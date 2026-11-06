@@ -1,0 +1,283 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.35cm}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{url}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  urlcolor=blue!45!black,
+  pdftitle={Lettre aux lycéennes et lycéens sur NGeGenBrain version 1},
+  pdfauthor={Document pédagogique fondé sur l'analyse de l'archive du modèle NGeGenBrain version 1},
+  pdfsubject={Explication pédagogique, capacités vérifiées, limites et usages théoriques}
+}
+\setlength{\parindent}{1.1em}
+\setlength{\parskip}{0.35em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.2em,topsep=0.2em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.25em,topsep=0.25em}
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{NGeGenBrain\_v1}
+\rhead{Lettre pédagogique}
+\cfoot{\thepage}
+\setlength{\headheight}{14pt}
+
+\newcommand{\ngb}{\texttt{NGeGenBrain\_v1}}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\important}[1]{\textbf{#1}}
+\pdfstringdefDisableCommands{\def\ngb{NGeGenBrain_v1}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries Lettre aux lycéennes et aux lycéens}\\[0.4em]
+  {\Large Comprendre NGeGenBrain\_v1 : ce qu'il fait, ce qu'il ne fait pas et ce qu'il pourrait devenir}\\[0.8em]
+  {\normalsize Document pédagogique fondé sur l'examen de l'archive logicielle \code{Dmodel\_NGeGenBrain\_v1.zip}}\\
+  {\small Version étudiée : 1.0.0 ; archive datée du 27 octobre 2026}
+\end{center}
+
+\vspace{0.5em}
+\noindent\textbf{Chères lycéennes, chers lycéens,}
+
+Vous avez peut-être déjà entendu parler d'intelligence artificielle, de robots ou de systèmes capables de répondre à des questions. Le nom \ngb{} peut donner l'impression qu'il s'agit d'un cerveau artificiel. Pour comprendre le projet correctement, commençons par une règle simple : \important{on ne doit pas déduire les capacités d'un logiciel de son nom ; il faut regarder son code, le faire fonctionner et tester ses résultats.}
+
+Cette lettre vous présente donc le système qui se trouve réellement dans l'archive examinée. Elle distingue trois choses : ce que la version actuelle sait faire dans son périmètre, ce que les tests permettent d'affirmer, et ce qu'une version future pourrait éventuellement accomplir si elle était développée et évaluée pour cela.
+
+\section*{1. Qu'est-ce que NGeGenBrain ?}
+
+\ngb{} est un logiciel exécutable localement, écrit en Python, qui organise des opérations informatiques à partir de composants enregistrés, de règles explicites et de données structurées. Il associe notamment :
+\begin{itemize}
+  \item un moteur qui exécute des programmes décrits sous forme de données JSON ;
+  \item un \emph{maillage} de faits et de relations, dans lequel des règles déclarées peuvent produire de nouvelles conclusions ;
+  \item des contrôles de types, de permissions et de budgets de calcul ;
+  \item une mémoire persistante et des traces qui permettent de retrouver ce qui s'est passé ;
+  \item des outils de recherche de candidats, de synthèse de petits programmes et d'évaluation de modèles simples du monde ;
+  \item une interface en ligne de commande et une interface Web destinée à fonctionner sur la machine locale.
+\end{itemize}
+
+Le mot \emph{compositionnelle} signifie ici que le système peut construire un traitement en assemblant des opérations plus petites, un peu comme on construit une phrase à partir de mots ou une recette à partir d'étapes. Le type d'une donnée indique sa catégorie attendue : par exemple un nombre entier, un texte ou un objet structuré. Un contrat précise ce qu'une opération accepte et ce qu'elle doit renvoyer.
+
+Il est donc plus exact de décrire la version actuelle comme \important{un moteur de calcul et de raisonnement symbolique contrôlé, avec mémoire et traces}, plutôt que comme un cerveau comparable au nôtre. Le projet possède des mécanismes qui peuvent évoquer certaines fonctions cognitives, mais cette ressemblance ne démontre ni conscience, ni compréhension humaine, ni intelligence générale.
+
+\section*{2. Quel est son but ?}
+
+Son but pratique est de rendre des traitements composés plus organisés, vérifiables et contrôlables. Au lieu de demander au programme de faire confiance à une réponse simplement parce qu'elle paraît plausible, le système tente de conserver les éléments qui permettent de comprendre comment un résultat a été produit.
+
+On peut résumer son principe ainsi :
+\begin{center}
+\fcolorbox{black!25}{black!3}{\begin{minipage}{0.91\linewidth}
+\centering
+\textbf{Décrire le travail} $\rightarrow$ \textbf{vérifier les règles} $\rightarrow$ \textbf{exécuter dans des limites} $\rightarrow$ \textbf{enregistrer le résultat et sa trace}
+\end{minipage}}
+\end{center}
+
+Ce choix est utile lorsqu'un résultat doit être inspecté : quelles données ont été utilisées ? Quelle règle a permis une déduction ? Le calcul a-t-il été terminé ? Le système a-t-il refusé une action, rencontré une limite ou seulement produit une simulation ? Les réponses à ces questions comptent autant que la valeur finale.
+
+\section*{3. Comment fonctionne-t-il, étape par étape ?}
+
+\begin{enumerate}
+  \item \textbf{On décrit une tâche.} Le programme est représenté par un arbre de syntaxe abstraite (AST) sérialisé en JSON. Il s'agit d'une description structurée des opérations à effectuer, pas d'un morceau de code Python libre à exécuter.
+  \item \textbf{Le système vérifie la demande.} Il contrôle la forme des données, les types attendus, les capacités autorisées, les préconditions et les budgets déclarés. Une tâche qui ne respecte pas les conditions peut être rejetée.
+  \item \textbf{Il appelle des composants enregistrés.} Ces composants réalisent les opérations prévues. Le moteur vérifie ensuite les résultats et les postconditions annoncées.
+  \item \textbf{Il conserve les éléments utiles.} La base SQLite peut conserver des faits, des règles, des éléments de mémoire, des métadonnées et des traces. La trace d'événements est chaînée par empreintes pour aider à détecter certaines modifications.
+  \item \textbf{Il rend un statut explicite.} Un résultat peut être réussi, partiel, non résolu, rejeté, échoué ou annulé. Il ne faut donc pas confondre « une valeur existe » et « la tâche a été menée à bien ».
+\end{enumerate}
+
+\subsection*{Une métaphore : un atelier avec un cahier de laboratoire}
+
+Imaginez un atelier scolaire. Les outils sur l'établi sont les composants ; les consignes de sécurité sont les contrats, les permissions et les budgets ; le cahier de laboratoire est la mémoire et la trace. Lorsqu'une expérience échoue, le cahier ne devrait pas écrire « réussite » simplement pour faire plaisir : il doit indiquer l'échec, le résultat partiel ou la limite rencontrée.
+
+Cette métaphore aide à comprendre l'organisation du logiciel, mais elle a une limite importante : un logiciel ne devient pas scientifique uniquement parce qu'il garde un journal. Il faut aussi que ses données soient fiables, que ses règles soient adaptées et que ses conclusions soient validées.
+
+\section*{4. Que peut faire la version actuelle ?}
+
+Les capacités ci-dessous sont présentes dans le code et décrites dans le guide du projet. Cela ne signifie pas que chaque usage possible a été validé dans des conditions réelles.
+
+{\small\setlength{\tabcolsep}{3pt}\begin{tabularx}{0.96\linewidth}{>{\raggedright\arraybackslash}p{0.24\linewidth} X}
+\textbf{Fonction} & \textbf{Ce qu'elle permet actuellement} \\
+\hline
+Exécution compositionnelle & Assembler et exécuter des opérations déclarées dans un AST JSON, avec contrôles de contrats, de capacités et de budgets. \\
+Maillage de faits & Enregistrer des faits structurés, interroger des relations et appliquer des règles déclarées comportant une ou plusieurs prémisses. \\
+Dérivations et certificats & Associer certaines conclusions à leurs prémisses et à leurs règles, puis revérifier cette dérivation contre les éléments actifs. \\
+Mémoire persistante & Stocker et retrouver des données locales, créer des points de contrôle, suspendre/réactiver certains éléments et tenir compte des dépendances ou révocations connues. \\
+Traces et intégrité & Journaliser des événements, chaîner leurs empreintes et vérifier l'intégrité de la base et de la chaîne d'événements. \\
+Synthèse bornée & Chercher des programmes candidats cohérents avec des exemples d'entrée et de sortie, sous un budget de recherche. \\
+Modèles du monde simples & Définir une fonction de transition, produire une prédiction simulée et évaluer des prédictions sur un jeu de contrôle distinct, comparé à une référence. \\
+Intentions conversationnelles & Associer des motifs de texte pré-définis à des paramètres typés et à des programmes déclaratifs. Une phrase ambiguë peut rester non résolue. \\
+Interfaces & Utiliser une ligne de commande, un service HTTP local et une interface Web qui partagent le même catalogue d'actions métier. \\
+\end{tabularx}}
+
+\subsection*{Exemple : relier deux informations}
+
+Supposons que le maillage contienne les deux faits observés suivants :
+\begin{itemize}
+  \item « A est relié à B » ;
+  \item « B est relié à C ».
+\end{itemize}
+
+Si une règle de transitivité a été déclarée explicitement, le système peut alors dériver « A est relié à C ». Il peut enregistrer les faits utilisés et la règle ayant produit la conclusion. La règle n'est pas automatique par magie : elle doit être déclarée, et la conclusion n'est valable que dans le cadre des prémisses et de la règle employées.
+
+De même, la relation « A est relié à B » ne permet pas à elle seule de conclure « B est relié à A ». Il faut une autre règle qui autorise cette inversion. Cette distinction est essentielle : \important{un système rigoureux ne doit pas inventer une règle simplement parce qu'elle semble raisonnable.}
+
+\section*{5. Ce que les tests permettent de dire}
+
+La suite de tests du dépôt V1 a été exécutée à partir d'une extraction de l'archive fournie. Dans cet environnement, elle a produit \important{65 tests réussis, 0 échec et 0 erreur}. Le rapport d'audit présent dans l'archive présente en outre un benchmark indépendant de 15 scénarios ; il rapporte 15 réussites sur 15 pour la version V1, après 8 réussites et 7 échecs sur les 15 mêmes scénarios pour la version V0.
+
+Ces tests couvrent notamment l'arithmétique rationnelle, la fermeture de certains graphes, la gestion des types et des contextes, des limites de ressources, la validation des règles, la résistance à la falsification d'un certificat, la manipulation d'entrées profondément imbriquées et le refus d'exécuter du code Python présenté comme simple texte.
+
+Il s'agit d'éléments encourageants : des défauts observés dans la version antérieure ont été corrigés et des tests de non-régression ont été ajoutés. Mais un test vérifie un cas déterminé ou une propriété dans une portée déterminée. \important{65 tests réussis ne prouvent pas que toutes les entrées possibles, toutes les attaques ou tous les usages futurs seront sûrs.} Un benchmark fini n'est ni une preuve mathématique universelle, ni une certification de sécurité industrielle.
+
+\section*{6. Ce que NGeGenBrain ne sait pas démontrer aujourd'hui}
+
+Il est aussi important de connaître les limites que les fonctions présentes dans le code :
+\begin{itemize}
+  \item \textbf{Ce n'est pas un assistant conversationnel général.} Le module de chat résout des motifs déclarés et des emplacements typés. Il ne comprend pas automatiquement toutes les phrases, les sous-entendus, l'humour ou les questions inconnues.
+  \item \textbf{Une prédiction reste une simulation.} Les résultats des modèles du monde sont étiquetés comme simulés, non observés et non certifiés. Un bon résultat sur un échantillon de contrôle ne garantit pas que le modèle fonctionnera dans le monde réel.
+  \item \textbf{Une synthèse cohérente avec des exemples n'est pas une preuve universelle.} Un programme qui réussit sur quelques exemples peut échouer sur une entrée jamais testée.
+  \item \textbf{Un certificat ne prouve pas que les prémisses sont vraies.} Il peut aider à contrôler qu'une conclusion suit de prémisses et de règles enregistrées ; il ne transforme pas des données fausses en vérités.
+  \item \textbf{Une empreinte ne garantit pas la véracité.} Une chaîne d'événements ou un hash peut aider à détecter une altération, mais ne prouve pas que l'événement initial était exact ni qui l'a écrit.
+  \item \textbf{Le projet n'est pas livré comme un système distribué ou un service public durci.} L'interface HTTP est conçue pour la machine locale et refuse par défaut les adresses d'écoute non locales. Elle ne doit pas être exposée directement à Internet comme un service multi-utilisateur de production.
+  \item \textbf{Toutes les affirmations théoriques ne sont pas prouvées par machine.} Le dépôt contient des textes formels et des obligations de raffinement, mais cela ne revient pas à une vérification complète de chaque exécution du programme Python par un assistant de preuve.
+\end{itemize}
+
+Une autre prudence concerne ASCR : le code contient une reconstruction nommée ASCR-NG pour un rôle de recherche/récupération, mais les sources historiques du runtime ASCR/AAM n'étaient pas présentes dans les éléments examinés. L'équivalence exacte avec une implémentation historique inconnue n'est donc pas démontrée.
+
+\section*{7. À quoi pourrait servir la version actuelle ?}
+
+Dans son périmètre réel, NGeGenBrain peut servir de base expérimentale ou pédagogique, notamment pour :
+\begin{itemize}
+  \item apprendre comment on construit un programme à partir d'opérations plus simples ;
+  \item illustrer les différences entre un fait enregistré, une hypothèse, une déduction et une simulation ;
+  \item explorer des graphes de relations et des systèmes de règles explicites ;
+  \item étudier les types, les contrats, les budgets de calcul, la traçabilité et la gestion d'erreurs ;
+  \item réaliser des prototypes locaux pour des tâches structurées dont les règles sont connues et que l'on peut tester ;
+  \item comparer une prédiction simple à une référence sur des données tenues à l'écart de la construction du modèle.
+\end{itemize}
+
+Exemples scolaires possibles : suivre des relations dans un réseau de transport imaginaire, appliquer une règle logique à une petite base de faits, simuler une transition numérique ou examiner pourquoi une action a été rejetée. Ces exemples sont des usages proposés, non des modules scolaires spécialisés livrés automatiquement.
+
+Pour le moment, il serait imprudent de lui confier seul des décisions médicales, juridiques, financières, de sécurité, de recrutement ou toute tâche dont l'échec pourrait blesser quelqu'un ou lui causer un tort important. Ces domaines demandent des données fiables, des évaluations spécifiques, des contrôles humains et des garanties bien plus fortes que les tests logiciels présentés ici.
+
+\section*{8. Que pourrait accomplir une version plus avancée ?}
+
+Le code fournit une architecture sur laquelle de nouvelles fonctions pourraient être construites, mais une possibilité théorique n'est pas une capacité déjà disponible. Avec du développement, des données adaptées, des outils supplémentaires et une évaluation indépendante, des versions futures pourraient par exemple :
+\begin{itemize}
+  \item \textbf{mieux traduire le langage naturel en tâches structurées}, avec un mécanisme capable de demander des précisions quand une demande est ambiguë ;
+  \item \textbf{se connecter à des sources de données ou à des capteurs}, tout en conservant l'origine, la date et le niveau de confiance des informations ;
+  \item \textbf{construire des simulations plus riches} pour comparer des scénarios et analyser les écarts entre prédiction et observation ;
+  \item \textbf{planifier une suite d'actions} sous contraintes, puis vérifier chaque étape avant de l'exécuter ;
+  \item \textbf{aider à créer et tester des programmes}, en recherchant des candidats, générant des cas de test et présentant les contre-exemples trouvés ;
+  \item \textbf{intégrer un vérificateur formel externe} pour certaines propriétés mathématiques ou logicielles, si les propriétés sont correctement spécifiées et si la chaîne de vérification est elle-même validée ;
+  \item \textbf{prendre en charge des collaborations ou déploiements distribués}, à condition de développer l'authentification, l'isolation, la gestion des accès et les mécanismes de sécurité nécessaires.
+\end{itemize}
+
+Ces améliorations ne sont pas garanties par la seule architecture. Par exemple, ajouter un modèle de langage pourrait rendre le dialogue plus souple, mais ne garantirait pas que toutes ses réponses soient exactes. Ajouter des capteurs pourrait fournir davantage de données, mais ne garantirait pas qu'elles soient justes. Connecter un robot ne donnerait pas automatiquement au système une compréhension sûre du monde physique.
+
+Pour qu'une nouvelle capacité devienne crédible, il faudrait la définir précisément, l'implémenter, la tester sur des situations variées, publier ses limites, examiner les échecs et prévoir un moyen d'arrêter ou de reprendre la main.
+
+\section*{9. Conséquences : les avantages possibles et les risques}
+
+\subsection*{Les avantages possibles}
+
+\begin{itemize}
+  \item \textbf{Plus de visibilité :} une trace peut faciliter la compréhension d'un résultat et le diagnostic d'une erreur.
+  \item \textbf{Des refus explicites :} les contrats, capacités et budgets peuvent empêcher certaines opérations non autorisées ou trop coûteuses dans le périmètre contrôlé.
+  \item \textbf{Des raisonnements plus inspectables :} des faits, des règles et leurs dépendances permettent d'examiner comment une conclusion a été obtenue.
+  \item \textbf{Une expérimentation locale :} le système n'a pas besoin d'un service cloud externe pour son fonctionnement décrit ; ses données persistantes restent toutefois sur la machine où il est installé.
+\end{itemize}
+
+\subsection*{Les risques à ne pas ignorer}
+
+\begin{itemize}
+  \item \textbf{Le risque de confiance excessive :} une interface soignée ou un certificat technique peut donner une impression de certitude supérieure aux preuves réelles.
+  \item \textbf{Les données erronées :} une déduction impeccable à partir de prémisses incorrectes peut donner une conclusion incorrecte.
+  \item \textbf{La confidentialité :} la base locale peut contenir des messages, des faits, des traces ou des métadonnées. « Local » ne signifie pas automatiquement « protégé » ; il faut sécuriser l'appareil, les comptes, les sauvegardes et l'accès au fichier.
+  \item \textbf{Les biais et les erreurs de conception :} les règles choisies, les données sélectionnées et les critères d'évaluation influencent les résultats.
+  \item \textbf{L'automatisation de mauvaises décisions :} une erreur répétée à grande vitesse peut amplifier ses conséquences si personne ne contrôle le processus.
+  \item \textbf{La maintenance et la responsabilité :} il faut garder les versions, les journaux et les tests, et déterminer qui peut modifier les règles, autoriser une action ou corriger un résultat.
+\end{itemize}
+
+La bonne attitude n'est donc ni d'avoir peur de toute intelligence artificielle, ni de croire qu'un système informatique est fiable parce qu'il porte un nom impressionnant. C'est de comprendre ce qu'il fait, d'exiger des preuves adaptées à l'usage et de garder une personne responsable lorsque les conséquences sont importantes.
+
+\section*{10. Comment évaluer une prochaine version ?}
+
+Avant de dire qu'une capacité est acquise, il est utile de poser au minimum les questions suivantes :
+\begin{enumerate}
+  \item Quel comportement exact prétend-on obtenir et dans quelles conditions ?
+  \item Quelles entrées ont été testées, et lesquelles ne l'ont pas été ?
+  \item Existe-t-il une référence indépendante permettant de juger les résultats ?
+  \item Les erreurs, les sorties partielles et les refus sont-ils conservés et expliqués ?
+  \item Peut-on vérifier l'origine des données et reproduire l'expérience ?
+  \item Que se passe-t-il si les données sont fausses, contradictoires ou malveillantes ?
+  \item Qui autorise les actions, protège les données et assume les conséquences ?
+\end{enumerate}
+
+Cette méthode est valable pour NGeGenBrain comme pour n'importe quel logiciel d'intelligence artificielle. Elle apprend à distinguer une démonstration convaincante d'une capacité réellement mesurée.
+
+\section*{Pour conclure}
+
+Chères lycéennes, chers lycéens, NGeGenBrain\_v1 peut être vu comme un atelier informatique qui sait assembler des opérations, manipuler des faits et des règles, conserver des traces et produire certaines déductions sous contrôle. Sa valeur actuelle ne vient pas d'une intelligence mystérieuse, mais d'une architecture explicite dont certaines propriétés ont été testées.
+
+Son ambition future pourrait être plus grande : mieux comprendre des demandes, simuler des situations, aider à construire des programmes ou coordonner des outils. Mais chaque ambition exige du travail réel, des validations et une description honnête des limites. Il ne faut pas confondre ce que le logiciel fait aujourd'hui, ce que l'on espère lui faire faire demain et ce qu'il serait mathématiquement possible de lui faire faire dans des conditions idéales.
+
+Retenez enfin cette image : \textbf{un résultat est comme une réponse écrite au tableau ; la méthode, les hypothèses et les vérifications sont le travail qui permet de savoir si cette réponse mérite notre confiance.} En informatique comme en sciences, la curiosité est essentielle, mais la rigueur consiste aussi à dire « je ne sais pas encore » quand les preuves manquent.
+
+\vspace{1em}
+\noindent Avec confiance dans votre curiosité et votre esprit critique,\\[0.4em]
+\noindent\textit{Lettre pédagogique destinée aux lycéennes et aux lycéens.}
+
+\newpage
+\appendix
+\section*{Repères techniques et portée de l'analyse}
+\addcontentsline{toc}{section}{Repères techniques et portée de l'analyse}
+
+Cette annexe sert à rendre le document vérifiable. Elle ne remplace pas la documentation et les tests du projet.
+
+\subsection*{Éléments directement examinés}
+
+\begin{itemize}
+  \item Archive analysée : \url{Dmodel_NGeGenBrain_v1.zip}.
+  \item Empreinte SHA-256 calculée sur l'archive examinée :\par\smallskip\noindent\texttt{71534f98}\allowbreak\texttt{ff590e5c}\allowbreak\texttt{1a103888}\allowbreak\texttt{f0e553e9}\allowbreak\texttt{e8966d34}\allowbreak\texttt{d7f03644}\allowbreak\texttt{29eac8ea}\allowbreak\texttt{e238b5c8}.
+  \item Guide utilisateur : \url{Dmodel_NGeGenBrain_v1/docs/USER_GUIDE.md}.
+  \item Rapport d'audit : \url{Dmodel_NGeGenBrain_v1/docs/REPORT_AUDIT_NGeGenBrain_v1.md}.
+  \item Audit du formalisme : \url{Dmodel_NGeGenBrain_v1/docs/FORMALISM_AUDIT.md}.
+  \item Code principal : répertoire \url{Dmodel_NGeGenBrain_v1/src/ngegenbrain/} ; tests : \url{Dmodel_NGeGenBrain_v1/tests/}.
+\end{itemize}
+
+\subsection*{Résultats observés et interprétation}
+
+La suite fournie a été exécutée depuis une extraction de l'archive avec la commande :
+\begin{quote}\small\ttfamily
+PYTHONWARNINGS=error::ResourceWarning PYTHONPATH=src \textbackslash{}\\
+python3 -m unittest discover -s tests -v
+\end{quote}
+Elle a terminé avec le résultat \code{Ran 65 tests} puis \code{OK}. Le rapport d'audit du projet signale séparément un benchmark indépendant de 15 scénarios, tous réussis sur V1. Ce dernier résultat est rapporté comme résultat du banc inclus dans la chaîne d'audit ; l'exécution présente de cette analyse a rejoué la suite de 65 tests, pas l'ensemble complet du banc indépendant externe.
+
+Les conclusions de cette lettre sont donc limitées au code, à la documentation et aux tests énoncés. Elles ne prétendent pas prouver l'absence de tout défaut, la sécurité absolue, la correction de tout programme possible, la conscience du système ou une équivalence historique avec des composants dont les sources n'étaient pas présents.
+
+\subsection*{Glossaire rapide}
+
+\begin{description}[leftmargin=2.7cm,style=nextline]
+  \item[AST] Représentation structurée d'un programme sous forme d'arbre, ici encodée en JSON.
+  \item[Contrat] Conditions décrivant les entrées autorisées, les sorties attendues et certaines obligations d'une opération.
+  \item[Maillage] Réseau de faits et de relations, sur lequel des règles explicites peuvent produire des faits dérivés.
+  \item[Prémisse] Information de départ nécessaire à une règle ou à une déduction.
+  \item[Certificat] Structure permettant de vérifier une dérivation donnée contre des prémisses et des règles ; ce n'est pas une garantie que les prémisses sont vraies.
+  \item[Holdout] Partie des données tenue à l'écart de la construction ou du réglage du modèle afin d'évaluer ses résultats sur des exemples distincts.
+  \item[Simulation] Résultat calculé par un modèle ; il doit rester distinct d'une observation réelle.
+  \item[Traçabilité] Capacité à retrouver les opérations, les données ou les règles qui ont participé à un résultat.
+\end{description}
+
+\end{document}

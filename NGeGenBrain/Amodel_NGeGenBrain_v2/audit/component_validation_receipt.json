@@ -1,0 +1,591 @@
+{
+  "checks": [
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "src",
+        "ngbrain.py",
+        "scripts",
+        "tests"
+      ],
+      "duration_seconds": 0.937,
+      "name": "compileall",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/bin/pdflatex",
+        "-no-shell-escape",
+        "-interaction=nonstopmode",
+        "-halt-on-error",
+        "theorie_programmation_compositionnelle_NG_v2.tex"
+      ],
+      "duration_seconds": 0.639,
+      "name": "latex_pass1",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/bin/pdflatex",
+        "-no-shell-escape",
+        "-interaction=nonstopmode",
+        "-halt-on-error",
+        "theorie_programmation_compositionnelle_NG_v2.tex"
+      ],
+      "duration_seconds": 0.573,
+      "name": "latex_pass2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "duration_seconds": 0,
+      "name": "latex_pdf_exists",
+      "passed": true,
+      "pdf_bytes": 424595,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "init"
+      ],
+      "duration_seconds": 2.399,
+      "name": "cli_init",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "status"
+      ],
+      "duration_seconds": 2.743,
+      "name": "cli_status",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "benchmark",
+        "--bits",
+        "4",
+        "--seed",
+        "20261027",
+        "--max-samples",
+        "4096"
+      ],
+      "duration_seconds": 2.453,
+      "name": "cli_benchmark",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "audit"
+      ],
+      "duration_seconds": 2.277,
+      "name": "cli_audit",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "compose",
+        "--file",
+        "/mnt/data/NGeGenBrain_v2/examples/compose_xor.json"
+      ],
+      "duration_seconds": 2.309,
+      "name": "cli_compose",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "discover",
+        "--train-file",
+        "/mnt/data/NGeGenBrain_v2/examples/discovery_train_parity3.json",
+        "--validation-file",
+        "/mnt/data/NGeGenBrain_v2/examples/discovery_validation_parity3.json"
+      ],
+      "duration_seconds": 2.019,
+      "name": "cli_discover",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "plan",
+        "--inputs-file",
+        "/mnt/data/NGeGenBrain_v2/examples/causal_sweep_inputs.json",
+        "--target",
+        "xor_layers.0.positive"
+      ],
+      "duration_seconds": 2.083,
+      "name": "cli_plan",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "counterexamples",
+        "--rows-file",
+        "/mnt/data/NGeGenBrain_v2/examples/discovery_validation_parity3.json",
+        "--candidate-file",
+        "/mnt/data/NGeGenBrain_v2/examples/affine_candidate_parity3.json"
+      ],
+      "duration_seconds": 2.124,
+      "name": "cli_counterexamples",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "sweep",
+        "--inputs-file",
+        "/mnt/data/NGeGenBrain_v2/examples/causal_sweep_inputs.json",
+        "--target",
+        "xor_layers.0.positive",
+        "--mode",
+        "zero"
+      ],
+      "duration_seconds": 2.28,
+      "name": "cli_sweep",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "synthetic-ladder",
+        "--seed",
+        "20261027"
+      ],
+      "duration_seconds": 2.327,
+      "name": "cli_synthetic_ladder",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/NGeGenBrain_v2/ngbrain.py",
+        "--workspace",
+        "/tmp/ngv2-cli-final-k77yr25m/workspace",
+        "reconstruct",
+        "--source",
+        "synthetic",
+        "--seed",
+        "712",
+        "--vocab-size",
+        "5",
+        "--epochs",
+        "40",
+        "--max-new-tokens",
+        "8"
+      ],
+      "duration_seconds": 3.636,
+      "name": "cli_reconstruct_synthetic",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "count": 72,
+      "duration_seconds": 0,
+      "errors": [],
+      "name": "json_syntax_integrity",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "count": 3,
+      "duration_seconds": 0,
+      "errors": [],
+      "name": "embedded_zip_crc_integrity",
+      "passed": true,
+      "returncode": 0
+    }
+  ],
+  "created_utc": "2026-10-27T15:39:56Z",
+  "embedded_archives": [
+    {
+      "bad_member": null,
+      "file_count": 69,
+      "path": "references/Amodel_NGeGenBrain_v1.zip",
+      "valid": true
+    },
+    {
+      "bad_member": null,
+      "file_count": 81,
+      "path": "references/Dmodel_NGeGenBrain_v1.zip",
+      "valid": true
+    },
+    {
+      "bad_member": null,
+      "file_count": 19,
+      "path": "references/suivi_model_NGeGenBrain_v1.zip",
+      "valid": true
+    }
+  ],
+  "full_validate_release_orchestrator": {
+    "note": "The combined orchestrator did not return a receipt within the tool execution window; constituent tests and commands are being verified independently.",
+    "status": "INCONCLUSIVE_TIMEOUT"
+  },
+  "json_files": [
+    {
+      "path": "NGeGenBrain_v2_mise_en_oeuvre.json",
+      "valid": true
+    },
+    {
+      "path": "archive_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "audit/evidence_sync_summary.json",
+      "valid": true
+    },
+    {
+      "path": "audit/validation_receipt.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/adversarial_counterexample_result.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/causal_sweep_result.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/command_log.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/numeric_discovery_result.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/synthetic_ladder_command_output.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/synthetic_ladder_results.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/synthetic_ladder_smoke.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T142419Z/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T142419Z/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/causal_lm_reconstruction/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/causal_lm_reconstruction/composed_lookup_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/causal_lm_reconstruction/composed_rule_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/causal_lm_reconstruction/finite_context_lookup_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/causal_lm_reconstruction/public_summary.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/causal_lm_reconstruction/rule_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T143800Z/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/causal_lm_reconstruction/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/causal_lm_reconstruction/composed_lookup_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/causal_lm_reconstruction/composed_rule_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/causal_lm_reconstruction/finite_context_lookup_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/causal_lm_reconstruction/public_summary.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/causal_lm_reconstruction/rule_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T151437Z/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/causal_lm_reconstruction/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/causal_lm_reconstruction/composed_lookup_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/causal_lm_reconstruction/composed_rule_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/causal_lm_reconstruction/finite_context_lookup_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/causal_lm_reconstruction/public_summary.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/causal_lm_reconstruction/rule_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T153200Z/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/causal_lm_reconstruction/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/causal_lm_reconstruction/composed_lookup_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/causal_lm_reconstruction/composed_rule_model.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/causal_lm_reconstruction/finite_context_lookup_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/causal_lm_reconstruction/public_summary.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/causal_lm_reconstruction/rule_reconstruction.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_20261027T154300Z/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_final_20261027/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_final_20261027/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_final_20261027_v2/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_final_20261027_v2/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_release_final_20261027/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_release_final_20261027/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_release_final_20261027c/synthetic_lab/analysis/benchmark_manifest.json",
+      "valid": true
+    },
+    {
+      "path": "benchmarks/results/20261027_official/workspace_release_final_20261027c/synthetic_lab/auditor_only/hidden_ground_truth.json",
+      "valid": true
+    },
+    {
+      "path": "checklist_de_travail_NGeGenBrain_v2.json",
+      "valid": true
+    },
+    {
+      "path": "checklist_erreurs_model_v2.json",
+      "valid": true
+    },
+    {
+      "path": "checklist_erreurs_no_model_v2.json",
+      "valid": true
+    },
+    {
+      "path": "chemins_NGeGenBrain_v2.json",
+      "valid": true
+    },
+    {
+      "path": "examples/affine_candidate_parity3.json",
+      "valid": true
+    },
+    {
+      "path": "examples/captures_example.json",
+      "valid": true
+    },
+    {
+      "path": "examples/causal_sweep_inputs.json",
+      "valid": true
+    },
+    {
+      "path": "examples/compose_xor.json",
+      "valid": true
+    },
+    {
+      "path": "examples/discovery_train_parity3.json",
+      "valid": true
+    },
+    {
+      "path": "examples/discovery_validation_parity3.json",
+      "valid": true
+    },
+    {
+      "path": "logs/final_command_log.json",
+      "valid": true
+    },
+    {
+      "path": "preuves_NGeGenBrain_v2.json",
+      "valid": true
+    },
+    {
+      "path": "registre_experiences_NGeGenBrain_v2.json",
+      "valid": true
+    },
+    {
+      "path": "registre_hypotheses_NGeGenBrain_v2.json",
+      "valid": true
+    },
+    {
+      "path": "registre_mecanismes_NGeGenBrain_v2.json",
+      "valid": true
+    },
+    {
+      "path": "registre_reconstruction_NGeGenBrain_v2.json",
+      "valid": true
+    }
+  ],
+  "note": "Component-level checks only; full validate_release orchestrator timed out in its invocation window and is explicitly inconclusive.",
+  "real_pretrained_llm": {
+    "reason": "transformers unavailable in this runtime and no local pretrained checkpoint available; mock adapter contract and trained synthetic causal Transformer were tested.",
+    "status": "NOT_EXECUTED"
+  },
+  "root": "/mnt/data/NGeGenBrain_v2",
+  "schema": "NGeGenBrain_v2_component_validation_v1",
+  "source_validation_tree": "NGeGenBrain_v2 source tree immediately before package manifest generation",
+  "v1_test_run": {
+    "count": 65,
+    "log_path": "audit/test_runs/v1_preserved_regression_tests_final.log",
+    "log_sha256": "b7785625d2789d555a74f15f93a4d4d1c9ab08ee13586eab9021a3baa3b6c2a7",
+    "passed": true,
+    "source": "fresh independent rerun"
+  },
+  "v2_test_run": {
+    "count": 52,
+    "log_path": "audit/test_runs/v2_unit_integration_tests_final.log",
+    "log_sha256": "964f98506efd6a876d598a31a7fb0cc764495a4f2c8e7dd6a4f10d342d0b298d",
+    "passed": true,
+    "source": "fresh independent rerun"
+  },
+  "windows_bat_native_execution": {
+    "reason": "The current runtime is Linux; batch files can be inspected but not faithfully executed without Windows or a compatible runner.",
+    "status": "NOT_EXECUTED"
+  }
+}

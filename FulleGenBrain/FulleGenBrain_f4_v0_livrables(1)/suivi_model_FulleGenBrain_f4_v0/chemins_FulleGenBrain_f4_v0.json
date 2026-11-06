@@ -1,0 +1,56 @@
+# État en cours — FulleGenBrain_f4_v0
+
+**Date de clôture locale :** 2026-10-26T20:28:00+00:00
+**État des phases :** P00 à P13 = `PASS` selon les critères de sortie enregistrés et les preuves citées dans `checklist_de_travail_FulleGenBrain_f4_v0.json`.
+**Publication :** aucune publication effectuée. Aucun dépôt distant n’a été créé et aucun push n’a été réalisé.
+
+## Où le travail s’est arrêté et ce qui a été vérifié
+
+La phase P13 a été validée sur l’arbre livré après extraction dans un dossier temporaire propre. Le reçu contrôlé est `logs/executions/P13/20261026T173648246635+0000_p13-clean-extraction-after-sqlite-sidecar-race-fix.receipt.json` et la preuve détaillée détachée est `spec/evidence/P13_clean_extraction_validation.json`.
+
+- Les trois ZIP passent le CRC, leur inventaire de membres et les SHA-256 internes.
+- Le runtime Dmodel passe 13 commandes de smoke test : `doctor`, `test`, `components`, `adapters`, `inspect-sources`, validation/exécution, synthèse/reprise, mémoire et ASCRC.
+- La GUI locale passe : route `/` en HTML, `/api/health` en JSON `PASS`, arrêt propre.
+- La fusion des trois paquets s’est faite sans conflits; la relocalisation des chemins a réussi.
+- La suite intégrée après extraction/fusion passe **264 tests et 174 sous-tests**, avec `ResourceWarning` élevé au rang d’erreur.
+- Les suites amont ORDER/AAM/eGenBrain précédemment exécutées dans leurs environnements isolés totalisent **175 tests** (leurs reçus individuels se trouvent dans les rapports/logs P11).
+- Les formalismes `formalisme_FulleGenBrain_5.tex`, `theorie_programation_compositionnelle_3.tex` et le formalisme opérationnel sont présents. Les compilations LaTeX successives sont consignées; quelques avertissements `Underfull \hbox` non bloquants restent documentés.
+- Les incidents P13 ouverts antérieurement ont été conservés dans les registres et résolus avec renvoi vers la validation finale; aucun historique d’erreur n’a été supprimé.
+
+## Livrables
+
+1. `Dmodel_FulleGenBrain_f4_v0.zip` — noyau exécutable, CLI, GUI locale, exemples, schémas et charges runtime minimales des adaptateurs effectivement câblés.
+2. `Amodel_FulleGenBrain_f4_v0.zip` — rapports, reçus, journal d’exécution, provenance, preuves et contrôles d’intégrité.
+3. `suivi_model_FulleGenBrain_f4_v0.zip` — checklists, chemins, scripts, tests, benchmarks, formalismes et preuves reproductibles.
+4. `chemins_FulleGenBrain_f4_v0.json` — chemins canoniques de ce workspace et du point de sauvegarde.
+5. `P13_clean_extraction_validation.json` + `release_manifest.json` + fichiers `.sha256` — preuves détachées contenant les hashes des ZIP finaux. Ces preuves sont volontairement externes aux ZIP pour éviter un hash circulaire d’une archive qui contiendrait son propre hash.
+
+Les archives ne contiennent **pas** les dépôts historiques complets, l’archive source originale, les jeux d’entraînement, les tests amont complets ni les anciens points de sauvegarde. Elles contiennent seulement le runtime essentiel et les preuves de provenance nécessaires.
+
+## Éléments qui restent explicitement partiels / à fournir par la source
+
+- **Base historique MG d’eGenBrain : `PARTIAL`.** Le fragment `part01` a son intégrité vérifiée, mais `part02` était absent de `source_orderX_0.zip`. Aucun octet de remplacement n’a été fabriqué. L’adaptateur mesh livré fonctionne séparément; la reconstitution de la base MG ne peut pas être considérée comme exécutée sans le fragment original manquant.
+- **AAM O94.6 et ORDER 80.4.7 : `NOT_RUN` comme runtimes.** Les éléments fournis sont des artefacts d’audit/comparaison plutôt que des runtimes autonomes. Leur provenance/lecture est documentée; aucun runtime fictif n’a été créé.
+- Une publication publique nécessite encore la revue humaine des notices de licence des composants vendoriés et l’action explicite de l’utilisateur sur son dépôt. Le guide `release/READY_TO_PUBLISH.md` décrit la procédure, mais rien n’a été publié.
+
+Ces statuts `PARTIAL` / `NOT_RUN` décrivent uniquement l’absence d’artefacts ou l’absence d’un runtime exécutable dans les sources fournies; ils ne sont pas une prédiction de succès ou d’échec futur du modèle.
+
+## Commandes de vérification locale
+
+Depuis le dossier contenant les ZIP et le manifeste, vérifier les SHA-256 indiqués dans les fichiers `.sha256`, puis :
+
+```bash
+unzip -t Dmodel_FulleGenBrain_f4_v0.zip
+unzip -t Amodel_FulleGenBrain_f4_v0.zip
+unzip -t suivi_model_FulleGenBrain_f4_v0.zip
+```
+
+Après extraction de Dmodel :
+
+```bash
+./run_fullegenbrain.sh doctor
+./run_fullegenbrain.sh test
+./run_fullegenbrain.sh --help
+```
+
+La publication reste une action manuelle réservée à l’auteur.

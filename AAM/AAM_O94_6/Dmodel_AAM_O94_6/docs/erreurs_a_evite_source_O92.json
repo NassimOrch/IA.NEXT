@@ -1,0 +1,1035 @@
+{
+  "schema": "aam-o92-error-ledger-v1",
+  "date_local": "2026-10-12",
+  "methodology": "Catalogue des erreurs observées, défauts historiques corrigés, risques expérimentaux et éléments non exécutés. Les états sont distincts: correction documentée, résolu par configuration, superseded, open, NOT_RUN, FAIL_QUALITY_GATE. Les erreurs des archives n’impliquent pas que chaque version possède tous les défauts listés.",
+  "source_archive_sha256": "15042320c27907e37fec406156968c3d567b9eda47dfc4d9a0f615c9eb28112c",
+  "entries": [
+    {
+      "id": "O72-001",
+      "version_scope": "O72/O73",
+      "category": "contrat de tâche",
+      "severity": "high",
+      "observed_error_or_risk": "Un prédicat étroit ou une tâche mal spécifiée peut être présenté comme une capacité générale; une solution codée pour un benchmark peut masquer un manque de représentation.",
+      "consequence_if_ignored": "Fausse certification et surapprentissage de la tâche testée.",
+      "correction_or_prevention": "Déclarer domaine/entrées/sorties/critère; ne pas injecter une solution spécifique pour gonfler un score; laisser UNRESOLVED si la preuve ne suffit pas.",
+      "correction_status": "principe documenté; vérifier à chaque tâche",
+      "source_paths": [
+        "rapports/rapport_O72_e_1_hardtest_0.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O74-001",
+      "version_scope": "O74/O75",
+      "category": "formalisme seuil/quotient",
+      "severity": "high",
+      "observed_error_or_risk": "L’infimum d’un seuil peut ne pas être atteint; une valeur de seuil sans association aux paires perd la structure; quotient non canonique si canonicalisation non définie.",
+      "consequence_if_ignored": "Frontières erronées, signatures non reproductibles.",
+      "correction_or_prevention": "Séparer infimum et attainment, enregistrer pair↔seuil et définir/tester la règle canonique.",
+      "correction_status": "corrigé/documenté dans formalismes plus récents",
+      "source_paths": [
+        "formalismes/model_order_O75_0.tex; formalismes/model_order_O75.tex; formalismes/model_emergent_order_75.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O74-002",
+      "version_scope": "O74/O75",
+      "category": "provenance",
+      "severity": "medium",
+      "observed_error_or_risk": "Un champ historique `llm_verified` était renseigné comme constant plutôt que par l’événement de vérification réellement exécuté.",
+      "consequence_if_ignored": "État de certification mensonger.",
+      "correction_or_prevention": "Dériver chaque statut du journal d’événements; tester que métadonnées et actions concordent.",
+      "correction_status": "correction documentée",
+      "source_paths": [
+        "formalismes/model_order_O75.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O75-MATH-001",
+      "version_scope": "ORDER75 Math O75_2",
+      "category": "certification mathématique",
+      "severity": "critical",
+      "observed_error_or_risk": "Une requête RH analytique mal spécifiée a pu être classée PROVEN par une voie linéaire faute de contrat analytique dédié.",
+      "consequence_if_ignored": "Preuve mathématique non fondée.",
+      "correction_or_prevention": "Contrat analytique explicite, preuve indépendante; une recherche numérique finie ne suffit pas à certifier une proposition universelle.",
+      "correction_status": "correction et rejeu documentés",
+      "source_paths": [
+        "rapports/rapport_reimann_math_order_75_2.tex; formalismes/model_math_order_O75_2(1).tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O75-MATH-002",
+      "version_scope": "ORDER75 Math O75_2",
+      "category": "types de données",
+      "severity": "high",
+      "observed_error_or_risk": "Une liste de cinq tâches a été traitée comme chaîne et découpée en caractères.",
+      "consequence_if_ignored": "Mauvaise distribution des tâches et statistiques invalides.",
+      "correction_or_prevention": "Valider JSON/schema en entrée, préserver liste/chaîne, ajouter tests de types.",
+      "correction_status": "corrigé/documenté",
+      "source_paths": [
+        "rapports/rapport_reimann_math_order_75_2.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O75-MATH-003",
+      "version_scope": "ORDER75 Math O75_2",
+      "category": "stabilité numérique",
+      "severity": "high",
+      "observed_error_or_risk": "Une forme exponentielle directe de xi pouvait sous-déborder à grande hauteur imaginaire; le calcul log/phase a corrigé le cas observé.",
+      "consequence_if_ignored": "Comptage ou résultat numérique faux.",
+      "correction_or_prevention": "Calcul en log-domaine/phase, étude de précision et pas, vérification indépendante; conserver les essais invalides mais les exclure de la conclusion.",
+      "correction_status": "correction et rerun documentés",
+      "source_paths": [
+        "rapports/rapport_reimann_math_order_75_2.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O77-001",
+      "version_scope": "O77",
+      "category": "analyse lexicale",
+      "severity": "high",
+      "observed_error_or_risk": "La détection par sous-chaîne a mal classé certains comportements; la correction utilise une détection lexicale délimitée.",
+      "consequence_if_ignored": "Mauvais routage ou synthèse invalidée.",
+      "correction_or_prevention": "Analyse token-aware/AST puis vérification du comportement observé.",
+      "correction_status": "correction consignée",
+      "source_paths": [
+        "rapports/rapport_test_jeu_ORDER77.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O77-002",
+      "version_scope": "O77 interactive 2D",
+      "category": "couverture représentation",
+      "severity": "high",
+      "observed_error_or_risk": "Corriger le détecteur ne crée pas la représentation d’un système interactif 2D événementiel.",
+      "consequence_if_ignored": "Confondre bonne classification et compétence d’exécution.",
+      "correction_or_prevention": "Modèle état/événement/action, test de boucle d’événement; séparer SYNTHESIZED_UNVERIFIED et SELF_TESTED.",
+      "correction_status": "partiellement adressé; capacité générique reste à tester",
+      "source_paths": [
+        "rapports/rapport_test_jeu_ORDER77.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O83-001",
+      "version_scope": "O83",
+      "category": "features et poids",
+      "severity": "high",
+      "observed_error_or_risk": "Les n-grammes initiaux étaient limités à chaque token et les poids de famille encodés dans les IDs; intégration différente du prototype et performance d’intention tombée vers 33–44 %.",
+      "consequence_if_ignored": "Dégradation silencieuse entre algorithme validé et code intégré.",
+      "correction_or_prevention": "N-grammes char 2–4 sur chaîne entière + features token; poids TF-IDF séparés des identifiants; tests de non-régression prototype/runtime.",
+      "correction_status": "correction documentée et performance récupérée",
+      "source_paths": [
+        "formalismes/laboratoire_AAM_O83.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O85-001",
+      "version_scope": "O85/O90",
+      "category": "identité relationnelle",
+      "severity": "critical",
+      "observed_error_or_risk": "Les IDs de chemin de composition ne correspondaient pas au `FactorizedRelation.unit_id` canonique; certaines caractéristiques pouvaient disparaître silencieusement.",
+      "consequence_if_ignored": "Perte de distinctions et résultats incomplets.",
+      "correction_or_prevention": "IDs canoniques typés de bout en bout, tests round-trip/collision, assertion du nombre de features attendues/produites.",
+      "correction_status": "correctif 3 documenté; tests ciblés passent",
+      "source_paths": [
+        "formalismes/laboratoire_O90.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O85-002",
+      "version_scope": "O85/O90",
+      "category": "validation configuration",
+      "severity": "high",
+      "observed_error_or_risk": "`interaction_order` utilisé dans des modes invalides.",
+      "consequence_if_ignored": "Schéma de features instable et sorties difficiles à interpréter.",
+      "correction_or_prevention": "Valider combinaison mode/ordre au chargement, erreur explicite, tests des frontières.",
+      "correction_status": "correctif documenté",
+      "source_paths": [
+        "formalismes/laboratoire_O90.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O85-003",
+      "version_scope": "O85 suite historique",
+      "category": "collecte de tests",
+      "severity": "medium",
+      "observed_error_or_risk": "pytest sur l’arborescence multi-version complète a causé 33 erreurs de collecte dû aux noms de modules dupliqués; la suite dédiée O85 a 175 réussites.",
+      "consequence_if_ignored": "Confondre erreur de collecte avec régression fonctionnelle ou omettre des tests.",
+      "correction_or_prevention": "Exécuter chaque snapshot à sa racine déclarée, fixer le runner, archiver commandes et outputs.",
+      "correction_status": "contournement par exécution ciblée; organisation à améliorer",
+      "source_paths": [
+        "formalismes/laboratoire_O90.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O86-001",
+      "version_scope": "O86.1",
+      "category": "tolérance schéma",
+      "severity": "medium",
+      "observed_error_or_risk": "Un extracteur supposait une clé date absente; quelques tentatives import/runner sans PYTHONPATH n’étaient pas reproduisibles.",
+      "consequence_if_ignored": "Crash sur schéma valide ou faux échec du test.",
+      "correction_or_prevention": "Accès défensif aux champs optionnels, validation de schéma, environnement d’import explicite.",
+      "correction_status": "correction notée dans rapports",
+      "source_paths": [
+        "formalismes/laboratoire_AAM_O86.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O86-002",
+      "version_scope": "O86.1",
+      "category": "orchestration/validité expérimentale",
+      "severity": "high",
+      "observed_error_or_risk": "Un pilote monolithique dépassait le budget; certaines expériences utilisaient validation trop petite ou perte circulaire; un wrapper omettait Path.",
+      "consequence_if_ignored": "Campagne partielle ou score artificiellement favorable.",
+      "correction_or_prevention": "Découper et checkpoint-er; tests d’intégration; validation adéquate; retirer pertes circulaires; séparer test final.",
+      "correction_status": "corrigé ou exclu dans le rapport source",
+      "source_paths": [
+        "formalismes/laboratoire_AAM_O86.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O82-001",
+      "version_scope": "O82.2",
+      "category": "configuration/bootstrap",
+      "severity": "high",
+      "observed_error_or_risk": "Sans `AAM_O82_INDEPENDENT_CHECKLIST_DIR`, 50/125 tests échouaient car les fichiers étaient cherchés dans le home externe; avec la gouvernance archivée, 125/125 passent.",
+      "consequence_if_ignored": "Le modèle dépend d’un état de machine invisible et échoue sur PC propre.",
+      "correction_or_prevention": "Packager les checklists ou résoudre un chemin relatif; détecter la dépendance au démarrage; essai clean-profile/Windows.",
+      "correction_status": "passe après configuration; portabilité non résolue",
+      "source_paths": [
+        "FINAL_AUDIT_O82_2/model_snapshot/src/aam_o82/governance.py"
+      ],
+      "evidence": {
+        "without_env": "50 failed, 75 passed",
+        "with_env": "125 passed in 10.14 s"
+      }
+    },
+    {
+      "id": "O82-002",
+      "version_scope": "O82.2 tests",
+      "category": "contrat API",
+      "severity": "medium",
+      "observed_error_or_risk": "Un test attrapait TypeError après options Engine non supportées et relançait les défauts du constructeur.",
+      "consequence_if_ignored": "Le test ne contrôle plus la feature qu’il prétend tester.",
+      "correction_or_prevention": "Pas de fallback silencieux sur TypeError; aligner API et assertions sur option explicitement active/désactive.",
+      "correction_status": "risque de robustesse tests à corriger",
+      "source_paths": [
+        "FINAL_AUDIT_O82_2/model_snapshot/tests/test_auto_self_observation_gate.py"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O90-001",
+      "version_scope": "O90/O85",
+      "category": "complexité de composition",
+      "severity": "high",
+      "observed_error_or_risk": "L’ajout de vues relationnelles augmente coût et complexité de provenance; la complexité de la signature ne garantit pas le gain.",
+      "consequence_if_ignored": "Modèle plus grand, moins interprétable sans performance additionnelle.",
+      "correction_or_prevention": "Ajouter seulement si une collision constatée le justifie; ablation, couts et contribution de chaque vue mesurés.",
+      "correction_status": "principe de conception",
+      "source_paths": [
+        "formalismes/laboratoire_O90.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O90-002",
+      "version_scope": "O90/O91",
+      "category": "validation leakage",
+      "severity": "critical",
+      "observed_error_or_risk": "Les holdouts/OOD ne doivent pas participer au choix de modèle/seed. Des copies de rapports ne sont pas des réplicats indépendants.",
+      "consequence_if_ignored": "Mesures optimistes et généralisation non étayée.",
+      "correction_or_prevention": "Geler splits et seed selon le plan pré-enregistré; hash-identifier code/données/config; choix sur VALIDATION seulement.",
+      "correction_status": "appliqué dans les expériences corrigées O92",
+      "source_paths": [
+        "formalismes/laboratoire_O90.tex; rapports/rapport_tests_difficiles_O91_final_v3.md"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O91-ASR-001",
+      "version_scope": "O91 final_v3",
+      "category": "qualité speech",
+      "severity": "high",
+      "observed_error_or_risk": "PocketSphinx a WER 1.0388 moyenne sur 10 fichiers synthétiques, 0/10 à WER<=0.20; Whisper.cpp non testé faute de poids/binaire.",
+      "consequence_if_ignored": "Ne pas revendiquer ASR acceptable sur cette installation.",
+      "correction_or_prevention": "Brancher un ASR configuré, préciser modèle/langue/licence/CPU, préparer test représentatif, mesurer WER par domaine et seuil.",
+      "correction_status": "FAIL_QUALITY_GATE / autre backend NOT_RUN",
+      "source_paths": [
+        "rapports/rapport_tests_difficiles_O91_final_v3.md"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O91-MODAL-001",
+      "version_scope": "O91",
+      "category": "sémantique multimodale",
+      "severity": "critical",
+      "observed_error_or_risk": "OCR six cartes et classification signal synthétique ne démontrent ni VLM sémantique à vrais poids, ni audio/video compréhension générale.",
+      "consequence_if_ignored": "Confondre plumbing et modèles pré-entraînés fonctionnels.",
+      "correction_or_prevention": "État séparé pour extraction, classification, reconnaissance, génération et VLM; poids/config/commandes vérifiables, sets gelés.",
+      "correction_status": "VLM réel NOT_RUN; limites explicites",
+      "source_paths": [
+        "Dmodel_AAM_O91_final_v3; Amodel_AAM_O91_final_v3"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O91-WIN-001",
+      "version_scope": "O91/O92",
+      "category": "acceptation plateforme",
+      "severity": "high",
+      "observed_error_or_risk": "Le rapport Windows décrit en partie des vérifications planifiées/Xvfb/Linux, pas une acceptation native Windows exécutée.",
+      "consequence_if_ignored": "Installer peut échouer sur un profil Windows propre ou dépendre de chemins Linux.",
+      "correction_or_prevention": "Gate native Windows 10/11, PowerShell, Unicode, CPU/GPU, mode offline, update/rollback.",
+      "correction_status": "NOT_RUN",
+      "source_paths": [
+        "Dmodel_AAM_O91_final_v3/windows_validation.md"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-IMG-001",
+      "version_scope": "O92 expérience image v1",
+      "category": "protocole expérimental",
+      "severity": "critical",
+      "observed_error_or_risk": "La première validation utilisait des distributions spatiales/échelles décalées; elle favorisait presque constamment une classe et n’était pas un jeu IID de sélection.",
+      "consequence_if_ignored": "Choix de modèle invalide et score de validation non comparable.",
+      "correction_or_prevention": "Remplacer par validation IID de même distribution, conserver shift/OOD gelés; ne pas effacer le run initial.",
+      "correction_status": "SUPERSEDED et exclu du choix; v2 + 3 seeds exécutés",
+      "source_paths": [
+        "O92_image_experiment_v2.py; O92_image_replication_compact.py"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-IMG-002",
+      "version_scope": "O92 image v2",
+      "category": "fusion multivue",
+      "severity": "high",
+      "observed_error_or_risk": "La concaténation naïve de global/quadrants/mirroir/negative a BA=0.5 sur inversion de palette malgré 2208 caractéristiques; confirmé avec trois seeds.",
+      "consequence_if_ignored": "Les canaux bruts peuvent créer une dépendance au signe/contraste et submerger la représentation canonique.",
+      "correction_or_prevention": "Vues séparées typées, normalisation/canonicalisation, poids partagés lorsque justifié, portes de fiabilité calibrées, tests contrastifs et ablations.",
+      "correction_status": "preuve synthétique présente; architecture corrigée en conception",
+      "source_paths": [
+        "O92_image_experiment_v2.json; O92_image_replication_compact.json"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-WEATHER-001",
+      "version_scope": "O92 dataset météo",
+      "category": "risque fuite/définition cible",
+      "severity": "high",
+      "observed_error_or_risk": "F1 élevé sur BASEL_picnic_weather, mais la définition exacte de la cible pourrait partager directement des règles/calculs avec les caractéristiques météo; audit source label non encore achevé.",
+      "consequence_if_ignored": "Score gonflé par une fuite ou tâche tautologique au lieu de généralisation intéressante.",
+      "correction_or_prevention": "Inspecter la provenance/formule des labels, tester des sous-ensembles qui retirent les proxies; utiliser plusieurs tâches sans fuite.",
+      "correction_status": "OPEN — avant benchmark phare",
+      "source_paths": [
+        "weather_prediction_dataset.csv; weather_prediction_pecnic_label.csv"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-SKILL-001",
+      "version_scope": "O92 skill acquisition lab",
+      "category": "extrapolation fonctionnelle",
+      "severity": "high",
+      "observed_error_or_risk": "Les polynômes réussissent parfaitement quand classe du mécanisme et degré concordent; MLP choisi pour hinge a RMSE OOD 1.9535 au lieu de 0.0164 IID.",
+      "consequence_if_ignored": "Un bon ajustement local est confondu avec compétence transférable hors domaine.",
+      "correction_or_prevention": "Déduire plusieurs modèles candidats des observations, tester source-off en validation, séparer holdout/OOD, stocker domaine de validité et stratégie d’abstention/extension.",
+      "correction_status": "résultat expérimental consigné; généraliser les tâches",
+      "source_paths": [
+        "O92_skill_acquisition_lab.json"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-DATA-001",
+      "version_scope": "datasets inclus",
+      "category": "intégrité JSONL",
+      "severity": "high",
+      "observed_error_or_risk": "batch_dataset.jsonl contient 783 enregistrements valides et une ligne 784 mal formée.",
+      "consequence_if_ignored": "Un loader peut échouer en bloc ou éliminer silencieusement une donnée.",
+      "correction_or_prevention": "Conserver le fichier source, quarantainer ligne brute + erreur + position; politique de réparation/reprise explicite.",
+      "correction_status": "détecté, réparation non effectuée automatiquement",
+      "source_paths": [
+        "batch_dataset.jsonl"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-DATA-002",
+      "version_scope": "datasets inclus",
+      "category": "format JSON",
+      "severity": "medium",
+      "observed_error_or_risk": "Détection d’un groupe JSON vide, d’un log ayant avertissement texte avant JSON et de deux objets JSON concaténés.",
+      "consequence_if_ignored": "Consommateur strict échoue ou avale un état incomplet.",
+      "correction_or_prevention": "Renommer le log en .log; JSON unique/tableau, ou JSONL pour plusieurs enregistrements; test parse dans CI.",
+      "correction_status": "détecté, corrections attendues dans source copy",
+      "source_paths": [
+        "archive corpus manifest / content records"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-DATA-003",
+      "version_scope": "0000.parquet",
+      "category": "décodage des données",
+      "severity": "high",
+      "observed_error_or_risk": "Signature de Parquet détectée mais schema/records non lus car aucune librairie de décodage disponible.",
+      "consequence_if_ignored": "On pourrait supposer colonnes/qualité sans preuve.",
+      "correction_or_prevention": "Installer/adopter lecteur Parquet autorisé et valider schéma, cardinalités, valeurs manquantes, types.",
+      "correction_status": "NOT_RUN_SEMANTIC_DECODE",
+      "source_paths": [
+        "0000.parquet"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-BIN-001",
+      "version_scope": "poids/checkpoints binaires",
+      "category": "inspection binaire",
+      "severity": "medium",
+      "observed_error_or_risk": "155 occurrences de checkpoints/artefacts de poids identifiées par signature/hash, sans désérialisation arbitraire.",
+      "consequence_if_ignored": "Ne pas surestimer la compréhension du contenu interne ou charger des artefacts non fiables.",
+      "correction_or_prevention": "Inventaire de format/version/taille/source; charger plus tard dans un sandbox avec formats sûrs et code de chargement déclaré.",
+      "correction_status": "inventaire fait; analyse interne non effectuée",
+      "source_paths": [
+        "carnet_note_O92.json"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-ENV-001",
+      "version_scope": "réexécutions",
+      "category": "environnement de test",
+      "severity": "medium",
+      "observed_error_or_risk": "Certains premiers échecs proviennent du mauvais PYTHONPATH ou du mauvais runner; le test ORDER unittest a trouvé 0 tests alors que pytest a 11.",
+      "consequence_if_ignored": "Mauvaise attribution de défaut ou faux “tout passe” sans tests exécutés.",
+      "correction_or_prevention": "Enregistrer cwd, Python, commande, env vars, nombre tests et code de sortie; 0 tests = NOT_RUN.",
+      "correction_status": "résolu par commandes exactes consignées",
+      "source_paths": [
+        "laboratoire_O92.json"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-FUSION-001",
+      "version_scope": "O92 HFPN",
+      "category": "sous-spécification d’architecture",
+      "severity": "high",
+      "observed_error_or_risk": "Les mécanismes partagés, la calibration, les pertes et la gouvernance du cycle de vie sont architecture proposée, non comparés in vivo end-to-end.",
+      "consequence_if_ignored": "Présenter un design choisi comme un modèle déjà opérationnel.",
+      "correction_or_prevention": "Implémenter par modules sous interfaces testées; ablater gate/normalisation/mémoire; source-off acceptance et tests de robustesse avant promotion.",
+      "correction_status": "OPEN — conception seulement",
+      "source_paths": [
+        "fformalisme_model_emergent_O92.tex"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "O92-AUTO-JSONL-ceb53432",
+      "version_scope": "archive corpus",
+      "category": "parse JSONL",
+      "severity": "high",
+      "observed_error_or_risk": "Groupe JSONL avec enregistrements invalides; voir occurrences/hash dans laboratoire_O92.json.",
+      "consequence_if_ignored": "Données ignorées/erreurs de parsing; risque de perte silencieuse.",
+      "correction_or_prevention": "Quarantaine des enregistrements invalides avec offset et octets bruts, pas de suppression tacite.",
+      "correction_status": "détecté dans inventaire; chemin détaillé par occurrence dans carnet_note_O92.json",
+      "source_paths": [
+        "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081"
+      ],
+      "evidence": {}
+    }
+  ],
+  "detected_content_anomalies": [
+    {
+      "type": "invalid_jsonl_records",
+      "sha256": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "bytes": 3986317,
+      "occurrences": [
+        {
+          "path": "dataset/batch_dataset.jsonl",
+          "scope": "direct_unpacked_root",
+          "bytes": 3986317,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "valid_records": 783,
+      "invalid_records": 1,
+      "examples": [
+        {
+          "line": 784,
+          "error": "Unterminated string starting at: line 1 column 980 (char 979)",
+          "excerpt": "{\"id\": \"7cc80448-51bc-403f-80f6-b067f70a8260\", \"category\": \"character_creation\", \"difficulty\": \"hard\", \"genre\": \"adventu"
+        }
+      ]
+    },
+    {
+      "type": "parquet_not_semantically_decoded",
+      "sha256": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+      "bytes": 2306545,
+      "occurrences": [
+        {
+          "path": "dataset/0000.parquet",
+          "scope": "direct_unpacked_root",
+          "bytes": 2306545,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "signature": {
+        "head_PAR1": true,
+        "tail_PAR1": true,
+        "semantic_decode": "NOT_RUN: pyarrow/fastparquet/duckdb/polars absent in tested environment"
+      }
+    },
+    {
+      "type": "invalid_strict_json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "occurrences": [
+        {
+          "path": "b374899be43a1aca/l1_verify_ood.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "13894efa592fee27/audit_release_8022/tests/compileall.log",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/tests/__init__.py",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised_acquire.stdout.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "excerpt": ""
+    },
+    {
+      "type": "zero_byte_content_group",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "occurrences": [
+        {
+          "path": "b374899be43a1aca/l1_verify_ood.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "13894efa592fee27/audit_release_8022/tests/compileall.log",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/tests/__init__.py",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised_acquire.stdout.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "interpretation": "Un fichier vide peut être intentionnel (JSONL store vide, __init__.py, stdout/stderr silencieux); vérifier selon le contrat plutôt que déclarer tous les fichiers vides défectueux."
+    },
+    {
+      "type": "invalid_strict_json",
+      "sha256": "f866ffe7d37f33c212aade743652e1664b3066f9379dcb7ac4c8e0e76322b2fc",
+      "bytes": 739,
+      "occurrences": [
+        {
+          "path": "44f520f56de227bb/logs/reassembly_v3_validation.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 739,
+          "content_role": "result_record_or_machine_readable_state"
+        }
+      ],
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "excerpt": "/mnt/data/reconstruire_suivi_model_AAM_O91_final_v3.py:5: SyntaxWarning: invalid escape sequence '\\s'\n  py -3.11 .\\reconstruire_suivi_model_AAM_O91_final_v3.py --parts-dir . --output .\\suivi_model_AAM_O91_final_v3.zip\n{\n  \"status\": \"PASS\",\n"
+    },
+    {
+      "type": "invalid_strict_json",
+      "sha256": "ed4c7af5a015f795bfc6ab3b2ece1834d16e7aeb6d9ab74cdaae9e481acf7af3",
+      "bytes": 1072,
+      "occurrences": [
+        {
+          "path": "1978f61351c4648d/FINAL_AUDIT_O82_2/experiment_raw/p03_selection_compare.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 1072,
+          "content_role": "result_record_or_machine_readable_state"
+        }
+      ],
+      "error": "Extra data: line 2 column 1 (char 666)",
+      "excerpt": "{\"candidate\": \"iter_050\", \"fit_s\": 20.981812670999716, \"valid\": {\"accuracy\": 0.9586776859504132, \"coverage\": 0.9586776859504132, \"selective_accuracy\": 1.0}, \"stability\": {\"case\": 1.0, \"space\": 1.0}, \"threshold\": 0.7, \"validation_record\": {\""
+    }
+  ],
+  "count": 32,
+  "severity_counts": {
+    "critical": 5,
+    "high": 20,
+    "medium": 7,
+    "low": 0
+  }
+}

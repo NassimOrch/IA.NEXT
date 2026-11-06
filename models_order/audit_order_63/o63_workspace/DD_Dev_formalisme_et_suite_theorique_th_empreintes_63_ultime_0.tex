@@ -1,0 +1,191 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,longtable,array,geometry,hyperref,listings}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=false,pdfborder={0 0 0}}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{remark}[definition]{Remarque}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Rset}{\mathcal{R}}
+\newcommand{\W}{\mathcal{W}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\Def}{\mathsf{D}}
+\begin{document}
+\title{DD — Consolidation formelle ultime — Order 63}\author{Order 63 — dossier d’exécution}\date{21 septembre 2026}\maketitle
+
+\begin{abstract}
+Cette consolidation formalise les objets ajoutés en O63 et explicite les hypothèses nécessaires. Elle distingue les résultats mathématiques qui découlent réellement des définitions des propriétés qui restent empiriques. La notion de world model sémantique et la navigation RS y sont traitées comme structures expérimentales, non comme théorèmes universels.
+\end{abstract}
+
+\section{Empreinte, fibre et factorisation}
+\begin{definition}[Empreinte]
+Soit $X$ un support d'états et $G$ une famille de sondes $f:X\to Y_f$. On définit $I_G:X\to\prod_{f\in G}Y_f$ par $I_G(x)=(f(x))_{f\in G}$.
+\end{definition}
+
+\begin{definition}[Fibre]
+La fibre de $x$ sous $G$ est $[x]_G=\{y\in X:I_G(y)=I_G(x)\}$.
+\end{definition}
+
+\begin{proposition}[Raffinement monotone]
+Si $G\subseteq H$, alors $I_H(x)=I_H(y)$ implique $I_G(x)=I_G(y)$. Par conséquent chaque fibre de $H$ est incluse dans une fibre de $G$.
+\end{proposition}
+
+\begin{proof}
+L’égalité de $I_H$ entraîne l’égalité de chacune de ses coordonnées, donc des coordonnées indexées par $G$. La relation d’équivalence induite par $H$ est donc plus fine ou égale.
+\end{proof}
+
+\begin{proposition}[Factorisation exacte]
+Soit $A:X\to Y$ et supposons $I_G(x)=I_G(y)\Rightarrow A(x)=A(y)$. Il existe alors une application $\bar A$ sur l’image de $I_G$ telle que $A=\bar A\circ I_G$.
+\end{proposition}
+
+\begin{proof}
+Pour $z$ dans l’image, choisir $x$ tel que $I_G(x)=z$ et poser $\bar A(z)=A(x)$. La condition d’indiscernabilité rend cette définition indépendante du représentant.
+\end{proof}
+
+\section{Fermeture et géométrie des seuils}
+Pour un ensemble de sondes $G$, la fermeture $\operatorname{Cl}(G)$ regroupe les sondes dont la valeur est déterminée par l’empreinte déjà acquise, sur le support déclaré. L’extensivité, la monotonie et l’idempotence sont des propriétés de la clôture définie dans le corpus source.
+
+O63 calcule expérimentalement les seuils de séparation par niveaux de coût. Pour une paire $x,y$, un niveau $\tau$ est conservé tant que les empreintes au niveau considéré restent identiques. L’ultramétrie codée dans \code{UltrametricGeometryEngine} n’est considérée comme justifiée que sous les hypothèses du corpus et après vérification sur le support.
+
+\section{Déficit}
+Le déficit opérationnel O63 est
+\[
+D=(D_{obs},D_{cap},D_{res},D_{search},D_{transfer},D_{constraint}).
+\]
+Il s’agit d’un état de contrôle, pas d’une distance universelle à une solution. Le code calcule chaque composante à partir des observations, transitions, ressources, contraintes et traces disponibles au temps courant.
+
+\begin{remark}
+Le déficit ne peut à lui seul inventer une transformation qui n’appartient à aucun générateur accessible. Cette réserve est explicitement présente dans les développements historiques du projet et est maintenue dans O63.
+\end{remark}
+
+\section{World model sémantique}
+On note $\Z$ l’espace latent produit par le Transformer. L’encodage est une application apprise
+\[
+E_\theta:X\to\Z.
+\]
+La dynamique est un ensemble de transitions
+\[
+W_{\theta,j}: (z,a,c)\mapsto(\hat z',\hat r,\hat u),
+\qquad j=1,2,3.
+\]
+La moyenne des membres fournit la prédiction et leur désaccord participe à l’incertitude.
+
+\begin{definition}[Effet sémantique d’action]
+Pour une transition observée $(x,a,x')$, son effet sémantique est $\Delta z=E_\theta(x')-E_\theta(x)$.
+\end{definition}
+
+L’embedding interne d’une action est appris à partir des effets enregistrés et non de son identifiant textuel. Cette construction autorise les IDs opaques utilisés en évaluation.
+
+\begin{proposition}[Conservation du statut opaque]
+Si les IDs d’action sont injectés comme identifiants arbitraires et qu’aucune caractéristique dépendant du texte de l’ID n’est utilisée dans l’encodage, alors une permutation bijective des IDs ne change pas l’information sémantique disponible au modèle, hors historique appris associé aux effets.
+\end{proposition}
+
+\begin{remark}
+Cette proposition est une propriété d’implémentation du protocole d’action opaque, non une preuve que le modèle comprend la sémantique du domaine.
+\end{remark}
+
+\section{Trajectoires RS}
+Soit une trajectoire vérifiée
+\[
+\gamma=(z_0,z_1,\ldots,z_T).
+\]
+La fonction RS O63 prend un état origine, un état courant, un candidat et un déficit :
+\[
+Q_\phi(z_0,z_t,z_c,D_t)=(p,u,v).
+\]
+L’apprentissage produit une approximation de la progression temporelle et des relations directionnelles entre états. Les négatifs inter-trajectoires et inversés définissent un problème contrastif supervisé par démonstrations vérifiées.
+
+\begin{definition}[Navigation RS]
+La navigation RS est l’utilisation de $Q_\phi$ pour modifier l’ordre d’expansion ou la fusion des candidats à partir d’états imaginés ou observés.
+\end{definition}
+
+Le caractère « utile pour résoudre » n’est pas une propriété mathématique de $Q_\phi$ : il doit être établi par les expériences de décision. La campagne O63 montre que ce lien est encore imparfait.
+
+\section{Micro-mémoire et propagation}
+Pour chaque composant $k$, on définit
+\[
+M_t^k=(E_t^k,H_t^k,P_t^k,V_t^k,B_t^k).
+\]
+Une mise à jour générique est
+\[
+M_{t+1}^k=U_k(M_t^k,o_t^k,a_t^k,o_{t+1}^k,e_t^k,m_t^{in}).
+\]
+La propagation est
+\[
+m_t^{i\to j}=T_{ij}(M_t^i,e_t^i),
+\]
+avec une relation d’autorisation $i\to j$ déclarée dans le bus.
+
+\begin{proposition}[Non-fuite structurelle du bus]
+Si le bus refuse toute route non déclarée et si chaque module n’a accès qu’aux messages de ses routes autorisées, alors la propagation structurelle ne peut créer une communication directe hors du graphe de routes.
+\end{proposition}
+
+\begin{proof}
+Le seul mécanisme de transmission inter-module est le bus. Pour une route non déclarée, \code{send} lève une exception et ne produit pas un message utilisable par le destinataire. Le graphe des dépendances inter-modules est donc contenu dans le graphe autorisé.
+\end{proof}
+
+\begin{remark}
+Cette propriété n’interdit pas une fuite sémantique contenue dans un message autorisé. Elle garantit seulement la frontière structurelle ; la provenance et les audits doivent compléter cette garantie.
+\end{remark}
+
+\section{Imagination et causalité}
+Une hypothèse imaginée est un objet $h$ produisant des branches contrefactuelles. Pour une branche $b$ :
+\[
+U(b)=\hat r(b)-\lambda_u\hat u(b)-\lambda_D\|\hat D(b)\|.
+\]
+O63 utilise un faisceau de branches et réinjecte la meilleure utilité dans la fusion décisionnelle.
+
+\begin{definition}[Effet causal local]
+Pour un composant $k$, un effet interventionnel local est la différence observée entre une exécution avec le signal $k$ et une exécution où le signal $k$ est neutralisé, toutes les autres conditions contrôlées étant conservées autant que possible.
+\end{definition}
+
+Une expérience O63 montre un effet local de l’imagination sur un épisode caché : masquer l’imagination modifie la séquence d’actions et la récompense. Cela ne constitue pas une identification universelle.
+
+\section{Synthèse et généralisation}
+Un programme $P$ est promu selon des mesures séparées : réussite sur support d’entraînement, performance holdout, sensibilité aux entrées, structure non triviale, utilisation de services, et généralisation hors support. L’exécution seule est donc insuffisante.
+
+Une exécution sandboxée est modélisée par
+\[
+VM(P,x)\to(y,\pi),
+\]
+où $\pi$ est une provenance d’exécution. Toute opération d’accès au système hôte hors liste blanche est rejetée.
+
+\section{Contraintes et contre-exemples}
+Soit $C$ une contrainte candidate. Son état logique O63 suit :
+\[
+HYPOTHESIS\to TESTED\to
+\begin{cases}
+FRAGILIZED & \text{si un contre-exemple apparaît},\\
+VERIFIED_{support} & \text{si le support est suffisant et aucun contre-exemple connu n’existe},\\
+REJECTED & \text{si la révision échoue}.
+\end{cases}
+\]
+La notation $VERIFIED_{support}$ est recommandée pour éviter de confondre vérification finie et universalité.
+
+\section{Checkpoints comme état causal}
+Le checkpoint complet doit contenir tout état interne susceptible de modifier l’avenir. Formellement, si $S_t$ est l’état complet du système, une restauration correcte vise
+\[
+restore(save(S_t))\equiv S_t
+\]
+sur la classe d’observables choisie. O63 teste les tailles de trajectoire et les statistiques de reprise ; les archives OOD démontrent la production de checkpoints réels.
+
+\section{Optimisations}
+Une optimisation $O$ est admissible sans perte lorsque, sur un support $X$ déclaré,
+\[
+F_O(x)=F(x)\quad\forall x\in X.
+\]
+Les optimisations O63 possèdent des tests d’équivalence ou de conservation. Les gains temporels sont ensuite mesurés séparément. Il est donc interdit d’inférer un speedup universel à partir d’un seul support.
+
+\section{Limites formelles encore ouvertes}
+Aucune construction O63 ne fournit encore une preuve que l’espace neural $\Z$ est universellement sémantique, qu’il est géométriquement stable pour tous les domaines, ou que les trajectoires vérifiées engendrent une navigation complète. La synthèse générale n’est pas démontrée universellement et la campagne chess n’est pas résolue. Ces propositions restent ouvertes.
+
+\section{Conclusion}
+La formulation O63 fournit maintenant un langage formel commun pour lier empreintes, déficit, world model sémantique, RS, imagination, mémoire locale, programmes, causalité et ressources. Les affirmations au-delà des supports testés restent explicitement hors du statut de théorème.
+\end{document}

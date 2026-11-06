@@ -1,0 +1,98 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}\usepackage{amsmath,amssymb,booktabs,longtable,geometry,hyperref,xcolor}
+\geometry{margin=2.2cm}
+\title{ORDER72 -- Architecture émergente v0\newline\large Conception dérivée de l'audit O71 et de la théorie des empreintes}
+\author{Dossier de conception scientifique}
+\date{24 septembre 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Ce document fixe l'architecture proposée pour ORDER72 après analyse croisée de ORDER71, de ses variantes WM O65 et attention O70-att1, des rapports d'expérience O71 et des documents théoriques disponibles. Le résultat central est une séparation causale stricte : le World Model (WM) est un mécanisme de représentation, de prédiction, d'estimation d'incertitude et de priorisation ; il n'est jamais une source de vérité. La vérité opérationnelle reste fournie par l'expérience exécutable et par le vérificateur indépendant. ORDER72 ajoute un portefeuille de WM, une calibration par retour public, un méta-contrôleur de mode et un registre explicite de l'utilisation causale du WM.
+\end{abstract}
+\tableofcontents
+\section{Statut et portée}
+Cette architecture est une proposition de développement, pas une preuve d'une universalité absolue. Les résultats O71 montrent une généralité mécaniste sur plusieurs familles, mais ne permettent pas de conclure à l'AGI universelle. Le but d'O72 est de supprimer une ambiguïté architecturale précise : un WM présent dans le code mais sans influence décisionnelle réelle sur les tâches certifiées.
+\section{Base théorique}
+La théorie des empreintes fournie dans \texttt{DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex} impose une distinction entre l'information observable, ses classes d'indiscernabilité, les transformations qui descendent sur ces classes et les ponts externes nécessaires pour relier simulation et réalisation. ORDER72 respecte cette séparation.
+\subsection{Quotient observationnel}
+Pour une famille de sondes $\Phi$, une base d'observations $\mathcal G$ et un niveau de résolution $P$, une empreinte est notée
+\[
+I(x)=I_{\Phi,\mathcal G}^{P}(x).
+\]
+Deux états sont indiscernables à ce niveau si $I(x)=I(y)$. Toute transformation interne supposée sémantiquement valable doit respecter les fibres observationnelles concernées. Cette contrainte devient un invariant logiciel du pipeline O72.
+\subsection{Déficit}
+On note $D=(D_{amb},D_{probe},D_{res},D_{trans})$ les composantes du déficit : ambiguïté, sondes manquantes, ressources et écart de transfert. Une raffinement d'empreinte ne peut pas créer artificiellement une distinction qui n'est pas observée ; il doit réduire ou conserver le déficit selon la relation de raffinement déclarée.
+\section{Diagnostic O71}
+Le chemin autonome à objectif public de O71 suit :
+\[
+\text{état public}\rightarrow\text{compilateur}\rightarrow\text{simulation exacte}\rightarrow\text{objectif public}\rightarrow\text{vérificateur}.
+\]
+Dans ce chemin, le WM n'est utilisé que pour encoder l'observation, puis aucune prédiction WM n'intervient dans le choix final. Les mesures d'instrumentation réalisées après extraction de O71 donnent une exécution avec encodage mais zéro appel à \texttt{predict} dans le chemin de certification.
+
+Le chemin de recherche ouverte utilise en revanche \texttt{ActiveGeneralSearch} et appelle le WM pour prédire l'évolution latente, la récompense et l'incertitude. L'audit comparatif montre toutefois que l'attention O70-att1 reste pratiquement équivalente à un WM nul sur un banc de recherche à budget limité ; l'O65 apporte seulement un gain faible sur ce banc. La conclusion n'est donc pas que « le WM est inutile », mais que son utilisation causale est actuellement trop faible.
+\section{Rôles stricts d'O72}
+\begin{longtable}{p{0.23\textwidth}p{0.70\textwidth}}
+\toprule
+Rôle & Définition et frontière \\
+\midrule
+Représentation & Transformer l'observation brute en état latent compatible avec les contrats d'empreintes. \\
+Prédiction & Estimer les conséquences probables d'une action ou d'une trajectoire. \\
+Incertitude & Estimer le manque de confiance et le désaccord inter-WM ; indicateur de risque, jamais preuve de vérité. \\
+Priorisation & Ordonner les expériences/candidats pour réduire un coût de recherche ou augmenter l'information obtenue. \\
+Mémoire & Conserver les transitions observées avec provenance et signatures d'état. \\
+Vérification & Recalculer à partir de l'environnement, du simulateur certifié ou d'un test externe indépendant. \\
+Vérité & \textbf{Interdit au WM}. Une réponse vérifiée exige une source externe au prédicteur. \\
+\bottomrule
+\end{longtable}
+\section{Architecture complète}
+\subsection{Vue d'ensemble}
+\[
+X\xrightarrow{I_P}L
+\xrightarrow{\mathcal K}\text{contraintes/empreintes}
+\xrightarrow{\mathcal P}\text{portefeuille WM}
+\xrightarrow{\mathcal A}\text{priorisation}
+\xrightarrow{\mathcal E}\text{expérience/simulation}
+\xrightarrow{\mathcal V}\text{vérification}
+\xrightarrow{\mathcal M}\text{mémoire}
+\xrightarrow{\mathcal R}\text{raffinement}.\]
+Le symbole $\mathcal P$ représente le portefeuille de WM ; $\mathcal V$ est explicitement séparé.
+\subsection{Mode CERTIFY}
+Lorsque le constructeur produit un espace fini légal $A$, une fonction d'objectif public $J$ et une simulation $S$, O72 doit vérifier
+\[
+\forall a\in A,\quad S(a)\text{ est évalué},
+\]
+puis calculer
+\[
+a^*\in\arg\max_{a\in A}J(S(a))
+\]
+ou le minimum selon le sens déclaré. Une décision n'est certifiée que si la couverture est complète et l'optimum unique, ou si une relation mathématique de même force a été certifiée. Le WM ne peut modifier cette preuve.
+\subsection{Mode SEARCH}
+Lorsque la fermeture exacte n'est pas disponible dans le budget, le WM sert à choisir quelles hypothèses explorer. Le résultat est alors explicitement marqué provisoire/non vérifié jusqu'à satisfaction du contrat externe.
+\subsection{Portefeuille WM}
+O72 démarre avec au moins deux membres complémentaires : le portefeuille O65 généraliste de transitions et le WM attentionnel O70-att1. Ils sont gelés. Leur taille n'est pas une variable de vérité ; leur utilité est mesurée par la réduction de regret, de temps ou de nombre d'expériences à niveau de certification constant.
+\section{Calibration du WM}
+Pour un petit ensemble pilote $P=\{a_1,\ldots,a_m\}$ dont les conséquences sont publiques, on calcule pour le WM $k$
+\[
+R_k(P)=\frac1m\sum_{j=1}^{m}|\hat r_{k,j}-r_j|.
+\]
+Le routeur choisit le backend avec la meilleure utilité prédictive observée, sous pénalisation de l'incertitude. En absence de retour public exploitable, le routeur ne fabrique pas de vérité : il bascule vers un choix conservateur basé sur l'incertitude et laisse la décision non certifiée.
+\section{Barrière de vérité}
+La structure O72 interdit trois raccourcis : utilisation d'un champ caché comme objectif, conversion d'une prédiction WM en réponse, et passage d'une simulation interne à une revendication externe sans test. Tout payload destiné au routeur est scanné contre les champs de type \texttt{target}, \texttt{answer}, \texttt{correct}, \texttt{oracle}, \texttt{solution}, \texttt{ground\_truth}, etc.
+\section{Pourquoi pas simplement un WM plus gros ?}
+La comparaison O71 montre qu'un WM plus riche n'ajoute aucune exactitude sur un chemin qui n'utilise pas ses prédictions. La taille ne devient utile que si elle augmente effectivement la couverture prédictive ou la qualité de priorisation dans des régimes où ces prédictions sont causalement consommées. Le critère d'O72 est donc une utilité marginale par coût :
+\[
+\eta=\frac{\Delta U_{\mathrm{decision}}}{\Delta\mathrm{compute}},
+\]
+où $\Delta U_{\mathrm{decision}}$ est une réduction de regret, de temps ou de nombre d'expériences à protocole de vérification identique. Un petit WM spécialisé peut suffire dans un sous-espace ; un portefeuille de petits WM complémentaires peut couvrir plusieurs sous-espaces ; un grand WM n'est justifié que lorsqu'il produit un gain mesurable supplémentaire.
+\section{Mémoire et théorie fini/inini}
+La branche \texttt{infini\_vs\_fini} est intégrée comme théorie des cadres : un problème fermé dans un cadre fini permet la certification exhaustive ; un résidu hors cadre doit être représenté comme déficit ou besoin de raffinement. O72 ne transforme pas cette notion en ontologie de l'infini et n'utilise pas une limite de calcul pour masquer une absence de preuve.
+\section{Protocole expérimental O72}
+Les tests doivent être de familles différentes : arithmétique, logique, séquence, graphes, planification, contraintes, symbolique, spatial, causal, contre-exemple, partiellement observable, associatif, tâches sans choix explicite et tâches sous budget. Chaque famille doit être testée avec graines multiples, permutation des actions, mutations de représentation, budgets différents et contrôle WM nul.
+\section{Contrats de sortie}
+Chaque résultat comporte : mode, statut de certification, source de vérité, backend WM choisi, budget consommé, nombre d'appels WM, désaccord, provenance des observations et hash des WM gelés. Aucune métrique interne n'est présentée comme preuve externe.
+\section{Architecture de développement v0}
+Le package O72 v0 implémente le contrat de rôles, le routeur, le gel/hash des WM et le méta-chemin CERTIFY/SEARCH. Il réutilise volontairement O71 v1 comme noyau de vérification plutôt que de réécrire prématurément ses composants éprouvés. Les modifications futures devront être justifiées par une mesure de déficit ou une expérience reproduisible.
+\section{Critères de passage à O72 v1}
+Une v1 ne doit être produite que si : (i) le routeur démontre une utilité causale par rapport à WM nul sur plusieurs familles ; (ii) la vérification reste indépendante ; (iii) le coût du pilotage est compté ; (iv) les performances ne dégradent pas systématiquement le noyau O71 ; (v) les gains persistent sous permutation des actions et changement de graines ; (vi) les nouvelles capacités sont testées hors distribution.
+\section{Conclusion}
+L'architecture émergente est donc un système d'empreintes doté d'un portefeuille de modèles prédictifs, et non un WM confondu avec le raisonneur. Cette distinction répond directement au diagnostic O71 : le WM peut être petit lorsque le problème est clos et certifiable, mais devient stratégique dans les régimes où l'espace est ouvert, coûteux, partiellement observable ou impossible à fermer immédiatement. La question de l'échelle doit être traitée expérimentalement par utilité décisionnelle, pas par nombre de paramètres.
+\end{document}

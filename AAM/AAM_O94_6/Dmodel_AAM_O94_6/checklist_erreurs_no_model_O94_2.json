@@ -1,0 +1,357 @@
+{
+  "schema": "aam-o94-2-error-ledger-v1",
+  "title": "checklist erreurs no model O94 2.json",
+  "parent_ledger": "checklist_erreurs_no_model.json",
+  "parent_sha256": "24d94f1714daaf35dd41d40309bf076571fc3a50cc9df06b1f38488832812793",
+  "updated_utc": "2026-10-19T13:54:14.933869Z",
+  "updated_for": "P8 final docs and release verification; LaTeX output-capture decode issue resolved by explicit replacement decoding",
+  "items": [
+    {
+      "incident_id": "O942-E001",
+      "phase": "P5",
+      "category": "ui_constructor_task_collision",
+      "severity": "TEST_UI_MODAL_BLOCK",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "Le catalogue de composition rafraîchissait pendant la construction de l’UI, entrant en conflit avec un contrôle de statut asynchrone.",
+      "remediation": "Déclencher le chargement du catalogue à la demande, au lieu du constructeur.",
+      "evidence": [
+        "logs/O94_2/T03_ui_initialization.json",
+        "logs/O94_2/T08_ui_combined_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E002",
+      "phase": "P3",
+      "category": "stale_base_block_expectation",
+      "severity": "OUTDATED_TEST_FIXTURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "Le test attendait l’ancien nombre de méthodes de base après ajout des méthodes O94.2.",
+      "remediation": "Mettre à jour l’assertion à partir du catalogue/version actuelle, puis relancer le test des briques.",
+      "evidence": [
+        "logs/O94_2/T05_base_blocks.json",
+        "logs/O94_2/T05_base_blocks_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E003",
+      "phase": "P6",
+      "category": "invalid_test_command_path",
+      "severity": "TEST_HARNESS_COMMAND_TYPO",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "Un lot de test invoquait un chemin de module de test qui n’existe pas.",
+      "remediation": "Exécuter le module présent dans le dépôt et conserver le premier reçu en historique.",
+      "evidence": [
+        "logs/O94_2/T06_runtime_and_chat.json",
+        "logs/O94_2/T06_runtime_and_chat_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E004",
+      "phase": "P6",
+      "category": "versioned_ui_expectation_stale",
+      "severity": "O94_1_ASSERTION_IN_O94_2_TEST",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "Un test UI historique attendait le titre de fenêtre O94.1 au lieu du titre O94.2.",
+      "remediation": "Mettre à jour l’assertion à O94.2 puis retester le module concerné.",
+      "evidence": [
+        "logs/O94_2/T11_suite_batch_02.json",
+        "logs/O94_2/T12_stale_version_assertion_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E005",
+      "phase": "P6",
+      "category": "ui_test_without_virtual_display",
+      "severity": "TEST_ENVIRONMENT_CONFIGURATION",
+      "status": "RESOLVED_BY_XVFB_RETEST",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "Une exécution de tests incluant Tk a été lancée sans Xvfb et a échoué sur l’absence d’affichage; ce résultat n’était pas une preuve d’échec du runtime sous interface graphique.",
+      "remediation": "Exécuter les lots d’UI avec Xvfb et conserver le reçu de la commande corrigée.",
+      "evidence": [
+        "logs/O94_2/T09_targeted_regression.json",
+        "logs/O94_2/T10_targeted_regression_xvfb.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E006",
+      "phase": "P6",
+      "category": "monolithic_regression_timeout",
+      "severity": "HARNESS_TIMEOUT_NONCONCLUSIVE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "La suite entière lancée dans un seul processus dépassait la fenêtre de l’outil de test; l’arrêt n’a produit aucun résultat global exploitable.",
+      "remediation": "Exécuter les fichiers par lots courts et vérifiables; ne pas comptabiliser le lot interrompu.",
+      "evidence": [
+        "logs/O94_2/T11_suite_batch_01.json",
+        "logs/O94_2/T11_suite_batch_02.json",
+        "logs/O94_2/T11_suite_batch_03.json",
+        "logs/O94_2/T87_final_regression_matrix.json",
+        "logs/O94_2/T41_complete_test_matrix.json"
+      ],
+      "resolution_summary": "Les 30 lots segmentés ont terminé avec PASS_BOUNDED; la matrice T87 couvre 60/60 modules exactement une fois (349 tests, 21 sous-tests) et ne compte aucun lot interrompu."
+    },
+    {
+      "incident_id": "O942-E007",
+      "phase": "P6",
+      "category": "o942_parent_control_hash_refs_missing",
+      "severity": "PREFLIGHT_GUARD_BLOCKED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:44:32.737419Z",
+      "summary": "Le gate O94.2 exige les empreintes des deux registres historiques d’erreurs, mais leurs champs de référence étaient absents de la checklist; le préflight a bloqué les tests dépendants.",
+      "remediation": "Inscrire les SHA-256 courants sans modifier les registres historiques, puis vérifier le gate et retester le lot concerné.",
+      "evidence": [
+        "logs/O94_2/T11_suite_batch_04.json",
+        "logs/O94_2/T13_phase_gate_preflight.json",
+        "logs/O94_2/T17_suite_batch04_after_mutable_drift_fix.json"
+      ],
+      "resolution_evidence": [
+        "logs/O94_2/savepoint_refresh.json",
+        "logs/O94_2/T11_suite_batch_04.json",
+        "logs/O94_2/preflight_gate_smoke.json"
+      ],
+      "resolution_summary": "Après synchronisation et snapshot, preflight passe; lot 4 passe 32 tests."
+    },
+    {
+      "incident_id": "O942-E008",
+      "phase": "P6",
+      "category": "powershell_launcher_preflight_guard_absent",
+      "severity": "PORTABLE_LAUNCHER_CONTRACT",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:44:32.737419Z",
+      "summary": "Le lanceur PowerShell O94.2 ne contenait pas d’appel préflight explicite attendu par le test d’acceptation portable.",
+      "remediation": "Ajouter le contrôle preflight, un journal persistant et le diagnostic en cas d’échec, puis retester le contrat du lanceur.",
+      "evidence": [
+        "logs/O94_2/T11_suite_batch_04.json",
+        "logs/O94_2/T17_suite_batch04_after_mutable_drift_fix.json"
+      ],
+      "resolution_evidence": [
+        "run_AAM_O94_2.ps1",
+        "logs/O94_2/T11_suite_batch_04.json"
+      ],
+      "resolution_summary": "Le nouveau lanceur PowerShell inclut le préflight et le test de portabilité du lot 4 passe."
+    },
+    {
+      "incident_id": "O942-E009",
+      "phase": "P6",
+      "category": "ui_field_mapping_test_double_missing_root",
+      "severity": "TEST_FIXTURE_INCOMPLETE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:44:32.737419Z",
+      "summary": "Le test de contrat de mapping UI utilisait un objet O93Desktop incomplet et omettait l’attribut root transmis comme parent à la boîte de confirmation.",
+      "remediation": "Compléter la fixture UI avec root=None et relancer le contrat UI et les tests boîte noire concernés.",
+      "evidence": [
+        "logs/O94_2/T14_ui_field_mapping_contract.json",
+        "logs/O94_2/T15_ui_field_mapping_contract_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E010",
+      "phase": "P6",
+      "category": "receipt_runner_import_path",
+      "severity": "TEST_HARNESS_PRECONDITION_BLOCK",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:44:59.253157Z",
+      "summary": "Le reçu-exécuteur ne trouvait pas aam_o93 lorsqu’il était appelé comme script depuis scripts/, car la racine du modèle n’était pas insérée dans sys.path avant le préflight.",
+      "remediation": "Insérer explicitement la racine du modèle dans sys.path avant le contrôle, rafraîchir le point de sauvegarde et relancer les tests via le runner.",
+      "evidence": [
+        "logs/O94_2/T15_ui_field_mapping_contract_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E011",
+      "phase": "P6",
+      "category": "aggregated_test_wrapper_timeout",
+      "severity": "HARNESS_TIMEOUT_NONCONCLUSIVE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:52:33.383007Z",
+      "summary": "La matrice combinant plusieurs lots a dépassé la fenêtre de 240 secondes du lanceur externe et n’a pas produit de reçu agrégé exploitable; les reçus individuels restent la seule preuve recevable.",
+      "remediation": "Exécuter les modules O94.2 et les modules restants en lots plus petits avec reçus indépendants, sans comptabiliser les lots qui n’ont pas terminé.",
+      "evidence": [
+        "logs/O94_2/T18_full_segmented_matrix_stage_timeout.json",
+        "logs/O94_2/T11_suite_batch_01.json",
+        "logs/O94_2/T87_final_regression_matrix.json",
+        "logs/O94_2/T41_complete_test_matrix.json"
+      ],
+      "resolution_summary": "Les reçus individuels ont été réconciliés par T67/T87, tous les 30 lots passent et la couverture exacte est confirmée; les tentatives agrégées interrompues demeurent conservées mais ne servent pas de preuve de réussite."
+    },
+    {
+      "incident_id": "O942-E012",
+      "phase": "P6",
+      "category": "subprocess_descendant_retains_pipes",
+      "severity": "HARNESS_TIMEOUT_NONCONCLUSIVE",
+      "status": "RESOLVED_BY_ISOLATED_RETESTS",
+      "opened_utc": "2026-10-19T12:55:05.365096Z",
+      "summary": "Un lot groupé RAG/SMS n’a pas produit de reçu dans la fenêtre externe; le runner initial ne tuait pas le groupe de processus Xvfb/pytest, ce qui pouvait laisser un descendant garder des pipes ouverts.",
+      "remediation": "Terminer le groupe de processus complet à l’expiration et relancer chaque module séparément.",
+      "evidence": [
+        "logs/O94_2/T24_rag_sms_regression_timeout.json",
+        "logs/O94_2/T25_runner_timeout_selftest.json",
+        "logs/O94_2/T26_rag_resolution.json",
+        "logs/O94_2/T27_sms_retrieval.json",
+        "logs/O94_2/T28_sms_corpus_sample.json",
+        "logs/O94_2/T29_rag_adaptive.json",
+        "logs/O94_2/T11_suite_batch_03.json",
+        "logs/O94_2/T11_suite_batch_06.json",
+        "logs/O94_2/T11_suite_batch_07.json",
+        "logs/O94_2/T11_suite_batch_14.json"
+      ],
+      "resolution_summary": "Le runner a terminé proprement un test de timeout en 2,053 s en tuant le groupe de processus; les composants RAG/SMS qui avaient été regroupés sont ensuite passés individuellement/par paires."
+    },
+    {
+      "incident_id": "O942-E013",
+      "phase": "P6",
+      "category": "direct_regression_runner_import_path",
+      "severity": "TEST_HARNESS_PRECONDITION_BLOCK",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:59:56.545038Z",
+      "summary": "Le runner de régression appelé directement ne trouvait pas aam_o93, car le chemin de recherche Python commençait par scripts/; le runner fonctionnait lorsqu’il était enfant du receipt runner qui définissait PYTHONPATH.",
+      "remediation": "Ajouter la racine du modèle à sys.path avant le préflight et relancer les groupes 11 et suivants par appel direct.",
+      "evidence": [
+        "logs/O94_2/T11_suite_batch_11.json",
+        "logs/O94_2/T11_suite_batch_12.json",
+        "logs/O94_2/T11_suite_batch_13.json",
+        "logs/O94_2/T11_suite_batch_14.json",
+        "logs/O94_2/T11_suite_batch_15.json",
+        "logs/O94_2/T11_suite_batch_16.json",
+        "logs/O94_2/T11_suite_batch_17.json",
+        "logs/O94_2/T11_suite_batch_18.json",
+        "logs/O94_2/T11_suite_batch_19.json",
+        "logs/O94_2/T11_suite_batch_20.json",
+        "logs/O94_2/T11_suite_batch_21.json"
+      ]
+    },
+    {
+      "incident_id": "O942-E014",
+      "phase": "P6",
+      "category": "latex_output_directory_setup",
+      "severity": "TEST_INVOCATION_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:06:15.009878Z",
+      "summary": "La première commande pdflatex a reçu un dossier de sortie /tmp/o942latex qui n’existait pas et TeX n’a pas pu créer son journal.",
+      "remediation": "Créer explicitement le dossier de sortie puis relancer depuis le receipt runner ; ne pas compter la première commande comme résultat de compilation.",
+      "evidence": [
+        "logs/O94_2/T32_formalism_latex_compile.json",
+        "logs/O94_2/T38_laboratory_latex_final.json"
+      ],
+      "resolution_summary": "Le dossier /tmp/o942latex a été créé explicitement et le document a été compilé avec succès ; reçu final T38 après la mise à jour de la commande."
+    },
+    {
+      "incident_id": "O942-E015",
+      "phase": "P6",
+      "category": "receipt_text_decode",
+      "severity": "TEST_HARNESS_EXCEPTION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:06:15.009878Z",
+      "summary": "Le receipt runner utilisait le décodage strict par défaut et s’est arrêté sur un octet de sortie pdflatex non UTF-8, sans produire de reçu normal.",
+      "remediation": "Configurer les sous-processus avec encoding UTF-8 et errors=replace, compiler de nouveau et vérifier le reçu.",
+      "evidence": [
+        "scripts/o942_run_receipt.py",
+        "logs/O94_2/T37_formalism_latex_final.json",
+        "logs/O94_2/T38_laboratory_latex_final.json"
+      ],
+      "resolution_summary": "Le runner encodé en UTF-8 avec remplacement des octets non conformes a produit des reçus normaux ; les compilations finales ont réussi."
+    },
+    {
+      "incident_id": "O942-E016",
+      "phase": "P6",
+      "category": "latex_inline_code_syntax",
+      "severity": "DOCUMENT_BUILD_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:06:52.360115Z",
+      "summary": "Compilation LaTeX du formalisme révélant un underscore brut dans une notation en backticks, qui n’est pas une syntaxe valide LaTeX.",
+      "remediation": "Remplacer les marqueurs markdown de code par une notation LaTeX d’inline-code, puis compiler formalisme et laboratoire dans un répertoire temporaire après création explicite du répertoire.",
+      "evidence": [
+        "logs/O94_2/T37_formalism_latex_final.json",
+        "logs/O94_2/T38_laboratory_latex_final.json"
+      ],
+      "resolution_summary": "Les marqueurs inline ont été convertis en commandes LaTeX valides ; la compilation finale du formalisme et du laboratoire passe sans erreur fatale."
+    },
+    {
+      "incident_id": "O942-E017",
+      "phase": "P6",
+      "category": "document_hash_drift_during_build",
+      "severity": "PREFLIGHT_BLOCKED_NO_TEST_EXECUTED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:13:55.196401Z",
+      "summary": "Un retest de l’adaptateur local a été arrêté avant l’exécution du test parce que le hash du laboratoire avait changé au cours de la préparation du document. Aucun test produit n’a été exécuté pendant cet échec de préflight.",
+      "remediation": "Isoler une copie autonome de construction, mettre à jour les références SHA-256, synchroniser le point sav_AAM_O94_2 puis relancer le contrôle pré-exécution.",
+      "evidence": [
+        "logs/O94_2/T37_model_integration_retest.json",
+        "logs/O94_2/T38_savepoint_refresh_final_docs.json",
+        "logs/O94_2/T42_model_integration_final.json"
+      ],
+      "resolution_summary": "Sur la copie isolée, le préflight repasse sans avertissement et les tests d’intégration de modèles passent : 8 passed dans T42."
+    },
+    {
+      "incident_id": "O942-E018",
+      "phase": "P8",
+      "category": "preflight_savepoint_not_refreshed_after_source_edit",
+      "severity": "TEST_BLOCKED_BEFORE_PRODUCT_EXECUTION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:26:48.180154Z",
+      "summary": "Le premier retest après correction a été bloqué avant exécution car le point de sauvegarde contenait les hash précédents du CLI et du fichier de test.",
+      "remediation": "Rafraîchir sav_AAM_O94_2 après toute modification contrôlée, faire vérifier le manifeste puis relancer le même test seulement après préflight PASS_BOUNDED.",
+      "evidence": [
+        "logs/O94_2/T61_savepoint_after_e2e_test_addition.json",
+        "logs/O94_2/T11_suite_batch_10.json"
+      ],
+      "resolution_summary": "Après refresh du savepoint, le test complet du module et la paire de lots correspondante ont réussi."
+    },
+    {
+      "incident_id": "O942-E019",
+      "phase": "P8",
+      "category": "savepoint_refresh_portability_refactor_name_error",
+      "severity": "SAVEPOINT_REFRESH_ABORTED_PRE_RUNTIME",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:30:04.023201Z",
+      "summary": "Le retrait des chemins absolus a laissé une référence parent_audit utilisée sans initialisation; le script de rafraîchissement s’est arrêté après une NameError. Aucun test produit n’a été lancé par cet échec.",
+      "remediation": "Rendre le chemin d’audit optionnel via AAM_O94_1_AUDIT_ARCHIVE et vérifier son existence avant hash; sans variable, conserver le hash du parent modèle enregistré et laisser le hash d’audit nul.",
+      "evidence": [
+        "logs/O94_2/T72_savepoint_remove_absolute_build_path.json",
+        "logs/O94_2/T74_pre_candidate_preflight.json",
+        "logs/O94_2/T75_savepoint_refresh_portable_retest.json",
+        "logs/O94_2/T76_restore_check_portable_retest.json",
+        "logs/O94_2/T77_pre_candidate_preflight.json"
+      ],
+      "resolution_summary": "Le chemin parent_audit est maintenant optionnel et fourni par variable d’environnement; à défaut le script conserve la provenance SHA enregistrée. Le refresh passe (43 fichiers), le contrôle restore check-only ne trouve aucun mismatch et le préflight passe."
+    },
+    {
+      "incident_id": "O942-E020",
+      "phase": "P8",
+      "category": "stale_archive_excluded_latest_cli_fix",
+      "severity": "RELEASE_ARTIFACT_REGRESSION_AFTER_SUCCESSFUL_SOURCE_TEST",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:44:27.465766Z",
+      "summary": "L’archive Dmodel publiée ne reflétait pas l’arbre source final : le CLI contenu dans le ZIP avait l’ancienne fermeture `blackbox-live`, bien que le code source et son test E2E incluent déjà la correction. Une extraction exacte a reproduit deux échanges capturés, un rapport STOPPED durable puis un code retour 1 par UnboundLocalError.",
+      "impact": "Le mode live pouvait sembler fonctionner mais la commande terminait en erreur après avoir écrit sa trace.",
+      "remediation": "Reconstruire les trois archives à partir de l’arbre source figé /mnt/data/build_O94_2/model ; vérifier l’empreinte de aam_o93/cli.py dans le ZIP extrait ; relancer préflight, tests ciblés et deux échanges CLI depuis l’extraction finale.",
+      "evidence": [
+        "logs/O94_2/T88_archive_cli_failure_before_rebuild.json",
+        "logs/O94_2/T92_source_targeted_regression_after_release_artifact_failure.json",
+        "logs/O94_2/T93_candidate_extraction_runtime_verification.json"
+      ],
+      "resolution_summary": "Le candidat reconstruit depuis l’arbre source courant (SHA-256 96155d58059a6d76c0eea46d9f05ac8b38db8b82ff5ab36356659db0cf76be62) a été extrait dans un nouveau dossier. Le préflight, 18 tests ciblés, UI Xvfb, compileall, catalogue modèles/briques et un test CLI live réel à deux échanges, fermeture :quit, rapport STOPPED durable et code retour zéro passent. Les trois ZIP du candidat passent CRC et chemins sûrs; une seconde reconstruction finale suivra la clôture."
+    },
+    {
+      "incident_id": "O942-E021",
+      "phase": "P8",
+      "category": "latex_receipt_wrapper_locale_decode",
+      "severity": "RECEIPT_CAPTURE_DECODE_EXCEPTION_AFTER_SUBPROCESS",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:52:48.704329Z",
+      "summary": "Le wrapper Python a levé UnicodeDecodeError en décodant la sortie pdflatex (octet 0xe9) avec l’encodage par défaut ; la commande pdflatex avait été lancée mais aucun reçu fiable n’avait été écrit pour le laboratoire.",
+      "impact": "La capture du résultat de compilation était incomplète ; ce n’était pas une preuve d’échec de compilation LaTeX.",
+      "remediation": "Relancer la compilation en capturant la sortie avec UTF-8 et errors=replace et vérifier explicitement le code retour des deux passes, le PDF temporaire et le journal de compilation.",
+      "evidence": [
+        "logs/O94_2/T94_formalism_latex_final_after_packaging_audit.json",
+        "logs/O94_2/T95_laboratory_latex_final_after_archive_e2e.json"
+      ],
+      "resolution_summary": "Deux passes pdflatex passent pour formalisme_O94_2.tex et laboratoire_O94_2.tex ; les reçus T94/T95 sont PASS_BOUNDED."
+    }
+  ],
+  "updated_unix": 1792416604.0232248
+}

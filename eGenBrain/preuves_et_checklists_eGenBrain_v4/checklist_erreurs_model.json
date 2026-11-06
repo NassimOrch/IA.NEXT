@@ -1,0 +1,190 @@
+{
+  "project": "eGenBrain_v4_extreme_experimental_campaign",
+  "items": [
+    {
+      "id": "MODEXP-001",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "L’induction d’opérateurs a été testée en deux graines : les bras addition/multiplication désactivés échouent en 240/240 sorties par type de configuration (avec/sans exemples) par exception operator_not_registered_or_disabled; bras activés exacts. Les exemples n’apprennent pas une procédure dans le runtime mesuré. Ce constat porte sur l’implémentation gelée, pas sur l’impossibilité théorique.",
+      "source_issue": "MOD-007",
+      "evidence": [
+        "source/checklist_erreurs_model_v4_initial.json"
+      ],
+      "final_note": "Les deux opérations add/multiply sont exactes quand l’opérateur intégré est actif (60/60 par opérateur, par graine). Quand il est désactivé, l’apprentissage à partir d’exemples n’est pas observé: 0/60 exact et 60 exceptions par bras, avec ou sans exemples. Cela mesure l’implémentation testée, pas une impossibilité théorique.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-002",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "La grammaire quantité/unité/entité/prix est bornée et fondée sur regex. Sur l’intégration principale, les requêtes quantité avec faits donnent 39/80 résultats prouvés/exacts et 41 fallbacks; sans faits 0/80 preuves/réponses exactes et 80 fallbacks. La capacité linguistique libre n’est pas établie.",
+      "source_issue": "MOD-005",
+      "evidence": [
+        "source/checklist_erreurs_model_v4_initial.json"
+      ],
+      "final_note": "Le solveur quantité-coût repose sur une grammaire bornée/regex. Dans la suite de langage libre, les comportements de négation, conflit, monde ouvert et paraphrase ont été effectivement testés; la voie de réponse n’a produit aucune réponse sémantique exacte dans les 480 sorties d’extension.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-003",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Les tests de retrait/modification confirment que des lignes dérivées demeurent stockées après retrait (derived_fact_persisted=true), même lorsque la requête après suppression s’abstient. L’invalidation physique et la gestion des dépendances sont insuffisantes dans la version gelée.",
+      "evidence": [
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "Les tests de retrait de prémisses donnent ABSTAIN mais des lignes dérivées persistent en stockage. La révision/modification n’a pas démontré une invalidation complète des dépendances; la révision d’un fait et l’état de stockage sont reportés séparément.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-004",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Le vérificateur indépendant a rejeté un certificat dont les dimensions de sortie ont été modifiées et le hash recalculé (output_dimensions_mismatch); le vérificateur intégré accepte le même certificat. Les certificats simples et mutations valeur/opérateur/hash ont aussi été testés; la série de certificats de composition sans certificat produit est non-évaluable.",
+      "evidence": [
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "Les certificats ont été testés par le vérificateur intégré et un vérificateur indépendant. Le vérificateur intégré accepte une altération de dimensions après recomputing du hash; le vérificateur indépendant la rejette (output_dimensions_mismatch). Les tamperings de valeur/opérateur/hash testés sont rejetés.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-005",
+      "status": "confirmed_open_measured",
+      "severity": "medium",
+      "description": "L’application de règles explicitement données atteint 30/30 au contrôle positif; la composition relationnelle/transitivité sans règle intermédiaire explicite obtient 0/50 dans chaque mode/jeu d’extension. Ces tests distinguent application de règles et induction de structure; ils ne prouvent pas une impossibilité générale.",
+      "evidence": [
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "L’application de règles explicites réussit sur le contrôle positif (30/30 closure_only et full_v4). Les familles d’induction sans règle explicitement fournie n’obtiennent aucune réussite: 0/50 pour composition de relation et 0/50 pour induction de transitivité pour chaque mode.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-006",
+      "status": "confirmed_open_measured",
+      "severity": "medium",
+      "description": "La suite linguistico-sémantique indépendante comprend conflits, portée de négation, paraphrase/implication et monde ouvert : 480/480 sorties sont NO_ASCR_RESULTS avec fallback; 0 texte candidat exact, 0 abstention explicite et 0 exception. Cela mesure l’intégration v4 testée, pas le potentiel d’autres grammaires ou formalismes.",
+      "evidence": [
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "Sur l’extension de langue libre, 480/480 sorties suivent le chemin NO_ASCR_RESULTS / réponse nulle, avec fallback exécuté, et 0/480 exactes pour conflit, négation, monde ouvert et paraphrase. La suite d’intégration quantité donne 39/80 réponses exactes avec preuve de cas, contre 0/80 sans preuve; cela n’autorise aucune conclusion sur l’impossibilité théorique d’une capacité sémantique.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-007",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Résultat confirmatoire : les bras avec add/multiply désactivés se terminent par exception dans 240/240 runs pour chaque type d’opération/configuration pertinente, avec ou sans exemples. Les opérateurs activés sont exacts. Aucune procédure générale n’a été induite par les exemples dans le moteur gelé.",
+      "source_issue": "P2 operator induction disabled",
+      "evidence": [
+        "results/scored/operator_induction_scored.json",
+        "results/raw/operator_induction_disabled.jsonl",
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "Confirmé sur deux graines: add/multiply désactivés déclenchent l’exception operator_not_registered_or_disabled; les exemples numériques n’entraînent pas de procédure générale observable. Bras actif: 60/60 exact par opérateur par graine.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-008",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Sur le transfert d’unités, les facteurs uniques nouvellement déclarés sont transférés exactement, les facteurs absents conduisent à une abstention correcte, mais 15/15 cas contradictoires par bras operators_only et full_v4 acceptent un nombre. Cela indique une absence de contrôle d’unicité/cohérence dans ces configurations.",
+      "source_issue": "P3 new-unit transfer",
+      "evidence": [
+        "results/scored/new_unit_transfer_scored.json",
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "Sur unités nommées après gel, le transfert est exact quand un facteur de conversion unique est donné (60/60 agrégé operators_only/full_v4); lorsque deux facteurs contradictoires sont fournis, ces modes acceptent à tort un montant dans 30/30 cas agrégés.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-009",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Les cas de contradiction booléenne structurée lèvent ValueError structured_activation_requires_subject_predicate_object avant de résoudre le conflit. L’exception est conservée et non scorée comme abstention ni comme succès.",
+      "source_issue": "Confirmatory no-reference observations",
+      "evidence": [
+        "results/raw/confirmatory_v2/paired_ablation_v2.jsonl",
+        "results/raw/confirmatory_v2/revision_tests_v2.jsonl"
+      ],
+      "final_note": "La requête structurée à objet wildcard lève ValueError structured_activation_requires_subject_predicate_object avant le traitement du conflit; exception conservée comme résultat réel.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-010",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Après retrait/modification de prémisses, des dérivés obsolètes restent dans la base; la requête peut s’abstenir alors que la ligne dérivée reste stockée. La rétractation et la recomputation doivent être traitées comme une capacité distincte.",
+      "source_issue": "Confirmatory no-reference observations",
+      "evidence": [
+        "results/raw/confirmatory_v2/revision_tests_v2.jsonl"
+      ],
+      "final_note": "Les retraits de prémisses produisent parfois ABSTAIN en réponse tandis que les faits dérivés restent enregistrés. L’état de réponse ne prouve donc pas l’effacement de la mémoire dérivée.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-011",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "description": "Le test adversarial de dimensions falsifiées (hash recalculé) est accepté par le vérificateur intégré et rejeté par le vérificateur indépendant avec output_dimensions_mismatch. Une garantie d’intégrité de certificat nécessite l’autorité indépendante.",
+      "source_issue": "Confirmatory no-reference observations",
+      "evidence": [
+        "results/raw/confirmatory_v2/certificate_tests_v2.jsonl"
+      ],
+      "final_note": "Le vérificateur intégré accepte un certificat dont les dimensions de sortie ont été falsifiées après recalcul du hash; le vérificateur indépendant le rejette. Défaut confirmé, moteur inchangé dans cette campagne.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-012",
+      "status": "confirmed_non_evaluable_composition_certificates",
+      "severity": "high",
+      "description": "Les cas de certificat de composition en langage naturel n’obtiennent pas de certificat exploitable du producteur; ils restent non évaluables pour le test du vérificateur. Ils ne sont pas déclarés réussis. Le producteur est borné par la grammaire de quantité/unité/coût testée.",
+      "source_issue": "Confirmatory no-reference observations",
+      "evidence": [
+        "results/raw/confirmatory_v2/certificate_tests_v2.jsonl"
+      ],
+      "final_note": "Les 5 cas de certificat de composition naturelle ne fournissent pas de certificat consommable; évalués comme non évaluables pour la validation du certificat, jamais comme réussite. La limite du fixture/harness est préservée.",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-013",
+      "status": "confirmed_open_measured_complete",
+      "severity": "high",
+      "description": "La suite complète a achevé ses deux jeux de 477 cas, cinq modes appariés et les suites auxiliaires. Les clôtures profondes ont rendu des résultats, avec des pointes mesurées de plusieurs minutes (DEPTH_64_0 closure_only v2 ~439,885 s; replay DEPTH_64_1 closure_only ~255–258 s et full_v4 ~255–256 s par graine). Les bases les plus profondes enregistrent ~2 080 faits / 43 680 dérivations (~67 MiB). Ce constat est une mesure de coût de l’implémentation, non un verdict théorique.",
+      "source_issue": "P5 confirmatory composition depth",
+      "evidence": [
+        "results/raw/confirmatory_v2/paired_ablation_v2.jsonl",
+        "results/databases/confirmatory_v2/paired_ablation_v2/closure_only/DEPTH_64_0.sqlite3",
+        "results/raw/confirmatory_v3/paired_ablation_v3.jsonl",
+        "logs/confirmatory_v2/jobs/paired.log",
+        "logs/confirmatory_v3/jobs/paired.log"
+      ],
+      "latest_checkpoint_note": "Au checkpoint 2026-10-24T20:22:50Z, chaque matrice a 251/2385 lignes durables et le dernier cas consigné est DEPTH_64_2/observations_only; les runners sont toujours actifs sur la suite ordonnée, sans nouvelle ligne pendant la fermeture suivante. La campagne conserve la profondeur et les répétitions. Le coût de fermeture constaté est un résultat d’exécution de l’implémentation courante, pas une conclusion théorique.",
+      "final_note": "Matrices confirmatoires appariées terminées: 2 385 sorties par graine, mêmes 477 cas et 5 modes; deux graines, profondeurs 32/64. À DEPTH_64_1, closure_only dure 255.26 s (v2) / 258.04 s (v3) et full_v4 255.60 s / 255.85 s. Les bases profondes observées contiennent 2 080 faits relationnels, 65 nœuds et 43 680 dérivations (environ 67 MiB).",
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "MODEXP-014",
+      "status": "confirmed_open_measured",
+      "severity": "high",
+      "title": "Généralisation linguistico-sémantique insuffisamment réalisée dans l’intégration testée",
+      "description": "La suite extension ciblant conflit, négation, paraphrases/implication et monde ouvert a produit NO_ASCR_RESULTS et fallback dans 480/480 sorties, sans réponse textuelle exacte ni abstention explicite. La sortie attendue n’est pas remplacée par un score de réussite, et ces mesures ne sont pas une conclusion universelle sur la théorie.",
+      "evidence": [
+        "results/raw/extension_v1/language/language_v2.jsonl",
+        "results/raw/extension_v1/language/language_v3.jsonl",
+        "results/scored/extension_v1/summary.json"
+      ],
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    }
+  ],
+  "last_updated": "2026-10-24T21:01:01+00:00",
+  "updated_utc": "2026-10-24T21:01:01+00:00",
+  "campaign_final_summary": {
+    "primary_rows": 6678,
+    "paired_effective_rows": 4770,
+    "extension_rows": 1280,
+    "integrity_audit_status": "PASS_WITH_DOCUMENTED_HISTORICAL_ANOMALIES",
+    "engine_modified": false,
+    "candidate_eGenBrain_v4_0_created": false,
+    "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "project_id": "NGeGenBrain_v1",
+  "run_id": "web_smoke_20261027_release",
+  "timestamp": "2026-10-27T11:58:46+01:00",
+  "environment": {
+    "os": "linux",
+    "python": "3.13.5"
+  },
+  "status": "PASS",
+  "checks_run": 6,
+  "failed_checks": 0,
+  "url": "http://127.0.0.1:40689",
+  "command": [
+    "/opt/pyvenv/bin/python3",
+    "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+    "--db",
+    "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/web_smoke_v1.sqlite3",
+    "serve",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "40689"
+  ],
+  "checks": [
+    {
+      "name": "html_root",
+      "method": "GET",
+      "path": "/",
+      "expected_status": 200,
+      "actual_status": 200,
+      "passed": true,
+      "response_sha256": "98966ade570bedf14058af505748b4b225bf88d975448adccc0fa5f20e13dea5",
+      "response_bytes": 8303,
+      "error": ""
+    },
+    {
+      "name": "javascript_asset",
+      "method": "GET",
+      "path": "/static/app.js",
+      "expected_status": 200,
+      "actual_status": 200,
+      "passed": true,
+      "response_sha256": "ebbe8beeea59775b906ad50cc935d731f18c92807f28577443f63db789c74225",
+      "response_bytes": 8309,
+      "error": ""
+    },
+    {
+      "name": "action_registry",
+      "method": "GET",
+      "path": "/api/actions",
+      "expected_status": 200,
+      "actual_status": 200,
+      "passed": true,
+      "response_sha256": "ec252595c038b8d4424677229066e7fc8d55d07660f6f4e3938474878c182366",
+      "response_bytes": 12510,
+      "error": ""
+    },
+    {
+      "name": "health_api",
+      "method": "GET",
+      "path": "/api/health",
+      "expected_status": 200,
+      "actual_status": 200,
+      "passed": true,
+      "response_sha256": "c5de4a39d700ee6654d11a6015e71a873cde9d93f9d4ced992e0069de4f1fdff",
+      "response_bytes": 397,
+      "error": ""
+    },
+    {
+      "name": "database_verify",
+      "method": "GET",
+      "path": "/api/database/verify",
+      "expected_status": 200,
+      "actual_status": 200,
+      "passed": true,
+      "response_sha256": "d22f401ad320d67aedb49d404123de09a7baf80d773b99758c8f77c5182a2526",
+      "response_bytes": 305,
+      "error": ""
+    },
+    {
+      "name": "action_post",
+      "method": "POST",
+      "path": "/api/action",
+      "expected_status": 200,
+      "actual_status": 200,
+      "passed": true,
+      "response_sha256": "4b2fa485b51cd85f6e16ca509d6533a832e4737c05ae2dd559153257c3f69f2c",
+      "response_bytes": 397,
+      "error": ""
+    }
+  ],
+  "scope": "Live local HTTP smoke executed through ngbrain.py CLI; does not replace native Windows .bat testing."
+}

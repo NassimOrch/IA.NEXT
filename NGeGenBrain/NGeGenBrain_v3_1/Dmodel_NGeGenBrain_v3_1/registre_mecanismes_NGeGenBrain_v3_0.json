@@ -1,0 +1,8 @@
+{
+  "mechanisms":[
+    {"mechanism_id":"M-NG30-SHARED-GRU","type":"implemented_computation","description":"Shared causal GRU maps byte embeddings and recurrent state to hidden trajectories.","status":"IMPLEMENTED; weights are explicit","provenance":"model_produit_NG_v3_0/model/model.pt"},
+    {"mechanism_id":"M-NG30-FACET-ROUTER","type":"learned_auxiliary_routing","description":"Pooled router logits classify one of eight document-facet labels; router softmax weights low-rank output corrections during forward/generation.","status":"IMPLEMENTED; test accuracy 10/16","provenance":"multifacet.py; training.json; multifacet_observation.json"},
+    {"mechanism_id":"M-NG30-NEXT-BYTE","type":"causal_prediction_head","description":"Shared output head and mixture of facet-specific low-rank corrections predict next byte.","status":"IMPLEMENTED; test NLL 1.8530 nats/byte on controlled corpus","provenance":"multifacet.py; experiment_summary.json"},
+    {"mechanism_id":"M-NG30-HIDDEN-COORDINATE-EFFECTS","type":"measured_intervention_effect","description":"Sustained zero ablations of single GRU hidden coordinates change next-byte NLL; coordinate semantics remain unknown.","status":"OBSERVED_WITH_SCOPED_PROTOCOL","provenance":"multifacet_observation.json"}
+  ]
+}

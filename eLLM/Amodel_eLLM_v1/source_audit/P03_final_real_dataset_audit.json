@@ -1,0 +1,424 @@
+{
+  "id": "P03-FINAL-REAL-DATASET-AUDIT-2",
+  "timestamp_utc": "2026-10-21T13:50:18.284827+00:00",
+  "status": "PASS",
+  "datasets": [
+    {
+      "dataset_id": "screenplay",
+      "relative_path": "training_data/raw/dataset/Screenplay_dataset.jsonl",
+      "expected_sha256": "03e27acb02d89f17ffdca10bf94d1125a2be743d9065055d5448b51a3994ba81",
+      "source_size_bytes": 20502764,
+      "source_sha256_before": "03e27acb02d89f17ffdca10bf94d1125a2be743d9065055d5448b51a3994ba81",
+      "source_hash_matches_source_audit": true,
+      "source_sha256_after": "03e27acb02d89f17ffdca10bf94d1125a2be743d9065055d5448b51a3994ba81",
+      "source_preserved": true,
+      "import": {
+        "format": "jsonl",
+        "rows_read": 4000,
+        "valid_rows": 4000,
+        "invalid_rows": 0,
+        "columns": [
+          "category",
+          "difficulty",
+          "format",
+          "genre",
+          "id",
+          "language",
+          "messages",
+          "metadata",
+          "turns"
+        ],
+        "issues": [],
+        "warnings": [],
+        "member_reports": []
+      },
+      "training_examples": {
+        "count": 4000,
+        "modes": {
+          "chat": 4000
+        },
+        "unique_record_hashes": 17,
+        "duplicate_examples_by_hash": 3983,
+        "mapping": {
+          "messages_field": "messages",
+          "text_field": null,
+          "prompt_field": null,
+          "target_field": null,
+          "label_field": "category",
+          "id_field": "id",
+          "system_field": null
+        },
+        "mapping_fallback_count": 0,
+        "mapping_fallback_fields": {}
+      },
+      "split": {
+        "seed": 20261021,
+        "target_ratios": {
+          "train": 0.8,
+          "validation": 0.1,
+          "test": 0.1
+        },
+        "actual_sizes": {
+          "train": {
+            "examples": 3078,
+            "proportion": 0.7695
+          },
+          "validation": {
+            "examples": 218,
+            "proportion": 0.0545
+          },
+          "test": {
+            "examples": 704,
+            "proportion": 0.176
+          },
+          "group_count": 2000,
+          "unique_record_hash_count": 17
+        },
+        "leaked_record_hash_count": 0,
+        "leaked_group_count": 0,
+        "passed": true,
+        "error": null,
+        "leaked_hash_examples": [],
+        "leaked_group_examples": []
+      },
+      "status": "PASS"
+    },
+    {
+      "dataset_id": "batch_jsonl",
+      "relative_path": "training_data/raw/dataset/batch_dataset.jsonl",
+      "expected_sha256": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "source_size_bytes": 3986317,
+      "source_sha256_before": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "source_hash_matches_source_audit": true,
+      "source_sha256_after": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "source_preserved": true,
+      "import": {
+        "format": "jsonl",
+        "rows_read": 784,
+        "valid_rows": 783,
+        "invalid_rows": 1,
+        "columns": [
+          "category",
+          "difficulty",
+          "format",
+          "genre",
+          "id",
+          "language",
+          "messages",
+          "metadata",
+          "turns"
+        ],
+        "issues": [
+          {
+            "source": "batch_dataset.jsonl",
+            "row_number": 784,
+            "category": "invalid_jsonl",
+            "message": "Unterminated string starting at: line 1 column 980 (char 979)",
+            "byte_count": 3059,
+            "record_sha256": "f1782c1bff7b651d88941f7aff393573609d138837a6a07fe53c2f5272b1961b"
+          }
+        ],
+        "warnings": [
+          "Des enregistrements JSONL invalides ont été comptés et consignés, jamais corrigés silencieusement."
+        ],
+        "member_reports": []
+      },
+      "training_examples": {
+        "count": 783,
+        "modes": {
+          "chat": 783
+        },
+        "unique_record_hashes": 17,
+        "duplicate_examples_by_hash": 766,
+        "mapping": {
+          "messages_field": "messages",
+          "text_field": null,
+          "prompt_field": null,
+          "target_field": null,
+          "label_field": "category",
+          "id_field": "id",
+          "system_field": null
+        },
+        "mapping_fallback_count": 0,
+        "mapping_fallback_fields": {}
+      },
+      "split": {
+        "seed": 20261021,
+        "target_ratios": {
+          "train": 0.8,
+          "validation": 0.1,
+          "test": 0.1
+        },
+        "actual_sizes": {
+          "train": {
+            "examples": 621,
+            "proportion": 0.793103
+          },
+          "validation": {
+            "examples": 41,
+            "proportion": 0.052363
+          },
+          "test": {
+            "examples": 121,
+            "proportion": 0.154534
+          },
+          "group_count": 783,
+          "unique_record_hash_count": 17
+        },
+        "leaked_record_hash_count": 0,
+        "leaked_group_count": 0,
+        "passed": true,
+        "error": null,
+        "leaked_hash_examples": [],
+        "leaked_group_examples": []
+      },
+      "batch_malformed_line_784_explicitly_recorded": true,
+      "batch_invalid_record_hashes": [
+        "f1782c1bff7b651d88941f7aff393573609d138837a6a07fe53c2f5272b1961b"
+      ],
+      "status": "PASS"
+    },
+    {
+      "dataset_id": "sms_zip",
+      "relative_path": "training_data/raw/dataset/smsspamcollection.zip",
+      "expected_sha256": "7fecc7384a0905eb21fff50110eb6d0f82e5efa83241c16e5d8065e80e5c4f4a",
+      "source_size_bytes": 5640890,
+      "source_sha256_before": "7fecc7384a0905eb21fff50110eb6d0f82e5efa83241c16e5d8065e80e5c4f4a",
+      "source_hash_matches_source_audit": true,
+      "source_sha256_after": "7fecc7384a0905eb21fff50110eb6d0f82e5efa83241c16e5d8065e80e5c4f4a",
+      "source_preserved": true,
+      "import": {
+        "format": "zip",
+        "rows_read": 11146,
+        "valid_rows": 11146,
+        "invalid_rows": 0,
+        "columns": [
+          "label",
+          "text",
+          "",
+          "labels",
+          "text_hi",
+          "text_de",
+          "text_fr",
+          "text_es",
+          "text_zh",
+          "text_ar",
+          "text_bn",
+          "text_ru",
+          "text_pt",
+          "text_ja",
+          "text_id",
+          "text_ur",
+          "text_pa",
+          "text_jv",
+          "text_tr",
+          "text_ko",
+          "text_mr",
+          "text_uk",
+          "text_sv",
+          "text_no"
+        ],
+        "issues": [],
+        "warnings": [
+          "Les sous-rapports détaillés par membre sont conservés dans member_reports."
+        ],
+        "member_reports": [
+          {
+            "source": "SMSSpamCollection",
+            "file_sha256": "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d",
+            "format": "tsv_no_header",
+            "rows_read": 5574,
+            "valid_rows": 5574,
+            "invalid_rows": 0,
+            "columns": [
+              "label",
+              "text"
+            ],
+            "issues": [],
+            "warnings": []
+          },
+          {
+            "source": "data-augmented.csv",
+            "file_sha256": "f90ca26ca52ca65acdb71c1d73bf1d1c3806bb12f9489ae3f0b6e4e64a76920f",
+            "format": "csv",
+            "rows_read": 5572,
+            "valid_rows": 5572,
+            "invalid_rows": 0,
+            "columns": [
+              "",
+              "labels",
+              "text",
+              "text_hi",
+              "text_de",
+              "text_fr",
+              "text_es",
+              "text_zh",
+              "text_ar",
+              "text_bn",
+              "text_ru",
+              "text_pt",
+              "text_ja",
+              "text_id",
+              "text_ur",
+              "text_pa",
+              "text_jv",
+              "text_tr",
+              "text_ko",
+              "text_mr",
+              "text_uk",
+              "text_sv",
+              "text_no"
+            ],
+            "issues": [],
+            "warnings": []
+          }
+        ]
+      },
+      "training_examples": {
+        "count": 11146,
+        "modes": {
+          "chat": 11146
+        },
+        "unique_record_hashes": 5216,
+        "duplicate_examples_by_hash": 5930,
+        "mapping": {
+          "messages_field": null,
+          "text_field": "text",
+          "prompt_field": null,
+          "target_field": null,
+          "label_field": "label",
+          "id_field": null,
+          "system_field": null
+        },
+        "mapping_fallback_count": 5572,
+        "mapping_fallback_fields": {
+          "labels": 5572
+        }
+      },
+      "split": {
+        "seed": 20261021,
+        "target_ratios": {
+          "train": 0.8,
+          "validation": 0.1,
+          "test": 0.1
+        },
+        "actual_sizes": {
+          "train": {
+            "examples": 8886,
+            "proportion": 0.797237
+          },
+          "validation": {
+            "examples": 1145,
+            "proportion": 0.102727
+          },
+          "test": {
+            "examples": 1115,
+            "proportion": 0.100036
+          },
+          "group_count": 11146,
+          "unique_record_hash_count": 5216
+        },
+        "leaked_record_hash_count": 0,
+        "leaked_group_count": 0,
+        "passed": true,
+        "error": null,
+        "leaked_hash_examples": [],
+        "leaked_group_examples": []
+      },
+      "sms_augmentation_fallback_expected": true,
+      "status": "PASS"
+    },
+    {
+      "dataset_id": "question_answer_parquet",
+      "relative_path": "training_data/raw/dataset/0000.parquet",
+      "expected_sha256": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+      "source_size_bytes": 2306545,
+      "source_sha256_before": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+      "source_hash_matches_source_audit": true,
+      "source_sha256_after": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+      "source_preserved": true,
+      "import": {
+        "format": "parquet",
+        "rows_read": 7473,
+        "valid_rows": 7473,
+        "invalid_rows": 0,
+        "columns": [
+          "question",
+          "answer"
+        ],
+        "issues": [],
+        "warnings": [
+          "Lecteur de secours parquet_lite_v1; groupes=8; codecs=['SNAPPY']; encodages=['RLE_DICTIONARY']; verifications_minmax=16; subset déclaré: colonnes plates UTF-8 BYTE_ARRAY, pages V1, UNCOMPRESSED/Snappy."
+        ],
+        "member_reports": []
+      },
+      "training_examples": {
+        "count": 7473,
+        "modes": {
+          "chat": 7473
+        },
+        "unique_record_hashes": 7473,
+        "duplicate_examples_by_hash": 0,
+        "mapping": {
+          "messages_field": null,
+          "text_field": null,
+          "prompt_field": "question",
+          "target_field": "answer",
+          "label_field": null,
+          "id_field": null,
+          "system_field": null
+        },
+        "mapping_fallback_count": 0,
+        "mapping_fallback_fields": {}
+      },
+      "split": {
+        "seed": 20261021,
+        "target_ratios": {
+          "train": 0.8,
+          "validation": 0.1,
+          "test": 0.1
+        },
+        "actual_sizes": {
+          "train": {
+            "examples": 5975,
+            "proportion": 0.799545
+          },
+          "validation": {
+            "examples": 737,
+            "proportion": 0.098622
+          },
+          "test": {
+            "examples": 761,
+            "proportion": 0.101833
+          },
+          "group_count": 7473,
+          "unique_record_hash_count": 7473
+        },
+        "leaked_record_hash_count": 0,
+        "leaked_group_count": 0,
+        "passed": true,
+        "error": null,
+        "leaked_hash_examples": [],
+        "leaked_group_examples": []
+      },
+      "parquet_runtime_minmax_checks": 16,
+      "status": "PASS"
+    }
+  ],
+  "aggregate": {
+    "dataset_count": 4,
+    "total_rows_read": 23403,
+    "total_valid_rows": 23402,
+    "total_invalid_rows": 1,
+    "total_training_examples": 23402,
+    "all_source_hashes_unchanged": true,
+    "all_source_hashes_match_audit": true,
+    "all_split_checks_pass": true
+  },
+  "interpretation_notes": [
+    "All raw source files are read-only. Any malformed source record remains present and is represented in the import report with its hash.",
+    "Screenplay has 4,000 rows but low payload diversity; duplicates are reported rather than silently removed.",
+    "The augmented SMS ZIP member uses row-level fallback from label to labels, with the effective field recorded for each row.",
+    "The Parquet fallback supports a declared subset, not the whole Apache Parquet specification; PyArrow remains the general reader on compatible machines."
+  ]
+}

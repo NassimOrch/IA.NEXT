@@ -1,0 +1,79 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,geometry,hyperref,xcolor,enumitem,verbatim,array}
+\geometry{margin=2.0cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{definition}{Définition}[section]
+\newtheorem{remark}{Remarque}[section]
+\title{Rapport d’expérience reconstruit — model\_order\_59}
+\author{Order 61 — reconstruction expérimentale et formelle}
+\date{20 septembre 2026}
+\begin{document}
+\maketitle
+\begin{center}\textbf{Reconstruction forensique des expériences O59, avec pipeline, équations, commandes, paramètres et statut réel}\end{center}
+\tableofcontents
+\newpage
+\section{Périmètre et méthode}
+Ce document est volontairement distinct du rapport O59 historique : il ne le recopie pas. Il reconstruit les expériences à partir du code O59 corrigé et de l'audit hard final, en séparant démonstrations logicielles, résultats de capacité, observations négatives et surdéclarations détectées.\section{Artefacts analysés}
+Les entrées principales sont : \texttt{model\_order\_59.zip}, \texttt{model\_order\_59\_corrige.zip}, \texttt{audit\_order\_59\_hard\_v\_0\_final.zip}, les rapports hard/correction et les traces JSON archivées. L'analyse directe du code porte notamment sur \texttt{src/order59/core.py}, \texttt{agent.py}, \texttt{perception.py}, \texttt{prediction.py}, \texttt{imagination.py}, \texttt{synthesis.py}, \texttt{program\_vm.py}, \texttt{verification.py}, \texttt{memory.py}, \texttt{transfer.py}, \texttt{neural.py}.\section{Pipeline O59 réellement exécuté}
+La boucle effective était :
+\[
+O_t\to I_t\to \Pi_t\to D_t\to G_t^{active}\to R_t\to C_t\to W_t\to H_t\to P_t\to M_t\to A_t\to V_t.
+\]
+Dans le code, les points d'ancrage sont : \texttt{Order59Agent.observe}, \texttt{\_estimate\_deficit}, \texttt{\_active\_probe}, \texttt{\_representation\_step}, \texttt{\_induce\_constraints}, \texttt{\_choose\_action}, \texttt{\_synthesize} et \texttt{solve\_episode}. La simulation imaginative est appelée depuis \texttt{\_choose\_action}.\section{Équations effectivement utilisées}
+\begin{align*}
+I_G(x)&=(f(x))_{f\in G},\\
+x\sim_Gy&\iff I_G(x)=I_G(y),\\
+[x]_G&=\{y:I_G(y)=I_G(x)\},\\
+I_{G\cup\{g\}}(x)&=(I_G(x),g(x)),\\
+\Theta(x,y)&=\sup\{\iota(\lambda):I_{G_\lambda}(x)=I_{G_\lambda}(y)\},\\
+D&=(D_{obs},D_{cap},D_{res},D_{search},D_{transfer},D_{constraint}).
+\end{align*}
+Les implémentations exactes de ces objets sont dans \texttt{core.py} : \texttt{build\_partition} (l.102), \texttt{is\_sufficient} (l.108), \texttt{factorize} (l.117), \texttt{refinement\_partition} (l.125), \texttt{closure} (l.134), \texttt{pair\_thresholds} (l.144), \texttt{minimum\_double\_ok} (l.155) et \texttt{ultrametric\_from\_thresholds} (l.162).\section{Sondes et représentation : implémentation exacte}
+\texttt{GenericProbeFactory.candidates} (\texttt{perception.py}, l.53) fournit type, longueur, hash court, clés, types de clés, longueurs, signes, buckets, chemins et indices. \texttt{Order59Agent.\_active\_probe} (l.102) sélectionne les sondes en calculant une entropie de conséquences. Cette sélection a été contaminée par des éléments futurs : \texttt{\_future\_sig} (l.90) inclut l'observation suivante, l'acceptation et la récompense.\section{Contraintes}
+\texttt{ConstraintInducer.induce\_from\_assignments} et \texttt{induce\_from\_interactions} (\texttt{constraints.py}, l.8 et l.17) construisent des candidates à partir d'observations/interactions. Cette induction est réelle mais certaines contraintes d'interaction peuvent être des annotations de rejet plutôt qu'une relation riche sur les états.\section{Prédiction et world model}
+\texttt{PredictiveModel} (\texttt{prediction.py}, l.6--49) construit des vecteurs état/action, met à jour sur les transitions, ajuste le modèle et réalise des prédictions multi-pas. Il est cependant compact et principalement basé sur des features génériques et une régression linéaire, ce qui limite sa capacité démontrée sur des dynamiques complexes.\section{Imagination}
+\texttt{ImaginationEngine.hypotheses} (\texttt{imagination.py}, l.8) génère cinq formes fixes : probe, constraint, program, action\_sequence, representation. \texttt{simulate} (l.19) exécute réellement l'hypothèse via un simulateur. Le statut exact est donc ``imagination exécutée mais fortement bornée'' et non imagination ouverte.\section{Synthèse de programmes}
+\texttt{ProgramSynthesizer.enumerate} (\texttt{synthesis.py}, l.8--23) compose un AST à profondeur bornée. \texttt{Order59Agent.\_program\_score} (\texttt{agent.py}, l.165) exécute la VM sur une portion tenue à l'écart des transitions et calcule essentiellement
+\[
+score(p)=corr(\langle p\rangle, r)-\lambda\,complexity(p).
+\]
+La récompense n'entre pas directement comme variable du programme, mais elle est utilisée comme cible externe de sélection. Ceci n'est pas équivalent à une synthèse générale de raisonnement.\section{VM et vérification}
+\texttt{ProgramVM} (\texttt{program\_vm.py}, l.4--21) vérifie le programme et l'exécute dans un environnement restreint. \texttt{IndependentReasoningVerifier.verify\_action} (\texttt{verification.py}, l.6) vérifie toutefois seulement l'appartenance de l'action à la liste d'actions et la finitude du score. Le coup chess \texttt{f6g3} est l'exemple forensique où cette vérification est insuffisante : l'action est dans l'alphabet mais illégale dans l'état courant.\section{Mémoire, transfert, neural}
+\texttt{MemorySystem} (\texttt{memory.py}, l.10--23) conserve, récupère, invalide et remplace des items. \texttt{TransferDiscovery.discover/certify} (\texttt{transfer.py}, l.7--17) recherche des correspondances de signatures/features et les certifie sur un protocole de base. \texttt{NeuralProbeController} et \texttt{NeuralActionController} (\texttt{neural.py}) sont de petits contrôleurs MLP en ligne. Ces mécanismes sont réels mais ne démontrent pas seuls le lifelong learning, le transfert sémantique ou une capacité de modèle fondamental.\section{Commandes archivées}
+Les artefacts indiquent notamment les séquences suivantes :
+\begin{verbatim}
+cd /tmp/order59_work/model_order_59
+python -m pip install -e . --no-build-isolation -q
+pytest -q
+cd /tmp/order59_work/audit_order_59/scripts
+python run_experiments.py
+\end{verbatim}
+Les commandes de la campagne hard et les paramètres complets sont dans l'archive d'audit et les JSON associés. La reconstruction ne remplace pas ces historiques par des commandes inventées.\section{Campagne hard multi-familles}
+\begin{longtable}{p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth}}
+\toprule
+Famille & Statut & Score & Pas & Probes & Actions & Imagination & Prog. \\
+\midrule
+\endhead
+binary-sequence & PARTIAL & 0.6428571428571429 & 14 & 12 & 28 & 140 & 0 \\
+hidden-control & PARTIAL & 0.0 & 25 & 12 & 125 & 625 & 1 \\
+sorting & PARTIAL & 0.0 & 25 & 17 & 250 & 1250 & 0 \\
+context-bandit & PARTIAL & 0.08333333333333333 & 12 & 12 & 36 & 180 & 0 \\
+sequence & PARTIAL & 0.0 & 7 & 10 & 448 & 1695 & 0 \\
+maze & PARTIAL & 0.0 & 30 & 25 & 120 & 600 & 0 \\
+visual & PARTIAL & 0.2857142857142857 & 7 & 7 & 14 & 70 & 0 \\
+permutation & PARTIAL & 0.4 & 30 & 17 & 1920 & 7010 & 0 \\
+\bottomrule
+\end{longtable}Les huit familles sont toutes PARTIAL. La moyenne arithmétique des huit scores vaut environ 0.1765 ; elle est uniquement descriptive, car les tâches n'ont pas la même échelle ni la même difficulté.\section{Generic interface O59}
+Trois essais génériques historiques (bag, string, numeric) sont reportés PASS à score 1.0. Leur harness exact n'est toutefois pas autonome dans l'archive finale, ce qui limite la force de reproduction directe de ce résultat.\section{Chess O59}
+Les cinq campagnes longues chess finissent PARTIAL, score 0. Les traces montrent notamment 10 pas, environ 40 960 évaluations, des milliers de branches imaginées et un dernier coup répété \texttt{f6g3}. La vérification indépendante décrite dans le code n'effectuait pas la légalité sémantique de l'état ; ce fait est désormais le point de correction central d'O61.\section{Tests logiciels et anti-triche}
+La release O59 corrigée passe 24/24 tests, compileall et l'audit statique. Les scans repository-level ne montrent pas de table de solutions, de dispatch benchmark ni d'appels interdits évidents dans le noyau. Cela certifie l'intégrité logicielle du dépôt audité, pas la réussite des problèmes hard.\section{Résumé des surdéclarations identifiées}
+Le rapport historique O59 avait tendance à donner un statut plus fort que les preuves ne l'autorisaient pour : la vérification sémantique, l'indépendance de l'évaluation des programmes, l'ouverture de l'imagination et le transfert. La reconstruction présente explicitement les conditions exactes et les limites expérimentales.\section{Conclusion}
+O59 constitue un progrès causal réel par rapport à O58, mais la campagne hard ne démontre ni résolution générale difficile, ni maîtrise chess, ni synthèse générale de raisonnement, ni lifelong learning généralisé. La valeur de cette reconstruction est de figer exactement ce qui a été exécuté et les corrections qu'O61 devait entreprendre.\end{document}

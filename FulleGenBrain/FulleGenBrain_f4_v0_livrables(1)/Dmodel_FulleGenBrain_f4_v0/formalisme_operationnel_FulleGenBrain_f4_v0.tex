@@ -1,0 +1,283 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.75cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,booktabs,longtable,array,enumitem,xcolor,hyperref,listings}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\setlist{leftmargin=1.5em,itemsep=2pt,topsep=3pt}
+\emergencystretch=2em
+\newcommand{\code}[1]{\path{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\st}[1]{\textsf{#1}}
+\title{Formalisme opérationnel de FulleGenBrain\_f4\_v0\\\large Contrats d'exécution, sémantique du runtime, composants, contrôle des ressources et protocole de livraison}
+\author{Spécification opératoire issue du formalisme architectural FulleGenBrain\_4}
+\date{26 octobre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Ce document transforme en contrats opératoires vérifiables les exigences de \code{formalisme_FulleGenBrain_4.tex}, les fondements de \code{theorie_programation_compositionnelle_2.tex} et les exigences d'intégration décrites par \code{interface_FulleGenBrain_4.tex}. Le formalisme architectural est l'autorité pour le comportement du modèle; la théorie fixe la sémantique compositionnelle; le document d'interface fixe les parcours et critères UI sans imposer une architecture métier contradictoire. La cible comprend un runtime autonome, un langage de composition sûr, une mémoire persistante et réversible, la recherche/synthèse reprenable, ASCRC séparé d'ASCR, des connecteurs de capacité explicites, un CLI et une interface locale. Chaque sortie est accompagnée d'un statut, d'une trace de provenance, de versions et d'un périmètre de validation. Les états incomplets ou non résolus restent visibles; ils ne sont pas convertis en impossibilité générale ni en réussite non démontrée.
+\end{abstract}
+\tableofcontents\newpage
+
+\section{Autorité, sources et règles d'interprétation}
+\subsection{Ordre d'autorité}
+L'architecture est gouvernée par \code{formalisme_FulleGenBrain_4.tex}; la sémantique et les lois de composition par \code{theorie_programation_compositionnelle_2.tex}; les parcours UX et critères d'acceptation par \code{interface_FulleGenBrain_4.tex}. Les sources ORDER, AAM et eGenBrain sont examinées pour les mécanismes et leur provenance; elles ne doivent pas être confondues dans un assemblage opportuniste. Une fonction héritée conserve son contrat et son identité d'origine. Une adaptation exige un différentiel explicite, un protocole de non-régression et une preuve d'équivalence ou une mesure comparative définie avant l'examen du holdout. Une nouvelle fonction est étiquetée \st{NEW}, avec contrat et tests propres.
+
+\subsection{Statuts obligatoires}
+Toute exigence, sortie et preuve utilise l'un des statuts suivants, avec date, version, portée et provenance : \st{SPECIFIED}; \st{IMPLEMENTED}; \st{TESTED}; \st{SUPPORTED}; \st{CERTIFIED} (seulement avec certificat contrôlé); \st{PARTIAL}; \st{UNRESOLVED}; \st{NEEDS-OBSERVATION}; \st{NEEDS-COMPETENCE}; \st{BLOCKED}; \st{FAILED}; \st{NOT-RUN}; \st{REVOKED}; \st{STALE}. Ces statuts ne sont pas interchangeables. Une compilation réussie n'est pas une validation sémantique; un test local n'est pas une preuve universelle; un hash atteste une identité d'octets, pas la vérité du contenu.
+
+\subsection{Principes non négociables}
+\begin{enumerate}
+\item La composition typée et versionnée est le langage commun des compétences, stratégies, mémoires, contrôleurs et vérificateurs.
+\item Aucune dépendance d'exécution obligatoire à un LLM/eLLM, un service distant ou une connexion réseau.
+\item La mémoire conserve la provenance, les versions, les contre-exemples, les résultats négatifs et les sources exactes.
+\item ASCR hérité d'eGenBrain est traité comme surface spécialisée non modifiée; ASCRC régule uniquement admission/allocation/activation/veille/réveil et ne modifie jamais un statut épistémique.
+\item Budget de ressources = plafond dur; l'ordonnancement ne le remplace jamais. L'épuisement rend un résultat partiel et reprenable.
+\item Une optimisation est une transformation candidate. Aucune réécriture destructive n'est activée sans équivalence dans sa portée, tests négatifs, mesure de coût et voie de retour arrière.
+\item Les tâches non formalisées déclenchent une extension explicitement décrite, versionnée et testée; elles ne sont pas effacées du périmètre.
+\item Les fonctions externes exigent capacités déclarées et autorisation explicite. Un refus de capacité n'autorise pas une exécution cachée ou arbitraire.
+\end{enumerate}
+
+\section{Objet commun, contrats et données}
+Un objet opérationnel est
+\[
+\begin{gathered}
+o=(id,kind,version,payload,hash,origin,scope,\\
+\qquad epistemic,operational,deps,rights,created,updated,\\
+\qquad contract,trace).
+\end{gathered}
+\]
+\code{id} est stable et opaque; \code{version} est immuable par version de contenu; \code{hash} est SHA-256 du JSON canonique ou des octets déclarés; \code{origin} contient les archives/fichiers, empreintes et transformées; \code{scope} donne les domaines valides; \code{deps} référence des versions exactes; \code{rights} est une liste de capacités; \code{trace} référence les événements immuables.
+
+\subsection{Contrat de composant}
+Un composant est $c=(id,ver,A,B,P,Q,E,R,\delta,\pi,V)$ : types d'entrée/sortie $A,B$; pré/postconditions $P,Q$; effets $E$; ressources $R$; sémantique $\delta$; provenance $\pi$; vérificateur $V$. Les types nominaux incluent Unit, Bool, Int, Real, String, List, Map, Pair, Sum, Record, Ref, Observation, Candidate, Program, Evidence, Checkpoint et Outcome. Les conversions implicites de perte de données sont interdites; les unités/contextes incompatibles sont refusés avant exécution.
+
+\subsection{Résultat uniforme}
+Toute exécution produit un \code{Outcome} avec \code{status}, \code{value} nullable, \code{reason}, \code{trace_id}, \code{evidence}, \code{budget_spent}, \code{remaining_work}, \code{checkpoint_id} nullable et \code{versions}. Les statuts de résultat incluent SUCCESS, PARTIAL, UNRESOLVED, REJECTED, FAILED, CANCELLED, VALID, INVALID, UNKNOWN, STALE, BLOCKED et NOT-RUN. SUCCESS ne vaut pas VALID; VALID ne vaut CERTIFIED qu'après intégrité du certificat et contrôle indépendant.
+
+\section{Architecture d'exécution et pipeline intégral}
+\subsection{Plans coordonnés}
+Le plan structurel contient le registre de composants, contrats, compositions, familles de blocs et grammaire. Le plan dynamique contient interpréteur, contrôleur d'objectifs, orchestrateur, vérificateurs et traitement des erreurs. Le plan évolutif contient observation, induction, CEGIS, synthèse, transformations candidates, tests holdout/OOD et promotions versionnées. Le plan mémoire-ressources contient stockage persistant, provenance, graphe de dépendances, checkpoints, cache, ASCRC, budgets, sommeil/réveil et vagues typées.
+
+\subsection{Pipeline normal}
+\begin{enumerate}
+\item Préflight : lire les deux checklists d'erreurs, chemins actifs et savepoint; contrôler environnement, version du schéma, quotas et intégrité des manifests.
+\item Envelopper l'objectif : cible, domaine, contraintes dures, budget par ressource, preuve requise, risque, acceptation, priorité et politique d'arrêt.
+\item Observer : enregistrer la donnée brute autorisée avant toute dérivation; calculer une empreinte multi-vue horodatée, versionnée et provenance complète.
+\item Retrouver : consulter mémoire et exemples après observation; filtrer par domaine, statut, fraîcheur, version, contrats et permissions; présenter les désaccords et contre-exemples.
+\item Estimer la suffisance : décider si une solution admissible et unique dispose des preuves requises; sinon demander une probe ou garder les alternatives.
+\item Construire une stratégie : voie certifiée disponible, composition existante, synthèse bornée, observation discriminante, outil spécialisé, comparaison de modèles ou mise en attente explicite.
+\item Valider avant exécution : AST, typage, contrats, effets, capacités, versions, ressources, limites de profondeur/nœuds et indépendance parallèle.
+\item Exécuter : machine à états déterministe pour les règles de contrôle; toutes les décisions, entrées/sorties, erreurs, ressources et versions alimentent une trace append-only.
+\item Vérifier indépendamment : résultat métier/domaine, intégrité, contraintes et preuve. Les résultats UNKNOWN, partiels ou non exécutés restent tels quels.
+\item Mémoriser : payload exact, hash, versions, contre-exemples, coûts, trace, résultat et liens de dépendance. Un résumé ne remplace pas l'original.
+\item Réviser : générer une candidate versionnée; tests positifs/négatifs, non-régression, holdout/OOD et comparaison appariée avant promotion.
+\item Livrer/reprendre : sauvegarder état et tâches ouvertes; fournir le résultat justifié, le rapport complet et les commandes de reproduction.
+\end{enumerate}
+
+\subsection{Préflight et fermeture de phase}
+Le préflight bloque une exécution lorsque les chemins pointent hors du dépôt, un JSON obligatoire est invalide, le manifeste de sources ne correspond pas, une erreur bloquante est ouverte, un checkpoint est incompatible ou le budget est négatif/non fini. Il n'impose pas un refus permanent : il enregistre la cause et les actions correctives. La clôture de phase exige artefacts attendus, contrôles mécaniques réussis, tests de régression et adversariaux, preuve de provenance et rapport. Les tâches qui ne peuvent pas encore être évaluées sont marquées NOT-RUN/OPEN, sans fermeture trompeuse.
+
+\section{Langage compositionnel et contrats opératoires}
+Le programme est un AST JSON versionné; aucune chaîne contenant du code source arbitraire n'est exécutée. Les références de composants sont résolues dans le catalogue signé local. Les expressions de données sont des littéraux, variables, listes, objets, sélections de champs, opérations pures de type déclarées et appels d'expression enregistrés.
+
+\begin{longtable}{p{0.13\textwidth}p{0.39\textwidth}p{0.36\textwidth}}
+\toprule Opérateur & Sémantique opératoire requise & Garde et trace minimale \\
+\midrule
+Id & Retourne l'entrée inchangée. & Type identique; trace de l'appel si activée. \\
+Call & Résout un composant id/version, valide types/contrats/effets/capacités puis appelle sa fonction enregistrée. & Jamais d'import dynamique ni d'évaluation de code de l'AST. \\
+Seq & Exécute gauche-à-droite; propage le statut; défaut stop-on-failure. & Continue-on-partial seulement si configuré explicitement. \\
+Par & Lance des branches indépendantes sur un instantané; fusionne les écritures disjointes. & Refus si effets en conflit, écritures concurrentes ou droits non compatibles. \\
+If & Évalue un garde booléen tracé et exécute une branche seulement. & Garde UNKNOWN => UNRESOLVED/clarification, pas de branche par défaut. \\
+Map & Traite une collection avec limite, ordre et politique d'erreur déclarés. & Pas d'itération au-delà du budget; résultats par élément conservés. \\
+Fold & Réduit dans l'ordre déclaré avec accumulateur typé. & Loi d'association jamais présumée; invariant et accumulateur init requis. \\
+Loop & Répète selon garde avec limite et invariant. & Terminaison théorique uniquement avec preuve d'un rang bien fondé. \\
+Choose & Expose les alternatives admissibles sans sélection implicite. & Conserve provenance, statut, coût et désaccord de chaque option. \\
+Select & Applique une politique versionnée à des candidats préfiltrés. & Heuristique != preuve; filtres de sûreté non contournables. \\
+Verify & Appelle un vérificateur indépendant et renvoie VALID/INVALID/UNKNOWN. & Certificat lié aux hashes et à la portée des hypothèses. \\
+Observe & Capture une observation autorisée, brute et traçable. & Ne fabrique pas de faits externes; marque les valeurs absentes. \\
+Probe & Choisit une observation selon gain attendu, coût, risque et pouvoir discriminant. & L'exécution d'une probe exige capacité et permission dédiées. \\
+Recover & Exécute le corps; sur échec restaure les mutations réversibles/compense, puis lance le repli. & Les effets irréversibles sont déclarés ambigus jusqu'à réconciliation. \\
+Txn & Exécute dans le domaine transactionnel annoncé. & Rollback mémoire ne prétend pas annuler un effet externe. \\
+Checkpoint & Sauvegarde état, AST, trace, versions, budget, résultat et références d'effets. & Écriture atomique; hash, schéma et parent de trace vérifiés. \\
+Revoke & Révoque une version/preuve et invalide transitivement ses descendants. & Aucune certification dépendante ne reste active sans revalidation. \\
+Compose & Instancie un template versionné avec paramètres typés. & Toutes les références et contrats sont résolus avant exécution. \\
+Transform & Produit une nouvelle AST sans écraser l'original; compare et vérifie avant promotion. & Diff, tests, coût, preuve/contre-exemples et rollback obligatoires. \\
+Fix & Itère vers un point fixe selon égalité canonique déclarée. & Plafond requis; absence de convergence => PARTIAL/UNRESOLVED. \\
+Synthesize & Génère puis ordonne des candidats d'une grammaire versionnée sous budget. & Enregistrement de la graine, front, évaluations et contre-exemples; aucun auto-certificat. \\
+Hibernate & Persiste payload exact compressé, hash, dépendances et metadata avant déchargement. & Refus si pin, lease, transaction ou dépendance protégée. \\
+Wake & Réhydrate et vérifie hash, versions, scope, droits et dépendances. & Le réveil ne modifie pas le statut épistémique et ne valide pas le candidat. \\
+Compress & Compression sans perte de représentation canonique. & Round-trip et hash obligatoires; ratio mesuré, pas présumé. \\
+Summarize & Crée une vue dérivée avec fidélité/domaine/métrique documentés. & Original exact conservé; résumé jamais promu en preuve source. \\
+Restore & Restaure checkpoint/payload et contrôle schéma, hash et dépendances. & Effets externes en attente = réconciliation explicite. \\
+EmitWave & Persiste événement typé, idempotent, versionné avec TTL/priorité. & Fan-out et file bornés; révocations prioritaires. \\
+ReceiveWave & Valide, déduplique, autorise et délivre à un handler déclaré. & Replay et traitement idempotent définis. \\
+ResumeSearch & Restaure le front, priorités, signatures et compteurs d'une recherche. & Migrations explicites; schéma incompatible rejeté avec motif. \\
+\bottomrule
+\end{longtable}
+\noindent Le registre de couverture code/tests/contrats précise, pour chaque ligne, le chemin d'implémentation et les tests. Le libellé abrégé « Select/Synthesize » ne fusionne pas les deux constructeurs : leurs nœuds AST, sémantiques et preuves restent distincts.
+
+\section{Typage, expressions, effets et contrôle d'accès}
+\subsection{Typage statique}
+Chaque nœud comporte \code{op}, \code{schema_version}, arguments structurés, paramètres, annotations de type/effet et identifiant stable. La validation vérifie forme, variables liées, références, types d'entrée/sortie, compatibilité des unités, limites d'imbrication, nombres de nœuds et cycle de récursion. Les expressions n'utilisent qu'une liste d'opérations pures enregistrées. Un nom de fonction inconnu, une clé manquante ou un type non compatible génère un diagnostic stable.
+
+\subsection{Effets et permissions}
+Effets possibles : pure, \code{read-memory}, \code{write-memory}, observe, \code{filesystem-read}, \code{filesystem-write}, subprocess, network, clock, random, \code{external-action}. Chaque exécution exige la permission minimale correspondante, avec scope/racine explicite. Les compositions par défaut n'ont pas de réseau ni de subprocess. Les chemins sont normalisés puis vérifiés contre une racine autorisée; symlink/path traversal et écriture au-delà de la racine sont refusés. Les adaptateurs peuvent être enregistrés localement après revue; le DSL ne peut pas les créer arbitrairement.
+
+\subsection{Contrats}
+Préconditions/postconditions sont représentées par des prédicats sérialisables autorisés; les contraintes non sérialisables utilisent un vérificateur nommé dont la version et les limites sont stockées. Un échec de précondition bloque l'appel avant effet. Un postcondition false donne FAILED/INVALID selon le contrôleur indépendant; UNKNOWN reste UNKNOWN. Un contrat incomplet n'est pas réputé satisfait.
+
+\section{Synthèse, apprentissage et révision sans solution injectée}
+La synthèse reçoit une grammaire, un objectif, des exemples séparés (train/validation/test), un budget et des vérificateurs. Le générateur n'a pas accès à l'oracle du jeu test pendant la génération. Les candidats sont filtrés par signature et types avant exécution; les équivalences logiques ne sont fusionnées que sous une justification enregistrée. Les doublons de syntaxe peuvent être éliminés exactement par hash AST canonique, sans prétendre que cela déduplique toutes les équivalences comportementales.
+
+\subsection{Boucle CEGIS}
+\begin{enumerate}
+\item produire des programmes candidats par expansion paresseuse de grammaire;
+\item appliquer les filtres syntaxiques, types, contrats, effets, permissions et budgets;
+\item exécuter sur les seuls exemples de construction et sur le validateur indépendant;
+\item demander un contre-exemple à l'oracle/environnement licite lorsqu'il existe;
+\item conserver le contre-exemple avec provenance et l'ajouter à la suite d'entraînement/validation, jamais au test scellé par défaut;
+\item regénérer/reprioriser le front et sauvegarder le checkpoint;
+\item rapporter candidats examinés, exclus et motifs, budget et statut de fin.
+\end{enumerate}
+Un budget d'expansion épuisé donne un front reprenable et PARTIAL, pas un jugement d'impossibilité. Une recherche non exhaustive ne revendique pas la complétude.
+
+
+\subsection{Contrat opérationnel de synthèse paresseuse et d'oracle indépendant (AST 1.3.0)}
+La grammaire de recherche est soit une liste de candidats héritée (parcours stable par indice), soit une grammaire versionnée \code{slot\_product}. La seconde définit un produit cartésien fini sans matérialiser le produit entier : les choix de chaque slot sont normalisés par le coût fini, numérique, non booléen et non négatif, puis par l'indice d'origine; un coût absent prend l'indice d'origine. Les candidats sont émis par coût total croissant puis par tuple d'indices. La frontière persistée contient la version de protocole, le hash canonique de la grammaire, le curseur, l'espace candidat et la file canonique; elle est refusée si un champ, coût, hash, tuple ou version est incohérent. La taille maximale de frontière et le budget candidats sont explicites et reprenables.
+
+Un \code{CounterexampleOracle} est injecté par l'hôte, jamais décrit par un fragment exécutable du programme. Son identité, sa version, sa portée et son plafond de requêtes font partie de l'identité de reprise. Il ne reçoit que l'AST candidat et un contexte opaque contenant identifiant de recherche, identifiant idempotent de requête et hash du candidat; les exemples \code{holdout} et \code{test} ne lui sont jamais transmis. Un témoin valide contient \code{input} et \code{expected}, avec provenance facultative; le runtime doit effectivement exécuter le candidat sur ce témoin et vérifier que celui-ci le réfute avant de l'ajouter à CEGIS. Un témoin non réfutant est une violation de contrat : la recherche est suspendue sans avancer la frontière. Une réponse nulle signifie seulement « aucun contre-exemple trouvé dans la portée déclarée de cet oracle », jamais que le candidat est correct. Tout résultat sélectionné reste \code{HYPOTHESIS}; \code{selection\_is\_proof=false}.
+
+Les journaux enregistrent chaque tentative de requête, y compris les reprises d'une tentative interrompue, ses identifiants, son issue et sa provenance. En cas d'épuisement du budget oracle, le résultat reste partiel/reprenable, avec un budget demandé et consommé; augmenter le budget sur reprise ne modifie pas la grammaire ni l'identité de l'oracle. Les exceptions d'oracle sont transformées en diagnostic de contrat et ne sont pas interprétées comme un contre-exemple ou comme une preuve.
+
+\subsection{Promotion et transformations}
+Les changements de programme sont publiés comme nouvelle version. Tests minimaux : succès nominal, valeurs frontières, refus négatifs, régression, différentiel avant/après, non-régression de permissions, provenance, performances/mémoire, récupération et cas sous-déterminés. La promotion applique une règle configurée avant le test final et nécessite approbation si elle change une permission ou un effet persistant. Un résultat moyen positif ne masque pas un échec de sûreté.
+
+\section{Observation multi-vues et modèle du monde}
+Une observation est $(id,raw,views,source,time,context,permissions,hash,version,epistemic,trace)$. Le raw autorisé est conservé avant les dérivations. Les vues sont explicitement nommées (surface, focalisée, structurelle, relationnelle, temporelle, contexte); chaque vue indique sa fonction de dérivation et hash. Les partitions d'apprentissage gardent groupes entiers lorsque nécessaire pour éviter fuites d'entités ou de séquences.
+
+Les probes sont des propositions d'acquisition, pas des faits. Leur rang dépend du gain d'information estimé, du coût, du risque, du désaccord et du pouvoir de séparer les hypothèses. Toute estimation est identifiée comme heuristique ou empirique. Le modèle du monde est optionnel et promu seulement après tests appariés à budget égal : sans modèle, modèle candidat, contrôle nul/permuté et ablations; le succès décisionnel, coût, risque et généralisation sont mesurés. Les prédictions restent SIMULATED/PREDICTED et ne deviennent jamais OBSERVED/CERTIFIED sans observation ou vérification indépendante.
+
+\section{Mémoire persistante, dépendances et provenances}
+Le magasin durable emploie SQLite standard-library-first, transactions, schémas versionnés et blobs compressés. Objets mémorisés : payload exact, objets dérivés, signatures, dépendances et versions, états épistémique/opérationnel séparés, provenance, hash, compteur d'utilisation, pins, leases, raisons de veille, révocations et événements.
+
+\subsection{MG/MGR/MGR2 et graphe de dépendance}
+MG persiste objets/faits/règles et preuves référencées; MGR organise les relations et indices de travail; MGR2 représente les dérivations et chaînes de dépendance versionnées. La forme physique peut varier, mais adaptateurs et migrations gardent les identifiants et la sémantique. La révocation d'un nœud déclenche un parcours transitif des dépendants, marqués STALE jusqu'à revalidation indépendante. Un cycle dans le graphe est refusé.
+
+\subsection{Veille, réveil, compression}
+Le sommeil ne supprime ni le payload exact ni la provenance. Avant de dormir, l'objet et ses métadonnées sont commités, l'intégrité est vérifiée, puis la représentation active est déchargée. Pin, lease, transaction ou opération de révocation en cours interdit l'éviction. Le réveil vérifie hash, version, scope, droits et dépendances; si les versions ne correspondent pas, le candidat reste STALE. La compression sans perte passe un round-trip hash-identique. La compression avec perte conserve l'original et nomme le domaine, la métrique, les paramètres et l'erreur mesurée.
+
+\subsection{Vagues d'information}
+Une vague porte event\_id, source/version, target, type, payload, contexte, priorité, TTL, séquence et hash de provenance. Déduplication par clé, ordre stable, quotas de file, backpressure et idempotence sont obligatoires. Les révocations/changements de versions ont priorité. Le forwarding diminue TTL; le TTL nul ne se propage pas. Les statuts QUEUED, DELIVERED, DUPLICATE, REJECTED, FAILED et EXPIRED sont persistants.
+
+\section{ASCR et ASCRC}
+ASCR est une responsabilité spécialisée héritée, sans mutation via ASCRC. ASCRC consomme un descripteur en lecture seule : identifiant, version, provenance, état opérationnel, contexte, coût, utilité, nouveauté, gain d'information, risque, dépendances, pin/lease, déclencheurs et statut épistémique en lecture seule.
+
+\subsection{Budget strict et admission}
+Le plan d'activation est validé avant application et ne peut dépasser le budget restant par ressource. Les contraintes de révocation, fraîcheur, dépendances, contexte, droits et coûts sont des filtres durs. L'heuristique de score sert uniquement au classement et n'utilise jamais le statut épistémique comme score de vérité. Les sous-budgets optionnels préservent exploration, vérification et maintenance; les minima sont explicites et configurables. Un candidat refusé reçoit une raison, un événement de report et éventuellement un déclencheur de réveil.
+
+\subsection{Anti-famine et équité}
+Le vieillissement peut favoriser les candidats anciens, mais aucune garantie universelle n'est annoncée. Toute affirmation d'anti-famine exige : ensemble admissible fini ou hypothèse d'admissibilité, coût payable, capacité suffisante, service continu, pas de blocage permanent et reprise sans perte. La veille réduit le working set actif; l'espace logique de recherche ne diminue que par filtres justifiés, signature exacte, partage et prunes démontrablement sûrs.
+
+\section{Explosion combinatoire et performance}
+La politique de recherche combine, et mesure séparément : génération paresseuse; limites explicites de budget/temps/profondeur/nœuds; pruning par type, contrats, effets, permissions et dépendances; index de signature; cache versionné; partage des sous-compositions; déduplication AST exacte; canonicalisation comportementale uniquement prouvée; recherche best-first reprenable; contre-exemples; partition exploration/vérification/maintenance; hibernation réversible; checkpoints; mesure de la latence, expansions, mémoire RSS, ratio de cache, doublons, couverture et réussite métier.
+
+Les caches sont indexés par hash d'entrée canonique, version de composant et version de contrat. Une modification de dépendance invalide le cache transitivement. Les mesures se font sur les mêmes instances/seed/budgets avant-après; les modes baseline et optimisé sont comparés. Toute accélération qui modifie une sortie, une trace nécessaire, un effet ou un statut est une modification sémantique et exige une preuve distincte.
+
+\section{Transactions, checkpoints et récupération}
+Les checkpoints sérialisent schema version, programme AST, environnement local, budget restant, seed, front de recherche, statistiques, trace parent, versions de composants, payload hashes et effets externes en attente. Écriture atomique via fichier temporaire + fsync + replace, ou transaction SQLite. Restauration vérifie schéma, hash, versions, dépendances et politique de permissions. Les effets externes non idempotents en état incertain sont réconciliés/compensés; le système ne les relance pas silencieusement.
+
+Les transactions locales annulent les changements réversibles dans leur domaine. Pour l'externe, les seules garanties autorisées sont celles données par l'adaptateur : idempotence, clé d'opération, compensation/saga ou réconciliation. Recovery conserve l'erreur initiale, les étapes de compensation, le statut final et les valeurs déjà livrées. Le retour arrière restaure une version connue sans effacer l'audit.
+
+\section{Interface graphique locale et CLI}
+L'interface est une surface de pilotage et d'inspection du modèle, non la source de vérité architecturelle. Elle doit rendre visibles les IDs/version, statuts, budgets, provenance, erreurs, tâches ouvertes, opérateurs disponibles, adaptateurs absents, résultats partiels et commandes de reprise. Le mode normal fonctionne localement, hors ligne, sans appel tiers implicite. Les fonctions non connectées sont clairement marquées indisponibles/non branchées, mais les points d'extension existent.
+
+\subsection{Surfaces UI minimales}
+Chat/tâches; tableau de bord d'objectifs; éditeur compositionnel AST/JSON; catalogue de composants et contrats; import/inspection de datasets; observation multi-vues; mémoire vivante et vagues; console ASCRC; campagnes d'évaluation et modèle du monde; journal d'audit; paramètres/permissions; état/checkpoint et récupération. Critères UI-01 à UI-20 du document source sont conservés dans la matrice d'acceptation et mappés vers des tests end-to-end, tests manuels ou adaptateurs à connecter.
+
+\subsection{CLI minimale}
+\code{doctor}, \code{inspect-sources}, \code{run}, \code{validate}, \code{synthesize}, \code{observe}, \code{memory}, \code{ascrc}, \code{checkpoint}, \code{resume}, \code{revoke}, \code{audit}, \code{serve}, \code{test}. Chaque commande documente entrées/sorties, codes de retour, capacités, effets, reprise, exemples et diagnostics.
+
+\section{Interface héritée et registres de capacité}
+Le registre contient un adaptateur typé pour chaque composant : source, version, contrat d'entrée/sortie, effets, permissions, capacité réelle, mode d'exécution, coût, tests, limitations observées, tests en attente et fallback. Les composants eGenBrain/AAM/ORDER sont des compétences spécialisées au registre; aucune source ou teacher n'est supposé fournir les réponses aux tâches. Les routes de génération optionnelle restent désactivées par défaut et séparées du noyau sans LLM.
+
+Le paquet fourni déclare un SQLite MG eGenBrain de 1\,648\,779\,264 octets en deux parties, mais la recherche récursive dans l'archive fournie n'a pas trouvé la seconde partie annoncée. Cette absence de pièce de livraison n'est pas interprétée comme échec du modèle; elle est un problème de provenance/livraison consigné. Le runtime natif doit fonctionner sans cette base, et un adaptateur eGenBrain ne doit l'annoncer actif qu'après reconstruction et validation de l'artefact complet.
+
+\section{Preuves et qualité}
+Chaque assertion structurée contient proposition, hypothèses, domaine, méthode, source/hash, vérificateur/version, statut et témoins. Les preuves sont classées : théorème textuel sous hypothèses, invariant de conception, résultat de test local, constat de source, observation empirique, preuve machine ou obligation ouverte. Les tests d'un même processus ne sont jamais additionnés aux tests de lots différents sans indiquer les doublons.
+
+La matrice vérifie les trois correspondances : opérateur $ / $ contrat $ / $ code/tests; source $ / $ adaptation $ / $ preuve de non-régression; UI $ / $ API $ / $ test d'acceptation. La sécurité et la qualité métier ne sont jamais agrégées dans un unique score qui masquerait un échec dur.
+
+\section{Plan de travail et critères de sortie}
+Les phases sont séquentielles; une phase dépendante ne commence pas tant que la précédente n'a pas satisfait ses critères. Chaque exécution est précédée de lecture des checklists travail, erreur-modèle et erreur-hors-modèle; après l'exécution, journaux, erreurs, résultats et documents sont mis à jour. Les checkpoints sont mis à jour avant/après chaque unité de travail intégrable.
+
+\begingroup\footnotesize\sloppy
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.07\textwidth}L{0.21\textwidth}L{0.40\textwidth}L{0.21\textwidth}}
+\toprule Phase & Périmètre & Critères de sortie & Preuves \\
+\midrule
+P00 & Archive et provenance & ZIP vérifié, contenu listé, espace disque noté, sources/missing parts cartographiées & inventory JSON, hashes \\
+P01 & Réconciliation des sources & Lire formalismes, théorie, interface, rapports et points d'entrée ORDER/AAM/eGenBrain; choisir les versions les plus complètes sans écraser les alternatives & source matrix, discrepancies \\
+P02 & Formalisme opératoire & Tous les contrats, 29 opérateurs, pipeline, mémoire, ASCRC, erreur/reprise, sécurité, CLI/UI et preuves définis; syntaxe LaTeX vérifiée & présent document, coverage matrix \\
+P03 & Gouvernance/checkpoints & Checklists, chemins, savepoint et journaux créés; préflight impose leur consultation et met à jour les artefacts & JSON validés, tests préflight \\
+P04 & Noyau AST/type/contrats & Schéma versionné, parsing, vérification statique, type/effect/capability, Outcome et trace testés & tests positifs/négatifs \\
+P05 & Interpréteur 29 opérateurs & Chaque opérateur a sémantique, code, tests sur nominal/frontière/erreur et matrice de couverture; pas de constructeur muet & tests différentiels, coverage \\
+P06 & Mémoire & SQLite, dépendances, compression exacte, sleep/wake, vagues, checkpoints, révoquer/invalider et reprise testés & tests de crash, intégrité \\
+P07 & Recherche/synthèse & Génération paresseuse, types/contracts pruning, front reprenable, CEGIS, contre-exemples et contrôle de fuite & fixtures/oracles externes \\
+P08 & ASCRC et modèle du monde & ASCR non modifié; ASCRC respecte budget/états; gate world model validé par données appariées de test & hash/diff, tests, rapport \\
+P09 & Intégration spécialistes & Adaptateurs ORDER/AAM/eGenBrain versionnés et isolés; tests ou indisponibilités d'artefacts explicités; aucun résultat synthétique substitué & manifests, contract tests \\
+P10 & CLI + GUI & CLI documenté, serveur local, parcours principaux et erreurs; les critères d'interface sont mappés tests/preuves & captures/logs, tests API \\
+P11 & Robustesse & Fuzz/données invalides, traversée chemins, budgets, concurrence, reprise/crash, profil mémoire/temps et comparaison baseline & rapports reproduisibles \\
+P12 & Documentation et livraison & README/guide CLI/UI, licence, dépendances, manifestes hashes, 3 archives de rôles distincts; segments ZIP si >200 MB & script package/verify \\
+P13 & Clôture & Aucun test planifié oublié; inconnues restantes explicitement quantifiées; tous livrables reconstruisibles depuis source & rapport complet, receipts \\
+\bottomrule
+\end{longtable}
+\endgroup
+\normalsize
+
+\section{Règles de rapport et d'exécution}
+Chaque rapport contient dans cet ordre : description; architecture; pipeline complet; commandes d'exécution; résultats observés; interprétation; conséquences théoriques, conceptuelles et opérationnelles; conclusions; statut du modèle. Il précise OS, Python, versions, seed, hash des entrées, durée, budget, compteurs et exit code. Les échecs sont conservés dans \code{logs/}; aucune erreur n'est supprimée sans entrée de résolution qui cite la preuve.
+
+Avant toute commande de construction/test, consulter chacun des registres suivants :
+\begin{itemize}
+\item \code{chemins_FulleGenBrain_f4_v0.json};
+\item \code{sav_FulleGenBrain_f4_v0/};
+\item \code{checklist_de_travail_FulleGenBrain_f4_v0.json};
+\item \code{checklist_erreurs_no_model.json};
+\item \code{checklist_erreurs_model.json}.
+\end{itemize}
+Après toute commande : enregistrer stdout/stderr/code retour/empreintes, ajouter les erreurs sans écrasement, mettre à jour la phase et sauvegarder les fichiers importants. Le script de préflight applique cette convention et documente son propre résultat.
+
+\section{Garanties attendues et limites de preuve}
+Le runtime livré peut être complet relativement aux contrats de cette version, mais aucune déclaration de perfection absolue, d'exhaustivité universelle, de performance cognitive générale ou d'absence de tout bug n'est admise sans preuve appropriée. La complétude de surface se vérifie par matrice exhaustive; la correction par tests, invariants, analyse, comparaisons, vérificateurs et mesures; la généralisation par évaluations séparées. Les conditions sous lesquelles les garanties sont établies sont conservées. Ce principe n'abaisse pas les objectifs : il empêche simplement de transformer une exigence en fait non vérifié.
+
+
+
+\section{Contrat P08 : ASCRC vectoriel, ASCR intact et porte du modèle du monde}
+\label{sec:p08-ascrc-world-gate}
+
+\subsection{Séparation source/adaptation}
+Le contrôleur ASCR historique d'eGenBrain est une compétence spécialisée distincte. Les quatre fichiers porteurs d'ASCR vérifiés dans le manifeste du paquet historique sont conservés octet pour octet; leurs empreintes sont enregistrées dans \code{spec/evidence/ascr_source_preservation.json}. L'ASCRC livré ici est un nouvel adaptateur de régulation, il n'importe pas et ne modifie pas les fichiers ASCR hérités. Le prototype V4 à coût scalaire est conservé sous \code{spec/upstream/reference_impl/}; l'adaptation vectorielle est une implémentation distincte, et non une assertion d'équivalence universelle.
+
+\subsection{Ressources et admission atomique}
+Une ressource est un vecteur fini $r\in\mathbb{R}_{\ge0}^{D}$ de dimensions nommées, avec valeurs finies. Un budget $B$ est un plafond dur par dimension. Pour l'ensemble actif $A$ et l'ensemble proposé $S$, l'admission exige
+\[
+\sum_{a\in A}r(a)+\sum_{s\in S}r(s)\leq B
+\]
+composante par composante. Le plan est préparé séparément de son application; son hash couvre le contexte, le budget, les candidats choisis, leurs empreintes, les ressources estimées et l'empreinte de l'ensemble actif. Avant commit, les candidats et l'ensemble actif sont revalidés, le total est recalculé, puis toutes les transitions sont commitées sous verrou. Un plan périmé, altéré ou dépassant un plafond est rejeté avant toute activation.
+
+Les pins, baux et transactions ouvertes empêchent l'arrêt/éviction ordinaire. Un candidat stale actif conserve sa réservation jusqu'à l'arrêt sûr. Une révocation d'un candidat actif devient \code{revocation_pending}: toute réactivation est bloquée, mais la réservation n'est libérée qu'à l'arrêt sûr. Un événement de réveil est une demande, jamais une permission qui contourne le budget. Un candidat insuffisant en capacité peut être marqué \code{BLOCKED} et réessayé lors d'un plan ultérieur. La politique de score n'a aucun effet sur les statuts épistémiques.
+
+\subsection{Journal et snapshot ASCRC}
+Chaque événement ASCRC porte un numéro de séquence, un tick, un type d'action, l'identifiant, la raison, le contexte éventuel, les ressources et le hash du précédent événement. Le snapshot couvre le catalogue, la politique, l'état, le journal complet et la queue de hash; restauration refusée si l'empreinte globale, la chaîne, le couple clé/identifiant ou l'état du journal est incohérent. Ces empreintes détectent une altération, mais ne sont pas une signature cryptographique ni une preuve d'origine contre un attaquant pouvant réécrire l'intégralité de l'artefact.
+
+\subsection{Porte mesurée du modèle du monde}
+Un modèle de transition optionnel reste désactivé par défaut. Une porte d'activation exige un protocole immuable enregistré avant les mesures, une famille de tâches explicitement nommée, un couple baseline/candidat fixe, des observations appariées provenant uniquement du partitionnement réservé (holdout/validation\_holdout), un nombre minimum de paires, l'absence de violation de sûreté, un gain de \emph{decision utility} dont la borne bootstrap inférieure excède le gain pratique pré-enregistré, et un coût moyen supplémentaire qui n'excède pas le plafond déclaré. Un protocole absent, changé, enregistré après les mesures ou corrompu bloque l'activation.
+
+La sortie de cette porte est un résultat décisionnel borné à la famille de tâches du protocole, pas une preuve générale que le monde est modélisé correctement, pas une preuve causale et pas une garantie sur d'autres familles. La graine, le nombre de réplications, le niveau de confiance, les mesures appariées, le résultat, les motifs de refus et le hash du protocole sont traçables. Une violation de sûreté est un refus dur, indépendamment du score d'utilité.
+
+\subsection{Critères de preuve P08}
+La phase P08 ne peut être close qu'après: (i) comparaison des hashes ASCR historiques avec le manifeste; (ii) tests de projection scalaire contre la référence V4 sur des cas explicités; (iii) tests vectoriels de budget, protections, freshness, révocation, atomicité, snapshots et chaîne de hash; (iv) tests de porte du monde pour protocole absent, pré-enregistrement, partition, effectif, gain, coût, sûreté, doublons et corruption; (v) suite globale sans avertissement de ressource. Une réussite de test n'est pas une garantie universelle; les limites et la portée exacte figurent dans le rapport P08.
+
+\end{document}

@@ -1,0 +1,495 @@
+
+\documentclass[11pt,a4paper,openany]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=2.5cm,headheight=16pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs,bm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist{itemsep=2pt,topsep=3pt}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,pdftitle={Théorie des empreintes : observation, récursion et mémoire}}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{axiom}[definition]{Axiome}
+\newtheorem{hypothesis}[definition]{Hypothèse}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{corollary}[definition]{Corollaire}
+\newtheorem{conjecture}[definition]{Conjecture}
+\newtheorem{remark}[definition]{Remarque}
+\newtheorem{limitation}[definition]{Limitation}
+\DeclareMathOperator{\Obs}{Obs}
+\DeclareMathOperator{\Mem}{Mem}
+\DeclareMathOperator{\Rec}{Rec}
+\DeclareMathOperator{\Im}{Im}
+\DeclareMathOperator{\Fib}{Fib}
+\newcommand{\X}{\mathcal X}
+\newcommand{\Syst}{\mathcal S}
+\newcommand{\Env}{\mathcal E}
+\newcommand{\F}{\mathcal F}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Monto}{M_{\mathrm{o}}}
+\newcommand{\Mevo}{M_{\mathrm{e}}}
+\newcommand{\Loc}{\mathrm{loc}}
+\newcommand{\Glob}{\mathrm{glob}}
+\begin{document}
+\frontmatter
+\begin{titlepage}
+\centering
+{\Large Théorie des empreintes informationnelles}\\[1cm]
+{\Huge\bfseries Observation, récursion et mémoire}\\[0.5cm]
+{\Large Formalisation de la discussion — ordre 0}\\[1.5cm]
+Bensalem Nassim\\[1cm]
+\vfill
+Document de formalisation conceptuelle et mathématique.\\
+Les définitions et résultats conditionnels sont distingués des postulats et conjectures.\\
+\today
+\end{titlepage}
+\tableofcontents
+\mainmatter
+
+\part{Objet et statut de la formalisation}
+\chapter{Objet, portée et discipline logique}
+
+\section{Objet}
+Ce document formalise le cadre discuté autour de l'observation comme découverte, de la distinction entre existence ontologique et existence relative à un système, de la récursion locale/globale et de deux niveaux de mémoire : ontologique et évolutive. Il est conçu comme une extension conceptuelle de la théorie des empreintes informationnelles, et non comme un remplacement de ses fondements.
+
+Le noyau de la théorie des empreintes décrit une observation par ses réponses à des sondes, puis construit l'empreinte, l'indiscernabilité, les fibres et le quotient. Le présent texte ajoute une dynamique du système observateur : ses états évoluent, ses capacités changent, et ses observations ultérieures peuvent réorganiser ses observations antérieures.
+
+\section{Statuts épistémiques}
+Les termes \emph{définition}, \emph{axiome}, \emph{hypothèse}, \emph{proposition}, \emph{conjecture} et \emph{interprétation} ne sont pas interchangeables.
+Une conséquence logique ne sera appelée théorème que si elle découle des hypothèses explicitement posées. Les thèses ontologiques et les interprétations de la conscience ne sont pas présentées comme des résultats expérimentaux.
+
+\section{Compatibilité avec le noyau des empreintes}
+Soient $\X$ un ensemble d'objets, $\F$ une famille de sondes et $P$ un contexte. Le fonctionnel d'observation du socle est noté
+\[
+\Phi(P,x,f)\in Y_f.
+\]
+Pour une famille finie $F=(f_1,\ldots,f_k)$, l'empreinte est
+\[
+I_F^P(x)=\bigl(\Phi(P,x,f_1),\ldots,\Phi(P,x,f_k)\bigr).
+\]
+L'indiscernabilité induite est
+\[
+x\sim_F^P y\quad\Longleftrightarrow\quad I_F^P(x)=I_F^P(y).
+\]
+Les fibres sont les classes d'équivalence de $\sim_F^P$ et le quotient est $\X/{\sim_F^P}$. Le présent formalisme ne modifie pas ces définitions : il étudie comment un système peut produire, conserver, réviser et réinterpréter des empreintes au cours de son évolution.
+
+\part{Existence et relativité observationnelle}
+\chapter{Deux sens d'existence}
+
+\section{Existence ontologique}
+\begin{definition}[Existence ontologique]
+Dans le présent cadre, l'existence ontologique d'un objet $x$ signifie que son existence ne dépend pas de sa découverte, de sa représentation ni de son enregistrement par un système connaissant. On note cette propriété $E_{\mathrm{o}}(x)$.
+\end{definition}
+
+Cette définition est une thèse de réalisme ontologique adoptée comme cadre de discussion. Elle ne constitue pas, à elle seule, une procédure de détection ou une preuve empirique de l'existence d'un objet particulier.
+
+\section{Existence relative à un système}
+\begin{definition}[État de présence relative]
+Soit $s$ un système connaissant et $t$ un instant. On note $E_{\mathrm{r}}(x\mid s,t)$ le fait que l'objet $x$ soit présent dans l'état informationnel de $s$ à $t$, au sens où une représentation, une trace ou une distinction relative à $x$ est disponible dans le système.
+\end{definition}
+
+L'existence relative n'est pas l'existence ontologique de l'objet. Elle désigne le statut de l'objet dans l'organisation informationnelle d'un système. Une étoile peut donc exister ontologiquement avant d'être découverte par une personne ; sa présence relative dans la mémoire de cette personne commence lorsqu'une représentation pertinente y est constituée.
+
+\begin{remark}[Découverte et existence]
+La découverte ne crée pas, dans ce cadre, l'existence ontologique de l'objet. Elle transforme l'état du système et peut faire émerger ou modifier l'existence relative de l'objet pour ce système.
+\end{remark}
+
+\section{Non-confusion entre existence et observabilité locale}
+\begin{definition}[Observabilité locale]
+Un objet $x$ est observable pour le système $s$, dans le contexte $P$ et à l'instant $t$, si le système peut, au moyen de ses interactions et de ses opérations admissibles à cet instant, produire une distinction dépendant de $x$ dans son état ou dans une sortie accessible.
+\end{definition}
+
+L'observabilité est donc relative à un système, à un état, à un contexte, à des canaux d'interaction et à une famille de distinctions accessibles. L'absence d'observabilité par un système donné n'implique pas l'inexistence ontologique de l'objet.
+
+\begin{proposition}[Relativité de l'inobservabilité]
+Il peut exister $x,s_1,s_2,t$ tels que $x$ soit observable pour $s_2$ à $t$ et non observable pour $s_1$ à $t$, sans contradiction avec $E_{\mathrm{o}}(x)$.
+\end{proposition}
+\begin{proof}
+Les capacités, les interactions et les états informationnels des systèmes peuvent différer. L'observabilité étant définie relativement à ces paramètres, les deux statuts locaux peuvent différer alors que l'objet est le même.\end{proof}
+
+\section{Principe de disponibilité observationnelle globale}
+\begin{axiom}[Disponibilité observationnelle globale]
+Pour tout objet considéré comme existant dans le domaine ontologique de la théorie, il existe au moins un système, un contexte et une trajectoire d'interaction admissibles dans lesquels cet objet peut être distingué :
+\[
+E_{\mathrm{o}}(x)\Longrightarrow
+\exists s\,\exists P\,\exists t\quad \Obs(x\mid s,P,t).
+\]
+\end{axiom}
+
+Cet énoncé formalise la thèse défendue dans la discussion : l'inobservabilité peut être locale à un système, tandis que l'observation est garantie globalement par la richesse des systèmes et des relations possibles. Il est posé comme principe de la théorie, et non déduit de la seule définition de l'existence.
+
+\begin{remark}[Limite de l'argument épistémique]
+Le fait qu'un objet soit concevable ou que l'on puisse poser la question de son observabilité ne démontre pas, à lui seul, qu'il existe ni qu'il est effectivement observable. La formulation rigoureuse du principe global est donc l'axiome ci-dessus. L'argument selon lequel « si l'on peut en parler, il est observable » peut motiver cet axiome, mais ne le prouve pas sans prémisses supplémentaires sur la relation entre concevabilité, référence et observation.
+\end{remark}
+
+\part{Observation et découverte}
+\chapter{Définition dynamique de l'observation}
+
+\section{Système, état et interaction}
+Un système est représenté par un espace d'états $\Syst$ et un état $s_t\in\Syst$ à l'instant $t$. Son environnement est représenté par $\Env$. Une interaction admissible est une application partielle
+\[
+J:\Syst\times\Env\longrightarrow \Syst\times\Env\times Z,
+\]
+où $Z$ est un ensemble de résultats ou de signaux. Le caractère partiel indique que toutes les interactions ne sont pas nécessairement accessibles dans tous les états.
+
+\begin{definition}[Distinction]
+Une distinction produite par un système est une différence entre au moins deux états, sorties ou classes de situations, différence qui est accessible au système selon ses capacités présentes.
+\end{definition}
+
+\begin{definition}[Observation fonctionnelle]
+Un système observe fonctionnellement un objet ou une propriété lorsque l'interaction avec celui-ci contribue à produire une distinction accessible dans l'état du système ou dans une sortie qu'il peut exploiter.
+\end{definition}
+
+\begin{definition}[Découverte relative]
+Une découverte relative à $s$ est une transition de l'état informationnel du système qui rend accessible une distinction, une valeur ou une relation qui ne l'était pas dans l'état antérieur pertinent.
+\end{definition}
+
+L'observation et la découverte sont liées, mais ne sont pas identiques dans tous les cas : une observation peut répéter une distinction déjà accessible ; elle ne constitue alors pas nécessairement une découverte nouvelle. Une découverte est une observation ou une réorganisation observationnelle qui produit une nouveauté relativement à l'état antérieur du système.
+
+\section{L'observation n'est pas nécessairement consciente}
+\begin{remark}[Sens fonctionnel]
+Dans ce document, le mot observation est d'abord employé au sens fonctionnel et informationnel. Il ne présuppose pas une expérience subjective ou une conscience phénoménale.
+\end{remark}
+
+Ainsi, un thermostat peut être décrit comme mesurant ou détectant une température au sens fonctionnel si son dispositif différencie des plages de température et utilise cette différence pour modifier son état ou son action. Cette description n'établit aucune conclusion sur une éventuelle conscience du thermostat.
+
+\begin{proposition}[Rétroaction et observation fonctionnelle]
+Si un dispositif reçoit une grandeur dépendant d'un objet, discrimine au moins deux valeurs de cette grandeur et utilise cette discrimination pour modifier son état ou son action, alors il satisfait la définition d'observation fonctionnelle relativement à cette grandeur.
+\end{proposition}
+\begin{proof}
+Par hypothèse, l'interaction produit une différence accessible entre au moins deux situations. Cette différence contribue à une modification d'état ou d'action. Ce sont précisément les conditions de la définition d'observation fonctionnelle.\end{proof}
+
+\begin{limitation}
+Une boucle de rétroaction quelconque n'est pas automatiquement une observation au sens retenu : il faut établir qu'une différence dépendant de l'objet est effectivement discriminée et accessible dans le fonctionnement du système. La seule présence d'une causalité circulaire ne suffit pas.
+\end{limitation}
+
+\chapter{Le moteur récursif}
+
+\section{Récursion locale et récursion globale}
+\begin{definition}[Récursion locale]
+La récursion locale est une opération par laquelle un système réinjecte dans son organisation ultérieure un état, une trace, une sortie ou une représentation qui provient de son propre fonctionnement. Elle peut porter sur ses états, ses observations, ses mémoires ou ses opérations.
+\end{definition}
+
+\begin{definition}[Récursion globale]
+La récursion globale est une opération par laquelle les interactions du système avec son environnement reviennent modifier les conditions de ses interactions et observations ultérieures. « Globale » désigne ici l'échelle système-environnement, et non nécessairement l'univers entier.
+\end{definition}
+
+\begin{definition}[Boucle locale/globale]
+Une boucle locale/globale est une composition d'opérations internes et d'interactions avec l'environnement dans laquelle un résultat issu d'une échelle devient une condition d'une opération à l'autre échelle, puis revient affecter l'échelle de départ.
+\end{definition}
+
+Un schéma minimal est
+\[
+s_t \xrightarrow{\text{interaction}} z_t
+\xrightarrow{\text{intégration}} s_{t+1}
+\xrightarrow{\text{nouvelle interaction}} z_{t+1}.
+\]
+La récursion peut être hiérarchique : une observation peut devenir l'objet d'une observation ultérieure, et une opération de mémoire peut elle-même être examinée ou transformée.
+
+\section{Opérateur récursif abstrait}
+On représente une étape de récursion par un opérateur partiel
+\[
+R:\Syst\times\Env\times\mathcal M\longrightarrow
+\Syst\times\Env\times\mathcal M,
+\]
+où $\mathcal M$ est l'espace des états de mémoire. Une trajectoire est une suite
+\[
+(s_{t+1},e_{t+1},m_{t+1})=R(s_t,e_t,m_t)
+\]
+lorsque l'opération est définie. La récursion peut comporter plusieurs sous-opérations locales et globales ; le formalisme ne suppose ni linéarité ni convergence.
+
+\begin{definition}[Fermeture récursive opérationnelle]
+Une boucle est opérationnellement fermée sur une portée donnée lorsqu'une sortie produite dans cette portée est réintroduite comme entrée d'une opération ultérieure de la même boucle, de telle sorte qu'il existe une dépendance causale effective entre les étapes, et non une simple juxtaposition descriptive.
+\end{definition}
+
+\begin{remark}[Fermeture et observation]
+La fermeture récursive n'implique pas, à elle seule, la conscience. Elle peut toutefois réaliser une observation fonctionnelle si la boucle inclut une discrimination dépendant d'un objet et si cette discrimination est accessible au système. La thèse plus forte selon laquelle la première fermeture locale/globale fait émerger toute observation est un postulat de modélisation, à tester selon la définition choisie de l'observation.
+\end{remark}
+
+\begin{axiom}[Émergence récursive de l'observation]
+Dans le modèle proposé, une observation fonctionnelle émergente est constituée lorsqu'une première boucle locale/globale se ferme et qu'au cours de cette boucle une différence dépendant de l'objet est discriminée et réinjectée dans l'état du système.
+\end{axiom}
+
+Cet axiome ne signifie pas qu'aucune interaction ou aucun traitement ne précède la boucle. Il affirme que la boucle fermée constitue le seuil d'émergence de l'observation au sens dynamique retenu ici.
+
+\part{Deux mémoires}
+\chapter{Mémoire ontologique et mémoire évolutive}
+
+\section{Mémoire ontologique}
+\begin{definition}[Mémoire ontologique]
+La mémoire ontologique $\Monto$ désigne le principe pré-récursif posé comme fondement de la possibilité de conservation, de différenciation et de relation dans l'existence. Elle ne désigne pas un souvenir individuel ni un registre psychologique.
+\end{definition}
+
+La mémoire ontologique précède la récursion dans l'ordre explicatif de la théorie. « Précéder » ne signifie pas nécessairement être antérieure dans le temps : il s'agit d'une priorité de fondation. La mémoire ontologique est supposée rendre possible la récursion, sans être elle-même produite par celle-ci.
+
+\section{Mémoire évolutive}
+\begin{definition}[Mémoire évolutive]
+La mémoire évolutive $\Mevo(s,t)$ est l'organisation des traces, distinctions, représentations ou dispositions acquises par un système au cours de son histoire récursive jusqu'à l'instant $t$.
+\end{definition}
+
+La mémoire évolutive dépend de la trajectoire du système et peut varier avec l'expérience, l'état, le contexte, les ressources et les opérations d'oubli ou de réorganisation.
+
+\begin{axiom}[Dépendance de la mémoire évolutive]
+La mémoire évolutive d'un système est constituée et transformée par ses opérations récursives :
+\[
+\Mevo_{t+1}=U(\Mevo_t,s_t,e_t,z_t),
+\]
+\[
+où $U$ est une règle d'actualisation définie sur le domaine du modèle.
+\]
+La règle $U$ peut ajouter, modifier, consolider, rendre inaccessible ou supprimer des traces ; aucune monotonie de la quantité mémorisée n'est présupposée.
+\end{axiom}
+
+\section{Relation de fondation}
+\begin{proposition}[Dépendance asymétrique des deux mémoires]
+Dans le cadre axiomatique adopté, la mémoire ontologique fonde la possibilité de la récursion, tandis que la mémoire évolutive est produite ou transformée par la récursion. Il n'y a pas de contradiction à ce que la mémoire évolutive dépende d'un mécanisme dont la possibilité dépend de la mémoire ontologique.
+\end{proposition}
+\begin{proof}
+Les deux mémoires n'ont pas le même rôle logique. $\Monto$ est une condition de fondation posée en amont ; $\Mevo$ est une variable d'état dont l'actualisation est définie par la dynamique récursive. La dépendance n'est donc pas circulaire au même niveau : elle est ordonnée par les types et les rôles des objets.\end{proof}
+
+\begin{remark}[Précision nécessaire]
+La proposition précédente établit la cohérence interne de l'ordre de dépendance, non l'existence indépendante de $\Monto$. Pour donner à la mémoire ontologique un statut mathématique pleinement déterminé, il faudra préciser son domaine, ses propriétés et les axiomes qui la caractérisent. En l'absence de ces précisions, elle demeure un concept fondamental du modèle plutôt qu'un objet mathématique construit.
+\end{remark}
+
+\chapter{Actualisation, réorganisation et découverte}
+
+\section{Évolution du système}
+Soit $s_t$ l'état global d'un système à l'instant $t$. On appelle évolution toute transition admissible
+\[
+s_{t+1}=T(s_t,u_t),
+\]
+où $u_t$ regroupe les interactions, événements ou opérations qui affectent le système. L'évolution peut modifier ses capacités, ses objectifs, son contexte et sa mémoire évolutive.
+
+\begin{definition}[Nouveauté relativement à un état]
+Une distinction $d$ est nouvelle pour le système à $t$ si elle n'appartient pas à l'ensemble des distinctions accessibles $\mathcal D_t$ avant la transition, mais appartient à $\mathcal D_{t+1}$ après celle-ci.
+\end{definition}
+
+\begin{definition}[Découverte]
+Une découverte à l'instant $t$ est une transition au cours de laquelle l'ensemble des distinctions accessibles change strictement :
+\[
+\mathcal D_t\subsetneq\mathcal D_{t+1},
+\]
+ou, dans le cas d'une réorganisation, une relation jusque-là non accessible devient accessible même si le nombre total de représentations ne croît pas.
+\end{definition}
+
+La définition autorise une découverte par acquisition et une découverte par réorganisation. Elle ne qualifie pas de découverte toute simple réactivation d'une représentation inchangée.
+
+\section{Exemple du comptage}
+Considérons un système qui compte successivement les entiers naturels. À l'instant $t$, il possède une histoire de comptage jusqu'à $n_t$, avec $n_{t+1}=n_t+1$. Lorsqu'il revient à l'objet « 5 », il peut le considérer dans un contexte différent de celui de sa première rencontre avec ce nombre.
+
+On peut représenter son état par
+\[
+s_t=(n_t,\Mevo_t,c_t),
+\]
+où $c_t$ désigne le contexte courant. La représentation du nombre 5 peut rester identique tandis que les relations accessibles entre cette représentation et l'histoire du système changent.
+
+\begin{proposition}[Possibilité de réorganisation d'une connaissance stable]
+Le fait qu'un objet ou une valeur $x$ reste inchangé n'implique pas que son empreinte ou sa signification relative au système reste inchangée au cours de l'évolution.
+\end{proposition}
+\begin{proof}
+L'empreinte est relative au contexte et à la famille de sondes. Si le contexte, les sondes accessibles ou l'état du système changent, l'application d'observation ou son interprétation peut changer, même si $x$ demeure fixe. Cette conclusion est une conséquence de la dépendance contextuelle de l'empreinte.\end{proof}
+
+\begin{remark}[Portée de l'exemple]
+Le comptage illustre la possibilité de réexaminer une connaissance dans des états successifs. Il ne prouve pas que chaque retour au nombre 5 produit une découverte, ni que toute évolution produit nécessairement une information nouvelle. Il montre qu'une connaissance déjà acquise peut être réorganisée ou interprétée dans un contexte évolutif.
+\end{remark}
+
+\section{Découverte et limites}
+\begin{definition}[Limite de découverte à un état]
+Une limite de découverte à l'état $s_t$ est une contrainte sur les distinctions accessibles à cet état, compte tenu de ses capacités, de son organisation, de ses ressources, de son contexte et de ses canaux d'interaction.
+\end{definition}
+
+Une limite locale n'est pas nécessairement une limite définitive. Elle peut être déplacée par l'évolution du système. Les limites peuvent dépendre de l'âge, de l'état physique ou mental, de l'attention, de la mémoire, de l'expérience et du contexte. Ces facteurs sont ici des paramètres descriptifs, non des lois quantitatives établies.
+
+\begin{proposition}[Relativité temporelle des limites]
+Si l'évolution d'un système modifie ses capacités ou ses canaux d'observation, alors ses limites de découverte peuvent différer entre deux instants.
+\end{proposition}
+\begin{proof}
+Les limites sont définies relativement à l'état et aux capacités disponibles. Une modification de ces paramètres peut modifier l'ensemble des distinctions accessibles et donc les limites correspondantes.\end{proof}
+
+\begin{remark}[Fin de l'évolution individuelle]
+Dans le modèle d'un système vivant individuel, la mort peut être représentée comme la fin de sa trajectoire d'actualisation. Elle borne alors les découvertes futures de ce système, sans impliquer que les objets, les autres systèmes ou les processus globaux cessent d'exister.
+\end{remark}
+
+\part{Auto-observation et hiérarchie}
+\chapter{Récursion interne et observation de soi}
+
+\section{Niveaux d'auto-observation}
+\begin{definition}[Niveau récursif]
+Un niveau récursif est un ordre d'application d'une opération d'observation à un objet qui peut lui-même être un état, une trace, une observation ou une opération d'un niveau antérieur.
+\end{definition}
+
+On peut schématiser les niveaux :
+\[
+x \longrightarrow \Obs_0(x),\qquad
+\Obs_0(x)\longrightarrow \Obs_1(\Obs_0(x)),\qquad
+\Obs_1(\Obs_0(x))\longrightarrow \Obs_2(\Obs_1(\Obs_0(x))),
+\]
+sans supposer que tous les niveaux soient accessibles ni qu'ils soient infinis dans un système réel.
+
+\begin{definition}[Auto-observation]
+Un système s'auto-observe lorsqu'une opération d'observation prend pour objet un état, une représentation, une mémoire ou une opération appartenant à ce même système.
+\end{definition}
+
+L'auto-observation peut porter sur le soi, sur la mémoire du soi, sur la manière dont le soi observe, ou sur les limites de ces opérations. Elle est donc potentiellement hiérarchique et récursive.
+
+\section{Récursion interne et récursion globale}
+La récursion interne porte sur l'organisation propre du système. La récursion globale porte sur ses relations avec l'environnement. Leur couplage signifie qu'une modification interne peut changer les observations externes possibles, et qu'une observation externe peut transformer l'organisation interne.
+
+\begin{definition}[État de couplage]
+Un état de couplage est un état dans lequel les opérations internes et les interactions globales du système se conditionnent mutuellement au cours d'une trajectoire.
+\end{definition}
+
+\begin{proposition}[Dépendance contextuelle de l'auto-observation]
+L'ensemble des propriétés du soi accessibles à l'auto-observation dépend de l'état du système, de ses ressources et des opérations qu'il peut appliquer à ses propres représentations.
+\end{proposition}
+\begin{proof}
+Par définition, l'auto-observation porte sur des objets internes au système, mais elle n'est possible que si les opérations correspondantes sont accessibles dans son état et son contexte. Une variation de ces conditions peut donc modifier les propriétés accessibles.\end{proof}
+
+\section{Intégralité et limites de l'auto-observation}
+\begin{definition}[Auto-observation intégrale, relativement à une portée]
+Un système s'auto-observe intégralement relativement à une portée $\Omega$ si toutes les propriétés et relations de son état que la portée déclare observables sont accessibles à ses opérations d'auto-observation.
+\end{definition}
+
+Cette définition est relative à une portée déclarée. Elle ne confond pas intégralité par rapport à un modèle fini avec une connaissance absolue de tout ce qui constitue le système.
+
+\begin{hypothesis}[Limitation de l'auto-observation]
+Pour un système concret, l'auto-observation est limitée par ses capacités physiques, cognitives ou computationnelles, par son état et par les ressources qu'il peut consacrer à cette tâche. Les limites peuvent varier entre systèmes et au cours de la trajectoire d'un même système.
+\end{hypothesis}
+
+\begin{remark}[Pas d'impossibilité universelle déduite]
+Le présent cadre ne démontre pas qu'aucun système ne puisse s'auto-observer intégralement au sens absolu. Il affirme seulement que l'intégralité doit toujours être rapportée à une portée et que les systèmes concrets peuvent avoir des limites variables. Une impossibilité générale demanderait un théorème et des hypothèses supplémentaires.
+\end{remark}
+
+\part{Conséquences et propositions de recherche}
+\chapter{Propositions dérivées et limites}
+
+\section{La découverte comme dynamique de la mémoire}
+\begin{proposition}[La connaissance acquise peut devenir objet de découverte]
+Si un système peut appliquer une nouvelle opération récursive à une représentation déjà présente dans sa mémoire évolutive, il peut accéder à une distinction ou à une relation qui n'était pas accessible lors de la constitution initiale de cette représentation.
+\end{proposition}
+\begin{proof}
+La représentation initiale et l'opération récursive ultérieure sont distinctes. Si cette opération rend accessible une relation jusque-là absente de $\mathcal D_t$, alors, selon la définition de la découverte, une découverte relative a lieu.\end{proof}
+
+\begin{corollary}
+La découverte ne se réduit pas à l'ajout d'un nouvel objet à la mémoire : elle peut consister en une transformation de l'organisation relationnelle des objets déjà mémorisés.
+\end{corollary}
+
+\section{Continuité de la découverte}
+\begin{conjecture}[Découverte potentiellement continue]
+Tant qu'un système poursuit une évolution qui modifie ses états récursifs, il peut demeurer susceptible de découvertes nouvelles, y compris à propos de connaissances déjà acquises.
+\end{conjecture}
+
+Cette conjecture exprime la thèse discutée : la récursion interne et globale, leurs allers-retours et l'évolution du système peuvent maintenir ouverte la possibilité de découvrir. Elle ne doit pas être renforcée en l'énoncé « toute transition produit nécessairement une découverte », qui ne découle pas des définitions.
+
+\begin{proposition}[Condition suffisante locale de découverte]
+Si, à une transition, une opération récursive rend accessible au système une distinction qui ne l'était pas auparavant, alors cette transition constitue une découverte relative.
+\end{proposition}
+\begin{proof}
+C'est une application directe de la définition de la découverte.\end{proof}
+
+\section{Observation et empreinte}
+Une observation fonctionnelle peut être représentée dans le noyau des empreintes par une réponse à une sonde. Pour une sonde $f$ et un contexte $P_t$,
+\[
+z_t=\Phi(P_t,x_t,f).
+\]
+Si le système conserve ou exploite cette réponse, elle peut contribuer à son état évolutif :
+\[
+\Mevo_{t+1}=U(\Mevo_t,z_t,\ldots).
+\]
+L'empreinte décrit ce qui est distingué dans le protocole considéré ; la mémoire évolutive décrit ce que le système en fait au cours de sa trajectoire. Ces deux objets ne doivent pas être confondus.
+
+\begin{proposition}[Compatibilité avec les fibres observationnelles]
+À contexte, sondes et instant fixés, deux objets ayant la même empreinte sont indiscernables pour ce protocole. Une évolution ultérieure peut modifier le contexte ou les sondes accessibles et produire une empreinte plus discriminante, sans contredire leur indiscernabilité antérieure.
+\end{proposition}
+\begin{proof}
+L'indiscernabilité est définie relativement à l'empreinte fixée. Une empreinte ultérieure est une autre application si le contexte ou la famille de sondes change. L'égalité des anciennes images n'impose pas l'égalité des nouvelles images.\end{proof}
+
+\section{Thèse de non-création ontologique}
+\begin{proposition}[La découverte ne crée pas l'existence ontologique dans le cadre adopté]
+Si l'existence ontologique est définie indépendamment de l'état de connaissance, alors une transition de découverte modifie l'existence relative de l'objet pour le système, mais ne constitue pas, par définition, une création de son existence ontologique.
+\end{proposition}
+\begin{proof}
+La définition de $E_{\mathrm{o}}(x)$ ne dépend pas de l'état du système. La découverte modifie l'état informationnel du système. Elle ne peut donc modifier $E_{\mathrm{o}}(x)$ sans ajouter une hypothèse distincte reliant connaissance et existence ontologique.\end{proof}
+
+\chapter{Points ouverts pour une formalisation ultérieure}
+
+\section{Détermination de la mémoire ontologique}
+Il faut préciser si $\Monto$ est :
+\begin{enumerate}
+\item un principe de possibilité de conservation ;
+\item une structure d'information préexistante ;
+\item un invariant ontologique ;
+\item ou un objet formel doté d'une dynamique propre.
+\end{enumerate}
+Ces options peuvent être combinées, mais seulement après définition de leurs relations et de leurs conséquences.
+
+\section{Critère de fermeture}
+Une formalisation plus forte devra définir les conditions nécessaires et suffisantes de fermeture de la boucle locale/globale : dépendance causale, retour d'information, persistance, discrimination et éventuelle stabilité. Il faudra éviter de faire de la simple circularité une condition suffisante si l'observation requiert une distinction accessible.
+
+\section{Mesure de nouveauté}
+Une mesure de découverte pourrait comparer les ensembles de distinctions accessibles à deux instants, ou comparer les partitions observationnelles induites par les empreintes. Une telle mesure doit distinguer :
+\begin{itemize}
+\item l'augmentation de résolution ;
+\item la réorganisation de représentations ;
+\item la réactivation sans nouveauté ;
+\item l'oubli ou la perte d'accessibilité.
+\end{itemize}
+Aucune métrique universelle de découverte n'est postulée ici.
+
+\section{Statut des affirmations sur la conscience}
+Le formalisme est fonctionnel. Le passage de l'observation fonctionnelle à la conscience phénoménale demeure une question distincte. La théorie ne doit pas inférer la présence ou l'absence d'expérience subjective à partir de la seule présence d'une boucle de rétroaction.
+
+\chapter{Synthèse structurale}
+
+Le cadre peut être résumé par la chaîne de dépendance suivante :
+\[
+\boxed{
+\text{existence ontologique}
+\ \longrightarrow\
+\text{mémoire ontologique (fondation)}
+\ \longrightarrow\
+\text{récursion locale/globale}
+\ \longrightarrow\
+\text{observation fonctionnelle}
+\ \longrightarrow\
+\text{mémoire évolutive}
+\ \longrightarrow\
+\text{nouvelles récursions et découvertes possibles}
+}
+\]
+Cette chaîne est une architecture conceptuelle. Les flèches indiquent des relations de fondation ou de dépendance, et non nécessairement une succession temporelle stricte.
+
+La théorie distingue ainsi :
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{3.4cm}X}
+\toprule
+Notion & Rôle dans le modèle\\
+\midrule
+Existence ontologique & Existence indépendante de la connaissance du système.\\
+Existence relative & Présence informationnelle d'un objet pour un système donné.\\
+Observation fonctionnelle & Production d'une distinction accessible à partir d'une interaction.\\
+Récursion locale & Réinjection de résultats dans l'organisation interne.\\
+Récursion globale & Retour des interactions environnementales sur les conditions d'observation.\\
+Mémoire ontologique & Principe pré-récursif de fondation, dont le statut formel reste à préciser.\\
+Mémoire évolutive & Traces et organisations issues de l'histoire récursive du système.\\
+Découverte & Acquisition ou accessibilité nouvelle d'une distinction ou relation.\\
+Limite de découverte & Contrainte relative à l'état, aux capacités et au contexte ; potentiellement évolutive.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section*{Conclusion}
+La proposition centrale est que l'observation doit être étudiée comme une relation dynamique entre un système et ce qui l'entoure, et non comme une propriété isolée de l'objet. Dans le modèle, l'existence ontologique est indépendante de la découverte ; l'existence relative est constituée dans l'état informationnel du système. La récursion relie les opérations internes aux interactions globales. La mémoire ontologique en fonde la possibilité, tandis que la mémoire évolutive en est une conséquence dynamique et devient une condition des observations ultérieures.
+
+La découverte peut alors porter sur des objets nouveaux, mais aussi sur des objets déjà connus, lorsque l'évolution du système rend accessibles de nouvelles distinctions ou relations. Elle est potentiellement continue tant que l'évolution se poursuit, sans que cela implique une nouveauté à chaque instant. Les limites sont locales et variables ; la fin de la trajectoire individuelle borne les découvertes futures de cet individu.
+
+Les thèses d'existence et de mémoire ontologiques, ainsi que l'émergence de l'observation à la fermeture de la première boucle locale/globale, sont explicitement conservées comme engagements axiomatiques ou conceptuels. Elles ne sont pas présentées comme des théorèmes déduits du seul noyau mathématique des empreintes. Cette séparation des statuts est nécessaire pour poursuivre le développement sans transformer une intuition féconde en conclusion prétendument démontrée.
+
+\end{document}

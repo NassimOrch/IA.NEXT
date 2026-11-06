@@ -1,0 +1,1570 @@
+$ /opt/pyvenv/bin/python3 /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/ngbrain.py --db /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3 init
+exit_code=0
+passed=True
+summary=keys=action,at,ok,result,status
+STDOUT:
+{
+  "action": "system.initialize",
+  "at": "2026-10-27T10:59:39.830+00:00",
+  "ok": true,
+  "result": {
+    "component_count": 39,
+    "database": "/mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3",
+    "initialized": true,
+    "model_id": "NGeGenBrain_v1",
+    "schema_version": 1,
+    "trace_integrity": {
+      "count": 39,
+      "head_hash": "ceec26534b1002db339d6e356bbd066dc76c908b5219df071a6f79377cbacd55",
+      "problems": [],
+      "valid": true
+    },
+    "version": "1.0.0"
+  },
+  "status": "Success"
+}
+
+STDERR:
+
+
+$ /opt/pyvenv/bin/python3 /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/ngbrain.py --db /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3 status
+exit_code=0
+passed=True
+summary=keys=health,stats
+STDOUT:
+{
+  "health": {
+    "action": "system.health",
+    "at": "2026-10-27T10:59:40.580+00:00",
+    "ok": true,
+    "result": {
+      "database": "/mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3",
+      "model_id": "NGeGenBrain_v1",
+      "status": "ready",
+      "trace_integrity": {
+        "count": 39,
+        "head_hash": "ceec26534b1002db339d6e356bbd066dc76c908b5219df071a6f79377cbacd55",
+        "problems": [],
+        "valid": true
+      },
+      "version": "1.0.0"
+    },
+    "status": "Success"
+  },
+  "stats": {
+    "action": "system.stats",
+    "at": "2026-10-27T10:59:40.581+00:00",
+    "ok": true,
+    "result": {
+      "counts": {
+        "ascrc_candidates": 0,
+        "chat_intents": 0,
+        "checkpoints": 0,
+        "components": 39,
+        "compositions": 0,
+        "deployments": 0,
+        "events": 39,
+        "leases": 0,
+        "memory_objects": 0,
+        "mesh_facts": 0,
+        "mesh_rules": 0,
+        "revocations": 0,
+        "search_sessions": 0,
+        "waves": 0,
+        "world_model_evaluations": 0,
+        "world_models": 0
+      },
+      "database": "/mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3",
+      "schema_version": 1,
+      "trace_integrity": {
+        "count": 39,
+        "head_hash": "ceec26534b1002db339d6e356bbd066dc76c908b5219df071a6f79377cbacd55",
+        "problems": [],
+        "valid": true
+      }
+    },
+    "status": "Success"
+  }
+}
+
+STDERR:
+
+
+$ /opt/pyvenv/bin/python3 /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/ngbrain.py --db /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3 actions
+exit_code=0
+passed=True
+summary=action_count=51
+STDOUT:
+[
+  {
+    "description": "Initialise le registre natif et le schéma persistant de manière idempotente.",
+    "example": {},
+    "group": "Système",
+    "id": "system.initialize",
+    "title": "Initialiser le runtime"
+  },
+  {
+    "description": "Retourne le registre canonique partagé entre CLI, API et interface web.",
+    "example": {},
+    "group": "Système",
+    "id": "system.actions",
+    "title": "Catalogue d'actions"
+  },
+  {
+    "description": "Statut, versions, base active et intégrité de chaîne.",
+    "example": {},
+    "group": "Système",
+    "id": "system.health",
+    "title": "Santé du runtime"
+  },
+  {
+    "description": "Lance uniquement la suite unittest locale du dépôt avec timeout fixe; aucune commande utilisateur n'est exécutée.",
+    "example": {},
+    "group": "Système",
+    "id": "system.selftest",
+    "title": "Exécuter les tests du dépôt"
+  },
+  {
+    "description": "Exécute le scénario de démonstration dans sa base dédiée, jamais dans la base principale si l'action n'est pas configurée explicitement.",
+    "example": {},
+    "group": "Système",
+    "id": "system.demo",
+    "title": "Démonstration isolée"
+  },
+  {
+    "description": "Comptages persistants, schéma SQLite et intégrité de trace.",
+    "example": {},
+    "group": "Système",
+    "id": "system.stats",
+    "title": "Statistiques du maillage"
+  },
+  {
+    "description": "SQLite integrity_check, clés étrangères et chaîne d'événements.",
+    "example": {},
+    "group": "Système",
+    "id": "database.verify",
+    "title": "Vérifier la base"
+  },
+  {
+    "description": "Catalogue des signatures et versions enregistrées.",
+    "example": {},
+    "group": "Composants",
+    "id": "components.list",
+    "title": "Lister les composants"
+  },
+  {
+    "description": "Enregistre une définition déclarative ou un opérateur natif autorisé.",
+    "example": {
+      "definition": {
+        "body": {
+          "args": [
+            {
+              "var": "input"
+            },
+            2
+          ],
+          "component": "multiply",
+          "op": "Call"
+        },
+        "deterministic": true,
+        "effects": [],
+        "id": "double",
+        "implementation": "composition",
+        "input_types": [
+          "Number"
+        ],
+        "output_type": "Number",
+        "pure": true,
+        "required_capabilities": [],
+        "version": "1.0.0"
+      }
+    },
+    "group": "Composants",
+    "id": "components.register",
+    "title": "Enregistrer un composant"
+  },
+  {
+    "description": "Liste les AST déclaratifs persistés.",
+    "example": {},
+    "group": "Programmes",
+    "id": "compositions.list",
+    "title": "Lister les compositions"
+  },
+  {
+    "description": "Persiste une composition versionnée et non exécutable comme texte arbitraire.",
+    "example": {
+      "composition": {
+        "id": "sum-two",
+        "program": {
+          "args": [
+            {
+              "path": [
+                0
+              ]
+            },
+            {
+              "path": [
+                1
+              ]
+            }
+          ],
+          "component": "add",
+          "op": "Call"
+        },
+        "version": "1.0.0"
+      }
+    },
+    "group": "Programmes",
+    "id": "compositions.register",
+    "title": "Enregistrer une composition"
+  },
+  {
+    "description": "Exécute l'AST d'une composition via le moteur partagé.",
+    "example": {
+      "budget": 1000,
+      "capabilities": [],
+      "id": "sum-two",
+      "input": [
+        2,
+        4
+      ]
+    },
+    "group": "Programmes",
+    "id": "compositions.run",
+    "title": "Exécuter une composition"
+  },
+  {
+    "description": "Exécute un AST compositionnel avec trace, budget et capacités.",
+    "example": {
+      "budget": 1000,
+      "capabilities": [],
+      "input": null,
+      "program": {
+        "args": [
+          2,
+          4
+        ],
+        "component": "add",
+        "op": "Call"
+      }
+    },
+    "group": "Programmes",
+    "id": "program.run",
+    "title": "Exécuter un programme"
+  },
+  {
+    "description": "Applique les réécritures structurelles certifiées du moteur.",
+    "example": {
+      "program": {
+        "op": "Seq",
+        "steps": [
+          {
+            "op": "Id"
+          },
+          {
+            "args": [
+              {
+                "var": "input"
+              }
+            ],
+            "component": "identity",
+            "op": "Call"
+          }
+        ]
+      },
+      "strategy": "normalize"
+    },
+    "group": "Programmes",
+    "id": "program.transform",
+    "title": "Transformer un programme"
+  },
+  {
+    "description": "Ajoute un fait typé avec contexte, statut et provenance.",
+    "example": {
+      "context": {},
+      "object": "B",
+      "predicate": "edge",
+      "provenance": {
+        "source": "user"
+      },
+      "status": "observed",
+      "subject": "A",
+      "type_object": "Entity",
+      "type_subject": "Entity"
+    },
+    "group": "Maillage",
+    "id": "mesh.fact.add",
+    "title": "Ajouter un fait"
+  },
+  {
+    "description": "Recherche exacte par champs; un résultat n'est pas automatiquement une preuve.",
+    "example": {
+      "pattern": {
+        "predicate": "edge"
+      }
+    },
+    "group": "Maillage",
+    "id": "mesh.fact.query",
+    "title": "Interroger les faits"
+  },
+  {
+    "description": "Liste les hyperrègles actives avec leur version.",
+    "example": {},
+    "group": "Maillage",
+    "id": "mesh.rules.list",
+    "title": "Lister les règles"
+  },
+  {
+    "description": "Ajoute une règle à prémisses multiples avec contraintes déclaratives.",
+    "example": {
+      "rule": {
+        "conclusions": [
+          {
+            "object": {
+              "var": "z"
+            },
+            "predicate": "edge",
+            "subject": {
+              "var": "x"
+            }
+          }
+        ],
+        "id": "transitive-edge",
+        "premises": [
+          {
+            "object": {
+              "var": "y"
+            },
+            "predicate": "edge",
+            "subject": {
+              "var": "x"
+            }
+          },
+          {
+            "object": {
+              "var": "z"
+            },
+            "predicate": "edge",
+            "subject": {
+              "var": "y"
+            }
+          }
+        ],
+        "version": "1.0.0"
+      }
+    },
+    "group": "Maillage",
+    "id": "mesh.rule.add",
+    "title": "Ajouter une règle"
+  },
+  {
+    "description": "Exécute la clôture déterministe sur les règles actives, avec budget.",
+    "example": {
+      "max_new_facts": 5000,
+      "max_rounds": 32,
+      "rule_match_cap": 20000
+    },
+    "group": "Maillage",
+    "id": "mesh.infer",
+    "title": "Inférence bornée"
+  },
+  {
+    "description": "Vérifie cohérence des hashes, prémisses, version de règle et étapes d'opérateur.",
+    "example": {
+      "certificate": {}
+    },
+    "group": "Maillage",
+    "id": "mesh.certificate.verify",
+    "title": "Vérifier un certificat"
+  },
+  {
+    "description": "Affiche les événements append-only et leurs hashes.",
+    "example": {
+      "limit": 100
+    },
+    "group": "Preuves",
+    "id": "trace.list",
+    "title": "Journal des événements"
+  },
+  {
+    "description": "Charge un événement par numéro de séquence.",
+    "example": {
+      "seq": 1
+    },
+    "group": "Preuves",
+    "id": "trace.get",
+    "title": "Inspecter un événement"
+  },
+  {
+    "description": "Recalcule la chaîne SHA-256 des événements.",
+    "example": {},
+    "group": "Preuves",
+    "id": "trace.verify",
+    "title": "Vérifier la chaîne de trace"
+  },
+  {
+    "description": "Persiste un payload JSON canonique, compressé sans perte et haché.",
+    "example": {
+      "id": "memo-exemple",
+      "kind": "note",
+      "metadata": {
+        "dependencies": []
+      },
+      "payload": {
+        "text": "contenu"
+      }
+    },
+    "group": "Mémoire",
+    "id": "memory.put",
+    "title": "Mémoriser un objet"
+  },
+  {
+    "description": "Lit et vérifie l'intégrité d'un payload exact.",
+    "example": {
+      "id": "memo-exemple"
+    },
+    "group": "Mémoire",
+    "id": "memory.get",
+    "title": "Lire/réveiller la mémoire"
+  },
+  {
+    "description": "Liste les métadonnées de tous les objets mémoire.",
+    "example": {},
+    "group": "Mémoire",
+    "id": "memory.list",
+    "title": "Lister la mémoire"
+  },
+  {
+    "description": "Déclare un état de cycle de vie valide; les restrictions de réveil sont contrôlées par le moteur.",
+    "example": {
+      "id": "memo-exemple",
+      "state": "SLEEPING"
+    },
+    "group": "Mémoire",
+    "id": "memory.state",
+    "title": "Changer le cycle de vie"
+  },
+  {
+    "description": "Checkpoint, contrôle protections et transition SLEEPING.",
+    "example": {
+      "id": "memo-exemple"
+    },
+    "group": "Mémoire",
+    "id": "memory.hibernate",
+    "title": "Mettre en veille"
+  },
+  {
+    "description": "Vérifie payload et dépendances avant de repasser ACTIVE.",
+    "example": {
+      "id": "memo-exemple"
+    },
+    "group": "Mémoire",
+    "id": "memory.wake",
+    "title": "Réveiller la mémoire"
+  },
+  {
+    "description": "Persiste un instantané JSON avec hash canonique.",
+    "example": {
+      "kind": "manual",
+      "payload": {
+        "state": "ready"
+      }
+    },
+    "group": "Mémoire",
+    "id": "checkpoint.create",
+    "title": "Créer un checkpoint"
+  },
+  {
+    "description": "Restaure le payload si le hash reste valide.",
+    "example": {
+      "id": "checkpoint-id"
+    },
+    "group": "Mémoire",
+    "id": "checkpoint.get",
+    "title": "Vérifier/restaurer un checkpoint"
+  },
+  {
+    "description": "Enregistre une révocation et marque les dépendants connus STALE.",
+    "example": {
+      "reason": "source changed",
+      "subject_id": "memo-exemple"
+    },
+    "group": "Mémoire",
+    "id": "memory.revoke",
+    "title": "Révoquer une dépendance"
+  },
+  {
+    "description": "Persiste un événement typé avec TTL et provenance.",
+    "example": {
+      "wave": {
+        "kind": "fact.updated",
+        "payload": {
+          "id": "f1"
+        },
+        "source": "manual",
+        "ttl": 8
+      }
+    },
+    "group": "Événements",
+    "id": "wave.emit",
+    "title": "Émettre une vague"
+  },
+  {
+    "description": "Déduplique les événements reçus par identifiant.",
+    "example": {
+      "id": "wave-id"
+    },
+    "group": "Événements",
+    "id": "wave.receive",
+    "title": "Recevoir une vague"
+  },
+  {
+    "description": "Classe des candidats par recouvrement lexical et bonus canonique; ce score n'est pas une preuve.",
+    "example": {
+      "limit": 20,
+      "query": "A edge B"
+    },
+    "group": "Recherche",
+    "id": "ascr.search",
+    "title": "Retrieval ASCR-NG"
+  },
+  {
+    "description": "Évalue l'admission opérationnelle sous contraintes dures sans modifier le statut épistémique.",
+    "example": {
+      "budget": {
+        "cpu": 2
+      },
+      "capabilities": [],
+      "descriptor": {
+        "contract_valid": true,
+        "cost": {
+          "cpu": 1
+        },
+        "dependencies_valid": true,
+        "epistemic_status": "hypothesis",
+        "id": "candidate-1",
+        "lifecycle": "CATALOGUED",
+        "required_capabilities": [],
+        "utility": 0.8
+      }
+    },
+    "group": "Recherche",
+    "id": "ascrc.evaluate",
+    "title": "Régulation ASCRC"
+  },
+  {
+    "description": "Ordonne un ensemble de descripteurs admissibles; les scores restent heuristiques.",
+    "example": {
+      "budget": {},
+      "capabilities": [],
+      "descriptors": []
+    },
+    "group": "Recherche",
+    "id": "ascrc.order",
+    "title": "Classer des candidats"
+  },
+  {
+    "description": "Enregistre les candidats et effectue un tour d'allocation avec vieillissement anti-famine; ne certifie pas les candidats.",
+    "example": {
+      "budget": {
+        "cpu": 2
+      },
+      "capabilities": [],
+      "descriptors": [
+        {
+          "contract_valid": true,
+          "cost": {
+            "cpu": 1
+          },
+          "dependencies_valid": true,
+          "epistemic_status": "hypothesis",
+          "id": "candidate-a",
+          "required_capabilities": []
+        }
+      ],
+      "max_activations": 1
+    },
+    "group": "Recherche",
+    "id": "ascrc.schedule",
+    "title": "Ordonnancement persistant ASCRC"
+  },
+  {
+    "description": "Inspecte candidats, âges d'attente et compteur de services persistés.",
+    "example": {},
+    "group": "Recherche",
+    "id": "ascrc.candidates.list",
+    "title": "Candidats ASCRC persistés"
+  },
+  {
+    "description": "Inspecte les baux actifs/expirés sans accorder de droits implicites.",
+    "example": {
+      "include_expired": true
+    },
+    "group": "Système",
+    "id": "leases.list",
+    "title": "Lister les baux"
+  },
+  {
+    "description": "Libère un bail en vérifiant propriétaire ou capacité administrateur.",
+    "example": {
+      "capabilities": [
+        "admin:leases"
+      ],
+      "lease_id": "lease-id"
+    },
+    "group": "Système",
+    "id": "leases.release",
+    "title": "Libérer un bail"
+  },
+  {
+    "description": "Liste les ASTs staged dans le registre local; ce n'est pas un déploiement distant.",
+    "example": {},
+    "group": "Programmes",
+    "id": "deployments.list",
+    "title": "Registre de déploiement"
+  },
+  {
+    "description": "Recherche des programmes dans la grammaire déclarative; l'adéquation aux exemples n'est pas une preuve universelle.",
+    "example": {
+      "budget": 1000,
+      "objective": {
+        "capabilities": [],
+        "examples": [
+          {
+            "input": [
+              2,
+              4
+            ],
+            "output": 6
+          }
+        ]
+      }
+    },
+    "group": "Synthèse",
+    "id": "synthesis.run",
+    "title": "Synthétiser un candidat"
+  },
+  {
+    "description": "Reprend un front persisté sans supprimer les candidats non examinés.",
+    "example": {
+      "budget": 1000,
+      "session_id": "synth-id"
+    },
+    "group": "Synthèse",
+    "id": "synthesis.resume",
+    "title": "Reprendre la synthèse"
+  },
+  {
+    "description": "Enregistre une transition pure et versionnée. Les prédictions restent SIMULATED, jamais OBSERVED ou CERTIFIED.",
+    "example": {
+      "definition": {
+        "action_type": "Number",
+        "activation_policy": {
+          "min_gain": 0.05,
+          "min_samples": 5,
+          "z_score": 1.96
+        },
+        "id": "increment",
+        "output_type": "Number",
+        "state_type": "Number",
+        "transition_program": {
+          "args": [
+            {
+              "path": [
+                "state"
+              ]
+            },
+            {
+              "path": [
+                "action"
+              ]
+            }
+          ],
+          "component": "add",
+          "op": "Call"
+        }
+      }
+    },
+    "group": "Modèles du monde",
+    "id": "world_model.register",
+    "title": "Enregistrer un modèle du monde"
+  },
+  {
+    "description": "Liste modèles, versions et état d’activation opérationnelle conditionnelle.",
+    "example": {},
+    "group": "Modèles du monde",
+    "id": "world_model.list",
+    "title": "Lister les modèles du monde"
+  },
+  {
+    "description": "Simule un état suivant sans le promouvoir au rang d'observation ni de preuve.",
+    "example": {
+      "action": 2,
+      "budget": 1000,
+      "context": {},
+      "id": "increment",
+      "state": 4
+    },
+    "group": "Modèles du monde",
+    "id": "world_model.predict",
+    "title": "Simuler une transition"
+  },
+  {
+    "description": "Compare les prédictions à des observations séparées après prédiction; l'activation exige un gain apparié supérieur au seuil versionné.",
+    "example": {
+      "baseline_program": {
+        "key": "state",
+        "op": "Project",
+        "program": {
+          "op": "Id"
+        }
+      },
+      "budget": 1000,
+      "holdout": [
+        {
+          "action": 1,
+          "observed_next_state": 2,
+          "state": 1
+        }
+      ],
+      "id": "increment"
+    },
+    "group": "Modèles du monde",
+    "id": "world_model.evaluate",
+    "title": "Évaluer un modèle sur holdout"
+  },
+  {
+    "description": "Relie un motif textuel à des slots typés et à un AST. Motifs ambigus soumis à clarification; aucune capacité n'est accordée automatiquement.",
+    "example": {
+      "definition": {
+        "id": "sum-words",
+        "pattern": "add {left:Number} and {right:Number}",
+        "program": {
+          "args": [
+            {
+              "path": [
+                "slots",
+                "left"
+              ]
+            },
+            {
+              "path": [
+                "slots",
+                "right"
+              ]
+            }
+          ],
+          "component": "add",
+          "op": "Call"
+        }
+      }
+    },
+    "group": "Intentions & langage",
+    "id": "intents.register",
+    "title": "Enregistrer une intention déclarative"
+  },
+  {
+    "description": "Liste les motifs d'intention versionnés actifs qui peuvent être résolus par le chat.",
+    "example": {},
+    "group": "Intentions & langage",
+    "id": "intents.list",
+    "title": "Lister les intentions"
+  },
+  {
+    "description": "Résout une intention déclarative non ambiguë, calcule une expression arithmétique reconnue, ou présente les candidats de retrieval sans les convertir en faits.",
+    "example": {
+      "message": "calculate 2 + 4"
+    },
+    "group": "Chat",
+    "id": "chat.submit",
+    "title": "Envoyer un message"
+  }
+]
+
+STDERR:
+
+
+$ /opt/pyvenv/bin/python3 /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/ngbrain.py --db /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3 run --program /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/examples/add.json --input null --capabilities [] --budget 1000
+exit_code=0
+passed=True
+summary=result_status=Success
+STDOUT:
+{
+  "action": "program.run",
+  "at": "2026-10-27T10:59:41.990+00:00",
+  "ok": true,
+  "result": {
+    "details": {
+      "budget": 1000,
+      "duration_seconds": 0.000678,
+      "memory_measurement": "serialized working-set estimate; not operating-system RSS",
+      "resource_limits": {
+        "cpu": 1000,
+        "external": 0,
+        "io": 1000000,
+        "memory": 268435456,
+        "steps": 1000,
+        "time": 60.0
+      },
+      "resource_usage": {
+        "cpu": 1.0,
+        "external": 0.0,
+        "io": 0.0,
+        "memory": 62.0,
+        "time": 0.0
+      },
+      "serialized_working_set_peak_estimate_bytes": 62,
+      "steps": 1,
+      "trace": [
+        {
+          "at": "2026-10-27T10:59:41.987+00:00",
+          "index": 1,
+          "node": "Call",
+          "node_hash": "be6aff422aec94003d1191b8406ae6f896768bdad35a2a569b52bacc88e94fd0"
+        }
+      ]
+    },
+    "provenance": {
+      "event_hash": "50859d8603fd4fa1e31974cc10a3f67101e755df84439fa3d0a558fe4f920089",
+      "input_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "program_hash": "be6aff422aec94003d1191b8406ae6f896768bdad35a2a569b52bacc88e94fd0",
+      "trace_event_seq": 40
+    },
+    "reason": null,
+    "status": "Success",
+    "trace_id": "run_6f31dbfdca7377b9",
+    "value": 6
+  },
+  "status": "Success"
+}
+
+STDERR:
+
+
+$ /opt/pyvenv/bin/python3 /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/ngbrain.py --db /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3 verify
+exit_code=0
+passed=True
+summary=database_valid=True
+STDOUT:
+{
+  "action": "database.verify",
+  "at": "2026-10-27T10:59:42.719+00:00",
+  "ok": true,
+  "result": {
+    "foreign_key_violations": [],
+    "sqlite_integrity_check": [
+      "ok"
+    ],
+    "trace": {
+      "count": 40,
+      "head_hash": "50859d8603fd4fa1e31974cc10a3f67101e755df84439fa3d0a558fe4f920089",
+      "problems": [],
+      "valid": true
+    },
+    "valid": true
+  },
+  "status": "Success"
+}
+
+STDERR:
+
+
+$ /opt/pyvenv/bin/python3 /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1/ngbrain.py --db /mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified_cli.sqlite3 action system.actions --data {}
+exit_code=0
+passed=True
+summary=ok=True; result_type=list
+STDOUT:
+{
+  "action": "system.actions",
+  "at": "2026-10-27T10:59:43.388+00:00",
+  "ok": true,
+  "result": [
+    {
+      "description": "Initialise le registre natif et le schéma persistant de manière idempotente.",
+      "example": {},
+      "group": "Système",
+      "id": "system.initialize",
+      "title": "Initialiser le runtime"
+    },
+    {
+      "description": "Retourne le registre canonique partagé entre CLI, API et interface web.",
+      "example": {},
+      "group": "Système",
+      "id": "system.actions",
+      "title": "Catalogue d'actions"
+    },
+    {
+      "description": "Statut, versions, base active et intégrité de chaîne.",
+      "example": {},
+      "group": "Système",
+      "id": "system.health",
+      "title": "Santé du runtime"
+    },
+    {
+      "description": "Lance uniquement la suite unittest locale du dépôt avec timeout fixe; aucune commande utilisateur n'est exécutée.",
+      "example": {},
+      "group": "Système",
+      "id": "system.selftest",
+      "title": "Exécuter les tests du dépôt"
+    },
+    {
+      "description": "Exécute le scénario de démonstration dans sa base dédiée, jamais dans la base principale si l'action n'est pas configurée explicitement.",
+      "example": {},
+      "group": "Système",
+      "id": "system.demo",
+      "title": "Démonstration isolée"
+    },
+    {
+      "description": "Comptages persistants, schéma SQLite et intégrité de trace.",
+      "example": {},
+      "group": "Système",
+      "id": "system.stats",
+      "title": "Statistiques du maillage"
+    },
+    {
+      "description": "SQLite integrity_check, clés étrangères et chaîne d'événements.",
+      "example": {},
+      "group": "Système",
+      "id": "database.verify",
+      "title": "Vérifier la base"
+    },
+    {
+      "description": "Catalogue des signatures et versions enregistrées.",
+      "example": {},
+      "group": "Composants",
+      "id": "components.list",
+      "title": "Lister les composants"
+    },
+    {
+      "description": "Enregistre une définition déclarative ou un opérateur natif autorisé.",
+      "example": {
+        "definition": {
+          "body": {
+            "args": [
+              {
+                "var": "input"
+              },
+              2
+            ],
+            "component": "multiply",
+            "op": "Call"
+          },
+          "deterministic": true,
+          "effects": [],
+          "id": "double",
+          "implementation": "composition",
+          "input_types": [
+            "Number"
+          ],
+          "output_type": "Number",
+          "pure": true,
+          "required_capabilities": [],
+          "version": "1.0.0"
+        }
+      },
+      "group": "Composants",
+      "id": "components.register",
+      "title": "Enregistrer un composant"
+    },
+    {
+      "description": "Liste les AST déclaratifs persistés.",
+      "example": {},
+      "group": "Programmes",
+      "id": "compositions.list",
+      "title": "Lister les compositions"
+    },
+    {
+      "description": "Persiste une composition versionnée et non exécutable comme texte arbitraire.",
+      "example": {
+        "composition": {
+          "id": "sum-two",
+          "program": {
+            "args": [
+              {
+                "path": [
+                  0
+                ]
+              },
+              {
+                "path": [
+                  1
+                ]
+              }
+            ],
+            "component": "add",
+            "op": "Call"
+          },
+          "version": "1.0.0"
+        }
+      },
+      "group": "Programmes",
+      "id": "compositions.register",
+      "title": "Enregistrer une composition"
+    },
+    {
+      "description": "Exécute l'AST d'une composition via le moteur partagé.",
+      "example": {
+        "budget": 1000,
+        "capabilities": [],
+        "id": "sum-two",
+        "input": [
+          2,
+          4
+        ]
+      },
+      "group": "Programmes",
+      "id": "compositions.run",
+      "title": "Exécuter une composition"
+    },
+    {
+      "description": "Exécute un AST compositionnel avec trace, budget et capacités.",
+      "example": {
+        "budget": 1000,
+        "capabilities": [],
+        "input": null,
+        "program": {
+          "args": [
+            2,
+            4
+          ],
+          "component": "add",
+          "op": "Call"
+        }
+      },
+      "group": "Programmes",
+      "id": "program.run",
+      "title": "Exécuter un programme"
+    },
+    {
+      "description": "Applique les réécritures structurelles certifiées du moteur.",
+      "example": {
+        "program": {
+          "op": "Seq",
+          "steps": [
+            {
+              "op": "Id"
+            },
+            {
+              "args": [
+                {
+                  "var": "input"
+                }
+              ],
+              "component": "identity",
+              "op": "Call"
+            }
+          ]
+        },
+        "strategy": "normalize"
+      },
+      "group": "Programmes",
+      "id": "program.transform",
+      "title": "Transformer un programme"
+    },
+    {
+      "description": "Ajoute un fait typé avec contexte, statut et provenance.",
+      "example": {
+        "context": {},
+        "object": "B",
+        "predicate": "edge",
+        "provenance": {
+          "source": "user"
+        },
+        "status": "observed",
+        "subject": "A",
+        "type_object": "Entity",
+        "type_subject": "Entity"
+      },
+      "group": "Maillage",
+      "id": "mesh.fact.add",
+      "title": "Ajouter un fait"
+    },
+    {
+      "description": "Recherche exacte par champs; un résultat n'est pas automatiquement une preuve.",
+      "example": {
+        "pattern": {
+          "predicate": "edge"
+        }
+      },
+      "group": "Maillage",
+      "id": "mesh.fact.query",
+      "title": "Interroger les faits"
+    },
+    {
+      "description": "Liste les hyperrègles actives avec leur version.",
+      "example": {},
+      "group": "Maillage",
+      "id": "mesh.rules.list",
+      "title": "Lister les règles"
+    },
+    {
+      "description": "Ajoute une règle à prémisses multiples avec contraintes déclaratives.",
+      "example": {
+        "rule": {
+          "conclusions": [
+            {
+              "object": {
+                "var": "z"
+              },
+              "predicate": "edge",
+              "subject": {
+                "var": "x"
+              }
+            }
+          ],
+          "id": "transitive-edge",
+          "premises": [
+            {
+              "object": {
+                "var": "y"
+              },
+              "predicate": "edge",
+              "subject": {
+                "var": "x"
+              }
+            },
+            {
+              "object": {
+                "var": "z"
+              },
+              "predicate": "edge",
+              "subject": {
+                "var": "y"
+              }
+            }
+          ],
+          "version": "1.0.0"
+        }
+      },
+      "group": "Maillage",
+      "id": "mesh.rule.add",
+      "title": "Ajouter une règle"
+    },
+    {
+      "description": "Exécute la clôture déterministe sur les règles actives, avec budget.",
+      "example": {
+        "max_new_facts": 5000,
+        "max_rounds": 32,
+        "rule_match_cap": 20000
+      },
+      "group": "Maillage",
+      "id": "mesh.infer",
+      "title": "Inférence bornée"
+    },
+    {
+      "description": "Vérifie cohérence des hashes, prémisses, version de règle et étapes d'opérateur.",
+      "example": {
+        "certificate": {}
+      },
+      "group": "Maillage",
+      "id": "mesh.certificate.verify",
+      "title": "Vérifier un certificat"
+    },
+    {
+      "description": "Affiche les événements append-only et leurs hashes.",
+      "example": {
+        "limit": 100
+      },
+      "group": "Preuves",
+      "id": "trace.list",
+      "title": "Journal des événements"
+    },
+    {
+      "description": "Charge un événement par numéro de séquence.",
+      "example": {
+        "seq": 1
+      },
+      "group": "Preuves",
+      "id": "trace.get",
+      "title": "Inspecter un événement"
+    },
+    {
+      "description": "Recalcule la chaîne SHA-256 des événements.",
+      "example": {},
+      "group": "Preuves",
+      "id": "trace.verify",
+      "title": "Vérifier la chaîne de trace"
+    },
+    {
+      "description": "Persiste un payload JSON canonique, compressé sans perte et haché.",
+      "example": {
+        "id": "memo-exemple",
+        "kind": "note",
+        "metadata": {
+          "dependencies": []
+        },
+        "payload": {
+          "text": "contenu"
+        }
+      },
+      "group": "Mémoire",
+      "id": "memory.put",
+      "title": "Mémoriser un objet"
+    },
+    {
+      "description": "Lit et vérifie l'intégrité d'un payload exact.",
+      "example": {
+        "id": "memo-exemple"
+      },
+      "group": "Mémoire",
+      "id": "memory.get",
+      "title": "Lire/réveiller la mémoire"
+    },
+    {
+      "description": "Liste les métadonnées de tous les objets mémoire.",
+      "example": {},
+      "group": "Mémoire",
+      "id": "memory.list",
+      "title": "Lister la mémoire"
+    },
+    {
+      "description": "Déclare un état de cycle de vie valide; les restrictions de réveil sont contrôlées par le moteur.",
+      "example": {
+        "id": "memo-exemple",
+        "state": "SLEEPING"
+      },
+      "group": "Mémoire",
+      "id": "memory.state",
+      "title": "Changer le cycle de vie"
+    },
+    {
+      "description": "Checkpoint, contrôle protections et transition SLEEPING.",
+      "example": {
+        "id": "memo-exemple"
+      },
+      "group": "Mémoire",
+      "id": "memory.hibernate",
+      "title": "Mettre en veille"
+    },
+    {
+      "description": "Vérifie payload et dépendances avant de repasser ACTIVE.",
+      "example": {
+        "id": "memo-exemple"
+      },
+      "group": "Mémoire",
+      "id": "memory.wake",
+      "title": "Réveiller la mémoire"
+    },
+    {
+      "description": "Persiste un instantané JSON avec hash canonique.",
+      "example": {
+        "kind": "manual",
+        "payload": {
+          "state": "ready"
+        }
+      },
+      "group": "Mémoire",
+      "id": "checkpoint.create",
+      "title": "Créer un checkpoint"
+    },
+    {
+      "description": "Restaure le payload si le hash reste valide.",
+      "example": {
+        "id": "checkpoint-id"
+      },
+      "group": "Mémoire",
+      "id": "checkpoint.get",
+      "title": "Vérifier/restaurer un checkpoint"
+    },
+    {
+      "description": "Enregistre une révocation et marque les dépendants connus STALE.",
+      "example": {
+        "reason": "source changed",
+        "subject_id": "memo-exemple"
+      },
+      "group": "Mémoire",
+      "id": "memory.revoke",
+      "title": "Révoquer une dépendance"
+    },
+    {
+      "description": "Persiste un événement typé avec TTL et provenance.",
+      "example": {
+        "wave": {
+          "kind": "fact.updated",
+          "payload": {
+            "id": "f1"
+          },
+          "source": "manual",
+          "ttl": 8
+        }
+      },
+      "group": "Événements",
+      "id": "wave.emit",
+      "title": "Émettre une vague"
+    },
+    {
+      "description": "Déduplique les événements reçus par identifiant.",
+      "example": {
+        "id": "wave-id"
+      },
+      "group": "Événements",
+      "id": "wave.receive",
+      "title": "Recevoir une vague"
+    },
+    {
+      "description": "Classe des candidats par recouvrement lexical et bonus canonique; ce score n'est pas une preuve.",
+      "example": {
+        "limit": 20,
+        "query": "A edge B"
+      },
+      "group": "Recherche",
+      "id": "ascr.search",
+      "title": "Retrieval ASCR-NG"
+    },
+    {
+      "description": "Évalue l'admission opérationnelle sous contraintes dures sans modifier le statut épistémique.",
+      "example": {
+        "budget": {
+          "cpu": 2
+        },
+        "capabilities": [],
+        "descriptor": {
+          "contract_valid": true,
+          "cost": {
+            "cpu": 1
+          },
+          "dependencies_valid": true,
+          "epistemic_status": "hypothesis",
+          "id": "candidate-1",
+          "lifecycle": "CATALOGUED",
+          "required_capabilities": [],
+          "utility": 0.8
+        }
+      },
+      "group": "Recherche",
+      "id": "ascrc.evaluate",
+      "title": "Régulation ASCRC"
+    },
+    {
+      "description": "Ordonne un ensemble de descripteurs admissibles; les scores restent heuristiques.",
+      "example": {
+        "budget": {},
+        "capabilities": [],
+        "descriptors": []
+      },
+      "group": "Recherche",
+      "id": "ascrc.order",
+      "title": "Classer des candidats"
+    },
+    {
+      "description": "Enregistre les candidats et effectue un tour d'allocation avec vieillissement anti-famine; ne certifie pas les candidats.",
+      "example": {
+        "budget": {
+          "cpu": 2
+        },
+        "capabilities": [],
+        "descriptors": [
+          {
+            "contract_valid": true,
+            "cost": {
+              "cpu": 1
+            },
+            "dependencies_valid": true,
+            "epistemic_status": "hypothesis",
+            "id": "candidate-a",
+            "required_capabilities": []
+          }
+        ],
+        "max_activations": 1
+      },
+      "group": "Recherche",
+      "id": "ascrc.schedule",
+      "title": "Ordonnancement persistant ASCRC"
+    },
+    {
+      "description": "Inspecte candidats, âges d'attente et compteur de services persistés.",
+      "example": {},
+      "group": "Recherche",
+      "id": "ascrc.candidates.list",
+      "title": "Candidats ASCRC persistés"
+    },
+    {
+      "description": "Inspecte les baux actifs/expirés sans accorder de droits implicites.",
+      "example": {
+        "include_expired": true
+      },
+      "group": "Système",
+      "id": "leases.list",
+      "title": "Lister les baux"
+    },
+    {
+      "description": "Libère un bail en vérifiant propriétaire ou capacité administrateur.",
+      "example": {
+        "capabilities": [
+          "admin:leases"
+        ],
+        "lease_id": "lease-id"
+      },
+      "group": "Système",
+      "id": "leases.release",
+      "title": "Libérer un bail"
+    },
+    {
+      "description": "Liste les ASTs staged dans le registre local; ce n'est pas un déploiement distant.",
+      "example": {},
+      "group": "Programmes",
+      "id": "deployments.list",
+      "title": "Registre de déploiement"
+    },
+    {
+      "description": "Recherche des programmes dans la grammaire déclarative; l'adéquation aux exemples n'est pas une preuve universelle.",
+      "example": {
+        "budget": 1000,
+        "objective": {
+          "capabilities": [],
+          "examples": [
+            {
+              "input": [
+                2,
+                4
+              ],
+              "output": 6
+            }
+          ]
+        }
+      },
+      "group": "Synthèse",
+      "id": "synthesis.run",
+      "title": "Synthétiser un candidat"
+    },
+    {
+      "description": "Reprend un front persisté sans supprimer les candidats non examinés.",
+      "example": {
+        "budget": 1000,
+        "session_id": "synth-id"
+      },
+      "group": "Synthèse",
+      "id": "synthesis.resume",
+      "title": "Reprendre la synthèse"
+    },
+    {
+      "description": "Enregistre une transition pure et versionnée. Les prédictions restent SIMULATED, jamais OBSERVED ou CERTIFIED.",
+      "example": {
+        "definition": {
+          "action_type": "Number",
+          "activation_policy": {
+            "min_gain": 0.05,
+            "min_samples": 5,
+            "z_score": 1.96
+          },
+          "id": "increment",
+          "output_type": "Number",
+          "state_type": "Number",
+          "transition_program": {
+            "args": [
+              {
+                "path": [
+                  "state"
+                ]
+              },
+              {
+                "path": [
+                  "action"
+                ]
+              }
+            ],
+            "component": "add",
+            "op": "Call"
+          }
+        }
+      },
+      "group": "Modèles du monde",
+      "id": "world_model.register",
+      "title": "Enregistrer un modèle du monde"
+    },
+    {
+      "description": "Liste modèles, versions et état d’activation opérationnelle conditionnelle.",
+      "example": {},
+      "group": "Modèles du monde",
+      "id": "world_model.list",
+      "title": "Lister les modèles du monde"
+    },
+    {
+      "description": "Simule un état suivant sans le promouvoir au rang d'observation ni de preuve.",
+      "example": {
+        "action": 2,
+        "budget": 1000,
+        "context": {},
+        "id": "increment",
+        "state": 4
+      },
+      "group": "Modèles du monde",
+      "id": "world_model.predict",
+      "title": "Simuler une transition"
+    },
+    {
+      "description": "Compare les prédictions à des observations séparées après prédiction; l'activation exige un gain apparié supérieur au seuil versionné.",
+      "example": {
+        "baseline_program": {
+          "key": "state",
+          "op": "Project",
+          "program": {
+            "op": "Id"
+          }
+        },
+        "budget": 1000,
+        "holdout": [
+          {
+            "action": 1,
+            "observed_next_state": 2,
+            "state": 1
+          }
+        ],
+        "id": "increment"
+      },
+      "group": "Modèles du monde",
+      "id": "world_model.evaluate",
+      "title": "Évaluer un modèle sur holdout"
+    },
+    {
+      "description": "Relie un motif textuel à des slots typés et à un AST. Motifs ambigus soumis à clarification; aucune capacité n'est accordée automatiquement.",
+      "example": {
+        "definition": {
+          "id": "sum-words",
+          "pattern": "add {left:Number} and {right:Number}",
+          "program": {
+            "args": [
+              {
+                "path": [
+                  "slots",
+                  "left"
+                ]
+              },
+              {
+                "path": [
+                  "slots",
+                  "right"
+                ]
+              }
+            ],
+            "component": "add",
+            "op": "Call"
+          }
+        }
+      },
+      "group": "Intentions & langage",
+      "id": "intents.register",
+      "title": "Enregistrer une intention déclarative"
+    },
+    {
+      "description": "Liste les motifs d'intention versionnés actifs qui peuvent être résolus par le chat.",
+      "example": {},
+      "group": "Intentions & langage",
+      "id": "intents.list",
+      "title": "Lister les intentions"
+    },
+    {
+      "description": "Résout une intention déclarative non ambiguë, calcule une expression arithmétique reconnue, ou présente les candidats de retrieval sans les convertir en faits.",
+      "example": {
+        "message": "calculate 2 + 4"
+      },
+      "group": "Chat",
+      "id": "chat.submit",
+      "title": "Envoyer un message"
+    }
+  ],
+  "status": "Success"
+}
+
+STDERR:
+

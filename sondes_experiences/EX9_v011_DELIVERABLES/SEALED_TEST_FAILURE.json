@@ -1,0 +1,16 @@
+{
+  "status": "OPENED_BUT_NOT_SCORED",
+  "test_domain": "xor8",
+  "opened_marker": "SEALED_TEST_OPENED.json",
+  "lock_sha256": "dda7d7be506e45b14b40065f6285d355c8dfb9c85f5b43901f2593b12241f413",
+  "failure_stage": "checkpoint_deserialization_before_first_prediction",
+  "exception": "AttributeError: Can't get attribute 'MLP' on <module '__main__' from '.../score_sealed_test.py'>",
+  "root_cause": "Checkpoints were saved while the training module was executed as __main__; torch pickle stores classes such as __main__.MLP, whereas the evaluator imports classification_models under its module name and does not bind that class in __main__.",
+  "test_generator_called": true,
+  "test_labels_generated_in_memory": true,
+  "predictions_written": false,
+  "test_metrics_written": false,
+  "policy": "Treat this holdout as consumed/compromised. Do not rerun or attempt a second scoring pass on the same seed. Any future confirmatory holdout requires a newly preregistered independent seed/domain and a new lock, with this failed opening disclosed.",
+  "classification_validation_results_status": "UNCHANGED_AND_VALID",
+  "external_real_confirmation": "NOT_ESTABLISHED"
+}

@@ -1,0 +1,99 @@
+{
+  "checks": {
+    "all_320_p3_candidate_runs_have_data_metadata": true,
+    "all_p3_data_files_exist": true,
+    "all_p3_data_hashes_match_run_metadata_and_manifest": true,
+    "all_p3_run_data_files_are_listed_in_manifest": true,
+    "all_three_p6_runners_still_contain_load_manifest_map": true,
+    "current_runner_runtime_loader_matches_reconstructed_map": true,
+    "manifest_file_exists": true,
+    "manifest_map_reconstruction_count_is_71": true,
+    "manifest_record_count_matches_declared": true,
+    "no_exact_manifest_map_files_or_python_identifiers": true,
+    "p6_audit_has_zero_integrity_discrepancies": true,
+    "p6_audit_status_pass": true,
+    "three_p6_loader_implementations_are_identical": true
+  },
+  "checks_passed": 13,
+  "checks_total": 13,
+  "current_audit_manifest_variable": {
+    "assignment_line_numbers": [
+      80
+    ],
+    "note": "The current audit script loads the manifest JSON into a local variable named manifest but does not subsequently read that variable. Its data integrity check instead follows P3 run_metadata data_file/data_sha256 references. This is redundant/unused code in the current audit script, not evidence that the on-disk manifest was deleted.",
+    "subsequent_load_reference_line_numbers": []
+  },
+  "generated_at_utc": "2026-11-04T13:53:05.392435+00:00",
+  "interpretation": "No evidence in the current workspace that the persistent P3 data manifest or the P6 load_manifest_map function was deleted. The phrase “Supprimé manifest_map” cannot be conclusively reconstructed as a filesystem deletion from current artifacts; it may have referred to a transient in-memory mapping or an earlier local code object. The original shell/UI action log needed to identify the exact operation is not present in this workspace.",
+  "manifest": {
+    "bare_manifest_map_python_identifiers_found": [],
+    "bytes": 217573,
+    "declared_record_count": 71,
+    "exact_manifest_map_files_found": [],
+    "path": "02_data/P3_pilot/P3_DATA_MANIFEST.json",
+    "reconstructed_map_entries": 71,
+    "records": 71,
+    "sha256": "9a55dbcd835c9e92da22a158a3d074fcf5d5cbecfd2654f1e06f5e6edba51cb9"
+  },
+  "p3_data_reconciliation": {
+    "all_rows_ok": true,
+    "candidate_runs": 320,
+    "hash_mismatches": [],
+    "missing_data_files": [],
+    "missing_manifest_records": [],
+    "rows_checked": 320
+  },
+  "p6_integrity_audit": {
+    "audit_json_sha256": "b6c2c3cb5b3af580c04c6d16a65502e5e1f8283ab022d67e0d0d544bc0f1781f",
+    "audit_script_sha256": "7e0c11387d61fe16a45c1f08ce5b848b94bd800606334a871f557ecabe38a552",
+    "checks_passed": 24,
+    "checks_total": 24,
+    "integrity_discrepancies": 0,
+    "status": "PASS"
+  },
+  "p6_runner_loader_functions_identical": true,
+  "p6_runner_scripts": [
+    {
+      "exists": true,
+      "file": "04_code/run_p6_ablation_v1.py",
+      "loader_block_sha256": "3b6244008b0c157dda69293cba64a6dd94e3def75ae199108ddfd199b65e68e1",
+      "loader_present": true,
+      "references_manifest_path": true,
+      "sha256": "9d7daec37b6e7808e0e24ee799ca428639908fbe6a6e7c4725010d2329280a30"
+    },
+    {
+      "exists": true,
+      "file": "04_code/run_p6_ablation_v2.py",
+      "loader_block_sha256": "3b6244008b0c157dda69293cba64a6dd94e3def75ae199108ddfd199b65e68e1",
+      "loader_present": true,
+      "references_manifest_path": true,
+      "sha256": "59a49d397fb5104e5f5f22104292b4e19271b0d213e9b3e1082929daad2f87d8"
+    },
+    {
+      "exists": true,
+      "file": "04_code/run_p6_ablation.py",
+      "loader_block_sha256": "3b6244008b0c157dda69293cba64a6dd94e3def75ae199108ddfd199b65e68e1",
+      "loader_present": true,
+      "references_manifest_path": true,
+      "sha256": "5050142e3b848b602179ef2f11ea3a6683571e75d2fe819df20bdc36e9816dad"
+    }
+  ],
+  "p6_success_provenance": {
+    "script_files_available": true,
+    "script_sha256_counts": {
+      "5050142e3b848b602179ef2f11ea3a6683571e75d2fe819df20bdc36e9816dad": 172,
+      "59a49d397fb5104e5f5f22104292b4e19271b0d213e9b3e1082929daad2f87d8": 25,
+      "NOT_RECORDED": 123
+    },
+    "success_records": 320
+  },
+  "report_sha256": "080464a2b33cce0b27717641e02fee632adf7878700ea550909b34271fdde444",
+  "runtime_loader": {
+    "entries": 71,
+    "keys_match_reconstructed_map": true,
+    "record_file_and_hash_values_match": true
+  },
+  "status": "PASS",
+  "title": "EX12 P6 manifest_map incident and data-manifest reconciliation",
+  "workspace": "EX12_NEXT_0"
+}

@@ -1,0 +1,37 @@
+{
+  "ablations": {
+    "rows": 30,
+    "arms": 6,
+    "seeds_per_arm": {
+      "global_gates_no_lr_mod": 5,
+      "inner_coord_only": 5,
+      "local_only": 5,
+      "outer_coord_only": 5,
+      "static_global_coord": 5,
+      "uniform_gates_with_lr_mod": 5
+    }
+  },
+  "stage_oof": {
+    "rows": 10,
+    "arms": 2,
+    "seeds_per_arm": {
+      "stage_affine_gate": 5,
+      "stage_gate_only": 5
+    },
+    "oof_generation_in_pipeline": true,
+    "stage_logits_extra_extraction_included": true,
+    "stage_logits_extra_extraction_mean_seconds": 1.0115217247999682,
+    "stage_logits_parity_max_abs": 0.0
+  },
+  "recursive_base": {
+    "rows": 5,
+    "seeds": 5
+  },
+  "all_parameter_ratios_ge4": true,
+  "test_opened": false,
+  "notes": [
+    "No training was rerun; this script only pairs existing per-seed metrics with the same-seed EX7 MLP-ge4x comparator.",
+    "Ablation time compares direct model fit with MLP fit; stage-OOF pipeline time includes 3-fold OOF generation, base fit, the additional stage-logit extraction pass, and corrector fit. The stage-logit extra pass was timed by replaying existing fold checkpoints without retraining.",
+    "The recursive base-only comparison excludes any post-hoc OOF correction."
+  ]
+}

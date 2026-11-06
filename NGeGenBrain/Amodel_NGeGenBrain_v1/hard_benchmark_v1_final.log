@@ -1,0 +1,188 @@
+{
+  "output": "/mnt/data/NGeGenBrain_v1_work_1/hard_benchmark_v1_final.json",
+  "model_id": "NGeGenBrain_v1",
+  "model_version": "1.0.0",
+  "source_sha256": "71534f98ff590e5c1a103888f0e553e9e8966d34d7f0364429eac8eae238b5c8",
+  "passed": 15,
+  "failed": 0,
+  "tests": [
+    {
+      "id": "ARITH-001",
+      "verdict": "PASS",
+      "observed": "2400 matches; 0 mismatches"
+    },
+    {
+      "id": "MESH-001",
+      "verdict": "PASS",
+      "observed": "35 pairs; missing=0 extra=0"
+    },
+    {
+      "id": "MESH-002",
+      "verdict": "PASS",
+      "observed": {
+        "new_facts": 1,
+        "q_fact_types": [
+          "String",
+          "Int"
+        ]
+      }
+    },
+    {
+      "id": "WM-001",
+      "verdict": "PASS",
+      "observed": {
+        "activation": {
+          "enabled": false,
+          "reason": "incomplete_holdout_predictions"
+        },
+        "model_exact_match_rate": null,
+        "record_keys": [
+          "id",
+          "model_id",
+          "model_version",
+          "evaluation",
+          "created_at",
+          "activation_state"
+        ]
+      }
+    },
+    {
+      "id": "BUDGET-001",
+      "verdict": "PASS",
+      "observed": {
+        "finite_status": "Partial",
+        "nonfinite_status": "Rejected",
+        "nonfinite_reason": "budget.cpu must be a finite, non-negative number"
+      }
+    },
+    {
+      "id": "BUDGET-002",
+      "verdict": "PASS",
+      "observed": {
+        "accepted": false,
+        "error": "ValueError: resource_cost must use known dimensions and finite, non-negative numbers"
+      }
+    },
+    {
+      "id": "TRACE-001",
+      "verdict": "PASS",
+      "observed": {
+        "visible_events": 200,
+        "chain": {
+          "valid": true,
+          "count": 200,
+          "problems": [],
+          "head_hash": "c97c5557557daab57831089122bd6a7d4d17cae9407c0e4fe25493fca9f92cbb"
+        },
+        "errors": []
+      }
+    },
+    {
+      "id": "MEM-001",
+      "verdict": "PASS",
+      "observed": {
+        "payload_error": "CRC check failed",
+        "payload_returned": true
+      }
+    },
+    {
+      "id": "MESH-003",
+      "verdict": "PASS",
+      "observed": {
+        "accepted_indices": [],
+        "persisted_count": 0
+      }
+    },
+    {
+      "id": "CERT-001",
+      "verdict": "PASS",
+      "observed": {
+        "valid_certificate": {
+          "valid": true,
+          "problems": [],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        },
+        "forged_certificate": {
+          "valid": false,
+          "problems": [
+            "conclusion_not_entailed_by_rule_and_premises"
+          ],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        }
+      }
+    },
+    {
+      "id": "TYPE-001",
+      "verdict": "PASS",
+      "observed": {
+        "checks": 10,
+        "errors": []
+      }
+    },
+    {
+      "id": "SEC-001",
+      "verdict": "PASS",
+      "observed": {
+        "status": "Success",
+        "value_equals_payload": true,
+        "value": "__import__(\"os\").system(\"echo SHOULD_NOT_RUN\")"
+      }
+    },
+    {
+      "id": "ROBUST-001",
+      "verdict": "PASS",
+      "observed": {
+        "returned": true,
+        "status": "Rejected",
+        "reason": "maximum JSON/AST nesting depth exceeded",
+        "details": {
+          "preflight": {
+            "valid": false,
+            "reason": "maximum JSON/AST nesting depth exceeded",
+            "path": "$.steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0]",
+            "max_depth": 128,
+            "observed_depth_at_least": 129,
+            "node_count": 128
+          },
+          "program_shape": {
+            "valid": false,
+            "reason": "maximum JSON/AST nesting depth exceeded",
+            "path": "$.steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0]",
+            "max_depth": 128,
+            "observed_depth_at_least": 129,
+            "node_count": 128
+          },
+          "input_shape": {
+            "valid": true,
+            "max_depth": 1,
+            "node_count": 0
+          },
+          "environment_shape": {
+            "valid": true,
+            "max_depth": 2,
+            "node_count": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "MESH-005",
+      "verdict": "PASS",
+      "observed": {
+        "subjects": [
+          "alice"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "id": "MESH-006",
+      "verdict": "PASS",
+      "observed": {
+        "observed_match_calls": 1,
+        "reported_status": "BUDGET_EXHAUSTED",
+        "rule_match_attempts": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,2202 @@
+%bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% !TEX program = pdflatex
+% ============================================================
+% TH_SONDE — PROTOCOLE EXPERIMENTAL FONDAMENTAL
+% CNG : Coeur Neuronal Général
+% CNC : Coeur Neuronal de Calcul
+%
+% Source technique :
+% sondes_ex7_v003.zip
+% inputs/reference_v002/src/ex6_common.py
+%
+% Document autonome compilable avec pdfLaTeX.
+% ============================================================
+
+\documentclass[11pt,a4paper]{article}
+
+% ------------------------------------------------------------
+% LANGUE ET TYPOGRAPHIE
+% ------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ------------------------------------------------------------
+% MISE EN PAGE
+% ------------------------------------------------------------
+\usepackage[
+    a4paper,
+    left=2cm,
+    right=2cm,
+    top=2cm,
+    bottom=2cm
+]{geometry}
+
+\usepackage{setspace}
+\setstretch{1.08}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{3em}
+
+% ------------------------------------------------------------
+% MATHEMATIQUES
+% ------------------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+
+% ------------------------------------------------------------
+% TABLEAUX
+% ------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{makecell}
+\usepackage{adjustbox}
+
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{4pt}
+
+% ------------------------------------------------------------
+% FIGURES ET GRAPHES
+% ------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,
+    positioning,
+    shapes.geometric,
+    fit,
+    calc
+}
+
+\usepackage{caption}
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    width=0.95\textwidth
+}
+
+% ------------------------------------------------------------
+% LISTES ET LIENS
+% ------------------------------------------------------------
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=1.5em,itemsep=2pt}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=2pt}
+
+\usepackage[hidelinks]{hyperref}
+
+% ------------------------------------------------------------
+% COMMANDES
+% ------------------------------------------------------------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Loss}{\mathcal{L}}
+\newcommand{\CNG}{\textsc{CNG}}
+\newcommand{\CNC}{\textsc{CNC}}
+\newcommand{\RBF}{\textsc{RBF}}
+\newcommand{\MSE}{\textsc{MSE}}
+\newcommand{\MAE}{\textsc{MAE}}
+\newcommand{\RMSE}{\textsc{RMSE}}
+
+% ------------------------------------------------------------
+% STYLES TIKZ
+% ------------------------------------------------------------
+\tikzset{
+    block/.style={
+        draw,
+        rounded corners=2pt,
+        align=center,
+        minimum height=8mm,
+        text width=25mm,
+        inner sep=4pt,
+        font=\small
+    },
+    smallblock/.style={
+        draw,
+        rounded corners=2pt,
+        align=center,
+        minimum height=7mm,
+        text width=20mm,
+        inner sep=3pt,
+        font=\scriptsize
+    },
+    inputblock/.style={
+        draw,
+        rounded corners=2pt,
+        align=center,
+        minimum height=7mm,
+        text width=16mm,
+        inner sep=3pt,
+        font=\small
+    },
+    flow/.style={
+        -{Latex[length=2mm]},
+        thick
+    },
+    optionalflow/.style={
+        -{Latex[length=2mm]},
+        dashed,
+        thick
+    }
+}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+
+\title{
+    \textbf{Fondations expérimentales de th\_sonde}\\
+    \large Formalisation du coeur neuronal général et du coeur neuronal de calcul
+}
+
+\author{Projet th\_sonde}
+\date{Version expérimentale 1.0}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce protocole définit deux expériences successives destinées
+à tester les fondations de l'architecture th\_sonde.
+
+La première expérience étudie un coeur neuronal général
+(\CNG), composé de plusieurs sondes neuronales adaptatives
+dont les sorties sont combinées pour approximer une fonction.
+
+La deuxième expérience étudie un coeur neuronal de calcul
+(\CNC), composé de sondes spécialisées dans des opérations
+mathématiques élémentaires et capables d'être assemblées
+dans des graphes de calcul.
+
+La base technique est l'implémentation AdaptiveRBF
+présente dans EX7 V003.
+
+L'objectif n'est pas de démontrer immédiatement la
+supériorité d'une architecture complète, mais de vérifier
+séparément :
+\begin{enumerate}
+    \item la capacité d'une sonde à apprendre ;
+    \item la capacité de plusieurs sondes à coopérer ;
+    \item la capacité de sondes spécialisées à calculer ;
+    \item la capacité de ces sondes à être composées ;
+    \item le coût réel de cette composition.
+\end{enumerate}
+
+Aucun résultat expérimental nouveau n'est présupposé.
+Les performances devront être mesurées selon le protocole
+décrit dans ce document.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Fondement technique : source EX7 V003}
+% ============================================================
+
+\subsection{Source de référence}
+
+L'archive de référence est :
+
+\begin{center}
+\texttt{sondes\_ex7\_v003.zip}
+\end{center}
+
+Le fichier source principal utilisé est :
+
+\begin{center}
+\texttt{inputs/reference\_v002/src/ex6\_common.py}
+\end{center}
+
+La classe concernée est :
+
+\begin{center}
+\texttt{AdaptiveRBF}
+\end{center}
+
+Elle est définie aux lignes 115 à 138 du fichier.
+
+\subsection{Structure réellement présente dans la source}
+
+La sonde comprend :
+
+\begin{enumerate}
+    \item une projection linéaire apprise ;
+    \item une activation hyperbolique tangente ;
+    \item des centres RBF initialisés par KMeans ;
+    \item des largeurs RBF apprenables ;
+    \item une matrice de lecture apprenable ;
+    \item un biais de sortie.
+\end{enumerate}
+
+L'encodeur de la source est :
+
+\[
+z(x)=\tanh(Wx+b)
+\]
+
+Les centres sont initialisés à partir de la projection
+des données d'entraînement :
+
+\[
+C=\operatorname{KMeans}(z(X_{\mathrm{train}}))
+\]
+
+La distance au centre $k$ est :
+
+\[
+d_k^2(x)=\|z(x)-c_k\|_2^2
+\]
+
+Les largeurs sont paramétrées en logarithme :
+
+\[
+\sigma_k=\exp(\ell_k)
+\]
+
+La fonction d'activation RBF est :
+
+\[
+r_k(x)=
+\exp\left(
+-\frac{d_k^2(x)}{2\sigma_k^2}
+\right)
+\]
+
+La sortie est :
+
+\[
+P(x)=r(x)^\top V+\beta
+\]
+
+Dans EX7, cette sortie possède deux dimensions,
+correspondant aux deux logits de classification.
+
+\subsection{Adaptation pour les expériences numériques}
+
+Pour les expériences CNG et CNC, la dimension
+de sortie doit être adaptée à la tâche.
+
+Pour une fonction scalaire :
+
+\[
+n_{\mathrm{classes}}=1
+\]
+
+Pour une fonction vectorielle :
+
+\[
+n_{\mathrm{classes}}=q
+\]
+
+où $q$ est la dimension de sortie recherchée.
+
+Il ne faut donc pas conserver automatiquement
+les deux logits de la tâche Wisconsin.
+
+La structure interne de la sonde est réutilisée,
+mais la dimension de sa couche de lecture est adaptée.
+
+\subsection{Différence entre la source et les nouvelles expériences}
+
+\begin{tabularx}{\textwidth}{
+    >{\RaggedRight\arraybackslash}p{0.32\textwidth}
+    X
+}
+\toprule
+\textbf{Élément} & \textbf{Statut} \\
+\midrule
+Encodeur Linear + tanh
+& Présent dans la source. \\
+
+Centres RBF KMeans
+& Présents dans la source. \\
+
+Largeurs apprenables
+& Présentes dans la source. \\
+
+Couche de lecture
+& Présente dans la source. \\
+
+Plusieurs sondes avec fusion apprise
+& Nouvelle configuration CNG. \\
+
+Sondes dédiées aux opérations
+& Nouvelle configuration CNC. \\
+
+Composition de graphes de calcul
+& Nouvelle expérience CNC. \\
+
+Coordinateur neuronal adaptatif
+& Non inclus dans ces deux expériences. \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Précaution sur l'expérience EX7}
+
+Dans EX7 V003 :
+
+\begin{itemize}
+    \item sept sondes sont entraînées ;
+    \item les données supervisées sont réparties en sept shards ;
+    \item les centres KMeans sont initialisés sur les caractéristiques
+    de l'ensemble d'entraînement ;
+    \item les sept sondes reçoivent les mêmes dimensions d'entrée ;
+    \item les sept sondes sont exécutées à l'inférence ;
+    \item le coordinateur $\rho$ est un vecteur global appris.
+\end{itemize}
+
+Il n'y a pas de sélection conditionnelle des sondes
+à l'inférence.
+
+Le présent protocole ne reprend pas automatiquement
+le partitionnement des données en shards.
+
+Pour le CNG initial, toutes les sondes reçoivent
+le même jeu d'entraînement. Cette décision permet
+d'isoler l'effet de la composition des sondes.
+
+% ============================================================
+\section{Question scientifique générale}
+% ============================================================
+
+\subsection{Question principale}
+
+Peut-on construire un coeur fonctionnel à partir
+de plusieurs sondes neuronales adaptatives, de telle sorte
+que ces sondes apprennent collectivement une fonction
+et puissent ensuite être spécialisées dans des opérations
+réutilisables ?
+
+\subsection{Décomposition de la question}
+
+La question est décomposée en deux expériences.
+
+\textbf{Expérience A : CNG}
+
+Les sondes doivent apprendre une fonction générale
+à partir d'exemples.
+
+\textbf{Expérience B : CNC}
+
+Les sondes doivent apprendre des opérations identifiables,
+puis les composer dans un graphe de calcul.
+
+Cette séparation évite de confondre :
+\begin{itemize}
+    \item capacité d'approximation ;
+    \item coopération ;
+    \item spécialisation ;
+    \item composition ;
+    \item coordination dynamique.
+\end{itemize}
+
+\subsection{Hypothèses}
+
+\begin{tabularx}{\textwidth}{
+    >{\centering\arraybackslash}p{0.10\textwidth}
+    X
+}
+\toprule
+\textbf{Code} & \textbf{Hypothèse falsifiable} \\
+\midrule
+H1
+& Une sonde AdaptiveRBF peut approximer des fonctions
+numériques non linéaires sur un domaine défini. \\
+
+H2
+& Plusieurs sondes combinées peuvent apprendre
+une fonction avec une erreur de généralisation contrôlée. \\
+
+H3
+& La composition apprise de plusieurs sondes peut
+apporter un bénéfice mesurable par rapport à une sonde unique. \\
+
+H4
+& Une sonde spécialisée peut apprendre une opération
+mathématique élémentaire. \\
+
+H5
+& Des sondes opérationnelles entraînées séparément
+peuvent être composées dans un graphe de calcul inédit. \\
+
+H6
+& Le coût de composition reste mesurable et ne doit pas
+annuler le bénéfice fonctionnel obtenu. \\
+\bottomrule
+\end{tabularx}
+
+Aucune de ces hypothèses ne doit être considérée
+comme démontrée avant l'exécution des expériences.
+
+% ============================================================
+\section{Définition mathématique d'une sonde}
+% ============================================================
+
+\subsection{Entrée et paramètres}
+
+Une sonde $P_i$ reçoit :
+
+\[
+x\in\R^n
+\]
+
+Ses paramètres sont :
+
+\[
+\theta_i=
+(W_i,b_i,C_i,\ell_i,V_i,\beta_i)
+\]
+
+avec :
+
+\[
+W_i\in\R^{d\times n}
+\]
+
+\[
+b_i\in\R^d
+\]
+
+\[
+C_i\in\R^{K\times d}
+\]
+
+\[
+\ell_i\in\R^K
+\]
+
+\[
+V_i\in\R^{K\times q}
+\]
+
+\[
+\beta_i\in\R^q
+\]
+
+où :
+\begin{itemize}
+    \item $n$ est la dimension de l'entrée ;
+    \item $d$ est la dimension latente ;
+    \item $K$ est le nombre de centres RBF ;
+    \item $q$ est la dimension de sortie.
+\end{itemize}
+
+\subsection{Encodeur latent}
+
+\[
+z_i(x)=\tanh(W_i x+b_i)
+\]
+
+\subsection{Activation RBF}
+
+\[
+\sigma_{i,k}=\exp(\ell_{i,k})
+\]
+
+\[
+r_{i,k}(x)=
+\exp\left(
+-\frac{
+\|z_i(x)-c_{i,k}\|_2^2
+}{
+2\sigma_{i,k}^2
+}
+\right)
+\]
+
+Les largeurs doivent respecter les bornes numériques
+définies dans l'implémentation :
+
+\[
+0.05\leq\sigma_{i,k}\leq12
+\]
+
+\subsection{Lecture}
+
+\[
+P_i(x;\theta_i)
+=
+r_i(x)^\top V_i+\beta_i
+\]
+
+\subsection{Initialisation}
+
+Les centres sont initialisés avec KMeans sur les
+représentations latentes du jeu d'entraînement uniquement.
+
+Les données de validation et de test sont exclues
+de cette initialisation.
+
+Pour chaque sonde :
+\begin{enumerate}
+    \item initialiser $W_i$ et $b_i$ ;
+    \item calculer $z_i(X_{\mathrm{train}})$ ;
+    \item appliquer KMeans ;
+    \item initialiser les centres $C_i$ ;
+    \item calculer une largeur initiale à partir
+    des distances inter-centres ;
+    \item initialiser $V_i$ et $\beta_i$ ;
+    \item entraîner les paramètres autorisés.
+\end{enumerate}
+
+La méthode exacte d'initialisation est enregistrée
+dans la configuration de chaque expérience.
+
+\subsection{Graphe interne d'une sonde}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[node distance=7mm and 9mm]
+
+\node[inputblock] (x) {Entrée $x$};
+
+\node[block, right=of x] (encoder)
+{Encodeur latent\\
+$z=\tanh(Wx+b)$};
+
+\node[block, right=of encoder] (rbf)
+{Activations RBF\\
+$r_1,\ldots,r_K$};
+
+\node[block, right=of rbf] (readout)
+{Lecture\\
+$r^\top V+\beta$};
+
+\node[inputblock, right=of readout] (y)
+{Sortie $P_i(x)$};
+
+\draw[flow] (x)--(encoder);
+\draw[flow] (encoder)--(rbf);
+\draw[flow] (rbf)--(readout);
+\draw[flow] (readout)--(y);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Structure interne d'une sonde adaptative dérivée d'EX7.}
+\end{figure}
+
+% ============================================================
+\section{Expérience A : coeur neuronal général}
+% ============================================================
+
+\subsection{Définition du CNG}
+
+Le coeur neuronal général est un ensemble de $M$ sondes :
+
+\[
+\mathcal{C}_{G}
+=
+\{P_1,P_2,\ldots,P_M\}
+\]
+
+Chaque sonde reçoit la même entrée :
+
+\[
+h_i=P_i(x;\theta_i)
+\]
+
+Les sorties sont concaténées :
+
+\[
+h(x)=
+\begin{bmatrix}
+h_1(x)\\
+h_2(x)\\
+\vdots\\
+h_M(x)
+\end{bmatrix}
+\]
+
+Un composeur apprend à combiner ces sorties.
+
+Pour la première expérience, le composeur est linéaire :
+
+\[
+C_\phi(h)=W_c h+b_c
+\]
+
+La fonction globale du CNG est :
+
+\[
+\boxed{
+\widehat y(x)=
+W_c
+\begin{bmatrix}
+P_1(x;\theta_1)\\
+P_2(x;\theta_2)\\
+\vdots\\
+P_M(x;\theta_M)
+\end{bmatrix}
++b_c
+}
+\]
+
+Les paramètres optimisés sont :
+
+\[
+\Theta=
+\{\theta_1,\ldots,\theta_M,W_c,b_c\}
+\]
+
+\subsection{Architecture du CNG}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[node distance=8mm and 9mm]
+
+\node[inputblock] (x) {Entrée $x$};
+
+\node[smallblock, right=12mm of x, yshift=16mm] (p1)
+{Sonde $P_1$};
+
+\node[smallblock, right=12mm of x] (p2)
+{Sonde $P_2$};
+
+\node[smallblock, right=12mm of x, yshift=-16mm] (pm)
+{Sonde $P_M$};
+
+\node[block, right=15mm of p2] (concat)
+{Concaténation\\des sorties};
+
+\node[block, right=of concat] (compose)
+{Composeur appris\\$C_\phi$};
+
+\node[inputblock, right=of compose] (y)
+{Sortie $\widehat y$};
+
+\draw[flow] (x.east)--(p1.west);
+\draw[flow] (x.east)--(p2.west);
+\draw[flow] (x.east)--(pm.west);
+
+\draw[flow] (p1.east)--(concat.west);
+\draw[flow] (p2.east)--(concat.west);
+\draw[flow] (pm.east)--(concat.west);
+
+\draw[flow] (concat)--(compose);
+\draw[flow] (compose)--(y);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Graphe du coeur neuronal général.}
+\end{figure}
+
+\subsection{Ce qui est volontairement absent}
+
+La version CNG-1 ne contient pas :
+\begin{itemize}
+    \item de coordinateur externe ;
+    \item de sélection dynamique de sondes ;
+    \item de routage conditionnel ;
+    \item de mémoire temporaire ;
+    \item de modification du graphe ;
+    \item de communication récurrente entre sondes.
+\end{itemize}
+
+La seule coopération étudiée est la combinaison
+apprise de leurs sorties.
+
+Cette restriction permet d'isoler l'effet du
+multi-sondes.
+
+\subsection{Fonctions à apprendre}
+
+Quatre fonctions synthétiques sont retenues.
+
+\[
+f_1(x)=\sin(x)
+\]
+
+\[
+f_2(x_1,x_2)=x_1x_2
+\]
+
+\[
+f_3(x_1,x_2)=x_1^2+x_2
+\]
+
+\[
+f_4(x_1,x_2,x_3)
+=
+\sin(x_1x_2)+x_3
+\]
+
+Elles couvrent :
+
+\begin{tabularx}{\textwidth}{
+    >{\centering\arraybackslash}p{0.13\textwidth}
+    X
+}
+\toprule
+\textbf{Fonction} & \textbf{Propriété testée} \\
+\midrule
+$f_1$ & Approximation non linéaire simple. \\
+$f_2$ & Interaction multiplicative. \\
+$f_3$ & Composition quadratique et additive. \\
+$f_4$ & Interaction non linéaire de plusieurs variables. \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Domaines}
+
+Les domaines d'entraînement et d'interpolation sont :
+
+\[
+f_1:\quad x\in[-\pi,\pi]
+\]
+
+\[
+f_2:\quad (x_1,x_2)\in[-2,2]^2
+\]
+
+\[
+f_3:\quad (x_1,x_2)\in[-2,2]^2
+\]
+
+\[
+f_4:\quad (x_1,x_2,x_3)\in[-2,2]^3
+\]
+
+Un jeu d'extrapolation séparé est généré sur :
+
+\[
+[-3,3]^n
+\]
+
+Les résultats d'interpolation et d'extrapolation
+ne doivent jamais être fusionnés dans une seule métrique.
+
+\subsection{Génération et séparation des données}
+
+Pour chaque fonction :
+
+\[
+D=
+D_{\mathrm{train}}
+\cup
+D_{\mathrm{val}}
+\cup
+D_{\mathrm{test}}
+\]
+
+Les ensembles sont disjoints.
+
+Répartition proposée :
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Ensemble & Proportion \\
+\midrule
+Entraînement & 70 \% \\
+Validation & 15 \% \\
+Test & 15 \% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le jeu de test est généré indépendamment du jeu
+d'entraînement et du jeu de validation.
+
+Le test ne doit pas être consulté pendant
+la sélection des hyperparamètres.
+
+Les données de validation et de test ne sont pas
+utilisées pour initialiser les centres KMeans.
+
+\subsection{Configurations à comparer}
+
+\begin{tabularx}{\textwidth}{
+    >{\centering\arraybackslash}p{0.10\textwidth}
+    >{\RaggedRight\arraybackslash}p{0.34\textwidth}
+    X
+}
+\toprule
+\textbf{ID} & \textbf{Configuration} & \textbf{Objectif} \\
+\midrule
+G1
+& Une sonde AdaptiveRBF
+& Référence individuelle. \\
+
+G2
+& Plusieurs sondes avec fusion moyenne fixe
+& Effet du nombre de sondes sans apprentissage du composeur. \\
+
+G3
+& Plusieurs sondes avec composeur appris
+& Architecture CNG candidate. \\
+
+G4
+& MLP dense de capacité comparable
+& Comparateur neuronal classique. \\
+\bottomrule
+\end{tabularx}
+
+La fusion fixe de G2 est :
+
+\[
+\widehat y_{\mathrm{fixe}}
+=
+\frac{1}{M}
+\sum_{i=1}^{M}P_i(x)
+\]
+
+La fusion apprise de G3 est :
+
+\[
+\widehat y_{\mathrm{apprise}}
+=
+W_c[P_1(x);\ldots;P_M(x)]+b_c
+\]
+
+\subsection{Tailles initiales}
+
+La configuration principale reprend les dimensions
+de référence de la sonde EX7 :
+
+\[
+d=4,\qquad K=8
+\]
+
+Le nombre de sondes est :
+
+\[
+M\in\{1,2,4,7\}
+\]
+
+Les expériences secondaires peuvent étudier :
+
+\[
+d\in\{2,4,8\}
+\]
+
+\[
+K\in\{4,8,16\}
+\]
+
+La recherche secondaire ne doit commencer qu'après
+la réalisation de l'expérience principale.
+
+\subsection{Fonction de perte}
+
+Pour une sortie scalaire :
+
+\[
+\Loss_{\mathrm{CNG}}
+=
+\frac{1}{N}
+\sum_{j=1}^{N}
+\left(
+\widehat y_j-y_j
+\right)^2
+\]
+
+Pour une sortie de dimension $q$ :
+
+\[
+\Loss_{\mathrm{CNG}}
+=
+\frac{1}{Nq}
+\sum_{j=1}^{N}
+\sum_{k=1}^{q}
+(\widehat y_{j,k}-y_{j,k})^2
+\]
+
+L'ensemble des sondes et le composeur sont entraînés
+conjointement.
+
+\subsection{Optimisation}
+
+Configuration initiale :
+
+\begin{itemize}
+    \item Optimiseur : Adam.
+    \item Learning rate : $10^{-3}$.
+    \item Weight decay : $10^{-5}$.
+    \item Batch size : 64.
+    \item Maximum : 500 époques.
+    \item Early stopping : patience 30.
+    \item Sélection : MSE de validation.
+\end{itemize}
+
+Ces valeurs constituent une configuration initiale
+à geler avant l'expérience principale.
+
+Les résultats doivent également contenir les valeurs
+réellement utilisées par le programme.
+
+\subsection{Mesure de la coopération}
+
+Le nombre de sondes ne prouve pas leur coopération.
+
+Pour mesurer la contribution d'une sonde $i$,
+on compare le modèle complet au modèle dont cette
+sonde a été retirée.
+
+Modèle complet :
+
+\[
+\widehat y_{\mathrm{full}}(x)
+=
+C_\phi(P_1(x),\ldots,P_M(x))
+\]
+
+Modèle sans sonde $i$ :
+
+\[
+\widehat y_{-i}(x)
+=
+C_{\phi,-i}(P_1(x),\ldots,P_{i-1}(x),
+P_{i+1}(x),\ldots,P_M(x))
+\]
+
+Le composeur réduit est réentraîné dans une expérience
+d'ablation indépendante.
+
+On calcule :
+
+\[
+\Delta_i=
+\Loss_{-i}-\Loss_{\mathrm{full}}
+\]
+
+Une valeur positive signifie que le retrait de la sonde
+dégrade la performance.
+
+Une valeur nulle ou négative indique que la sonde
+n'apporte pas de contribution positive mesurable
+dans cette configuration.
+
+On complète cette analyse par :
+\begin{itemize}
+    \item la corrélation des sorties des sondes ;
+    \item la corrélation de leurs erreurs ;
+    \item la contribution de chaque sonde ;
+    \item la stabilité de ces mesures entre graines.
+\end{itemize}
+
+Il ne faut pas conclure à une spécialisation uniquement
+parce que les sondes ont des paramètres indépendants.
+
+% ============================================================
+\section{Expérience B : coeur neuronal de calcul}
+% ============================================================
+
+\subsection{Définition}
+
+Le coeur neuronal de calcul est un ensemble de sondes
+dont chacune apprend une opération mathématique.
+
+On définit :
+
+\[
+\mathcal{O}
+=
+\{
+\mathrm{ADD},
+\mathrm{SUB},
+\mathrm{MUL},
+\mathrm{DIV},
+\mathrm{EXP},
+\mathrm{LOG}
+\}
+\]
+
+Chaque opération possède une sonde :
+
+\[
+P_o(u;\theta_o)
+\]
+
+La sonde doit approximer la fonction mathématique
+associée à l'opération.
+
+Exemples :
+
+\[
+P_{\mathrm{ADD}}(a,b)\approx a+b
+\]
+
+\[
+P_{\mathrm{MUL}}(a,b)\approx ab
+\]
+
+\[
+P_{\mathrm{EXP}}(a)\approx e^a
+\]
+
+\[
+P_{\mathrm{LOG}}(a)\approx\log(a)
+\]
+
+\subsection{Domaines de validité}
+
+Les domaines suivants sont fixés pour l'expérience
+principale.
+
+\begin{tabularx}{\textwidth}{
+    >{\centering\arraybackslash}p{0.16\textwidth}
+    X
+}
+\toprule
+\textbf{Opération} & \textbf{Domaine} \\
+\midrule
+ADD & $(a,b)\in[-2,2]^2$. \\
+
+SUB & $(a,b)\in[-2,2]^2$. \\
+
+MUL & $(a,b)\in[-2,2]^2$. \\
+
+DIV & $(a,b)\in[-2,2]^2$ avec $|b|\geq0.25$. \\
+
+EXP & $a\in[-2,2]$. \\
+
+LOG & $a\in[0.1,4]$. \\
+\bottomrule
+\end{tabularx}
+
+Ces restrictions sont obligatoires.
+
+Une division par zéro n'est pas une entrée valide.
+
+Un logarithme d'un nombre négatif n'est pas une entrée valide.
+
+Les expériences hors domaine sont rapportées comme
+des tests de robustesse distincts, jamais comme des
+évaluations normales.
+
+\subsection{Apprentissage individuel des opérations}
+
+Pour chaque opération $o$, on génère :
+
+\[
+D_o=
+\{(u_j,o(u_j))\}_{j=1}^{N_o}
+\]
+
+La perte de la sonde est :
+
+\[
+\Loss_o(\theta_o)
+=
+\frac{1}{N_o}
+\sum_{j=1}^{N_o}
+\left(
+P_o(u_j;\theta_o)-o(u_j)
+\right)^2
+\]
+
+Chaque sonde est entraînée séparément.
+
+Les données sont divisées en trois ensembles :
+\[
+D_o=
+D_{o,\mathrm{train}}
+\cup D_{o,\mathrm{val}}
+\cup D_{o,\mathrm{test}}
+\]
+
+Les centres KMeans sont initialisés uniquement
+sur les représentations des données d'entraînement.
+
+\subsection{Architecture du CNC}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[node distance=8mm and 9mm]
+
+\node[block] (input) {Entrées\\numériques};
+
+\node[smallblock, right=13mm of input, yshift=22mm] (add)
+{Sonde ADD};
+
+\node[smallblock, right=13mm of input, yshift=11mm] (sub)
+{Sonde SUB};
+
+\node[smallblock, right=13mm of input] (mul)
+{Sonde MUL};
+
+\node[smallblock, right=13mm of input, yshift=-11mm] (div)
+{Sonde DIV};
+
+\node[smallblock, right=13mm of input, yshift=-22mm] (exp)
+{Sonde EXP / LOG};
+
+\node[block, right=17mm of mul] (graph)
+{Graphe de calcul\\explicite};
+
+\node[block, right=of graph] (result)
+{Résultat numérique};
+
+\draw[flow] (input.east)--(add.west);
+\draw[flow] (input.east)--(sub.west);
+\draw[flow] (input.east)--(mul.west);
+\draw[flow] (input.east)--(div.west);
+\draw[flow] (input.east)--(exp.west);
+
+\draw[flow] (add.east)--(graph.west);
+\draw[flow] (sub.east)--(graph.west);
+\draw[flow] (mul.east)--(graph.west);
+\draw[flow] (div.east)--(graph.west);
+\draw[flow] (exp.east)--(graph.west);
+
+\draw[flow] (graph)--(result);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Organisation des sondes opérationnelles du CNC.}
+\end{figure}
+
+Le graphe de calcul est explicite dans cette première
+version.
+
+Le CNC ne décide pas encore de l'opération à exécuter.
+
+Cette décision est volontaire : elle permet de tester
+la capacité des sondes à calculer avant de tester
+la capacité d'un coordinateur à choisir les opérations.
+
+\subsection{Premier graphe composé}
+
+La première expression composée est :
+
+\[
+f(a,b,c)=ab+e^c
+\]
+
+Les opérations sont :
+
+\[
+u_1=P_{\mathrm{MUL}}(a,b)
+\]
+
+\[
+u_2=P_{\mathrm{EXP}}(c)
+\]
+
+\[
+\widehat y=P_{\mathrm{ADD}}(u_1,u_2)
+\]
+
+La cible exacte est :
+
+\[
+y=ab+e^c
+\]
+
+\subsection{Graphe du premier calcul}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[node distance=8mm and 12mm]
+
+\node[inputblock] (a) {$a$};
+\node[inputblock, below=of a] (b) {$b$};
+\node[inputblock, below=of b] (c) {$c$};
+
+\node[block, right=of a, yshift=-4mm] (mul)
+{Sonde MUL\\$u_1=P_{\mathrm{MUL}}(a,b)$};
+
+\node[block, right=of c] (exp)
+{Sonde EXP\\$u_2=P_{\mathrm{EXP}}(c)$};
+
+\node[block, right=19mm of mul, yshift=-9mm] (add)
+{Sonde ADD\\$\widehat y=P_{\mathrm{ADD}}(u_1,u_2)$};
+
+\node[inputblock, right=of add] (out)
+{$\widehat y$};
+
+\draw[flow] (a)--(mul);
+\draw[flow] (b)--(mul);
+\draw[flow] (c)--(exp);
+\draw[flow] (mul)--(add);
+\draw[flow] (exp.east)--([yshift=-5mm]add.west);
+\draw[flow] (add)--(out);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Graphe neuronal du calcul $ab+e^c$.}
+\end{figure}
+
+\subsection{Deuxième niveau de composition}
+
+Après validation du premier graphe, trois expressions
+sont retenues :
+
+\[
+f_1(a,b,c)=ab+e^c
+\]
+
+\[
+f_2(a,b,c)=\frac{ab}{c+1}
+\]
+
+\[
+f_3(a,b,c)=
+\log(a^2+b^2+1)+e^c
+\]
+
+Les graphes doivent être définis avant l'évaluation.
+
+Pour $f_2$, on impose :
+
+\[
+|c+1|\geq0.25
+\]
+
+Pour $f_3$, l'argument du logarithme est strictement positif.
+
+\subsection{Propagation des erreurs}
+
+Chaque opération apprise possède une erreur locale :
+
+\[
+\epsilon_o(u)=P_o(u)-o(u)
+\]
+
+L'erreur finale est :
+
+\[
+\epsilon_{\mathrm{final}}
+=
+\widehat y-y
+\]
+
+Pour le premier graphe :
+
+\[
+\widehat y=
+P_{\mathrm{ADD}}
+\left(
+P_{\mathrm{MUL}}(a,b),
+P_{\mathrm{EXP}}(c)
+\right)
+\]
+
+L'erreur finale dépend :
+\begin{itemize}
+    \item de l'erreur de multiplication ;
+    \item de l'erreur exponentielle ;
+    \item de l'erreur d'addition ;
+    \item de la sensibilité des opérations suivantes
+    aux erreurs des opérations précédentes.
+\end{itemize}
+
+Il faut donc enregistrer les sorties intermédiaires
+et calculer les erreurs à chaque noeud.
+
+Une bonne précision sur chaque opération isolée
+ne garantit pas une bonne précision sur un graphe composé.
+
+\subsection{Trois configurations CNC}
+
+\begin{tabularx}{\textwidth}{
+    >{\centering\arraybackslash}p{0.10\textwidth}
+    >{\RaggedRight\arraybackslash}p{0.33\textwidth}
+    X
+}
+\toprule
+\textbf{ID} & \textbf{Configuration} & \textbf{Objectif} \\
+\midrule
+C1
+& Sondes opérationnelles entraînées séparément,
+puis gelées
+& Mesurer la composition sans ajustement global. \\
+
+C2
+& Sondes opérationnelles avec ajustement conjoint
+sur les graphes
+& Mesurer l'effet d'un ajustement global. \\
+
+C3
+& Modèle neuronal direct entraîné sur chaque expression
+& Comparateur sans composition opérationnelle explicite. \\
+\bottomrule
+\end{tabularx}
+
+C1 est l'expérience principale.
+
+C2 est secondaire.
+
+C3 constitue le comparateur direct.
+
+\subsection{Pourquoi C1 est prioritaire}
+
+Si les sondes opérationnelles sont entraînées séparément,
+puis assemblées sans réentraînement, une réussite
+sur des graphes non vus constitue une preuve plus forte
+de réutilisabilité.
+
+Si l'on entraîne directement l'ensemble du graphe,
+il devient difficile de savoir si le modèle a appris
+des opérations réutilisables ou simplement une fonction
+globale.
+
+C'est pourquoi C1 doit être exécutée avant C2.
+
+% ============================================================
+\section{Comparateurs et équité expérimentale}
+% ============================================================
+
+\subsection{Comparateurs CNG}
+
+Les comparateurs sont :
+
+\begin{enumerate}
+    \item une sonde AdaptiveRBF unique ;
+    \item plusieurs sondes à fusion fixe ;
+    \item plusieurs sondes à fusion apprise ;
+    \item un MLP de capacité comparable.
+\end{enumerate}
+
+\subsection{Comparateurs CNC}
+
+Les comparateurs sont :
+
+\begin{enumerate}
+    \item calcul natif exact ;
+    \item MLP direct sur l'expression ;
+    \item sonde AdaptiveRBF directe sur l'expression ;
+    \item CNC composé avec sondes gelées ;
+    \item CNC composé avec ajustement conjoint.
+\end{enumerate}
+
+Le calcul natif est une référence exacte et une référence
+de coût. Il ne constitue pas un concurrent neuronal
+de capacité comparable.
+
+\subsection{Contrôle du nombre de paramètres}
+
+Pour chaque modèle :
+
+\[
+P_{\mathrm{total}}
+=
+P_{\mathrm{entraînable}}
++
+P_{\mathrm{buffers}}
++
+P_{\mathrm{prétraitement}}
+\]
+
+Les paramètres doivent être comptés automatiquement.
+
+Le rapport doit donner :
+\begin{itemize}
+    \item le nombre de paramètres entraînables ;
+    \item le nombre de paramètres fixes ;
+    \item le nombre de paramètres de prétraitement ;
+    \item le total persistant ;
+    \item la taille du checkpoint.
+\end{itemize}
+
+Les comparaisons de qualité doivent être accompagnées
+du nombre de paramètres.
+
+Une différence de capacité importante doit être
+explicitement signalée.
+
+\subsection{Graines}
+
+On reprend les cinq graines utilisées dans EX7 :
+
+\[
+S=\{1501,1607,1717,2029,3037\}
+\]
+
+Elles permettent une première analyse de sensibilité
+à l'initialisation.
+
+Elles ne constituent pas cinq jeux de données indépendants.
+
+Pour une validation confirmatoire, il faudra ultérieurement
+augmenter le nombre de répétitions et varier les
+échantillons de données.
+
+% ============================================================
+\section{Mesures et métriques}
+% ============================================================
+
+\subsection{Qualité numérique}
+
+Erreur absolue moyenne :
+
+\[
+\MAE=
+\frac{1}{N}
+\sum_{i=1}^{N}
+|\widehat y_i-y_i|
+\]
+
+Erreur quadratique moyenne :
+
+\[
+\MSE=
+\frac{1}{N}
+\sum_{i=1}^{N}
+(\widehat y_i-y_i)^2
+\]
+
+Racine de l'erreur quadratique moyenne :
+
+\[
+\RMSE=\sqrt{\MSE}
+\]
+
+Erreur relative moyenne :
+
+\[
+E_{\mathrm{rel}}
+=
+\frac{1}{N}
+\sum_{i=1}^{N}
+\frac{|\widehat y_i-y_i|}
+{\max(|y_i|,\varepsilon)}
+\]
+
+La valeur de $\varepsilon$ doit être fixée avant
+l'évaluation.
+
+L'erreur relative ne doit pas être utilisée seule
+lorsque les cibles sont proches de zéro.
+
+\subsection{Coût d'exécution}
+
+Pour chaque architecture, mesurer :
+
+\begin{itemize}
+    \item latence p50 ;
+    \item latence p95 ;
+    \item latence p99 ;
+    \item débit ;
+    \item nombre de paramètres ;
+    \item mémoire persistante ;
+    \item mémoire maximale, si mesurable ;
+    \item durée d'entraînement.
+\end{itemize}
+
+Les latences sont mesurées dans des conditions identiques :
+\begin{itemize}
+    \item même matériel ;
+    \item même nombre de threads ;
+    \item même précision numérique ;
+    \item même taille de batch ;
+    \item même nombre de warmups ;
+    \item même nombre de répétitions.
+\end{itemize}
+
+Les temps de construction et d'initialisation
+sont rapportés séparément du temps d'inférence.
+
+\subsection{Mesures propres au CNC}
+
+Pour chaque graphe :
+
+\[
+N_{\mathrm{sondes}}
+=
+\text{nombre de sondes appelées}
+\]
+
+\[
+N_{\mathrm{noeuds}}
+=
+\text{nombre de noeuds du graphe}
+\]
+
+\[
+D_{\mathrm{graphe}}
+=
+\text{profondeur maximale}
+\]
+
+Il faut aussi mesurer :
+
+\[
+T_{\mathrm{total}}
+=
+T_{\mathrm{sondes}}
++
+T_{\mathrm{composition}}
+\]
+
+Cette décomposition permet de vérifier si la composition
+introduit un coût disproportionné.
+
+% ============================================================
+\section{Plan expérimental complet}
+% ============================================================
+
+\subsection{Séquence des expériences}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=0.78\textwidth}
+\begin{tikzpicture}[node distance=6mm]
+
+\node[block] (a)
+{Gel du protocole};
+
+\node[block, below=of a] (b)
+{Validation logicielle};
+
+\node[block, below=of b] (c)
+{Entraînement CNG};
+
+\node[block, below=of c] (d)
+{Ablations CNG};
+
+\node[block, below=of d] (e)
+{Entraînement des opérations CNC};
+
+\node[block, below=of e] (f)
+{Composition des graphes};
+
+\node[block, below=of f] (g)
+{Tests de généralisation};
+
+\node[block, below=of g] (h)
+{Audit et décision};
+
+\draw[flow] (a)--(b);
+\draw[flow] (b)--(c);
+\draw[flow] (c)--(d);
+\draw[flow] (d)--(e);
+\draw[flow] (e)--(f);
+\draw[flow] (f)--(g);
+\draw[flow] (g)--(h);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Ordre obligatoire des opérations expérimentales.}
+\end{figure}
+
+\subsection{Phase 0 : gel du protocole}
+
+Avant l'entraînement :
+\begin{enumerate}
+    \item fixer les fonctions ;
+    \item fixer les domaines ;
+    \item fixer les graines ;
+    \item fixer les architectures ;
+    \item fixer les hyperparamètres ;
+    \item fixer les métriques ;
+    \item enregistrer les configurations.
+\end{enumerate}
+
+Toute modification après consultation des résultats
+de test doit produire une nouvelle version du protocole.
+
+\subsection{Phase 1 : validation logicielle}
+
+Les tests unitaires doivent vérifier :
+
+\begin{itemize}
+    \item les dimensions des tenseurs ;
+    \item la stabilité des activations RBF ;
+    \item les bornes des largeurs ;
+    \item la reproductibilité des initialisations ;
+    \item l'absence de valeurs NaN ;
+    \item l'absence de valeurs infinies ;
+    \item la séparation des ensembles ;
+    \item le calcul exact des opérations de référence.
+\end{itemize}
+
+\subsection{Phase 2 : exécution CNG}
+
+Pour chaque fonction et chaque graine :
+
+\begin{enumerate}
+    \item générer les données ;
+    \item séparer train, validation et test ;
+    \item initialiser les sondes sur le train ;
+    \item initialiser le composeur ;
+    \item entraîner le modèle ;
+    \item sélectionner le checkpoint sur validation ;
+    \item évaluer sur test ;
+    \item enregistrer prédictions et métriques.
+\end{enumerate}
+
+\subsection{Phase 3 : ablations CNG}
+
+Pour chaque sonde :
+\begin{enumerate}
+    \item retirer la sonde ;
+    \item reconstruire le composeur ;
+    \item réentraîner le modèle réduit ;
+    \item comparer les métriques ;
+    \item enregistrer la contribution.
+\end{enumerate}
+
+Les résultats d'ablation doivent être comparés
+au modèle complet sur les mêmes partitions.
+
+\subsection{Phase 4 : entraînement des opérations CNC}
+
+Pour chaque opération :
+
+\begin{enumerate}
+    \item générer les entrées ;
+    \item calculer les sorties exactes ;
+    \item séparer les ensembles ;
+    \item initialiser la sonde ;
+    \item entraîner la sonde ;
+    \item sélectionner le checkpoint ;
+    \item évaluer l'opération ;
+    \item sauvegarder le modèle.
+\end{enumerate}
+
+\subsection{Phase 5 : composition CNC}
+
+Les sondes sont chargées sans modification.
+
+Pour chaque graphe :
+\begin{enumerate}
+    \item fournir les entrées ;
+    \item exécuter les opérations dans l'ordre ;
+    \item sauvegarder les sorties intermédiaires ;
+    \item comparer chaque noeud à sa référence exacte ;
+    \item comparer la sortie finale à la cible ;
+    \item mesurer le coût d'exécution.
+\end{enumerate}
+
+\subsection{Phase 6 : généralisation}
+
+Le CNC est testé sur des compositions qui n'ont pas
+été utilisées pendant l'entraînement.
+
+Les tests comprennent :
+\begin{itemize}
+    \item des entrées numériques inédites ;
+    \item des compositions inédites ;
+    \item des valeurs proches des limites du domaine ;
+    \item des domaines d'extrapolation séparés.
+\end{itemize}
+
+\subsection{Phase 7 : audit final}
+
+Les éléments suivants sont conservés :
+
+\begin{itemize}
+    \item code source ;
+    \item configuration ;
+    \item graines ;
+    \item checkpoints ;
+    \item prédictions ;
+    \item métriques par graine ;
+    \item historiques d'entraînement ;
+    \item profils de latence ;
+    \item journaux d'erreurs ;
+    \item empreintes SHA-256.
+\end{itemize}
+
+Les expériences échouées ne sont pas supprimées.
+
+% ============================================================
+\section{Critères de validation}
+% ============================================================
+
+\subsection{Niveau 1 : fonctionnement individuel}
+
+Une sonde est fonctionnelle si :
+\begin{enumerate}
+    \item elle apprend l'opération ou la fonction ciblée ;
+    \item elle converge de manière reproductible ;
+    \item elle généralise à des entrées non vues ;
+    \item elle reste numériquement stable.
+\end{enumerate}
+
+\subsection{Niveau 2 : fonctionnement collectif}
+
+Le CNG est fonctionnel si le modèle multi-sondes
+apprend correctement les fonctions testées.
+
+La coopération est validée seulement si elle apporte
+un bénéfice mesurable par rapport à une sonde unique
+et aux comparateurs à capacité contrôlée.
+
+\subsection{Niveau 3 : composition}
+
+Le CNC est fonctionnel si :
+\begin{enumerate}
+    \item les opérations individuelles sont apprises ;
+    \item les opérations peuvent être assemblées ;
+    \item les graphes composés produisent les sorties attendues ;
+    \item les erreurs intermédiaires sont maîtrisées ;
+    \item les compositions inédites sont évaluées.
+\end{enumerate}
+
+\subsection{Niveau 4 : efficacité}
+
+Une bonne précision ne prouve pas une meilleure efficacité.
+
+Une revendication d'efficacité exige :
+\begin{itemize}
+    \item une mesure de latence ;
+    \item une mesure du nombre d'opérations ;
+    \item une mesure de mémoire ;
+    \item une comparaison avec les références ;
+    \item une qualité numérique suffisante.
+\end{itemize}
+
+Le calcul natif exact est une référence particulièrement
+importante pour le CNC.
+
+Le CNC ne sera pas déclaré plus rapide qu'un calcul natif
+sans mesure directe.
+
+\subsection{Tableau de décision}
+
+\begin{tabularx}{\textwidth}{
+    >{\RaggedRight\arraybackslash}p{0.34\textwidth}
+    X
+}
+\toprule
+\textbf{Résultat} & \textbf{Décision} \\
+\midrule
+La sonde individuelle échoue
+& Corriger la sonde avant toute composition. \\
+
+La sonde fonctionne mais le CNG échoue
+& Étudier le composeur, l'initialisation et l'interaction
+entre les sondes. \\
+
+Le CNG fonctionne sans bénéfice multi-sondes
+& Conserver le résultat comme approximation distribuée,
+sans revendiquer un avantage collectif. \\
+
+Le CNG montre un bénéfice reproductible
+& Autoriser l'expérience CNC. \\
+
+Les opérations CNC fonctionnent individuellement,
+mais les graphes échouent
+& Étudier la propagation des erreurs et la stabilité. \\
+
+Les graphes fonctionnent sans réentraînement
+& Valider la réutilisation des sondes opérationnelles
+dans le périmètre testé. \\
+
+La qualité est bonne mais le coût est supérieur
+& Conclure à une capacité fonctionnelle, pas à une
+amélioration d'efficacité. \\
+\bottomrule
+\end{tabularx}
+
+% ============================================================
+\section{Analyse statistique}
+% ============================================================
+
+\subsection{Résultats par graine}
+
+Pour une métrique $m$ et $S$ graines :
+
+\[
+\overline m=
+\frac{1}{S}\sum_{s=1}^{S}m_s
+\]
+
+Écart-type :
+
+\[
+s_m=
+\sqrt{
+\frac{1}{S-1}
+\sum_{s=1}^{S}(m_s-\overline m)^2
+}
+\]
+
+Les résultats sont présentés sous la forme :
+
+\[
+\overline m\pm s_m
+\]
+
+Les résultats individuels restent accessibles.
+
+\subsection{Comparaison appariée}
+
+Pour deux modèles A et B :
+
+\[
+\Delta_s=m_{A,s}-m_{B,s}
+\]
+
+\[
+\overline\Delta=
+\frac{1}{S}\sum_{s=1}^{S}\Delta_s
+\]
+
+Les graines communes permettent une comparaison
+appariée de l'initialisation.
+
+Elles ne remplacent pas des échantillons de données
+indépendants.
+
+Les intervalles de confiance obtenus avec cinq graines
+doivent être interprétés comme descriptifs et non
+comme une preuve confirmatoire.
+
+% ============================================================
+\section{Organisation du code}
+% ============================================================
+
+\subsection{Structure du projet}
+
+\begin{verbatim}
+th_sonde/
+|
++-- configs/
+|   +-- cng_config.json
+|   +-- cnc_config.json
+|   +-- seeds.json
+|
++-- src/
+|   +-- adaptive_rbf.py
+|   +-- neural_core_general.py
+|   +-- neural_core_calculation.py
+|   +-- synthetic_data.py
+|   +-- operation_graph.py
+|   +-- train_cng.py
+|   +-- train_cnc_operations.py
+|   +-- evaluate_cnc_graphs.py
+|   +-- benchmark.py
+|   +-- audit.py
+|
++-- tests/
+|   +-- test_adaptive_rbf.py
+|   +-- test_cng.py
+|   +-- test_operations.py
+|   +-- test_graphs.py
+|   +-- test_data_integrity.py
+|
++-- results/
+|   +-- raw/
+|   +-- models/
+|   +-- metrics/
+|   +-- profiles/
+|   +-- logs/
+|
++-- reports/
+|   +-- cng_report.md
+|   +-- cnc_report.md
+|   +-- final_report.md
+|
++-- checksums/
+    +-- SHA256SUMS.txt
+\end{verbatim}
+
+\subsection{Responsabilités des modules}
+
+\begin{tabularx}{\textwidth}{
+    >{\RaggedRight\arraybackslash}p{0.40\textwidth}
+    X
+}
+\toprule
+\textbf{Module} & \textbf{Responsabilité} \\
+\midrule
+\texttt{adaptive\_rbf.py}
+& Reprise et adaptation de la classe source. \\
+
+\texttt{neural\_core\_general.py}
+& Assemblage des sondes et composeur CNG. \\
+
+\texttt{neural\_core\_calculation.py}
+& Sondes dédiées aux opérations. \\
+
+\texttt{synthetic\_data.py}
+& Génération et séparation des données. \\
+
+\texttt{operation\_graph.py}
+& Définition et exécution des graphes CNC. \\
+
+\texttt{benchmark.py}
+& Mesures de temps, mémoire et paramètres. \\
+
+\texttt{audit.py}
+& Contrôles d'intégrité et de reproductibilité. \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Réutilisation du code source}
+
+La classe AdaptiveRBF doit être reprise depuis :
+
+\begin{verbatim}
+inputs/reference_v002/src/ex6_common.py
+\end{verbatim}
+
+Les éléments à conserver sont :
+\begin{itemize}
+    \item la structure de l'encodeur ;
+    \item la projection latente ;
+    \item l'initialisation KMeans ;
+    \item le calcul des distances ;
+    \item les largeurs apprenables ;
+    \item la couche de lecture.
+\end{itemize}
+
+Les éléments à adapter sont :
+\begin{itemize}
+    \item la dimension de sortie ;
+    \item les fonctions de perte ;
+    \item les générateurs de données ;
+    \item les graphes de composition ;
+    \item les métriques de calcul numérique.
+\end{itemize}
+
+La source originale doit rester inchangée.
+Les nouvelles expériences doivent être placées
+dans des modules distincts.
+
+% ============================================================
+\section{Limites et précautions}
+% ============================================================
+
+\subsection{Limites de cette première validation}
+
+Ce protocole ne valide pas encore :
+
+\begin{itemize}
+    \item un coordinateur neuronal adaptatif ;
+    \item un routage dynamique ;
+    \item une sélection conditionnelle de sondes ;
+    \item une mémoire temporaire intelligente ;
+    \item une modification dynamique du graphe ;
+    \item une architecture physique ;
+    \item une supériorité générale sur les MLP ;
+    \item une supériorité sur le calcul natif.
+\end{itemize}
+
+Ces mécanismes devront être étudiés dans des expériences
+ultérieures.
+
+\subsection{Limite de la base EX7}
+
+EX7 V003 est une expérience de développement
+sur le jeu Wisconsin.
+
+Le rapport final indique notamment :
+\begin{itemize}
+    \item 1\,341 paramètres persistants pour V003 ;
+    \item 97,88 \% d'accuracy ;
+    \item 0,06806 de log-loss ;
+    \item une latence p50 raw-end-to-end de 0,2902 ms
+    au batch 1 ;
+    \item une validation externe non établie.
+\end{itemize}
+
+Le MLP apparié obtient dans ce rapport :
+\begin{itemize}
+    \item 98,12 \% d'accuracy ;
+    \item 0,05136 de log-loss ;
+    \item une latence p50 de 0,0251 ms au batch 1.
+\end{itemize}
+
+Ces résultats montrent que la compacité de V003
+ne garantit ni une meilleure qualité ni une meilleure
+latence.
+
+Ils ne constituent pas une validation du CNG ou du CNC,
+qui sont des expériences distinctes.
+
+\subsection{Limite de la spécialisation}
+
+Le fait d'affecter une opération à une sonde ne garantit
+pas que cette sonde apprenne une représentation
+réutilisable.
+
+Cette propriété doit être testée sur plusieurs graphes.
+
+\subsection{Limite de la composition}
+
+Une composition peut amplifier les erreurs.
+
+Il faut donc mesurer :
+\begin{itemize}
+    \item l'erreur de chaque opération ;
+    \item l'erreur de chaque noeud ;
+    \item l'erreur finale ;
+    \item la profondeur du graphe ;
+    \item le coût d'exécution.
+\end{itemize}
+
+% ============================================================
+\section{Décision de passage vers l'étape suivante}
+% ============================================================
+
+La progression expérimentale est :
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=0.82\textwidth}
+\begin{tikzpicture}[node distance=9mm]
+
+\node[block] (p)
+{Sonde adaptative};
+
+\node[block, below=of p] (g)
+{Coeur neuronal général};
+
+\node[block, below=of g] (c)
+{Coeur neuronal de calcul};
+
+\node[block, below=of c] (coord)
+{Coordination neuronale apprise};
+
+\node[block, below=of coord] (multi)
+{Architecture multi-coeurs};
+
+\draw[flow] (p)--(g);
+\draw[flow] (g)--(c);
+\draw[flow] (c)--(coord);
+\draw[flow] (coord)--(multi);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Progression expérimentale du projet th\_sonde.}
+\end{figure}
+
+Le passage vers l'étape suivante n'est autorisé
+que lorsque l'étape précédente a produit des résultats
+reproductibles.
+
+Le coordinateur neuronal adaptatif ne doit pas être
+introduit avant d'avoir vérifié :
+\begin{enumerate}
+    \item que les sondes apprennent correctement ;
+    \item que plusieurs sondes peuvent être combinées ;
+    \item que des sondes spécialisées peuvent être réutilisées ;
+    \item que les graphes composés fonctionnent ;
+    \item que le coût de composition est quantifié.
+\end{enumerate}
+
+% ============================================================
+\section{Conclusion}
+% ============================================================
+
+Cette expérience constitue le socle expérimental
+du projet th\_sonde.
+
+Le \CNG{} vérifie la capacité de plusieurs sondes
+adaptatives à apprendre collectivement une fonction.
+
+Le \CNC{} vérifie la capacité de sondes spécialisées
+à apprendre des opérations élémentaires et à les
+composer dans des graphes de calcul.
+
+Les deux expériences sont complémentaires, mais
+ne doivent pas être confondues.
+
+Le CNG répond à la question :
+
+\begin{center}
+\textit{Plusieurs sondes peuvent-elles former
+un coeur neuronal fonctionnel ?}
+\end{center}
+
+Le CNC répond à la question :
+
+\begin{center}
+\textit{Des sondes neuronales spécialisées peuvent-elles
+réaliser et composer des opérations de calcul ?}
+\end{center}
+
+La coordination adaptative, la mémoire et la modification
+dynamique des graphes seront étudiées ultérieurement.
+
+\[
+\boxed{
+\text{Sonde}
+\rightarrow
+\text{CNG}
+\rightarrow
+\text{CNC}
+\rightarrow
+\text{Coordination apprise}
+}
+\]
+
+La règle fondamentale est de valider chaque niveau
+indépendamment avant d'introduire le niveau suivant.
+
+% ============================================================
+\appendix
+\section{Checklist de reproductibilité}
+% ============================================================
+
+\begin{itemize}
+    \item[$\square$] Source AdaptiveRBF identifiée et versionnée.
+    \item[$\square$] Source originale conservée sans modification.
+    \item[$\square$] Configuration expérimentale gelée.
+    \item[$\square$] Graines enregistrées.
+    \item[$\square$] Domaines mathématiques définis.
+    \item[$\square$] Ensembles train, validation et test disjoints.
+    \item[$\square$] KMeans limité aux données train.
+    \item[$\square$] Nombre de paramètres calculé automatiquement.
+    \item[$\square$] Comparateurs entraînés.
+    \item[$\square$] Ablations exécutées.
+    \item[$\square$] Checkpoints sauvegardés.
+    \item[$\square$] Prédictions sauvegardées.
+    \item[$\square$] Erreurs intermédiaires CNC sauvegardées.
+    \item[$\square$] Latences mesurées.
+    \item[$\square$] Résultats par graine conservés.
+    \item[$\square$] Résultats négatifs conservés.
+    \item[$\square$] Audit final effectué.
+    \item[$\square$] Empreintes SHA-256 générées.
+\end{itemize}
+
+\end{document}

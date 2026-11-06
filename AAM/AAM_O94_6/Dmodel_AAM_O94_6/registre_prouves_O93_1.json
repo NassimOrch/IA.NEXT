@@ -1,0 +1,192 @@
+{
+  "schema": "aam-o931-proof-register-v1",
+  "title": "Registre incrémental de preuves AAM O93_1",
+  "version": "0.93.1",
+  "generated_unix": 1791989084.947299,
+  "baseline_registry": "registre_prouves.json (O93_0 historique; non modifié par cette annexe)",
+  "summary": {
+    "implementation_complete_claimed": false,
+    "p1_p2_p3_status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "p4_status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "full_sms_corpus_status": "NOT_VALIDATED",
+    "proof_count": 12,
+    "overall_status": "P4_COMPLETE_LOCAL_TESTED_BOUNDED_FULL_SMS_NOT_VALIDATED"
+  },
+  "proofs": [
+    {
+      "id": "O931-P1-CHAT-RAG-CAPSULE",
+      "requirement": "RAG retrieval and selected language capsule are linked in the user-facing chat response.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py",
+          "aam_o93/ui.py",
+          "tests/test_o931_chat_pipeline.py",
+          "logs/O931/p3_current_chat_rag_lm_regression.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P1-GENERATION-PROVENANCE",
+      "requirement": "Actual generation invocation records capsule, prompt/context hashes and citations; rejected candidates are distinguished from delivered fallback.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py::_generate_chat_from_evidence",
+          "aam_o93/ui.py::format_chat_result",
+          "tests/test_o931_chat_pipeline.py"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P1-LM-TRAIN-API-CLI",
+      "requirement": "A dedicated CLI/API trains a chat-language capsule distinct from skill acquisition.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py::train_language_model",
+          "aam_o93/cli.py::train-language-model",
+          "logs/O931/p3_language_model_training_api_cli_stop.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P1-LM-TRAIN-UI",
+      "requirement": "Training control is visible in the desktop UI; completed capsules become selectable and are invoked by chat.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::_training_train_language_model",
+          "tests/test_o931_language_model_training_surface.py",
+          "logs/O931/p3_lm_training_ui_single.json",
+          "logs/O931/p3_ui_real_trained_capsule_single.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P1-TRAINING-PAUSE-RESUME",
+      "requirement": "Training pause/resume and stop checkpoints have explicit, tested semantics; partial capsules are not published.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py::train_language_model",
+          "tests/test_o931_language_model_training_surface.py",
+          "logs/O931/p3_lm_training_pause_resume_final.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P2-RESPONSIVE-CHAT-UI",
+      "requirement": "Chat controls and feedback region stay within screen bounds under tested Xvfb geometry.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py",
+          "tests/test_o931_ui_smoke.py",
+          "logs/O931/p3_ui_smoke_layout_single.json",
+          "logs/O931/O93_1_chat_ui_visual_final.png"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P2-BUSY-CATALOG-REFRESH",
+      "requirement": "Scheduled catalogue refreshes defer while a long task occupies UI, avoiding blocking modal dialogs.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py",
+          "tests/test_o931_ui_busy_catalog_refresh.py",
+          "logs/O931/p3_ui_deferred_catalog_refresh.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P3-AUTONOMY-BOOT",
+      "requirement": "Autonomy starts by default, runs a pulse, survives a user request, can be manually stopped/restarted and closes cleanly with AAM.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py",
+          "tests/test_o931_autonomy_boot_lifecycle.py",
+          "logs/O931/p3_autonomy_lifecycle_final_targeted.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P3-REAL-SMS-BOUNDED",
+      "requirement": "A held-out row in the real SMS dataset is recovered from RAG, included in the prompt, and a matching trained capsule is invoked; the candidate is rejected and cited extractive fallback is delivered.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "source_material/dataset/smsspamcollection.zip",
+          "logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.json",
+          "logs/O931/p3_real_sms_acceptance_detached_exit_check.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P3-REAL-SMS-FULL",
+      "requirement": "End-to-end acceptance over all 5,574 SMS rows.",
+      "status": "NOT_VALIDATED",
+      "traceability": {
+        "references": [
+          "logs/O931/p3_full_sms_corpus_acceptance_timeout_receipt.json",
+          "logs/O931/p3_full_sms_sparse_run_interrupted_receipt.json"
+        ]
+      },
+      "objective_acceptance_needed": true,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P3-SPARSE-PROXIMITY",
+      "requirement": "Sparse proximity optimization matches exhaustive oracle within 1e-12 including self-exclusion and no-intersection cases.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "tests/test_o931_sparse_proximity_optimization.py",
+          "logs/O931/p3_sparse_opt_test_receipt.json",
+          "logs/O931/p3_feature_sum_sparse_retest_receipt.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    },
+    {
+      "id": "O931-P4-PACKAGING",
+      "requirement": "Package integrity, clean extraction, manifest verification, CLI smoke and target tests are validated for final archives.",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "logs/O931/p4_phase_closure_gate.json",
+          "logs/O931/p4_candidate_dmodel_pytest_receipt.json",
+          "logs/O931/p4_candidate_amodel_pytest_receipt.json",
+          "logs/O931/p4_followup_content_retest.json",
+          "logs/O931/p4_final_source_regression.json",
+          "logs/O931/p4_final_cli_status.json",
+          "logs/O931/p4_tex_final_compile.json"
+        ]
+      },
+      "objective_acceptance_needed": false,
+      "scope": "local bounded unless explicitly stated otherwise"
+    }
+  ],
+  "interpretation": "Ce registre ne prédit ni succès ni échec général du modèle. PASS_BOUNDED limite le résultat aux cas, données et environnements consignés."
+}

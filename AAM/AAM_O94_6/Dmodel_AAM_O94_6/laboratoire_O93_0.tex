@@ -1,0 +1,234 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}\usepackage{lmodern}\usepackage[a4paper,margin=2cm]{geometry}\usepackage{microtype}\usepackage{hyperref}\usepackage{booktabs,longtable,tabularx,array}\usepackage{amsmath,amssymb}\usepackage{listings}\usepackage{enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}\setlist{itemsep=2pt,topsep=3pt}\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,frame=single}
+\title{Laboratoire AAM O93\_0 -- Audit, expériences et validation par phases}\author{AAM -- dossier de conception et de preuve}\date{13 octobre 2026}
+\begin{document}\maketitle
+\begin{abstract}Ce laboratoire établit la base traçable de O93\_0 à partir de \texttt{sources\_AAM\_17.zip}. Il prend la théorie des empreintes comme fondement conceptuel, O93 et O92\_0 comme sources logicielles récentes et les modèles historiques comme contexte. Il transforme les besoins en expériences, critères de sortie, contrats et preuves. Il ne prédit ni réussite ni échec; une capacité décrite, exécutée, testée et acceptée par test indépendant relève de quatre niveaux de preuve différents.\end{abstract}
+\tableofcontents
+\chapter{Description et sources}
+\section{Mission}Construire un AAM unifié qui observe les données brutes et leurs vues, crée des sondes différenciées, cherche invariants/variantes, construit des empreintes et des espaces sémantiques, apprend des mécanismes reproductibles, les compose et les adapte, puis mémorise les conséquences dans une boucle autonome persistante. Le laboratoire établit les faits de départ, les questions à tester, les critères d'acceptation, les erreurs et le statut effectif.
+\section{Ordre et importance des sources}
+\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{.31\linewidth}>{\raggedright\arraybackslash}p{.57\linewidth}}\toprule Source & Fonction \\\midrule
+\nolinkurl{DDD_Base_theorie_des_empreintes_complete_order_5.tex} (racine et \texttt{theorie\_emp}) & Source principale; ordre 5, observation, empreintes, famille de sondes, équivalence observationnelle, distances/résolutions, contraintes, profils, généralisation et frontières de preuve. \\
+\nolinkurl{theorie_emp/th_emp_observation_formalisme_0(1).tex} et formalismes DD\_Dev/empirical & Compléments théoriques et formalisme opérationnel d'observation. \\
+\nolinkurl{formalisme_O93.tex}, \nolinkurl{laboratoire_O93.tex}, code, tests, logs O93 & Source logiciel prioritaire : runtime commun, observateur, sondes adaptatives, compétences, acquisition source-off, RAG observation-first, mémoire, autonomie et sécurité. \\
+\nolinkurl{formalisme_model_emergent_O92.tex}, formalismes/laboratoire O92\_0 & Héritage, méthodes d'apprentissage et contexte des corrections. \\
+\texttt{dataset/} & SMS, jeux JSONL, Parquet et météo. Étiquettes seulement dans des expériences explicitement supervisées. \\
+\texttt{formalismes/} et \texttt{rapports/} & Historique des modèles et des expériences; ils n'équivalent pas à une preuve de la version courante. \\
+\bottomrule\end{longtable}\normalsize
+L'archive racine présente 220 entrées listées (dont entrées de répertoire); les lots O93 annoncent respectivement 504 entrées Dmodel, 181 Amodel et 413 suivi. L'inventaire exécuté et les SHA-256 sont fournis dans \texttt{source\_inventory.json}. L'archive O92\_0 et son patch sont conservés dans l'audit.
+\section{Constats source O93}Les modules hérités exécutent déjà l'observation, les probes, l'acquisition de compétences, une mémoire, une boucle d'autonomie, une recherche lexicale et une interface Tk. Les journaux O93 déclarent P0--P9 réussies dans leur protocole antérieur, tandis que P10 reste bloquée sur des tests Windows natifs, matériels physiques et fournisseurs Internet indisponibles. Ces succès historiques ne valident pas les exigences nouvelles O93\_0.
+\begin{enumerate}
+\item Le RAG hérité stocke des morceaux observés, mais la recherche de contenu hérité est lexicalement indexée. Il manque encore la chaîne sémantique demandée : espaces distincts, classes itoken/vtoken, distances, évolution de poids, espace final et lecteur pondéré.
+\item Les probes ont un mode de recherche adaptative bornée. Un candidat trouvé au développement n'est pas une preuve de reproduction, de transfert ni de généralisation.
+\item Le registre des compétences existe; l'interface détaillée pour gestion complète, sélection manuelle, arbres de composition et réglages de mémoire reste à démontrer.
+\item L'interface fournie expose cinq espaces principaux et ne couvre pas visiblement tout le schéma souhaité : historique latéral, inspection d'espaces, entraînement détaillé, internet, graphe de mémoire et focus.
+\item La boucle autonome hérité démarre avec l'UI ou une commande; le démarrage automatique de toute exécution applicative reste à concevoir et tester. Les init CLI ponctuelles doivent rester capables de s'arrêter proprement.
+\item L'observation multimodale peut ne donner que des propriétés structurelles. Le code doit distinguer explicitement contenu décodé, partiel, inconnu et non exécuté.
+\end{enumerate}
+\chapter{Architecture de laboratoire}
+\section{Graphe de fonctionnement}
+\begin{lstlisting}
+Sources/requete -> contrat TaskEnvelope -> observation brute multi-sondes
+        ^                                  |
+        |                                  v
+Memoire causale <- recompense <- verification independante
+        ^                                  ^
+        |                                  |
+Autonomie/orchestrateur <- competence <- RAG espace final
+                                ^             ^
+                                |             |
+                     composition/adaptation espaces semantiques
+                                              ^
+                               sondes miroir, primitives, composees
+                                              ^
+                             empreintes/vues/distances/collisions
+\end{lstlisting}
+\section{Deux modes}Le mode local doit fonctionner sans réseau, capteur ou fournisseur externe : UI, mémoire, observation locale, compétences présentes, entraînement de proximité et RAG. Le potentiel étendu ajoute les ressources autorisées (accélération, entraînement large, connecteurs Internet et matériel), sans supprimer le mode local. Un défaut d'environnement produit un statut explicite, pas un jugement de potentiel.
+\section{Format invariant des rapports}Chaque rapport, sans exception, comporte : description; architecture; pipeline complet; commandes exactes; environnement, jeux de données, seeds et hashes; résultats bruts; interprétation; conséquences théoriques, conceptuelles et opérationnelles; erreurs/limites; conclusion; statut du modèle et gates suivantes. Un test non exécuté est noté \texttt{NOT\_RUN}.
+\chapter{Expériences abstraites}
+\section{A -- identité observationnelle}Construire des objets avec des transformations distinctes (ordre, casse, ponctuation, champs, miroir spatial/temporel lorsque les décodeurs sont disponibles). Calculer séparément le hash brut et les vues typées. Mesurer collision et fausse séparation au regard de critères de tâche explicites. Résultats : sorties de chaque sonde, paramètres, durée, hash et erreurs. Interprétation : une empreinte n'affirme qu'une équivalence relative à sa famille de sondes. Conséquences théoriques : distinguer égalité d'octets et quotient observationnel; conceptuelles : profils de collisions; opérationnelles : demander de nouvelles sondes si les vues sont insuffisantes. Statut : ne pas conclure universellement d'un essai jouet.
+\section{B -- génération de sondes}Mesurer sondes primitives, paramètres, miroirs et compositions. Chaque sonde est identifiée par un hash de définition canonique, exécutée sans consulter la cible, puis évaluée séparément. Suivre gain marginal, distances, collisions, fausses séparations, stabilité et coût. Résultats : portefeuille, matrice de différences, traces et checkpoint. Interprétation : plus de sondes ne garantit pas de meilleure généralisation. Conséquences : continuer tant que l'information gagne et le budget le permet; si le budget finit, reprise obligatoire. Le statut \texttt{CANDIDATE\_FOUND\_NOT\_GENERALIZATION\_PROOF} ne vaut pas acceptation.
+\section{C -- espaces sémantiques}Pour chaque sonde, construire un espace indépendant contenant tokens, occurrences, relations contextuelles, classe, poids et provenance. Pour des vecteurs valides : $s(t,u)=\max(0,\min(1,\cos(z_t,z_u)))$ et $d(t,u)=1-s(t,u)$. Si $I_j$ est l'ensemble des invariants de l'espace $j$, $p_j(t)=\max_{u\in I_j}s_j(t,u)$. La mise à jour vtoken doit croître monotoniquement en $p_j(t)$; les itokens sont pondérés par stabilité et proximité aux autres itokens. Le nombre d'espaces s'adapte à la variation des ensembles/rangs/poids, à la stabilité de lecture et au gain marginal, avec statut de convergence explicite. Résultats : hashes des sources et des espaces, itoken/vtoken, distances, poids, score de lecture. Interprétation : convergence heuristique n'est pas preuve de compréhension générale. Conséquences : un RAG inspectable et régénérable. Statut initial : la fonctionnalité nouvelle n'est pas prouvée par le RAG lexical hérité.
+\section{D -- lecture de la demande}Observer la requête par plusieurs sondes du même type que celles du RAG; construire son contexte; classer/retrouver par poids, type itoken/vtoken, distance et proximité contextuelle; garder les citations et la provenance; router automatiquement ou manuellement les compétences. La recherche lexicale reste une compétence distincte. Résultats : contribution des tokens, passages sourcés, compétence choisie et lacunes. Interprétation : similarité ne remplace pas une preuve de vérité. Statut : ajouter tests d'ablation des poids et de recherche lexicale.
+\section{E -- autonomie causale}Démarrer AAM sans données puis observer les pulses, mémoire, agenda et erreurs. Soumettre une requête et vérifier sa priorité, puis reprise de l'auto-observation. Chaque mise à jour mémorielle relie cause, observation, décision, effet, score, parent et hash. L'enregistrement de raisonnement détaillé peut être stoppé séparément de la mémoire de contrôle. Le feedback utilisateur guide le diagnostic mais ne remplace pas un vérificateur indépendant. Statut : tests de concurrence, pause, arrêt, reprise et crash requis.
+\section{F -- observer / reproduire}Charger un fichier et, après consentement explicite, un périphérique; préserver l'entrée brute; générer les sondes de façon itérative; comparer les sorties; enregistrer les statuts de décodage et tenter une reproduction source-off. Aucun code ne doit retourner une sortie préprogrammée pour réussir le test. Un périphérique absent ou un format inconnu ne devient jamais un succès fictif. Statut : séparer tests de fichiers, simulation abstraite et matériel réel.
+\chapter{Plan de phases et critères de sortie}
+\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{.07\linewidth}>{\raggedright\arraybackslash}p{.18\linewidth}>{\raggedright\arraybackslash}p{.58\linewidth}>{\raggedright\arraybackslash}p{.05\linewidth}}\toprule Phase & But & Gate / preuves requises & État initial \\
+\midrule
+P0 & Audit et base & Inventaire haché, documents relus, contrats/statuts, checklists, registre, préflight, tests fondation et rapport reproductible & À mesurer \\
+P1 & Observation universelle & Texte/structures/médias testés; source inchangée; provenance; vues; statuts décodage; capteurs sous consentement & À mesurer \\
+P2 & Moteur de sondes & Unicité, miroirs/composition, distances, collisions, continuation/checkpoint et aucun oracle en génération & À mesurer \\
+P3 & RAG sémantique & Espaces, itoken/vtoken, poids/distances, convergence, final, lecteur, nettoyage et tests d'ablation & À mesurer \\
+P4 & Compétences & Compétences de base justifiées, sélection auto/manuelle, composition, reproduction source-off et généralisation indépendante & À mesurer \\
+P5 & \shortstack[l]{Autonomie/\\mémoire} & Autostart, priorité requête, focus, causalité, récompense, mémoire ON/OFF, pause/stop/reprise & À mesurer \\
+P6 & UI intégrée & Chat/historique, Observer, RAG, sondes, compétences, mémoire, entraînement, Internet, réglages; contrôles connectés et testés & À mesurer \\
+P7 & \shortstack[l]{Données/\\entraînement} & lecteurs multi-formats, champs facultatifs selon méthode, ajout/mise à jour RAG, pause, arrêt, suivi & À mesurer \\
+P8 & Intégration/sécurité & Tests bout-en-bout, permissions, erreurs, intégrité, non-régression et récupération & À mesurer \\
+P9 & Livraison portable & extraction propre, self-check, manifestes, lanceurs, guide, preuves synchronisées & À mesurer \\
+P10 & Acceptance externe & Windows natif, matériels physiques, Internet configuré, crash/rollback/ACL et rapports & À mesurer \\
+\bottomrule\end{longtable}\normalsize
+Avant toute exécution, lire le présent formalisme, la checklist de phase et les deux registres d'erreurs. Après, journaliser commande, code retour, sorties et erreurs, mettre à jour les checklists, puis réexécuter la phase affectée. Une phase dépendante est rouverte lorsque le code, les documents ou les paramètres pertinents changent.
+\chapter{Commandes de référence}
+\begin{lstlisting}
+python -m aam_o93 status
+python -m aam_o93 observe "path/to/file.pdf"
+python -m aam_o93 knowledge-ingest "path/to/corpus"
+python -m aam_o93 probes "sample" --modality text
+python -m unittest discover -s tests -v
+python scripts/verify_manifest.py
+\end{lstlisting}
+Les commandes exactes, l'environnement et le hash de version doivent être conservés dans le rapport correspondant. Les commandes réseau et capteurs nécessitent une autorisation distincte.
+\chapter{Conséquences et statut}
+\section{Théoriques}L'implémentation met à l'épreuve la dépendance des empreintes à une famille de sondes. Les poids sont une hypothèse empirique versionnée, pas une vérité universelle pré-injectée.\section{Conceptuelles}La recherche classique est une compétence acquise parmi d'autres; l'observation multi-sondes et les espaces sémantiques forment le chemin normal RAG. Une compétence est une procédure/mécanisme reproductible, composable et adaptable.\section{Opérationnelles}Les fonctions passent par un contrat commun et une mémoire causale; toute preuve suit exactement la version testée. « Contourner une limitation » signifie rechercher un autre chemin permis (autre sonde, compétence, décomposition, ressource autorisée), jamais outrepasser consentement, sécurité, lois, permissions ou prétendre qu'un test manquant a réussi.\section{Conclusion/statut}Le formalisme spécifie la cible. Le statut réel reste celui des checklists et du registre de preuve. Aucun succès ni échec futur n'est supposé.
+
+\chapter{Dossier de validation P7 -- lecteurs multimodaux réels}
+\section{Description}
+Ce dossier ferme une lacune observée dans O93 : l'observateur classait l'image, l'audio et la vidéo principalement par empreintes, alors qu'un module de lecteurs bornés existait sans être appelé par le contrat central. Le patch P7 relie désormais les lecteurs au chemin \texttt{O93Observer.observe\_path}, au service d'inspection de datasets et à l'ingestion RAG. Il n'assimile jamais des statistiques de pixels, des métriques de signal ou des frames décodées à une transcription ou à une compréhension de scène.
+\section{Architecture}
+\begin{lstlisting}
+file bytes --SHA256--> O93Observer --real decoder--> media record
+     |                       |                         |
+     +-- hash after ---------+-- source stability -----+
+                                                       |
+                          +----------------------------+------------------+
+                          |                                               |
+                 DatasetInspectionService                         RAG ingestion
+                 status/measurements/lengths               actual OCR text only
+                          |                                               |
+                  training eligibility                    provenance + source hash
+\end{lstlisting}
+\section{Pipeline complet}
+\begin{enumerate}
+\item Lire le fichier dans la limite de taille et calculer le SHA-256 des octets initiaux.
+\item Calculer les vues d'empreinte à partir du snapshot brut sans exécuter le contenu.
+\item Appeler le lecteur réel : Pillow pour les pixels; SoundFile/libsndfile ou FFmpeg pour le PCM; OpenCV pour des frames vidéo échantillonnées; Tesseract seulement si disponible et autorisé par la politique locale.
+\item Comparer le hash déclaré par le lecteur au hash initial et refaire le hash du chemin après observation. Toute divergence dégrade le statut et ne peut devenir un succès.
+\item Exposer les mesures et le statut de décodage dans le rapport dataset sans y écrire le texte OCR brut.
+\item Ajouter au RAG seulement le texte effectivement retourné par OCR image/frames vidéo. Chaque chunk garde le SHA-256 source, le type et le moteur d'extraction; le contenu est non fiable et les drapeaux d'injection restent appliqués.
+\item Pour l'audio, ne créer aucun transcript si aucun moteur ASR réel n'est configuré. Le PCM et ses mesures peuvent être observés sans rendre le fichier éligible à une acquisition textuelle supervisée.
+\end{enumerate}
+\section{Contrats de statut}
+\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{.17\linewidth}>{\raggedright\arraybackslash}p{.32\linewidth}>{\raggedright\arraybackslash}p{.38\linewidth}}\toprule Modalité & Statut borné observé & Interprétation permise \\\midrule
+Image & \texttt{PIXELS\_DECODED}; \texttt{IMAGE\_OCR\_\allowbreak{}TEXT\_\allowbreak{}DECODED} ou \texttt{IMAGE\_PIXELS\_\allowbreak{}DECODED\_\allowbreak{}NO\_\allowbreak{}OCR\_\allowbreak{}TEXT} & Dimensions, statistiques pixels et hash sont des observations; seul le texte réellement renvoyé par OCR est du texte extrait. \\
+Audio & \texttt{PCM\_DECODED}; \texttt{AUDIO\_PCM\_\allowbreak{}DECODED\_\allowbreak{}ASR\_\allowbreak{}NOT\_\allowbreak{}CONFIGURED} & Mesures de signal uniquement; \texttt{ASR\_STATUS=ENGINE\_\allowbreak{}NOT\_\allowbreak{}CONFIGURED} ne constitue pas une transcription. \\
+Vidéo & \texttt{VIDEO\_FRAMES\_DECODED}; \texttt{VIDEO\_FRAMES\_\allowbreak{}OCR\_\allowbreak{}TEXT\_\allowbreak{}DECODED\_\allowbreak{}NO\_\allowbreak{}ASR} ou \texttt{VIDEO\_FRAMES\_\allowbreak{}DECODED\_\allowbreak{}ASR\_\allowbreak{}NOT\_\allowbreak{}CONFIGURED} & Frames réellement décodées et éventuellement OCR par frame; aucun récit de scène ni transcription sonore n'est inféré. \\
+Parquet & lecteur natif lorsqu'il existe, sinon \texttt{o930\_parquet\_flat\_fallback} & Le fallback est limité aux schémas primitifs plats et aux encodages/compresseurs supportés; une fonction non supportée donne \texttt{NOT\_DECODED}, un fichier invalide donne \texttt{ERROR}. \\
+\bottomrule\end{longtable}
+\section{Commandes exactes d'exécution}
+Depuis \texttt{Dmodel\_AAM\_O93\_0} :
+\begin{lstlisting}
+PYTHONPATH=. python -m pytest -q tests/test_p7_dataset_service.py
+PYTHONPATH=. python -m pytest -q tests/test_p7_dataset_service.py tests/test_p7_integrated.py tests/test_p7_training_control.py
+\end{lstlisting}
+Les commandes réellement exécutées et leur variable \texttt{PYTHONPATH} absolue sont conservées dans les prévols. Les fichiers stdout, stderr, codes retour et SHA-256 sont associés aux résultats \texttt{O930\_P7\_media\_decoder\_result.json} et aux journaux individuels.
+\section{Environnement et intégrité}
+Le moteur local ne dispose pas de PyArrow/Fastparquet/Polars/DuckDB; le fallback Parquet existant a néanmoins décodé le fichier source \texttt{source\_material/dataset/0000.parquet} en lecture seule : 7\,473 lignes, colonnes \texttt{question}/\texttt{answer}, 8 groupes de lignes.
+
+Le SHA-256 du fichier Parquet est affiché ci-dessous en deux lignes successives, à concaténer sans séparateur :
+\begin{lstlisting}
+ea82612ea9582142387730c793eb67d3
+b12849002bc0b7fa6f8efafa7351419d
+\end{lstlisting}
+
+Le SHA-256 de l’archive source originale est affiché ci-dessous en deux lignes successives, à concaténer sans séparateur :
+\begin{lstlisting}
+add72728952cd4ec83b6994a02d28022
+339fbbed29835d40c01b8f26bca60c38
+\end{lstlisting}
+Les tests médias créent les images, signaux et vidéos dans des répertoires temporaires, comparent leurs hashes avant/après et ne réécrivent pas les sources.
+
+Le SHA-256 du fichier Parquet est donné ci-dessous en deux lignes successives, à concaténer sans séparateur :
+\begin{lstlisting}
+ea82612ea9582142387730c793eb67d3
+b12849002bc0b7fa6f8efafa7351419d
+\end{lstlisting}
+
+Le SHA-256 de l’archive source originale est lui aussi donné en deux lignes successives, à concaténer sans séparateur :
+\begin{lstlisting}
+add72728952cd4ec83b6994a02d28022
+339fbbed29835d40c01b8f26bca60c38
+\end{lstlisting}
+Les tests médias créent les images, signaux et vidéos dans des répertoires temporaires, comparent leurs hashes avant/après et ne réécrivent pas les sources.
+\section{Résultats bruts}
+\begin{itemize}
+\item \texttt{media\_decoder\_dataset\_service\_pytest} : code 0, 18 tests réussis, 4 sous-tests, 5.87 s; stderr vide.
+\item \texttt{media\_decoder\_cross\_integration\_pytest} : code 0, 27 tests réussis, 9 sous-tests, 16.74 s; stderr vide.
+\item \texttt{runtime\_parquet\_inspection\_tests} : code 0, 20 tests réussis, 9 sous-tests; inspection runtime non supervisée des 7\,473 enregistrements sans clé cible inventée.
+\end{itemize}
+Les résultats complets, sorties et hashes sont consignés dans \texttt{Dmodel\_AAM\_O93\_0/logs/}. Le test OCR/RAG prouve qu'un vrai texte retourné par Tesseract est ingéré avec provenance \texttt{kind=ocr}; il ne prouve pas une compréhension générale d'image.
+\section{Interprétation des résultats}
+Les lecteurs image, audio et vidéo sont maintenant exécutés et leurs mesures remontent par l'observateur central. Le service dataset distingue \texttt{observation\_eligible} de \texttt{training\_eligible}; des pixels seuls ou du PCM sans transcript ne sont pas revendiqués comme contenu textuel entraînable. L'ingestion RAG ne génère pas de légende ni de transcription artificielle. Les résultats sont bornés aux formats et budgets testés.
+\section{Conséquences}
+\textbf{Théoriques :} l'identité par octets et la mesure d'une modalité restent distinctes de l'équivalence sémantique.\
+\textbf{Conceptuelles :} l'observation produit plusieurs niveaux, mais un niveau bas n'est pas promu en interprétation.\
+\textbf{Opérationnelles :} les rapports exposent lecteur, mesures, provenance, OCR/ASR et limites; un moteur absent ou une structure non prise en charge reste explicite.
+\section{Erreurs, limites et conclusion/statut}
+Le moteur ASR reste \texttt{ENGINE\_NOT\_CONFIGURED}; l'audio ne produit donc pas de transcript. Le fallback Parquet ne remplace pas un moteur général et ne couvre pas les fonctions Parquet hors contrat. Les périphériques physiques, les connecteurs réseau et l'acceptation Windows native ne sont pas validés par ces tests. Statut de phase : la checklist et le registre de preuves sont les sources autoritatives pour l'état courant; les limites ASR, Parquet général, capteurs physiques, réseau distant et validation Windows restent explicites.
+
+\section{Anomalies documentaires et retests}
+\textbf{Compilation initiale.} Le premier essai a échoué sur le chemin du lecteur d'observation. Le diagnostic conservé dans le journal était :
+\begin{lstlisting}
+Missing $ inserted
+O93Observer.observe_path
+\end{lstlisting}
+Le balisage inline a été corrigé, puis deux passes réussies ont confirmé la réparation.
+
+\textbf{Inspection visuelle.} Le premier rendu montrait un chevauchement des statuts dans le tableau des modalités, ainsi que des hashes qui dépassaient la marge.
+\textbf{Correction.} Les colonnes sont contraintes à la largeur utile, les identifiants longs ont des points de coupure et les SHA-256 sont affichés en deux lignes successives à concaténer sans séparateur.
+\textbf{Incident d'inspection.} Une commande de lecture interrompue par \texttt{SIGPIPE} a été remplacée par une lecture directe des journaux JSON. Aucune archive ni source dataset n'a été modifiée.
+
+%% O930_P7_FINAL_RECONCILIATION_BEGIN
+\section{Réconciliation de P7 -- lecteurs, datasets et entraînement piloté}
+\subsection{Description}
+La phase P7 vérifie l'inspection non destructive, l'extraction effectivement décodée, la préparation RAG et le contrôle d'entraînement. Le périmètre de cette acceptation est local, borné et reproductible; les résultats ne sont pas extrapolés à des formats, codecs, corpus ou matériels non testés.
+
+\subsection{Architecture}
+Le flux passe par \texttt{aam\_o93.dataset\_io}, le service d'inspection de datasets, \texttt{aam\_o93.parquet\_fallback}, \texttt{aam\_o93.media\_readers}, \texttt{O93Observer.observe\_path}, \texttt{AAMRuntime.ingest\_knowledge} et le contrôleur d'entraînement coopératif. Les sources sont lues en mode non destructif; les artefacts de quarantaine, journaux, chunks, checkpoints et capsules sont écrits uniquement dans les espaces de travail du runtime.
+
+\subsection{Pipeline complet vérifié}
+\begin{enumerate}
+\item Calculer l'empreinte SHA-256 de la source et vérifier le budget de lecture.
+\item Détecter le format puis décoder par le lecteur déclaré : JSON, JSONL, CSV, TSV, TXT, MD, PDF, DOCX, Parquet ou lecteur média applicable.
+\item Mettre en quarantaine les lignes structurées invalides avec offsets et hashes; ne pas ignorer silencieusement les lignes mal formées.
+\item En mode non supervisé, ne pas exiger ni inventer des champs cible; préparer l'observation et le RAG sans prétendre à un ajustement de paramètres supervisé.
+\item Pour images, audio et vidéo, séparer pixels, PCM, frames, texte OCR réellement retourné et transcription ASR. Seul un texte réellement extrait avec provenance peut être envoyé comme contenu textuel au RAG.
+\item Pour l'entraînement supervisé, demander pause à une frontière sûre, écrire un checkpoint, reprendre la même tâche ou arrêter en conservant le checkpoint et le statut réel.
+\item Recalculer les hashes, vérifier les journaux d'audit et de raisonnement puis arrêter le runtime proprement.
+\end{enumerate}
+
+\subsection{Commandes d'exécution}
+\begin{lstlisting}
+python -m pytest -q tests/test_p7_dataset_service.py tests/test_p7_integrated.py tests/test_p7_training_control.py
+xvfb-run -a python scripts/p7_training_control_ui_smoke.py
+python -m pytest -q tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p2_probes.py
+python -m py_compile scripts/p7_finalize_latex_format.py scripts/p7_append_final_reconciliation.py
+pdflatex -interaction=nonstopmode -halt-on-error -file-line-error laboratoire_O93_0.tex
+pdflatex -interaction=nonstopmode -halt-on-error -file-line-error formalisme_O93_0.tex
+\end{lstlisting}
+Les commandes de phase sont exécutées par le runner préflighté; leurs résultats, sorties, codes retours et SHA-256 figurent dans \texttt{logs/O930\_P7\_*\_result.json} et les journaux associés.
+
+\subsection{Résultats bruts}
+\begin{itemize}
+\item Régression isolée P0--P7 : 25 modules, 174 tests réussis, 16 sous-tests réussis, aucun échec; les résultats individuels sont référencés dans \texttt{logs/O930\_P7\_cross\_phase\_regression\_matrix\_current\_result.json}. Les tests P8--P10 ne sont pas inclus dans cette exécution, car P7 était encore la phase courante.
+\item Tests P7 intégrés : 27 tests et 9 sous-tests réussis pour lecteur dataset, routage RAG et contrôle d'entraînement. La suite de lecteurs/médias dédiée compte 18 tests et 4 sous-tests réussis.
+\item Le Parquet fourni a été réellement décodé par le fallback borné : 7\,473 lignes, colonnes \texttt{question}/\texttt{answer}, huit groupes de lignes; le SHA-256 avant, pendant et après la lecture est identique.
+\item Les lecteurs médias testés décodent les pixels d'image, le PCM audio et des frames vidéo échantillonnées. Le test OCR vérifie une chaîne réelle retournée par Tesseract et la provenance des chunks RAG; aucun transcript audio n'est fabriqué.
+\item Le smoke graphique Entraînement a inspecté 24 exemples, demandé pause, constaté un checkpoint, repris jusqu'à la capsule, puis vérifié les hashes, l'intégrité mémoire et l'arrêt propre du runtime.
+\end{itemize}
+
+\subsection{Interprétation des résultats}
+Les tests démontrent les chemins de lecture et de contrôle exécutés dans cet environnement. Ils n'établissent pas une compréhension générale de toute image/vidéo/audio ni une généralisation à des encodages ou corpus absents de la matrice. L'absence d'un moteur Parquet natif n'empêche pas la lecture du dataset source testé, puisque le fallback a décodé réellement ce fichier; ses limites sont néanmoins explicites.
+
+\subsection{Conséquences théoriques, conceptuelles et opérationnelles}
+\textbf{Théoriques :} l'empreinte des octets, les caractéristiques de modalité et un texte dérivé restent des objets distincts.\\
+\textbf{Conceptuelles :} l'éligibilité à l'observation n'est pas automatiquement une éligibilité à l'entraînement supervisé.\\
+\textbf{Opérationnelles :} les lecteurs exposent leurs noms, statuts, provenance, erreurs et limites; les données invalides sont mises en quarantaine plutôt que corrigées en silence.
+
+\subsection{Erreurs, limites et statut}
+Le moteur ASR reste \texttt{ENGINE\_NOT\_CONFIGURED}; aucune transcription audio n'est revendiquée. Le fallback Parquet supporte les schémas primitifs plats, Data Page V1, encodages PLAIN/dictionnaire et codecs testés; les fonctions non prises en charge renvoient un statut explicite au lieu d'être devinées. Les périphériques physiques, le réseau distant/MCP, l'acceptation Windows native et l'entraînement à grande échelle restent \texttt{NOT\_RUN}. Les portes P7 ne seront déclarées terminées qu'après l'inscription des preuves de compilation du présent document dans la checklist.
+%% O930_P7_FINAL_RECONCILIATION_END
+\end{document}

@@ -1,0 +1,199 @@
+{
+  "schema": "aam-o94-5-proof-registry-v1",
+  "version": "O94_5",
+  "generated_utc": "2026-10-20T12:44:14.545230+00:00",
+  "validation_root": "receipts/O94_5/",
+  "entries": [
+    {
+      "id": "OBS-001",
+      "feature": "Observation image/PDF/audio/vidéo par outils réels",
+      "source_files": [
+        "aam_o93/observation_tools.py",
+        "aam_o93/runtime.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_real_tool_observation_regression.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "7 tests ciblés réussis; inclus dans la suite 419/0",
+      "unverified_scope": "ASR réel sans modèle local configuré; caméras/capteurs physiques et réseau live non certifiés."
+    },
+    {
+      "id": "COMP-001",
+      "feature": "DSL compositionnel, compilation CPython/bytecode, éditeur et diagnostics de projet",
+      "source_files": [
+        "aam_o93/composition_compiler.py",
+        "aam_o93/composition_runtime.py",
+        "aam_o93/code_workbench.py",
+        "aam_o93/code_editor_app.py",
+        "examples/compositions/O94_5/project_compilation_audit.json"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_composition_compiler_editor_dispatch.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "10 tests ciblés réussis; compilation et exécution de code projet couvertes",
+      "unverified_scope": "N’affirme pas la synthèse automatique de tout IDE industriel ou l’exécution sûre de code non fiable; sandbox OS requis."
+    },
+    {
+      "id": "LM-001",
+      "feature": "Intégration modèle Transformers local / SafeTensors / .pt/.pth strict",
+      "source_files": [
+        "aam_o93/model_integration.py",
+        "requirements-transformers.txt",
+        "examples/model_integration/transformers-local.json"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_local_model_adapter_regression.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "15 tests contrats/registry/dispatch passés",
+      "unverified_scope": "Vraie génération SmolLM2 non exécutée : poids/tokenizer absents et Transformers non installé dans cet environnement."
+    },
+    {
+      "id": "RW-001",
+      "feature": "Récompense/punition causale et sélection de compétence",
+      "source_files": [
+        "aam_o93/reward_policy.py",
+        "aam_o93/runtime.py",
+        "aam_o93/autonomy.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_reward_autonomy_composition_regression.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "11 tests ciblés; dimensions distinctes, idempotence et adaptation testées",
+      "unverified_scope": "Ne prouve pas l’émergence d’une intelligence générale; mesure un mécanisme causal opérationnel."
+    },
+    {
+      "id": "OBS-LIVE-001",
+      "feature": "Observation live filesystem/processus par CLI",
+      "source_files": [
+        "aam_o93/observation_live.py",
+        "aam_o93/cli.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_passive_live_observation_cli.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "8 tests ciblés passés",
+      "unverified_scope": "Capture réseau exige outils et autorisations système et n’est pas déclarée certifiée ici."
+    },
+    {
+      "id": "RAG-001",
+      "feature": "RAG sémantique, résolution mémoire et corpus SMS",
+      "source_files": [
+        "aam_o93/semantic_rag.py",
+        "aam_o93/runtime.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_rag_memory_ui_real_corpus.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "34 tests ciblés passés sur RAG, mémoire, UI et échantillon réel SMS",
+      "unverified_scope": "N’implique pas que chaque donnée multimodale soit transformée en fait vrai ou que la généralisation soit parfaite."
+    },
+    {
+      "id": "CHAT-001",
+      "feature": "Chat unifié modèle/RAG/observation/mémoire/compétences",
+      "source_files": [
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py",
+        "aam_o93/cli.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P5_ui_e2e_retest.json",
+        "receipts/O94_5/P6_reward_autonomy_composition_regression.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "intégration ciblée et suite globale réussies",
+      "unverified_scope": "Modèle de génération réel non certifié tant que son bundle ne l’est pas."
+    },
+    {
+      "id": "TEST-001",
+      "feature": "Suite générale de régression",
+      "source_files": [
+        "scripts/run_o945_full_suite.py",
+        "aam_o93/o945_phase_gate.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "419 passés, 0 échec, 5 avertissements, 21 sous-tests, 199.38s",
+      "unverified_scope": "Les tests n’épuisent pas toutes les architectures et toutes les tâches possibles."
+    },
+    {
+      "id": "DOCS-001",
+      "feature": "Documentation, matrice de preuves, préflight de version et traçabilité",
+      "source_files": [
+        "README_O94_5_FR.md",
+        "GUIDE_UTILISATEUR_O94_5.md",
+        "RAPPORT_TESTS_O94_5_FR.md",
+        "registre_prouves_O94_5.json",
+        "O94_5_TEST_MATRIX.json",
+        "CHANGE_REGISTER_O94_5.json",
+        "scripts/audit_o945_documentation.py",
+        "scripts/preflight_o945.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P7_documentation_restore_final.json",
+        "receipts/O94_5/P7_post_registry_documentation_audit.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "14 contrôles documentaires/exécution réussis; 18 références requises, 8 capacités prouvées et 7 batteries ciblées auditées, zéro référence cassée.",
+      "unverified_scope": "La compilation LaTeX est vérifiée par code de retour et PDF non vide; aucune revue visuelle exhaustive du PDF n’est revendiquée."
+    },
+    {
+      "id": "SAVEPOINT-001",
+      "feature": "Sauvegarde O94.5 restaurable et parent O94.4 immuable",
+      "source_files": [
+        "scripts/refresh_o945_savepoint.py",
+        "scripts/restore_o945_savepoint.py",
+        "scripts/preflight_o945.py",
+        "aam_o93/o945_phase_gate.py",
+        "tests/test_o945_savepoint_restore.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P7_documentation_restore_final.json",
+        "receipts/O94_5/P7_post_registry_documentation_audit.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "49 fichiers parent et 168 fichiers O94.5 vérifiés; 3 tests de restauration couvrent backup, traversal et altération du snapshot.",
+      "unverified_scope": "La restauration remplace seulement les fichiers suivis et ne supprime pas les fichiers non suivis."
+    },
+    {
+      "id": "PKG-001",
+      "feature": "Reconstruction de la livraison, extraction fraîche et vérification d’intégrité",
+      "source_files": [
+        "scripts/build_o945_delivery.py",
+        "scripts/verify_o945_followup.py",
+        "scripts/assemble_o945_split_archive.py",
+        "scripts/o94_delivery_common.py"
+      ],
+      "evidence_receipts": [
+        "receipts/O94_5/P8_candidate_archive_verification.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "status": "PASS_BOUNDED",
+      "result": "ZIP candidat sous la limite, CRC/SHA manifeste valides, préflight/restauration/compilation/tests ciblés validés; archive finale reconstruite et vérifiée dans le manifeste externe.",
+      "unverified_scope": "Le runtime Transformers et les poids utilisateur SmolLM2 restent absents de l’environnement, donc aucune génération réelle de ces poids n’est affirmée."
+    }
+  ],
+  "open_external_qualification": [
+    {
+      "incident_id": "O945-E001",
+      "scope": "Génération avec les vrais poids SmolLM2-360M de l’utilisateur",
+      "reason": "Les poids/tokenizer/config n’étaient pas présents dans les archives; le runtime Transformers ne pouvait pas être installé via l’index dans cette session.",
+      "required_next_test": "Sur la machine détenant le bundle, installer requirements-transformers.txt, model-register le dossier complet, lancer model-generate, puis vérifier un vrai output et un test de holdout."
+    }
+  ],
+  "claim_policy": "PASS_BOUNDED indique uniquement le périmètre testé; les domaines non testés sont listés explicitement."
+}

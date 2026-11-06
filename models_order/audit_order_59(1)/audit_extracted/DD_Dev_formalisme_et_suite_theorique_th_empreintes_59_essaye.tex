@@ -1,0 +1,86 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.2cm}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\sloppy
+\setlist{nosep}
+\title{ORDER 59 --- ESSAYE : journal des tentatives, variantes, echecs et voies ouvertes}
+\author{Reconstruction experimentale ORDER 59}
+\date{20 septembre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\begin{abstract}
+ESSAYE n'est pas un double du document principal. Il rassemble les constructions tentees pour franchir les defauts d'integration decouverts dans O58. Il garde explicitement les approches abandonnees, les echecs de validation, les interruptions de calcul et les questions qui restent ouvertes.
+\end{abstract}
+
+\section{Point de depart : les regressions O58}
+L'audit de O58 a montre quatre regressions conceptuelles : la representation principale etait deja compilee en \texttt{Problem}, le probing actif restait lateral au benchmark principal, l'imagination enregistrait des hypotheses sans les faire agir, et la synthese se limitait a une petite selection d'heuristiques. Le premier objectif d'ESSAYE a ete de casser ces quatre dependances.
+
+\section{Essai 1 : representation brute}
+La premiere variante fait entrer des dictionnaires, suites, grilles et matrices sans objet de type \texttt{Problem}. Le percepteur construit une observation neutre, puis des sondes generiques. L'experience montre que cette entree est effectivement acceptée et qu'une partition peut etre construite sans connaitre la famille du benchmark.
+
+Le probleme apparu ensuite est plus profond : une banque de sondes generiques ne suffit pas a garantir l'expressivite. Cette observation a conduit a la boucle active, qui peut reclasser les sondes en fonction des consequences deja observees.
+
+\section{Essai 2 : active probing}
+La premiere mesure testait uniquement le nombre de classes de sonde. Elle pouvait survaloriser une transformation qui change la description sans reduire l'incertitude sur les consequences. La version O59 corrige cela en prenant une notion de diversite predictive au sein des classes.
+
+Dans la campagne finale, la representation est reconstruite periodiquement. Les logs donnent par exemple 21 appels actifs de sonde sur HiddenPermutation et 21 sur Maze sous les budgets finaux. Le mecanisme est donc causalement present. Il n'a cependant pas produit une resolution complete dans cette passe.
+
+\section{Essai 3 : imagination}
+Le premier essai d'imagination herite directement de O58 et ne faisait qu'enregistrer des hypotheses. Cette strategie est consideree insuffisante.
+
+La seconde variante realise :
+\[
+H\to simulate_W(H)\to score(H)\to action.
+\]
+Le modele interne effectue la simulation et la sortie contribue au score de proposition. Cette modification est petite mais structurante : une hypothese n'est plus seulement une trace.
+
+La question encore ouverte est la richesse du simulateur. Les resultats permettent d'affirmer que la boucle existe et agit ; ils ne permettent pas d'affirmer une imagination generale.
+
+\section{Essai 4 : synthese de programmes}
+La DSL O58 contenait surtout MinDomain, MaxDegree, Pressure et Assigned. Cet espace a ete remplace par une grammaire de composition de primitives de perception, prediction, imagination, memoire, action et verification.
+
+Une erreur de conception a alors ete evitee : tester uniquement qu'un AST produit quelque chose n'est pas une validation comportementale. La nouvelle version execute le candidat par \texttt{ProgramVM} dans des contextes issus des transitions. La premiere implementation du score, qui dependait trop de la taille de l'AST, a ete supprimee.
+
+Cette version reste bornée par une enumeration finie. C'est une contrainte de calcul mesuree, pas une conclusion sur la synthese universelle.
+
+\section{Essai 5 : monde interne}
+La table de transitions de O58 a ete conservee comme memoire de support mais completee par un ajustement lineaire. L'intention est de distinguer trois situations : transition deja observee, interpolation du modele appris, extrapolation sans support empirique.
+
+Le protocole final ne fournit pas encore un corpus hors distribution assez riche pour etablir une generalisation dynamique forte. La question est donc maintenue ouverte.
+
+\section{Essai 6 : memoire cumulative}
+La memoire peut stocker un programme puis le recuperer sur l'episode suivant. Une experience repetition de SequenceEnv a toutefois donne 0.2 avec memoire et 0.2 sans memoire dans la configuration finale. Cela prouve la possibilite du retrieval mais pas l'effet causal durable.
+
+\section{Essai 7 : chess sans oracle}
+Chess est utilise comme test de rupture parce que le probleme exige une anticipation et un espace d'actions beaucoup plus large. Le chemin agent construit les actions a partir du plateau observe. Il ne demande pas au moteur d'evaluation quels coups sont legaux.
+
+Deux positions ont ete executees. Le cas mate-in-one et le cas ouvert sont tous deux PARTIAL dans la passe finale a deux plies. Ce n'est ni une preuve de limite ni un resultat a minimiser : c'est une observation verifiable sous ce budget.
+
+\section{Essai 8 : transfert et fausse analogie}
+Le transfert decouvre les correspondances de signatures sans consulter le nom d'une famille de benchmark. Une correspondance controlee est certifiee VERIFIED. Une absence de correspondance conduit au rejet.
+
+La limitation actuelle tient a la simplicite du vocabulaire d'invariants fourni par les observations disponibles. Il reste a montrer la decouverte de relations plus abstraites que des signatures structurales locales.
+
+\section{Echecs computationnels et interruption}
+Une campagne intermediaire a ete lancee avec des horizons beaucoup plus longs. Elle a depasse le timeout de calcul global. L'analyse locale du cout a montre que le nombre d'evaluations de programmes et les ajustements neuraux repetes devenaient dominants. La version finale reduit donc la frequence d'entrainement neural et borne les campagnes.
+
+L'incident est conserve comme resultat de ressource. Il n'est pas converti en phrase du type ``le modele ne peut pas faire X''.
+
+\section{Regressions protegees}
+Le test de relaxation des contraintes conserve les deux operandes. Le packaging explicite la decouverte setuptools sous \texttt{src/}, ce qui supprime le defaut d'import direct observe en O58. L'auditeur AST refuse les primitives d'execution dynamique et les tables de solutions.
+
+\section{Questions laissees ouvertes}
+Les pistes les plus exigeantes restent : apprendre des sondes qu'aucun catalogue initial ne propose, faire evoluer un programme de raisonnement sur plusieurs episodes avec gain causal durable, produire une abstraction inter-domaines qui ne repose pas sur des signatures locales, et construire un monde interne qui generalise au-dela des transitions deja vues.
+
+Ces questions sont ouvertes parce que les experiences courantes ne les ont pas encore tranchees, et non parce qu'une limite a ete decidee a l'avance.
+
+\end{document}

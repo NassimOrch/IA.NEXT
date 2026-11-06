@@ -1,0 +1,271 @@
+\documentclass[11pt,oneside]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.6cm,headheight=28pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\usepackage{xcolor,microtype,url,hyperref,fancyhdr}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black,pdftitle={NGeGenBrain observation formalisme next 1},pdfsubject={Décomposition invariant-variant, multi-échelle et dynamique}}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\emergencystretch}{3em}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small NGeGenBrain -- théorie de l'observation}\fancyhead[R]{\small Suite next\_1}\fancyfoot[C]{\thepage}
+\newtheorem{theoreme}{Théorème}[chapter]
+\newtheorem{proposition}[theoreme]{Proposition}
+\newtheorem{lemme}[theoreme]{Lemme}
+\newtheorem{corollaire}[theoreme]{Corollaire}
+\theoremstyle{definition}\newtheorem{definition}[theoreme]{Définition}\newtheorem{hypothese}[theoreme]{Hypothèse explicite}\newtheorem{convention}[theoreme]{Convention}\newtheorem{critere}[theoreme]{Critère}
+\theoremstyle{remark}\newtheorem{remarque}[theoreme]{Remarque}\newtheorem{contreexemple}[theoreme]{Contre-exemple}
+\newcommand{\X}{\mathcal X}\newcommand{\Y}{\mathcal Y}\newcommand{\Z}{\mathcal Z}\newcommand{\U}{\mathcal U}\newcommand{\W}{\mathcal W}\newcommand{\Fcal}{\mathcal F}\newcommand{\Pcal}{\mathcal P}\newcommand{\Gcal}{\mathcal G}\newcommand{\Lcal}{\mathcal L}\newcommand{\Scal}{\mathcal S}\newcommand{\Tcal}{\mathcal T}\newcommand{\Vcal}{\mathcal V}\newcommand{\Mcal}{\mathcal M}\newcommand{\Ecal}{\mathcal E}\newcommand{\Dcal}{\mathcal D}\newcommand{\R}{\mathbb R}\newcommand{\N}{\mathbb N}\newcommand{\Prob}{\mathbb P}\newcommand{\Exp}{\mathbb E}\newcommand{\dd}{\mathrm d}\newcommand{\Id}{\operatorname{Id}}\newcommand{\TV}{\operatorname{TV}}\newcommand{\KL}{\operatorname{KL}}\newcommand{\norm}[1]{\left\lVert#1\right\rVert}\newcommand{\abs}[1]{\left\lvert#1\right\rvert}\newcommand{\1}{\mathbf 1}\newcommand{\given}{\,\middle|\,}\newcommand{\argmin}{\operatorname*{arg\,min}}
+\title{\Huge\bfseries NGeGenBrain : formalisme de l'observation -- suite next\_1\\[0.6em]\Large Invariants, variations, multi-échelle et reconstruction des observations vivantes}
+\author{Formalisation mathématique consolidée}
+\date{Version de travail stabilisée -- 28 octobre 2026}
+\begin{document}
+\frontmatter\maketitle\thispagestyle{empty}
+\begin{center}\begin{minipage}{0.91\textwidth}
+\textbf{Objet.} Ce texte prolonge le formalisme de l'observation et le formalisme du problème inverse. Il traite précisément la distinction entre invariants et variations, la perte d'information induite par une empreinte compressée, et les conditions sous lesquelles une observation peut être reconstruite.
+
+\medskip\textbf{Règle de rigueur.} Une propriété appelée « invariante » l'est toujours relativement à une famille déclarée de transformations, contextes, sondes et échelles. Une décomposition en invariant et variant n'est pas unique sans conditions additionnelles. Une preuve conditionnelle ne supprime pas ses hypothèses.
+\end{minipage}\end{center}
+\vfill\noindent\textbf{Documents de référence :} \url{NGeGenBrain_observation_formalisme.tex} et \url{NGeGenBrain_observation_formalisme_next_0.tex}. Le présent texte est une extension ciblée ; les corrections et harmonisations transversales sont reprises dans le document maître \url{NGeGenBrain_observation_formalisme_full_0.tex}.
+\clearpage\tableofcontents\mainmatter
+
+\part{Question mathématique et vocabulaire corrigé}
+\chapter{Pourquoi l'empreinte ne doit pas être confondue avec l'observation entière}
+\section{Objets à distinguer}
+On distingue quatre objets qui ne sont pas interchangeables : (i) l'exécution source et sa trajectoire ; (ii) l'enregistrement de cette trajectoire sous un protocole donné ; (iii) l'empreinte, qui est une application choisie sur cet enregistrement ; (iv) un mécanisme candidat qui peut produire des enregistrements. Une empreinte peut être exhaustive relativement à un protocole et néanmoins insuffisante pour reconstruire la trajectoire brute.
+
+\begin{definition}[Enregistrement observationnel]
+Soit \(\Omega\) l'espace des trajectoires possibles et \(\Y\) l'espace des enregistrements admissibles. Un protocole fixé \(\pi\) induit une application d'observation \(O_\pi:\Omega\to\Y\). En présence d'aléas de mesure ou d'exécution, \(O_\pi(\omega)\) désigne une réalisation d'un noyau probabiliste plutôt qu'une application déterministe.
+\end{definition}
+\begin{definition}[Empreinte relative]
+Une empreinte relative à \(\pi\) est une application \(I_\pi:\Y\to\Z\), où \(\Z\) est son espace de valeurs. L'empreinte composée sur une trajectoire est \(F_\pi=I_\pi\circ O_\pi\). Le terme « empreinte » ne signifie ni « invariant » ni « suffisant » sans une propriété supplémentaire prouvée.
+\end{definition}
+\begin{definition}[Invariance déclarée]
+Soit \(\mathcal G\) un ensemble de transformations de \(\Y\). Une application \(I:\Y\to\Z\) est \emph{invariante sous} \(\mathcal G\) si, pour tous \(y\in\Y\) et \(g\in\mathcal G\), \(I(g\cdot y)=I(y)\), lorsque l'action \(g\cdot y\) est définie. L'invariance est toujours relative à \(\mathcal G\) et au domaine où l'égalité est évaluée.
+\end{definition}
+\begin{proposition}[Invariance sous transformations et constance sur les fibres sont distinctes]
+Soient $P$ un espace de contextes, $\Y$ un domaine d'enregistrements, $\Fcal_0$ une famille non vide de sondes et $W_f$ le codomaine de chaque sonde $f$. Pour un contexte fixé $p\in P$, soit
+\[
+ I_{p,\Fcal_0}(y)=\bigl(\Phi(p,y,f)\bigr)_{f\in\Fcal_0}\in\prod_{f\in\Fcal_0}W_f.
+\]
+Soit $\mathcal A$ une famille déclarée d'applications $a:\Y\to\Y$. Alors $I_{p,\Fcal_0}$ est invariant sous $\mathcal A$ si et seulement si
+\[
+ \forall a\in\mathcal A\ \forall y\in\Y\ \forall f\in\Fcal_0,\qquad
+ \Phi(p,a(y),f)=\Phi(p,y,f).
+\]
+En revanche, $I_{p,\Fcal_0}$ est toujours constante sur chacune de ses propres fibres, par définition de la relation $y\sim y'\iff I_{p,\Fcal_0}(y)=I_{p,\Fcal_0}(y')$. Cette dernière propriété tautologique ne démontre aucune invariance sous une famille de transformations non spécifiée. Fixer le contexte et la famille de sondes rend la signature bien définie; cela ne garantit pas qu'elle soit préservée si l'objet ou le contexte change.
+\end{proposition}
+\begin{proof}
+L'égalité de deux éléments du produit $\prod_{f\in\Fcal_0}W_f$ équivaut à l'égalité de toutes leurs coordonnées. En appliquant cette caractérisation à $I_{p,\Fcal_0}(a(y))=I_{p,\Fcal_0}(y)$, on obtient exactement la condition affichée, dans les deux sens. La constance sur les fibres résulte de leur définition : deux éléments d'une même fibre ont par définition la même valeur de $I_{p,\Fcal_0}$. Elle n'implique pas que $a(y)$ appartienne à la même fibre que $y$ pour une transformation arbitraire $a$.
+\end{proof}
+\begin{contreexemple}[Une sonde fixée ne garantit pas l'invariance par transformation]
+Prenons $\Y=\mathbb R$, une seule sonde $f$ définie par $\Phi(p,y,f)=y$, et la transformation $a(y)=y+1$. L'empreinte vaut $I_{p,\{f\}}(y)=y$, donc $I_{p,\{f\}}(a(y))=y+1\ne y=I_{p,\{f\}}(y)$. La famille de sondes est pourtant fixée. Ainsi, l'invariance ne suit pas du seul fait que le protocole utilise un nombre fini ou déterminé de sondes.
+\end{contreexemple}
+\begin{remarque}[Sens rigoureux de l'invariance contextuelle]
+Si par « invariance contextuelle » on entend que la signature reste égale lorsque le contexte varie dans un ensemble $P_0$, il faut vérifier séparément $I_{p,\Fcal_0}(y)=I_{p',\Fcal_0}(y)$ pour tous $p,p'\in P_0$ et les $y$ du domaine revendiqué. Si l'on entend plutôt la constance sur les classes induites par une signature à contexte fixé, le terme précis est « constance sur les fibres observationnelles ». Les deux notions peuvent être utiles, mais elles ne sont pas équivalentes.
+\end{remarque}
+\begin{remarque}
+Une moyenne stable entre contextes peut être un estimateur d'invariant, mais ne devient pas un invariant exact par le seul fait qu'elle varie peu sur un échantillon fini. Il faut préciser si l'on revendique une propriété exacte, une borne d'erreur ou seulement une régularité empirique.
+\end{remarque}
+
+\section{Correction d'une intuition partiellement juste}
+L'intuition « l'empreinte capte les invariants » peut être utile pour concevoir un système, mais elle n'est pas vraie par définition. Une empreinte peut contenir des variations brutes; à l'inverse, une empreinte volontairement invariante peut les éliminer. La théorie distingue donc : (a) empreinte générale ; (b) empreinte invariantielle ; (c) empreinte multi-facettes ; (d) empreinte de trajectoire ; (e) dossier d'évidence, plus riche que toute empreinte compressée.
+
+\begin{proposition}[Une empreinte non injective ne permet pas de reconstruire chaque observation]
+Soient \(I:\Y\to\Z\) et \(y_1\ne y_2\) tels que \(I(y_1)=I(y_2)\). Il n'existe aucune application \(R:\Z\to\Y\) telle que \(R(I(y))=y\) simultanément pour tout \(y\in\{y_1,y_2\}\).
+\end{proposition}
+\begin{proof}
+Si un tel \(R\) existait, alors \(y_1=R(I(y_1))=R(I(y_2))=y_2\), contradiction avec \(y_1\ne y_2\).\end{proof}
+\begin{corollaire}[Condition exacte de reconstruction]
+Il existe une application de reconstruction $R:I(\Y)\to\Y$ satisfaisant $R\circ I=\Id_\Y$ si et seulement si $I$ est injective. Pour reconstruire seulement une propriété cible $A:\Y\to\W$, la condition nécessaire et suffisante est que $A$ soit constante sur chaque fibre de $I$. Le domaine de $R$ est explicitement restreint à $I(\Y)$, qui contient toutes les signatures produites; une extension aux valeurs de $\Z\setminus I(\Y)$ n'est pas requise pour reconstruire les observations effectivement représentées.
+\end{corollaire}
+\begin{proof}
+Si $R\circ I=\Id_\Y$, alors $I(y)=I(y')$ implique $y=R(I(y))=R(I(y'))=y'$, donc $I$ est injective. Réciproquement, si $I$ est injective, chaque $z\in I(\Y)$ possède un unique antécédent; poser $R(z)$ égal à cet antécédent définit bien une application et donne $R\circ I=\Id_\Y$. Pour la propriété cible, si $A=\bar A\circ I$, elle est constante sur les fibres. Réciproquement, si $A$ est constante sur les fibres, définir $\bar A(I(y))=A(y)$ est indépendant du choix de $y$ et fournit la factorisation.\end{proof}
+
+\part{Décomposition invariant--variant}
+\chapter{Quotient invariant et information résiduelle}
+\section{Relation d'indiscernabilité structurale}
+\begin{definition}[Fibre invariantielle]
+Pour une application invariante \(I:\Y\to\Z\), la fibre de \(y\) est \([y]_I=\{y'\in\Y:I(y')=I(y)\}\). Elle contient exactement les enregistrements que l'empreinte ne distingue pas.
+\end{definition}
+\begin{proposition}[Une empreinte invariante factorise par le quotient]
+La relation \(y\sim_I y'\iff I(y)=I(y')\) est une relation d'équivalence. L'application \(I\) induit une bijection entre le quotient \(\Y/\!\sim_I\) et l'image \(I(\Y)\).
+\end{proposition}
+\begin{proof}
+Réflexivité, symétrie et transitivité découlent de l'égalité dans \(\Z\). L'application induite envoie la classe \([y]\) sur \(I(y)\). Elle est bien définie par définition des classes, surjective sur l'image et injective puisque deux classes ayant la même image coïncident.\end{proof}
+\begin{definition}[Coordonnée variante ou résiduelle]
+Une coordonnée variante est une application \(V:\Y\to\U\) conçue pour distinguer certaines différences que \(I\) oublie. Elle peut encoder le contexte, la sonde, l'intervention, l'état temporel, la position dans la trajectoire, la réalisation stochastique ou un résidu mesuré. Le nom « variant » n'implique pas qu'elle soit bruit pur ou négligeable.
+\end{definition}
+\begin{theoreme}[Critère de reconstruction par empreinte et variante]
+La paire \((I,V):\Y\to\Z\times\U\) permet de reconstruire exactement chaque \(y\in\Y\) si et seulement si elle est injective. De façon équivalente, pour tous \(y,y'\), \(I(y)=I(y')\) et \(V(y)=V(y')\) impliquent \(y=y'\).
+\end{theoreme}
+\begin{proof}
+Appliquer le corollaire de reconstruction à l'application produit \(J(y)=(I(y),V(y))\). La condition écrite est exactement l'injectivité de \(J\).\end{proof}
+\begin{remarque}
+Ce théorème ne prétend pas que la séparation invariant/variant existe automatiquement. Il donne le critère exact qu'une telle décomposition doit satisfaire. La construction d'un \(V\) suffisamment discriminant constitue un problème effectif, à résoudre par le protocole et à valider.
+\end{remarque}
+
+\chapter{Quand une décomposition additive est-elle définie de façon unique ?}
+\section{Non-unicité sans contrainte}
+\begin{contreexemple}[Décomposition additive non identifiable]
+Pour toute donnée \(y\in\R\), les couples \((s,v)=(y,0)\), \((0,y)\) et \((y-c,c)\) pour tout \(c\in\R\) satisfont \(y=s+v\). L'équation seule ne définit donc ni un invariant ni un variant unique.
+\end{contreexemple}
+\begin{proposition}[Unicité par somme directe]
+Soient \(U,W\) deux sous-espaces vectoriels d'un espace vectoriel \(E\), avec \(U\cap W=\{0\}\). Si \(y=s+v=s'+v'\), où \(s,s'\in U\) et \(v,v'\in W\), alors \(s=s'\) et \(v=v'\). Une décomposition existe pour chaque \(y\in U+W\).
+\end{proposition}
+\begin{proof}
+De \(s+v=s'+v'\), on déduit \(s-s'=v'-v\). Le membre gauche appartient à \(U\) et le droit à \(W\); leur valeur commune appartient donc à \(U\cap W=\{0\}\). Ainsi \(s=s'\) et \(v=v'\). L'existence pour \(y\in U+W\) découle de la définition de cette somme.\end{proof}
+\begin{remarque}
+L'hypothèse \(U\cap W=\{0\}\) est un contrat de modèle, non un fait découvert automatiquement. Dans une application statistique, elle peut être remplacée par une condition d'identifiabilité explicitement vérifiée, par exemple une matrice de conception de rang plein; sinon l'ambiguïté doit être conservée.
+\end{remarque}
+
+\section{Invariance, stabilité temporelle et stationnarité ne sont pas synonymes}
+\begin{definition}[Trois prédicats distincts]
+Une application $q:X\to Z$ est invariante sous une famille déclarée $\mathcal G$ de transformations de $X$ si $q(gx)=q(x)$ pour tout $g\in\mathcal G$ et tout $x$ où l'action est définie. Une trajectoire observée $s:T\to Z$ est $\varepsilon$-stable sur une fenêtre $J\subseteq T$ relativement à une métrique $d$ si $\sup_{t,u\in J}d(s(t),s(u))\leq\varepsilon$. Un processus stochastique est stationnaire au sens strict si toutes ses distributions finies sont invariantes par translation temporelle admissible; d'autres notions, comme la stationnarité au second ordre, doivent être nommées séparément. Ces prédicats ont des définitions et des quantificateurs différents; aucune implication entre eux n'est présumée par la seule terminologie.
+\end{definition}
+\begin{proposition}[L'invariance sous une action d'état n'implique pas la constance temporelle]
+Il existe un espace d'état $X$, une action non triviale $\mathcal G$, une application $q:X\to\mathbb R$ invariante sous $\mathcal G$ et une trajectoire $x:T\to X$ telle que $t\mapsto q(x(t))$ ne soit pas constante.
+\end{proposition}
+\begin{proof}
+Prenons $X=\mathbb R^2$, $\mathcal G=\{g_a:a>0\}$ avec $g_a(u,v)=(au,v)$ et $q(u,v)=v$. Pour tout $a>0$, $q(g_a(u,v))=v=q(u,v)$, donc $q$ est invariant sous cette action non triviale. Pour $T=\mathbb R$, définissons $x(t)=(0,t)$. Alors $q(x(t))=t$, qui n'est pas constant. L'invariance de $q$ sous $\mathcal G$ n'implique donc pas la constance temporelle de son observation le long d'une trajectoire.
+\end{proof}
+\begin{remarque}[Implications entre prédicats]
+Une implication entre invariance, stabilité sur une fenêtre et stationnarité ne peut être affirmée qu'après avoir spécifié les espaces, l'action, la fenêtre, la métrique, la loi du processus et les hypothèses qui les relient. Cette section ne pose aucune implication générale supplémentaire.
+\end{remarque}
+\begin{remarque}
+Pour un LLM, un mécanisme stable peut produire des états cachés différents à chaque token. L'invariant pertinent peut être la loi de transition, le contrat de calcul ou la relation de dépendance, non une valeur d'activation constante.
+\end{remarque}
+
+\part{Multi-échelle, multi-facettes et temps}
+\chapter{Un ordre produit des échelles observationnelles}
+\section{Indices indépendants}
+\begin{definition}[Indexation multi-échelle]
+Soient \((\Lambda,\preceq_\Lambda)\) un poset d'échelles de résolution, \((\mathfrak F,\preceq_F)\) un poset de familles de sondes et \((\Delta,\preceq_\Delta)\) un poset de résolutions temporelles. Une échelle composite est un élément \(s=(\lambda,F,\delta)\) de l'ordre produit \(\Sigma=\Lambda\times\mathfrak F\times\Delta\), muni de l'ordre coordonnée par coordonnée. L'ordre n'affirme une amélioration de résolution que si chaque coordonnée a une sémantique de raffinement déclarée.
+\end{definition}
+\begin{definition}[Empreinte en tour multi-échelle]
+Pour chaque \(s\in\Sigma\), soit \(I_s:\Y\to\Z_s\) l'empreinte à l'échelle \(s\). La famille complète est \(\mathbf I_\Sigma(y)=(I_s(y))_{s\in\Sigma}\). Une empreinte à une échelle instrumentale fixée peut donc demeurer multi-facettes ou multi-temporelle, si les composantes correspondantes sont conservées.
+\end{definition}
+\begin{proposition}[Raffinement des empreintes par ajout de coordonnées]
+Soit \(A\subseteq B\) des indices de sondes et de temps, et supposons que l'empreinte sur \(B\) conserve exactement toutes les composantes de celle sur \(A\) plus éventuellement des composantes supplémentaires. Alors l'indiscernabilité induite par l'empreinte de \(B\) est plus fine ou égale à celle induite par \(A\).
+\end{proposition}
+\begin{proof}
+Si les empreintes de \(B\) sont égales, toutes leurs coordonnées le sont, notamment celles qui constituent l'empreinte de \(A\). Ainsi l'égalité sous \(B\) implique l'égalité sous \(A\), ce qui est la définition du raffinement.\end{proof}
+\begin{remarque}
+La monotonie ne vaut pas si l'on remplace les anciennes composantes par un résumé différent ou si le protocole de mesure change sans relation de restriction. Il faut alors établir un théorème de comparaison adapté, pas présumer une hiérarchie.
+\end{remarque}
+
+\chapter{Traces live, histoire et reconstruction temporelle}
+\section{Trace, événements et états}
+\begin{definition}[Trace d'observation]
+Une trace discrète est une suite \(\tau=((t_i,e_i))_{i\in J}\) où \(J\) est un ensemble d'indices ordonné, \(t_i\) un temps enregistré et \(e_i\) un événement de mesure, de commande ou de perte. Une trace continue idéale est une fonction de temps, mais une trace réelle est généralement un échantillonnage sous une horloge et un ordonnanceur déclarés.
+\end{definition}
+\begin{definition}[Dossier temporel complet relatif au protocole]
+Un dossier temporel est le tuple constitué des événements bruts disponibles, horodatages, identifiants de sondes, contextes, interventions, versions du modèle, erreurs d'acquisition, règles de synchronisation, données manquantes et métadonnées de provenance. « Complet » signifie complet relativement au protocole et au domaine déclarés, non complet par rapport à toute propriété imaginable du système.
+\end{definition}
+\begin{proposition}[Un échantillonnage fini ne détermine pas un signal arbitraire]
+Pour tout ensemble fini de temps d'échantillonnage distincts \(t_1,\ldots,t_n\), il existe deux fonctions continues distinctes ayant les mêmes valeurs en chacun de ces temps.
+\end{proposition}
+\begin{proof}
+Soit \(g(t)=\prod_{i=1}^n(t-t_i)\). Cette fonction polynomiale est non nulle hors de ses racines et vérifie \(g(t_i)=0\). Pour toute fonction continue \(f\), les fonctions \(f\) et \(f+g\) sont distinctes mais ont les mêmes valeurs aux temps \(t_i\).\end{proof}
+\begin{proposition}[Borne d'interpolation sous régularité Lipschitz]
+Soit \(f:[a,b]\to\R\) une fonction \(L\)-Lipschitz, c'est-à-dire \(\abs{f(t)-f(s)}\le L\abs{t-s}\). Si les temps d'échantillonnage couvrent l'intervalle avec un maillage maximal \(h\), alors l'estimation par valeur au plus proche échantillon satisfait \(\abs{\hat f(t)-f(t)}\le Lh/2\) lorsque chaque point a un échantillon à distance au plus \(h/2\); avec la seule définition d'un écart maximal entre échantillons \(h\), la borne générale sûre est \(Lh\).
+\end{proposition}
+\begin{proof}
+Soit \(t_i\) un échantillon le plus proche. Par Lipschitz, \(\abs{f(t)-f(t_i)}\le L\abs{t-t_i}\). La borne découle de la distance garantie par le maillage. Le facteur \(1/2\) nécessite la couverture au plus proche dans un maillage borné aux deux extrémités; sans cette garantie, la distance maximale ne dépasse que \(h\).\end{proof}
+\begin{remarque}
+Le résultat ne reconstruit pas exactement le signal. Il transforme une hypothèse de régularité en une borne d'erreur. Si la régularité n'est pas justifiée, la garantie n'est pas disponible.
+\end{remarque}
+
+\chapter{Conditions d'identifiabilité des composants invariant et variant}
+\section{Plan d'expériences apparié}
+\begin{definition}[Plan apparié]
+Un plan est apparié lorsque les contextes ou interventions comparés partagent les variables contrôlées nécessaires et que les différences restantes sont enregistrées. Le mot « apparié » décrit le protocole; la validité causale exige en plus des hypothèses sur l'assignation, les confondeurs, les effets de report et la mesure.
+\end{definition}
+\begin{proposition}[Une différence observée n'identifie pas sans condition l'effet de la sonde]
+Si deux enregistrements diffèrent à la fois par la sonde et par un contexte non contrôlé, leur différence ne peut être attribuée de façon unique à la sonde à partir de ces deux enregistrements seuls.
+\end{proposition}
+\begin{proof}
+Considérons le modèle additif \(Y=\beta_F F+\beta_C C\). Deux observations où \(F\) et \(C\) changent simultanément ne fournissent qu'une équation pour les deux contributions; plusieurs couples \((\beta_F,\beta_C)\) peuvent produire la même différence. L'attribution unique est donc impossible sans variation séparée ou contrainte additionnelle.\end{proof}
+\begin{proposition}[Identifiabilité dans un modèle linéaire]
+Pour le modèle \(y=X\theta\) avec matrice connue \(X\), le paramètre \(\theta\) est unique pour toute donnée compatible si et seulement si \(X\) est de rang colonne plein.
+\end{proposition}
+\begin{proof}
+Si \(X\) est de rang colonne plein, son noyau est réduit à \(\{0\}\); si \(X\theta=X\theta'\), alors \(X(\theta-\theta')=0\), donc \(\theta=\theta'\). Si le rang n'est pas plein, il existe \(u\ne0\) tel que \(Xu=0\), et \(\theta\) comme \(\theta+u\) produisent la même donnée; l'unicité échoue.\end{proof}
+\begin{remarque}
+Ce résultat ne démontre pas que la décomposition d'un LLM est linéaire. Il précise seulement le test d'identifiabilité dans la classe de modèles linéaires choisie. Les modèles non linéaires nécessitent leur propre analyse.
+\end{remarque}
+
+\part{Conséquences pour le problème inverse et NGeGenBrain}
+\chapter{Reconstruction comme génération conditionnelle d'une observation}
+\begin{definition}[Générateur observationnel]
+Un générateur observationnel est un noyau \(Q(\dd y\mid i,v,h,p)\) ou, dans le cas déterministe, une fonction \(G(i,v,h,p)\), qui produit un enregistrement à partir d'une empreinte, de coordonnées variantes, d'une histoire \(h\) et d'un protocole \(p\). Ce générateur ne doit être considéré comme identifié que relativement à une classe déclarée et à des expériences discriminantes.
+\end{definition}
+\begin{proposition}[Un modèle invariant seul ne reproduit les variantes que si elles sont déterminées par lui]
+Soit \(I:\Y\to\Z\). Il existe un générateur déterministe \(G:\Z\to\Y\) satisfaisant \(G(I(y))=y\) pour tout \(y\in\Y\) si et seulement si \(I\) est injective. Si \(I\) n'est pas injective, un générateur \(G(I(y))\) peut au mieux choisir un représentant ou reproduire une distribution conditionnelle, mais pas garantir la reconstruction exacte de l'observation individuelle.
+\end{proposition}
+\begin{proof}
+La première assertion est le critère de reconstruction précédemment démontré. Si l'empreinte est non injective, il existe au moins deux entrées avec la même empreinte, donc un seul résultat \(G(I(y))\) ne peut être simultanément égal aux deux. Pour un générateur stochastique, il peut représenter la distribution conditionnelle des observations compatibles si celle-ci est estimable, mais cela n'identifie pas la réalisation individuelle perdue.\end{proof}
+\begin{definition}[Reconstruction fidèle à un protocole]
+Un candidat est fidèle à un protocole \(\pi\) sur un domaine \(D\) si la distance déclarée entre la loi de ses enregistrements et celle du source est sous une tolérance préétablie pour toute condition testée dans \(D\). La fidélité sur \(D\) ne vaut pas hors de \(D\) sans hypothèse de généralisation.
+\end{definition}
+
+\chapter{Procédure minimale invariant--variant--dynamique}
+La procédure suivante est une spécification de recherche, pas une garantie de réussite universelle.
+\begin{enumerate}[label=\textbf{P\arabic*.}]
+\item Déclarer le système, le protocole, le domaine d'entrée, les états accessibles, les familles de sondes, les contextes, les interventions et les contraintes de ressources.
+\item Collecter et conserver les événements bruts, y compris les pertes, horodatages et erreurs; construire les empreintes à plusieurs facettes sans remplacer les données brutes par des seules statistiques.
+\item Déclarer la relation d'invariance : quelles transformations, changements de contexte ou interventions sont supposés préserver la composante structurelle.
+\item Définir séparément les coordonnées variantes : contexte, facette, intervention, histoire, trajectoire, stochastique et résidu de mesure.
+\item Tester l'identifiabilité de la décomposition dans la classe choisie. Si elle échoue, préserver plusieurs décompositions compatibles au lieu d'en sélectionner arbitrairement une.
+\item Définir un ensemble de mécanismes candidats, leur sémantique exécutable, leurs interfaces et leurs dépendances.
+\item Choisir des expériences qui discriminent les candidats, avec contrôles positifs et négatifs adaptés; enregistrer les prédictions avant exécution.
+\item Construire et exécuter le candidat sans appel oracle caché au source; rejouer des trajectoires lorsque le contrat le permet.
+\item Ré-observer le candidat sous le même ensemble de sondes, de contextes et d'interventions; comparer les signatures multi-échelles, les trajectoires et les incertitudes.
+\item Valider sur des données indépendantes; enregistrer divergences, contre-exemples, alternatives encore compatibles et domaine de validité.
+\end{enumerate}
+\begin{proposition}[Préservation de l'incertitude dans une reconstruction honnête]
+Si le dossier et la classe de mécanismes laissent plusieurs candidats non équivalents compatibles, un rapport qui ne retient qu'un candidat doit déclarer une règle de sélection distincte de la preuve d'identification. Sans cette déclaration, la conclusion d'unicité ne suit pas des données.
+\end{proposition}
+\begin{proof}
+Par définition, plusieurs candidats non équivalents satisfont les contraintes disponibles. Le dossier ne permet donc pas de déduire que l'un d'eux est le seul mécanisme possible. Une règle de sélection peut ordonner les candidats, par exemple par coût, mais l'ordre dépend alors du critère et ne réduit pas l'ensemble des compatibles au sens logique.\end{proof}
+
+\chapter{Ce que cette théorie autorise et n'autorise pas à conclure}
+\begin{longtable}{p{0.3\textwidth}p{0.29\textwidth}p{0.31\textwidth}}
+\toprule Revendication & Conditions minimales & Conclusion non autorisée sans preuve supplémentaire \\\midrule
+\endhead
+Empreinte invariante & Transformations et domaine déclarés, propriété d'invariance établie & Dire que toute empreinte est intrinsèquement invariante \\
+Reconstruction exacte & Injectivité de l'empreinte ou de la paire (invariant, variant) & Reconstituer une observation perdue avec l'invariant seul \\
+Séparation invariant/variant unique & Contraintes d'identifiabilité, par exemple somme directe ou rang plein dans la classe choisie & Traiter une décomposition illustrative comme canonique \\
+Observation continue fidèle & Horloges, échantillonnage, pertes et modèle d'erreur spécifiés & Déduire un signal continu arbitraire d'échantillons finis \\
+Effet de sonde causal & Plan valide, interventions et confondeurs traités & Confondre différence temporelle ou corrélation avec causalité \\
+Mécanisme reconstruit & Exécuteur autonome, expériences discriminantes et validation indépendante & Confondre une statistique, un graphe ou une bonne sortie avec une compréhension mécaniste \\
+\bottomrule
+\end{longtable}
+
+\chapter{Conclusion}
+L'idée décisive est de séparer l'empreinte de l'observation complète. Une empreinte peut être conçue pour retenir des invariants, mais cette propriété doit être définie et démontrée relativement à un ensemble de transformations. Les variations ne forment pas automatiquement un résidu identifiable : leur séparation d'avec l'invariant requiert des contraintes de modèle ou un plan d'expériences suffisamment informatif. Le temps ajoute l'histoire et l'échantillonnage; il ne transforme pas à lui seul une information partielle en trace complète.
+
+Pour NGeGenBrain, le programme théorique devient : \emph{trace brute et provenance} \(\to\) \emph{famille d'empreintes multi-échelles} \(\to\) \emph{décomposition invariant/variant/histoire} \(\to\) \emph{ensemble de mécanismes compatibles} \(\to\) \emph{expériences discriminantes} \(\to\) \emph{candidat exécutable} \(\to\) \emph{ré-observation et validation}. Chaque flèche possède son contrat et ses conditions de validité; aucune ne doit être remplacée par une explication narrative.
+
+\appendix
+\chapter{Registre des résultats démontrés}
+Les résultats formels ci-dessus sont démontrés au niveau mathématique de leurs définitions : (1) non-reconstructibilité à partir d'une application non injective; (2) critère de reconstruction exacte et de factorisation; (3) correspondance quotient--image; (4) critère invariant plus variante; (5) non-unicité additive sans contraintes; (6) unicité d'une somme directe; (7) distinction logique entre invariance et stationnarité; (8) raffinement par ajout de coordonnées; (9) non-identifiabilité d'une trace continue depuis des temps finis sans régularité; (10) borne d'erreur sous Lipschitz; (11) confusion entre facteurs non appariés; (12) identifiabilité du modèle linéaire au rang plein. Ces théorèmes ne prouvent pas que leurs hypothèses valent pour un LLM donné : cela relève de l'audit et de l'expérimentation.
+
+\chapter{Checklist d'application}
+\begin{enumerate}[label=\textbf{I\arabic*.}]
+\item Quel groupe de transformations définit l'invariance ?
+\item L'invariance est-elle exacte ou approximative, et avec quelle métrique et tolérance ?
+\item Quelles coordonnées de l'observation sont effacées par l'empreinte ?
+\item Quelle variable/trace variante est conservée pour permettre une reconstruction ?
+\item L'application combinée est-elle injective sur le domaine ciblé ?
+\item Si la décomposition est additive, quelle contrainte assure son unicité ?
+\item Le temps est-il mesuré comme état, trajectoire, événement, fenêtre ou flux ?
+\item Les pertes, délais, horloges et effets intrusifs des sondes sont-ils déclarés ?
+\item Les expériences séparent-elles la sonde du contexte ?
+\item Les résultats de l'étudiant ont-ils été ré-observés sous le même protocole que la source ?
+\item Les conclusions négatives, modèles concurrents et limites sont-ils conservés ?
+\end{enumerate}
+\end{document}

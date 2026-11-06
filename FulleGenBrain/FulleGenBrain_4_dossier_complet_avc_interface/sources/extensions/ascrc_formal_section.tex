@@ -1,0 +1,43 @@
+\section{ASCRC : contrôleur de régulation et d'activation compositionnelle}
+\subsection{Contrat d'entrée/sortie}
+ASCRC est un contrôleur versionné, distinct du ASCR historique d'eGenBrain v4. Il reçoit $G$, le contexte $x$, un flux de descripteurs de candidats, des événements typés, un checkpoint de front et le vecteur de ressources dures $B$. Il produit un plan d'activation $P_t$, des allocations $b_i$, des décisions de veille/réveil, une file de reprises, des motifs d'exclusion/report et une trace chaînée. Il n'écrit pas le champ de statut épistémique et ne change pas le contenu de la structure ASCR source.
+
+\subsection{Candidat et produit d'états indépendants}
+Un candidat est décrit par le tuple versionné :
+\[
+\begin{aligned}
+ d_c=(&id,ver,signature,contract,deps,scope,cost,risk,utility,novelty,\\
+      &information,age,pinned,leased,wakeOn,epistemic,provenance).
+\end{aligned}
+\]
+Son état architectural est un produit, et non une étiquette unique :
+\[
+ State(c)=Exists(c)\times Epistemic(c)\times Lifecycle(c)\times Eligibility(c)\times Activation(c).
+\]
+Cette factorisation interdit les conversions implicites telles que dormant $\Rightarrow$ faux, score haut $\Rightarrow$ vrai, admis $\Rightarrow$ certifié ou exécuté $\Rightarrow$ sûr.
+
+\subsection{Politique multi-étage}
+Le contrôleur suit cinq niveaux : (0) grammaire et génération paresseuse; (1) types, contrats, effets, permissions et versions; (2) index de signature, dépendances et cache; (3) classement bon marché et allocation des quotas; (4) sonde/test approfondi et activation sous budget. Le plan est incrémental : seul le sous-ensemble rencontré par le générateur et l'index est scoré. Un candidat non développé reste représenté par la continuation versionnée du générateur.
+
+\subsection{Allocation des ressources}
+Le budget global est un vecteur $B$, et le plan satisfait $\sum_i b_i^{(r)}\leq B^{(r)}$ pour toute ressource $r$. La politique peut réserver des fractions versionnées aux familles exploitation, exploration, vérification et maintenance. Les contraintes de sûreté et les droits sont des portes dures, jamais des poids compensables. L'équilibre entre priorité, information attendue, coût, risque, nouveauté, âge et diversité est une politique versionnée, mesurée et révisable, non une propriété de vérité.
+
+\subsection{États opérationnels et événements de réveil}
+Les états $CATALOGUED$, $ELIGIBLE$, $ACTIVE$, $DORMANT$, $STALE$, $BLOCKED$, $REVOKED$ sont séparés des statuts épistémiques. Réveils : objectif/contextualisation nouveaux, observation, contre-exemple, échec actif, dépendance disponible, nouvelle preuve, demande explicite, seuil d'âge ou maintenance. Toute restauration vérifie hash, version, contrat, dépendances et droits avant de rendre le candidat exécutable. Les objets épinglés, loués, engagés dans une transaction ou nécessaires à une révocation ne sont pas endormis de façon ordinaire.
+
+\subsection{Invariants vérifiables}
+\begin{enumerate}
+\item \textbf{Conservation de catalogue :} mise en veille/report ne supprime pas le descripteur durable ni le pointeur vers payload/checkpoint.
+\item \textbf{Neutralité épistémique :} ASCRC ne peut pas produire à lui seul $REFUTED$, $CERTIFIED$ ou $SUPPORTED$.
+\item \textbf{Budget :} aucune allocation active n'excède le vecteur de ressources ou les limites de concurrence.
+\item \textbf{Fraîcheur :} un candidat $STALE$ ne s'exécute pas avant revalidation.
+\item \textbf{Protections :} pin, lease, transaction et invalidation prioritaire bloquent l'hibernation non sûre.
+\item \textbf{Trace :} chaque activation, sommeil, réveil, report ou allocation porte cause, politique, version, contexte et coût estimé/observé.
+\item \textbf{Non-altération d'ASCR :} ASCRC ne change ni les contrats ni la sémantique d'ASCR d'eGenBrain v4.
+\end{enumerate}
+
+\subsection{Anti-famine et limites des garanties}
+Pour un ensemble fini et continuellement admissible dont chaque élément est exécutable dans les ressources disponibles, un ordonnanceur avec vieillissement/rotation, quota d'exploration positif, appels répétés et checkpoint reprenable évite le report permanent. Cette propriété ne constitue pas une complétude pour une grammaire infinie, une arrivée infinie plus rapide que le service ou un candidat dont le coût excède toujours le budget disponible. Ces cas restent gérés par génération paresseuse, classes de coût, fractionnement, adaptation du budget et états de continuation explicitement typés.
+
+\subsection{Plan de preuve et d'évaluation}
+Le noyau devra établir par tests et, lorsque possible, preuve machine : conservation de catalogue, neutralité épistémique, respect du budget, absence d'hibernation sous pin/lease/transaction, réveil après événement, revalidation stale, reprise identique après interruption, anti-famine dans le domaine hypothétique et absence d'appels à ASCR modifiant son état. Comparaisons appariées : FIFO, best-first, ASCRC sans exploration, ASCRC avec exploration et veille activée/désactivée; budgets physiques, tâches et graines comparables; métriques de qualité, coût de décision, coût du contrôleur, diversité, famine et erreurs.

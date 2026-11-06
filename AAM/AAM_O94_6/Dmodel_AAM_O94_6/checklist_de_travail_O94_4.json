@@ -1,0 +1,181 @@
+{
+  "schema": "aam-o94-4-work-checklist-v1",
+  "title": "O94.4 — checklist incrémentale, adaptateur personnalisable et revalidation de livraison",
+  "created_utc": "2026-10-20T08:35:00+01:00",
+  "updated_utc": "2026-10-20T08:23:32.082111+00:00",
+  "version": "0.94.4",
+  "rule": "Avant chaque exécution lire cette checklist et les deux registres d’erreurs. Après chaque exécution enregistrer le résultat, les erreurs et la preuve. Aucun passage de phase sans critères de sortie et artefact de preuve.",
+  "parent_version": "O94_3",
+  "reference_formalism": "formalisme_O94_4.tex",
+  "reference_laboratory": "laboratoire_O94_4.tex",
+  "reference_error_model": "checklist_erreurs_model_O94_4.json",
+  "reference_error_environment": "checklist_erreurs_no_model_O94_4.json",
+  "reference_formalism_sha256_current": "865739410c609bc167d76b332a5ccc92afbb8d25839d185af8e0bc050c74a630",
+  "reference_laboratory_sha256_current": "53f9bed877855b08b96b32581f1a67529d170518d1c3ad804ae7445919527ec0",
+  "current_phase": "COMPLETE",
+  "global_status": "COMPLETE_EVIDENCED",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Auditer O94.3 et reproduire les limites de couverture actuelles",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [],
+      "criteria": [
+        "Intégrité de l’archive source et tests parents consignés.",
+        "Comportements observés distingués des capacités non testées.",
+        "Sous-couverture train/validation calculée à partir des traces."
+      ],
+      "evidence": [
+        "receipts/O94_4/P0_baseline.json"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Supprimer les plafonds silencieux et ajouter des budgets explicites facultatifs",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "Aucune troncature implicite des séquences train/validation par défaut.",
+        "Les budgets explicites sont paramétrables et propagés du CLI au moteur.",
+        "Valeur zéro ou négative rejetée; politique disponible dans la trace.",
+        "Tests unitaires du chemin de production passent."
+      ],
+      "evidence": [
+        "receipts/O94_4/P1_coverage_patch.json"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Valider le préflight et les intégrations Runtime/CLI avec et sans budget",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1"
+      ],
+      "criteria": [
+        "Preflight O94.4 PASS_BOUNDED et overlay parent authentifié.",
+        "Commande CLI par défaut utilise toutes les fenêtres disponibles.",
+        "Commande CLI plafonnée respecte exactement les budgets et les affiche dans les traces.",
+        "Tests runtime et interface de commande existants passent.",
+        "Le RAG ne conserve pas un résultat secondaire si son score échoue au seuil relatif déclaré.",
+        "Une question de fréquence sélectionne une phrase source contenant l’intervalle, plutôt qu’une phrase d’identification seulement.",
+        "Les diagnostics rendent visible le seuil et le nombre de candidats filtrés; les sources originales demeurent inchangées."
+      ],
+      "evidence": [
+        "receipts/O94_4/P2_runtime_cli.json"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Rejouer la suite complète et les scénarios RAG observation boîte noire et composition",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P2"
+      ],
+      "criteria": [
+        "Suite complète sous affichage virtuel sans échec.",
+        "Tests RAG réels/synthétiques, capture live, compilation de composition et modèle local contrôlés.",
+        "Commandes, codes retour, logs et limites de couverture consignés."
+      ],
+      "evidence": [
+        "receipts/O94_4/P3_regression_suite.json"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Auditer la documentation, la sauvegarde restaurable et les archives autonomes",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P3"
+      ],
+      "criteria": [
+        "Manuel GUI/CLI et rapports au template commun inclus.",
+        "Point de sauvegarde vérifiable, version et chemins consignés.",
+        "Manifestes SHA/ZIP valides; archives inférieures à 220 Mo ou divisées avec script d’assemblage.",
+        "Preflight après extraction autonome et tests de livraison réussis."
+      ],
+      "evidence": [
+        "receipts/O94_4/P4_delivery_audit.json"
+      ]
+    },
+    {
+      "id": "P5",
+      "name": "Étendre le registre et l’interface aux adaptateurs Python personnalisés",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P4"
+      ],
+      "criteria": [
+        "Le backend python_adapter est enregistré comme backend autorisé.",
+        "L’exécution requiert une approbation explicite et épingle le SHA-256 du module.",
+        "Inférence, intégrité du module et politique d’entraînement sont testées sur un runtime non-PyTorch de démonstration.",
+        "L’interface graphique propose le backend et un gabarit documenté."
+      ],
+      "evidence": [
+        "receipts/O94_4/P5_python_adapter.json"
+      ]
+    },
+    {
+      "id": "P6",
+      "name": "Formaliser le but intégral AAM et séparer preuves acquises des capacités non certifiées",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P5"
+      ],
+      "criteria": [
+        "Les briques compétence/méthode/règle sont définies avec contrats et provenance.",
+        "Les contrats d’observation, RAG, mémoire, résolution continue, récompense, réseau et multimodalité sont formalisés.",
+        "Les cas PDF, migration SQL, programme ancien et OCR ont des critères d’acceptation explicites sans faux statut PASS."
+      ],
+      "evidence": [
+        "receipts/O94_4/P6_capability_formalization.json"
+      ]
+    },
+    {
+      "id": "P7",
+      "name": "Rejouer la régression complète après l’extension et vérifier les gates",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P6"
+      ],
+      "criteria": [
+        "La suite complète est exécutée sans masquer les warnings.",
+        "Les tests du contrat python_adapter, UI, runtime et release sont passés.",
+        "Le préflight passe après mise à jour des formalismes et de la checklist.",
+        "Les comptes et incidents sont consignés."
+      ],
+      "evidence": [
+        "receipts/O94_4/P7_full_regression.json"
+      ]
+    },
+    {
+      "id": "P8",
+      "name": "Rafraîchir le savepoint et vérifier de manière indépendante les trois ZIP définitifs",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P7"
+      ],
+      "criteria": [
+        "Le savepoint O94_4 reflète tous les documents et changements nouveaux.",
+        "Manifestes SHA-256 recalculés et cohérents dans les trois paquets.",
+        "CRC, chemins sûrs, extraction propre et préflight modèle extraits vérifiés.",
+        "Les trois archives sont chacune inférieures à 220 Mo et leur sidecar SHA-256 est livré."
+      ],
+      "evidence": [
+        "receipts/O94_4/P8_final_delivery.json"
+      ]
+    }
+  ]
+}

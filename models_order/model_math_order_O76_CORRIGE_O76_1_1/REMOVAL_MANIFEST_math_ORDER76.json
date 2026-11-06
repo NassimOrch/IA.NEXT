@@ -1,0 +1,115 @@
+{
+  "version": "math_order76_1.1",
+  "purpose": "Declare runtime components intentionally excluded from O76 proof authority, with reasons and replacement paths.",
+  "principle": "Removal means removal from the authoritative proof runtime, not deletion from the historical source corpus.",
+  "items": [
+    {
+      "id": "REM01",
+      "component": "Riemann/RH numerical probe and finite-grid analytics",
+      "source_patterns": [
+        "riemann.py",
+        "rh_proof.py",
+        "li_probe.py",
+        "riemann_hypothesis_*",
+        "rapport_reimann_*"
+      ],
+      "action": "excluded_from_runtime",
+      "reason": "Finite numerical evidence, zeta evaluations, Li probes and contour/grid experiments cannot establish the universal proposition of the Riemann hypothesis. Keeping them in the proof authority would repeat E43-E58.",
+      "replacement": "Keep such material only as external experiment/audit; O76 proof runtime uses exact symbolic certificates only."
+    },
+    {
+      "id": "REM02",
+      "component": "PyTorch/world-model checkpoints and neural artifacts",
+      "source_patterns": [
+        "*.pt"
+      ],
+      "action": "excluded_from_runtime",
+      "reason": "The nine checkpoint artifacts are historical model components, not deterministic proof certificates, and are not required for the exact math kernel.",
+      "replacement": "Pure-stdlib exact symbolic runtime; a future neural proposer may be added only as non-authoritative candidate generation."
+    },
+    {
+      "id": "REM03",
+      "component": "Benchmark result snapshots and injected final answers",
+      "source_patterns": [
+        "*.result.json",
+        "final_results/*",
+        "MODEL_DECISION_*",
+        "probe.result.json"
+      ],
+      "action": "excluded_from_runtime",
+      "reason": "Using benchmark outputs as resolution logic would violate R03/R14 and can create false proofs through answer leakage.",
+      "replacement": "Examples remain input-only; the runtime recomputes results from the stated problem."
+    },
+    {
+      "id": "REM04",
+      "component": "Legacy LLM and non-math domain wrappers",
+      "source_patterns": [
+        "chess",
+        "cipher/cryptanalysis",
+        "transition/cipher wrappers",
+        "LLM-specific launcher paths"
+      ],
+      "action": "excluded_from_runtime",
+      "reason": "The requested O76 model is dedicated to mathematics. Retaining unrelated domain classifiers would reintroduce semantic ambiguity documented by E02-E17.",
+      "replacement": "Explicit MathProblem contract and deterministic parser."
+    },
+    {
+      "id": "REM05",
+      "component": "Opaque/non-serializable algebraic checkpoint representations",
+      "source_patterns": [
+        "legacy Poly object checkpoint state",
+        "default=str checkpoint serialization"
+      ],
+      "action": "replaced",
+      "reason": "Stringifying Python objects loses mathematical structure and prevents replay; this directly addresses E28.",
+      "replacement": "Structured poly_payload, exact generator representations, canonical JSON and problem hash."
+    },
+    {
+      "id": "REM06",
+      "component": "Rule treating a complete Groebner basis as a solved theorem",
+      "source_patterns": [
+        "structural Groebner result used as proof"
+      ],
+      "action": "removed_as_authority_rule",
+      "reason": "A complete basis is an algebraic invariant, not by itself a certificate that a requested target equals zero; this directly addresses E27.",
+      "replacement": "Representation-tracking Buchberger plus explicit ideal-identity certificate replay."
+    },
+    {
+      "id": "REM07",
+      "component": "Empty JSON harness artifacts",
+      "source_patterns": [
+        "hard5.r4.json",
+        "hard5.final.json",
+        "hard5.repeat1.json",
+        "hard5.repeat4.json",
+        "stress4/run4a.json",
+        "stress4/run4.json"
+      ],
+      "action": "classified_as_invalid_artifacts",
+      "reason": "They contain no JSON data and correspond to harness interruption history E38; an empty stdout/file cannot be used as a mathematical result.",
+      "replacement": "Internal checkpoint/log files and explicit UNRESOLVED status."
+    },
+    {
+      "id": "REM08",
+      "component": "External symbolic/numeric solver dependencies",
+      "source_patterns": [
+        "SymPy/SciPy/NumPy/pandas/scikit-learn proof path"
+      ],
+      "action": "excluded",
+      "reason": "The source history explicitly removed external solver authority. O76 keeps the proof kernel auditable and deterministic with Python standard library only."
+    },
+    {
+      "id": "REM09",
+      "component": "Raw prose claims of universal mathematical truth outside the formal input grammar",
+      "source_patterns": [
+        "unsupported target text",
+        "open-problem prose",
+        "Collatz",
+        "Riemann hypothesis statements without formal relation encoding"
+      ],
+      "action": "excluded_from_proof_authority",
+      "reason": "The decisive test showed that accepting natural-language universal claims without a formal semantics would create an unsound bridge from prose to proof. Such inputs are classified UNSUPPORTED_FORM/UNRESOLVED.",
+      "replacement": "Require an exact supported contract or a future formally specified theorem language with an independent verifier."
+    }
+  ]
+}

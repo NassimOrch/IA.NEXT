@@ -1,0 +1,599 @@
+{
+  "schema": "aam-o94-5-work-checklist-v1",
+  "title": "O94.5 — refonte fonctionnelle et preuves de bout en bout",
+  "version": "0.94.5",
+  "parent_version": "O94_4",
+  "current_phase": "COMPLETE",
+  "global_status": "COMPLETE_EVIDENCED_FINAL_ARCHIVES_REQUIRE_EXTERNAL_SIDECAR_VERIFICATION",
+  "rule": "Avant toute exécution, relire cette checklist, checklist_erreurs_model_O94_5.json et checklist_erreurs_no_model_O94_5.json. Après chaque exécution, enregistrer la commande, le code retour, les logs, les défauts et les preuves. Ne clore une phase que sur critères objectivement testés.",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Auditer O94.4 et reproduire les défauts signalés",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [],
+      "criteria": [
+        "Inventaire des implémentations et des dépendances effectué.",
+        "Défauts séparés des fonctions déjà démontrées.",
+        "Reproduction/tests de référence consignés."
+      ],
+      "evidence": [
+        "receipts/O94_5/P0_baseline.json"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Rendre le chargement Hugging Face local utilisable sans adaptateur écrit par l’utilisateur",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "Sélection d’un dossier complet ou de model.safetensors détectée automatiquement.",
+        "Validation des fichiers requis, dépendances et diagnostic explicite.",
+        "Tests couvrant registre, génération simulée et échecs propres; aucune promesse sur poids absents."
+      ],
+      "evidence": [
+        "receipts/O94_5/P1_transformers_generation.json"
+      ],
+      "result_note": "Les critères prédéfinis sur bundle/registre/génération simulée/diagnostic sont satisfaits. La génération réelle SmolLM2 est explicitement NON VÉRIFIÉE faute de runtime disponible et de poids locaux; incident O945-ENV-004."
+    },
+    {
+      "id": "P2",
+      "name": "Construire une observation outillée multimodale avec preuves et diagnostics",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "Inventaire des outils disponibles effectué.",
+        "Inspecteur multimodal utilise réellement les utilitaires locaux présents.",
+        "Rapport reproductible, limites et hashes consignés."
+      ],
+      "evidence": [
+        "receipts/O94_5/P2_observation_toolchain_complete.json"
+      ],
+      "execution_log": [
+        "receipts/O94_5/P2_preflight_hash_interruption.json",
+        "receipts/O94_5/P2_observation_persist_text_signature_regression.json",
+        "receipts/O94_5/P2_ffmpeg_sampling_regression.json",
+        "receipts/O94_5/P2_ffmpeg_sampling_fix.json",
+        "receipts/O94_5/P2_observation_reward_final.json",
+        "receipts/O94_5/P2_video_frame_fix.json",
+        "receipts/O94_5/P2_video_output_seek.json",
+        "receipts/O94_5/P2_observation_privacy_fix.json"
+      ],
+      "last_result": "7 passed, 0 failed; source hashes unchanged; final report SHA-256 verified",
+      "result_note": "7 real-tool tests pass. OCR/PDF/audio/video decoders and runtime→fingerprint→RAG path are exercised. No local ASR model is available; no speech-transcription claim is made."
+    },
+    {
+      "id": "P3",
+      "name": "Faire évoluer la composition vers un compilateur réel de programmes",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "DSL typée compilée en source Python/AST sans eval du DSL.",
+        "Compilation syntaxique réelle, diagnostics de lignes, paquet généré.",
+        "Programme complexe généré à partir de briques, tests et exécution avec timeout."
+      ],
+      "evidence": [
+        "receipts/O94_5/P3_phase_gate_receipt.json"
+      ],
+      "last_result": "19 passed, 0 failed after the checked-in composition artifact and syntax-highlighting fix; actual LaTeX-to-PDF compiler produced a valid PDF; project build reported one deliberate syntax error with line/column while compiling valid files.",
+      "result_note": "Composition is now demonstrated on a nontrivial project-audit workflow: reviewed DSL, CPython-generated source and bytecode, per-file compilation diagnostics, integrity manifest, and a multi-tab editor/workbench. Still bounded: not a general-purpose arbitrary-code compiler, no static type checker, no linker/package manager, and running a project is not sandboxed. Gate evidence points to the post-build final receipt; receipt status normalized transparently from exit_code=0, passed=19, failed=0.",
+      "artifacts": [
+        "receipts/O94_5/P3_composition_compiler_retest_final.json",
+        "receipts/O94_5/P3_composition_artifact_build_final.json",
+        "aam_o93/composed_programs/O94_5_project_compilation_audit.py",
+        "aam_o93/composed_programs/O94_5_project_compilation_audit.py.manifest.json",
+        "examples/compositions/O94_5/project_compilation_audit.json",
+        "aam_o93/code_editor_app.py",
+        "tests/test_o945_compiled_project_audit.py"
+      ],
+      "gate_note": "Les reçus finalisés et les artefacts de programme sont scellés dans le savepoint. Les logs d’exécution sont conservés hors du snapshot immuable mais leur SHA-256 est contrôlé par la checklist.",
+      "logs": [
+        "logs/O94_5/P3_composition_compiler_postbuild.log"
+      ],
+      "log_sha256": {
+        "logs/O94_5/P3_composition_compiler_postbuild.log": "1d3842f9cd38df308ef6cca8c7712a430251e949d5078fbe6c42d5b5d2f6ac22"
+      }
+    },
+    {
+      "id": "P4",
+      "name": "Relier feedback causal et récompense à l’orchestration/runtime/chat",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "Événements de réussite/échec technique et rating utilisateur séparés.",
+        "Préférences apprises modifient réellement le classement des compétences.",
+        "Traçabilité causale et tests anti-double-application / invariance des vérités."
+      ],
+      "evidence": [
+        "receipts/O94_5/P4_reward_runtime_regression_final.json"
+      ],
+      "started_utc": "2026-10-20T10:21:01.659535+00:00",
+      "artifacts": [
+        "aam_o93/reward_policy.py",
+        "tests/test_o945_causal_reward_routing.py",
+        "tests/test_o945_reward_runtime_integration.py",
+        "logs/O94_5/P4_causal_feedback_final.stdout.txt"
+      ],
+      "last_result": "50 passed, 0 failed in 9.41s after final rerun; the test checks post-rating audit events from the journal, not a stale snapshot.",
+      "result_note": "The three channels are separate and bounded: explicit human preference, operational execution reliability, and independently verified outcomes. User satisfaction is not treated as ground truth. This closes the defined P4 criteria, not the entire AAM release.",
+      "closed_utc": "2026-10-20T11:27:00+01:00"
+    },
+    {
+      "id": "P5",
+      "name": "Unifier le chat avec modèle choisi, RAG, mémoire, compétences et composition",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "criteria": [
+        "Scénario d’intégration passe via runtime principal.",
+        "Modèle intégré explicitement sélectionné, contexte RAG et traces associés.",
+        "Fallbacks visibles et aucune substitution silencieuse."
+      ],
+      "evidence": [
+        "receipts/O94_5/P5_chat_ui_release_identity_regression.json",
+        "receipts/O94_5/P5_ui_detail_smoke_regression.json",
+        "receipts/O94_5/P5_cli_foundation_composition_dispatch.json",
+        "receipts/O94_5/P5_rag_runtime_sms_corpus.json",
+        "receipts/O94_5/P5_ui_e2e_retest.json"
+      ],
+      "started_utc": "2026-10-20T10:35:00Z",
+      "result_note": "The end-to-end UI test selected an actual registered adapter from the UI model picker, sent the user's question through the actual Tk action dispatcher and AAMRuntime.solve, exposed only query-relevant RAG context, rendered the answer, verified the selected backend and context/prompt hashes, and confirmed the reward reliability update is causally linked to task completion. The adapter used for this test is deterministic test code; it validates integration, not general LLM semantic quality.",
+      "artifacts": [
+        "receipts/O94_5/P5_sms_rag_chat.json",
+        "logs/O94_5/P5_sms_rag_chat.log",
+        "receipts/O94_5/P5_unified_chat_ui_identity_timeout.json",
+        "logs/O94_5/P5_unified_chat_ui_identity.log",
+        "receipts/O94_5/P5_ui_stack_diagnostic.json",
+        "logs/O94_5/P5_ui_stack_diagnostic.log",
+        "tests/test_o945_chat_unified_pipeline.py",
+        "aam_o93/__init__.py",
+        "receipts/O94_5/P5_ui_e2e_retest.json",
+        "logs/O94_5/P5_ui_e2e_retest.log",
+        "aam_o93/ui.py",
+        "tests/test_o931_release_identity.py",
+        "tests/test_o940_ui_resolution_details.py",
+        "tests/test_o931_ui_smoke.py",
+        "tests/test_p0_foundation.py",
+        "receipts/O94_5/P5_chat_ui_release_identity_regression.json",
+        "logs/O94_5/P5_chat_ui_release_identity_regression.log",
+        "receipts/O94_5/P5_ui_detail_smoke_regression.json",
+        "logs/O94_5/P5_ui_detail_smoke_regression.log",
+        "receipts/O94_5/P5_cli_foundation_composition_dispatch.json",
+        "logs/O94_5/P5_cli_foundation_composition_dispatch.log"
+      ],
+      "execution_log": [
+        "receipts/O94_5/P5_unified_chat_ui_identity_timeout.json",
+        "receipts/O94_5/P5_ui_stack_diagnostic.json",
+        "receipts/O94_5/P5_ui_e2e_retest.json",
+        "receipts/O94_5/P5_chat_ui_release_identity_regression.json",
+        "receipts/O94_5/P5_ui_detail_smoke_regression.json",
+        "receipts/O94_5/P5_cli_foundation_composition_dispatch.json"
+      ],
+      "last_result": "P5 completed on 5 passing independent receipts: visible chat+model+RAG+reward+release identity (4), UI details/smoke (4), CLI foundation and composition dispatch (7), runtime RAG+real shipped SMS corpus (4), and isolated live Tk E2E (1). All failed/time-out attempts remain visible in execution_log/artifacts.",
+      "closed_utc": "2026-10-20T10:59:47.799322+00:00"
+    },
+    {
+      "id": "P6",
+      "name": "Campagne de tests de bout en bout sur cas réels disponibles",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5"
+      ],
+      "criteria": [
+        "Tests ciblés et campagne large effectués; échecs non masqués.",
+        "Programme composé réel compilé, exécuté et vérifié.",
+        "Observation outillée réelle testée sur fichiers/processus ou multimodal disponible."
+      ],
+      "evidence": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "receipts/O94_5/P6_real_tool_observation_regression.json",
+        "receipts/O94_5/P6_composition_compiler_editor_dispatch.json",
+        "receipts/O94_5/P6_local_model_adapter_regression.json",
+        "receipts/O94_5/P6_reward_autonomy_composition_regression.json",
+        "receipts/O94_5/P6_passive_live_observation_cli.json",
+        "receipts/O94_5/P6_rag_memory_ui_real_corpus.json",
+        "receipts/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.json"
+      ],
+      "started_utc": "2026-10-20T10:59:47.799322+00:00",
+      "execution_log": [
+        "receipts/O94_5/P6_real_tool_observation_regression.json",
+        "receipts/O94_5/P6_composition_compiler_editor_dispatch.json",
+        "receipts/O94_5/P6_local_model_adapter_regression.json",
+        "receipts/O94_5/P6_reward_autonomy_composition_regression.json",
+        "receipts/O94_5/P6_passive_live_observation_cli.json",
+        "receipts/O94_5/P6_rag_memory_ui_real_corpus.json",
+        "receipts/O94_5/P6_full_suite_regression.json",
+        "receipts/O94_5/P6_targeted_regressions_retry01.json",
+        "receipts/O94_5/P6_full_suite_manifest_mutation_20261020.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T112306Z_15724.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T112306Z_15724.log",
+        "receipts/O94_5/P6_full_suite_preflight_20261020T112306Z_15724.json",
+        "receipts/O94_5/P6_audit_media_correction_targeted_retry01.json",
+        "logs/O94_5/P6_audit_media_correction_targeted_retry01.log",
+        "receipts/O94_5/P6_audit_media_correction_preflight_retry01.json",
+        "receipts/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.json",
+        "receipts/O94_5/P6_status_contract_fix_preflight.json",
+        "receipts/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.json",
+        "logs/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.log",
+        "logs/O94_5/P6_full_suite_regression_20261020T114536Z_18667.log"
+      ],
+      "artifacts": [
+        "receipts/O94_5/P6_real_tool_observation_regression.json",
+        "logs/O94_5/P6_real_tool_observation_regression.log",
+        "receipts/O94_5/P6_composition_compiler_editor_dispatch.json",
+        "logs/O94_5/P6_composition_compiler_editor_dispatch.log",
+        "receipts/O94_5/P6_local_model_adapter_regression.json",
+        "logs/O94_5/P6_local_model_adapter_regression.log",
+        "receipts/O94_5/P6_reward_autonomy_composition_regression.json",
+        "logs/O94_5/P6_reward_autonomy_composition_regression.log",
+        "receipts/O94_5/P6_passive_live_observation_cli.json",
+        "logs/O94_5/P6_passive_live_observation_cli.log",
+        "receipts/O94_5/P6_rag_memory_ui_real_corpus.json",
+        "logs/O94_5/P6_rag_memory_ui_real_corpus.log",
+        "scripts/run_o945_full_suite.py",
+        "receipts/O94_5/P6_full_suite_preflight.json",
+        "receipts/O94_5/P6_full_suite_regression.json",
+        "logs/O94_5/P6_full_suite_regression.log",
+        "logs/O94_5/P6_full_suite_runner.log",
+        "receipts/O94_5/P6_targeted_regressions_retry01.json",
+        "logs/O94_5/P6_targeted_regressions_retry01.log",
+        "receipts/O94_5/P6_targeted_regressions_preflight_retry01.json",
+        "logs/O94_5/P6_full_suite_manifest_mutation_20261020.log",
+        "receipts/O94_5/P6_full_suite_manifest_mutation_20261020.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T112306Z_15724.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T112306Z_15724.log",
+        "receipts/O94_5/P6_full_suite_preflight_20261020T112306Z_15724.json",
+        "receipts/O94_5/P6_audit_media_correction_targeted_retry01.json",
+        "logs/O94_5/P6_audit_media_correction_targeted_retry01.log",
+        "receipts/O94_5/P6_audit_media_correction_preflight_retry01.json",
+        "receipts/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.json",
+        "logs/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.log",
+        "tests/test_o945_observation_multimedia_ffmpeg.py",
+        "tests/test_o945_observation_reward.py",
+        "receipts/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.json",
+        "logs/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.log",
+        "logs/O94_5/P6_full_suite_regression_20261020T114536Z_18667.log",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T114952Z_19680.log",
+        "receipts/O94_5/P6_full_suite_preflight_20261020T114952Z_19680.json"
+      ],
+      "last_result": "PASS_BOUNDED. Broad pytest regression: 419 passed, 0 failed, 5 warnings, 21 subtests, 199.38 s under Xvfb. Targeted receipts prove real-tool observation, a composition/compiler/editor program build and execution path, model adapter routes (real SmolLM2 weights still absent), causal reward/autonomy, live observation CLI, and RAG on the SMS corpus.",
+      "result_note": "Warnings are five TorchScript API deprecations; no test failures. SmolLM2 generation on the user-provided actual weights remains unverified because those weights and the Transformers runtime are absent in this environment; this is explicitly retained as an open external fixture/runtime acceptance item, not claimed as a pass.",
+      "completed_utc": "2026-10-20T11:54:38.515102+00:00"
+    },
+    {
+      "id": "P7",
+      "name": "Formaliser O94.5, clôture des incidents et sauvegarde restaurable",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P6"
+      ],
+      "criteria": [
+        "Formalisme et laboratoire respectent le template de rapport.",
+        "Checklists et registres d’erreurs mis à jour après chaque campagne.",
+        "sav_AAM_O94_5 et chemins_O94_5.json cohérents et restaurables."
+      ],
+      "evidence": [
+        "receipts/O94_5/P7_documentation_restore_final.json",
+        "receipts/O94_5/P7_post_registry_documentation_audit.json"
+      ],
+      "started_utc": "2026-10-20T11:54:38.515102+00:00",
+      "closed_utc": "2026-10-20T12:18:43.943303+00:00",
+      "artifacts": [
+        "formalisme_O94_5.tex",
+        "laboratoire_O94_5.tex",
+        "build_docs/O94_5/formalisme_O94_5.pdf",
+        "build_docs/O94_5/laboratoire_O94_5.pdf",
+        "README_O94_5_FR.md",
+        "GUIDE_UTILISATEUR_O94_5.md",
+        "RAPPORT_TESTS_O94_5_FR.md",
+        "registre_prouves_O94_5.json",
+        "O94_5_TEST_MATRIX.json",
+        "CHANGE_REGISTER_O94_5.json",
+        "DELIVERY_STATE_O94_5.md",
+        "chemins_O94_5.json",
+        "checklist_erreurs_model_O94_5.json",
+        "checklist_erreurs_no_model_O94_5.json",
+        "run_AAM_O94_5.sh",
+        "run_AAM_O94_5.bat",
+        "run_AAM_O94_5.ps1",
+        "scripts/preflight_o945.py",
+        "scripts/restore_o945_savepoint.py",
+        "scripts/audit_o945_documentation.py",
+        "scripts/refresh_o945_savepoint.py",
+        "tests/test_o945_savepoint_restore.py",
+        "tests/test_o945_standalone_preflight.py",
+        "tests/test_o945_documentation_integrity.py",
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120522Z.json",
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120732Z.json",
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120820Z.json",
+        "receipts/O94_5/P7_docs_restore_compile_20261020T121453Z.json",
+        "receipts/O94_5/P7_documentation_restore_final.json",
+        "receipts/O94_5/P7_post_registry_documentation_audit.json",
+        "logs/O94_5/P7_docs_restore_compile_20261020T120522Z.log",
+        "logs/O94_5/P7_docs_restore_compile_20261020T120732Z.log",
+        "logs/O94_5/P7_docs_restore_compile_20261020T120820Z.log",
+        "logs/O94_5/P7_docs_restore_compile_20261020T121453Z.log",
+        "logs/O94_5/P7_post_registry_documentation_audit.log"
+      ],
+      "logs": [
+        "logs/O94_5/P7_post_registry_documentation_audit.log"
+      ],
+      "log_sha256": {
+        "logs/O94_5/P7_post_registry_documentation_audit.log": "4efb14f101f6979147d7bbce32e61144105a936300e707160da565d6ca47724b"
+      },
+      "result_note": "Documentation cross-reference audit: 18 required documents, 10 proof entries, 7 targeted batteries, 0 broken references; release-specific gate and read-only savepoint restore verification PASS_BOUNDED; six P7 unit tests pass; both LaTeX sources compile into non-empty PDFs. Earlier failed LaTeX attempts are retained as historical evidence and incident records; they are not overwritten."
+    },
+    {
+      "id": "P8",
+      "name": "Assembler et auditer les livrables O94.5",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P7"
+      ],
+      "criteria": [
+        "Dmodel/Amodel/suivi O94.5 reconstruits depuis l’état clôturé.",
+        "CRC, SHA-256, extraction propre, préflight et compilation vérifiés.",
+        "Chaque archive <220 Mio, sinon division + script de fusion."
+      ],
+      "evidence": [
+        "receipts/O94_5/P8_candidate_archive_verification.json",
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json"
+      ],
+      "started_utc": "2026-10-20T12:18:43.943303+00:00",
+      "artifacts": [
+        "scripts/build_o945_delivery.py",
+        "scripts/verify_o945_followup.py",
+        "scripts/assemble_o945_split_archive.py",
+        "receipts/O94_5/P8_candidate_archive_verification.json",
+        "README_O94_5_FR.md",
+        "RAPPORT_TESTS_O94_5_FR.md",
+        "registre_prouves_O94_5.json",
+        "CHANGE_REGISTER_O94_5.json"
+      ],
+      "logs": [
+        "logs/O94_5/P8_runner_targeted_regression.log"
+      ],
+      "log_sha256": {
+        "logs/O94_5/P8_runner_targeted_regression.log": "2400204595617567d8419a2d2ef7a9ff5398f6c311be611f1848b2af1375ea5a"
+      },
+      "completed_utc": "2026-10-20T12:44:14.545994+00:00"
+    }
+  ],
+  "updated_utc": "2026-10-20T12:44:14.546003+00:00",
+  "history": [
+    {
+      "timestamp_utc": "2026-10-20T10:41:33.844637+00:00",
+      "phase": "P5",
+      "event": "chat_unified_runtime_retest",
+      "receipt": "receipts/O94_5/P5_chat_unified_runtime_retest01.json",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "duration_seconds": 3.964
+    },
+    {
+      "timestamp_utc": "2026-10-20T10:44:09.805384+00:00",
+      "phase": "P5",
+      "event": "combined_regression_campaign_interrupted_by_outer_timeout",
+      "receipt": "receipts/O94_5/P5_chat_rag_memory_reward_sms_integration_timeout.json",
+      "log": "logs/O94_5/P5_chat_rag_memory_reward_sms_integration_timeout.log",
+      "status": "INTERRUPTED_NO_TEST_SUMMARY",
+      "test_counts": null
+    },
+    {
+      "timestamp_utc": "2026-10-20T10:44:29.372899+00:00",
+      "phase": "P5",
+      "event": "chat_rag_batch1",
+      "receipt": "receipts/O94_5/P5_chat_rag_batch1.json",
+      "log": "logs/O94_5/P5_chat_rag_batch1.log",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "duration_seconds": 8.496
+    },
+    {
+      "timestamp_utc": "2026-10-20T10:45:13.271939+00:00",
+      "phase": "P5",
+      "event": "memory_runtime_reward_batch2",
+      "receipt": "receipts/O94_5/P5_memory_runtime_reward_batch2.json",
+      "log": "logs/O94_5/P5_memory_runtime_reward_batch2.log",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "duration_seconds": 8.47
+    },
+    {
+      "timestamp_utc": "2026-10-20T10:45:50.163359+00:00",
+      "phase": "P5",
+      "event": "official_sms_corpus_sample",
+      "receipt": "receipts/O94_5/P5_sms_corpus_sample.json",
+      "log": "logs/O94_5/P5_sms_corpus_sample.log",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "duration_seconds": 12.094
+    },
+    {
+      "timestamp_utc": "2026-10-20T10:46:26.379473+00:00",
+      "phase": "P5",
+      "event": "official_sms_rag_chat",
+      "receipt": "receipts/O94_5/P5_sms_rag_chat.json",
+      "log": "logs/O94_5/P5_sms_rag_chat.log",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "duration_seconds": 16.243
+    },
+    {
+      "timestamp_utc": "2026-10-20T10:50:16.075443+00:00",
+      "phase": "P5",
+      "event": "chat_composition_dispatch",
+      "receipt": "receipts/O94_5/P5_chat_composition_dispatch.json",
+      "log": "logs/O94_5/P5_chat_composition_dispatch.log",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "duration_seconds": 2.649
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:11:19.700921+00:00",
+      "phase": "P6",
+      "event": "full_repository_pytest_regression_first_pass",
+      "receipt": "receipts/O94_5/P6_full_suite_regression.json",
+      "log": "logs/O94_5/P6_full_suite_regression.log",
+      "status": "FAIL",
+      "exit_code": 1,
+      "duration_seconds": 194.54,
+      "summary": "401 passed, 16 failed, 5 warnings, 21 subtests passed; run omitted Xvfb."
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:19:08.344969+00:00",
+      "phase": "P6",
+      "event": "TARGETED_REGRESSION_24_PASS",
+      "result": "PASS_BOUNDED",
+      "receipt": "receipts/O94_5/P6_targeted_regressions_retry01.json",
+      "notes": "24 tests passed under Xvfb; full suite remains required."
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:22:53.178649+00:00",
+      "phase": "P6",
+      "event": "FULL_SUITE_INVALIDATED_BY_MUTABLE_SAVEPOINT_OUTPUTS",
+      "result": "FAIL_HARNESS_SAVEPOINT_MUTATION",
+      "receipt": "receipts/O94_5/P6_full_suite_manifest_mutation_20261020.json",
+      "notes": "Not treated as functional verdict; runner changed to unique attempt files."
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:28:50.908278+00:00",
+      "phase": "P6",
+      "event": "FULL_SUITE_XVFB_417_PASS_3_FAIL",
+      "result": "FAIL_RETEST_REQUIRED",
+      "receipt": "receipts/O94_5/P6_full_suite_regression_20261020T112306Z_15724.json",
+      "notes": "All three failures are recorded; no suppression. Corrective code changes were applied and require targeted retest then broad regression."
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:31:16.435361+00:00",
+      "phase": "P6",
+      "event": "TARGETED_AUDIT_MEDIA_13_PASS_2_SUBFAIL_RAW_FINGERPRINT",
+      "result": "FAIL_RETEST_REQUIRED",
+      "receipt": "receipts/O94_5/P6_audit_media_correction_targeted_retry01.json",
+      "notes": "The remaining issue was no raw view fingerprint for semantically empty but valid modalities; added raw-byte fingerprint evidence."
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:44:43.246263+00:00",
+      "phase": "P6",
+      "event": "opened_status_contract_mismatch_and_aligned_only_legacy_test_expectations",
+      "receipt": "receipts/O94_5/P6_full_suite_regression.json",
+      "status": "OPEN_RETEST_REQUIRED"
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:45:33.978274+00:00",
+      "phase": "P6",
+      "event": "status_contract_targeted_retest_pass",
+      "receipt": "receipts/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.json",
+      "status": "PASS_BOUNDED",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:49:42.592552+00:00",
+      "phase": "P6",
+      "event": "pytest_stdout_complete_runner_receipt_missing_due_execution_channel_interruption",
+      "log": "logs/O94_5/P6_full_suite_regression_20261020T114536Z_18667.log",
+      "status": "OPEN_RETEST_REQUIRED",
+      "observed_summary": "419 passed, 0 failed, 5 warnings, 21 subtests"
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:54:38.515102+00:00",
+      "phase": "P6",
+      "event": "close_phase_after_full_regression_and_targeted_acceptance",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+      "passed": 419,
+      "failed": 0,
+      "warnings": 5,
+      "subtests_passed": 21
+    },
+    {
+      "timestamp_utc": "2026-10-20T11:54:38.515102+00:00",
+      "phase": "P7",
+      "event": "open_formalize_docs_reconcile_open_incidents_and_restore_savepoint",
+      "status": "IN_PROGRESS",
+      "depends_on": "P6"
+    },
+    {
+      "timestamp_utc": "2026-10-20T12:18:43.943303+00:00",
+      "phase": "P7",
+      "event": "post_registry_documentation_restore_audit_complete",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_5/P7_post_registry_documentation_audit.json",
+      "checks_passed": 9,
+      "checks_failed": 0,
+      "unit_tests_passed": 6,
+      "notes": "18 required docs; 10 proof entries; 7 targeted batteries; no broken references; both LaTeX files compiled; savepoint restore verifier passed."
+    },
+    {
+      "timestamp_utc": "2026-10-20T12:18:43.943303+00:00",
+      "phase": "P8",
+      "event": "open_final_release_packaging_and_independent_archive_verification",
+      "status": "IN_PROGRESS",
+      "depends_on": "P7"
+    },
+    {
+      "timestamp_utc": "2026-10-20T12:35:45.281390+00:00",
+      "phase": "P8",
+      "event": "candidate_archive_validated_and_release_content_closed_for_final_rebuild",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_5/P8_candidate_archive_verification.json",
+      "next": "Final archive rebuild/extraction validation in scripts/build_o945_delivery.py --step final"
+    },
+    {
+      "timestamp_utc": "2026-10-20T12:41:37.292262+00:00",
+      "phase": "P8",
+      "event": "reopened_after_final_fresh_extraction_suite_found_async_training_status_test_race",
+      "status": "IN_PROGRESS",
+      "failed_test": "tests/test_p7_training_control.py::TrainingControlIntegration::test_cancelled_supervised_preparation_does_not_claim_a_completed_fit",
+      "reason": "The checkpoint file is written before the public in-memory status callback; test now waits for both observations."
+    },
+    {
+      "timestamp_utc": "2026-10-20T12:44:14.546007+00:00",
+      "phase": "P8",
+      "event": "candidate_archive_validated_and_release_content_closed_for_final_rebuild",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_5/P8_candidate_archive_verification.json",
+      "next": "Final archive rebuild/extraction validation in scripts/build_o945_delivery.py --step final"
+    }
+  ],
+  "last_execution": {
+    "timestamp_utc": "2026-10-20T12:44:14.546009+00:00",
+    "phase": "P8",
+    "event": "candidate_archive_gate_passed",
+    "receipt": "receipts/O94_5/P8_candidate_archive_verification.json",
+    "status": "PASS_BOUNDED",
+    "exit_code": 0,
+    "archive_bytes": 179495834,
+    "archive_sha256": "093707f5c3cca630836ba26c25e9dd0b2333d6cda092df3d8270bc18bd275476"
+  },
+  "updated_for": "O94.5 P8 candidate passed; final closed-state archives are being rebuilt and independently verified before release."
+}

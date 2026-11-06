@@ -1,0 +1,1603 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{stmaryrd}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+
+\geometry{margin=2.5cm}
+\setlist[itemize]{leftmargin=1.7em}
+\setlist[enumerate]{leftmargin=1.9em}
+\setlength{\headheight}{14pt}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Infini vs fini -- Version 2}
+\rhead{Racine et inracine}
+\cfoot{\thepage}
+
+\title{\textbf{Infini vs fini -- Formalisation rigoureuse d'une hypothèse}\\
+\large Version 2 : racines, inracines, contraintes et récursivité}
+\author{}
+\date{}
+
+\newtheorem{definition}{Définition}[section]
+\newtheorem{axiom}{Axiome}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{remark}{Remarque}[section]
+\newtheorem{consequence}{Conséquence}[section]
+\newtheorem{question}{Question ouverte}[section]
+\newtheorem{warning}{Point de vigilance}[section]
+\newtheorem{example}{Exemple}[section]
+
+\newcommand{\Rac}{\mathsf{R}}
+\newcommand{\Inrac}{\mathsf{I}}
+\newcommand{\Cadre}{\mathsf{K}}
+\newcommand{\Con}{\mathsf{C}}
+\newcommand{\Sol}{\mathcal{S}}
+\newcommand{\Det}{\mathsf{D}}
+\newcommand{\Actual}{\mathsf{A}}
+\newcommand{\Per}{\mathsf{P}}
+\newcommand{\Ex}{\mathsf{Ex}}
+\newcommand{\Refi}{\mathsf{Ref}}
+\newcommand{\ClotureOnt}{\operatorname{ClotureOntologique}}
+\newcommand{\Loc}{\mathsf{Loc}}
+\newcommand{\sat}{\models}
+\newcommand{\poss}{\Diamond}
+\newcommand{\nextlev}{\leadsto}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Ce document propose une révision complète de l'hypothèse développée dans la
+Version 1. La notion d'\emph{inracine} devient l'outil conceptuel central pour
+remplacer la formulation directe selon laquelle « l'infini contraint le fini ».
+L'objectif est de préserver l'intuition originale --- un fond non clôturable,
+des déterminations locales, des contraintes, des solutions et une récursivité
+entre niveaux --- tout en évitant deux confusions : assimiler l'infini à un
+objet gigantesque, et assimiler l'inracine à un simple contenu encore inconnu.
+
+La théorie distingue ainsi :
+\[
+\boxed{
+\text{inracine}
+\;\leftrightarrow\;
+\text{dépassement d'un cadre}
+\;\leftrightarrow\;
+\text{racine locale}
+}
+\]
+et propose une structure récursive générale :
+\[
+\boxed{
+\Inrac_0\;
+extarrow\;\Cadre_0\;\to\;\Rac_0\;\to\;
+\Inrac_1\;\to\;\Cadre_1\;\to\;\Rac_1\;\to\;\cdots
+}
+\]
+Le symbole de flèche n'est pas interprété par défaut comme une causalité
+physique. Il exprime selon le contexte une relation de conditionnement,
+de détermination, de dérivation ou de passage de niveau.
+
+La Version 2 est une formalisation métaphysique et méta-théorique. Elle ne
+démontre pas que le réel physique est effectivement infini, qu'il existe une
+infinité actuelle d'objets, ni que l'univers est un ordinateur. Elle fournit en
+revanche un langage rigoureux pour exprimer une thèse ontologique : une
+\emph{racine} est une détermination locale obtenue sous certaines contraintes,
+et une \emph{inracine} désigne le dépassement non exhaustivement clôturable du
+cadre dans lequel cette racine est déterminée.
+\end{abstract}
+
+\section{Principe de fidélité et statut de la théorie}
+
+\begin{definition}[Principe de fidélité]
+Une théorie doit d'abord être reconstruite selon ses propres primitives avant
+d'être comparée aux définitions standards de la métaphysique, des
+mathématiques, de la physique ou de la théorie de la connaissance.
+\end{definition}
+
+La Version 2 poursuit exactement trois opérations distinctes :
+\begin{enumerate}
+    \item expliciter les primitives de l'hypothèse ;
+    \item dériver les conséquences internes à ces primitives ;
+    \item comparer ensuite ces conséquences à des cadres externes.
+\end{enumerate}
+
+\begin{warning}[Pas de tribunal ontologique préalable]
+Une définition mathématique interne à un système formel établit ce qui vaut
+dans ce système. Elle ne constitue pas, à elle seule, une démonstration que
+la structure ainsi définie est une catégorie ontologique ultime du réel.
+Réciproquement, contester une interprétation ontologique ne revient pas à
+contester la cohérence des mathématiques qui utilisent cette définition.
+\end{warning}
+
+La théorie proposée est donc de nature \emph{ontologique et relationnelle}.
+Elle ne cherche pas d'abord à supprimer le langage du fini, mais à lui retirer
+le statut de primitive ontologique absolue.
+
+\section{Du problème « infini vs fini » au couple « racine vs inracine »}
+
+La Version 1 partait de l'idée :
+\[
+\text{fond non limité}
+\to
+\text{contraintes}
+\to
+\text{problèmes}
+\to
+\text{solutions}.
+\]
+La Version 2 introduit une distinction supplémentaire : toute solution ou
+détermination locale peut être considérée comme une \emph{racine}, relativement
+à un cadre, tandis que ce qui dépasse la clôture de ce cadre constitue son
+\emph{inracine}.
+
+On passe donc de la simple opposition :
+\[
+\text{infini}\;\text{vs}\;\text{fini}
+\]
+à une architecture asymétrique :
+\[
+\boxed{
+\text{racine}\;\text{vs}\;\text{inracine}
+}
+\]
+où la relation fondamentale n'est pas celle de deux objets symétriques, mais
+celle d'une détermination locale et de son dépassement de cadre.
+
+\subsection{Pourquoi le terme « inracine » ?}
+
+Le mot \emph{inracine} est ici introduit comme un terme théorique original. Il
+est construit comme l'envers conceptuel de « racine », non comme un terme déjà
+standardisé d'une discipline particulière.
+
+La racine évoque ici ce qui est suffisamment déterminé pour servir de point
+d'appui local. L'inracine désigne ce qui, relativement à ce point d'appui,
+ne peut être réduit à sa clôture locale.
+
+\begin{remark}
+L'inracine ne signifie donc pas simplement « extérieur », « plus grand »,
+« caché », « inconnu », « imaginaire » ou « infini ». La notion est plus précise :
+elle désigne une \emph{structure de non-clôture relative à un cadre}.
+\end{remark}
+
+\section{Primitives formelles}
+
+Afin d'éviter de transformer l'ontologie en une simple théorie des ensembles,
+les primitives sont typées.
+
+\begin{definition}[Inracine]
+Pour un cadre local \(\Cadre\), son \emph{inracine} \(\Inrac(\Cadre)\) est la
+structure théorique représentant ce qui excède la capacité de clôture du cadre
+\(\Cadre\), sans que cet excédent soit lui-même identifié à un objet extérieur
+ou à une totalité exhaustive.
+\end{definition}
+
+Il est utile d'écrire :
+\[
+\boxed{
+\Inrac(\Cadre)=\text{dépassement non clôturé du cadre }\Cadre.
+}
+\]
+Le terme « dépassement » est relationnel : il est toujours le dépassement
+d'un cadre déterminé.
+
+\begin{definition}[Cadre]
+Un \emph{cadre} \(\Cadre\) est une structure de détermination qui spécifie au
+moins :
+\begin{enumerate}
+    \item un domaine local de candidats ou d'états ;
+    \item un langage ou un mode de représentation ;
+    \item un ensemble de contraintes \(\Con\) ;
+    \item éventuellement des ressources, échelles et règles de sélection.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Contrainte]
+Une \emph{contrainte} est une condition qui restreint, structure ou organise
+l'espace des déterminations admissibles dans un cadre donné.
+\end{definition}
+
+La contrainte n'est donc pas nécessairement une cause. Elle peut être physique,
+causale, logique, géométrique, matérielle, cognitive, computationnelle,
+linguistique, mathématique, sociale, informationnelle ou conceptuelle.
+
+\begin{definition}[Espace local de solutions]
+Pour un cadre \(\Cadre\) possédant un espace de candidats \(\mathcal D_{\Cadre}\)
+et un ensemble de contraintes \(\Con_{\Cadre}\), on définit :
+\[
+\Sol(\Cadre)=
+\{D\in\mathcal D_{\Cadre}\mid D\sat\Con_{\Cadre}\}.
+\]
+Une détermination admissible est donc un élément de l'espace de solutions.
+\end{definition}
+
+\begin{definition}[Racine]
+Une \emph{racine} \(\Rac\) est une détermination locale distinguée relativement
+à un cadre \(\Cadre\). Elle peut être :
+\begin{enumerate}
+    \item une solution effectivement sélectionnée ;
+    \item une solution construite ;
+    \item une valeur observée ;
+    \item une structure stabilisée ;
+    \item ou une représentation suffisamment déterminée pour servir de point
+de départ à un niveau ultérieur.
+\end{enumerate}
+\end{definition}
+
+La notation :
+\[
+\boxed{\Rac\in\Sol(\Cadre)}
+\]
+exprime le cas où la racine est effectivement compatible avec les contraintes.
+
+\begin{definition}[Localité]
+Une détermination est dite \emph{locale} lorsqu'elle est déterminée relativement
+à un cadre donné. La localité ne désigne donc pas nécessairement une petite
+région spatiale ; elle peut être spatiale, temporelle, causale, structurelle,
+informationnelle, perceptive, mathématique ou conceptuelle.
+\end{definition}
+
+Ainsi :
+\[
+\boxed{
+\text{local}=\text{déterminé relativement à un cadre donné}.
+}
+\]
+
+\section{Axiomes de la Version 2}
+
+\begin{axiom}[Fond non clôturable]
+Il existe un principe fondamental \(\mathfrak I_\ast\), appelé ici \emph{inracine
+fondamentale}, tel qu'il n'est pas lui-même une racine résultant d'une clôture
+ontologique supérieure.
+\end{axiom}
+
+Cet axiome remplit le rôle ontologique qui était auparavant attribué directement
+à « l'infini ». Il est important de ne pas le confondre avec un objet maximal.
+
+\begin{axiom}[Non-totalisation]
+Il n'existe pas, dans la théorie, de cadre local \(\Cadre^{\ast}\) qui puisse être
+identifié à une clôture exhaustive de \(\mathfrak I_\ast\).
+\end{axiom}
+
+On peut schématiser :
+\[
+\boxed{
+\neg\exists \Cadre^{\ast}\;\text{tel que}\;
+\Cadre^{\ast}\text{ clôture exhaustivement }\mathfrak I_\ast.
+}
+\]
+Ce n'est pas un énoncé sur la cardinalité d'un ensemble ; c'est une condition
+méta-ontologique de non-clôture.
+
+\begin{axiom}[Détermination sous contraintes]
+Toute racine locale pertinente pour la théorie est relative à un cadre de
+contraintes :
+\[
+\Rac\in\Sol(\Cadre).
+\]
+La théorie ne pose donc pas la racine comme une entité ontologiquement
+indépendante du cadre de détermination.
+\end{axiom}
+
+\begin{axiom}[Récursivité]
+Lorsqu'une racine devient suffisamment déterminée pour servir de nouvelle base
+de détermination, elle peut contribuer à la formation d'un cadre ultérieur.
+On écrit :
+\[
+\Rac_n\nextlev\Cadre_{n+1}.
+\]
+Cette possibilité n'implique pas qu'une racine engendre nécessairement une
+seule et unique contrainte ultérieure.
+\end{axiom}
+
+\begin{axiom}[Relativité de la clôture]
+Une clôture locale est toujours relative à son cadre. Le passage de \(\Cadre_n\)
+à \(\Cadre_{n+1}\) peut révéler des déterminations qui n'étaient pas pertinentes,
+accessibles ou exprimables dans \(\Cadre_n\).
+\end{axiom}
+
+\section{L'inracine n'est pas l'inconnu}
+
+Cette distinction est indispensable à la cohérence du concept.
+
+\begin{definition}[Inracine épistémique]
+L'inracine épistémique d'un cadre \(\Cadre\), notée \(\Inrac^{\mathrm{epi}}(\Cadre)\),
+désigne ce qui dépasse les capacités actuelles de connaissance,
+d'observation, de description ou de calcul de l'agent considéré.
+\end{definition}
+
+\begin{definition}[Inracine ontologique]
+L'inracine ontologique \(\Inrac^{\mathrm{ont}}(\Cadre)\) désigne ce qui excède
+la clôture ontologique du cadre \(\Cadre\), indépendamment du fait que ce
+surplus soit actuellement connu ou inconnu.
+\end{definition}
+
+\begin{proposition}[Non-équivalence]
+En général :
+\[
+\boxed{
+\Inrac^{\mathrm{epi}}(\Cadre)\neq
+\Inrac^{\mathrm{ont}}(\Cadre).
+}
+\]
+\end{proposition}
+
+\begin{proof}
+Un domaine peut être parfaitement connu par un agent tout en restant local et
+non exhaustif ontologiquement. À l'inverse, un agent peut échouer à connaître
+un contenu qui appartient à un cadre fermé par stipulation. L'échec cognitif
+ne suffit donc pas à définir la non-clôture ontologique.
+\end{proof}
+
+La théorie peut utiliser l'inracine épistémique pour parler de perception,
+mais son noyau ontologique doit reposer sur l'inracine ontologique.
+
+\section{Le principe « toute racine porte son inracine »}
+
+Le principe central de la Version 2 est :
+\[
+\boxed{
+\text{Toute racine locale porte son inracine relativement au cadre qui la détermine.}
+}
+\]
+
+Cela signifie que lorsqu'une racine \(\Rac_n\) est déterminée dans \(\Cadre_n\),
+on ne doit pas automatiquement identifier \(\Rac_n\) à une clôture ontologique
+ultime.
+
+On introduit une relation binaire :
+\[
+\Ex(\Rac_n,\Cadre_n)
+\]
+qui signifie « le cadre \(\Cadre_n\), relativement à la racine \(\Rac_n\),
+présente un dépassement non clôturé ».
+
+La définition de l'inracine peut alors s'écrire sous forme relationnelle :
+\[
+\boxed{
+\Inrac_n=\Inrac(\Rac_n,\Cadre_n)
+\quad\text{si}\quad
+\Ex(\Rac_n,\Cadre_n).
+}
+\]
+
+\begin{remark}
+Cette notation ne signifie pas que \(\Inrac_n\) est nécessairement un objet,
+un ensemble ou une région ontologique située « derrière » \(\Rac_n\). Elle
+représente d'abord une structure relationnelle de non-clôture.
+\end{remark}
+
+\section{La structure récursive complète}
+
+La structure de base devient :
+\[
+\boxed{
+\mathfrak I_0
+\rightsquigarrow
+\Cadre_0
+\to
+\Sol(\Cadre_0)
+\to
+\Rac_0
+\rightsquigarrow
+\Inrac_0
+\rightsquigarrow
+\Cadre_1
+\to
+\Sol(\Cadre_1)
+\to
+\Rac_1
+\rightsquigarrow
+\Inrac_1
+\rightsquigarrow\cdots
+}
+\]
+
+Une écriture plus compacte est :
+\[
+\boxed{
+(\Cadre_n,\Rac_n,\Inrac_n)
+\nextlev
+(\Cadre_{n+1},\Rac_{n+1},\Inrac_{n+1}).
+}
+\]
+
+On peut décomposer chaque transition :
+\[
+\Cadre_n
+\overset{\Con_n}{\longrightarrow}
+\Sol(\Cadre_n)
+\overset{\Actual_n}{\longrightarrow}
+\Rac_n
+\overset{\Ex_n}{\longrightarrow}
+\Inrac_n
+\overset{\Refi_n}{\longrightarrow}
+\Cadre_{n+1}.
+\]
+
+Ici :
+\begin{itemize}
+    \item \(\Con_n\) désigne la structure de contraintes ;
+    \item \(\Actual_n\) représente, lorsque nécessaire, la sélection ou
+    l'actualisation d'une solution ;
+    \item \(\Ex_n\) produit l'identification du dépassement relatif ;
+    \item \(\Refi_n\) représente une éventuelle reformulation ou extension du
+    cadre à partir de ce dépassement.
+\end{itemize}
+
+\begin{warning}[Pas d'identité obligatoire entre niveaux]
+La théorie ne dit pas que \(\Rac_n=\Rac_{n+1}\). Elle dit qu'une racine peut
+servir de point d'appui pour une nouvelle détermination. Les niveaux sont
+reliés, mais ne sont pas identiques.
+\end{warning}
+
+\section{Racine comme solution locale}
+
+La Version 1 proposait :
+\[
+\text{solution}=\text{détermination compatible avec des contraintes}.
+\]
+La Version 2 précise cette idée :
+\[
+\boxed{
+\Rac=\text{solution locale relativement à un cadre de contraintes}.
+}
+\]
+
+Il ne faut toutefois pas identifier toute racine à une solution mathématique.
+Une racine peut être un état physique stabilisé, une perception, une structure,
+un résultat expérimental, une configuration causale ou une valeur numérique.
+
+La relation fondamentale reste :
+\[
+\Rac\in\Sol(\Cadre).
+\]
+
+\subsection{Le fini comme prédicat relationnel secondaire}
+
+On remplace la proposition primitive :
+\[
+D\in\mathrm{Fini}
+\]
+par une qualification relative :
+\[
+\boxed{\mathrm{Fini}_{\Cadre}(D)}.
+\]
+
+Cette notation signifie : « \(D\) se présente comme borné ou déterminé dans le
+cadre \(\Cadre\) ».
+
+Elle ne signifie pas : « \(D\) est absolument borné dans toute ontologie
+possible ».
+
+On peut alors poser :
+\[
+\boxed{
+\mathrm{Fini}_{\Cadre}(\Rac)
+\quad\not\Rightarrow\quad
+\ClotureOnt(\Rac).
+}
+\]
+
+\begin{consequence}[Déplacement de la charge ontologique]
+La question « pourquoi existe-t-il des objets finis ? » est remplacée, au niveau
+fondamental, par « quelles structures de contraintes rendent possible une
+racine localement bornée, et comment son inracine est-elle définie ? ».
+\end{consequence}
+
+\section{Le rôle de la perception}
+
+La perception fournit un cas privilégié de localité, mais elle n'est pas la
+source de l'ontologie.
+
+On distingue :
+\[
+\underbrace{
+\text{réalité}
+\to
+\Cadre_{\mathrm{phys}}
+\to
+\Rac_{\mathrm{phys}}
+}_{\text{niveau ontologique / physique}}
+\]
+et :
+\[
+\underbrace{
+\Rac_{\mathrm{phys}}
+\to
+\Cadre_{\mathrm{cogn}}
+\to
+\Rac_{\mathrm{cogn}}.
+}_{\text{niveau épistémique}}
+\]
+
+La perception peut alors être dite « locale » parce qu'elle sélectionne une
+détermination selon des capacités sensorielles, attentionnelles,
+linguistiques et conceptuelles données.
+
+\begin{definition}[Perception locale]
+Une perception est locale lorsqu'elle constitue une détermination relative à
+un ensemble de capacités et de contraintes de représentation déterminées.
+\end{definition}
+
+Cette définition autorise plusieurs couches :
+\[
+\mathfrak I
+\to
+\Rac_{\mathrm{phys}}
+\to
+\Inrac_{\mathrm{phys}}
+\to
+\Rac_{\mathrm{cogn}}
+\to
+\Inrac_{\mathrm{cogn}}
+\to\cdots
+\]
+mais les flèches ne doivent pas être lues comme une chaîne de perception
+humaine uniquement. La même logique peut être appliquée à des systèmes
+physiques, biologiques, computationnels ou mathématiques.
+
+\section{Conséquences ontologiques}
+
+\subsection{1. Non-fondamentalité du fini}
+
+\begin{proposition}
+Dans la théorie, le caractère localement fini d'une racine ne suffit pas à lui
+conférer un statut de primitive ontologique.
+\end{proposition}
+
+\begin{proof}
+Par définition, une racine est relative à un cadre et satisfait ses contraintes.
+Sa finitude locale est donc un prédicat relatif à ce cadre. Un prédicat relatif
+ne peut être utilisé comme primitive absolue sans ajouter un axiome indépendant
+établissant cette absoluité.
+\end{proof}
+
+\subsection{2. Dépendance relationnelle de la racine}
+
+Si :
+\[
+\Rac\in\Sol(\Cadre),
+\]
+alors l'identité théorique de \(\Rac\) dépend au moins partiellement de la
+structure de \(\Cadre\).
+
+Cela ne signifie pas que la racine est « seulement subjective ». Cela signifie
+que sa détermination locale est relationnelle.
+
+\[
+\boxed{
+\Rac=\Rac(\Cadre,\Con,\text{conditions de sélection}).
+}
+\]
+
+\subsection{3. La clôture locale n'est pas une clôture absolue}
+
+Une racine peut être parfaitement stable dans un cadre sans constituer une
+clôture du réel.
+
+\[
+\boxed{
+\text{stabilité locale}\neq\text{absoluité ontologique}.
+}
+\]
+
+Cette proposition permet de conserver la réalité des limites locales sans
+les transformer en bornes métaphysiques ultimes.
+
+\subsection{4. Pas d'extérieur absolu}
+
+L'inracine ne doit pas être interprétée comme « l'extérieur de tout ». Si elle
+était un extérieur absolu, elle deviendrait elle-même une totalité déterminée
+par contraste avec un intérieur.
+
+La conséquence correcte est plus faible et plus rigoureuse :
+\[
+\boxed{
+\text{l'inracine est un dehors-relatif au cadre, non un dehors-absolu.}
+}
+\]
+
+\subsection{5. Asymétrie fondamentale}
+
+La structure ontologique n'est pas :
+\[
+\text{racine}\leftrightarrow\text{inracine}
+\]
+comme si les deux étaient deux catégories symétriques.
+
+Elle est plutôt :
+\[
+\boxed{
+\text{racine} = \text{détermination locale},
+\qquad
+\text{inracine} = \text{non-clôture relativement à cette détermination}.
+}
+\]
+
+\subsection{6. Non-auto-suffisance de la racine}
+
+Si une racine est une solution sous contraintes, elle n'est pas théoriquement
+auto-suffisante :
+\[
+\Rac\in\Sol(\Cadre).
+\]
+
+Si les contraintes sont elles-mêmes des déterminations produites à un niveau
+antérieur, on obtient :
+\[
+\mathfrak I_0
+\to
+\Con_0
+\to
+\Rac_0
+\to
+\Con_1
+\to
+\Rac_1
+\to\cdots.
+\]
+Cette régression est un programme de recherche, non une preuve qu'elle est
+nécessairement infinie dans tout modèle possible.
+
+\section{Conséquences épistémologiques et perspectives}
+
+\subsection{1. La perception comme cadrage}
+
+Toute perception, mesure ou représentation sélectionne une classe de
+caractéristiques accessibles depuis un cadre donné.
+
+Ainsi :
+\[
+\boxed{
+\text{observer}=\text{déterminer sous des contraintes d'accès et de représentation}.
+}
+\]
+
+Cela explique pourquoi une description très précise peut rester locale.
+La précision de la racine n'annule pas son inracine.
+
+\subsection{2. Les perspectives sont relatives, pas arbitraires}
+
+Deux cadres \(\Cadre_1\) et \(\Cadre_2\) peuvent produire deux racines
+\(\Rac_1\) et \(\Rac_2\) différentes sans que l'une soit nécessairement une
+« illusion ». Elles peuvent correspondre à des projections ou déterminations
+différentes d'un même contexte ontologique.
+
+Il faut toutefois conserver une condition de cohérence : deux perspectives ne
+sont pas déclarées compatibles simplement parce qu'elles sont différentes.
+Il faut examiner leurs domaines, contraintes et relations de traduction.
+
+\subsection{3. Principe anti-réification}
+
+\begin{proposition}[Principe anti-réification]
+Le passage :
+\[
+\text{frontière d'un cadre}
+\Rightarrow
+\text{frontière de l'être}
+\]
+n'est pas logiquement valide sans prémisse supplémentaire.
+\end{proposition}
+
+Ce principe vaut pour le langage ordinaire, la perception, les modèles
+scientifiques, les systèmes formels et les représentations informatiques.
+
+\subsection{4. Connaître n'est pas totaliser}
+
+Une connaissance peut être complète relativement à un cadre tout en restant
+locale par rapport à un cadre plus englobant.
+
+\[
+\boxed{
+\text{complétude relative}\neq\text{totalisation ontologique}.
+}
+\]
+
+\section{Conséquences mathématiques}
+
+\subsection{1. Deux niveaux à ne pas confondre}
+
+La théorie respecte les mathématiques usuelles lorsqu'elles définissent
+formellement la finitude, l'infinitude, les cardinalités ou les limites.
+Elle ajoute une méta-question : quel statut ontologique attribue-t-on à ces
+notions lorsqu'elles sont appliquées au réel ?
+
+Ainsi :
+\[
+\boxed{
+\text{fini dans une structure formelle}
+\neq
+\text{fini comme clôture ontologique ultime}.
+}
+\]
+
+\subsection{2. Cadres comme structures de contraintes}
+
+Un modèle mathématique \(M\) accompagné de contraintes \(C\) définit un espace
+de solutions :
+\[
+\Sol_M(C)=\{x\in M\mid x\sat C\}.
+\]
+Une solution locale \(x\) peut être considérée comme une racine dans le
+cadre \((M,C)\).
+
+\subsection{3. Raffinement par contraintes}
+
+Si \(C'\) renforce \(C\), c'est-à-dire si toute solution de \(C'\) satisfait
+\(C\), alors :
+\[
+\boxed{
+\Sol_M(C')\subseteq\Sol_M(C).
+}
+\]
+La réduction de l'espace des solutions est donc une conséquence formelle
+simple d'un renforcement des contraintes.
+
+\subsection{4. Extension de cadre et non simple ajout de contraintes}
+
+Une difficulté supplémentaire apparaît lorsqu'un nouveau niveau introduit
+non seulement des contraintes supplémentaires, mais un langage, des variables
+ou des structures inexistantes dans le cadre précédent.
+
+Dans ce cas, il n'est pas toujours correct d'écrire :
+\[
+\Sol(C_{n+1})\subseteq\Sol(C_n).
+\]
+Il peut être nécessaire d'étendre le modèle :
+\[
+M_n\longrightarrow M_{n+1},
+\]
+puis de définir une relation de projection ou d'interprétation :
+\[
+\pi_{n+1,n}:M_{n+1}\to M_n.
+\]
+
+Cette distinction est importante pour ne pas transformer artificiellement
+l'inracine en simple sous-ensemble caché d'un espace déjà fixé.
+
+\subsection{5. Localité mathématique}
+
+Une structure peut être finie dans une présentation et appartenir à une
+structure plus riche dans une autre présentation. Il faut donc distinguer :
+\begin{itemize}
+    \item la finitude formelle interne à un système ;
+    \item l'ouverture d'un modèle vers des extensions ;
+    \item l'interprétation ontologique de ces structures.
+\end{itemize}
+
+\subsection{6. Le concept de racine en mathématiques}
+
+Le concept de racine ne remplace pas toutes les notions mathématiques
+existantes. Il fournit plutôt une couche méta-formelle :
+\[
+\boxed{
+\text{racine} = \text{détermination admissible relativement à un cadre formel}.
+}
+\]
+
+Cette couche peut s'appliquer à une solution d'équation, à un modèle, à un
+état d'un système, à une structure satisfaisant des axiomes ou à un élément
+sélectionné d'un espace de possibilités.
+
+\section{Exemple : \(x+2=5\)}
+
+On pose :
+\[
+C=\{x+2=5\}.
+\]
+Alors :
+\[
+\Sol(C)=\{3\}.
+\]
+Donc :
+\[
+\boxed{\Rac=3\in\Sol(C).}
+\]
+
+Le point ontologique n'est pas de nier que \(3\) est un nombre fini au sens
+mathématique standard. Le point est plus précis : la propriété mathématique
+de finitude de \(3\) ne suffit pas à établir que « fini » est une primitive
+ontologique de la réalité.
+
+\section{Exemple : le nombre 123}
+
+On peut représenter :
+\[
+C_1\to\Rac_1=123,
+\qquad
+C_2\to\Rac_2=124.
+\]
+
+Le nombre 123 est une détermination dans un cadre. Il ne devient pas moins
+réel parce qu'un autre cadre permet de distinguer 124.
+
+La théorie introduit donc la différence entre :
+\[
+\text{« 123 est déterminé ici »}
+\]
+et :
+\[
+\text{« 123 est une borne ontologique absolue de tout ce qui peut être ».}
+\]
+La seconde proposition nécessite une prémisse supplémentaire qui n'est pas
+contenue dans la première.
+
+\section{Exemple : un univers décrit par 17 particules}
+
+Supposons un modèle physique \(M\) avec la contrainte :
+\[
+C_{17}:\quad N=17.
+\]
+Alors :
+\[
+\Sol_M(C_{17})
+\]
+contient les états compatibles avec cette valeur.
+
+Dans le cadre de la théorie, on peut écrire :
+\[
+\Rac_{17}\in\Sol_M(C_{17}).
+\]
+Cela n'implique pas :
+\[
+\text{« 17 est la limite ontologique ultime de tout réel possible ».}
+\]
+
+Si un cadre différent \(C_{18}\) est physiquement cohérent dans un modèle
+étendu, on peut avoir :
+\[
+C_{18}:\quad N=18.
+\]
+Mais l'existence physique d'une telle possibilité n'est pas établie par la
+seule métaphysique des racines et des inracines.
+
+\begin{warning}[Possibilité conceptuelle vs possibilité physique]
+Le fait qu'un nombre puisse être décrit ou qu'une contrainte puisse être
+formellement modifiée n'établit pas que le monde physique réel autorise cette
+modification.
+\end{warning}
+
+\section{Conséquences algorithmiques et computationnelles}
+
+\subsection{1. Algorithme comme détermination locale}
+
+Un algorithme peut être formalisé comme :
+\[
+\mathcal A:(\Cadre,E)\longrightarrow\Rac,
+\]
+où \(E\) désigne les données d'entrée et où la sortie \(\Rac\) satisfait des
+contraintes spécifiées lorsque l'algorithme réussit.
+
+On peut écrire :
+\[
+\Rac\in\Sol(\Cadre,E).
+\]
+
+\subsection{2. L'espace de recherche}
+
+Une procédure algorithmique travaille sur un espace de candidats :
+\[
+\mathcal Q_0\supseteq\mathcal Q_1\supseteq\cdots\supseteq\mathcal Q_k.
+\]
+À chaque étape, les contraintes, tests ou règles de recherche peuvent réduire
+la classe des candidats.
+
+\begin{proposition}[Réduction de recherche]
+Si chaque étape ajoute seulement des critères de rejet compatibles avec le
+problème initial, alors :
+\[
+\mathcal Q_{n+1}\subseteq\mathcal Q_n.
+\]
+\end{proposition}
+
+\subsection{3. L'inracine computationnelle}
+
+Pour un algorithme donné, l'inracine peut être modélisée de manière
+épistémique comme ce qui reste hors de la capacité de représentation, de
+calcul ou de recherche du cadre courant.
+
+On peut écrire :
+\[
+\Inrac^{\mathrm{comp}}(\mathcal A,\Cadre)
+\]
+pour désigner le résidu de non-clôture computationnelle.
+
+Ce résidu peut provenir de plusieurs sources :
+\[
+\text{taille},\quad
+\text{temps},\quad
+\text{mémoire},\quad
+\text{information manquante},\quad
+\text{expressivité},\quad
+\text{indécidabilité formelle}.
+\]
+
+\begin{warning}[Incalculable ne signifie pas inracine ontologique]
+Une limite algorithmique particulière ne prouve pas qu'une limite ontologique
+existe ou n'existe pas. L'algorithmique opère à l'intérieur d'un cadre donné.
+\end{warning}
+
+\subsection{4. Algorithme récursif de déplacement de cadre}
+
+La théorie suggère un schéma général :
+\[
+\Cadre_n
+\xrightarrow{\mathcal A_n}
+\Rac_n
+\xrightarrow{\text{diagnostic du résidu}}
+\Inrac_n
+\xrightarrow{\text{reformulation}}
+\Cadre_{n+1}.
+\]
+
+Ce schéma ressemble structurellement aux méthodes d'extension ou de raffinement
+de modèles : une solution est obtenue, puis l'analyse de ses limites motive un
+nouveau cadre.
+
+\begin{remark}
+Ce processus n'implique aucune promesse de convergence vers une description
+ultime. Au contraire, dans le cadre de l'axiome de non-totalisation, la
+recherche d'une clôture exhaustive du fond n'est pas un objectif atteignable
+par stipulation.
+\end{remark}
+
+\subsection{5. Existence, calculabilité, actualisation}
+
+La théorie exige de distinguer au moins quatre notions :
+\[
+\begin{aligned}
+&\text{admissible sous }\Cadre,\\
+&\text{représentable dans }\Cadre,\\
+&\text{calculable par }\mathcal A,\\
+&\text{effectivement actualisé.}
+\end{aligned}
+\]
+
+Aucune implication générale du type :
+\[
+\text{admissible}\Rightarrow\text{calculable}\Rightarrow\text{réalisé}
+\]
+n'est autorisée sans hypothèses supplémentaires.
+
+\section{Conséquences physiques}
+
+\subsection{1. Les états physiques comme racines}
+
+Une formalisation physique peut être comprise comme :
+\[
+\Cadre_{\mathrm{phys}}
+\to
+\Sol(\Cadre_{\mathrm{phys}})
+\to
+\Rac_{\mathrm{phys}}.
+\]
+Les lois peuvent être interprétées comme structures de contraintes, mais cette
+lecture reste une interprétation méta-physique tant qu'elle ne spécifie pas une
+théorie dynamique particulière.
+
+\subsection{2. Portée minimale}
+
+La théorie n'établit pas, à elle seule :
+\begin{itemize}
+    \item que l'espace physique est infini ;
+    \item que le temps est infini ;
+    \item qu'il existe une infinité actuelle de particules ;
+    \item que toute limite physique est illusoire ;
+    \item qu'il existe une particule au-delà d'un nombre donné ;
+    \item qu'une loi particulière constitue l'ultime mécanisme de contrainte.
+\end{itemize}
+
+\subsection{3. Ce que la théorie pourrait exiger d'une extension physique}
+
+Pour devenir une théorie physique différenciable empiriquement, il faudrait
+spécifier :
+\begin{enumerate}
+    \item des variables primitives ;
+    \item des contraintes fondamentales ;
+    \item une dynamique de génération, sélection ou actualisation ;
+    \item une règle de correspondance avec les observations ;
+    \item des prédictions nouvelles ou des restrictions observables.
+\end{enumerate}
+
+\section{Conséquences causales}
+
+\subsection{Contrainte et cause}
+
+Une contrainte ne doit pas être identifiée à une cause :
+\[
+\boxed{
+\text{cause}\neq\text{contrainte}\neq\text{solution}.
+}
+\]
+
+Une cause peut contribuer à produire une racine, alors qu'une contrainte peut
+simplement définir ce qui est admissible.
+
+\subsection{Causalité sous cadre}
+
+Dans un modèle dynamique :
+\[
+\Rac_n(t)\xrightarrow{\text{dynamique}}\Rac_n(t+1).
+\]
+Dans un cadre plus large :
+\[
+\Rac_n\nextlev\Cadre_{n+1}.
+\]
+Il faut éviter de confondre les deux relations : la première peut être causale,
+la seconde est une relation de changement de cadre.
+
+\section{Conséquences structurelles et émergentes}
+
+Une idée centrale de la Version 2 est que :
+\[
+\boxed{
+\text{une racine à un niveau peut devenir une contrainte au niveau suivant}.
+}
+\]
+
+Formellement :
+\[
+\Rac_n\nextlev\Con_{n+1}.
+\]
+
+Cette structure autorise une ontologie récursive : les déterminations déjà
+obtenues ne sont pas seulement des résultats passifs ; elles peuvent devenir
+des conditions structurantes pour de nouvelles déterminations.
+
+\begin{consequence}[Émergence relationnelle]
+L'émergence peut être représentée, dans ce cadre, comme l'apparition d'une
+nouvelle racine dans un cadre dont les contraintes ne sont pas réductibles,
+pour l'analyse considérée, au simple vocabulaire du niveau antérieur.
+\end{consequence}
+
+La théorie ne prétend pas que toute émergence est métaphysiquement irréductible.
+Elle affirme seulement qu'un changement de cadre peut changer l'espace des
+déterminations pertinentes.
+
+\section{Conséquences modales : possible, représentable, réalisé}
+
+Il faut distinguer :
+\[
+\boxed{
+\begin{array}{lll}
+\text{admissible} &:& D\in\Sol(\Cadre),\\
+\text{représentable} &:& D\text{ peut être exprimé dans }\Cadre,\\
+\text{possible} &:& D\text{ est compatible avec un cadre physiquement ou logiquement autorisé},\\
+\text{réalisé} &:& D\text{ est effectivement actualisé dans le cadre considéré.}
+\end{array}
+}
+\]
+
+Ces notions peuvent coïncider dans certains modèles mais ne doivent pas être
+fusionnées par défaut.
+
+\subsection{Inracine et modalité}
+
+L'inracine n'est pas l'ensemble de toutes les possibilités. La raison est
+structurelle : définir « l'ensemble de toutes les possibilités » comme une
+totalité exhaustive réintroduirait précisément le type de clôture que la notion
+cherche à dépasser.
+
+La formulation rigoureuse est donc :
+\[
+\boxed{
+\text{l'inracine ouvre le cadre ; elle n'est pas la totalité de ce qui est possible.}
+}
+\]
+
+\section{Conséquences linguistiques et sémantiques}
+
+Les catégories utilisées dans le langage sont elles-mêmes des racines
+conceptuelles.
+
+On peut écrire :
+\[
+\text{contexte}
+\to
+\text{contraintes linguistiques}
+\to
+\text{concept}
+\to
+\text{racine sémantique}.
+\]
+
+Les mots « fini », « totalité », « extérieur », « objet » et même « réalité »
+sont donc soumis à une précaution méthodologique : leur usage grammatical
+ne garantit pas qu'ils désignent des bornes ontologiques absolues.
+
+\begin{proposition}[Principe de non-réification sémantique]
+La stabilité d'une distinction linguistique ne suffit pas à établir que la
+structure distinguée constitue une séparation ontologique ultime.
+\end{proposition}
+
+\section{Conséquences informationnelles}
+
+L'information elle-même peut être interprétée comme une détermination sous
+contraintes.
+
+Pour un agent \(A\), un état informationnel \(E_A\) est une représentation
+relative à un canal, une mémoire, un langage et des ressources.
+
+On peut écrire :
+\[
+E_A=E(A,\Cadre_A).
+\]
+
+L'inracine informationnelle correspond alors au résidu de ce qui n'est pas
+capturé par cette représentation.
+
+\begin{warning}[Résidu informationnel vs résidu ontologique]
+Un résidu dans une base de données, une observation ou une mémoire est un
+résidu informationnel. Il ne faut pas automatiquement l'identifier à un
+résidu ontologique.
+\end{warning}
+
+\section{Conséquences sur la théorie des modèles et la connaissance scientifique}
+
+Une théorie scientifique \(T_n\) fournit un cadre :
+\[
+T_n\to\Sol(T_n)\to\Rac_n.
+\]
+
+Lorsqu'une anomalie, une nouvelle échelle ou une nouvelle observation excède
+le pouvoir explicatif de \(T_n\), plusieurs scénarios sont possibles :
+\begin{enumerate}
+    \item enrichir les contraintes ;
+    \item modifier la structure du modèle ;
+    \item étendre le vocabulaire ;
+    \item changer de théorie.
+\end{enumerate}
+
+Dans le langage de la Version 2 : l'inracine d'un cadre scientifique peut
+fonctionner comme un signal de non-clôture méthodologique. Cela ne signifie
+pas que toute anomalie révèle une « nouvelle réalité » ; il faut un travail
+empirique et théorique supplémentaire.
+
+\section{Conséquences sur l'identité et la description des objets}
+
+Supposons deux cadres \(\Cadre_1\) et \(\Cadre_2\) qui déterminent la même
+entité sous des descriptions différentes. On peut avoir :
+\[
+\Rac_1=\mathrm{Desc}_1(O),
+\qquad
+\Rac_2=\mathrm{Desc}_2(O).
+\]
+
+La différence entre descriptions n'implique pas une multiplicité d'objets.
+Mais il faut une relation d'interprétation \(\tau\) permettant de relier les
+descriptions :
+\[
+\tau(\Rac_1)=\Rac_2
+\]
+ou, plus généralement, une correspondance partielle.
+
+La théorie est donc compatible avec une ontologie où l'identité de l'objet
+est distincte de chacune de ses racines descriptives.
+
+\section{Conséquences sur la récursivité}
+
+La structure récursive peut être distinguée en trois versions.
+
+\subsection{1. Récursivité descriptive}
+\[
+\Cadre_n\to\Rac_n\to\Cadre_{n+1}.
+\]
+Le niveau supérieur est seulement un changement de description.
+
+\subsection{2. Récursivité épistémique}
+\[
+\text{connaissance}_n
+\to
+\text{limite}_n
+\to
+\text{nouvelle connaissance}_{n+1}.
+\]
+L'agent augmente sa capacité de représentation.
+
+\subsection{3. Récursivité ontologique}
+\[
+\Rac_n\to\Con_{n+1}\to\Rac_{n+1}.
+\]
+Une détermination réelle devient effectivement une condition de nouvelles
+déterminations.
+
+\begin{warning}[Ne pas confondre les trois récursivités]
+Le fait qu'une structure puisse être décrite récursivement ne prouve pas que le
+réel lui-même soit ontologiquement récursif. L'ontologie récursive est une
+hypothèse supplémentaire.
+\end{warning}
+
+\section{Conséquences métaphysiques générales}
+
+\subsection{1. Le fond n'est pas une solution finale}
+
+Dans la théorie, la racine n'est pas l'aboutissement d'un calcul ayant trouvé
+la « réponse totale » du réel.
+
+\[
+\boxed{
+\Rac_n\neq\text{clôture ontologique finale}.
+}
+\]
+
+\subsection{2. La connaissance est structurellement locale}
+
+Toute représentation possède un cadre, donc une échelle, des critères de
+pertinence et des exclusions.
+
+\[
+\boxed{
+\text{toute représentation est locale relativement à des contraintes.}
+}
+\]
+
+\subsection{3. L'inracine n'est pas un nouvel infini substantialisé}
+
+Il serait contraire à la théorie de prendre :
+\[
+\Inrac=\text{un objet infiniment grand}
+\]
+ou :
+\[
+\Inrac=\text{un ensemble de tout ce qui échappe au cadre}.
+\]
+
+La notion doit rester relationnelle et ouverte.
+
+\subsection{4. La distinction racine/inracine est elle-même relative}
+
+Si une nouvelle racine est obtenue :
+\[
+\Inrac_n\to\Rac_{n+1},
+\]
+alors ce qui était inracine au niveau \(n\) devient partie d'une nouvelle
+racine au niveau \(n+1\). Mais \(\Rac_{n+1}\) n'épuise pas nécessairement
+l'inracine dont elle provient.
+
+Ainsi :
+\[
+\boxed{
+\text{ce qui devient racine à un niveau peut conserver une inracine à un niveau supérieur.}
+}
+\]
+
+\section{Une formalisation plus fine de la notion de « global »}
+
+L'expression « l'inracine est la globalité » doit être précisée pour éviter une
+contradiction entre globalité et non-totalisation.
+
+\begin{definition}[Globalité relative]
+Une structure est dite \emph{globalement relative} à un cadre \(\Cadre\) si
+elle excède les frontières locales de \(\Cadre\) tout en restant dépourvue
+d'une prétention à épuiser toute réalité.
+\end{definition}
+
+On peut alors écrire :
+\[
+\boxed{
+\Inrac(\Cadre)=\text{globalité relative du cadre, sans totalisation absolue}.
+}
+\]
+
+Le mot « global » signifie donc « englobant pour ce cadre-ci », et non
+« totalité absolue de tout ce qui existe ».
+
+\section{Le problème de « l'inracine contraint la racine »}
+
+La formulation initiale :
+\[
+\text{l'infini contraint le fini}
+\]
+était difficile parce qu'une contrainte ordinaire réduit un espace de solutions,
+alors que l'infini était défini comme non-limitable.
+
+La Version 2 remplace cette phrase par :
+\[
+\boxed{
+\text{l'inracine conditionne les limites locales de la racine.}
+}
+\]
+
+Une formulation encore plus stricte est :
+\[
+\boxed{
+\text{la racine n'est locale que relativement à l'inracine de son cadre.}
+}
+\]
+
+Cette formulation ne prétend plus que l'inracine exerce une contrainte
+identique aux contraintes locales. Elle introduit une relation de fondement,
+de contexte ou de non-clôture.
+
+\section{Question fondamentale : qu'est-ce qui contraint l'inracine ?}
+
+Dans la théorie, demander « qu'est-ce qui contraint l'inracine fondamentale ? »
+peut conduire à une contradiction si l'inracine fondamentale est précisément
+le principe non clôturable qui n'est pas lui-même dérivé d'une racine supérieure.
+
+La réponse interne de la théorie est donc :
+\[
+\boxed{
+\mathfrak I_\ast\text{ n'est pas posé comme solution d'une contrainte supérieure.}
+}
+\]
+
+Cela ne constitue pas une démonstration indépendante ; c'est un engagement
+axiomatique de la théorie.
+
+\section{Statut de la définition humaine de l'infini}
+
+Le terme « infini » reste historiquement et philosophiquement à l'origine de
+l'intuition de la théorie, mais la Version 2 déplace l'accent vers
+l'inracine.
+
+Une représentation humaine :
+\[
+D_{\mathrm{hum}}(\text{infini})
+\]
+est une racine conceptuelle. Elle ne doit pas être identifiée au fond qu'elle
+cherche à désigner.
+
+On peut alors écrire :
+\[
+\boxed{
+\text{toute conception de l'infini est une racine conceptuelle et porte son inracine.}
+}
+\]
+
+La théorie évite ainsi deux erreurs opposées :
+\begin{enumerate}
+    \item prétendre que notre définition épuiserait le non-clôturable ;
+    \item conclure que, parce qu'une conception est imparfaite, elle est nécessairement fausse.
+\end{enumerate}
+
+\section{Limites logiques de la formalisation}
+
+La formalisation proposée ne doit pas être présentée comme une déduction
+mathématique complète d'une métaphysique depuis zéro. Elle contient des axiomes
+philosophiques.
+
+En particulier, les propositions suivantes sont des engagements du cadre :
+\[
+\begin{aligned}
+&\text{(A1)}&&\mathfrak I_\ast\text{ est fondamental},\\
+&\text{(A2)}&&\mathfrak I_\ast\text{ n'est pas totalisable},\\
+&\text{(A3)}&&\Rac\in\Sol(\Cadre),\\
+&\text{(A4)}&&\text{les niveaux peuvent se relier récursivement}.
+\end{aligned}
+\]
+
+À partir de ces axiomes, les résultats mathématiques locaux tels que
+\(\Sol(C')\subseteq\Sol(C)\) sont démontrables dans les cadres formels
+correspondants. En revanche, les affirmations physiques ou métaphysiques
+universelles exigent des principes de pont supplémentaires.
+
+\section{Questions ouvertes structurantes}
+
+\begin{question}[Origine des contraintes]
+Les contraintes sont-elles elles-mêmes fondamentales, émergentes ou produites
+par des racines antérieures ?
+\end{question}
+
+\begin{question}[Sélection]
+Si \(|\Sol(\Cadre)|>1\), qu'est-ce qui sélectionne une racine particulière ?
+\end{question}
+
+\begin{question}[Actualisation]
+Quelle relation distingue une solution admissible d'une solution effectivement
+réalisée ?
+\end{question}
+
+\begin{question}[Pont physique]
+Quelles contraintes observables permettraient de transformer cette ontologie
+en théorie physique ?
+\end{question}
+
+\begin{question}[Pont mathématique]
+Existe-t-il une structure mathématique non triviale représentant la relation
+racine/inracine sans réifier l'inracine en un ensemble total ?
+\end{question}
+
+\begin{question}[Convergence]
+Une suite de raffinements :
+\[
+\Cadre_0\to\Cadre_1\to\Cadre_2\to\cdots
+\]
+peut-elle converger vers une limite locale sans jamais produire une clôture
+ontologique absolue ? Sous quelles notions de convergence ?
+\end{question}
+
+\begin{question}[Invariance]
+Quelles propriétés d'une racine restent invariantes lorsque le cadre change ?
+Cette question est nécessaire si l'on veut distinguer variation de description
+et variation ontologique réelle.
+\end{question}
+
+\section{Conséquences et critères de rigueur}
+
+Pour qu'une future théorie fondée sur l'inracine reste fidèle à son noyau,
+elle devrait satisfaire au minimum les critères suivants :
+\begin{enumerate}
+    \item ne pas transformer l'inracine en ensemble de « tout ce qu'on ne connaît pas » ;
+    \item ne pas traiter une racine locale comme une frontière absolue ;
+    \item distinguer contraintes, causes, représentations et réalisations ;
+    \item distinguer extension de cadre et simple ajout de contraintes ;
+    \item ne pas confondre possibilité conceptuelle et possibilité physique ;
+    \item ne pas supposer qu'une récursivité descriptive prouve une récursivité ontologique ;
+    \item maintenir séparés les niveaux ontologique, épistémique, mathématique et computationnel ;
+    \item considérer l'absence de totalisation comme un axiome métaphysique, et non comme un théorème mathématique automatique.
+\end{enumerate}
+
+\section{Tableau général des conséquences}
+
+\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.18\textwidth}
+                  >{\raggedright\arraybackslash}p{0.34\textwidth}
+                  >{\raggedright\arraybackslash}p{0.38\textwidth}}
+\toprule
+\textbf{Niveau} & \textbf{Réinterprétation} & \textbf{Conséquence}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Niveau} & \textbf{Réinterprétation} & \textbf{Conséquence}\\
+\midrule
+\endhead
+Ontologique & Le fond est non clôturable ; la racine est locale. & Une borne locale n'est pas automatiquement une clôture absolue.\\
+Épistémologique & Connaître signifie déterminer dans un cadre. & Toute connaissance est située relativement à des contraintes d'accès et de représentation.\\
+Perspective & Une perspective est un cadre local. & Deux perspectives peuvent être différentes sans que la différence suffise à établir une contradiction ou une identité.\\
+Mathématique & Une solution est une détermination satisfaisant des contraintes formelles. & Les espaces de solutions se réduisent sous ajout de contraintes ; les extensions de modèle demandent des relations de traduction.\\
+Algorithmique & Calculer revient à construire ou sélectionner une racine dans un espace de recherche. & La calculabilité est toujours relative à un cadre, des ressources et une procédure.\\
+Physique & Un état physique peut être représenté comme solution de contraintes. & Une ontologie des racines n'est pas encore une théorie physique.\\
+Causal & Les causes et les contraintes sont distinctes. & L'admissibilité n'est pas automatiquement la causalité.\\
+Modal & Possible, représentable et réalisé sont distincts. & L'existence d'une solution formelle ne garantit pas son actualisation.\\
+Linguistique & Les concepts sont des déterminations. & Une distinction grammaticale ne prouve pas une frontière ontologique.\\
+Informationnel & Toute représentation possède des limites de canal, mémoire et langage. & Un résidu informationnel n'est pas nécessairement un résidu ontologique.\\
+Structurel & Une racine peut devenir contrainte. & Une ontologie récursive des déterminations est possible comme extension de la théorie.\\
+Scientifique & Un modèle est une racine théorique sous contraintes. & L'inracine peut signaler une non-clôture méthodologique, sans constituer à elle seule une preuve empirique.\\
+Métaphysique & L'inracine n'est ni objet maximal ni totalité. & La théorie évite de réintroduire la totalité par le vocabulaire du « dehors ».\\
+\bottomrule
+\end{longtable}
+
+\section{Synthèse formelle minimale}
+
+Le système complet peut être résumé par les relations suivantes.
+
+\subsection*{Fondement}
+\[
+\boxed{
+\mathfrak I_\ast
+\text{ est non clôturable et n'est pas une racine d'un cadre supérieur.}
+}
+\]
+
+\subsection*{Localisation}
+\[
+\boxed{
+\Cadre_n
+\to
+\Sol(\Cadre_n)
+\to
+\Rac_n.
+}
+\]
+
+\subsection*{Inracine}
+\[
+\boxed{
+\Rac_n,\Cadre_n
+\to
+\Inrac_n
+=
+\text{dépassement non clôturé de }\Cadre_n.
+}
+\]
+
+\subsection*{Récursivité}
+\[
+\boxed{
+\Inrac_n
+\nextlev
+\Cadre_{n+1}
+\to
+\Sol(\Cadre_{n+1})
+\to
+\Rac_{n+1}
+\to
+\Inrac_{n+1}
+\to\cdots
+}
+\]
+
+\subsection*{Fini relatif}
+\[
+\boxed{
+\mathrm{Fini}_{\Cadre_n}(\Rac_n)
+\not\Rightarrow
+\text{clôture ontologique absolue}.
+}
+\]
+
+\subsection*{Principe central}
+\[
+\boxed{
+\textbf{Toute racine porte son inracine.}
+}
+\]
+
+\section{Conclusion}
+
+La Version 2 ne dit pas simplement que « tout est infini ». Elle propose une
+architecture conceptuelle plus précise :
+
+\[
+\boxed{\begin{gathered}
+\text{un fond non clôturable}
+\to
+\text{des cadres}
+\to
+\text{des contraintes}
+\to
+\text{des solutions}\\
+\to
+\text{des racines locales}
+\to
+\text{des inracines}
+\to
+\text{de nouveaux cadres}
+\to\cdots
+\end{gathered}}
+\]
+
+Le concept d'\emph{inracine} permet de reformuler l'intuition initiale sans
+faire de l'infini une « force qui limite » au sens ordinaire. L'inracine est
+plutôt le nom donné au fait structurel qu'une racine n'est locale que
+relativement à un cadre, et qu'un tel cadre ne constitue pas, par lui-même,
+une clôture ontologique ultime.
+
+Cette reformulation conserve les idées fondamentales développées auparavant :
+le fond non-limitable est premier ; les déterminations apparaissent relativement
+à des contraintes ; ce que nous appelons « fini » peut être compris comme une
+propriété secondaire de solutions locales ; une solution n'est pas
+nécessairement une réalisation ; et une détermination obtenue à un niveau peut
+servir de contrainte ou de point d'appui à un niveau ultérieur.
+
+Le déplacement essentiel est maintenant le suivant :
+\[
+\boxed{
+\text{infini vs fini}
+\quad\longrightarrow\quad
+\text{racine vs inracine}.
+}
+\]
+
+Le mot « inracine » ne supprime donc pas le problème de l'infini ; il en change
+le point d'accès théorique. Au lieu de chercher à représenter directement une
+totalité non totalisable, la théorie décrit la relation entre une détermination
+locale et ce qui excède sa clôture. L'inracine n'est ainsi ni un objet caché,
+ni l'ensemble de toutes les possibilités, ni un simple synonyme de notre
+ignorance. C'est une relation de non-clôture.
+
+La théorie demeure néanmoins une métaphysique axiomatique. Ses conséquences
+les plus fortes --- existence physique du fond non clôturable, caractère réel
+d'une récursivité ontologique, nature des contraintes fondamentales,
+mécanisme de sélection des solutions --- demandent des arguments ou des
+axiomes supplémentaires. Sa rigueur exige donc de distinguer en permanence ce
+qui est \emph{défini}, ce qui est \emph{déduit}, ce qui est \emph{proposé} et ce
+qui reste \emph{ouvert}.
+
+\end{document}

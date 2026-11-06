@@ -1,0 +1,128 @@
+{
+  "deliverable": "EX7 — optimisation calcul/ressources des sondes OOF",
+  "version": "workspace sondes_ex7_v001__2026-10-31; archive package v002",
+  "generated_local_date": "2026-10-31",
+  "validation": {
+    "validator": "validate_ex7_delivery.py",
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "torch": "2.10.0+cpu",
+    "device": "CPU",
+    "checks": {
+      "prompt_parent_19_sections": true,
+      "prompt_ex7_inherits_parent_verbatim": true,
+      "prompt_schema_7": true,
+      "python_files_ast_checked": 21,
+      "json_files_valid": 626,
+      "csv_files_valid": 54,
+      "npz_keys": [
+        "Xtr",
+        "ytr",
+        "Xva",
+        "yva",
+        "Xad",
+        "yad",
+        "scaler_mean",
+        "scaler_scale",
+        "train_row_ids",
+        "validation_row_ids",
+        "adaptation_row_ids"
+      ],
+      "checkpoint_files_loadable": 458,
+      "raw_result_json_count": 318,
+      "raw_result_test_opened_true": [],
+      "light_corrector_rows": 50,
+      "oof_2fold_completed": 10,
+      "org_main_seed_count": 5,
+      "org_parallel_seed_count": 5,
+      "reference_bundle_files": 49,
+      "org_oof_seed_count": 5
+    },
+    "errors": [],
+    "status": "PASS",
+    "test_opened": false
+  },
+  "campaigns": {
+    "light_correctors": {
+      "completed": 50,
+      "expected": 50
+    },
+    "distillation_and_no_corrector": {
+      "completed": 20,
+      "expected": 20
+    },
+    "structural_compression": {
+      "completed": 60,
+      "expected": 60
+    },
+    "orchestra_org_ablations": {
+      "completed": 30,
+      "expected": 30
+    },
+    "orchestra_org_capacity": {
+      "completed": 25,
+      "expected": 25
+    },
+    "oof_2fold": {
+      "completed": 10,
+      "expected": 10
+    },
+    "oof_5fold": {
+      "expected": 10,
+      "completed": 10,
+      "missing": []
+    },
+    "orchestra_org_main": {
+      "completed": 5,
+      "expected": 5
+    },
+    "orchestra_org_fold_fits": {
+      "completed": 15,
+      "expected": 15
+    },
+    "orchestra_org_oof_seeds": {
+      "completed": 5,
+      "expected": 5
+    },
+    "orchestra_org_stage_oof": {
+      "completed": 10,
+      "expected": 10
+    },
+    "orchestra_org_independent_layers_unique": {
+      "completed": 5,
+      "expected": 5
+    }
+  },
+  "integrity": {
+    "all_raw_result_test_opened_false": true,
+    "all_loaded_checkpoints_valid": 458,
+    "json_valid": 626,
+    "csv_valid": 54,
+    "python_ast_checked": 21,
+    "no_validation_errors": true,
+    "no_external_test_opened": true,
+    "source_bundle_embedded": true,
+    "recursive_org_audit": "PASS",
+    "run_manifest_rows": 318,
+    "deep_scan": {
+      "json_valid": 626,
+      "csv_valid": 54,
+      "npy_valid": 70,
+      "pt_valid": 468,
+      "npz_valid": 23,
+      "issues": []
+    },
+    "workspace_manifest_files": 1288,
+    "pre_archive_crc": "PASS — CRC zip testé; tous les 1290 fichiers présents, aucune différence SHA-256 (voir EX7_V002_ARCHIVE_VERIFICATION.json côté livraison).",
+    "archive_verification_sidecar": "EX7_V002_ARCHIVE_VERIFICATION.json (external, SHA-256 of archive held outside archive to avoid self-reference)"
+  },
+  "scientific_verdict": "INCOMPLET — DÉVELOPPEMENT UNIQUEMENT — VALIDATION EXTERNE NON ÉTABLIE",
+  "notes": [
+    "La branche Orchestra Org récursive est complète expérimentalement: 5 entraînements principaux, 15 fits de folds OOF, 5 campagnes OOF et 3 correcteurs par graine, 10 correcteurs de sorties de couches, 30 ablations et 5 contrôles uniques de couches indépendantes.",
+    "Le compteur principal a été corrigé: les 15 fits de fold OOF sont séparés des cinq graines principales; les cinq runs de couches indépendantes sont dédoublonnés.",
+    "Les dossiers de livrables contiennent des copies des métriques consolidées; le manifest des runs est régénéré avec SHA-256 des artefacts associés présents.",
+    "Énergie, DRAM, mémoire d activations et peak RSS isolé non mesurés de manière fiable; CPU-only, ONNX indisponible, torch.compile non évalué, CUDA indisponible.",
+    "La parallélisation CPU testée n accélère pas globalement; TorchScript améliore eager mais reste plus lent que MLP; quantification dynamique non retenue en vitesse.",
+    "Aucun jeu externe vierge accepté; les résultats restent limités au Wisconsin historique de développement.",
+    "Audit profond post-consolidation : 626 JSON, 54 CSV, 70 NPY, 468 checkpoints PT et 23 NPZ lisibles; aucun problème relevé. Le validateur de livraison, qui cible les checkpoints du dossier EX7, en a également chargé 458 sans erreur."
+  ]
+}

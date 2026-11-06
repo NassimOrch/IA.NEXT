@@ -1,0 +1,350 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,longtable,array,geometry,hyperref}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{axiom}{Axiome}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{remark}{Remarque}[section]
+\newcommand{\Prov}{\texttt{PROVEN}}
+\newcommand{\Refu}{\texttt{REFUTED}}
+\newcommand{\Unr}{\texttt{UNRESOLVED}}
+\newcommand{\Obs}{\texttt{OBSERVED}}
+\title{MODEL mathématique O76\\Spécification, conception, architecture et pipeline complet}
+\author{Construction O76 à partir des deux archives fournies}
+\date{30 septembre 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Objet et contrat de confiance}
+O76 est conçu comme un modèle mathématique computationnel dont la frontière de confiance est la preuve rejouable, et non la plausibilité d'une réponse. Le système distingue explicitement quatre états : \Prov\, lorsqu'un certificat est accepté par le vérificateur indépendant ; \Refu\, lorsqu'un contre-certificat exact démontre la fausseté du but dans le domaine déclaré ; \Unr\, lorsque le portefeuille de méthodes exactes n'a pas produit de certificat ; et \Obs\, réservé aux observations expérimentales et diagnostics qui ne valent jamais preuve.
+
+Le mot « émergent » désigne ici une capacité construite par fermeture récursive de transformations exactes : une observation structurelle sélectionne une trajectoire, la trajectoire produit un objet mathématique ou un échec informatif, le vérificateur rejoue cet objet, la mémoire conserve une trace non-oraculaire, et la nouvelle empreinte peut réorienter la trajectoire suivante. Il ne s'agit pas de prétendre qu'un état récursif constitue à lui seul une conscience ou une ontologie physique.
+
+\subsection{Principe rouge}
+O76 n'emploie aucune table de réponses cachées, aucune réponse injectée depuis un benchmark, aucune statistique numérique comme certificat de preuve, aucun solveur externe dans le chemin de décision, et aucune conversion d'une base de Gröbner en « solution » sans certificat d'identité. Le code livré doit pouvoir être relu, exécuté, checkpointé et vérifié localement.
+
+\section{Intégration des deux théories sources}
+\subsection{Théorie DDD des empreintes}
+La théorie \texttt{DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex} formalise l'observation relative, l'indiscernabilité, les fibres et quotients, les sondes et observables, la réduction par compatibilité, la fermeture observationnelle, une hiérarchie de seuils, la loi de double minimum et la métrique ultramétrique dérivée, les trajectoires, l'ordre interne, la généralisation, les déficits et témoins, la transformation certifiée, la recherche récursive et les objets de contrainte.
+
+O76 reprend ces éléments au niveau architectural sous la forme d'une empreinte de problème, d'une sélection de trajectoires compatibles et d'une règle stricte : l'empreinte peut ordonner les calculs mais ne peut jamais décider qu'une proposition mathématique est vraie.
+
+\subsection{Formalisme de l'observation récursive}
+Le document \texttt{th\_emp\_observation\_formalisme\_0.tex} ajoute une distinction indispensable entre existence ontologique et présence relative, l'observabilité locale dépendante du système, de l'état, du contexte et des ressources, la mémoire ontologique comme fondement déclaré, la mémoire évolutive mise à jour par une application, la découverte comme changement de distinctions accessibles, et surtout le critère de récursion fermée : une distinction dépendant de l'objet doit être discriminée puis réinjectée comme donnée de l'étape suivante.
+
+O76 traduit cette nouveauté en boucle opérationnelle. Pour un problème $P$ et un état de modèle $S_t$, une transition est de la forme
+\[
+S_{t+1}=R(S_t,P,\rho_t),
+\]
+où $\rho_t$ contient les ressources et les règles de sécurité de l'exécution. Une distinction $\delta_t$ devient structurellement pertinente lorsque elle dépend du contenu mathématique du problème, produit un artefact vérifiable, et est réintroduite à l'étape $t+1$. La boucle est fonctionnelle ; elle ne constitue pas une preuve ontologique sur le monde.
+
+\section{Modèle formel O76}
+\subsection{État}
+\begin{definition}[État O76]
+Un état de calcul est le tuple
+\[
+S=(\mathcal O,M_o,M_e,B,C,V,\Pi,\rho),
+\]
+avec : $\mathcal O$ l'ensemble des distinctions observées ; $M_o$ un registre déclaré de concepts d'ontologie du modèle ; $M_e$ la mémoire évolutive non-oraculaire ; $B$ l'ensemble des objets algébriques courants ; $C$ les contraintes ; $V$ le vérificateur indépendant ; $\Pi$ le portefeuille de trajectoires ; et $\rho$ le budget de ressources.
+\end{definition}
+
+\begin{axiom}[Observation disponible]
+L'observation globale est un axiome de modèle. O76 ne la déduit pas d'une preuve antérieure ; il déclare qu'un problème et ses métadonnées sont accessibles au runtime.
+\end{axiom}
+
+\begin{axiom}[Émergence récursive de l'observation]
+Une observation fonctionnelle est dite émergente lorsque la boucle locale/globale est fermée et qu'une distinction dépendant de l'objet est discriminée puis réinjectée dans une nouvelle étape de la trajectoire.
+\end{axiom}
+
+\subsection{Empreinte}
+\begin{definition}[Empreinte mathématique]
+Pour un problème $P$, l'empreinte est
+\[
+F(P)=\bigl(n,m,\mathbf d,\mathbf s,\mathbf r,\chi_{poly},\chi_{lin},\chi_{uni},\chi_{fin},h\bigr),
+\]
+où $n$ est le nombre de variables, $m$ le nombre de relations, $\mathbf d$ les degrés détectés, $\mathbf s$ le nombre de monômes, $\mathbf r$ les opérateurs relationnels, les indicatrices signalent les familles natives applicables et $h$ est un hash de forme déterministe.
+\end{definition}
+
+La loi de réduction d'observation héritée est implémentée comme principe de contrôle : si une observation $\rho$ est plus fine qu'une observation $\sigma$ dans le sens où l'indiscernabilité sous $\rho$ implique celle sous $\sigma$, le système peut utiliser la réduction $\rho\to\sigma$ pour organiser une trajectoire ; il ne peut pas utiliser cette relation comme oracle sur une vérité mathématique non démontrée.
+
+\subsection{Trajectoire et portefeuille}
+Une trajectoire $\tau=(P_0,P_1,\ldots,P_k)$ est une suite de transformations locales. Un portefeuille sélectionne plusieurs familles par la forme observée. L'ordre de sélection est une heuristique d'efficacité, pas un ordre logique de validité.
+
+\section{Langage d'entrée}
+Le contrat JSON minimal est :
+\begin{verbatim}
+{
+  "mode": "prove | solve | logic | matrix | diophantine | pell | congruences",
+  "variables": ["x", "y"],
+  "assumptions": ["x^2-2=0"],
+  "equations": ["x-y=0"],
+  "target": "x^4-4=0",
+  "domains": {"x": {"min": 0, "max": 10}},
+  "definitions": {"D": 2},
+  "matrix": [[1,2],[2,4]],
+  "congruences": [{"a":2,"modulus":3}]
+}
+\end{verbatim}
+Les relations sont séparées avant toute réduction algébrique. Cela interdit l'erreur historique où une relation complète, par exemple $2x=4$, était envoyée comme expression sans séparation de ses deux membres.
+
+\section{Noyau arithmétique exact}
+Les coefficients sont représentés par \texttt{Fraction}. Les polynômes sont des dictionnaires de monômes vers des rationnels, avec un ordre monomial déterministe. Les opérations d'addition, soustraction, produit, puissance, dérivée, spécialisation et évaluation ne passent pas par des flottants.
+
+\subsection{Division multivariée}
+Pour $f$ et une base $G=(g_1,\dots,g_r)$, la division produit
+\[
+f=\sum_{i=1}^r q_i g_i+r,
+\]
+avec un reste $r$. La trace mémorise chaque facteur de réduction. Le vérificateur peut rejouer cette identité à partir des polynômes exacts.
+
+\subsection{Buchberger avec représentations}
+La nouveauté centrale d'O76 par rapport à un simple solveur Gröbner est l'attachement à chaque élément $g_j$ d'une représentation
+\[
+g_j=\sum_{i=1}^{m} q_{ji} f_i,
+\]
+où les $f_i$ sont les générateurs initiaux. Les $S$-polynômes et toutes les réductions propagent ces représentations exactement.
+
+\begin{theorem}[Certificat d'appartenance à l'idéal]
+Soit $G$ une base de Gröbner complète dont chaque élément porte une représentation exacte dans l'idéal $I=\langle f_1,\ldots,f_m\rangle$. Si la division de la cible $g$ par $G$ donne un reste nul et les multiplicateurs recombinés donnent $q_1,\ldots,q_m$, alors
+\[
+g=\sum_i q_i f_i.
+\]
+Par conséquent $g\in I$.
+\end{theorem}
+\begin{proof}
+La division donne $g=\sum_j a_jg_j$ lorsque le reste est nul. En remplaçant chaque $g_j$ par sa représentation $\sum_i q_{ji}f_i$, on obtient
+\[
+g=\sum_j a_j\sum_i q_{ji}f_i=\sum_i\left(\sum_j a_jq_{ji}\right)f_i.
+\]
+Les multiplicateurs livrés par O76 sont précisément les parenthèses de droite. Le vérificateur recalcule directement cette somme exacte et refuse le certificat si l'égalité ne tient pas.
+\end{proof}
+
+Cette construction supprime la règle dangereuse « base complète = preuve ». La complétude de Buchberger n'est qu'une propriété de l'état de calcul ; la preuve finale est l'identité explicitement rejouée.
+
+\section{Familles de résolution et de preuve}
+\begin{longtable}{p{0.25\textwidth}p{0.29\textwidth}p{0.38\textwidth}}
+\toprule
+Famille & Objet & Certificat\\
+\midrule
+Identité polynomiale & $L=R$ & forme normale exacte gauche/droite et égalité rejouée\\
+Conséquence polynomiale linéaire & $\sum_i\lambda_i f_i=g$ & coefficients rationnels et identité directe\\
+Idéal / Gröbner & $g\in\langle f_i\rangle$ & représentations de Buchberger + multiplicateurs finaux\\
+Systèmes linéaires & $Ax=b$ & RREF exacte recalculée et solution re-jouée\\
+Racines univariées & $p(x)=0$ & partie sans multiplicité, Sturm, racines rationnelles et intervalles isolants\\
+Logique propositionnelle & tautologie/contre-modèle & table de vérité complète\\
+Domaine fini & quantification finie & énumération exhaustive exacte\\
+Matrices rationnelles & rang/RREF & RREF recalculée indépendamment\\
+Diophantien linéaire & $ax+by=c$ & identité de Bézout et solution particulière\\
+CRT & systèmes de congruences & composition exacte par PGCD étendu\\
+Pell & $x^2-Dy^2=1$ & solution exacte contrôlée par identité arithmétique\\
+\bottomrule\end{longtable}
+
+Les branches numériques expérimentales de Riemann, sondes de fréquence et statistiques de grille ne sont pas des branches de preuve O76. Une observation numérique peut rester dans un dossier expérimental, mais elle ne peut déclencher \Prov.
+
+\section{Racines et Sturm}
+Pour un polynôme univarié $p$, O76 calcule d'abord $\gcd(p,p')$ et la partie sans multiplicité
+\[
+p_{sf}=p/\gcd(p,p').
+\]
+Une suite de Sturm est ensuite construite. Si $V(t)$ désigne le nombre de variations de signes non nuls à $t$, le nombre de racines distinctes dans $(a,b)$ est calculé par $V(a)-V(b)$ lorsque les bornes ne sont pas des racines. L'isolement subdivise exactement l'intervalle de Cauchy jusqu'à obtenir une boîte contenant une seule racine.
+
+Les racines rationnelles sont recherchées suivant le théorème des racines rationnelles après extraction exacte des facteurs $x$, y compris $0$ et les candidats négatifs. L'état de sortie distingue racines rationnelles et racines algébriques représentées par leur polynôme et un intervalle isolant.
+
+\section{Preuves linéaires}
+Pour les relations linéaires, O76 effectue une élimination de Gauss-Jordan sur $\mathbb Q$. Pour une solution unique, le vérificateur recalcule la RREF complète et réévalue la solution. Pour une famille affine, il vérifie la RREF et la correspondance exacte entre les lignes pivots, la constante et les paramètres $t_j$.
+
+Une contradiction linéaire n'est pas déclarée preuve d'une impossibilité universelle tant qu'un certificat de combinaison exacte $\sum_i\lambda_i f_i=1$ n'est pas produit. Cette frontière est intentionnelle : elle empêche la confusion entre « l'algorithme a détecté une inconsistance » et « l'objet de preuve a été rejoué ».
+
+\section{Vérificateur indépendant}
+Le vérificateur est un module séparé du moteur. Il ne connaît ni la mémoire évolutive ni les résultats expérimentaux. Pour chaque certificat, il reconstruit les objets à partir des données de la preuve et rejoue l'assertion.
+
+\begin{proposition}[Fail-closed]
+Si le certificat est absent, de type inconnu, incohérent avec la cible ou avec les hypothèses, ou si sa recomposition exacte échoue, O76 ne peut pas retourner \Prov.
+\end{proposition}
+\begin{proof}
+Le moteur demande au vérificateur un booléen de rejeu. Le seul chemin qui retourne $\Prov$ passe par un résultat de vérification vrai. Toutes les erreurs de rejeu basculent dans le chemin non-certifié.
+\end{proof}
+
+Le test d'intégrité tente également de détecter les marqueurs d'oracle, de réponse injectée ou de contournement dans le code runtime hors du scanner lui-même.
+
+\section{Mémoire et émergence}
+La mémoire évolutive $M_e$ ne stocke pas de réponse cachée. Elle conserve des entrées identifiées par : type, empreinte, hash de l'énoncé, hash du payload et provenance. Elle peut donc se souvenir qu'une trajectoire particulière a produit un certificat ou a échoué sur une forme donnée, mais elle ne peut pas remplacer le rejeu du certificat dans un nouveau problème.
+
+La mémoire ontologique $M_o$ est un registre conceptuel réservé à l'architecture : observation relative, distinction, fermeture récursive, identité d'objet mathématique, provenance, etc. Les idées de mémoire ontologique et d'existence relative de la source 0 ne sont pas présentées comme des théorèmes mathématiques ; elles sont des primitives déclarées du modèle.
+
+La boucle émergente O76 est donc :
+\[
+\boxed{\text{observation}\to\text{empreinte}\to\text{trajet}\to\text{objet exact}\to\text{certificat}\to\text{rejeu}\to M_e\to\text{nouvelle observation}.}
+\]
+
+\section{Checkpoint et reprise}
+Les états lourds sont sérialisés en JSON canonique. Pour Buchberger, l'état contient la base, les représentations, les paires, le nombre de paires traitées et le nombre de générateurs. Le hash SHA-256 du problème normalisé est stocké au niveau du checkpoint.
+
+\begin{proposition}[Rejet d'un checkpoint obsolète]
+Un checkpoint associé à un problème $P$ ne peut pas être réutilisé pour un problème $P'$ si $H(P)\neq H(P')$.
+\end{proposition}
+\begin{proof}
+Le lecteur de checkpoint compare les deux hashes canoniques et lève une erreur de mismatch avant restauration.
+\end{proof}
+
+Le runtime effectue une écriture atomique par fichier temporaire puis remplacement. Une exécution interrompue peut être reprise avec une limite de paires plus élevée en conservant le front Buchberger déjà calculé.
+
+\section{Ressources et capacité utilisateur}
+La personnalisation est explicite dans \texttt{config/o76.json} :
+\begin{verbatim}
+time_s
+max_steps
+max_groebner_pairs
+max_finite_cases
+memory_entries
+enabled_strategies
+memory
+checkpoint
+\end{verbatim}
+Ces valeurs sont des budgets d'exécution et non des bornes mathématiques cachées. Quand une ressource est épuisée, le statut est \Unr. O76 ne transforme pas un budget de calcul en impossibilité mathématique.
+
+\subsection{Une commande}
+Depuis le dossier du modèle :
+\begin{verbatim}
+python3 run_math_O76.py examples/prove_groebner.json
+\end{verbatim}
+Aucune installation de paquet Python externe n'est nécessaire. Les modules runtime utilisent la bibliothèque standard.
+
+\subsection{Surcharge au clavier}
+\begin{verbatim}
+python3 run_math_O76.py probleme.json \\
+  --time 600 --max-steps 100 \\
+  --max-gb-pairs 100000 --max-finite-cases 1000000 \\
+  --strategies GROEBNER_BUCHBERGER,UNIVARIATE_STURM
+\end{verbatim}
+
+\section{Pipeline complet}
+\begin{enumerate}
+\item Validation et normalisation du contrat.
+\item Calcul de l'empreinte structurelle.
+\item Sélection du portefeuille de trajectoires.
+\item Lecture d'un checkpoint seulement s'il correspond au hash exact du problème.
+\item Exécution exacte de la trajectoire, avec budget explicite.
+\item Construction du certificat ou du contre-certificat.
+\item Vérification indépendante et fail-closed.
+\item Enregistrement dans la mémoire évolutive et du checkpoint terminal.
+\item Retour du statut et du certificat, sans prétendre à une preuve lorsqu'il n'y en a pas.
+\end{enumerate}
+
+\section{Architecture logicielle}
+\begin{verbatim}
+src/o76/
+  contract.py       contrat d'entree et hash du probleme
+  parser.py         expressions arithmetiques, relations, logique
+  fingerprint.py    empreinte et selection de trajectoires
+  algebra.py        Q-polynomes, division, Buchberger, Sturm
+  solver.py         generateurs de resultats/certificats
+  proof.py          construction des certificats
+  verifier.py       rejeu independant
+  checkpoint.py     persistence canonique et hash
+  memory.py         memoire non-oraculaire
+  portfolio.py      abstraction de trajectoire
+  integrity.py      scan anti-oracle
+  engine.py         orchestration
+run_math_O76.py     lanceur utilisateur
+selfcheck_math_O76.py
+\end{verbatim}
+
+\section{Autotests et non-régression}
+Le self-check comprend des identités, une conséquence Gröbner, un système linéaire, Sturm avec racines positives et négatives, tautologie et contre-modèle propositionnels, preuve et réfutation sur domaine fini, CRT, Diophantien, Pell, matrice, reprise checkpoint et scan d'intégrité. Un test de falsification modifie la cible d'un certificat Gröbner et exige que le vérificateur le rejette.
+
+Les fichiers Python du corpus source ont été recompilés ; les PDF du corpus ont été convertis en texte sans erreur ; les JSON/JSONL ont été contrôlés. Six fichiers JSON de stress du corpus étaient vides et ont été classés comme artefacts de harness, conformément au registre historique E38, plutôt que comme résultats mathématiques.
+
+\section{Frontières épistémiques}
+Une preuve retournée par O76 est rigoureuse au niveau du calcul exact et du rejeu du certificat. Elle ne constitue pas une vérification formelle du code Python par un assistant de preuve. La base de confiance ultime reste le langage Python, l'interpréteur, les primitives exactes et le code du vérificateur. L'architecture a été volontairement conçue de sorte qu'une limite de couverture se manifeste par \Unr plutôt que par une preuve simulée.
+
+De même, la loi de double minimum, la métrique ultramétrique et les axiomes de récursion sont des résultats ou engagements de la théorie des empreintes ; ils ne transforment pas automatiquement une instance arithmétique en théorème. O76 respecte la séparation entre méta-théorie de l'observation et preuve de l'énoncé.
+
+\section{Contrôles anti-erreurs hérités}
+Les erreurs historiques E23--E42 et les règles R01--R15 ont été intégrées dans la conception : partie sans multiplicité correcte, racines nulles et négatives, projection univariée explicite, checkpoint sérialisable, interdiction de traiter une base Gröbner comme résultat final, séparation de la cible et de ses membres, propagation des budgets, validation du contrat, vérificateur séparé, sortie vide non utilisée comme résultat, et distinction stricte entre pause et impossibilité.
+
+Les anomalies RH historiques E43--E58 conduisent à une règle encore plus stricte : aucune statistique numérique, grille finie, évaluation de zêta, sonde expérimentale ou conclusion institutionnelle externe n'entre dans la preuve O76. Elles peuvent exister dans la réflexion comme données d'audit, mais le runtime de preuve ne leur délègue aucune autorité.
+
+\section{Correction O76-1.1 issue du test décisif}
+Le test externe de septembre 2026 a distingué deux propriétés différentes : la puissance de recherche sur un idéal et la capacité à ne pas produire de fausse preuve lorsque la proposition sort du langage formel. La version O76-1.0 présentait une faiblesse de couverture sur les tours polynomiales triangulaires : Buchberger générique devenait excessivement coûteux sur une famille pourtant munie d'une élimination constructive évidente.
+
+\subsection{Stratégie triangulaire exacte}
+Soit une tour de $n$ variables, d'exposant $k\ge2$,
+\[
+f_0=x_1^k-c,\qquad f_i=x_{i+1}^k-x_i\;(1\le i<n),\qquad f_n=x_n-r.
+\]
+En posant $R_n=r$ et $R_i=R_{i+1}^k$, on construit
+\[
+h_i=x_i-R_i.
+\]
+La factorisation
+\[
+x_{i+1}^k-R_{i+1}^k=(x_{i+1}-R_{i+1})\sum_{j=0}^{k-1}x_{i+1}^{k-1-j}R_{i+1}^{j}
+\]
+donne l'identité
+\[
+h_i=-f_i+S_i h_{i+1},\qquad S_i=\sum_{j=0}^{k-1}x_{i+1}^{k-1-j}R_{i+1}^{j}.
+\]
+Ainsi chaque $h_i$ possède une représentation exacte dans l'idéal initial. Enfin,
+\[
+f_0-S_0h_1=R_1^k-c=\Delta.
+\]
+Lorsque $\Delta\ne0$,
+\[
+1=\frac1\Delta\bigl(f_0-S_0h_1\bigr)=\sum_{i=0}^{n}q_i f_i.
+\]
+La stratégie O76-1.1 conserve les $q_i$ sous forme de polynômes rationnels; le vérificateur recalcule directement $\sum q_i f_i=1$ puis, pour la cible $g$, vérifie $g=\sum (gq_i)f_i$.
+
+\begin{theorem}[Solidité de la tour triangulaire]
+Si le certificat \texttt{TRIANGULAR\_TOWER\_CONTRADICTION} passe le vérificateur O76-1.1, alors la cible polynomiale déclarée appartient à l'idéal engendré par les hypothèses.
+\end{theorem}
+\begin{proof}
+Le vérificateur reconstruit les hypothèses et la cible depuis leur texte. Il exige la forme triangulaire exacte, recalcule $R_i$ et $\Delta$, contrôle $\Delta\ne0$, puis vérifie l'identité $\sum_i q_i f_i=1$. Il vérifie ensuite que chaque multiplicateur de la cible est exactement $gq_i$ et que leur combinaison redonne $g$. Aucune donnée de mémoire, aucun hash de benchmark et aucune observation numérique n'intervient dans cette égalité finale.
+\end{proof}
+
+\subsection{Garde de forme non supportée}
+Une entrée qui contient une affirmation universelle en prose mais aucune relation arithmétique formellement parsable ne peut plus être dérivée vers le portefeuille propositionnel. Son résultat est \texttt{UNRESOLVED} avec \texttt{strategy=UNSUPPORTED\_FORM} et une raison explicite. Pour les entrées parsables, le portefeuille garde seulement des familles mathématiques effectivement compatibles avec la forme.
+
+Une régression ultérieure a été détectée par la batterie décisive : une phrase de prose comme `T(n)=n/2 si ...` contient un signe d'égalité interne. Le simple repérage d'un opérateur de relation ne suffit donc pas. O76-1.1 exige maintenant que la relation entière soit reconstruite par le parseur polynomial avant de positionner `polynomial=true`. Cette garde est générale et ne dépend d'aucun nom de conjecture ni d'aucun benchmark.
+
+\subsection{Diagnostic de portefeuille}
+Après exploration, une sortie \texttt{UNRESOLVED} porte \texttt{attempted\_strategies}. Le dernier nom de stratégie ne doit plus être interprété comme une classification sémantique du problème. Lorsque le portefeuille ne produit aucun certificat, la raison est \texttt{portfolio\_exhausted} ; l'épuisement d'un budget local reste distinct de l'impossibilité mathématique.
+
+\section{Protocole du test décisif}
+La campagne a été réalisée en quatre passes indépendantes, puis soumise à une régression finale de parsing et de non-régression automatisée.
+\begin{enumerate}
+\item \textbf{Porte d'intégrité ouverte.} Des affirmations correspondant à la conjecture de Collatz et à l'hypothèse de Riemann ont été injectées comme prose hors contrat. O76-1.1 les classe \texttt{UNSUPPORTED\_FORM}/\texttt{UNRESOLVED} et ne fabrique aucun certificat. L'hypothèse de Riemann est toujours présentée comme non résolue par le Clay Mathematics Institute; la conjecture de Collatz reste également listée parmi les problèmes non résolus.
+\item \textbf{Stress algébrique.} Une tour profondeur 12 exacte impose $x_{12}=1$, $x_{i+1}^2=x_i$ et $x_1^2=2$. La conclusion est l'inconsistance $1\in I$. O76-1.0 ne conclut pas dans le temps de la campagne; O76-1.1 fournit un certificat exact en environ une seconde.
+\item \textbf{Robustesse de forme.} Les mêmes hypothèses sont mélangées, un exposant $k=3$ est utilisé et une cible arbitraire est demandée sous le même système contradictoire. Tous les cas passent le vérificateur.
+\item \textbf{Contre-épreuve.} Une tour cohérente ($x_4=2$, $x_3^2=x_4$, $x_2^2=x_3$, $x_1^2=x_2$, $x_1^2=2^{16}$) ne reçoit pas de certificat de contradiction et retourne \texttt{UNRESOLVED}. Des mutations d'un coefficient, de la constante de contradiction et des multiplicateurs de cible sont rejetées.
+\end{enumerate}
+
+\section{Résultats expérimentaux O76-1.0 versus O76-1.1}
+\begin{longtable}{p{0.27\textwidth}p{0.32\textwidth}p{0.33\textwidth}}
+\toprule
+Test & O76-1.0 & O76-1.1 / contrôle\\
+\midrule
+Tour profondeur 10 & PROVEN, $\approx14.24$s & PROVEN, stratégie triangulaire; PASS\\
+Tour profondeur 12 & pas de certificat avant watchdog & PROVEN, $\approx1.0$s; PASS\\
+Équations mélangées & non testé & PROVEN, structure générale; PASS\\
+Tour $k=3$ contradictoire & non testé & PROVEN, autre exposant; PASS\\
+Tour cohérente & peut rester indécise & UNRESOLVED, aucune contradiction certifiée; attendu\\
+Collatz prose & UNRESOLVED, stratégie trompeuse & UNSUPPORTED\_FORM; aucun faux PROVEN\\
+Riemann prose & UNRESOLVED, stratégie trompeuse & UNSUPPORTED\_FORM; aucun faux PROVEN\\
+Certificat muté & rejeté & rejeté; PASS\\
+\bottomrule\end{longtable}
+\section{Conclusion architecturale}
+O76 n'est pas « un O75 plus gros ». Le changement essentiel est une nouvelle frontière de confiance : les modules de raisonnement sont générateurs de certificats ; le vérificateur est l'autorité ; la théorie des empreintes sert de méta-contrôle ; la mémoire évolutive sert d'expérience non-oraculaire ; la récursion fermée fournit le mécanisme d'émergence fonctionnelle ; et les ressources utilisateur sont explicitement configurables.
+
+Le modèle est donc sérieux comme moteur mathématique local, reproductible et extensible : son comportement utile provient de la composition exacte de plusieurs familles de preuve et de la capacité à réutiliser des états de calcul sans transformer une observation ou un succès expérimental en vérité mathématique.
+
+\end{document}

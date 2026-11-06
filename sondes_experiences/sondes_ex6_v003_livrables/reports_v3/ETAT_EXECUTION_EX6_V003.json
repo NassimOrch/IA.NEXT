@@ -1,0 +1,121 @@
+{
+  "campaign": "EX6",
+  "version": "v003",
+  "date": "2026-10-31",
+  "overall_status": "INCOMPLET",
+  "base_prompt": {
+    "file": "prompt_ex6.json",
+    "revision": "1.0.1",
+    "valid_json": true,
+    "sections": 19,
+    "sha256": "72744213da2626174e63c45256a6e7a69c6de84c2b810d7a4a94e931c885237c",
+    "execution_fully_compliant": false
+  },
+  "source_integrity": {
+    "last_sources_zip_sha256": "5f7a86cb3875f97324f75c46e379b6639673dfe9cc265a173fa8749f1be0f8eb",
+    "last_sources_zip_bytes": 457109554,
+    "zip_crc": "PASS",
+    "nested_primary_zip_count": 5,
+    "nested_internal_zip_count": 12,
+    "nested_crc": "PASS"
+  },
+  "data": {
+    "file": "inputs/data_manifest/wisconsin_dev_only_v002.npz",
+    "sha256": "93f7a5f6ef8a5daa090bf83f4a2169a9857893f4aca4b700f7b74566b14be1da",
+    "train_rows": 341,
+    "validation_rows": 85,
+    "adaptation_rows": 57,
+    "test_arrays_in_npz": false,
+    "historically_exposed_development_only": true,
+    "strict_test_isolation_limit": "sklearn loader materializes complete dataset object; no test rows serialized/indexed into model data path per audited manifest"
+  },
+  "runs": {
+    "stack_runs_completed": 20,
+    "oof_runs_completed": 10,
+    "replica_training_runs_completed": 5,
+    "total_model_run_summaries": 35,
+    "cascade_diagnostics_models": 10,
+    "replica_kernel_partition_controls": 1,
+    "retro_optimizer_control_suite": 1,
+    "v001_runs_repeated": false,
+    "v002_interrupted_attempt_retained": true
+  },
+  "selection": {
+    "homogeneous_variant": [
+      4,
+      1,
+      "global"
+    ],
+    "layer_specialists": [
+      [
+        5,
+        0,
+        "equal"
+      ],
+      [
+        1,
+        4,
+        "input"
+      ],
+      [
+        1,
+        4,
+        "input"
+      ],
+      [
+        4,
+        1,
+        "global"
+      ],
+      [
+        3,
+        2,
+        "input"
+      ],
+      [
+        1,
+        4,
+        "input"
+      ],
+      [
+        3,
+        2,
+        "global"
+      ]
+    ]
+  },
+  "independent_audit": {
+    "status": "PASS_WITH_LIMITATIONS",
+    "errors": [],
+    "prediction_count": 105,
+    "max_metric_delta": 0.0,
+    "parameter_audit_count": 35,
+    "min_mlp_ge4x_ratio": 4.00046992481203
+  },
+  "not_measured": [
+    "VRAM",
+    "peak activation memory",
+    "energy/joules",
+    "reliable cross-model RSS",
+    "hardware FLOP/MAC counters"
+  ],
+  "not_executed": [
+    "Replica dedicated batch sharding",
+    "end-to-end train of shared Replica base probes with explicit gradient policy",
+    "full Orchestra static external-global arm",
+    "Orchestra local-global/no-external arm as an independent family",
+    "Orchestra specialist dedicated family",
+    "single-layer/strict-equal-budget controls and systematic per-layer ablations",
+    "clean external domain / untouched confirmatory test",
+    "full RETRO alpha-beta architecture integration"
+  ],
+  "not_verified": [
+    "non-inferiority",
+    "independent-domain generalization",
+    "exact replay of historical interactive v001 cells",
+    "energy or GPU deployment advantage"
+  ],
+  "conclusion": "Parameter ratio achieved on measured v003 candidates; real fit/inference speed criteria not achieved. OOF log-loss point estimates are promising but exploratory only. No global success claim.",
+  "pareto_front_exploratory_created": true,
+  "pareto_front_confirmatory": false
+}

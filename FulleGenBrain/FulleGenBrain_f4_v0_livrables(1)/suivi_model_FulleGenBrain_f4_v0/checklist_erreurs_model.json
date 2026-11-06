@@ -1,0 +1,773 @@
+{
+  "schema_version": "1.0.0",
+  "project": "FulleGenBrain_f4_v0",
+  "checklist_kind": "environment_and_non_model_errors",
+  "policy": "Record tool/environment/archive/filesystem/build errors independently of model behavior; append resolution evidence instead of deleting history.",
+  "entries": [
+    {
+      "id": "ENV-001",
+      "severity": "INFO",
+      "status": "RESOLVED",
+      "description": "Python tool bridge failed, but shell access via container.exec worked; ZIP handling moved to unzip/zipinfo rather than retry-looping the failing bridge.",
+      "evidence": "Root ZIP CRC test PASS; nested formalism ZIP CRC test PASS.",
+      "resolution": "Use system shell and native unzip utilities for archive work; keep this event for audit history."
+    },
+    {
+      "id": "ENV-LATEX-001",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "The first pdflatex pass of formalisme_operationnel_FulleGenBrain_f4_v0.tex failed on an unescaped underscore in the plain-text token NOT_RUN (line 52).",
+      "evidence": "logs/P02/pdflatex.stdout.txt; logs/P02/pdflatex.exitcode=1",
+      "resolution": "LaTeX retry5 returned exit code 0; the syntax issue is fixed. Review remaining layout warnings separately.",
+      "resolution_evidence": "logs/P02/pdflatex_retry5.exitcode=0"
+    },
+    {
+      "id": "ENV-LATEX-002",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Second LaTeX pass exposed unescaped underscores in the prose list of effect identifiers (read_memory, write_memory, filesystem_read, filesystem_write, external_action). The table also had an overlong Select/Synthesize label which was a coverage-matrix authoring error.",
+      "evidence": "logs/P02/pdflatex_retry2.exitcode=1; logs/P02/pdflatex_retry3.exitcode=1; the generated TeX still contains raw underscore tokens in the effect-name paragraph.",
+      "resolution": "LaTeX retry5 returned exit code 0; the syntax issue is fixed. Review remaining layout warnings separately.",
+      "resolution_evidence": "logs/P02/pdflatex_retry5.exitcode=0"
+    },
+    {
+      "id": "ENV-LATEX-003",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "The fourth LaTeX pass reached a later raw identifier underscore in event_id; other raw underscores may remain outside math/code spans.",
+      "evidence": "logs/P02/pdflatex_retry4.stdout.txt; logs/P02/pdflatex_retry4.exitcode=1",
+      "resolution": "LaTeX retry5 returned exit code 0; the syntax issue is fixed. Review remaining layout warnings separately.",
+      "resolution_evidence": "logs/P02/pdflatex_retry5.exitcode=0"
+    },
+    {
+      "id": "ENV-LATEX-004",
+      "severity": "WARN",
+      "status": "RESOLVED",
+      "description": "LaTeX compiles, but the wide operator-contract table emits overfull hboxes at lines 212, 220 and 229; the 40.8773pt overrun needs layout adjustment.",
+      "evidence": "logs/P02/pdflatex_retry5.stdout.txt; exit code 0",
+      "resolution": "La matrice est passée à des colonnes ragged-right, son libellé trop long a été raccourci et les références aux registres séparées. Deux compilations finales ont code retour 0; le journal final a 0 Overfull hbox. Quelques Underfull hbox de tableaux étroits subsistent sans débordement de marge.",
+      "resolution_evidence": "logs/P02/pdflatex_final1.exitcode=0; logs/P02/pdflatex_final2.exitcode=0; logs/P02/formalisme_operationnel_FulleGenBrain_f4_v0.log (0 Overfull hbox)"
+    },
+    {
+      "id": "ENV-BOOT-001",
+      "severity": "INFO",
+      "status": "RESOLVED",
+      "description": "A source-inventory shell command attempted to redirect preflight output before creating logs/P01; the shell stopped before inspecting sources.",
+      "evidence": "Command returned shell error: missing logs/P01/preflight.json parent directory; no source files modified.",
+      "resolution": "Create logs/P01 first, then run the preflight and repeat the source inventory."
+    },
+    {
+      "id": "ENV-BOOT-002",
+      "severity": "INFO",
+      "status": "RESOLVED",
+      "description": "A shell redirection was attempted before logs/P03 existed while recording the phase-gate preflight; the fallback created the directory and reran preflight successfully.",
+      "evidence": "logs/P03/preflight_before_phase3_close.json; subsequent phase-gate and snapshot checks PASS.",
+      "resolution": "Create the phase log directory before redirecting output, and record the resulting preflight run.",
+      "resolution_evidence": "logs/P03/preflight_before_phase3_close.json"
+    },
+    {
+      "id": "ENV-BOOT-003",
+      "severity": "INFO",
+      "status": "RESOLVED",
+      "description": "The first P04 file-generation shell command redirected preflight output into logs/P04 before that directory existed, so the shell exited before writing source files.",
+      "evidence": "The failed shell command stopped at the first redirect; the workspace file listing showed no partial P04 modules.",
+      "resolution": "Create phase log directories before redirecting output; recreate the directory and run preflight successfully before retrying file generation.",
+      "resolution_evidence": "Preflight PASS at phase P04; the source-generation command is being retried from a clean boundary."
+    },
+    {
+      "id": "EXEC-20261026T112038000877+0000_p02-compile-versioned-formalisms",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P07: p02-compile-versioned-formalisms",
+      "evidence": "logs/executions/P07/20261026T112038000877+0000_p02-compile-versioned-formalisms.receipt.json",
+      "command": [
+        "python3",
+        "scripts/validate_latex_sources.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "7d5206f37475eaea3e047a8c27b5e693d8313b4174dfdec68ec0cba1b98e109c",
+      "resolution": "The LaTeX validator now decodes pdflatex output with explicit UTF-8 replacement handling; the three source documents each compiled twice successfully.",
+      "resolution_evidence": [
+        "scripts/validate_latex_sources.py",
+        "logs/executions/P07/20261026T112051038762+0000_p02-compile-versioned-formalisms-retest.receipt.json",
+        "build/latex_validation/validation_report.json"
+      ],
+      "resolution_validation": "All three TeX sources completed two pdflatex passes with exit code 0; zero overfull box warnings were counted in the final logs. Underfull box warnings remain recorded as layout warnings.",
+      "resolved_at": "2026-10-26T11:21:25+00:00"
+    },
+    {
+      "id": "EXEC-20261026T112933221027+0000_p08-ascrc-and-world-gate-focused-retest",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P08: p08-ascrc-and-world-gate-focused-retest",
+      "evidence": "logs/executions/P08/20261026T112933221027+0000_p08-ascrc-and-world-gate-focused-retest.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "python3",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "tests.test_p08_ascrc",
+        "tests.test_p08_world_model_gate",
+        "-v"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "79bbd7f3cc7d11180c68e8a963f3f7f0a9577a4b9881e3a6d54c66385d213b1c",
+      "resolution": "Échec transitoire du même cas de test créé par l’édition trop large du test stale; le bloc a été restauré au contrat de budget dur et le retest ciblé ainsi que le full suite passent.",
+      "resolution_evidence": [
+        "logs/executions/P08/20261026T112820183894+0000_p08-ascrc-and-world-gate-targeted-retest2.receipt.json",
+        "logs/executions/P08/20261026T112834099316+0000_p08-full-suite-after-ascrc-fixes.receipt.json"
+      ],
+      "resolution_validation": "Reçu ciblé et reçu complet PASS; le premier confirme 27 tests et le second 195 tests.",
+      "resolved_at": "2026-10-26T11:33:05+00:00"
+    },
+    {
+      "id": "EXEC-20261026T113103283025+0000_p08-compile-versioned-formalisms",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P08: p08-compile-versioned-formalisms",
+      "evidence": "logs/executions/P08/20261026T113103283025+0000_p08-compile-versioned-formalisms.receipt.json",
+      "command": [
+        "python3",
+        "scripts/validate_latex_sources.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "a41abdfb4ee13813ba8bcf5fe185ca8a4ad441f8d0daae457b91b91a7d643aa8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": "Le nouveau passage P08 du formalisme V5 utilisait un environnement LaTeX invariant non déclaré. Le préambule a été complété puis les trois documents canoniques ont été recompilés deux fois chacun.",
+      "resolution_evidence": [
+        "scripts/fix_p08_formalism_theorem_env.py",
+        "logs/executions/P08/20261026T113141384646+0000_p08-compile-versioned-formalisms-retest.receipt.json",
+        "build/latex_validation/validation_report.json"
+      ],
+      "resolution_validation": "Trois sources PASS, deux passes pdflatex par source, zéro Overfull hbox rapporté par le validateur; Underfull hbox restent des avertissements de justification.",
+      "resolved_at": "2026-10-26T11:33:05+00:00"
+    },
+    {
+      "id": "EXEC-20261026T115409448060+0000_p09-build-adapter-and-license-inventory",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P09: p09-build-adapter-and-license-inventory",
+      "evidence": "logs/executions/P09/20261026T115409448060+0000_p09-build-adapter-and-license-inventory.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "python3",
+        "scripts/build_p09_evidence.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5ea85a64b20d132656b2e6c80d4ad973021631e423d4f505518ee3ed4ebe2d1f",
+      "resolution": "A subsequent controlled retest passed after correction; the original failure record is retained for audit.",
+      "resolution_evidence": "logs/executions/P09/20261026T115511870908+0000_p09-build-adapter-and-license-inventory-final-retest.receipt.json",
+      "resolution_validation": "Receipt status=PASS, exit_code=0, label=p09-build-adapter-and-license-inventory-final-retest"
+    },
+    {
+      "id": "EXEC-20261026T115447302595+0000_p09-build-adapter-and-license-inventory-retest",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P09: p09-build-adapter-and-license-inventory-retest",
+      "evidence": "logs/executions/P09/20261026T115447302595+0000_p09-build-adapter-and-license-inventory-retest.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "python3",
+        "scripts/build_p09_evidence.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "6b6067d898d1e7763b4c791034247343c2e560bd312f10edfa75f467d92598af",
+      "resolution": "A subsequent controlled retest passed after correction; the original failure record is retained for audit.",
+      "resolution_evidence": "logs/executions/P09/20261026T115511870908+0000_p09-build-adapter-and-license-inventory-final-retest.receipt.json",
+      "resolution_validation": "Receipt status=PASS, exit_code=0, label=p09-build-adapter-and-license-inventory-final-retest"
+    },
+    {
+      "id": "EXEC-20261026T130408439676+0000_p11-lazy-frontier-combinatorial-benchmark",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-lazy-frontier-combinatorial-benchmark",
+      "evidence": "logs/executions/P11/20261026T130408439676+0000_p11-lazy-frontier-combinatorial-benchmark.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "PYTHONWARNINGS=error::ResourceWarning",
+        "python3",
+        "scripts/benchmark_p11_lazy_frontier.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "98e1870f168378311a58037b9a60dfdd5c2ffd942853f24073e81c75217f1b33",
+      "resolution": {
+        "reason": "Initial harness used the wrong return arity; the corrected untimed benchmark and subsequent optimized-path benchmark both passed, with ordering-parity checks.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T130537088476+0000_p11-lazy-frontier-benchmark-untimed-memory-trace.receipt.json",
+          "logs/executions/P11/20261026T131112105380+0000_p11-benchmark-optimized-frontier.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:18:20+00:00"
+    },
+    {
+      "id": "EXEC-20261026T130433273019+0000_p11-lazy-frontier-combinatorial-benchmark-retest",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-lazy-frontier-combinatorial-benchmark-retest",
+      "evidence": "logs/executions/P11/20261026T130433273019+0000_p11-lazy-frontier-combinatorial-benchmark-retest.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "PYTHONWARNINGS=error::ResourceWarning",
+        "python3",
+        "scripts/benchmark_p11_lazy_frontier.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ce9cd908c4ccbde308a5074b9b7f6c7d6766233a131bf23fed865695fefad092",
+      "resolution": {
+        "reason": "Corrected the benchmark result-shape expectation; the final baseline and optimized-path runs pass all fixture, cardinality, and ordering checks.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T130456880632+0000_p11-lazy-frontier-combinatorial-benchmark-final-retest.receipt.json",
+          "logs/executions/P11/20261026T131112105380+0000_p11-benchmark-optimized-frontier.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:18:20+00:00"
+    },
+    {
+      "id": "EXEC-20261026T131157088588+0000_p11-full-suite-after-lazy-frontier-optimization",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-full-suite-after-lazy-frontier-optimization",
+      "evidence": "logs/executions/P11/20261026T131157088588+0000_p11-full-suite-after-lazy-frontier-optimization.receipt.json",
+      "command": [
+        "python",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "exit_code": 2,
+      "stdout_sha256": "8677baf5c21d974cd503c419c11c437e20172296154f52cda8be5d75fc03ea1e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": {
+        "reason": "The failed invocation accidentally discovered archived upstream/vendor tests under the integrated-suite command. pytest.ini now scopes default discovery to tests/; upstream suites were run separately with their original import roots.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T131235627921+0000_p11-full-integrated-suite-after-discovery-fix.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:18:20+00:00"
+    },
+    {
+      "id": "EXEC-20261026T131309878079+0000_p11-run-upstream-world-model-tests",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-run-upstream-world-model-tests",
+      "evidence": "logs/executions/P11/20261026T131309878079+0000_p11-run-upstream-world-model-tests.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=spec/upstream",
+        "python",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "pytest",
+        "-q",
+        "spec/upstream/tests"
+      ],
+      "exit_code": 2,
+      "stdout_sha256": "ca6960d04ba0ad6675eca16cab27bf3e92730adebedeaa665e00db91249c4a73",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": {
+        "reason": "The reference implementation resides in spec/upstream/reference_impl, not at the upstream root; all three source reference test modules passed with that import root.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T131345504553+0000_p11-run-upstream-reference-tests-correct-import-root.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:18:20+00:00"
+    },
+    {
+      "id": "EXEC-20261026T131414263875+0000_p11-run-aam-o82-upstream-tests",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-run-aam-o82-upstream-tests",
+      "evidence": "logs/executions/P11/20261026T131414263875+0000_p11-run-aam-o82-upstream-tests.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=vendor/aam_o82_0",
+        "python",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "pytest",
+        "-q",
+        "vendor/aam_o82_0/tests"
+      ],
+      "exit_code": 2,
+      "stdout_sha256": "c6d612ea52ded1a0b60725608a5152981cb28932703b4b584f9eecdb5d59035d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": {
+        "reason": "The package uses a src/ layout; rerun with vendor/aam_o82_0/src plus isolated temporary governance checklists passed the entire upstream suite.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T131557220408+0000_p11-run-aam-o82-upstream-suite-isolated-governance.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:18:20+00:00"
+    },
+    {
+      "id": "EXEC-20261026T131509135569+0000_p11-run-aam-o82-upstream-tests-correct-src-root",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-run-aam-o82-upstream-tests-correct-src-root",
+      "evidence": "logs/executions/P11/20261026T131509135569+0000_p11-run-aam-o82-upstream-tests-correct-src-root.receipt.json",
+      "command": [
+        "env",
+        "PYTHONPATH=vendor/aam_o82_0/src",
+        "python",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "pytest",
+        "-q",
+        "vendor/aam_o82_0/tests"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "0b9f8bccd6bb72559eabe1886c9e513fc657227e56c8d57da2789ff23a31f4a4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": {
+        "reason": "The source-root correction exposed AAM’s intentional independent governance preflight. An isolated temporary directory populated from its clean bundled governance seed allowed the unmodified upstream suite to pass without modifying the project or AAM source checklists.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T131557220408+0000_p11-run-aam-o82-upstream-suite-isolated-governance.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:18:20+00:00"
+    },
+    {
+      "id": "EXEC-20261026T132340487221+0000_p11-preserve-public-frontier-defenses",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-preserve-public-frontier-defenses",
+      "evidence": "logs/executions/P11/20261026T132340487221+0000_p11-preserve-public-frontier-defenses.receipt.json",
+      "command": [
+        "python",
+        "scripts/restore_public_frontier_dedup_guard.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "69e08f0f96ffc1266fc5f15c9da77b16df57f45e791fe8f252bb84fe18c33d89",
+      "resolution": {
+        "reason": "The first patch script used the interpreter variable in its test-file anchor assertion and stopped before changing the test/benchmark call sites. A corrected idempotent patch was then applied, and the focused suite passed with the new public dedup regression plus runtime-path parity.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T132440415449+0000_p11-test-public-and-runtime-frontier-defenses.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:26:15+00:00"
+    },
+    {
+      "id": "CHECKPOINT-20261026T132733507891+0000_p11-egenbrain-reassembly-audit-final",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Savepoint refresh failed after a checked command.",
+      "evidence": "logs/executions/P11/20261026T132733507891+0000_p11-egenbrain-reassembly-audit-final.receipt.json",
+      "stderr": "Traceback (most recent call last):\n  File \"/mnt/data/FulleGenBrain_work/FulleGenBrain_f4_v0/scripts/savepoint.py\", line 135, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/mnt/data/FulleGenBrain_work/FulleGenBrain_f4_v0/scripts/savepoint.py\", line 83, in main\n    shutil.copytree(ROOT, temp, ignore=shutil.ignore_patterns(\"__pycache__\", \".pytest_cache\", \"*.pyc\", \".coverage\"))\n    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/shutil.py\", line 593, in copytree\n    return _copytree(entries=entries, src=src, dst=dst, symlinks=symlinks,\n                     ignore=ignore, copy_function=copy_function,\n                     ignore_dangling_symlinks=ignore_dangling_symlinks,\n                     dirs_exist_ok=dirs_exist_ok)\n  File \"/usr/lib/python3.13/shutil.py\", line 491, in _copytree\n    os.makedirs(dst, exist_ok=dirs_exist_ok)\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen os>\", line 228, in makedirs\nFileExistsError: [Errno 17] File exists: '/mnt/data/FulleGenBrain_work/sav_FulleGenBrain_f4_v0/.tmp_P11_20261026T132738+0000'\n",
+      "resolution": {
+        "reason": "A timestamp collision in an older savepoint implementation caused a transient mkdir failure while another snapshot used the same second-resolution name. The savepoint creator now reserves unique temp directories atomically with microsecond/UUID names. Subsequent full-suite and restore-smoke receipts pass, and the current latest snapshot restores all manifested files without hash errors.",
+        "successful_retest_receipts": [
+          "logs/executions/P11/20261026T132757516678+0000_p11-final-integrated-suite-after-frontier-guard-and-mesh-smoke.receipt.json",
+          "logs/executions/P11/20261026T132956432130+0000_p11-verify-latest-savepoint-and-restore-smoke.receipt.json"
+        ],
+        "historical_failure_preserved": true
+      },
+      "resolved_at": "2026-10-26T13:30:28+00:00"
+    },
+    {
+      "id": "EXEC-20261026T135753269340+0000_p11-validate-evidence-close-open-p12",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P11: p11-validate-evidence-close-open-p12",
+      "evidence": "logs/executions/P11/20261026T135753269340+0000_p11-validate-evidence-close-open-p12.receipt.json",
+      "command": [
+        "python",
+        "scripts/close_p11_open_p12.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "0185e6d0be639531d5586b399facb1abc9213a8a2b7a079bb131a60483263a49",
+      "resolution": "The gate expected top-level part01_matches_manifest/part02_found booleans, while the canonical fragment audit stores part01.matches_manifest and part02.exists_at_expected_path. Updated the closure script to the actual versioned schema; no source bytes or audit findings were modified.",
+      "resolution_evidence": [
+        "logs/executions/P11/20261026T135810914805+0000_p11-inspect-fragment-audit-schema-after-close-gate-failure.receipt.json",
+        "logs/executions/P11/20261026T135840419908+0000_p11-fix-close-gate-to-source-audit-schema.receipt.json",
+        "spec/evidence/eGenBrain_v4_fragment_availability.json",
+        "scripts/close_p11_open_p12.py"
+      ],
+      "resolution_validation": "Schema inspection and the gate-fix script both completed with checked-run exit code 0; the closure script will be rerun against the corrected schema."
+    },
+    {
+      "id": "EXEC-20261026T140956870392+0000_p12-validate-documentation-license-and-report-templates",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-validate-documentation-license-and-report-templates",
+      "evidence": "logs/executions/P12/20261026T140956870392+0000_p12-validate-documentation-license-and-report-templates.receipt.json",
+      "command": [
+        "python",
+        "scripts/validate_p12_documents.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "8ac9c86a687d34e673630c11dfe612084f4550adad07c3cd40f3cb9b51a99577",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:15:02+00:00",
+        "cause": "Validation harness/report-template check exposed heading normalization and validator syntax issues; corrected the validator and normalized all P00-P11 reports to the required nine-section French structure.",
+        "retest_receipt": "logs/executions/P12/20261026T141347422326+0000_p12-document-license-report-validation-green.receipt.json",
+        "retest_status": "PASS",
+        "retest_exit_code": 0
+      }
+    },
+    {
+      "id": "EXEC-20261026T141154840200+0000_p12-revalidate-report-template-and-license",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-revalidate-report-template-and-license",
+      "evidence": "logs/executions/P12/20261026T141154840200+0000_p12-revalidate-report-template-and-license.receipt.json",
+      "command": [
+        "python",
+        "scripts/validate_p12_documents.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "9791ff5a45e1b8a18f17db70f81609f65d436f9d2dd7168badad36c5b2b81eab",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:15:02+00:00",
+        "cause": "Validation harness/report-template check exposed heading normalization and validator syntax issues; corrected the validator and normalized all P00-P11 reports to the required nine-section French structure.",
+        "retest_receipt": "logs/executions/P12/20261026T141347422326+0000_p12-document-license-report-validation-green.receipt.json",
+        "retest_status": "PASS",
+        "retest_exit_code": 0
+      }
+    },
+    {
+      "id": "EXEC-20261026T141246081212+0000_p12-revalidate-report-template-and-license-after-fix",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-revalidate-report-template-and-license-after-fix",
+      "evidence": "logs/executions/P12/20261026T141246081212+0000_p12-revalidate-report-template-and-license-after-fix.receipt.json",
+      "command": [
+        "python",
+        "scripts/validate_p12_documents.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "845ea46c8bae34b4b1e5c8b5745b477d52d2525e1dfd842dfa508364be3d992e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:15:02+00:00",
+        "cause": "Validation harness/report-template check exposed heading normalization and validator syntax issues; corrected the validator and normalized all P00-P11 reports to the required nine-section French structure.",
+        "retest_receipt": "logs/executions/P12/20261026T141347422326+0000_p12-document-license-report-validation-green.receipt.json",
+        "retest_status": "PASS",
+        "retest_exit_code": 0
+      }
+    },
+    {
+      "id": "EXEC-20261026T141305759344+0000_p12-fix-command-heading-normalization",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-fix-command-heading-normalization",
+      "evidence": "logs/executions/P12/20261026T141305759344+0000_p12-fix-command-heading-normalization.receipt.json",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "scripts/validate_p12_documents.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "04011893e4123b4ff41254b7233563219152da05de8386ad3d1eec334a9656eb",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:15:02+00:00",
+        "cause": "Validation harness/report-template check exposed heading normalization and validator syntax issues; corrected the validator and normalized all P00-P11 reports to the required nine-section French structure.",
+        "retest_receipt": "logs/executions/P12/20261026T141347422326+0000_p12-document-license-report-validation-green.receipt.json",
+        "retest_status": "PASS",
+        "retest_exit_code": 0
+      }
+    },
+    {
+      "id": "INCIDENT-P12-CLI-SMOKE-WINDOW-20261026",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "CLI documented-example smoke test exceeded the enclosing execution window before a run_checked receipt was emitted; split into bounded groups for reproducible verification.",
+      "evidence": "logs/executions/P12/p12-cli-smoke-interruption.json",
+      "command": [
+        "python",
+        "scripts/run_checked.py",
+        "--label",
+        "p12-cli-documentation-smoke-final",
+        "--kind",
+        "no_model",
+        "--",
+        "python",
+        "scripts/check_cli_documented_examples.py"
+      ],
+      "exit_code": null,
+      "stdout_sha256": null,
+      "stderr_sha256": null,
+      "resolution": {
+        "resolved_at": "2026-10-26T14:20:09+00:00",
+        "cause": "The unsegmented smoke test exceeded the outer tool window before a receipt was emitted. The exact 18 documented commands were rerun in four bounded groups, each with an independent run_checked PASS receipt and successful command-level status validation.",
+        "retest_receipts": [
+          "logs/executions/P12/20261026T141801259016+0000_p12-cli-examples-core-group.receipt.json",
+          "logs/executions/P12/20261026T141824583393+0000_p12-cli-examples-run-and-synthesis-group.receipt.json",
+          "logs/executions/P12/20261026T141848880828+0000_p12-cli-examples-memory-group.receipt.json",
+          "logs/executions/P12/20261026T141941724084+0000_p12-cli-examples-service-group.receipt.json"
+        ],
+        "retest_command_count": 18,
+        "retest_status": "PASS"
+      }
+    },
+    {
+      "id": "EXEC-20261026T142243978792+0000_p12-build-and-self-verify-candidate-archives",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-build-and-self-verify-candidate-archives",
+      "evidence": "logs/executions/P12/20261026T142243978792+0000_p12-build-and-self-verify-candidate-archives.receipt.json",
+      "command": [
+        "python",
+        "scripts/package_deliverables.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "be695e5a48d32f98ce9a22ca6239ceb6425f9fade26927666f4be3e3394a4616",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:24:43+00:00",
+        "cause": "Removed repeated generated-file entries from the follow-up archive list. Packager compilation and an independent collision/required-path preflight pass. The subsequent release build is required to prove actual package integrity.",
+        "proof_receipts": [
+          "logs/executions/P12/20261026T142316111101+0000_p12-recompile-packager-after-list-conflict-fix.receipt.json",
+          "logs/executions/P12/20261026T142409858918+0000_p12-verify-packager-input-collision-fix.receipt.json"
+        ],
+        "final_package_retest_required": true
+      }
+    },
+    {
+      "id": "EXEC-20261026T142331157952+0000_p12-build-and-self-verify-candidate-archives-retest",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-build-and-self-verify-candidate-archives-retest",
+      "evidence": "logs/executions/P12/20261026T142331157952+0000_p12-build-and-self-verify-candidate-archives-retest.receipt.json",
+      "command": [
+        "python",
+        "scripts/package_deliverables.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "2077a86770d4279517884641adc8d8eb520e5ff056a1bf8fa67b63f3cf341320",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:24:43+00:00",
+        "cause": "This attempt was deliberately blocked by the packager fail-closed rule because the preceding path-list conflict entry remained open. That behavior is correct. The underlying file-list conflict is fixed and independently checked; the next normal package run must pass with no --allow-open-errors.",
+        "proof_receipts": [
+          "logs/executions/P12/20261026T142316111101+0000_p12-recompile-packager-after-list-conflict-fix.receipt.json",
+          "logs/executions/P12/20261026T142409858918+0000_p12-verify-packager-input-collision-fix.receipt.json"
+        ],
+        "final_package_retest_required": true
+      }
+    },
+    {
+      "id": "EXEC-20261026T143551530831+0000_p12-cli-examples-services-final",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P12: p12-cli-examples-services-final",
+      "evidence": "logs/executions/P12/20261026T143551530831+0000_p12-cli-examples-services-final.receipt.json",
+      "command": [
+        "python",
+        "scripts/check_cli_examples_bounded.py",
+        "--group",
+        "services",
+        "--timeout-per-command",
+        "5"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "b6688d0182653176a8638c39cbf2ef3e7c6e992f94c32e873c7965666096f7c6",
+      "resolution": {
+        "resolved_at": "2026-10-26T14:37:34+00:00",
+        "cause": "The initial per-command timeout of 5 seconds was below the observed startup/write duration of the observe example; no model/runtime defect was established by that timeout alone.",
+        "retest_receipt": "logs/executions/P12/20261026T143657450788+0000_p12-cli-examples-services-15s-retest.receipt.json",
+        "retest_status": "PASS",
+        "retest_exit_code": 0,
+        "retest_timeout_per_command_seconds": 15
+      }
+    },
+    {
+      "id": "EXEC-20261026T150726327606+0000_p13-prepare-release-evidence-and-package-policy",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P13: p13-prepare-release-evidence-and-package-policy",
+      "evidence": "logs/executions/P13/20261026T150726327606+0000_p13-prepare-release-evidence-and-package-policy.receipt.json",
+      "command": [
+        "python",
+        "scripts/prepare_p13_release_artifacts.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5d543a094635bbf280028782479ed393036cdcfa332f7291bb714f8875a10ee5",
+      "resolution": "The initial invocation failed due to a malformed multiline f-string in the release-artifact preparation script. The syntax was corrected; the controlled retest completed with exit code 0 and its checkpoint passed. The original failure receipt is retained unchanged.",
+      "resolution_evidence": "logs/executions/P13/20261026T151650459976+0000_p13-prepare-release-evidence-and-package-policy-retest.receipt.json",
+      "resolved_at": "2026-10-26T15:17:52+00:00"
+    },
+    {
+      "id": "EXEC-20261026T151828335814+0000_p13-compile-prepare-release-script",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P13: p13-compile-prepare-release-script",
+      "evidence": "logs/executions/P13/20261026T151828335814+0000_p13-compile-prepare-release-script.receipt.json",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "scripts/prepare_p13_release_artifacts.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "006a3dc4767c3eb8733d47b0212542a3a6d52c89d87420ba1e488851b67c1ed6",
+      "resolution": "The failed compile was caused by an extra closing parenthesis in the current release-preparation script. The current script and packager were recompiled successfully with exit code 0; the original failure receipt remains preserved.",
+      "resolved_at": "2026-10-26T15:21:30+00:00",
+      "resolution_evidence": "logs/executions/P13/20261026T152041615252+0000_p13-compile-prepare-release-script-retest2.receipt.json"
+    },
+    {
+      "id": "EXEC-20261026T152631306530+0000_p13-build-isolated-delivery-directory",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P13: p13-build-isolated-delivery-directory",
+      "evidence": "logs/executions/P13/20261026T152631306530+0000_p13-build-isolated-delivery-directory.receipt.json",
+      "command": [
+        "python",
+        "scripts/package_deliverables.py",
+        "--output-dir",
+        "/mnt/data/FulleGenBrain_work/final_delivery"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5bd4bfae865f2dce420871549306b9244d1203dee51b9dba56274a55baa344f5",
+      "resolution": "The candidate build was correctly blocked by the open error ledger at that time. P13 errors have now been reviewed and resolved against the subsequent successful clean-extraction receipt; the final packager is rerun only after the open-error count reaches zero.",
+      "resolution_evidence": [
+        "logs/executions/P13/20261026T173648246635+0000_p13-clean-extraction-after-sqlite-sidecar-race-fix.receipt.json",
+        "spec/evidence/P13_clean_extraction_validation.json"
+      ],
+      "resolution_validation": "The final controlled clean-extraction run completed with exit code 0: all three current ZIPs verified against internal manifests/hashes; 13 native CLI smoke commands PASS; GUI / and /api/health PASS; relocation and merge PASS; 264 tests and 174 subtests passed with ResourceWarning treated as an error. See the detached P13 validation JSON."
+    },
+    {
+      "id": "EXEC-20261026T153220918596+0000_p13-record-interrupted-clean-extraction-attempt",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "Checked command failed during phase P13: p13-record-interrupted-clean-extraction-attempt",
+      "evidence": "logs/executions/P13/20261026T153220918596+0000_p13-record-interrupted-clean-extraction-attempt.receipt.json",
+      "command": [
+        "python",
+        "scripts/record_p13_interrupted_extraction.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e656b8babd966fbbae8e43026afdc6cd1e024f0558d4275e93d7dacf1536b0df",
+      "resolution": "The helper refused to infer a timeout because the older progress log was incomplete/interleaved. This refusal is retained as history; a fresh per-run progress log later reached all_checks_pass and the checked command returned exit code 0.",
+      "resolution_evidence": [
+        "logs/executions/P13/20261026T173648246635+0000_p13-clean-extraction-after-sqlite-sidecar-race-fix.receipt.json",
+        "spec/evidence/P13_clean_extraction_validation.json"
+      ],
+      "resolution_validation": "The final controlled clean-extraction run completed with exit code 0: all three current ZIPs verified against internal manifests/hashes; 13 native CLI smoke commands PASS; GUI / and /api/health PASS; relocation and merge PASS; 264 tests and 174 subtests passed with ResourceWarning treated as an error. See the detached P13 validation JSON."
+    },
+    {
+      "id": "EXEC-P13-OUTER-TIMEOUT-final-clean-extraction-after-final-rebuild-20261026T1750",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "The outer shell execution timed out before run_checked could persist a receipt for the final post-rebuild clean-extraction attempt. The fresh progress log reaches integrated_suite_start, and the redirected pytest output contains 264 passed plus 174 subtests, but without a process exit/receipt this attempt is not counted as a PASS. The validation harness is being isolated from unrelated autoloaded pytest plugins before retest.",
+      "evidence": "logs/executions/P13/p13-final-clean-extraction-after-final-rebuild-correct-path.jsonl",
+      "command": [
+        "python3",
+        "scripts/run_checked.py",
+        "--label",
+        "p13-final-clean-extraction-after-final-rebuild-correct-path",
+        "--kind",
+        "model",
+        "--",
+        "python3",
+        "-u",
+        "scripts/p13_clean_extraction_validation.py",
+        "--deliverables-dir",
+        "/mnt/data/FulleGenBrain_f4_v0_release_work/deliverables",
+        "--source-archive",
+        "/mnt/data/source_orderX_0.zip"
+      ],
+      "exit_code": null,
+      "resolution": "The aggregate clean-extraction harness was interrupted after native runtime smoke checks and GUI health had passed; the integrated suite output from the extracted merged packages reported 264 passed and 174 subtests, and the same extracted-package suite was then rerun through run_checked with exit code 0 and checkpoint PASS.",
+      "resolution_evidence": [
+        "logs/executions/P13/p13-final-clean-extraction-after-file-backed-smoke-fix.jsonl",
+        "logs/executions/P13/20261026T181647653874+0000_p13-final-clean-extracted-integrated-suite-receipt.receipt.json",
+        "logs/executions/P13/clean-extraction-integrated-suite-20261026T181217-42045.stdout.txt"
+      ],
+      "resolution_validation": "PASS: final checked clean-extraction regression reports 264 tests passed and 174 subtests passed; ResourceWarning was treated as an error; post-test savepoint creation passed."
+    },
+    {
+      "id": "EXEC-P13-recovered-external-evidence-path-20261026T190939",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "P13 clean-extraction validation failed before running the model because the new external evidence directory was incorrectly forced to be relative to ROOT.",
+      "evidence": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/p13_validation.stderr.txt",
+      "command": "python scripts/p13_clean_extraction_validation.py --evidence-dir <external-directory>",
+      "resolution": "The validator now records evidence paths relative to the project only when they are inside ROOT, and records absolute paths for an external evidence directory. The fresh P13 report reached all_checks_pass, records 13 native smoke tests PASS, GUI health PASS, clean merge/relocation PASS, and 264 tests plus 174 subtests PASS.",
+      "opened_at": "2026-10-26T19:12:16+00:00",
+      "resolution_evidence": "spec/evidence/P13_clean_extraction_validation.json; /mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/retest_20261026T191256Z/progress.jsonl",
+      "resolved_at": "2026-10-26T19:16:56+00:00"
+    },
+    {
+      "id": "EXEC-P13-outer-wrapper-timeout-after-complete-report-20261026T191256",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "The outer shell wrapper timed out despite the P13 validator persisting its complete final report.",
+      "evidence": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/retest_20261026T191256Z/driver.stdout.txt",
+      "command": "timeout ... scripts/p13_clean_extraction_validation.py --evidence-dir <external-directory>",
+      "resolution": "The persisted P13 report is PASS and ends with stage all_checks_pass; all 13 native smoke records are PASS/SUCCESS, GUI health is PASS, archive CRC/internal manifests are PASS, merge conflicts are empty, relocation is PASS, and integrated pytest reports exit_code 0 with 264 tests and 174 subtests. No P13 validator or test process remained. The wrapper did not report its own return code; this incident is not counted as a separate command-level PASS.",
+      "resolution_evidence": "spec/evidence/P13_clean_extraction_validation.json; /mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/retest_20261026T191256Z/progress.jsonl; /mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/retest_20261026T191256Z/subprocess/clean-extraction-integrated-suite-20261026T191320-46220.stdout.txt",
+      "opened_at": "2026-10-26T19:13:41+00:00",
+      "resolved_at": "2026-10-26T19:16:56+00:00"
+    },
+    {
+      "id": "EXEC-P13-OUTER-TIMEOUT-final-rebuilt-packages-20261026T1940-composed-validation",
+      "severity": "ERROR",
+      "status": "RESOLVED",
+      "description": "The aggregate P13 clean-extraction invocation was cut off by the outer shell timeout before run_checked could produce a receipt. The attempt is not counted as a completed aggregate pass.",
+      "evidence": "logs/executions/P13/clean-extraction-20261026T194040-47714.jsonl",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "scripts/run_checked.py",
+        "--label",
+        "recovered-final-clean-extraction-after-final-build",
+        "--kind",
+        "model",
+        "--",
+        "/opt/pyvenv/bin/python",
+        "scripts/p13_clean_extraction_validation.py",
+        "--deliverables-dir",
+        "/mnt/data/FulleGenBrain_f4_v0_recovered/deliverables",
+        "--source-archive",
+        "/mnt/data/source_orderX_0.zip"
+      ],
+      "exit_code": null,
+      "resolution": "The validation was decomposed into independently verifiable steps against this package generation: all three archives passed manifest/hash/CRC checks; the 13 native CLI smoke commands passed; GUI health passed on loopback; merge and path relocation passed; then pytest was rerun directly against the exact extracted merged project and exited 0 with 264 tests plus 174 subtests. The aggregate wrapper itself remains recorded as interrupted, not successful.",
+      "resolution_evidence": [
+        "logs/executions/P13/clean-extraction-20261026T194040-47714.jsonl",
+        "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/p13_extracted_pytest_verbose_diagnostic.txt",
+        "deliverables/release_manifest.json"
+      ],
+      "resolution_validation": "PASS_COMPOSED: archive hashes/CRC PASS; native smoke=13 PASS; GUI PASS; merge conflicts=0; relocation PASS; exact extracted merged-project suite=264 passed, 174 subtests passed, exit 0 in 27.45s with ResourceWarning treated as error.",
+      "opened_at": "2026-10-26T19:40:40+00:00",
+      "resolved_at": "2026-10-26T19:48:39+00:00"
+    }
+  ],
+  "updated_at": "2026-10-26T19:48:39+00:00",
+  "last_updated": "2026-10-26T20:28:00+00:00"
+}

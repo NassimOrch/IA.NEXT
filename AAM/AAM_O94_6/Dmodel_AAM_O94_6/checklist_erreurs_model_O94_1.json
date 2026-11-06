@@ -1,0 +1,332 @@
+{
+  "schema": "aam-o94-1-model-error-ledger-v1",
+  "title": "Registre des anomalies modèle — AAM O94_1",
+  "parent_ledger": "checklist_erreurs_model.json",
+  "parent_sha256": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+  "updated_utc": "2026-10-19T09:36:25Z",
+  "updated_for": "P7 retest: concurrent JSONL journal integrity repair passed",
+  "items": [
+    {
+      "incident_id": "O941-M001",
+      "phase": "P2",
+      "severity": "SCOPE_LIMIT",
+      "status": "OPEN_WITH_BOUNDARY",
+      "summary": "La capsule boîte noire est une table I/O exacte entraînée sur train; elle ne reconstruit pas une méthode générale sur entrées inédites.",
+      "impact": "Ne pas affirmer un clonage algorithmique universel; les entrées inconnues sont UNRESOLVED.",
+      "evidence": [
+        "aam_o93/blackbox.py",
+        "tests/test_o941_blackbox.py",
+        "formalisme_O94_1.tex"
+      ],
+      "resolution_criteria": [
+        "Implémenter acquisition/composition d’une règle au-delà du lookup",
+        "Tester sur holdout et entrées générées indépendamment",
+        "Conserver une mesure et une portée explicites"
+      ]
+    },
+    {
+      "incident_id": "O941-M002",
+      "phase": "P4",
+      "severity": "CAPABILITY_GAP",
+      "status": "OPEN",
+      "summary": "L’observation active livrée exécute un protocole de commande I/O JSON/texte; l’observation générique d’une GUI, d’un processus opaque, d’un bus capteur, d’un flux vidéo ou d’un système de bases de données n’est pas implémentée par cet adaptateur.",
+      "impact": "Ne pas présenter la seule capture I/O comme observation universelle des objets en action.",
+      "evidence": [
+        "aam_o93/blackbox.py",
+        "formalisme_O94_1.tex"
+      ],
+      "resolution_criteria": [
+        "Définir et intégrer des adaptateurs typés distincts",
+        "Établir l’autorisation / sandbox / protocole d’acquisition",
+        "Tester chaque modalité dans un environnement adapté"
+      ]
+    },
+    {
+      "incident_id": "O941-M003",
+      "phase": "P3",
+      "severity": "RUNTIME_VALIDATION_GAP",
+      "status": "OPEN_UNTIL_REAL_PROVIDER_TEST",
+      "summary": "Les tests automatisés du registre LLM utilisent un endpoint simulé; ils ne valident pas un serveur réel, un répertoire réel de poids, ni un entraînement LoRA concret.",
+      "impact": "L’enregistrement du modèle est REGISTERED_NOT_RUNTIME_PROVED jusqu’au test de la configuration choisie.",
+      "evidence": [
+        "aam_o93/model_integration.py",
+        "tests/test_o941_model_integration.py",
+        "formalisme_O94_1.tex"
+      ],
+      "resolution_criteria": [
+        "Tester un endpoint local ou poids locaux autorisés",
+        "Conserver versions/dépendances et paramètres d’exécution",
+        "Évaluer sorties / entraînement sur données tenues à l’écart"
+      ]
+    },
+    {
+      "incident_id": "O941-M004",
+      "phase": "P1",
+      "severity": "ARCHITECTURE_REFACTOR_SCOPE",
+      "status": "OPEN_WITH_BOUNDARY",
+      "summary": "Le registre de briques normalise de nouveaux blocs mais tous les sous-systèmes historiques ne sont pas encore réécrits exclusivement en compositions de briques.",
+      "impact": "Le graphe des compositions est un contrat d’architecture et non la preuve d’une refonte totale du code.",
+      "evidence": [
+        "aam_o93/base_blocks.py",
+        "tests/test_o94_base_blocks.py",
+        "formalisme_O94_1.tex"
+      ],
+      "resolution_criteria": [
+        "Poursuivre extraction/refactorisation par composants",
+        "Ajouter preuves et tests de composition à chaque promotion",
+        "Ne supprimer aucune méthode historique avant équivalence testée"
+      ]
+    },
+    {
+      "incident_id": "O941-RUN-P1_python_compile",
+      "phase": "P1",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P1 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P1_python_compile.json",
+        "logs/O94_1/P1_python_compile.stdout.txt",
+        "logs/O94_1/P1_python_compile.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:25:08Z",
+      "resolution_evidence": [
+        "logs/O94_1/P1_python_compile_retest.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P3_model_integration_tests",
+      "phase": "P3",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P3 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P3_model_integration_tests.json",
+        "logs/O94_1/P3_model_integration_tests.stdout.txt",
+        "logs/O94_1/P3_model_integration_tests.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:32:21Z",
+      "resolution_evidence": [
+        "logs/O94_1/P3_model_integration_tests_final_retest.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P3_model_integration_tests_retest",
+      "phase": "P3",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P3 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P3_model_integration_tests_retest.json",
+        "logs/O94_1/P3_model_integration_tests_retest.stdout.txt",
+        "logs/O94_1/P3_model_integration_tests_retest.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:32:21Z",
+      "resolution_evidence": [
+        "logs/O94_1/P3_model_integration_tests_final_retest.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P4_runtime_cli_baseblocks_smoke",
+      "phase": "P4",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P4 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P4_runtime_cli_baseblocks_smoke.json",
+        "logs/O94_1/P4_runtime_cli_baseblocks_smoke.stdout.txt",
+        "logs/O94_1/P4_runtime_cli_baseblocks_smoke.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:35:32Z",
+      "resolution_evidence": [
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P4_runtime_cli_baseblocks_retest",
+      "phase": "P4",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P4 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest.json",
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest.stdout.txt",
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:35:32Z",
+      "resolution_evidence": [
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P5_regression_foundation_01",
+      "phase": "P5",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P5 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P5_regression_foundation_01.json",
+        "logs/O94_1/P5_regression_foundation_01.stdout.txt",
+        "logs/O94_1/P5_regression_foundation_01.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:39:59Z",
+      "resolution_evidence": [
+        "logs/O94_1/P5_regression_foundation_01_retest.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P5_integrity_compare_run",
+      "phase": "P5",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P5 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P5_integrity_compare_run.json",
+        "logs/O94_1/P5_integrity_compare_run.stdout.txt",
+        "logs/O94_1/P5_integrity_compare_run.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:48:38Z",
+      "resolution_evidence": [
+        "logs/O94_1/P5_integrity_compare_retest.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P5_finalize_evidence_and_lab",
+      "phase": "P5",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P5 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P5_finalize_evidence_and_lab.json",
+        "logs/O94_1/P5_finalize_evidence_and_lab.stdout.txt",
+        "logs/O94_1/P5_finalize_evidence_and_lab.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:54:30Z",
+      "resolution_evidence": [
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest3.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P5_finalize_evidence_and_lab_retest",
+      "phase": "P5",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P5 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest.json",
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest.stdout.txt",
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:54:30Z",
+      "resolution_evidence": [
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest3.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-RUN-P5_finalize_evidence_and_lab_retest2",
+      "phase": "P5",
+      "severity": "UNCLASSIFIED_EXECUTION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande de phase P5 a fini avec le code 1.",
+      "impact": "La phase reste ouverte; le résultat ne peut pas compter comme PASS.",
+      "evidence": [
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest2.json",
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest2.stdout.txt",
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest2.stderr.txt"
+      ],
+      "resolution_criteria": [
+        "Classer échec modèle vs environnement",
+        "Corriger si nécessaire",
+        "Relancer une commande de retest avec préflight et reçu dédié"
+      ],
+      "resolved_utc": "2026-10-19T08:54:30Z",
+      "resolution_evidence": [
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest3.json"
+      ],
+      "resolution_summary": "La même commande a été relancée sous le runner contrôlé et a rendu un code de sortie nul."
+    },
+    {
+      "incident_id": "O941-M015",
+      "phase": "P7",
+      "category": "concurrent_journal_integrity",
+      "severity": "JSONL_HASH_CHAIN_APPEND_RACE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Un test Tk/runtime a reproduit une exception « journal tail cannot be parsed » pendant qu’une tâche d’entraînement et la boucle autonome écrivaient simultanément le journal O92. HashChainJournal sérialisait ni la lecture du dernier hash, ni l’allocation de séquence, ni l’ajout complet de ligne.",
+      "impact": "Une concurrence pouvait corrompre le journal JSONL ou casser la chaîne causale en mode UI/autonomie et tâche simultanée.",
+      "evidence": [
+        "logs/O94_1/P7_regression_receipt.json",
+        "tests/test_o941_standalone_startup.py"
+      ],
+      "remediation": "Protéger avec RLock tout le cycle last-hash → sequence → append et ajouter un test concurrent à payload large; retester l’UI/training et le journal 120 événements.",
+      "opened_utc": "2026-10-19T09:33:32Z",
+      "resolved_utc": "2026-10-19T09:36:25Z",
+      "resolution_evidence": [
+        "logs/O94_1/P7_regression_final_receipt.json",
+        "tests/test_o941_standalone_startup.py"
+      ],
+      "resolution_summary": "Après ajout d’un RLock couvrant l’ensemble last-hash/sequence/append/count/verify, les 27 tests ciblés passent. Le test UI+entraînement précédemment en échec passe et le test de concurrence valide 120 événements et une chaîne intègre."
+    }
+  ]
+}

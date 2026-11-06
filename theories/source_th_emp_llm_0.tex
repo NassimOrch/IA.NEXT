@@ -1,0 +1,859 @@
+\documentclass[11pt,a4paper]{article}
+
+% =====================================================================
+% Source théorique consolidée : théorie des empreintes et LLM
+% Version 0.1 — document autonome, révisable et testable
+% =====================================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{mathrsfs}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\geometry{margin=2.45cm}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  citecolor=blue!45!black,
+  urlcolor=blue!55!black,
+  pdftitle={Théorie des empreintes et architecture informationnelle des LLM},
+  pdfauthor={Document de travail — formalisation consolidée}
+}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\emergencystretch}{2em}
+
+% ----------------------------- Environnements -------------------------
+\newtheorem{definition}{Définition}[section]
+\newtheorem{hypothesis}[definition]{Hypothèse}
+\newtheorem{assumption}[definition]{Postulat de modélisation}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{corollary}[definition]{Corollaire}
+\newtheorem{conjecture}[definition]{Conjecture}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remarque}
+\newtheorem{example}[definition]{Exemple}
+
+% ----------------------------- Notations --------------------------------
+\newcommand{\X}{\mathcal X}
+\newcommand{\D}{\mathcal D}
+\newcommand{\V}{\mathcal V}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Pctx}{\mathcal P}
+\newcommand{\F}{\mathcal F}
+\newcommand{\Lam}{\Lambda}
+\newcommand{\Hspace}{\mathcal H}
+\newcommand{\Ispace}{\mathcal I}
+\newcommand{\Lspace}{\mathcal L}
+\newcommand{\Qspace}{\mathcal Q}
+\newcommand{\Rel}{\mathcal R}
+\newcommand{\Espace}{\mathcal E}
+\newcommand{\Cspace}{\mathcal C}
+\newcommand{\Mspace}{\mathcal M}
+\newcommand{\Nspace}{\mathcal N}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\Emp}{\mathsf I}
+\newcommand{\Obs}{\mathsf O}
+\newcommand{\Quot}{\mathsf Q}
+\newcommand{\Mem}{\mathsf M}
+\newcommand{\Pred}{\mathsf P}
+\newcommand{\Gen}{\mathsf G}
+\newcommand{\Search}{\mathsf S}
+\newcommand{\Trans}{\mathsf T}
+\newcommand{\Thresh}{\Theta}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\Overlap}{\operatorname{Overlap}}
+\newcommand{\softmax}{\operatorname{softmax}}
+\newcommand{\Id}{\operatorname{Id}}
+\newcommand{\Prob}{\mathbb P}
+\newcommand{\E}{\mathbb E}
+\newcommand{\1}{\mathbf 1}
+
+\title{\textbf{Théorie des empreintes et architecture informationnelle des modèles de langage}\\[0.35em]
+\large Formalisme consolidé : observation, empreintes, quotients, résolution, maillage, mémoire, transport et génération}
+\author{Source théorique de travail — version 0.1}
+\date{21 octobre 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Ce document consolide deux développements complémentaires : (i) une théorie observationnelle des empreintes informationnelles et (ii) une proposition d'architecture de modèle de langage construite à partir de cette théorie. Il organise les notions selon une dépendance logique explicite, fixe les notations, distingue les résultats mathématiques des choix d'architecture et des hypothèses empiriques, et signale les points qui nécessitent une définition opérationnelle avant toute implémentation.
+
+Le noyau formel est le suivant. Un domaine $\X$ est observé par une famille de sondes dans un contexte donné. L'ensemble des réponses définit une empreinte. L'égalité des empreintes induit une relation d'indiscernabilité, ses fibres et un quotient observationnel. Une famille emboîtée de sondes organise les résolutions et induit un raffinement monotone des partitions. Sous des hypothèses supplémentaires, un seuil d'indiscernabilité induit une géométrie ultramétrique, généralement une pseudoultramétrique tant que la séparation de tous les objets n'est pas garantie.
+
+Appliqué à un modèle de langage, ce cadre conduit à interpréter les activations, états latents et poids d'attention comme des observables ou composantes de descriptions internes, et non comme des concepts intrinsèquement localisés. Les empreintes peuvent être représentées par des graphes relationnels ; leur recouvrement forme un maillage. La mémoire explicite, le transport entre niveaux, la recherche, la prédiction et la génération sont ensuite définis comme modules distincts. L'ensemble constitue une architecture testable, mais sa compatibilité formelle avec la théorie ne prouve pas que les mécanismes décrits soient effectivement ceux des LLM existants.
+\end{abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+% =====================================================================
+\section{Objet, portée et statut épistémique}
+% =====================================================================
+
+\subsection{Objectif}
+Le but est d'établir une source canonique dans laquelle les concepts communs aux deux documents soient assemblés sans les confondre ni leur attribuer une validation empirique qu'ils n'ont pas encore reçue. Le document couvre le cadre observationnel général, son interprétation pour les LLM, une architecture possible, un protocole expérimental et les principales conditions de falsification.
+
+La chaîne conceptuelle directrice est :
+\[
+\boxed{\begin{gathered}
+\text{Domaine}\;\longrightarrow\;\text{Observation}\;\longrightarrow\;\text{Empreinte},\\[0.3em]
+\text{Indiscernabilité}\;\longrightarrow\;\text{Fibre/quotient}\;\longrightarrow\;\text{Résolution},\\[0.3em]
+\text{Structure relationnelle}\;\longrightarrow\;\text{Maillage/mémoire}\;\longrightarrow\;\text{Transport/recherche},\\[0.3em]
+\text{Prédiction}\;\longrightarrow\;\text{Génération}.
+\end{gathered}}
+\]
+Cette chaîne est un schéma d'organisation théorique : elle ne signifie pas que chacun de ses modules doive être implémenté comme une couche séquentielle distincte.
+
+\subsection{Quatre statuts à ne pas confondre}
+\begin{enumerate}[label=\arabic*.]
+  \item \textbf{Définition :} choix qui fixe un objet mathématique ou son sens dans le présent cadre.
+  \item \textbf{Résultat formel :} propriété déduite des définitions et des hypothèses explicitement indiquées.
+  \item \textbf{Hypothèse architecturale :} décision de conception proposée pour rendre les concepts calculables dans un LLM.
+  \item \textbf{Hypothèse empirique :} proposition sur le comportement réel d'un modèle, à vérifier sur des données et par des interventions.
+\end{enumerate}
+
+\begin{remark}
+Une définition cohérente, une proposition démontrée ou une architecture qui respecte les contraintes de la théorie ne démontrent pas que la théorie constitue une description fidèle des représentations internes d'un LLM. Cette validation exige des mesures, des contrôles et des résultats reproductibles.
+\end{remark}
+
+\subsection{Principe méthodologique}
+On maintient la distinction :
+\[
+\boxed{\text{unité interne}\neq\text{empreinte}\neq\text{concept}\neq\text{connaissance}.}
+\]
+Une unité peut contribuer à plusieurs empreintes. Cette participation commune ne suffit pas à établir que les empreintes, les concepts ou les connaissances correspondants sont identiques.
+
+% =====================================================================
+\section{Domaine, contexte et système d'observation}
+% =====================================================================
+
+\subsection{Domaine informationnel}
+\begin{definition}[Domaine d'objets]
+On note $\X$ un ensemble d'objets, d'états, d'événements, de séquences ou de configurations susceptibles d'être observés. Le type précis de ses éléments dépend de l'application.
+\end{definition}
+
+Pour un LLM minimal, on peut prendre un vocabulaire fini $\V$ et :
+\[
+\X=\V^*,\qquad x=(t_1,\ldots,t_n),\quad t_i\in\V,
+\]
+où $\V^*$ désigne l'ensemble des séquences finies de tokens. Des préfixes, conversations, états latents et paires (requête, état mémoire) peuvent également être inclus dans un domaine élargi.
+
+\begin{definition}[Contexte observationnel]
+L'ensemble $\Pctx$ contient les contextes d'observation. Un contexte $P$ peut encoder la tâche, la position, l'historique, les conditions expérimentales, l'état de mémoire ou les contraintes d'accès à l'information. Il est conceptuellement distinct de l'objet observé $x$.
+\end{definition}
+
+\subsection{Sondes et réponses observables}
+\begin{definition}[Sonde]
+Une sonde $f$ est une procédure d'observation qui associe à un contexte et à un objet une réponse dans un espace de sortie $Y_f$ :
+\[
+f:\Pctx\times\X\to Y_f.
+\]
+Les espaces $Y_f$ ne doivent pas être obligatoirement égaux à $\R$ ; une sonde peut produire un scalaire, un vecteur, une étiquette ou une structure finie.
+\end{definition}
+
+Soit $\F$ une famille de sondes et $\Phi$ un fonctionnel d'observation commun. Pour faciliter les écritures, on utilise :
+\[
+\Phi:\Pctx\times\X\times\F\to\bigsqcup_{f\in\F}Y_f,
+\]
+avec la convention que $\Phi(P,x,f)\in Y_f$. Cette écriture typée évite de supposer que toutes les sondes partagent nécessairement le même espace de sortie.
+
+\begin{definition}[Système d'observation]
+Un système d'observation est un quadruplet
+\[
+\mathscr O=(P,\Phi,\F,\Lam),
+\]
+où $P$ est le contexte considéré, $\Phi$ le mécanisme d'observation, $\F$ la famille de sondes et $\Lam$ l'échelle de résolution.
+\end{definition}
+
+\subsection{Univers et limites de l'observateur}
+\begin{assumption}[Domaine informationnel général]
+Pour les besoins du modèle, un domaine large $\mathcal U$ peut être traité comme un ensemble de phénomènes dont certaines propriétés produisent des traces accessibles à des observateurs. On ne postule pas que l'Univers physique soit littéralement une mémoire.
+\end{assumption}
+
+Un observateur $O$ n'accède généralement qu'à une famille $\F_O\subseteq\F$. Son information est donc relative aux sondes disponibles. Pour plusieurs observateurs $O_1,\ldots,O_m$, la famille réunie est $\F_{\mathrm{coll}}=\bigcup_i\F_{O_i}$. Si les familles sont complémentaires, le système collectif peut distinguer des propriétés inaccessibles à chacun des observateurs isolés. Ce résultat est conditionnel à la complémentarité effective des sondes ; il ne constitue pas une loi universelle sur les groupes humains.
+
+% =====================================================================
+\section{Échelle de résolution et empreinte observationnelle}
+% =====================================================================
+
+\subsection{Filtration des sondes}
+\begin{definition}[Échelle de résolution]
+Une échelle de résolution est un ensemble partiellement ordonné $(\Lam,\preceq)$ accompagné de familles de sondes $\F_\lambda\subseteq\F$ telles que :
+\[
+\lambda\preceq\mu\quad\Longrightarrow\quad \F_\lambda\subseteq\F_\mu.
+\]
+Le niveau $\mu$ rend donc disponibles au moins les observations accessibles au niveau $\lambda$.
+\end{definition}
+
+Dans les résultats sur les seuils, on supposera explicitement que l'échelle est totalement ordonnée. L'ordre seul n'impose pas une unité physique : on peut lui associer une application strictement croissante $\iota:\Lam\to\R_+$ servant uniquement à numéroter les niveaux.
+
+\subsection{Définition de l'empreinte}
+Pour chaque $\lambda$, le produit des sorties des sondes est noté $Y_\lambda=\prod_{f\in\F_\lambda}Y_f$.
+\begin{definition}[Empreinte observationnelle]
+Pour un contexte $P$, un objet $x\in\X$ et une résolution $\lambda\in\Lam$, l'empreinte observationnelle est l'application
+\[
+\Emp^P_\lambda:\X\to Y_\lambda,
+\qquad
+\Emp^P_\lambda(x)=\bigl(\Phi(P,x,f)\bigr)_{f\in\F_\lambda}.
+\]
+Le contexte $P$ peut être omis de la notation lorsqu'il reste fixe.
+\end{definition}
+
+Une empreinte est donc une description relative à un ensemble de sondes, à leur granularité, au contexte et au protocole retenu ; elle n'est pas, par définition, une description exhaustive ou absolue de l'objet.
+
+\subsection{Restriction entre résolutions}
+Pour $\lambda\preceq\mu$, la restriction
+\[
+r_{\mu\to\lambda}:Y_\mu\to Y_\lambda
+\]
+est la projection qui oublie les coordonnées des sondes présentes dans $\F_\mu$ mais absentes de $\F_\lambda$. La cohérence d'une famille d'empreintes emboîtées s'écrit :
+\[
+\boxed{\Emp_\lambda=r_{\mu\to\lambda}\circ\Emp_\mu.}
+\]
+Cette égalité est une conséquence directe de la construction lorsque les empreintes sont des tuples de réponses aux sondes incluses. Pour une architecture apprise, elle devient une contrainte à garantir ou à approximer, et non une propriété automatique du réseau.
+
+\begin{remark}[Résolution et précision numérique]
+La résolution signifie ici l'accès à des familles d'observations plus discriminantes. Elle ne se confond ni avec la dimension d'un vecteur, ni avec sa norme, ni avec le nombre de paramètres du réseau. En pratique, une représentation continue exige un protocole de comparaison numérique ou de quantification pour rendre l'indiscernabilité opérationnelle.
+\end{remark}
+
+% =====================================================================
+\section{Indiscernabilité, fibres et quotient}
+% =====================================================================
+
+\subsection{Relation d'indiscernabilité}
+\begin{definition}[Indiscernabilité à une résolution]
+Pour $x,y\in\X$, on définit :
+\[
+x\sim_{P,\lambda}y
+\quad\Longleftrightarrow\quad
+\Emp^P_\lambda(x)=\Emp^P_\lambda(y).
+\]
+Dans un modèle paramétré, l'indice $\theta$ est ajouté à $\Emp$ et à la relation.
+\end{definition}
+
+\begin{proposition}[Équivalence observationnelle]
+Pour un $P$ et un $\lambda$ fixés, la relation $\sim_{P,\lambda}$ est réflexive, symétrique et transitive. Elle est donc une relation d'équivalence sur $\X$.
+\end{proposition}
+\begin{proof}
+La réflexivité, la symétrie et la transitivité découlent directement de ces mêmes propriétés de l'égalité dans l'espace $Y_\lambda$.
+\end{proof}
+
+\subsection{Fibres et quotient}
+\begin{definition}[Fibre observationnelle]
+La fibre de $x$ à la résolution $\lambda$ est sa classe d'équivalence :
+\[
+[x]_\lambda=\{y\in\X:y\sim_\lambda x\}.
+\]
+\end{definition}
+
+\begin{definition}[Quotient observationnel]
+Le quotient est l'ensemble des classes d'indiscernabilité :
+\[
+\Pi_\lambda=\X/\!\sim_\lambda.
+\]
+L'application quotient est $q_\lambda:\X\to\Pi_\lambda$, $q_\lambda(x)=[x]_\lambda$.
+\end{definition}
+
+Le quotient représente les distinctions accessibles à la résolution choisie. Si des objets distincts ont la même empreinte, ils appartiennent à la même fibre ; cela indique une limite de la famille d'observations, non leur identité ontologique.
+
+\begin{proposition}[Identification du quotient à l'image]
+L'application $\bar{\Emp}_\lambda:\Pi_\lambda\to\Emp_\lambda(\X)$ définie par $\bar{\Emp}_\lambda([x])=\Emp_\lambda(x)$ est bien définie et bijective.
+\end{proposition}
+\begin{proof}
+Si $[x]=[y]$, alors $x\sim_\lambda y$, donc les empreintes sont égales : l'application est bien définie. Elle est surjective par définition de l'image. Si $\bar{\Emp}_\lambda([x])=\bar{\Emp}_\lambda([y])$, alors $x\sim_\lambda y$, donc $[x]=[y]$ ; elle est injective.
+\end{proof}
+
+\subsection{Raffinement monotone}
+\begin{proposition}[Raffinement des partitions]
+Si $\lambda\preceq\mu$ et $\F_\lambda\subseteq\F_\mu$, alors :
+\[
+\sim_\mu\;\subseteq\;\sim_\lambda.
+\]
+Autrement dit, chaque classe à la résolution supérieure est incluse dans une classe à la résolution inférieure : $[x]_\mu\subseteq[x]_\lambda$.
+\end{proposition}
+\begin{proof}
+L'égalité des réponses sur toutes les sondes de $\F_\mu$ implique leur égalité sur le sous-ensemble $\F_\lambda$. Par conséquent, $x\sim_\mu y$ entraîne $x\sim_\lambda y$.
+\end{proof}
+
+On peut exprimer cette propriété par la chaîne de partitions :
+\[
+\Pi_{\lambda_1}\succeq\Pi_{\lambda_2}\succeq\cdots\succeq\Pi_{\lambda_K},
+\qquad \lambda_1\preceq\lambda_2\preceq\cdots\preceq\lambda_K,
+\]
+où le symbole indique que la partition de droite est plus fine. L'orientation du symbole de raffinement doit être documentée dans tout code ou fichier de données afin d'éviter les inversions de convention.
+
+\begin{remark}[Équivalence exacte et tolérances]
+L'égalité exacte de vecteurs réels est une définition théorique claire, mais elle est souvent trop stricte pour les activations numériques. Le critère $\|I(x)-I(y)\|\leq\varepsilon$ n'est pas, en général, transitif ; il ne définit donc pas automatiquement une relation d'équivalence ni un quotient. Une implémentation qui emploie une tolérance doit ajouter une procédure de partitionnement ou de quantification canonique, ou assumer explicitement un graphe de voisinage au lieu d'un quotient strict.
+\end{remark}
+
+% =====================================================================
+\section{Seuils d'indiscernabilité et géométrie hiérarchique}
+% =====================================================================
+
+\subsection{Définition du seuil}
+On suppose dans cette section que $\Lam$ est totalement ordonné et que $\iota:\Lam\to\R_+$ est croissante. La filtration implique que, pour chaque paire $(x,y)$, l'ensemble des niveaux où les objets sont indiscernables est un segment initial (éventuellement vide ou non borné).
+
+\begin{definition}[Seuil d'indiscernabilité]
+Sous ces hypothèses, on pose :
+\[
+\Thresh(x,y)=\sup\{\iota(\lambda):x\sim_\lambda y\}.
+\]
+Si l'ensemble est vide, une convention de borne inférieure doit être spécifiée ; si l'indiscernabilité persiste à tous les niveaux, le seuil peut être infini. Le seuil mesure l'échelle jusqu'à laquelle la famille de sondes ne sépare pas la paire.
+\end{definition}
+
+Le supremum ne précise pas à lui seul si le niveau critique est inclus. Pour les échelles discrètes ou les décisions au voisinage du seuil, on conserve éventuellement une convention de bord $b(x,y)$, ou l'indicateur direct $\1[x\sim_\lambda y]$.
+
+\begin{proposition}[Loi du minimum double]
+Sous une filtration emboîtée et une échelle totalement ordonnée, le seuil satisfait, avec les conventions de bornes compatibles :
+\[
+\boxed{\Thresh(x,z)\geq\min\{\Thresh(x,y),\Thresh(y,z)\}.}
+\]
+\end{proposition}
+\begin{proof}
+Pour tout niveau dont l'intensité est strictement inférieure au minimum des deux seuils, les hypothèses de filtration donnent $x\sim_\lambda y$ et $y\sim_\lambda z$ (en tenant compte des éventuelles conventions de bord). Par transitivité de $\sim_\lambda$, on a $x\sim_\lambda z$. En prenant le supremum des niveaux admissibles, on obtient l'inégalité.
+\end{proof}
+
+\subsection{Pseudoultramétrique dérivée}
+Lorsque les seuils sont dans $[0,+\infty]$, on peut poser, pour $x\neq y$ :
+\[
+d_\Theta(x,y)=\exp(-\Thresh(x,y)),\qquad d_\Theta(x,x)=0,
+\]
+avec $\exp(-\infty)=0$. La loi du minimum double donne :
+\[
+\boxed{d_\Theta(x,z)\leq\max\{d_\Theta(x,y),d_\Theta(y,z)\}.}
+\]
+La fonction obtenue est une \emph{pseudoultramétrique} si des objets distincts peuvent rester indiscernables à toutes les résolutions (distance nulle entre objets distincts). Elle n'est une ultramétrique au sens strict que si la propriété de séparation est assurée : $d_\Theta(x,y)=0\Rightarrow x=y$.
+
+\begin{remark}
+La géométrie ultramétrique est donc un résultat conditionnel du cadre de seuils ; elle n'est ni automatique pour une représentation neuronale arbitraire ni prouvée empiriquement par l'existence de plusieurs couches. Les conditions de filtration, de cohérence et de séparation doivent être vérifiées.
+\end{remark}
+
+% =====================================================================
+\section{Abstraction, fermeture et transport observationnel}
+% =====================================================================
+
+\subsection{Abstraction comme invariance}
+Une formulation opérationnelle de l'abstraction consiste à définir une propriété ou une tâche $A:\X\to Y$. La propriété est observable à la résolution $\lambda$ si elle ne varie pas à l'intérieur d'une fibre.
+
+\begin{definition}[Propriété qui descend au quotient]
+Une application $A:\X\to Y$ descend au quotient $\Pi_\lambda$ si :
+\[
+x\sim_\lambda y\quad\Longrightarrow\quad A(x)=A(y).
+\]
+Dans ce cas, il existe une unique application $\bar A:\Pi_\lambda\to Y$ telle que $A=\bar A\circ q_\lambda$.
+\end{definition}
+
+Cette propriété donne un critère précis : une abstraction est une propriété qui reste stable quand les distinctions éliminées par le niveau d'observation sont oubliées. Une tâche qui varie à l'intérieur d'une fibre ne peut pas être résolue exactement à partir du seul quotient correspondant.
+
+\subsection{Transport compatible}
+\begin{definition}[Compatibilité d'une transformation]
+Soit $F:\X\to\X$. La transformation $F$ est compatible avec l'observation $\Emp_\lambda$ si :
+\[
+\Emp_\lambda(x)=\Emp_\lambda(y)
+\quad\Longrightarrow\quad
+\Emp_\lambda(F(x))=\Emp_\lambda(F(y)).
+\]
+\end{definition}
+
+\begin{proposition}[Factorisation d'une transformation compatible]
+Si $F$ est compatible avec $\Emp_\lambda$, alors il existe une unique application $C_F$ sur l'image $\Emp_\lambda(\X)$ telle que :
+\[
+\boxed{\Emp_\lambda\circ F=C_F\circ\Emp_\lambda.}
+\]
+\end{proposition}
+\begin{proof}
+Pour $z\in\Emp_\lambda(\X)$, choisissons $x$ tel que $z=\Emp_\lambda(x)$ et posons $C_F(z)=\Emp_\lambda(F(x))$. La compatibilité garantit que la définition ne dépend pas du représentant choisi. L'unicité découle du fait que chaque $z$ de l'image est de la forme $\Emp_\lambda(x)$.
+\end{proof}
+
+La factorisation n'est garantie que sur l'image des empreintes, sauf si une extension à un espace plus large est définie séparément. Ce point est important pour un modèle neuronal : une transformation arbitraire de l'espace latent ne descend pas automatiquement au quotient.
+
+\subsection{Compatibilité entre résolutions}
+Pour $\lambda\preceq\mu$, une famille de transformations $C_\lambda,C_\mu$ est compatible entre échelles si :
+\[
+\boxed{r_{\mu\to\lambda}\circ C_\mu=C_\lambda\circ r_{\mu\to\lambda}}
+\]
+sur le domaine où les deux côtés sont définis. Cette égalité exprime la commutation entre transformation et perte de détails. Elle constitue une contrainte architecturale forte à tester, et non une propriété automatique d'un réseau entraîné.
+
+\subsection{Fermeture observationnelle}
+Pour un ensemble de sondes donné, une fermeture $\operatorname{Cl}_\lambda$ doit être spécifiée comme un opérateur sur une classe d'objets (par exemple, propriétés logiquement déductibles ou conséquences calculées). Pour parler de fermeture au sens formel, il faut préciser au minimum son domaine, l'ordre d'inclusion retenu et les axiomes visés (extensivité, monotonie, idempotence). Sans ce choix, le terme « fermeture » reste un programme de formalisation et ne doit pas être utilisé comme s'il désignait déjà un opérateur unique.
+
+% =====================================================================
+\section{Passage aux modèles de langage}
+% =====================================================================
+
+\subsection{Dataset et états internes}
+Soit $\D=\{d_1,\ldots,d_N\}$ un corpus de séquences tokenisées, avec $d_i=(t_{i,1},\ldots,t_{i,n_i})$. Un modèle de paramètres $\theta$ calcule des états internes :
+\[
+h_{i,j}^{(0)}=E_\theta(t_{i,j})+P_\theta(j),
+\]
+\[
+H_i^{(\ell)}=F_{\ell,\theta}(H_i^{(\ell-1)}),\qquad \ell=1,\ldots,L.
+\]
+La forme de $F_{\ell,\theta}$ peut être celle d'un Transformer ou d'une autre architecture. Le cadre des empreintes n'impose pas à lui seul un type unique de backbone.
+
+\subsection{Observables internes}
+Une observable interne peut sélectionner une activation, une combinaison de dimensions, une sortie de tête d'attention, une relation entre positions, une statistique de couche ou une sortie auxiliaire. Pour un modèle $\theta$, on note $\F_\theta^{\mathrm{int}}$ une famille de ces observables.
+
+\begin{definition}[Empreinte interne d'une donnée]
+L'empreinte interne complète d'une donnée $x$ est la famille de réponses aux observables internes retenues :
+\[
+\Emp_\theta(x)=\bigl(f(H_\theta(x))\bigr)_{f\in\F_\theta^{\mathrm{int}}}.
+\]
+Une empreinte multi-résolution est obtenue en sélectionnant une famille emboîtée $\F_{\theta,\lambda}^{\mathrm{int}}$ et en appliquant les définitions précédentes.
+\end{definition}
+
+Pour un token $t_j$ situé dans un contexte $x$, on peut considérer :
+\[
+\Emp_\theta(t_j\mid x)=\bigl(h_j^{(0)},h_j^{(1)},\ldots,h_j^{(L)}\bigr)
+\]
+ou une projection de cet état. Le même token lexical peut produire des empreintes différentes dans des contextes différents ; l'état contextualisé ne doit pas être confondu avec la forme lexicale seule.
+
+\subsection{Statut du neurone et de l'attention}
+Une unité $n_k$ définit une observable possible $f_k(x)=a_k(x)$ et une activation seuilée définit un support d'activation :
+\[
+\supp_\tau(n_k)=\{x\in\D:|a_k(x)|\geq\tau\}.
+\]
+De même, un poids d'attention $A_h(x)_{ij}$ peut être enregistré comme observable relationnelle. Ni l'activation d'un neurone, ni un poids d'attention ne constituent, isolément, une preuve de signification.
+
+\[
+\boxed{\text{unité interne}\to\text{observable}\to\text{empreinte/contextes relationnels}.}
+\]
+
+\begin{hypothesis}[Compositionalité distribuée]
+Les propriétés fonctionnelles pertinentes d'un LLM peuvent dépendre de configurations distribuées de composantes, de relations et de transformations plutôt que d'une unité unique.
+\end{hypothesis}
+
+Cette hypothèse est compatible avec la poly-sémanticité apparente, mais ne suffit pas à en établir la cause. Le partage d'une unité entre deux familles de contextes est d'abord une observation de coactivation. Pour conclure à un mécanisme structurel commun, il faut aligner les composantes, caractériser les relations et effectuer des interventions discriminantes.
+
+% =====================================================================
+\section{Graphes d'empreintes et maillage informationnel}
+% =====================================================================
+
+\subsection{Graphe d'une empreinte}
+\begin{definition}[Graphe d'empreinte]
+Une représentation relationnelle d'une empreinte est un graphe étiqueté et éventuellement pondéré :
+\[
+G_\theta(x)=(V_x,E_x,W_x,\ell_x),
+\]
+où $V_x$ est l'ensemble des composantes observées, $E_x\subseteq V_x\times V_x$ les relations, $W_x$ leurs poids optionnels et $\ell_x$ les étiquettes/type d'observation éventuels. Ce graphe est une représentation choisie de l'empreinte, et non une définition universelle imposée par la théorie.
+\end{definition}
+
+Les sommets peuvent correspondre à des positions, dimensions, unités, blocs, observables, états mémoire ou empreintes partielles. Les arêtes peuvent représenter une dépendance, une coactivation, une transformation, un lien d'attention ou une relation définie par un protocole expérimental. Les significations des nœuds et des arêtes doivent être documentées séparément.
+
+\subsection{Maillage global}
+Une union ensembliste naïve de graphes ne suffit pas, car deux nœuds issus de données différentes ne sont pas automatiquement le même nœud. Il faut définir un critère d'alignement.
+
+\begin{definition}[Maillage d'empreintes]
+Soit $\D=\{x_1,\ldots,x_N\}$. On construit d'abord la famille des graphes $G_\theta(x_i)$, puis une relation d'identification $\equiv_{\mathrm{mesh}}$ entre composantes, déterminée par un protocole explicite. Le maillage $\mathfrak M_\theta(\D)$ est le graphe obtenu en quotientant l'union disjointe des graphes par cette relation et en conservant les relations induites.
+\end{definition}
+
+\[
+\mathfrak M_\theta(\D)=\left(\bigsqcup_{x\in\D}G_\theta(x)\right)\!/\!\equiv_{\mathrm{mesh}}.
+\]
+
+Le critère d'identification peut être fondé sur l'identité d'une unité physique, une correspondance apprise, un appariement de sous-graphes ou une méthode de représentation. Ces options n'ont pas la même portée et doivent rester configurables. Une composante commune au sens de l'identification retenue ne rend pas les graphes entiers identiques.
+
+\subsection{Mesures de recouvrement}
+Si $V_x$ et $V_y$ sont des ensembles de composantes exprimés dans un univers canonique commun, le recouvrement de Jaccard peut être utilisé :
+\[
+J_\theta(x,y)=\frac{|V_x\cap V_y|}{|V_x\cup V_y|},
+\]
+si le dénominateur est non nul. Cette mesure dépend du protocole d'alignement des composantes. Si les graphes ne partagent pas directement un ensemble de sommets canoniques, il faut employer un appariement de graphes ou une mesure de similarité explicitement définie, plutôt que d'écrire une intersection sans sens mathématique.
+
+\begin{definition}[Superposition structurelle]
+Deux empreintes présentent une superposition structurelle relativement à un protocole donné si leurs supports alignés partagent des composantes ou si leurs graphes possèdent un sous-graphe commun selon le critère retenu.
+\end{definition}
+
+La superposition implique seulement un recouvrement structurel relatif au protocole. Elle n'implique ni égalité des données, ni équivalence observationnelle complète, ni identité sémantique.
+
+% =====================================================================
+\section{Poly-sémanticité et représentation distribuée}
+% =====================================================================
+
+Considérons deux contextes $x_c=$ « Le chat mange » et $x_v=$ « La voiture roule ». Supposons qu'une unité $n_k$ soit active dans les deux contextes et appartienne aux supports internes identifiés :
+\[
+n_k\in V_{x_c}\cap V_{x_v},\qquad G_\theta(x_c)\neq G_\theta(x_v).
+\]
+On peut conclure que l'unité participe aux deux empreintes selon le protocole. On ne peut pas en déduire :
+\[
+n_k=\text{concept « chat + voiture »}.
+\]
+
+\begin{hypothesis}[Superposition sans identité globale]
+Des structures internes globalement distinctes peuvent partager certaines composantes. La poly-sémanticité apparente peut, dans certains cas, être mieux expliquée par ce partage et par les relations qui entourent l'unité que par l'attribution d'un concept composite à l'unité elle-même.
+\end{hypothesis}
+
+\begin{example}[Schéma fictif de partage]
+Soient les deux supports :
+\[
+V_c=\{n_1,n_4,n_8,n_{17},n_{31}\},\qquad V_v=\{n_2,n_8,n_{17},n_{24},n_{31}\}.
+\]
+Alors :
+\[V_c\cap V_v=\{n_8,n_{17},n_{31}\},\qquad V_c\neq V_v.\]
+Cette intersection est un fait ensembliste ; l'interprétation fonctionnelle des unités partagées exige des observations et des interventions supplémentaires.
+\end{example}
+
+% =====================================================================
+\section{Mémoire, connaissance et intelligence}
+% =====================================================================
+
+\subsection{Définitions conceptuelles}
+\begin{definition}[Mémoire]
+Dans ce cadre, une mémoire est une structure persistante qui conserve des traces d'observations, d'empreintes ou de transformations d'empreintes.
+\end{definition}
+
+\begin{definition}[Connaissance]
+Une connaissance est une organisation relationnelle relativement stable d'empreintes, permettant leur identification, comparaison, combinaison ou réutilisation dans d'autres contextes.
+\end{definition}
+
+\begin{definition}[Intelligence fonctionnelle]
+L'intelligence fonctionnelle désigne ici la capacité d'un système à sélectionner, transformer et combiner des structures informationnelles pour produire des prédictions, décisions, distinctions ou actions adaptées à une tâche.
+\end{definition}
+
+Ces définitions forment une grille de modélisation, non une définition consensuelle de la mémoire ou de l'intelligence humaines. On distingue au moins trois supports dans un LLM :
+\begin{enumerate}[label=\alph*)]
+  \item la \textbf{mémoire paramétrique}, portée par les paramètres $\theta$ appris ;
+  \item la \textbf{mémoire contextuelle}, portée par la séquence et l'état courant ;
+  \item la \textbf{mémoire externe persistante}, ajoutée par l'architecture (par exemple un graphe ou un index consultable).
+\end{enumerate}
+Ces supports sont complémentaires mais ne sont pas interchangeables. En particulier, un LLM standard n'effectue pas nécessairement une écriture persistante de ses paramètres au cours de l'inférence.
+
+\subsection{Mémoire relationnelle explicite}
+On peut représenter l'état d'une mémoire externe par $M_t=(V_t,E_t,W_t)$. Une écriture prend la forme :
+\[
+M_{t+1}=\mathsf{Update}_\theta(M_t,\Emp_\theta(x_t)).
+\]
+Le pipeline de mise à jour est spécifié par le triplet d’opérations
+\[
+\mathsf{UpdatePipeline}=(\mathsf{Match},\mathsf{Create},\mathsf{UpdateEdges}),
+\]
+qui désigne respectivement l’appariement de composantes existantes, la création des composantes nouvelles et la mise à jour des relations. L’ordre exact et les signatures de ces opérations doivent être fixés dans une implémentation. Une lecture pour une requête $q$ renvoie un contexte :
+\[
+C_q=\mathsf{Read}_\theta(\Emp_\theta(q),M_t).
+\]
+Les règles d'écriture, la persistance, les critères de fusion, la gestion des contradictions et les limites de capacité doivent être spécifiés pour toute implémentation concrète.
+
+\subsection{Intelligence et transformation}
+On peut représenter une transformation interne par $\Gamma_\theta:\Ispace\to\Ispace$ ou, plus prudemment, par une application définie sur son domaine opérationnel. L'intérêt de cette écriture est de distinguer l'exploitation dynamique d'une structure de sa simple conservation. Elle ne constitue pas à elle seule une mesure de l'intelligence.
+
+% =====================================================================
+\section{Généralisation, invariants et abstraction}
+% =====================================================================
+
+\subsection{Structure commune}
+Pour comparer des graphes dont les nœuds ne sont pas identifiés terme à terme, on note $S\preccurlyeq G$ lorsque $S$ s'immerge dans $G$ selon une relation d'embedding définie (par exemple sous-graphe étiqueté, homomorphisme préservant certaines relations ou correspondance apprise). Cette notation est préférable à un simple sous-ensemble lorsque les empreintes ont des jeux de sommets différents.
+
+\begin{definition}[Structure généralisable relativement à une famille]
+Une structure $S$ est généralisable relativement à une famille d'exemples $\{x_1,\ldots,x_m\}$ si elle est identifiable dans chacun des graphes $G_\theta(x_i)$ selon le critère $S\preccurlyeq G_\theta(x_i)$ et si elle reste détectable ou exploitable sur des instances nouvelles compatibles.
+\end{definition}
+
+Le schéma théorique est :
+\[
+\text{instances différentes}\to\text{invariant commun}\to\text{réutilisation sur une instance nouvelle}.
+\]
+L'identification d'un invariant commun dans les données d'entraînement ne suffit pas à démontrer une généralisation : il faut tester le comportement sur des instances tenues à l'écart et vérifier séparément la réutilisation structurelle.
+
+\subsection{Mémorisation littérale et transfert}
+On distingue :
+\begin{itemize}
+  \item la récupération d'une séquence ou d'un exemple appris ;
+  \item la réutilisation d'une relation ou d'un motif appris sur une combinaison nouvelle ;
+  \item la construction d'une représentation qui n'a pas été directement observée.
+\end{itemize}
+Ces catégories peuvent se recouvrir. Un protocole expérimental doit donc définir les critères de nouveauté lexicale, combinatoire et relationnelle et prévenir les fuites entre entraînement et test.
+
+% =====================================================================
+\section{Architecture de langage fondée sur les empreintes}
+% =====================================================================
+
+\subsection{Principe de conception}
+L'architecture proposée n'est pas obligatoirement un remplacement des Transformers. Elle peut être implémentée au-dessus d'un backbone existant, ou servir à construire un modèle différent. Son élément distinctif est l'explicitation du système d'observation, des niveaux de résolution, du quotient ou de son approximation, du maillage relationnel et des contraintes de compatibilité.
+
+On représente le modèle abstrait par :
+\[
+\mathfrak L_\theta=(\V,E_\theta,\Pctx,\F_\theta,\Lam,\Phi_\theta,\Emp_\theta,
+\Pi_\theta,\Thresh_\theta,\mathfrak M_\theta,\Mem_\theta,\Trans_\theta,\Search_\theta,\Pred_\theta,\Gen_\theta).
+\]
+Cette liste donne une spécification conceptuelle ; chaque composant doit posséder un domaine, un codomaine, un algorithme et une stratégie d'entraînement dans l'implémentation.
+
+\subsection{Modules proposés}
+\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}}
+\toprule
+\textbf{Module} & \textbf{Formalisme} & \textbf{Rôle proposé}\\
+\midrule
+Tokenisation & $\mathsf{Tok}:\Sigma^*\to\V^*$ & Convertir la chaîne en tokens.\\
+\shortstack[l]{Embedding/\\backbone} & $\begin{gathered}H^{(0)}=E_\theta(x)+P_\theta(x)\\ H^{\ell}=F_\ell(H^{\ell-1})\end{gathered}$ & Calculer les états latents nécessaires.\\
+Observateurs & $Z_{\ell,k}=\Obs_{\ell,k,\theta}(H^{(\ell)})$ & Produire les observations mesurables à différentes couches et résolutions.\\
+Empreinte & $I_{\theta,k}(x)=\mathsf{Fingerprint}_k(Z)$ & Regrouper une famille déclarée de réponses observables.\\
+Quotient/fibres & $\Pi_{\theta,k}=\X/\!\sim_{\theta,k}$ & Représenter les classes d'indiscernabilité exactes ou leur approximation opérationnelle.\\
+Transport & $Q'=C_{\theta,k}(Q,C)$ & Transformer une empreinte en respectant les contraintes de factorisation.\\
+Maillage & $\mathfrak M_\theta(\D)$ & Aligner et relier les structures identifiées sur plusieurs données.\\
+Mémoire explicite & $M_{t+1}=\mathsf{Update}(M_t,I_t)$ & Persister des traces relationnelles lorsque le scénario le demande.\\
+Recherche & $\Search_\theta(s)\subseteq\mathscr S_\theta$ & Explorer des trajectoires ou candidats.\\
+Prédicteur & $p_\theta(\cdot\mid x,M)$ & Produire une distribution sur le prochain token.\\
+Générateur & $t_{n+1}\sim p_\theta(\cdot\mid t_{1:n},M)$ & Choisir un token suivant selon une politique définie.\\
+Journal expérimental & traces horodatées des états, observables et interventions & Permettre analyse, comparaison et reproductibilité.\\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{Empreintes multi-résolution}
+Pour une famille d'indices d'observations $\mathcal A_k$ emboîtée, on peut écrire :
+\[
+I_{\theta,k}(x)=\bigl(O_{\ell,j}^{(r)}(H^{(\ell)})\bigr)_{(\ell,j,r)\in\mathcal A_k}.
+\]
+Les opérateurs de restriction doivent vérifier :
+\[
+I_{\theta,\lambda}(x)=r_{\mu\to\lambda}(I_{\theta,\mu}(x)),\quad \lambda\preceq\mu.
+\]
+Si l'empreinte contient des graphes, les restrictions doivent aussi spécifier quels nœuds, types d'arêtes et poids sont conservés. Une projection arbitraire apprise séparément à chaque échelle peut violer cette condition.
+
+\subsection{Transport et tête de prédiction}
+Une forme abstraite du prédicteur est :
+\[
+p_\theta(\cdot\mid x,M)=Y_\theta\bigl(C_\theta(I_{\theta,\lambda}(x),M)\bigr),
+\]
+où $C_\theta$ transforme l'empreinte (et le contexte mémoire éventuel), tandis que $Y_\theta$ produit une distribution dans $\Delta(\V)$. On sépare donc explicitement observation, transformation et probabilités de sortie.
+
+Pour une génération autorégressive, à l'étape $m$ :
+\[
+p_m=p_\theta(\cdot\mid t_{1:m},M_m),\qquad t_{m+1}\sim\mathsf{Select}(p_m),
+\]
+puis on met à jour le contexte et, si une mémoire persistante est activée, l'état mémoire selon une politique déclarée. La prédiction, la sélection/génération et une action sur un environnement externe sont trois opérations différentes.
+
+\subsection{Recherche et imagination}
+Une recherche peut être définie sur un espace d'états $\mathscr S_\theta$ :
+\[
+\Search_\theta:\mathscr S_\theta\to 2^{\mathscr S_\theta}.
+\]
+Une trajectoire candidate est $\tau=(s_0,s_1,\ldots,s_m)$. L'imagination interne est une génération de trajectoires candidates sans nouvel apport observationnel externe. Elle ne doit pas être confondue avec une observation du monde. Ces modules sont optionnels et nécessitent une fonction d'évaluation, une limite de calcul et une politique de sélection.
+
+% =====================================================================
+\section{Apprentissage et contraintes de cohérence}
+% =====================================================================
+
+\subsection{Perte de base}
+Pour un corpus de séquences, la perte autorégressive usuelle est :
+\[
+\mathcal L_{\mathrm{LM}}(\theta)=-\sum_{x\in\D}\sum_{j=1}^{|x|-1}
+\log p_\theta(t_{j+1}\mid t_{1:j}).
+\]
+On peut proposer une perte combinée :
+\[
+\begin{aligned}
+\mathcal L(\theta)= {}&\mathcal L_{\mathrm{LM}}+\lambda_{\mathrm{obs}}\mathcal L_{\mathrm{obs}}
++\lambda_{\mathrm{mesh}}\mathcal L_{\mathrm{mesh}}\\
+&+\lambda_{\mathrm{res}}\mathcal L_{\mathrm{res}}
++\lambda_{\mathrm{mem}}\mathcal L_{\mathrm{mem}},
+\end{aligned}
+\]
+où les coefficients sont non négatifs. Les termes auxiliaires ne sont pas définis par leur seul nom : chacun doit être rendu calculable et associé à une métrique de validation, sans quoi cette somme demeure un programme de recherche et non une recette directement exécutable.
+
+\subsection{Compatibilité inter-résolutions}
+Une pénalité possible est :
+\[
+\mathcal L_{\mathrm{res}}=\sum_{\lambda\preceq\mu}\E_{x\sim\D}\left[
+ d_\lambda\left(I_{\theta,\lambda}(x),r_{\mu\to\lambda}(I_{\theta,\mu}(x))\right)\right].
+\]
+Si les empreintes sont construites par restriction exacte, cette perte vaut zéro par construction et peut être inutile. Si elles sont prédites par des modules séparés, elle pénalise l'incohérence. Le choix de $d_\lambda$ doit correspondre au type de représentation.
+
+\subsection{Pénalisation de la loi ultramétrique}
+Si une estimation $\widehat{\Theta}_\theta$ est apprise, on peut définir :
+\[
+\begin{aligned}
+\mathcal L_{\mathrm{ultra}}=\E_{x,y,z}\bigl[\max(0,&\min\{\widehat\Theta(x,y),\widehat\Theta(y,z)\}\\
+&-\widehat\Theta(x,z))\bigr].
+\end{aligned}
+\]
+Cette pénalité encourage l'inégalité du minimum double ; elle ne prouve ni que le seuil appris représente une propriété réelle du réseau, ni que l'échelle correspond à un phénomène sémantique interprétable. Le protocole doit établir indépendamment la validité des paires et des seuils estimés.
+
+\subsection{Maillage et mémoire}
+Une perte de maillage peut encourager des motifs identifiés à être cohérents entre contextes, tandis qu'une perte mémoire peut mesurer la qualité de récupération ou la stabilité après mises à jour. Dans les deux cas, il faut définir les positifs/négatifs, la règle de correspondance, les coûts de calcul, les risques de fuite de cible et la métrique comportementale attendue.
+
+\begin{remark}[Quotient calculable]
+Le quotient mathématique exact est un ensemble de classes. Un réseau neuronal ne le calcule pas nécessairement directement. Une implémentation doit préciser s'il utilise des signatures quantifiées, un clustering, un index de voisinage, un regroupement différentiable ou seulement des approximations de fibres. Le choix modifie les garanties mathématiques et doit figurer dans la spécification.
+\end{remark}
+
+% =====================================================================
+\section{Hypothèses centrales et prédictions expérimentales}
+% =====================================================================
+
+\subsection{Hypothèses structurantes}
+\begin{hypothesis}[Maillage d'empreintes]
+Les informations fonctionnelles d'un LLM peuvent être représentées de manière utile comme des structures d'empreintes qui se recouvrent et interagissent à plusieurs niveaux.
+\end{hypothesis}
+
+\begin{hypothesis}[Généralisation par invariants]
+Certaines généralisations peuvent être expliquées par la réutilisation de relations ou de motifs communs à plusieurs empreintes, plutôt que par une récupération littérale des exemples.
+\end{hypothesis}
+
+\begin{hypothesis}[Raffinement représentationnel]
+Une famille opérationnelle de sondes internes peut être construite de sorte que les résolutions supérieures distinguent toutes les paires distinguées aux résolutions inférieures, et éventuellement davantage.
+\end{hypothesis}
+
+\begin{hypothesis}[Poly-sémanticité structurelle]
+Certaines activations apparemment poly-sémantiques pourraient correspondre à des composantes partagées par des structures globales distinctes. Cette hypothèse doit être comparée à des explications concurrentes, notamment les effets de superposition, les directions de représentation et les artefacts de la méthode d'interprétation.
+\end{hypothesis}
+
+\subsection{Prédictions testables}
+\begin{enumerate}[label=\textbf{P\arabic*.}]
+  \item \textbf{Dépendance au contexte :} un même token peut avoir des empreintes internes différentes selon le contexte.
+  \item \textbf{Raffinement :} les partitions construites à des niveaux emboîtés doivent respecter l'inclusion des fibres si la filtration est correctement implémentée.
+  \item \textbf{Recouvrement non-identifiant :} un partage de composantes ne doit pas être utilisé seul comme preuve d'une identité sémantique.
+  \item \textbf{Structure commune :} certains motifs alignés devraient se réactiver dans des instances nouvelles conçues pour préserver ces motifs tout en modifiant les détails de surface.
+  \item \textbf{Intervention causale :} intervenir sur des composantes communes et sur des composantes spécifiques devrait produire des profils d'effet distincts si la décomposition structurelle est pertinente.
+  \item \textbf{Transport compatible :} les modules censés descendre au quotient doivent donner des sorties cohérentes pour des entrées appartenant à la même fibre.
+\end{enumerate}
+
+\subsection{Mesures candidates}
+Pour des composantes alignées, mesurer le Jaccard ou une similarité de graphes ; pour des états continus, mesurer une distance ou un écart normalisé ; pour le comportement, mesurer exactitude, perte/perplexité, robustesse et réussite sur des compositions inédites. Aucune métrique unique ne valide à elle seule la théorie entière : la cohérence des partitions, le réemploi de structures et le comportement doivent être mesurés séparément.
+
+% =====================================================================
+\section{Programme expérimental minimal}
+% =====================================================================
+
+\subsection{Environnement synthétique contrôlé}
+Le premier environnement devrait utiliser des données synthétiques issues d'une grammaire connue. Une structure latente $z=(e_1,e_2,r,a,p)$ peut déterminer une phrase $x=\operatorname{Surface}(z)$, tandis que le modèle ne reçoit que $x$. La structure latente sert de vérité de référence d'évaluation, sans être donnée comme entrée au modèle.
+
+Un jeu de départ peut inclure :
+\[
+\begin{array}{ll}
+x_1=\text{« le chat court »}, & x_2=\text{« le chien court »},\\
+x_3=\text{« la voiture roule »}, & x_4=\text{« le camion roule »}.
+\end{array}
+\]
+Les combinaisons entraînement/test doivent séparer les instances lexicales et, selon la question, les relations ou compositions. Un test qui ne fait que réarranger des exemples déjà vus ne suffit pas à démontrer le transfert structurel.
+
+\subsection{Ordre de mise en œuvre}
+\begin{enumerate}[label=\arabic*.]
+  \item Définir un domaine synthétique et les vérités de référence.
+  \item Construire et vérifier des sondes dont les réponses sont connues.
+  \item Calculer empreintes, fibres et quotients exacts sur un petit domaine.
+  \item Vérifier automatiquement le raffinement des partitions et la restriction inter-résolutions.
+  \item Implémenter un modèle neuronal réduit et enregistrer ses observables.
+  \item Définir le protocole d'alignement des composantes et construire le maillage.
+  \item Ajouter les modules de transport et vérifier la factorisation sur des cas contrôlés.
+  \item Ajouter la mémoire persistante seulement si la tâche requiert une mémoire externe.
+  \item Ajouter la prédiction autorégressive et la génération.
+  \item Comparer au modèle de référence à budget de données, de calcul et de paramètres comparable.
+  \item Effectuer des ablations et interventions causales avec groupes de contrôle.
+  \item Évaluer la généralisation et la réutilisation des structures sur des tests tenus à l'écart.
+\end{enumerate}
+
+\subsection{Contrôle et comparaison}
+Il faut comparer au minimum un modèle de base $M_{\mathrm{base}}$ et un modèle conforme à l'architecture proposée $M_{\mathrm{emp}}$, en contrôlant tokenizer, données, budget de calcul, capacité approximative, protocole d'évaluation et politique de génération. Un éventuel avantage doit être mesuré sur des dimensions déclarées avant l'expérience.
+
+% =====================================================================
+\section{Critères de falsification et limites}
+% =====================================================================
+
+Le programme doit accepter des résultats négatifs. Exemples de critères défavorables :
+\begin{enumerate}[label=\textbf{F\arabic*.}]
+  \item \textbf{Filtration violée :} une prétendue résolution supérieure perd des observations auparavant disponibles. Il s'agit alors d'une erreur d'architecture ou d'une définition différente de la résolution.
+  \item \textbf{Transport non factorisable :} des éléments d'une même fibre sont transformés en empreintes différentes par le module censé agir sur le quotient.
+  \item \textbf{Coactivation seule :} le partage d'une activation ne permet pas d'identifier de sous-structure stable ni de prédire les effets d'intervention.
+  \item \textbf{Réutilisation absente :} la réussite sur les nouveaux exemples ne s'accompagne pas de réutilisation structurelle selon les mesures préenregistrées.
+  \item \textbf{Aucun bénéfice distinctif :} l'architecture ne fournit ni avantage comportemental ni propriété interprétative reproductible face aux baselines.
+  \item \textbf{Instabilité :} les partitions, seuils ou motifs supposés centraux changent radicalement sous des perturbations mineures ou entre graines, au-delà des tolérances annoncées.
+\end{enumerate}
+
+\subsection{Ce que le cadre ne démontre pas}
+Le formalisme ne démontre pas, à lui seul :
+\begin{itemize}
+  \item que tout LLM possède une géométrie ultramétrique de représentations ;
+  \item que toute poly-sémanticité provient d'un partage de structures ;
+  \item que la mémoire paramétrique équivaut à une mémoire humaine ou à une mémoire explicite ;
+  \item que toute généralisation est réductible à la présence d'un sous-graphe commun ;
+  \item que l'Univers est littéralement un système mémoriel ;
+  \item que l'ajout de quotients ou de graphes améliore nécessairement la performance ;
+  \item que la structure d'un état latent peut être interprétée sans choix de sondes, d'alignement et de protocole.
+\end{itemize}
+
+% =====================================================================
+\section{Dictionnaire des concepts consolidés}
+% =====================================================================
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.68\textwidth}}
+\toprule
+\textbf{Concept} & \textbf{Sens retenu dans cette source}\\
+\midrule
+Observation & Réponse d'une sonde définie dans un contexte et appliquée à un objet.\\
+Sonde & Fonction ou procédure dont la réponse constitue une observable.\\
+Empreinte & Famille structurée de réponses aux sondes disponibles à un niveau de résolution.\\
+Indiscernabilité & Égalité des empreintes relativement au contexte et à la famille de sondes.\\
+Fibre & Classe d'objets donnant la même empreinte.\\
+Quotient & Ensemble des fibres, représentant les distinctions observables.\\
+Résolution & Niveau d'une filtration de sondes emboîtées.\\
+Seuil & Intensité maximale, au sens du supremum, jusqu'à laquelle une paire demeure indiscernable.\\
+Ultramétrique & Géométrie dérivée des seuils lorsque les hypothèses de filtration sont satisfaites ; pseudoultramétrique si la séparation échoue.\\
+Abstraction & Propriété constante sur les fibres d'une résolution et pouvant donc descendre au quotient.\\
+Transport & Transformation qui préserve l'indiscernabilité et descend au quotient.\\
+Fermeture & Opérateur à définir explicitement ; ne pas employer sans domaine et axiomes.\\
+Empreinte interne LLM & Réponses sélectionnées d'observables calculées à partir des états internes d'un modèle.\\
+Maillage & Graphe obtenu en alignant et fusionnant les composantes relationnelles d'un ensemble d'empreintes.\\
+Superposition & Recouvrement de composantes ou de motifs selon un protocole d'alignement explicite.\\
+Mémoire & Conservation de traces ; à distinguer en mémoire paramétrique, contextuelle et externe.\\
+Connaissance & Organisation stable et exploitable d'empreintes et de leurs relations.\\
+Généralisation & Réussite sur de nouvelles instances ; réutilisation structurelle est une hypothèse explicative à mesurer, pas une identité définitionnelle.\\
+Intelligence fonctionnelle & Exploitation dynamique des structures pour prédire, décider, transformer ou agir dans une tâche.\\
+\bottomrule
+\end{longtable}
+
+% =====================================================================
+\section{Thèse consolidée et chaîne finale}
+% =====================================================================
+
+La thèse de travail est la suivante : un système peut être décrit par les empreintes qu'il produit relativement à des observations définies. L'égalité d'empreintes induit des classes d'indiscernabilité ; une filtration des observations permet de raffiner ces classes. Dans le cas d'un LLM, les observables peuvent être des activations, des états, des relations ou des sorties intermédiaires. Plusieurs empreintes peuvent partager des composantes sans être identiques. Si un maillage de telles structures peut être construit de façon stable, une partie de la généralisation et de certains phénomènes de poly-sémanticité pourrait être étudiée comme un problème de recouvrement, de transport et de réutilisation de motifs.
+
+\[
+\boxed{
+\begin{gathered}
+\text{sondes}\to\text{empreintes}\to\text{fibres/quotients}\to\text{seuils et résolutions},\\
+\text{empreintes relationnelles}\to\text{maillage et mémoire}\to\text{transport/recherche},\\
+\text{transport}\to\text{prédiction}\to\text{génération}\to\text{évaluation causale}.
+\end{gathered}}
+\]
+
+La formulation centrale à conserver est donc :
+\[
+\fbox{\parbox{0.88\textwidth}{\centering\textbf{Un neurone n'est pas identifié par définition à un concept ; il est une composante observable d'une configuration plus large.}}}
+\]
+Cette formulation est méthodologique, non une négation de toute représentation localisée. Elle invite à établir empiriquement dans quels cas une interprétation locale est utile, dans quels cas une structure distribuée est nécessaire, et quelles prédictions discriminent ces explications.
+
+\subsection*{Questions formelles restant ouvertes}
+\begin{enumerate}[label=\arabic*.]
+  \item Quelle famille de sondes constitue une empreinte interne suffisante pour une tâche déterminée ?
+  \item Quel critère d'alignement définit des composantes communes entre données ou contextes ?
+  \item Quel algorithme calcule une approximation stable des fibres sans supposer à tort que la proximité est transitive ?
+  \item Comment opérationnaliser les seuils lorsqu'on ne dispose que d'une grille finie de résolutions ?
+  \item Quelle définition de fermeture observationnelle est utile au modèle et possède les axiomes recherchés ?
+  \item Quelles interventions causales distinguent partage structurel, coactivation corrélée et autres mécanismes concurrents ?
+  \item Dans quelles conditions un motif réutilisé explique-t-il un comportement nouveau plutôt que de simplement le corréler ?
+\end{enumerate}
+
+\end{document}

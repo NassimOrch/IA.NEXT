@@ -1,0 +1,199 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{longtable,booktabs,array,enumitem,hyperref,xcolor}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Laboratoire d'essais et registre de validation AAM O94\_1}
+\author{Dossier technique AAM}
+\date{19 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Description et objectifs du laboratoire}
+Ce laboratoire définit les essais réalisables de l'incrément O94\_1, conserve les résultats observés et n'attribue pas de succès global au modèle à partir d'un sous-ensemble de tests. Les intrants de base sont les archives O94\_0 fournies, leur audit, les formalismes hérités, la théorie des empreintes incluse et les datasets livrés. Les originaux restent intacts dans le dossier d'entrée; les modifications sont réalisées dans la copie de travail du dossier Dmodel. L'inventaire complet et les CRC ZIP se trouvent dans \texttt{logs/O94\_1/P0\_input\_integrity.json}.
+
+\section{Architecture soumise à l'essai}
+Le laboratoire examine séparément cinq domaines : (1) lecture/formalisme et briques de base; (2) capture active en boîte noire; (3) génération d'une réplique hors source et évaluation holdout; (4) modèles LLM intégrés et politiques d'entraînement; (5) UI, runtime, préflight, packaging et intégrité des données. Cette séparation évite de masquer un échec de réseau, un problème UI ou une absence de généralisation derrière une réussite locale d'une autre couche.
+
+\section{Pipeline complet et hypothèses d'essai}
+\subsection{Intégrité et provenance}
+\begin{enumerate}[nosep]
+\item Calculer SHA-256 pour chaque archive livrée, vérifier tous les membres ZIP, inventorier les entrées et conserver les hashes.
+\item Localiser l'archive source imbriquée et les sources du formalisme; ne pas extraire / compiler tous les PDF pour cette tâche.
+\item Rechercher le terme lexical relatif aux « neurones d'empreintes » dans les membres texte sélectionnés; consigner le nombre de membres parcourus et les occurrences littérales, sans assimiler l'absence d'occurrence à une conclusion architecturale.
+\end{enumerate}
+
+\subsection{Capture comportementale active}
+\begin{enumerate}[nosep]
+\item Préparer un programme cible de test possédé et inspecté par l'utilisateur; dans les tests automatisés, cible temporaire déterministe.
+\item Préparer des entrées JSONL avec champs \texttt{input} et \texttt{split}. Les données train et test doivent être séparées avant la capture ou par partition déterministe sans partage du même hash d'entrée.
+\item Appeler la cible sans shell en confirmant explicitement l'autorisation. Chaque cas crée un processus indépendant; stdout doit contenir du texte UTF-8/JSON pour que le résultat soit enregistré.
+\item Vérifier les codes de sortie, le timeout, le plafond de sortie, les hashes de trace et la provenance de l'exécutable.
+\end{enumerate}
+
+\subsection{Réplique et test indépendant}
+\begin{enumerate}[nosep]
+\item Générer la capsule exclusivement à partir des cas train; écarter les entrées observées avec sorties conflictuelles.
+\item Exporter un programme Python JSON-lines autonome et vérifier qu'il ne référence pas le chemin ni l'exécutable de la cible.
+\item Tester une entrée d'entraînement : l'égalité attendue est une affirmation limitée à cette entrée enregistrée.
+\item Tester une entrée holdout non vue : en absence d'algorithme appris, le comportement normatif est \texttt{UNRESOLVED}. Ne pas ajouter ce résultat dans la capsule.
+\item Enregistrer le score holdout, les cas non résolus, les hashes et le verdict borné. Aucun seuil générique ne certifie le clonage arbitraire.
+\end{enumerate}
+
+\subsection{Intégration d'un modèle}
+\begin{enumerate}[nosep]
+\item Enregistrer un backend local ou un endpoint approuvé avec une politique explicite. Le manifeste ne doit inclure aucune valeur de secret.
+\item Utiliser un faux serveur contrôlé en test pour vérifier la construction de requête, le parsing de réponse et la non-persistance des clés.
+\item Vérifier que les endpoints distants sont refusés sans Internet activé et sans allowlist, et que HTTP distant est refusé.
+\item Vérifier que \texttt{export\_supervised\_pairs} ne prétend pas modifier les poids et exclut les splits test. Sans split fourni, vérifier l'assignation déterministe d'un holdout par groupe d'entrée si au moins trois entrées uniques existent; les entrées identiques ne doivent pas traverser les frontières train/holdout.
+\item Réserver l'entraînement effectif de poids à une politique compatible et à des dépendances disponibles; une exportation de couples n'est pas un entraînement.
+\item Exécuter ensuite un test d'intégration manuel sur un endpoint ou un répertoire de poids réel; le résultat n'est déclaré que pour cette instance et cette configuration.
+\end{enumerate}
+
+\section{Commandes d'exécution}
+Depuis la racine du modèle extrait, les exemples suivants sont prévus. Avant chaque commande, lire le formalisme, le checklist de phases, les deux registres d'erreurs O94\_1 et les registres historiques :
+\begin{verbatim}
+python -m pytest -q tests/test_o941_blackbox.py
+python -m pytest -q tests/test_o941_model_integration.py
+python -m pytest -q tests/test_o94_base_blocks.py
+python -m aam_o93 base-blocks
+python -m aam_o93 models-list
+\end{verbatim}
+
+La capture doit être utilisée seulement sur une cible autorisée. Exemple de capture :
+\begin{verbatim}
+python -m aam_o93 blackbox-capture examples/blackbox/cases.jsonl \\
+  --command-json '["python","examples/blackbox/demo_target.py"]' \\
+  --trace-out work/capture.jsonl --authorize-target-execution \\
+  --timeout-seconds 5 --max-cases 200
+python -m aam_o93 blackbox-build-replica work/capture.jsonl \\
+  --out work/replica.json --export-python work/replica_standalone.py
+python -m aam_o93 blackbox-replay work/replica.json '{"text":"bonjour"}'
+python -m aam_o93 blackbox-evaluate work/replica.json work/capture.jsonl
+\end{verbatim}
+
+Exemple d'intégration par manifeste :
+\begin{verbatim}
+python -m aam_o93 model-register examples/model_integration/ollama-local.json
+python -m aam_o93 model-generate fixture-model "Décris ta configuration" --tokens 96
+python -m aam_o93 model-train fixture-model examples/model_integration/train_pairs.jsonl
+\end{verbatim}
+Les exemples réseau exigent un serveur réel pour l'exécution opérationnelle. Les tests automatisés utilisent un endpoint simulé et ne doivent pas être décrits comme une connexion à Internet ou à un modèle réel.
+
+\section{Résultats obtenus à ce stade}
+\subsection{Intégrité des intrants}
+Les archives Dmodel et Amodel d'entrée et l'archive imbriquée \texttt{sources\_AAM\_17.zip} passent les contrôles ZIP. Les hashes sont conservés. La recherche lexicale ciblée n'a trouvé aucune occurrence de la chaîne « neurone(s) d'empreinte(s) » dans les 201 membres texte éligibles parcourus de l'archive imbriquée. Cela ne tranche pas si un concept proche existe sous un autre nom ni si le modèle utilise un type de neurone particulier : il faut lire les définitions et examiner les chemins d'exécution.
+
+\subsection{Essais ciblés de boîte noire et modèles intégrés}
+Le premier jeu de tests local a vérifié : l'exigence d'autorisation; la capture de six couples I/O; l'exclusion des deux cas test de la capsule; l'exécution autonome sur une entrée train; l'état non résolu sur une entrée test inconnue; le rejet d'entrées contradictoires; un timeout sur cible lente; la validation d'allowlist et de HTTPS; la réponse simulée d'un endpoint compatible; l'absence de persistance de la valeur de clé API; la distinction entre préparation de dataset et mise à jour des poids. Le reçu exact et le nombre de tests sont placés dans \texttt{logs/O94\_1} après exécution reproductible.
+
+La capture et la réplique ne prouvent pas la reconstruction interne de la méthode observée. Par construction, une table de correspondance reproduit seulement les entrées de train connues. Le holdout peut montrer zéro correspondance pour des entrées inédites sans signifier que le but général est impossible : il indique le périmètre du mécanisme implémenté et la nécessité d'acquérir / composer une méthode plus générale.
+
+\section{Interprétation des résultats}
+\begin{longtable}{p{0.25\linewidth}p{0.32\linewidth}p{0.33\linewidth}}
+\toprule
+Observation & Interprétation permise & Conclusion interdite \\
+\midrule
+ZIP sans erreur de CRC & Les octets compressés et CRC des membres sont lisibles pour cette lecture. & Le modèle lui-même est fonctionnel. \\
+Appel simulé LLM réussi & Le contrat request/response fonctionne contre la fixture test. & Le serveur utilisateur ou le modèle réel fonctionne. \\
+Réponse exacte sur train & La capsule restitue une sortie observée pour cette entrée exacte. & Le programme a été reconstruit algorithmiquement. \\
+Entrée inconnue non résolue & La table exacte n'a pas de correspondance et n'appelle pas la source. & Aucun modèle AAM ne pourrait généraliser cette compétence. \\
+Tests unitaires passants & Les assertions de ces tests sont vérifiées localement. & Tous les systèmes d'exploitation, poids, périphériques ou corpus sont validés. \\
+\bottomrule
+\end{longtable}
+
+\section{Conséquences}
+\subsection{Théoriques}
+L'observation active peut produire un ensemble de transitions et des empreintes, mais la méthode interne n'est pas identifiée automatiquement à partir d'une table entrée/sortie finie. La validation d'une compétence générale demande des sondes diversifiées, des splits sans fuite, un critère de tâche explicite et des cas jamais vus. Le modèle peut proposer de nouvelles compositions; celles-ci doivent être enregistrées avec leur dépendances et leurs preuves.
+
+\subsection{Conceptuelles}
+La compétence de reproduction a au moins trois niveaux séparés : restitution de cas observés, reproduction d'une règle/méthode sur un domaine déclaré, et généralisation à des entrées inédites. Les artefacts O94\_1 nomment le niveau atteint à chaque test. Un score de récompense utilisateur constitue une préférence de trajectoire, pas un label de vérité.
+
+\subsection{Opérationnelles}
+Une exécution de cible reste une exécution réelle, non un bac à sable. L'opérateur doit contrôler les permissions, le répertoire de travail, les entrées, les sorties et les secrets; les cibles non fiables doivent tourner dans un conteneur/VM dédié. Pour bases de données, systèmes internes et réseaux, les captures doivent s'effectuer dans un environnement de test et les actions destructrices doivent avoir des sauvegardes et autorisations explicites.
+
+\section{Registre des écarts et des erreurs}
+Les défauts hérités ne sont pas effacés. Les erreurs spécifiques à O94\_1 sont enregistrées dans \texttt{checklist\_erreurs\_model\_O94\_1.json} et \texttt{checklist\_erreurs\_no\_model\_O94\_1.json}. Une erreur d'environnement (par exemple absence de poids local, dépendance Transformers absente ou caméra non disponible) est séparée d'une anomalie de code. Les entrées résolues contiennent la preuve de correction et l'empreinte du test.
+
+\section{Résultats P5 -- régression et intégrité}
+\subsection{Description}
+La phase P5 vérifie la régression du dépôt par modules, la classification des erreurs d'exécution, la préservation des sources historiques et les frontières des affirmations. Les résultats sont conservés dans \texttt{logs/O94\_1/P5\_regression\_matrix.json}, \texttt{P5\_failure\_classification.json}, \texttt{P5\_integrity\_compare.json} et \texttt{P5\_scope\_audit.json}.
+
+\subsection{Architecture et pipeline complet}
+Le pipeline collecte les reçus de chaque exécution contrôlée, associe les fichiers de test aux reçus ayant terminé avec le code zéro, puis vérifie les échecs antérieurs et leurs retests. Le contrôle d'intégrité compare chaque membre du ZIP parent aux fichiers extraits, puis revalide les CRC, le SHA-256 des archives fournies, l'archive de sources incorporée et le fichier maître de la théorie des empreintes. Aucun résultat du lot interrompu par l'enveloppe d'exécution n'est compté.
+
+\subsection{Commandes d'exécution}
+Les commandes sont enregistrées avec leur vecteur d'arguments, le code retour, la sortie standard, la sortie d'erreur et les empreintes dans \texttt{logs/O94\_1}. Les commandes de référence exécutées incluent :
+\begin{verbatim}
+python -m pytest -q tests/test_o941_blackbox.py tests/test_o941_model_integration.py tests/test_o941_runtime_integration.py tests/test_o94_base_blocks.py tests/test_o94_cli_contract.py
+xvfb-run -a python -m pytest -q tests/test_o931_release_identity.py tests/test_o931_sparse_proximity_optimization.py tests/test_o931_ui_busy_catalog_refresh.py tests/test_o931_ui_smoke.py
+python scripts/o941_reconcile_p5_regression.py
+python scripts/o941_integrity_compare.py
+\end{verbatim}
+Les lancements de contrôle passent par \texttt{scripts/o941\_run\_phase.py}, qui consulte les checklists, vérifie la phase active, conserve les sorties et met à jour le point de sauvegarde.
+
+\subsection{Résultats}
+\begin{itemize}
+\item \textbf{Régression :} 57/57 fichiers de test distincts disposent d'au moins un reçu P5 réussi. Les reçus de tests totalisent 331 tests rapportés passés et 21 sous-tests rapportés passés, sur 19 reçus de pytest P5. La matrice signale zéro fichier manquant et zéro échec d'exécution non résolu.
+\item \textbf{Intégrité :} les deux ZIP fournis sont identiques aux empreintes relevées au préflight et leurs membres passent le contrôle CRC. Dans l'arbre modèle parent, 6017 membres sont inchangés, 12 membres ont des modifications attendues de code/contrôle/tests, zéro membre est manquant et zéro changement hors périmètre n'est détecté. Dans l'arbre d'audit parent, les 5652 membres sont inchangés et aucun ne manque.
+\item \textbf{Sources :} l'archive \texttt{sources\_AAM\_17.zip}, sa copie d'audit et \texttt{DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex} correspondent aux empreintes de référence.
+\item \textbf{Incidents :} une assertion de test épinglait l'ancienne version 0.94.0; elle a été actualisée pour 0.94.1 et le même ensemble de tests a ensuite passé. Le premier contrôleur d'intégrité visait un mauvais répertoire d'audit; le chemin a été corrigé et le même contrôle a passé au retest. Un lot UI/RAG groupé a été interrompu par l'enveloppe d'exécution avant qu'un reçu fiable existe; il a été arrêté, enregistré comme incident d'environnement, et ses résultats ne sont pas comptés.
+\end{itemize}
+
+\subsection{Interprétation des résultats}
+Les reçus réussis attestent les assertions concrètes des fichiers testés dans cet environnement. Ils ne démontrent pas tous les comportements possibles, l'exécution sous toutes les versions de Windows, l'accessibilité d'un serveur LLM réel ni un entraînement réel sur poids externes. Le résultat d'intégrité signifie que les différences par rapport au parent sont limitées aux chemins autorisés; il ne signifie pas que chaque capacité visée par le cahier des charges est achevée.
+
+\subsection{Conséquences théoriques, conceptuelles et opérationnelles}
+Théoriquement, on garde séparées les données observées, les sorties exactes sur les entrées connues, les mesures de holdout et la généralisation. Conceptuellement, la boîte noire actuelle reste un adaptateur de comportement I/O à domaine explicite, et non une identification universelle de la méthode interne. Opérationnellement, les fichiers source historiques et la théorie n'ont pas été altérés; les diffs autorisés et chaque incident sont traçables.
+
+\subsection{Conclusion et statut de la phase}
+Les critères P5 de couverture des tests disponibles, de classification des exécutions, de comparaison des empreintes et de maintien des limites des affirmations sont satisfaits par les pièces citées. Ce résultat ne ferme pas les limites O941-M001 à O941-M004 : la capture GUI/capteurs/vidéo/OCR générique, la validation sur véritables modèles externes et la factorisation de tout le code historique restent signalées comme éléments non démontrés. Aucune conclusion n'est faite sur le potentiel général de AAM.
+
+\section{Conclusion et statut du modèle}
+O94\_1 ajoute une chaîne testable pour intégration de modèles et une première observation comportementale active par I/O structuré. La portée validée doit rester bornée aux tests réellement exécutés. Les fonctions de capture d'interface graphique, clonage algorithmique général, OCR/composition multimodale apprise et migration/déploiement autonomes ne doivent être déclarées complètes qu'après leur adaptateur dédié, test sur cas indépendants et audit de sécurité. Le statut de phase et les hashes de chaque document constituent la source autoritative des livrables.
+
+\section{Rapport P7 — démarrage autonome et intégrité du journal}
+\subsection{Description}
+P7 traite le signalement utilisateur : le fichier BAT ouvrait une console qui disparaissait sans montrer l'UI. Le premier diagnostic a reproduit un contrôle de pré-démarrage bloqué, avant la création de la fenêtre Tk.
+
+\subsection{Architecture}
+Le lanceur Windows appelle Python, vérifie la version et Tk/Tcl, journalise le préflight, puis appelle \texttt{python -m aam\_o93 ui}. Le préflight utilise \texttt{chemins\_O94.json} et \texttt{o941\_phase\_gate.py}; celui-ci exige le manifeste \texttt{sav\_AAM\_O94\_1/savepoint\_manifest.json}. Le paquet modèle avait indiqué une copie dans un ZIP voisin de suivi, qui ne se trouve pas dans une extraction isolée.
+
+\subsection{Pipeline complet}
+\begin{enumerate}
+\item Lire les chemins, la checklist de phases et les registres d'erreurs avant l'exécution.
+\item Reproduire le blocage : sauvegarde de phase déclarée mais absente dans l'arbre du modèle extrait seul.
+\item Copier la sauvegarde versionnée, y compris son manifeste et ses instantanés, dans le paquet modèle.
+\item Faire pointer le contrôle runtime vers le chemin local; garder la copie d'archive externe pour le suivi.
+\item Rendre le BAT diagnostique : préflight JSON préalable, journal persistant, impression du journal et pause si code de sortie non nul.
+\item Relancer le test de l'UI; une régression a ensuite décelé une course concurrente dans le journal historique O92 lors de l'écriture simultanée par la boucle autonome et l'entraînement.
+\item Sérialiser le cycle lecture-du-hash / allocation de séquence / écriture de ligne de \texttt{HashChainJournal}, puis rejouer les tests UI et d'entraînement.
+\end{enumerate}
+
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python -m aam_o93.preflight
+python -m aam_o93 --workspace <dossier-temporaire> status
+xvfb-run -a python -m pytest -q tests/test_o941_standalone_startup.py tests/test_p0_foundation.py tests/test_o931_ui_smoke.py tests/test_o94_base_blocks.py tests/test_o941_runtime_integration.py tests/test_o941_model_integration.py tests/test_o941_blackbox.py
+python scripts/o941_verify_savepoint.py
+\end{verbatim}
+Le BAT a aussi été contrôlé statiquement; aucun shell Windows natif n'est disponible dans l'environnement de construction pour exécuter directement le fichier batch.
+
+\subsection{Résultats}
+Le préflight du dossier modèle seul passe en \texttt{PASS\_BOUNDED}. Les 497 chemins du manifeste de sauvegarde possèdent un instantané correspondant dont le SHA-256 concorde. Le contrôle de démarrage CLI retourne la version 0.94.1, l'autonomie démarrée et la mémoire d'événements disponible. Le test du flux de commande \texttt{ui}, exécuté sous Xvfb avec arrêt automatique réservé au test, traverse le vrai routage CLI et la vraie classe Tk. Après correction du journal concurrent, le lot ciblé rend \texttt{27 passed}; le premier échec reste conservé dans \texttt{P7\_regression\_receipt.json} et le retest est consigné dans \texttt{P7\_regression\_final\_receipt.json}.
+
+\subsection{Interprétation}
+La cause du défaut de démarrage était un contrat de conditionnement incohérent entre un livrable annoncé autonome et un fichier de contrôle exigeant une ressource dans l'archive sœur. Le défaut du journal était séparé : plusieurs fils pouvaient calculer le même dernier hash et écrire la ligne sans verrou. Les tests passent après les deux correctifs; la validation native sur Windows reste à exécuter sur la machine cible.
+
+\subsection{Conséquences théoriques, conceptuelles et opérationnelles}
+Théoriquement, les contrôles d'intégrité du démarrage doivent avoir les mêmes racines et chemins que la distribution. Conceptuellement, l'audit de package fait partie du runtime : une bonne UI ne peut pas démarrer si son contrat de préflight est impossible à satisfaire dans le paquet livré. Opérationnellement, l'archive modèle inclut la sauvegarde nécessaire, les journaux de lancement sont conservés et les ajouts concurrents au journal sont sérialisés. Le BAT garde sa console ouverte lorsque le runtime échoue.
+
+\subsection{Conclusion et statut du modèle}
+P7 est clos pour les critères reproductibles dans cet environnement : préflight d'extraction autonome, CLI, UI Tk sous affichage virtuel, intégrité du snapshot et régression ciblée. Statut : \texttt{COMPLETE\_EVIDENCED\_BOUNDED}. La véritable exécution du BAT doit encore être confirmée sous Windows avec Python 3.11+ et Tk/Tcl disponibles; les erreurs et leurs retests sont conservés sans effacer la première tentative.
+
+\end{document}

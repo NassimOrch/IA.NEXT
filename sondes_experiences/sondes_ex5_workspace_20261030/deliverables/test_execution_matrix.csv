@@ -1,0 +1,19 @@
+version,command,status,result
+v001,python tests/test_ex5_final_integrity.py,PASS,"overall_pass=true; checksums, metrics, ratios and freeze semantics conform"
+v001,python tests/test_adam_freeze_semantics.py,PASS,strict skip-step semantics and negative controls logged
+v002,python tests/test_alternating_freeze.py,PASS,strict A/B frozen-state invariance; forward(X)
+v002,python tests/test_adam_freeze_semantics.py,PASS,Adam state semantics controls recorded
+v003,python tests/test_external_split.py,PASS,disjoint splits; no test tensor before freeze
+v004,pytest -q tests,PASS,2 passed
+v005,pytest -q tests,PASS,1 passed
+v006,pytest -q tests,PASS,3 passed; PCA/vectorized artifacts audited
+v007,three test_profile_integrity.py functions invoked individually,PASS_INDIVIDUALLY,all 3 functions passed; full pytest collection exceeded command window and is not claimed PASS
+workspace,pytest -q tests/test_oof_mlp_pairing.py tests/test_oof_artifacts_complete.py,PASS,4 passed; full OOF artifact and exact MLP linkage tests
+workspace,python scripts/audit_oof_artifacts_ex5.py,PASS,162 manifest entries; 25/25 folds; 10/10 composite checkpoints; 20/20 MLP links; no missing artifact
+global,python scripts/audit_integrite_global_ex5.py,PASS,1850 version JSON; 1720 JSONL lines; 1313 checkpoint refs; 1162 canonical prediction refs; 826 metric recalculations; 437 ge4x links; zero mismatches
+workspace,python scripts/build_variant_catalogue_ex5.py,PASS,338 candidate registry pairs; 53 JSONL registries; v001–v007 indexed
+workspace,python scripts/final_workspace_integrity_audit.py,PASS,3951 non-cache files; 1865 JSON; 1720 JSONL lines; 61 rectangular CSV; prompt hashes and path containment pass
+v001 legacy,python tests/test_ex5_integrity.py,OBSOLETE_FAIL,old shared prediction pointers superseded; use test_ex5_final_integrity.py; originals retained
+EX4 v007 legacy,historical old-registry test,DOCUMENTED_FAIL,95 rows in mixed historical registry vs old expectation 70; filtered historical audit retained
+v007 backend,"TorchScript optimized / Numba v1,v2",EXPECTED_EXCLUSION,optimized parity exceeds 1e-6; Numba v1 invalid primitive; Numba v2 probe parity 1/5; not accepted backend
+EX5 global red rule,accuracy/log-loss plus every resource dimension,NOT_MET,no candidate satisfies predictive non-inferiority and all measured end-to-end resource dimensions

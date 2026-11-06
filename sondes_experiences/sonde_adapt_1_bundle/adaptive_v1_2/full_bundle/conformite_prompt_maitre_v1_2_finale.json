@@ -1,0 +1,134 @@
+{
+  "prompt": "PROMPT MAÎTRE — EXPÉRIMENTATION SCIENTIFIQUE NGeGenBrain",
+  "version": "final_v1_2",
+  "status": "PASS_WITH_LIMITATIONS",
+  "items": [
+    {
+      "requirement": "sources_obligatoires",
+      "status": "CONFORME",
+      "evidence": [
+        "references/NGeGenBrain_observation_formalisme_full_0.tex",
+        "references/rapport_experience_sondes_adaptatives.tex"
+      ],
+      "limitation": "SHA-256 copies confirmed against source files."
+    },
+    {
+      "requirement": "tracabilite_sonde_RBF",
+      "status": "CONFORME_AVEC_DISTINCTION",
+      "evidence": [
+        "formalisme_sonde_adaptative.tex",
+        "src/strict_models_v1_2.py"
+      ],
+      "limitation": "RBF is explicit experimental instantiation; source formalism does not prescribe RBF or learning."
+    },
+    {
+      "requirement": "A_sonde_adaptative",
+      "status": "CONFORME_DANS_PERIMETRE_TESTE",
+      "evidence": [
+        "results/strict_isolation_classification_v1_2_by_seed.csv"
+      ],
+      "limitation": "4 tasks x 3 new seeds x 4 methods."
+    },
+    {
+      "requirement": "B_mecanisme_appris",
+      "status": "PARTIEL",
+      "evidence": [
+        "results/strict_isolation_meta_rates_v1_2.csv",
+        "results/vitesses_adaptation_apprises.csv"
+      ],
+      "limitation": "Group-wise update rates meta-learned by hypergradient; optimizer not discovered from zero."
+    },
+    {
+      "requirement": "C_imitation_boite_noire",
+      "status": "CONFORME_DANS_FAMILLE_TESTEE",
+      "evidence": [
+        "results/strict_isolation_imitation_v1_2_by_target.csv",
+        "results/strict_isolation_imitation_v1_2_predictions_evaluation_only.csv"
+      ],
+      "limitation": "81 fits, nine artificial targets, three activation families; test domain limited."
+    },
+    {
+      "requirement": "D_neurone_reference",
+      "status": "CONFORME_COMME_BASELINE",
+      "evidence": [
+        "results/strict_isolation_classification_v1_2_by_seed.csv",
+        "results/strict_isolation_composition_v1_2_by_seed.csv"
+      ],
+      "limitation": "MLP source/reference; composition keeps original readout."
+    },
+    {
+      "requirement": "composition",
+      "status": "CONFORME_REMPLACEMENT_LOCAL",
+      "evidence": [
+        "results/strict_isolation_composition_v1_2_by_seed.csv",
+        "results/strict_isolation_component_fidelity_v1_2_by_unit.csv"
+      ],
+      "limitation": "96 component probes, 18 replacement conditions; not autonomous network reconstruction."
+    },
+    {
+      "requirement": "cas_usage_reel",
+      "status": "PARTIEL",
+      "evidence": [
+        "rapport_supplement_cas_reel_digits.pdf",
+        "rapport_experience_sondes_adaptatives_final_v1_2.pdf"
+      ],
+      "limitation": "Public compact benchmarks, not production/clinical validation."
+    },
+    {
+      "requirement": "anti_fuite",
+      "status": "CONFORME_AUX_CONTROLES_EXECUTES",
+      "evidence": [
+        "audit/strict_isolation_classification_v1_2_audit.json",
+        "audit/strict_isolation_imitation_v1_2_audit.json",
+        "audit/strict_isolation_composition_v1_2_audit.json"
+      ],
+      "limitation": "All recorded access checks pass; cannot prove no imaginable covert channel."
+    },
+    {
+      "requirement": "replay_inference",
+      "status": "CONFORME",
+      "evidence": [
+        "audit/strict_isolation_v1_2_inference_replay.json"
+      ],
+      "limitation": "18/18 frozen inference outputs byte-identical."
+    },
+    {
+      "requirement": "integrite_livraison",
+      "status": "CONFORME_AUX_CONTROLES_EXECUTES",
+      "evidence": [
+        "audit/audit_integrite_livraison_finale_v1_2.json",
+        "manifest_checksums.json"
+      ],
+      "limitation": "File hashes, schemas, uniqueness, counts, PDF and ZIP verified; checks do not prove scientific truth."
+    },
+    {
+      "requirement": "rapport_et_code",
+      "status": "CONFORME_POUR_REEXECUTION",
+      "evidence": [
+        "rapport_experience_sondes_adaptatives_final_v1_2.pdf",
+        "rapport_experience_sondes_adaptatives_final_v1_2.tex",
+        "src/",
+        "requirements.txt"
+      ],
+      "limitation": "Training weights not present when not originally saved; no checkpoints fabricated."
+    }
+  ],
+  "v1_2_counts": {
+    "classification_evaluations": 48,
+    "classification_predictions": 13392,
+    "imitation_fits": 81,
+    "imitation_predictions": 324000,
+    "component_models": 96,
+    "composition_systems": 6,
+    "composition_conditions": 18,
+    "composition_predictions": 4752,
+    "inference_replay_identical": 18
+  },
+  "scientific_limitations": [
+    "B only meta-learns group-wise update rates.",
+    "RBF is an explicit instantiation of the abstract observation formalism, not specified directly by full_0.",
+    "Composition keeps the source readout and does not demonstrate autonomous reconstruction.",
+    "Only limited activation families, tasks, seeds, and compact public benchmarks were tested.",
+    "OS access checks do not prove absolute absence of covert channels."
+  ]
+}

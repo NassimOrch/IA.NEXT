@@ -1,0 +1,162 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.25cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{float}
+\definecolor{bleu}{HTML}{174A70}
+\hypersetup{colorlinks=true,linkcolor=bleu,urlcolor=bleu,pdftitle={Rapport expérimental : réseau neuronal et sondes adaptatives},pdfauthor={NGeGenBrain}}
+\pagestyle{fancy}\fancyhf{}\lhead{NGeGenBrain -- expérience exploratoire}\rhead{Sondes adaptatives}\cfoot{\thepage}\setlength{\headheight}{14pt}
+\title{\vspace{-1.0cm}\color{bleu}\bfseries Rapport expérimental\\[0.3em]\Large Comparaison d'un réseau neuronal et d'un ensemble de sondes adaptatives}
+\author{Expérience reproductible pour NGeGenBrain}
+\date{28 octobre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Nous testons une idée : une sonde, initialement conçue pour observer une entrée et produire une réponse, peut-elle devenir un élément apprenant si elle adapte ses paramètres en fonction de l'erreur réalisée sur une tâche ? Pour examiner cette idée sans prétendre résoudre d'emblée le problème de la reconstruction d'un grand modèle de langage (LLM), nous avons comparé sur une tâche de classification non linéaire synthétique (a) un petit réseau neuronal, (b) un ensemble de sondes radiales adaptatives et (c) une ablation où les sondes ne peuvent pas adapter leur position ni leur largeur. Les deux premiers modèles disposent exactement de 49 paramètres entraînables. Sur cinq initialisations, les sondes adaptatives atteignent une précision moyenne de 96,005\%, proche des 95,870\% du réseau neuronal. Le réseau neuronal obtient toutefois un AUC et un log-loss légèrement meilleurs. L'ablation à sondes fixes atteint 86,230\% de précision. Ce résultat préliminaire montre que l'adaptation des sondes est utile dans ce montage précis ; il ne prouve ni la supériorité générale des sondes, ni la reconstruction mécaniste d'un LLM.
+\end{abstract}
+
+\section{Question et hypothèse}
+La question expérimentale est la suivante : \emph{si des sondes sont dotées d'une partie adaptative, peuvent-elles apprendre à réaliser une tâche comparable à celle confiée à un petit réseau neuronal ?}
+
+Hypothèses testées :
+\begin{enumerate}[leftmargin=1.5em]
+  \item Un ensemble de sondes adaptatives peut apprendre une frontière de décision non linéaire à partir d'exemples étiquetés.
+  \item Avec un nombre de paramètres entraînables identique, ses résultats peuvent être comparés à ceux d'un réseau neuronal simple.
+  \item Si les centres et les largeurs des sondes restent fixes, la performance peut se dégrader, ce qui donnerait une indication de l'utilité de cette adaptation.
+\end{enumerate}
+Il s'agit d'une expérience de preuve de concept. Elle porte sur une tâche artificielle et contrôlée ; elle n'observe pas de neurones internes d'un LLM et ne reconstruit pas un LLM.
+
+\section{Tâche et données}
+Nous avons utilisé le jeu synthétique \texttt{two moons} : deux classes de points en deux dimensions formant deux lunes imbriquées. La séparation entre les classes n'est pas linéaire, ce qui impose d'apprendre une frontière courbe.
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Jeu d'entraînement : 1\,200 points, graine de génération 20261028.
+  \item Jeu de test indépendant : 4\,000 points, graine de génération 20261029.
+  \item Bruit des données : 0,22.
+  \item Les variables d'entrée sont standardisées à partir des seules données d'entraînement ; les paramètres de standardisation sont ensuite appliqués au jeu de test. Cela évite d'utiliser les données de test pour préparer l'entraînement.
+\end{itemize}
+Le jeu de test reste identique entre les cinq initialisations de chaque modèle. Les graines d'initialisation des modèles sont 101, 202, 303, 404 et 505.
+
+\section{Formalisation des systèmes comparés}
+\subsection{Modèle A : réseau neuronal}
+Le réseau reçoit un vecteur d'entrée $x\in\mathbb{R}^2$, calcule douze activations cachées avec une fonction tangente hyperbolique, puis produit un logit :
+\[
+ h(x)=\tanh(Wx+b),\qquad z(x)=v^\top h(x)+a.
+\]
+La probabilité prédite de la classe 1 est $\hat p(x)=\sigma(z(x))$, où $\sigma(u)=1/(1+e^{-u})$. Le modèle compte $2\times12+12+12+1=49$ paramètres entraînables.
+
+\subsection{Modèle B : ensemble de sondes adaptatives}
+Chaque sonde $j$ est une fonction de proximité radiale. Elle reçoit l'entrée $x$ et renvoie un degré de réponse :
+\[
+ P_j(x;c_j,\sigma_j)=\exp\!\left(-\frac{\lVert x-c_j\rVert^2}{2\sigma_j^2}\right),
+\]
+où $c_j\in\mathbb{R}^2$ est le centre appris et $\sigma_j>0$ est la largeur apprise. Les réponses des douze sondes sont combinées :
+\[
+ z(x)=b+\sum_{j=1}^{12} w_j P_j(x;c_j,\sigma_j),
+ \qquad \hat p(x)=\sigma(z(x)).
+\]
+La partie adaptative est constituée des centres $c_j$, des largeurs $\sigma_j$ (optimisées en pratique par leurs logarithmes), des poids $w_j$ et du biais $b$. Le total est $12\times2+12+12+1=49$ paramètres entraînables.
+
+\subsection{Comment l'adaptation se produit-elle ?}
+Pour chaque exemple d'entraînement $(x_i,y_i)$, le système produit une prédiction $\hat p_i$. La perte binaire mesure l'écart entre cette prédiction et la cible $y_i\in\{0,1\}$ :
+\[
+ \mathcal L=-\frac1N\sum_{i=1}^N\left[y_i\log\hat p_i+(1-y_i)\log(1-\hat p_i)\right].
+\]
+L'optimiseur calcule des gradients et met à jour les paramètres :
+\[
+ \theta_{t+1}=\operatorname{Adam}\bigl(\theta_t,\nabla_{\theta}\mathcal L\bigr).
+\]
+Ainsi, les sondes ne sont plus seulement des instruments fixes qui observent : leurs centres et leurs échelles de réponse changent selon l'erreur de la tâche. Cette adaptation est supervisée : l'étiquette correcte est fournie pendant l'entraînement. Elle n'est pas une capacité d'apprentissage autonome sans signal de retour.
+
+\subsection{Modèle C : sondes fixes, ablation}
+Nous avons aussi testé douze sondes radiales dont les centres sont tirés aléatoirement au départ et dont les largeurs restent égales à 1. Seuls les douze poids de combinaison et le biais apprennent, soit 13 paramètres entraînables. Cette ablation sert à évaluer l'effet d'une capacité adaptative dans ce montage, mais elle n'a pas la même capacité d'apprentissage que les deux modèles à 49 paramètres. Il faut donc interpréter cette comparaison comme un test de mécanisme, et non comme une comparaison à capacité égale.
+
+\section{Protocole de bout en bout}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Générer les mêmes jeux d'entraînement et de test pour toutes les méthodes.
+  \item Ajuster la standardisation sur l'entraînement uniquement, puis transformer les deux jeux.
+  \item Initialiser chaque modèle avec chacune des cinq graines fixées.
+  \item Entraîner chaque modèle pendant 500 époques en traitement par lot complet (full-batch), avec Adam, taux d'apprentissage 0,02 et pénalisation $L_2$ de poids 0,0001.
+  \item Employer la même fonction de perte binaire pour les trois modèles.
+  \item Évaluer les probabilités sur les 4\,000 exemples de test jamais utilisés pour mettre à jour les paramètres.
+  \item Calculer précision, F1, aire sous la courbe ROC (AUC) et log-loss, puis résumer la moyenne et l'écart-type sur cinq initialisations.
+\end{enumerate}
+Les hyperparamètres n'ont pas été optimisés séparément pour avantager un modèle. Le nombre d'époques, l'optimiseur, le taux d'apprentissage, la régularisation, les données et la fonction de perte sont communs. Même ainsi, les deux architectures ont des géométries et des paysages d'optimisation différents : ce n'est pas une comparaison de toutes leurs variantes possibles.
+
+\section{Résultats}
+Les valeurs ci-dessous sont des moyennes $\pm$ écarts-types d'échantillon sur cinq initialisations ; les métriques sont évaluées sur le même jeu de test de 4\,000 exemples.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{3.0cm}r r r r r}
+\toprule
+\textbf{Modèle} & \textbf{Param.} & \textbf{Précision (\%)} & \textbf{AUC} & \textbf{Log-loss} & \textbf{F1 (\%)}\\
+\midrule
+Réseau neuronal MLP & 49 & $95,870\pm0,067$ & $0,99189\pm0,00049$ & $0,11086\pm0,00296$ & $95,901\pm0,067$\\
+Sondes adaptatives RBF & 49 & $96,005\pm0,054$ & $0,99064\pm0,00012$ & $0,11740\pm0,00081$ & $96,033\pm0,055$\\
+Sondes fixes (ablation) & 13 & $86,230\pm0,736$ & $0,91991\pm0,00831$ & $0,35498\pm0,01849$ & $86,379\pm0,700$\\
+\bottomrule
+\end{tabular}
+\caption{Résultats moyens. Pour précision et F1, l'écart-type est exprimé en points de pourcentage. Plus l'AUC est élevée, mieux le classement des exemples est séparé ; plus le log-loss est faible, mieux les probabilités prédites correspondent aux étiquettes.}
+\end{table}
+
+\subsection{Lecture des résultats}
+\begin{itemize}[leftmargin=1.5em]
+  \item La précision des sondes adaptatives est supérieure de 0,135 point de pourcentage à celle du MLP (96,005\% contre 95,870\%). L'écart est faible : il ne permet pas de conclure à une supériorité générale.
+  \item Le MLP a une AUC moyenne plus élevée (0,99189 contre 0,99064) et un log-loss plus bas (0,11086 contre 0,11740). Sur ces critères, il obtient donc de meilleurs résultats dans cette expérience.
+  \item L'ablation des sondes fixes atteint une précision plus faible de 9,775 points par rapport aux sondes adaptatives. Cela concorde avec l'idée que déplacer les centres et ajuster les largeurs apporte une capacité utile sur cette tâche. Cependant, le modèle fixe n'a que 13 paramètres entraînables contre 49 : cette différence contribue aussi au résultat.
+  \item Les écarts-types entre initialisations sont faibles pour les deux modèles à 49 paramètres. Comme les données de test sont identiques d'une initialisation à l'autre, ces écarts-types mesurent surtout la sensibilité à l'initialisation et ne constituent pas, à eux seuls, un intervalle de confiance sur toutes les données possibles.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{frontieres_decision_sondes.png}
+\caption{Frontières de décision illustratives pour une initialisation fixe. Les régions colorées indiquent la classe prédite ; les points sont les exemples de test. Le graphique illustre la forme de la frontière, mais les métriques tabulées, calculées sur cinq initialisations, constituent le résumé quantitatif.}
+\end{figure}
+
+\section{Conclusion scientifique}
+Cette expérience valide une idée limitée mais utile : \textbf{des sondes dotées de paramètres adaptatifs peuvent apprendre une tâche non linéaire et obtenir, dans ce banc d'essai, des performances proches d'un petit réseau neuronal ayant le même nombre de paramètres entraînables}. L'ablation suggère que l'adaptation des centres et des largeurs est importante pour ce modèle de sondes.
+
+Elle ne démontre pas que les sondes sont fondamentalement différentes des neurones au sens mathématique. Ici, les sondes radiales adaptatives constituent elles-mêmes une architecture de calcul apprenable, apparentée à un réseau à fonctions de base radiales. Le terme « sonde » décrit la manière dont nous interprétons ses réponses ; il ne suffit pas à créer une différence mathématique avec une unité de réseau.
+
+\section{Lien avec NGeGenBrain}
+Le résultat suggère une piste d'ingénierie pour NGeGenBrain : définir des sondes comme des composants opérationnels qui (i) reçoivent une entrée ou un état observé, (ii) produisent une réponse mesurable, (iii) conservent des paramètres adaptatifs, (iv) révisent ces paramètres à partir d'un critère d'erreur explicite, et (v) peuvent être assemblés par composition avec d'autres composants.
+
+Un futur essai plus proche de l'objectif général devrait observer un système source sur une tâche donnée, apprendre des sondes ou composants à partir des observations, composer un mécanisme candidat puis comparer ce mécanisme au système source sur des exemples et interventions non utilisés pour l'apprentissage. Il faudrait conserver les contextes, les traces et les incertitudes, et examiner si les différences sont localisables à un composant ou à une règle de composition.
+
+\section{Limites et prochaines expériences}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Répéter l'expérience avec plusieurs graines de génération de données, et pas seulement plusieurs initialisations des paramètres.
+  \item Réaliser une comparaison de budget plus complète : temps de calcul, nombre d'exemples, nombre de paramètres, et recherche d'hyperparamètres identique pour chaque famille.
+  \item Tester plusieurs tâches : XOR, cercles concentriques, données bruitées, tâches temporelles et tâches avec changements de contexte.
+  \item Ajouter des ablations séparant l'apprentissage des centres, des largeurs et des poids ; tester aussi des centres initialisés à partir des données au lieu d'une initialisation aléatoire.
+  \item Passer ensuite à une tâche d'observation d'un système source réel, en précisant exactement ce qui est observable et ce qui ne l'est pas. Pour un LLM, une sortie textuelle seule ne donne pas directement accès aux activations internes de ses neurones.
+\end{enumerate}
+
+\section{Reproductibilité et artefacts}
+Le script Python fourni avec ce rapport fixe les graines, construit les données, entraîne les trois modèles et écrit les résultats sous forme CSV et JSON. Les fichiers associés sont :
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{experience\_sondes\_adaptatives.py} : code complet de l'expérience ;
+  \item \texttt{resultats\_experience\_sondes.csv} : résultats par modèle et graine ;
+  \item \texttt{synthese\_experience\_sondes.json} : paramètres du protocole et statistiques récapitulatives ;
+  \item \texttt{frontieres\_decision\_sondes.png} : visualisation ;
+  \item \texttt{rapport\_experience\_sondes\_adaptatives.tex} : source de ce rapport.
+\end{itemize}
+Pour réexécuter le script, installer les dépendances \texttt{numpy}, \texttt{torch}, \texttt{scikit-learn} et \texttt{matplotlib}, puis lancer :
+\begin{quote}\ttfamily python experience\_sondes\_adaptatives.py\end{quote}
+
+\bigskip
+\noindent\textbf{Verdict final.} Les résultats sont encourageants pour une expérience exploratoire : les sondes adaptatives apprennent une représentation utile sur une tâche contrôlée. La prochaine étape n'est pas d'affirmer qu'une sonde remplace un neurone, mais de déterminer quelles familles de sondes, quelles règles d'adaptation et quelles compositions donnent des mécanismes reproductibles, mesurables et vérifiables.
+\end{document}

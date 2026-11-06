@@ -1,0 +1,111 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{booktabs,longtable,hyperref,url,xurl,enumitem,xcolor}
+\emergencystretch=2em
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Laboratoire expérimental AAM O94.6}
+\author{Protocole, essais reproduisibles et interprétation des résultats}
+\date{20 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Question scientifique et périmètre}
+Ce laboratoire n'affirme pas d'avance que AAM réussira ou échouera. Il définit des épreuves réelles, garde les sources et oracles séparés, conserve les observations brutes et analyse chaque écart. L'objectif opérationnel est de tester le passage entre observation, recherche, modèle intégré, composition, compilation, résolution itérative et chat.
+
+\section{Répertoire de preuve et méthode anti-contamination}
+\begin{enumerate}[leftmargin=1.5em]
+\item Les entrées d'essai sont écrites dans \path{real_task_tests/O94_6_replay/}; les oracles d'acceptation sont dans \path{real_task_tests/O94_6_replay/oracles/} et ne sont pas chargés par AAMRuntime.
+\item Avant un run, enregistrer versions, commandes, temps, hashes, état des sources RAG et snapshot.
+\item Capturer stdout, stderr, code de sortie, statut, sources retournées et trace mémoire.
+\item Garder tout échec, timeout ou test bloqué comme événement distinct; ne jamais transformer automatiquement \texttt{UNRESOLVED} ou \texttt{TIMEOUT} en succès.
+\item Faire tourner les tests UI sous Xvfb dans ce conteneur; une validation locale côté utilisateur se fait sur sa machine, qui n'est pas accessible à distance depuis cette session.
+\end{enumerate}
+
+\section{Phase P0 — reproduire la référence O94.5}
+La baseline a été réexécutée et conservée dans les reçus P0. Elle comportait des confusions d'entité: par exemple, une question sur GB-42 produisait une réponse de JP-19. Une requête multi-question répondait à seulement une des trois sous-questions. Ces résultats historiques restent intactes dans \path{real_task_tests/O94_5_baseline/evidence/}.
+
+\section{Phase P1 — pertinence RAG par entité}
+Jeu d'entités indépendantes GB-42 et FR-27. Sept prompts historiques sont évalués avec un oracle indépendant. O94.6 rend sept réponses correctes sur sept dans la campagne d'évaluation; exemples: GB-42 est affectée à Warehouse South, consigne -12 C, cycle 21 jours; FR-27 est Warehouse North, consigne -8 C, cycle 14 jours; Q7.4 demande isolation si la température dépasse -10 C pendant plus de six minutes et notification de l'ingénieur de garde. La source porte un hash et la sélection de passage est enregistrée. Ce test mesure la recherche/extraction depuis le corpus, pas la qualité d'un LLM.
+
+\section{Phase P2 — multi-question et synchronisation du chat}
+Une seule requête demande le dépôt, le point de consigne et la fréquence d'inspection pour GB-42. Trois enfants sont créés et donnent trois sorties ordonnées avec leurs preuves. Une deuxième question demande les attributs de VX-318 et attend Juniper, -11.5 C et 17 jours. L'oracle est uniquement utilisé après le retour d'AAM.
+
+\section{Phase P3 — génération longue et gestion des délais}
+Le scénario de sortie longue construit 600 segments et vérifie conservation complète et visibilité des marqueurs de début/fin. La réponse complète possède 58 199 caractères, hash \path{fa0c90e8de700034df9f1a935864e6cbee1401c5f436cafe5e30661528e514fd}, durée observée de 3,2248 s et un transcript visible de 58 443 caractères. Le fournisseur est une fixture de protocole déterministe, pas un LLM. Des tests séparés vérifient timeout réseau explicite, absence de modèle et erreurs fournisseur visibles.
+
+\section{Phase P4 — composition, compilation et éditeur multi-fichiers}
+La composition JSON de contrôle qualité contient dix nœuds et trois catégories de briques validées. Elle compile en code source Python et bytecode CPython puis s'exécute sur un projet multi-fichiers; les tests cible passent. Le programme de maintenance traite quatre objets et le vérificateur indépendant recalcule les jours de retard et les classes d'action. Le mini-éditeur multi-fichiers produit par le scénario compile quatre modules sans échec et passe cinq tests. Une variante modifiée change le comportement et est recompilée. Les hashes sont dans \path{real_task_tests/O94_6_replay/evidence/}.
+
+\section{Phase P5 — observation d'un processus de facturation}
+Le programme cible exécute validation de schéma, normalisation de lignes, remise, frais d'expédition, TVA avec arrondi décimal et finalisation. La capture l'exécute en sous-processus, sans importer le code cible dans le moteur. Huit paires sont observées; six appartiennent à l'entraînement et se rejouent exactement, deux sont gardées à l'écart et restent \texttt{UNRESOLVED}. Les checkpoints et la capsule sont stockés. Le réplicateur n'a pas généralisé à ces deux entrées: cette observation est un résultat de test, pas un échec présumé du potentiel général d'AAM.
+
+\section{Phase P6 — résolution continue et récompense}
+Le runtime résout une tâche depuis un passage local, puis un vérificateur indépendant valide une contrainte après la sortie. Les traces établissent une provenance source et un événement de récompense. Les tests montrent des dimensions distinctes pour retour humain, réussite opérationnelle et vérité vérifiée; une erreur fournisseur pénalise la fiabilité de la capacité de génération, tandis que le statut non résolu ne devient pas une assertion factuelle.
+
+\section{Essais complémentaires P7 — sorties brutes du chat}
+\subsection{RAG sans modèle intégré}
+Prompt: \texttt{Which warehouse is assigned to service card XD-620?}. Réponse exacte: \texttt{Service card XD-620: the assigned warehouse is Willow Quay.} Hash de réponse: \path{b34c625599e193637221436e557d92c782af199c4ea1d0a370d8e7f358345265}.
+
+\subsection{Fournisseur intégré et RAG}
+Prompt: \texttt{What is the set point for service card XD-620?}.
+
+Réponse brute:
+\begin{quote}\ttfamily\small\raggedright
+Generated from supplied test context: [[P7\_independent\_service\_card\_source.txt\#0:9867ac27e6]] Service card XD-620: the assigned warehouse is Willow Quay. The set point is -14.5 C.
+\end{quote}
+Hash: \path{27a8d809e411632532d9afade90b72535367e3c019d6fdda7bddd5f65423a4d3}. Le fournisseur est une fixture de test à extraction générique du contexte, non un modèle de langage.
+
+\subsection{Modèle de test sans RAG}
+Prompt: \texttt{Please give a short status sentence for this diagnostic request.}. Réponse: \texttt{Generated from supplied test context: AUCUNE PREUVE RAG LOCALE N'A ÉTÉ RETROUVÉE.} Statut \texttt{UNRESOLVED}; aucun fait externe n'a été inventé.
+
+\subsection{Trois questions dans un seul prompt}
+Prompt: \texttt{Which warehouse is assigned to service card XD-620? What is its set point? How often is its inspection interval?}. Réponse: (1) Warehouse Willow Quay; (2) -14.5 C; (3) every 19 days. Hash de sortie composée: \path{c19d6dce09ea6c8ff958d3d77f278253204ec1785f5b27d8f7b546d840ff8b1d}.
+
+\subsection{Exemple demandé: capitale du Japon}
+La fiche indépendante \path{real_task_tests/O94_6_replay/evidence/P7_capital_japan_independent_source.txt} a le SHA-256 \path{85a7c7851b8dc32cf5aacef8fb206b3ab3bed159bc423faebae092772b3334f6} et contient « the capital city of Japan is Tokyo ».
+
+Prompt : \texttt{What is the capital of Japan?}
+
+Sans modèle intégré, avec RAG:
+\begin{quote}\ttfamily\small
+Geography reference JPN-104: the capital city of Japan is Tokyo.
+\end{quote}
+SHA-256 de la sortie : \path{7f06ba3883681a8c5e40956b73a9f49a5d6d353923c542b791ebea94fa6f3269}.
+
+Avec l'adaptateur de contrat et RAG:
+\begin{quote}\ttfamily\small\raggedright
+Context-grounded test response: [[P7\_capital\_japan\_independent\_source.txt\#0:85a7c7851b]] Geography reference JPN-104: the capital city of Japan is Tokyo.
+\end{quote}
+SHA-256 : \path{fd337a5e4d3b6dd8ed68099b6404a6bda489e03264dbe0fe2b6079da9940c4a1}.
+
+Sans RAG, l'adaptateur retourne \texttt{UNRESOLVED} et une réponse visible:
+\begin{quote}\ttfamily\small
+Context-grounded test response: AUCUNE PREUVE RAG LOCALE N'A ÉTÉ RETROUVÉE.
+\end{quote}
+SHA-256 : \path{352836c0abec2c585a0da8ce165e9e422fa72434cd54aa2e5ea5817c00d0f845}. Le reçu \path{real\_task\_tests/O94\_6\_replay/evidence/P7\_capital\_chat\_evidence.json} conserve les trois sorties. La fixture est générique et ne contient pas « Tokyo » dans le code adaptateur; le mot vient de la source. Il s'agit d'un test de routage RAG, pas d'une preuve qu'un LLM réel sait répondre sans corpus.
+
+\section{Phase P8 — restauration et paquetage}
+Le contrôle final doit partir d'un snapshot, exclure les bytecodes et sorties mutables du manifeste de source, vérifier les hashes/CRC après extraction propre puis lancer le préflight et les tests d'acceptation. Une suite groupée a parfois expiré alors que son test vidéo isolé passe; les deux observations sont conservées, et le timeout groupé reste dans le registre plutôt que d'être effacé.
+
+\section{Commandes de reproduction}
+Depuis la racine de l'archive extraite:
+\begin{verbatim}
+python scripts/preflight_o946.py
+python scripts/o946_replay_o945_regression.py \
+  --project-root . \
+  --experiment-dir real_task_tests/O94_6_replay
+python scripts/o946_compound_query_trial.py
+python scripts/o946_run_composition_quality_gate.py \
+  --project-root . \
+  --workspace examples/compositions/O94_6_quality_gate_demo \
+  --variant-limit 2
+python scripts/o946_observe_invoice_pipeline.py
+python scripts/o946_capture_capital_chat_evidence.py
+python scripts/o946_capture_long_generation_evidence.py
+\end{verbatim}
+
+\section{Conclusion et état}
+Les preuves démontrent des chemins opérationnels bornés: extraction RAG sur des identifiants séparés, orchestration multi-question, conservation de sortie longue via une fixture, compilation et exécution compositionnelles, observation d'une cible externe et rejeu exact sur les entrées vues. Les deux entrées facture hors entraînement restent non résolues; la génération longue et l'exemple Tokyo utilisent des fournisseurs de test, pas un vrai LLM. Le chargement du modèle SmolLM2 de l'utilisateur n'a pas pu être vérifié sans poids et dépendances disponibles. Les exécutions sur le PC de l'utilisateur nécessitent les commandes et instructions livrées; la session ne peut pas observer à distance son ordinateur.
+\end{document}

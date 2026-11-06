@@ -1,0 +1,24 @@
+\section{Matrice de qualification du but fonctionnel intégral}
+\label{sec:matrice-cible-aam}
+Le présent correctif O94.4 est une incrémentation contrôlée de O94.3. Les résultats ci-dessous ne permettent pas de déclarer que tous les cas d'usage du système AAM intégral sont déjà résolus. Le but intégral est formalisé dans \texttt{cible\_fonctionnelle\_AAM\_O94\_4.tex}; chaque capacité doit être promue au statut démontré après un essai distinct et une preuve de provenance.
+
+\begin{longtable}{p{0.20\linewidth}p{0.23\linewidth}p{0.19\linewidth}p{0.29\linewidth}}
+\toprule
+\textbf{Capacité cible} & \textbf{Preuve O94.4 disponible} & \textbf{Statut de couverture} & \textbf{Critère de qualification complémentaire}\\
+\midrule
+\endhead
+Adaptateurs de modèles & Backends natifs et adaptateur Python générique; tests de contrat local & \texttt{PASS\_BOUNDED} pour le pont Python; endpoints distants non certifiés & Charger un modèle réel représentatif, vérifier ses dépendances, génération, politique d'entraînement et intégration chat/RAG.\\
+Entraînement local compact & Corpus fourni : 8 707 fenêtres train et 1 708 validation utilisées par défaut; budgets facultatifs vérifiés & \texttt{PASS\_BOUNDED}; qualité générative générale non certifiée & Essais multi-domaines, lots de généralisation tenus à l'écart, analyse des avertissements et mesures de qualité.\\
+RAG sémantique & Scénario batterie/météo, seuil relatif et sélection d'une phrase de fréquence & \texttt{PASS\_BOUNDED} sur ce scénario & Corpus plus large/multilingue, requêtes ambiguës, négation, contradictions, mises à jour, documents multimodaux et évaluation de rappel/précision.\\
+Observation filesystem live & Événements d'ajout/modification et chaîne de hashes vérifiés & \texttt{PASS\_BOUNDED} sur filesystem local & Processus, fenêtre graphique, événements synchronisés et capteurs réels avec autorisation et reprise après interruption.\\
+Boîte noire/reproduction & Rejeu exact d'une entrée vue; entrée inconnue retournée \texttt{UNRESOLVED} & Démonstration limitée; généralisation non démontrée & Holdout inédit, comparaison différentielle, perturbations et preuve que la capsule n'appelle pas simplement l'outil observé.\\
+Composition et exécution & Graphe DSL sauvegardé, compilé sous forme déclarative et exécuté avec traces & \texttt{PASS\_BOUNDED}; pas de compilation native générale & Programme non trivial compilable dans un toolchain identifié, tests unitaires/intégration, analyse des effets de bord et cas non vus.\\
+Mémoire/arbre de résolution & Modules de mémoire, journal et arbre présents dans le modèle & Tests de régression partiels; cohérence de l'ensemble à approfondir & Cas multi-étapes avec hypothèses, preuves, réfutations, relations causales lisibles et reprise depuis sauvegarde.\\
+Récompense/punition et autonomie & Boucle autonome et journal d'événements présents & Intégration bornée; recherche autonome prolongée non certifiée & Expérience de récompense répétée montrant un changement traçable d'orchestration, mesure avant/après, mécanisme d'arrêt et absence d'auto-attribution de récompense.\\
+PDF style, migration SQL, programme ancien & Scénarios formalisés; pas de chaîne d'acceptation métier complète dans cette campagne & \texttt{UNVERIFIED} comme cas d'usage bout en bout & Exécuter chaque banc isolément, sur exemples réels autorisés, contre critères de fidélité et jeux de régression/holdout.\\
+OCR/vision/audio/vidéo/capteurs & Adaptateurs et ingestion partiels selon les modules et dépendances présentes & Pas de certification de capteur physique dans cette campagne & Au moins un chemin réel par modalité, puis reproduction sans dépendance directe à l'outil observé, avec holdout et provenance.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Interprétation et conséquences}
+\textbf{Théoriques :} une observation finie produit une hypothèse de comportement; l'équivalence et la généralisation exigent des contre-exemples et des entrées indépendantes. \textbf{Conceptuelles :} compétences, méthodes et règles ont des rôles distincts; les compositions doivent conserver leurs contrats et preuves. \textbf{Opérationnelles :} le correctif O94.4 peut être livré avec les tests réussis ci-dessus, mais le statut cible du système intégral reste un ensemble de capacités à qualifier, sans conclusion a priori sur son succès ou son échec. Chaque phase suivante devra ajouter des preuves positives ou des défauts observés, jamais masquer les éléments non testés.

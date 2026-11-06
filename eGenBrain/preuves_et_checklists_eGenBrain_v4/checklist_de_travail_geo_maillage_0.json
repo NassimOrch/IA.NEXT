@@ -1,0 +1,231 @@
+{
+  "project": "Étude et formalisation de la géométrie de maillage eGenBrain 0",
+  "protocol": "11 tours documentés; chaque exécution consulte chemins/checklists avant et journalise résultat/erreurs après; une phase n'est close que sur critères vérifiés.",
+  "state": "completed_final_snapshot_and_package_verified",
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Rétablir les chemins, le contrôle de source et les registres",
+      "status": "completed",
+      "exit_criteria": [
+        "chemins exacts",
+        "source hash/CRC confirmé",
+        "checklists d'erreurs présentes",
+        "anomalies de continuité consignées"
+      ],
+      "evidence": [
+        "chemins_geo_maillage_0.json",
+        "checklist_de_travail_geo_maillage_0.json",
+        "checklist_erreurs_no_model.json",
+        "checklist_erreurs_model.json",
+        "source_org.zip SHA-256 + CRC verified"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Inventorier les sources conceptuelles et leurs versions",
+      "status": "completed",
+      "exit_criteria": [
+        "archive source listée",
+        "v2/v3 et DDD formalismes extraits",
+        "manifestes SHA-256 créés"
+      ],
+      "evidence": [
+        "source_manifest.json",
+        "23 extracted source artifacts",
+        "v2/v3 runtime and DDD source files verified"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Extraire et formaliser les définitions héritées",
+      "status": "completed",
+      "exit_criteria": [
+        "source lineage documentée",
+        "définitions MG/ASCR/MGR/MGR2 et empreintes distinguées"
+      ],
+      "evidence": [
+        "theorie_de_maillage_eGenBrain_0.tex source-lineage sections",
+        "MG/ASCR/MGR/MGR2 and observation/rule geometry distinguished"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Définir le formalisme général du maillage",
+      "status": "completed",
+      "exit_criteria": [
+        "objets et opérateurs typés",
+        "hypothèses explicites",
+        "propositions avec preuves ou statut conjectural"
+      ],
+      "evidence": [
+        "theorie_de_maillage_eGenBrain_0.tex definitions and theorem proofs",
+        "hypotheses and non-claims explicitly labeled"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Construire et vérifier le laboratoire reproductible",
+      "status": "completed",
+      "exit_criteria": [
+        "11 tours distincts",
+        "JSON valides",
+        "résultats et limites conservés"
+      ],
+      "evidence": [
+        "laboratoire_theorie_de_maillage_eGenBrain_0.tex: eleven named tours",
+        "run_mesh_lab.py syntax-check passed; standard library only"
+      ]
+    },
+    {
+      "id": "P5",
+      "name": "Exécuter les 11 tours et intégrer les résultats solides",
+      "status": "completed",
+      "exit_criteria": [
+        "chaque tour exécuté",
+        "résultats reproductibles",
+        "aucun résultat synthétique présenté comme test v3"
+      ],
+      "evidence": [
+        {
+          "tour": "T01",
+          "status": "PASS",
+          "artifact": "experiments/tour_T01.json",
+          "integration_title": "Raffinement observationnel",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T02",
+          "status": "PASS",
+          "artifact": "experiments/tour_T02.json",
+          "integration_title": "Seuils hiérarchiques conditionnels",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T03",
+          "status": "PASS",
+          "artifact": "experiments/tour_T03.json",
+          "integration_title": "Superposition sans identité",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T04",
+          "status": "PASS",
+          "artifact": "experiments/tour_T04.json",
+          "integration_title": "Ordre observé distinct de causalité",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T05",
+          "status": "PASS",
+          "artifact": "experiments/tour_T05.json",
+          "integration_title": "Sémantique des hyperrègles",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T06",
+          "status": "PASS",
+          "artifact": "experiments/tour_T06.json",
+          "integration_title": "Arbitrage union/intersection",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T07",
+          "status": "PASS",
+          "artifact": "experiments/tour_T07.json",
+          "integration_title": "Isolation du maillage transitoire",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T08",
+          "status": "PASS",
+          "artifact": "experiments/tour_T08.json",
+          "integration_title": "Composition typée et unités",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T09",
+          "status": "PASS",
+          "artifact": "experiments/tour_T09.json",
+          "integration_title": "Composition relationnelle certifiée",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T10",
+          "status": "PASS",
+          "artifact": "experiments/tour_T10.json",
+          "integration_title": "Ablation topologique",
+          "compiled_after_integration": true
+        },
+        {
+          "tour": "T11",
+          "status": "PASS",
+          "artifact": "experiments/tour_T11.json",
+          "integration_title": "Nouveauté compositionnelle et limites de preuve",
+          "compiled_after_integration": true
+        }
+      ],
+      "completed_tours": 11,
+      "required_tours": 11,
+      "sequentially_integrated_tours": 11
+    },
+    {
+      "id": "P6",
+      "name": "Vérifier formalisme, LaTeX et cohérence mathématique",
+      "status": "completed",
+      "exit_criteria": [
+        "compilation sans erreurs fatales",
+        "lint JSON",
+        "contrôle des énoncés et hypothèses"
+      ],
+      "evidence": [
+        "formalism_validation.json: PASS; 4 compilation runs; 220 JSON files parsed; 106 nonfatal layout warnings recorded."
+      ]
+    },
+    {
+      "id": "P7",
+      "name": "Valider la traçabilité des sources et la provenance des résultats",
+      "status": "completed",
+      "exit_criteria": [
+        "chaque affirmation majeure tracée",
+        "SHA-256 des sources et artefacts",
+        "statuts de preuve séparés"
+      ],
+      "evidence": [
+        "preuves_geo_maillage_0.json; proof_registry_validation.json: PASS; 104 hash references, 66 line ranges, 11 tour results, 11 sequential integrations."
+      ]
+    },
+    {
+      "id": "P8",
+      "name": "Finaliser la checklist, le registre de preuves et les sauvegardes",
+      "status": "completed",
+      "exit_criteria": [
+        "registres JSON valides",
+        "snapshot avec manifeste hashes",
+        "restore/check du snapshot"
+      ],
+      "evidence": [
+        "T01–T11 sequential checkpoints exist",
+        "proof_registry_validation.json PASS after final registry rebuild",
+        "final snapshot manifest and restore verification completed"
+      ]
+    },
+    {
+      "id": "P9",
+      "name": "Assembler et vérifier les livrables",
+      "status": "completed",
+      "exit_criteria": [
+        "ZIP CRC validé",
+        "fichiers TeX/JSON inclus",
+        "SHA-256 du paquet et contenu documentés"
+      ],
+      "evidence": [
+        "Candidate ZIP: CRC test PASS; 375 files; required TeX/JSON/source archive present.",
+        "Extracted to a fresh temporary directory; source_org.zip SHA-256 matched.",
+        "Independent proof-registry validator passed after extraction: 104 hashes, 66 line ranges, 11 tour results and 11 sequential integrations."
+      ],
+      "notes": "The final release archive is rebuilt after this checklist and proof registry are synchronized; the final release archive receives a second CRC/extraction/proof-registry check before delivery."
+    }
+  ],
+  "finalized_at": "2026-10-24T17:07:24.602013+00:00"
+}

@@ -1,0 +1,74 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,longtable,array,geometry,hyperref,listings}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=false,pdfborder={0 0 0}}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{remark}[definition]{Remarque}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Rset}{\mathcal{R}}
+\newcommand{\W}{\mathcal{W}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\Def}{\mathsf{D}}
+\begin{document}
+\title{DD — Essais, tentatives et hypothèses — Order 63}\author{Order 63 — dossier d’exécution}\date{21 septembre 2026}\maketitle
+
+\begin{abstract}
+Le présent document conserve toutes les tentatives O63 qui ont été explorées mais ne doivent pas être confondues avec les résultats démontrés. Il sert de registre des alternatives, des blocages, des essais rejetés et des hypothèses restant ouvertes.
+\end{abstract}
+
+\section{Pourquoi le premier RS O62 était insuffisant}
+Le premier RS recevait essentiellement un état courant et un état successeur et apprenait à séparer des transitions vues de transitions mélangées. L’expérience a montré qu’un bon classement des paires n’impliquait pas une bonne navigation vers une résolution. La branche RS O63 est donc passée à une structure trajectorielle.
+
+\section{Hypothèse : world model comme espace sémantique}
+Hypothèse centrale : si un modèle séquentiel neural apprend un espace $\Z$ suffisamment structuré, alors des trajectoires de raisonnement vérifiées peuvent fournir une géométrie empirique de progression dans cet espace :
+\[
+z_0\to z_1\to\dots\to z_T.
+\]
+Cette hypothèse est motivée par la théorie, mais elle ne devient pas un théorème simplement parce qu’un Transformer est utilisé. O63 teste sa stabilité indirectement au travers des erreurs de prédiction, de la navigation holdout, des actions opaques et de la campagne générale.
+
+\section{Alternatives explorées pour le world model}
+Une première solution utilisant une architecture trop proche d’un petit MLP latent n’a pas été conservée. Le modèle final utilise un Transformer à octets. Cette solution est volontairement domain-free : aucune tokenisation de noms métier n’est injectée.
+
+Un entraînement plus long du Transformer a été essayé, mais la durée de calcul l’a rendu disproportionné pour cette session. Le choix retenu est donc un entraînement d’une époque sur la même architecture, avec la totalité des fonctions dynamiques présentes. Ce choix ne doit pas être interprété comme une limite théorique du modèle.
+
+\section{Alternative RS multi-objectifs}
+Les objectifs envisagés comprennent : classification, ranking, contraste, ordre temporel, distance au terminal et cohérence multi-step. O63 implémente effectivement progression, incertitude et direction et conserve les trajectoires. Une comparaison exhaustive de toutes les pertes n’a pas été menée ; elle reste un travail expérimental futur, et aucun gagnant n’est déclaré.
+
+\section{Négatifs RS}
+Les négatifs faciles d’O62 ont été jugés insuffisants. O63 ajoute des négatifs inter-trajectoires et des inversions temporelles. Une génération encore plus forte de contrefactuels action par action pourrait améliorer le protocole, mais elle nécessite un générateur d’alternatives qui ne doit pas devenir un oracle de domaine. Elle n’a donc pas été introduite artificiellement.
+
+\section{Micro-mémoire}
+Un cache global unique aurait été plus simple, mais il aurait cassé la distinction causale entre modules. La solution locale retenue utilise 12 memories et un bus à routes déclarées. Une idée plus ambitieuse serait une mémoire hiérarchique consolidant progressivement épisode, connaissance, procédure et méta-connaissance. Cette consolidation n’est pas revendiquée comme entièrement achevée dans O63.
+
+\section{Contraintes : anomalie historique}
+La logique O62 de promotion permettait que la présence de contre-exemples participe à une condition de promotion. Cette logique était incohérente avec leur statut de preuve disconfirmante. O63 corrige la direction causale : un contre-exemple fragilise et empêche la promotion jusqu’à révision.
+
+\section{Imagination : tentatives}
+L’imagination a été rendue récursive, multi-horizon et utilisable avec RS. Une branche de travail plus ambitieuse ferait apprendre une valeur d’hypothèse indépendante, puis réutiliserait les sous-arbres entre épisodes. Le mécanisme de réutilisation de sous-arbre complet n’est pas encore démontré et n’est donc pas présenté dans le document principal comme acquis.
+
+\section{Synthèse de programmes : problème non résolu}
+La VM est réellement générique et sandboxée. Pourtant la campagne program-synthesis reste FAIL. Cela indique que l’espace de programmes généré est encore insuffisant ou mal aligné avec les besoins des tâches. Une extension vers une recherche de programmes récursive et une synthèse assistée par contre-exemple est plausible, mais elle doit être développée sans injecter de règles métier.
+
+\section{Essais causaux}
+La campagne de masquage montre un effet discret de l’imagination : la trajectoire change et la récompense varie de $-1$ à $0.25$ dans un épisode particulier. En revanche le masque mémoire n’a pas changé ce résultat sur ce support. Cette différence est précisément pourquoi la présence d’un module ne peut pas être prise pour une preuve de causalité.
+
+\section{Chess}
+Les positions chess sont utiles comme stress-test car les actions sont opaques et la légalité est contrôlée par un vérificateur externe. Les cinq épisodes O63 post-correction sont NOT\_VERIFIED. Aucun résultat n’est transformé en assertion « le chess est impossible ».
+
+\section{Optimisation}
+Les mesures multi-échelle montrent des speedups croissants sur le micro-support de closure. Une extrapolation à un système général serait abusive. Pour certaines optimisations, seule la conservation fonctionnelle a été mesurée et aucun timing n’est disponible. Ces techniques restent donc dans le statut « conservation démontrée, gain de performance non universellement établi ».
+
+\section{Ce qui reste ouvert}
+Restent ouverts : une navigation RS robuste sur des familles jamais vues, une consolidation mémoire multi-épisode validée, une synthèse de programmes de raisonnement qui généralise effectivement, une dynamique sémantique stable à plus grande échelle, et une démonstration que l’ensemble de ces mécanismes forme une intelligence générale au-delà des environnements testés.
+
+\section{Règle de non-contamination}
+Aucun élément de cette section ne doit être automatiquement promu en claim du document principal. Le rôle de ce document est précisément de conserver les idées tentées sans faire disparaître les échecs ni gonfler les résultats.
+\end{document}

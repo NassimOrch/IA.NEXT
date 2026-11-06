@@ -1,0 +1,86 @@
+{
+  "schema": "aam-o94-3-error-ledger-v1",
+  "title": "checklist_erreurs_model_O94_3.json",
+  "parent_ledger": "checklist_erreurs_model.json",
+  "parent_sha256": "71d5a1219a8b3d0193552a4b19d6aa8dc4e776dacff7d5e918ad957741ef5e99",
+  "created_utc": "2026-10-19T15:04:12.468472Z",
+  "updated_utc": "2026-10-19T16:00:24Z",
+  "updated_for": "O94_3 correction cumulative from O94_2; previous records remain available in O94_2 ledgers and are not rewritten.",
+  "items": [
+    {
+      "incident_id": "O943-M001",
+      "phase": "P1",
+      "category": "missing_passive_live_observation",
+      "severity": "CORE_FUNCTIONALITY_MISSING",
+      "status": "RESOLVED_BOUNDED_ADAPTERS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "L’ancien chemin Observer mélangeait l’import de traces préfabriquées et le sondage actif d’un protocole JSON Lines; il ne créait pas de trace à partir de sources OS vivantes.",
+      "impact": "La fonction nommée Observer ne satisfaisait pas le sens attendu et requérait un fichier/contrat préparé.",
+      "remediation": "Ajouter une session passive filesystem/process/réseau qui écrit elle-même une trace JSONL et un rapport; séparer ce mode de l’import dataset et du sondage actif JSONL.",
+      "evidence": [
+        "aam_o93/observation_live.py",
+        "tests/test_o943_passive_observation.py",
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json"
+      ],
+      "resolution_summary": "P1 fermé sur tests live filesystem, snapshots PID, création automatique JSONL/rapport, chaîne d’empreintes, diagnostics et budgets. Le vrai réseau reste dépendant des outils/droits présents, avec fixtures de backend dans cette livraison."
+    },
+    {
+      "incident_id": "O943-M002",
+      "phase": "P3",
+      "category": "local_model_adapters_visibility",
+      "severity": "LOCAL_MODEL_INTEGRATION_UNCLEAR",
+      "status": "RESOLVED_WITH_EXPLICIT_CONTRACT",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "L’intégration des modèles locaux était difficile à trouver, et le contrat d’adaptateur PyTorch n’était pas livré sous forme de gabarit visible.",
+      "impact": "Un checkpoint .pt/.pth sans architecture n’est pas automatiquement chargeable.",
+      "remediation": "Ajouter un onglet scrollable dédié, un bouton de génération de gabarit Python et les exemples de backends Transformers/Ollama/OpenAI-compatible/workspace AAM.",
+      "evidence": [
+        "aam_o93/ui.py",
+        "aam_o93/model_integration.py",
+        "examples/model_adapters/README_O94_3_FR.md",
+        "examples/model_adapters/pytorch_state_dict_adapter_template.py"
+      ],
+      "resolution_summary": "Gabarit fourni avec contrat load_model/generate/train_model optionnel; il échoue clairement tant que build_model()/generate() ne sont pas adaptés au checkpoint. Pas de fausse promesse d’universalité."
+    },
+    {
+      "incident_id": "O943-M003",
+      "phase": "P4",
+      "category": "missing_composition_compile_and_learned_blocks_surface",
+      "severity": "CORE_UI_PATH_INCOMPLETE",
+      "status": "RESOLVED_BOUNDED_COMPOSITION",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "La compilation et l’apprentissage de briques depuis observation n’étaient pas assez visibles et le catalogue ne montrait pas clairement les blocs issus de traces.",
+      "impact": "Impossible de suivre distinctement une observation, les candidats de briques et la compilation d’une composition.",
+      "remediation": "Ajouter compilation DSL vers artefact JSON, ingestion de traces par LearnedBlockStore, exact lookup train-only et candidats de méthode/règle à revue manuelle; ajouter la brique passive au catalogue.",
+      "evidence": [
+        "aam_o93/block_learning.py",
+        "aam_o93/base_blocks.py",
+        "aam_o93/runtime.py",
+        "tests/test_o943_learned_blocks_and_composition.py",
+        "receipts/O94_3/P4_composition_learning.json",
+        "tests/test_o943_runtime_integration.py",
+        "tests/test_o943_ui_contracts.py"
+      ],
+      "resolution_summary": "Retest P4: observation filesystem live → JSONL créé par AAM → candidats visibles après apprentissage; DSL compile/save/run testé sur support exact et entrée inédite unresolved; aucun code arbitraire exécuté.",
+      "updated_utc": "2026-10-19T15:59:07Z"
+    },
+    {
+      "incident_id": "O943-M004",
+      "phase": "P5",
+      "category": "rag_regression_risk",
+      "severity": "POTENTIAL_FEATURE_LOSS",
+      "status": "RESOLVED_BYTE_PARITY_AND_RUNTIME_TESTS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "Les corrections d’interface et d’observation pourraient accidentellement retirer des fonctions RAG historiques.",
+      "impact": "Risque de perte du moteur sémantique, retrieval et corpus SMS.",
+      "remediation": "Comparer les hashes des six fichiers RAG/moteur/tests historiques entre les archives O94_0, O94_1, O94_2 et laisser les fichiers inchangés dans O94_3.",
+      "evidence": [
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json",
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P5_rag_hash_parity.json"
+      ],
+      "resolution_summary": "P5: 47 RAG/SMS/résolution/adaptive tests pass, and six protected implementation/test files retain the O94_2 SHA-256 values; no RAG file changed.",
+      "updated_utc": "2026-10-19T16:00:24Z"
+    }
+  ]
+}

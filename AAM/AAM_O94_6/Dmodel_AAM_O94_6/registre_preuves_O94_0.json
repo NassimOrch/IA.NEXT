@@ -1,0 +1,495 @@
+{
+  "schema": "aam-o94-0-proof-registry-v1",
+  "version": "O94_0",
+  "generated_utc": "2026-10-18T15:31:34.150474+00:00",
+  "baseline": "O94 livré; incrément limité aux retours R1/R2/R3; sources historiques préservées",
+  "theory_sources": [
+    {
+      "path": "source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex",
+      "sha256": "7256823991944d2da57a8460517dac97259ae375a3ccb0a2d7f05477af006e2a",
+      "role": "source théorique centrale"
+    },
+    {
+      "path": "source_material/source_archive/sources_AAM_17.zip",
+      "sha256": "add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38",
+      "role": "archive source imbriquée"
+    }
+  ],
+  "phase_state_at_authoring": "P6 COMPLETE_EVIDENCED; P7 candidats vérifiés, archives finales en reconstruction et validation.",
+  "entries": [
+    {
+      "id": "THEORY-RESOLUTION-FILTRATION",
+      "requirement": "Ancrer la hiérarchie dans la théorie de l’arbre de résolution et du raffinement monotone.",
+      "status": "SOURCE_ANALYZED_LOCAL_BOUNDED",
+      "code_references": [
+        "source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex",
+        "aam_o93/resolution_tree.py::rank_answer_records"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_o940_memory_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P0_input_archive_integrity.json",
+        "logs/O94_0/P4_memory_resolution_retest_001.json"
+      ],
+      "limits": [
+        "Le raffinement théorique n’est pas une garantie universelle de vérité pour des poids heuristiques propres à un corpus."
+      ]
+    },
+    {
+      "id": "R1-UNIQUE-PLAIN-ANSWER",
+      "requirement": "Le chat affiche une seule réponse textuelle utile, sans dumps de records dans le corps principal.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py::AAMRuntime._extractive_fallback",
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence",
+        "aam_o93/resolution_tree.py::rank_answer_records"
+      ],
+      "test_references": [
+        "tests/test_o931_chat_pipeline.py",
+        "tests/test_o940_rag_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P3_gate_chat_answer_contract.json",
+        "logs/O94_0/P3_long_structured_answer_retest_003.json",
+        "logs/O94_0/P3_trained_generator_context_retest_001.json"
+      ],
+      "limits": [
+        "Le garde structural/lexical ne vérifie pas à lui seul la vérité factuelle."
+      ]
+    },
+    {
+      "id": "R1-DETAILS-SEPARATION",
+      "requirement": "Les sources, scores, hashes et diagnostics sont consultables séparément dans Détails.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/ui.py",
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence"
+      ],
+      "test_references": [
+        "tests/test_o940_ui_resolution_details.py",
+        "tests/test_o931_chat_pipeline.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P4_details_depth_ui_retest_001.json",
+        "logs/O94_0/P4_chat_response_details_nonregression_001.json"
+      ],
+      "limits": [
+        "Validation UI sous Xvfb/Linux; test natif Windows non fourni."
+      ]
+    },
+    {
+      "id": "R2-RAG-BEFORE-GENERATION",
+      "requirement": "La route standard récupère d’abord des preuves puis appelle le générateur avec question et contexte distincts.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/semantic_rag.py::SemanticRAG.search",
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence",
+        "aam_o93/runtime.py::AAMRuntime._bounded_record_context"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_o931_chat_pipeline.py",
+        "tests/test_p3_semantic_rag.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P3_gate_integrated_route.json",
+        "logs/O94_0/P3_trained_generator_context_retest_001.json",
+        "logs/O94_0/P3_context_expansion_filtered_passages_003.json"
+      ],
+      "limits": [
+        "Le serveur LLM externe réel n’a pas été testé dans cette session."
+      ]
+    },
+    {
+      "id": "R2-EXPLICIT-DIRECT-RAG",
+      "requirement": "Le mode extractif direct RAG est un choix explicite, pas la voie de génération par défaut.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence",
+        "aam_o93/ui.py"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_o931_chat_pipeline.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P3_empty_index_and_resolution.json",
+        "logs/O94_0/P3_gate_chat_answer_contract.json"
+      ],
+      "limits": [
+        "Le mode direct restitue des éléments source et ne prouve pas leur vérité."
+      ]
+    },
+    {
+      "id": "R2-AAM-BACKEND-SELECTION",
+      "requirement": "Permettre un backend AAM explicite en remplacement du générateur LLM, sans substitution silencieuse ni récursion.",
+      "status": "IMPLEMENTED_ADAPTER_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py::AAMRuntime.generate_from_evidence",
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P3_peer_delegation_retest_003.json",
+        "logs/O94_0/P3_peer_delegation_end_to_end_005.json",
+        "logs/O94_0/P3_post_tsv_rag_resolution_002_test_o940_rag_resolution.json"
+      ],
+      "limits": [
+        "Adaptateur contrôlé validé; compatibilité live avec toute version/service AAM non établie."
+      ]
+    },
+    {
+      "id": "R2-EMPTY-INDEX-STATE",
+      "requirement": "Distinguer index vide/aucun match du statut du générateur.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/semantic_rag.py::SemanticRAG.search",
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P3_empty_index_and_resolution.json",
+        "logs/O94_0/P3_gate_rag_empty_index.json"
+      ],
+      "limits": [
+        "Un corpus vide ne fournit pas de preuve locale; toute réponse générale reste non vérifiée."
+      ]
+    },
+    {
+      "id": "R2-STRUCTURED-LONG-RECORDS",
+      "requirement": "Préserver les réponses structurées longues même quand le contexte injecté au générateur est borné.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py::AAMRuntime._bounded_record_context",
+        "aam_o93/runtime.py::AAMRuntime._extractive_fallback"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P3_long_structured_answer_retest_003.json",
+        "logs/O94_0/P3_post_tsv_rag_resolution_002_test_o940_rag_resolution.json"
+      ],
+      "limits": [
+        "Le contexte du générateur est borné; il ne s’agit pas d’un entraînement LLM fondation."
+      ]
+    },
+    {
+      "id": "R2-SMS-PRESERVING-INGESTION",
+      "requirement": "Conserver chaque ligne SMS et ses guillemets comme données; produire des unités récupérables.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/observer.py",
+        "aam_o93/semantic_rag.py",
+        "aam_o93/runtime.py"
+      ],
+      "test_references": [
+        "tests/test_o931_record_preserving_rag.py",
+        "tests/test_o940_real_sms_corpus_sample.py",
+        "tests/test_o940_real_sms_retrieval.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P2_sms_tsv_retest_004.json",
+        "logs/O94_0/P3_real_sms_rag_chat_003_test_o940_real_sms_retrieval.json",
+        "logs/O94_0/P5_full_sms_chat_regression_002_test_o940_real_sms_retrieval.json"
+      ],
+      "limits": [
+        "Ingestion inspectée sur 300/5574 lignes; un sweep RAG de l’intégralité n’est pas déclaré."
+      ]
+    },
+    {
+      "id": "R3-MASTER-MICRO-LEAF-RAG",
+      "requirement": "Router question→empreintes/signatures maîtres→micro-RAG→records feuilles avant lecture des payloads.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/resolution_tree.py",
+        "aam_o93/semantic_rag.py::SemanticRAG.search"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_p3_semantic_rag.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P2_P3_P4_targeted_tests_003.json",
+        "logs/O94_0/P3_context_expansion_filtered_passages_003.json",
+        "logs/O94_0/P3_gate_rag_adaptive.json"
+      ],
+      "limits": [
+        "Les budgets et le regroupement sont corpus-relatifs; ils ne prouvent pas une sémantique parfaite sur chaque corpus."
+      ]
+    },
+    {
+      "id": "R3-ADAPTIVE-DEPTH-AND-BUDGET",
+      "requirement": "La profondeur et les budgets pilotent l’accès aux branches; plus de détail ouvre un raffinement.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/semantic_rag.py::SemanticRAG.search",
+        "aam_o93/resolution_tree.py",
+        "aam_o93/memory_resolution.py::MemoryResolutionTree.resolve"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_o940_memory_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P2_P3_P4_targeted_tests_003.json",
+        "logs/O94_0/P4_memory_resolution_retest_001.json"
+      ],
+      "limits": [
+        "Les niveaux testés sont discrets et bornés; pas de prétention à une résolution infinie."
+      ]
+    },
+    {
+      "id": "R3-MEMORY-MASTER-MICRO-EVENT",
+      "requirement": "Appliquer l’accès hiérarchique à la mémoire tout en gardant le journal d’audit canonique.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/memory_resolution.py::MemoryResolutionTree",
+        "aam_o93/runtime.py::AAMRuntime.resolve_memory",
+        "aam_o93/memory.py"
+      ],
+      "test_references": [
+        "tests/test_o940_memory_resolution.py",
+        "tests/test_p6_memory_event_inspection.py",
+        "tests/test_p6_memory_causal_graph_view.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P4_memory_resolution_retest_001.json",
+        "logs/O94_0/P4_memory_event_inspection_retest_001.json",
+        "logs/O94_0/P4_causal_graph_view_retest_001.json"
+      ],
+      "limits": [
+        "L’index est dérivé; une vérification de hashes ne garantit pas à elle seule la justesse sémantique."
+      ]
+    },
+    {
+      "id": "R3-CORRUPTION-INTEGRITY",
+      "requirement": "Détecter des feuilles/index/journaux altérés plutôt que charger silencieusement les données modifiées.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/memory_resolution.py",
+        "aam_o93/runtime.py",
+        "scripts/o940_snapshot.py"
+      ],
+      "test_references": [
+        "tests/test_o940_memory_resolution.py",
+        "tests/test_o94_snapshot_portability.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P4_memory_resolution_retest_001.json",
+        "logs/O94_0/P5_isolate_test_o94_snapshot_portability.json"
+      ],
+      "limits": [
+        "Les hashes assurent l’intégrité par rapport au manifeste, pas la provenance de confiance d’une source extérieure."
+      ]
+    },
+    {
+      "id": "R3-CONTEXTUAL-MEMORY-REFINEMENT",
+      "requirement": "Le contexte supplémentaire permet de distinguer les résolutions; la profondeur consultée est explicite.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/memory_resolution.py::MemoryResolutionTree.resolve",
+        "aam_o93/runtime.py::AAMRuntime.resolve_memory",
+        "aam_o93/ui.py"
+      ],
+      "test_references": [
+        "tests/test_o940_memory_resolution.py",
+        "tests/test_o940_ui_resolution_details.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P4_memory_resolution_retest_001.json",
+        "logs/O94_0/P4_details_depth_ui_retest_001.json"
+      ],
+      "limits": [
+        "La résolution dépend des événements mémorisés; un événement absent ne peut pas être lu via l’index."
+      ]
+    },
+    {
+      "id": "UI-DETAILS-DEPTH",
+      "requirement": "Exposer la profondeur et les informations de résolution dans l’interface Détails.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/ui.py",
+        "aam_o93/runtime.py::AAMRuntime.resolve_memory"
+      ],
+      "test_references": [
+        "tests/test_o940_ui_resolution_details.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P4_details_depth_ui_retest_001.json"
+      ],
+      "limits": [
+        "Test UI sur Xvfb; aucune validation native Windows dans cette phase."
+      ]
+    },
+    {
+      "id": "P5-BOUNDED-CORPUS-EVALUATION",
+      "requirement": "Évaluer les réponses après l’inférence sur un échantillon avec références séparées de l’exécution.",
+      "status": "EVALUATED_SAMPLE_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py::AAMRuntime._generate_chat_from_evidence",
+        "aam_o93/semantic_rag.py::SemanticRAG.search"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/corpus_eval/P3_bounded_corpus_eval_002.json",
+        "logs/O94_0/P5_matrix_consolidated_001.json"
+      ],
+      "limits": [
+        "10 requêtes sur un échantillon de 32 records; ce n’est pas une mesure de vérité générale ou de généralisation universelle."
+      ]
+    },
+    {
+      "id": "P5-SMS-REAL-CORPUS-SAMPLE",
+      "requirement": "Évaluer ingestion et retrieval d’un sous-ensemble de SMS réels en préservant les lignes.",
+      "status": "EVALUATED_SAMPLE_BOUNDED",
+      "code_references": [
+        "aam_o93/observer.py",
+        "aam_o93/semantic_rag.py",
+        "aam_o93/runtime.py"
+      ],
+      "test_references": [
+        "tests/test_o931_record_preserving_rag.py",
+        "tests/test_o940_real_sms_corpus_sample.py",
+        "tests/test_o940_real_sms_retrieval.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P2_sms_tsv_retest_004.json",
+        "logs/O94_0/P5_record_preserving_sms_retest_001_test_o931_record_preserving_rag.json",
+        "logs/O94_0/P5_full_sms_chat_regression_002_test_o940_real_sms_retrieval.json"
+      ],
+      "limits": [
+        "300 lignes vérifiées sur 5 574; le reste doit être évalué si une certification du corpus complet est requise."
+      ]
+    },
+    {
+      "id": "PROCESS-REWARD-TRACE",
+      "requirement": "Conserver les relations causales et ne pas assimiler la note utilisateur à la vérité.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/memory.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py"
+      ],
+      "test_references": [
+        "tests/test_p6_memory_causal_graph_view.py",
+        "tests/test_p6_memory_event_inspection.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P4_causal_reward_memory_retest_001.json",
+        "logs/O94_0/P4_causal_graph_view_retest_001.json"
+      ],
+      "limits": [
+        "Le graphe décrit les références causales enregistrées; il ne démontre pas la causalité du monde réel au-delà des événements instrumentés."
+      ]
+    },
+    {
+      "id": "P6-DOCUMENT-REGISTRY-SAVEPOINT",
+      "requirement": "Formaliser O94_0, vérifier les références R1-R3, compiler les documents TeX et contrôler le manifeste du point de sauvegarde.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "scripts/o940_validate_p6_documents.py",
+        "scripts/o940_snapshot.py",
+        "scripts/o940_verify_savepoint.py",
+        "scripts/o940_close_p6.py"
+      ],
+      "test_references": [],
+      "evidence": [
+        "logs/O94_0/P6_document_authoring_preflight_001.json",
+        "logs/O94_0/P6_document_registry_validation_002.json"
+      ],
+      "limits": [
+        "La validation de document, des chemins et des hashes ne constitue pas une preuve de vérité factuelle ou de généralisation du modèle."
+      ]
+    },
+    {
+      "id": "P6-DOCUMENTS-INCIDENTS-AND-TRACEABILITY",
+      "requirement": "Formaliser l’implémentation, documenter les incidents/limites et relier chaque exigence R1-R3 à des chemins/tests/reçus.",
+      "status": "DOCUMENTS_COMPILED_PATHS_VALIDATED",
+      "code_references": [
+        "scripts/o940_p6_validate_registry.py",
+        "scripts/o940_refresh_manifests.py",
+        "scripts/o940_snapshot.py"
+      ],
+      "test_references": [
+        "logs/O94_0/P6_tex_source_validation_003.json"
+      ],
+      "evidence": [
+        "laboratoire_O94_0.tex",
+        "formalisme_O94_0.tex",
+        "docs/O94_0/P6_rapport_incidents_limites.md",
+        "registre_preuves_O94_0.json",
+        "registre_prouves_O94_0.json"
+      ],
+      "limits": [
+        "La validation compile les sources LaTeX sans inspection visuelle du PDF; l’index de références ne certifie pas la vérité métier."
+      ]
+    },
+    {
+      "id": "P7-PORTABLE-ARCHIVE-CANDIDATES",
+      "requirement": "Dmodel, audit et suivi candidats sous 220 MiB, avec CRC, extraction neuve et manifestes cohérents; smoke CLI pour le modèle.",
+      "status": "CANDIDATES_VERIFIED_FINAL_ARCHIVES_PENDING",
+      "code_references": [
+        "scripts/o94_delivery_common.py::create_zip_tree",
+        "scripts/o94_delivery_common.py::verify_archive",
+        "scripts/o940_refresh_manifests.py"
+      ],
+      "test_references": [
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_o940_memory_resolution.py"
+      ],
+      "evidence": [
+        "logs/O94_0/P7_candidate_set_001.json",
+        "logs/O94_0/P7_candidate_builder_incidents_001.json",
+        "docs/O94_0/P7_livraison_scope.md"
+      ],
+      "limits": [
+        "Ces reçus sont des candidats; les hashes finaux des ZIP seront dans le sidecar externe.",
+        "Les endpoints externes, Windows natif, les capteurs physiques et le corpus SMS intégral n’ont pas été validés."
+      ]
+    }
+  ],
+  "validation": {
+    "valid_json": true,
+    "path_validation": "PASS",
+    "checked_references": 145,
+    "missing_references": 0,
+    "latex_structural_validation": "PASS",
+    "pdflatex": "PASS",
+    "receipt": "logs/O94_0/P7_registry_extension_validation_001.json"
+  },
+  "claim_boundary": [
+    "Une source citée ne garantit pas la vérité factuelle de la réponse.",
+    "La compatibilité AAM externe est testée via adaptateur contrôlé; pas tous les déploiements externes.",
+    "L’évaluation scénario 10/10 porte sur dix requêtes sélectionnées dans un échantillon de 32 records; références comparées seulement après l’inférence.",
+    "Le dataset SMS complet comprend 5574 lignes; les contrôles d’ingestion détaillés portent notamment sur 300 lignes.",
+    "Les tests UI ont utilisé Xvfb; Windows/NTFS natif, serveurs LLM réels et matériel physique ne sont pas déclarés validés.",
+    "Les incidents historiques et leurs retests restent conservés dans checklist_erreurs_no_model.json et checklist_erreurs_model.json."
+  ],
+  "history": [
+    {
+      "event": "CREATED_O94_0",
+      "at_utc": "2026-10-18T15:11:25.625928+00:00",
+      "note": "Registre incrémental distinct de registre_prouves_O94.json; les sources historiques ne sont pas écrasées."
+    },
+    {
+      "event": "P6_REOPEN_002",
+      "at_utc": "2026-10-18T15:18:13.392844+00:00",
+      "note": "P6 reopened because old P6 receipt/closure preceded post-close document and registry updates."
+    },
+    {
+      "at": "2026-10-18T15:31:34.150474+00:00",
+      "event": "P7_candidate_evidence_added",
+      "receipt": "logs/O94_0/P7_candidate_set_001.json",
+      "status": "CANDIDATES_VERIFIED_FINAL_ARCHIVES_PENDING"
+    }
+  ]
+}

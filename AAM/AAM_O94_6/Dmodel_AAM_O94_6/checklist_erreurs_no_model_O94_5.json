@@ -1,0 +1,1238 @@
+{
+  "schema": "aam-o94-5-environment-error-ledger-v1",
+  "title": "O94.5 — défauts environnement/harness",
+  "parent_ledger": "checklist_erreurs_no_model_O94_4.json",
+  "updated_for": "P8 candidate passed after fixing the pause status observation race.",
+  "items": [
+    {
+      "incident_id": "O943-E001",
+      "phase": "P2",
+      "category": "ui_syntax_validation",
+      "severity": "PYTHON_SYNTAX_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "Un correctif UI a introduit des sauts de ligne littéraux au milieu de chaînes Python, empêchant ui.py de compiler.",
+      "remediation": "Remplacer ces sauts de ligne dans les littéraux par des échappements \\n et compiler tous les modules avec compileall.",
+      "evidence": [
+        "aam_o93/ui.py"
+      ],
+      "resolution_summary": "compileall passe et les tests UI O94.3 passent sous Xvfb; le scroll canvas+barre est détecté.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E002",
+      "phase": "P1",
+      "category": "trace_sequence_monotonicity",
+      "severity": "AUDIT_SEQUENCE_GAP_OR_DUPLICATE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "Les événements de démarrage non comptés utilisaient auparavant le compteur métier comme numéro de séquence, ce qui pouvait dupliquer le numéro.",
+      "remediation": "Séparer _sequence et _event_count; tout événement écrit incrémente _sequence, même quand il ne consomme pas le budget métier.",
+      "evidence": [
+        "aam_o93/observation_live.py",
+        "tests/test_o943_passive_observation.py"
+      ],
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E003",
+      "phase": "P4",
+      "category": "test_harness_scope",
+      "severity": "RAG_PRESERVATION_TEST_ONLY_HASH_ASSERTION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "La parité de hashes des fichiers RAG est démontrée, mais la batterie de tests RAG complète O94_3 doit encore être exécutée pour vérifier le comportement du runtime intégré.",
+      "remediation": "Exécuter les tests sémantiques, résolution, SMS et RAG adaptatif après que les gates O94_3 sont synchronisés.",
+      "evidence": [
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json",
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P5_rag_hash_parity.json"
+      ],
+      "resolved_utc": "2026-10-19T16:00:24Z",
+      "resolution_summary": "Les tests RAG/SMS/résolution repassent en P5 (47 passed) après gate positif; les six hashes protégés O94_3 correspondent à O94_2.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E004",
+      "phase": "P1",
+      "category": "action_contract_capability_enum",
+      "severity": "CLI_AND_UI_LIVE_CAPTURE_BLOCKED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:41:00Z",
+      "summary": "Le CLI observe-live demandait la capacité de métadonnées « observe », absente de l’enum allowed des ActionEnvelope; l’observation passive échouait avant d’ouvrir sa session.",
+      "remediation": "Ajouter « observe » aux capacités demandables. Le routeur enregistre une demande, mais cette liste ne confère aucune autorité; les contrôles d’autorisation restent dans le service de capture.",
+      "evidence": [
+        "aam_o93/contracts.py",
+        "aam_o93/cli.py",
+        "tests/test_o943_passive_observation.py"
+      ],
+      "resolution_summary": "Le CLI live observe désormais des ajouts/modifications pendant la session; le test subprocess de bout en bout passe après correction du lecteur non tamponné.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E005",
+      "phase": "P1",
+      "category": "cli_live_test_reader_buffering",
+      "severity": "FALSE_NEGATIVE_IN_TEST_HARNESS",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:43:05Z",
+      "summary": "Le test subprocess mélangeait select() et TextIOWrapper; la réponse pretty-printed déjà tamponnée en espace utilisateur n'était pas visible à select(), et le fichier test était créé à la fin du budget de capture.",
+      "remediation": "Lire un descripteur binaire non tamponné avec os.read après select; conserver le test qui crée/modifie un fichier pendant la session.",
+      "evidence": [
+        "tests/test_o943_cli_live_e2e.py",
+        "receipts/O94_3/P1_observation_live.json"
+      ],
+      "resolution_summary": "Le test subprocess repasse et valide file_added/file_modified ainsi que la chaîne de hashes.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E006",
+      "phase": "P6",
+      "category": "aggregate_full_suite_timeout",
+      "severity": "VALIDATION_NOT_CONCLUSIVE",
+      "status": "RESOLVED_BY_SEGMENTED_MATRIX",
+      "opened_utc": "2026-10-19T15:43:05Z",
+      "summary": "Une exécution agrégée de toute la suite a dépassé le délai externe sans résumé exploitable; aucun test de cette commande n'est compté comme succès global.",
+      "remediation": "Exécuter la suite par lots reproductibles de fichiers et conserver un reçu par lot; laisser les tests réellement longs isolés.",
+      "evidence": [
+        "pytest.ini",
+        "receipts/O94_3/P6_matrix_reconciliation.json"
+      ],
+      "resolution_summary": "La commande agrégée initiale reste non concluante et n’est pas comptée. La matrice segmentée a ensuite couvert les 66 fichiers exactement une fois (6 via P5, 60 via 15 lots P6); les 15 reçus P6 passent, avec 368 tests reportés et 21 sous-tests.",
+      "updated_utc": "2026-10-19T16:13:42Z",
+      "resolved_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E007",
+      "phase": "P2",
+      "category": "ui_test_without_display",
+      "severity": "ENVIRONMENT_DISPLAY_UNAVAILABLE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:45:52Z",
+      "summary": "Un lancement UI sans serveur X a rencontré TclError: couldn't connect to display :0.",
+      "remediation": "Relancer les tests de widgets dans un environnement d’affichage virtuel avec xvfb-run; ne pas compter la tentative sans affichage.",
+      "evidence": [
+        "tests/test_o943_ui_contracts.py",
+        "receipts/O94_3/P2_scrollable_ui.json"
+      ],
+      "resolution_summary": "Le lot UI a ensuite passé sous Xvfb (4 tests réussis); l’exécution Windows native reste non testée ici.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E008",
+      "kind": "PHASE_GATE_STALE_SAVEPOINT_AFTER_IMPLEMENTATION",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Les tests modèle ont été lancés immédiatement après l’ajout du backend TorchScript et des assertions UI, avant synchronisation du savepoint : le préflight a bloqué les tests de runtime sur les hashes attendus anciens. Aucun résultat de runtime n’est inféré à partir de cette exécution; le savepoint doit être rafraîchi, puis les mêmes tests relancés.",
+      "evidence": [
+        "logs/O94_3/P3_model_and_composition.stdout.txt",
+        "logs/O94_3/P3_model_and_composition.stderr.txt",
+        "scripts/refresh_o943_savepoint.py"
+      ],
+      "at_utc": "2026-10-19T15:51:30Z",
+      "resolution_evidence": "logs/O94_3/P3_model_and_composition_final.stdout.txt",
+      "resolved_at_utc": "2026-10-19T15:53:26Z",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E009",
+      "phase": "P4",
+      "category": "composition_test_contract_mismatch",
+      "severity": "TEST_ASSERTION_INVALID",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T15:57:10Z",
+      "summary": "Le test ajoutait une assertion sur competence_id/result alors que le contrat public expose block_id/output dans le catalogue et le rapport de composition.",
+      "remediation": "Aligner le test sur les champs exposés par base_block_catalog et CompositionRepository.run, puis relancer les tests de composition sur entrée observée et entrée inédite.",
+      "evidence": [
+        "tests/test_o943_runtime_integration.py",
+        "aam_o93/block_learning.py",
+        "aam_o93/competence_graph.py"
+      ],
+      "resolved_utc": "2026-10-19T15:57:56Z",
+      "resolution_summary": "Le test corrigé suit les contrats publics block_id/output; le lot composition/compétences passe (5 tests), puis le test bout-en-bout de trace passive → apprentissage est ajouté pour verrouiller cette intégration.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E010",
+      "phase": "P5",
+      "category": "phase_receipt_status_contract",
+      "severity": "GATE_METADATA_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:00:41Z",
+      "summary": "Le gate a bloqué P5→P6 parce que le rapport secondaire de hash avait status=PASS, alors que les reçus de phase autorisent PASS_BOUNDED/COMPLETE_EVIDENCED. Les 47 tests RAG et les six comparaisons SHA-256 étaient déjà positifs.",
+      "remediation": "Normaliser le statut machine du reçu de hash sur PASS_BOUNDED, conserver le résultat booléen détaillé dans ses checks, puis répéter le gate.",
+      "evidence": [
+        "receipts/O94_3/P5_rag_hash_parity.json",
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P6_matrix_reconciliation.json"
+      ],
+      "resolved_utc": "2026-10-19T16:13:42Z",
+      "resolution_summary": "Le rapport de hash P5 a été régénéré au bon schéma PASS_BOUNDED; la parité six fichiers est confirmée et la réconciliation/matrice affiche un gate PASS_BOUNDED.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E011",
+      "phase": "P5",
+      "category": "receipt_file_write_target_mixup",
+      "severity": "AUDIT_ARTIFACT_OVERWRITE_CAUGHT_BEFORE_DELIVERY",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:01:12Z",
+      "summary": "Un script de transition utilisait par erreur le contenu du registre d’incidents comme payload du rapport de hashes, écrasant temporairement le fichier P5_rag_hash_parity.json; le gate a détecté le champ status absent et bloqué la transition. Le registre d’incidents source est intact.",
+      "remediation": "Régénérer le rapport de hash depuis rapport_O94_3/rag_parity..., utiliser des chemins distincts typés et vérifier schema/status/filename avant le gate, puis recalculer le savepoint.",
+      "evidence": [
+        "receipts/O94_3/P5_rag_hash_parity.json",
+        "checklist_erreurs_no_model_O94_3.json",
+        "aam_o93/o943_phase_gate.py"
+      ],
+      "resolved_utc": "2026-10-19T16:01:31Z",
+      "resolution_summary": "Le rapport de hashes a été reconstruit depuis la source de parité; son schéma/status sont validés, la parité six fichiers est PASS_BOUNDED et le gate P5/P6 passe après rafraîchissement du savepoint.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E012",
+      "phase": "P6",
+      "category": "segmented_runner_import_path",
+      "severity": "RUNNER_BOOTSTRAP_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:02:23Z",
+      "summary": "Le runner P6 était démarré depuis scripts/ et ne plaçait pas la racine du modèle dans sys.path, provoquant ModuleNotFoundError aam_o93 avant toute exécution de test. Aucun résultat de tests n’est inféré.",
+      "remediation": "Ajouter ROOT à sys.path avant import du phase gate puis recompiler et relancer le même lot.",
+      "evidence": [
+        "scripts/run_o943_segmented_regression.py",
+        "receipts/O94_3/P6_matrix_reconciliation.json"
+      ],
+      "resolved_utc": "2026-10-19T16:13:42Z",
+      "resolution_summary": "Le runner ajoute ROOT à sys.path; les 15 lots reproductibles ont démarré avec préflight PASS_BOUNDED.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E013",
+      "phase": "P6",
+      "category": "regression_runner_buffered_output_and_timeout",
+      "severity": "VALIDATION_NOT_CONCLUSIVE",
+      "status": "RESOLVED_BY_BOUNDED_MATRIX",
+      "opened_utc": "2026-10-19T16:03:38Z",
+      "summary": "Le runner du premier lot P6 utilisait PIPEs gardés en mémoire et n’a pas écrit de reçu avant l’interruption externe. Aucune assertion de ce lot n’est comptée comme résultat.",
+      "remediation": "Écrire stdout/stderr directement dans des logs, réduire la taille du lot à 4 fichiers, et utiliser un timeout par lot qui écrit toujours un reçu après arrêt du groupe.",
+      "evidence": [
+        "scripts/run_o943_segmented_regression.py",
+        "receipts/O94_3/P6_matrix_reconciliation.json"
+      ],
+      "resolved_utc": "2026-10-19T16:13:42Z",
+      "resolution_summary": "Le runner stream les sorties directement en fichiers, tue son groupe de processus en timeout et produit un reçu par lot; la matrice actuelle a 15/15 lots passants. La tentative initiale reste non comptée.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E014",
+      "phase": "P6",
+      "category": "network_capture_fixture_startup_race",
+      "severity": "REGRESSION_TEST_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:06:32Z",
+      "summary": "Le lot 05 a échoué sur le test TShark/Dumpcap simulé: aucune ligne network_packet n’était présente après un sleep fixe de 0,8 s; les 13 assertions précédentes du lot passaient. Le résultat est FAIL, non PASS.",
+      "remediation": "Le test attend désormais l’événement réel ou un arrêt explicite avec diagnostic, avec budget total 6 s et délai d’attente 4 s; conserver la première tentative et relancer le lot complet.",
+      "evidence": [
+        "receipts/O94_3/P6_batch_05_attempt1.json",
+        "logs/O94_3/P6_batch_05_attempt1.stdout.txt",
+        "tests/test_o943_passive_observation.py",
+        "receipts/O94_3/P6_batch_05.json",
+        "logs/O94_3/P6_batch_05.stdout.txt"
+      ],
+      "resolved_utc": "2026-10-19T16:07:17Z",
+      "resolution_summary": "La fixture attend désormais le premier événement au lieu d’utiliser un sleep fixe; le test réseau isolé passe et le lot 05 repasse (15 passed). La tentative initiale demeure archivée.",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E015",
+      "phase": "P6",
+      "category": "pytest_summary_parser_subtests",
+      "severity": "TEST_RECEIPT_CLASSIFICATION_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:08:24Z",
+      "summary": "Le lot 09 a terminé avec code retour 0 et la sortie pytest 38 passed, 7 subtests passed; le parseur du runner ne reconnaissait pas la ligne de synthèse et classait le reçu OPEN_NON_CONCLUSIVE.",
+      "remediation": "Accepter les résumés pytest comportant des sous-tests et enregistrer le nombre de sous-tests, puis relancer le lot 09.",
+      "evidence": [
+        "receipts/O94_3/P6_batch_09_attempt1.json",
+        "logs/O94_3/P6_batch_09_attempt1.stdout.txt",
+        "scripts/run_o943_segmented_regression.py",
+        "receipts/O94_3/P6_batch_09.json"
+      ],
+      "resolved_utc": "2026-10-19T16:13:42Z",
+      "resolution_summary": "Le parseur reconnaît désormais les résumés avec « subtests passed »; le lot 09 repasse (38 tests et 7 sous-tests).",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E016",
+      "phase": "P6",
+      "category": "ui_action_not_registered",
+      "severity": "UI_FUNCTION_BLOCKED_BY_ACTION_ROUTER",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:10:49Z",
+      "summary": "Le lot 14 a échoué car l’action UI learn-blocks-from-last-observation n’était pas dans _DISPATCHABLE_ACTIONS, donc le routeur central aurait rejeté le clic avant l’apprentissage.",
+      "remediation": "Réutiliser l’identifiant d’action déjà enregistré learn-blocks-from-trace puis relancer le lot 14 complet et les contrats UI.",
+      "evidence": [
+        "receipts/O94_3/P6_batch_14_attempt1.json",
+        "logs/O94_3/P6_batch_14_attempt1.stdout.txt",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py",
+        "receipts/O94_3/P6_batch_14.json"
+      ],
+      "resolved_utc": "2026-10-19T16:13:42Z",
+      "resolution_summary": "L’action du bouton d’apprentissage réutilise l’identifiant routeur déjà enregistré learn-blocks-from-trace; le lot 14 repasse (23 tests et 10 sous-tests).",
+      "updated_utc": "2026-10-19T16:13:42Z"
+    },
+    {
+      "incident_id": "O943-E017",
+      "phase": "P7",
+      "category": "latex_runner_output_encoding",
+      "severity": "VALIDATION_HARNESS_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:21:22Z",
+      "summary": "Le runner documentaire P7 a échoué à décoder la sortie subprocess de pdflatex en UTF-8 strict (UnicodeDecodeError, octet 0xe9). La compilation précédente en shell avait réussi, mais cette tentative de validation P7 ne reçoit pas de statut positif.",
+      "remediation": "Capturer la sortie subprocess avec encoding=utf-8 et errors=replace, puis rejouer la compilation et le contrôle du registre; conserver la tentative échouée.",
+      "evidence": [
+        "scripts/o943_p7_finalize_documentation.py",
+        "receipts/O94_3/P7_document_compile.json",
+        "logs/O94_3/laboratoire_O94_3_pdflatex_1.stdout.txt",
+        "receipts/O94_3/P7_documentation_audit.json"
+      ],
+      "updated_utc": "2026-10-19T16:23:53Z",
+      "resolved_utc": "2026-10-19T16:23:53Z",
+      "resolution_summary": "Le runner a relancé les deux compilations LaTeX par document; le reçu P7_documentation_audit.json est positif et les hashes sources concordent."
+    },
+    {
+      "incident_id": "O943-E018",
+      "phase": "P8",
+      "category": "release_validation_harness",
+      "severity": "INVALID_API_CALL_SIGNATURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:31:42Z",
+      "summary": "Le contrôle pré-livraison manuel a appelé validate_o943 avec un troisième argument non accepté par son contrat public. Aucun test produit n’a été lancé par cette commande.",
+      "remediation": "Utiliser validate_o943(root, operation) et preflight(root, operation), puis conserver le reçu du contrôle correct.",
+      "evidence": [
+        "scripts/o943_build_release.py",
+        "receipts/O94_3/P8_pre_candidate_gate.json",
+        "sav_AAM_O94_3/savepoint_manifest.json"
+      ],
+      "updated_utc": "2026-10-19T16:33:23Z",
+      "resolution_summary": "Retest: validate_o943(root, operation) et preflight(root, operation) ont passé avec PASS_BOUNDED; le mauvais appel n’a lancé aucun test modèle."
+    },
+    {
+      "incident_id": "O943-E019",
+      "phase": "P8",
+      "category": "validation_command_environment",
+      "severity": "MISSING_PROJECT_IMPORT_PATH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:31:42Z",
+      "summary": "Une commande de lecture du contrat de validation a été lancée hors du répertoire projet et sans ajouter la racine au chemin Python, provoquant ModuleNotFoundError lors de l’import aam_o93. Aucun test produit n’a été lancé.",
+      "remediation": "Exécuter depuis la racine du modèle ou inclure explicitement la racine dans sys.path avant d’importer le package.",
+      "evidence": [
+        "aam_o93/o943_phase_gate.py",
+        "aam_o93/preflight.py",
+        "receipts/O94_3/P8_pre_candidate_gate.json",
+        "sav_AAM_O94_3/savepoint_manifest.json"
+      ],
+      "updated_utc": "2026-10-19T16:33:23Z",
+      "resolution_summary": "Retest: la commande lancée depuis la racine du projet a importé aam_o93 et les deux gates ont passé avec PASS_BOUNDED."
+    },
+    {
+      "incident_id": "O943-E020",
+      "phase": "P8",
+      "category": "savepoint_release_order",
+      "severity": "MISSING_LISTED_RECEIPT_AT_REFRESH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:32:35Z",
+      "summary": "Le rafraîchissement du savepoint a refusé un chemin obligatoire car le reçu P8_pre_candidate_gate.json avait été ajouté à la liste avant création du fichier. Aucune validation de runtime n’a eu lieu pendant cette commande.",
+      "remediation": "Créer le reçu provisoire avant de rafraîchir le savepoint; lancer le gate après la copie; conserver les tentatives et le retest.",
+      "evidence": [
+        "scripts/o943_savepoint_files.json",
+        "scripts/refresh_o943_savepoint.py",
+        "receipts/O94_3/P8_pre_candidate_gate.json",
+        "sav_AAM_O94_3/savepoint_manifest.json"
+      ],
+      "updated_utc": "2026-10-19T16:33:23Z",
+      "resolution_summary": "Retest: le fichier de reçu a été créé avant refresh; le savepoint a été rafraîchi à 137 fichiers puis les deux gates ont passé avec PASS_BOUNDED."
+    },
+    {
+      "incident_id": "O943-E021",
+      "phase": "P8",
+      "category": "network_observer_report_persistence",
+      "severity": "MISSING_FINAL_REPORT_AFTER_NETWORK_CAPTURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T16:35:55Z",
+      "summary": "La validation du modèle extrait échoue dans le test TShark/dumpcap simulé : le JSONL et le PCAPNG existent, mais le chemin report_path annoncé (network.jsonl.report.json) est absent à l’arrêt. Le RAG/SMS passe 47 tests; le lot core s’arrête à ce défaut.",
+      "remediation": "Inspecter la finalisation/arrêt du worker réseau; garantir la persistance atomique du rapport ou retourner explicitement une erreur de finalisation et tester le cycle stop.",
+      "evidence": [
+        "aam_o93/observation_live.py",
+        "tests/test_o943_passive_observation.py",
+        "receipts/O94_3/P8_candidate_verification.json",
+        "logs/O94_3/P8_candidate_tests_commands_core_live_models_composition_ui.stdout.txt",
+        "logs/O94_3/P8_network_report_diagnostic.json",
+        "receipts/O94_3/P8_network_stop_retest.json",
+        "logs/O94_3/P8_network_stop_retest.stdout.txt",
+        "logs/O94_3/P8_network_stop_retest.stderr.txt",
+        "receipts/O94_3/P8_candidate_attempt1_failure.json",
+        "logs/O94_3/P8_candidate_attempt1_failure.log"
+      ],
+      "updated_utc": "2026-10-19T16:40:44Z",
+      "diagnostic_note": "Un diagnostic isolé avec wait_seconds=10 termine proprement (worker_alive=false, report_exists=true); cela concorde avec un délai de join trop court et le nettoyage double du collecteur réseau.",
+      "resolution_summary": "Le premier candidat en échec est conservé par hash et reçu distinct. Le retest isolé réseau passe et le second candidat extrait passe 19 tests core + 47 tests RAG/SMS, compileall et commandes CLI."
+    },
+    {
+      "incident_id": "O944-M001",
+      "phase": "P1",
+      "category": "silent_training_window_truncation",
+      "severity": "TRAINING_COVERAGE_HIDDEN_CAP",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T08:35:00+01:00",
+      "summary": "Le chemin LM local limitait silencieusement une époque à 5000 fenêtres train et 1000 fenêtres validation, indépendamment du nombre réellement disponible et sans option CLI correspondante.",
+      "impact": "Une partie des données demeure inutilisée; les métriques de validation reposent sur un sous-échantillon non déclaré.",
+      "remediation": "Aucun plafond par défaut; exposer des plafonds explicites optionnels, les transmettre du CLI au cœur d’entraînement, valider qu’ils sont positifs et inscrire à la trace le nombre disponible/utilisé.",
+      "evidence": [
+        "receipts/O94_4/P0_baseline.json",
+        "tests/test_o944_language_window_policy.py",
+        "receipts/O94_4/P1_coverage_patch.json",
+        "receipts/O94_4/P2_runtime_cli.json"
+      ],
+      "resolution_summary": "Réconcilié dans l’overlay O94.5 à partir des preuves O94.4 préservées : receipts/O94_4/P1_coverage_patch.json, receipts/O94_4/P2_runtime_cli.json et tests/test_o944_language_window_policy.py. Le rapport O94.4 associé valide les fenêtres disponibles par défaut et les budgets explicites; le ledger historique parent reste inchangé.",
+      "updated_utc": "2026-10-20T12:24:41.475292+00:00"
+    },
+    {
+      "incident_id": "O944-E002",
+      "phase": "P2",
+      "category": "stale_savepoint_gate_after_source_edit",
+      "severity": "CONTROLLED_RELEASE_GATE_BLOCK",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T07:37:58.830045+00:00",
+      "summary": "Un smoke run retournait BLOCKED au preflight parent après modification de semantic_rag.py mais avant rafraîchissement du manifeste descendant O94.4.",
+      "impact": "Le test d’intégration s’arrête avant d’atteindre le chemin RAG; c’est la protection d’intégrité attendue et non une erreur de l’algorithme RAG.",
+      "remediation": "Rafraîchir le savepoint O94.4 et vérifier les hashes source/snapshot avant de relancer la même commande.",
+      "evidence": [
+        "scripts/refresh_o944_savepoint.py",
+        "sav_AAM_O94_4/savepoint_manifest.json",
+        "logs/O94_4/rag_semantic_search_after.json"
+      ],
+      "resolution_summary": "Après suppression des logs volatils des entrées hashées, les mêmes commandes fonctionnelles s’exécutent et le préflight O94.4 passe. La sortie de test ne peut plus invalider le gate en amont.",
+      "updated_utc": "2026-10-20T07:39:45.500964+00:00"
+    },
+    {
+      "incident_id": "O944-E003",
+      "phase": "P2",
+      "category": "volatile_test_logs_inside_executable_savepoint",
+      "severity": "SELF_MODIFYING_RELEASE_GATE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T07:38:40.197617+00:00",
+      "summary": "Les journaux stdout des commandes RAG étaient inclus dans le manifeste de sauvegarde exécutable; le shell les tronquait avant que le runtime consulte le préflight et provoquait un échec de hash avant le test proprement dit.",
+      "impact": "La commande était bloquée par la garde O94.4 avant l’exécution RAG, bien que le code fonctionnel n’ait pas été atteint.",
+      "remediation": "Les journaux d’exécution ne sont plus des entrées du manifeste du gate. La sauvegarde continue de protéger le code, les formalismes, checklists, reçus contrôlés et fichiers de test; les journaux restent archivés en tant que preuves.",
+      "evidence": [
+        "scripts/refresh_o944_savepoint.py",
+        "sav_AAM_O94_4/savepoint_manifest.json"
+      ],
+      "resolution_summary": "Après suppression des logs volatils des entrées hashées, les mêmes commandes fonctionnelles s’exécutent et le préflight O94.4 passe. La sortie de test ne peut plus invalider le gate en amont.",
+      "updated_utc": "2026-10-20T07:39:45.500964+00:00"
+    },
+    {
+      "incident_id": "O944-P5-CUSTOM-ADAPTER-HOLDOUT-ASSERTION-001",
+      "category": "test_harness",
+      "phase": "P5",
+      "severity": "ASSERTION_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le premier test du hook adapter_train attendait `holdout_rows_excluded`, alors que l’API renvoie le champ documenté `heldout_rows_excluded`; l’adaptateur a réellement exécuté son hook et le test a échoué uniquement sur le nom du champ attendu.",
+      "impact": "La première exécution ciblée n’est pas comptée comme PASS; l’assertion a été corrigée sans modifier le comportement de production.",
+      "evidence": [
+        {
+          "report": "logs/O94_4/pytest_python_adapter_first_attempt.txt",
+          "status": "FAIL_ONE_TEST_ASSERTION",
+          "detail": "7 passed, 1 failed; KeyError sur le champ de résultat attendu"
+        },
+        {
+          "report": "logs/O94_4/pytest_python_adapter_retest.txt",
+          "status": "PASS",
+          "detail": "8 passed sur tests/test_o944_python_adapter.py et tests/test_o943_model_adapter_contracts.py"
+        }
+      ],
+      "resolution": {
+        "report": "logs/O94_4/pytest_python_adapter_retest.txt",
+        "note": "Assertion ajustée au champ retourné par l’API; retest propre réussi.",
+        "timestamp": 1792483564.07635
+      }
+    },
+    {
+      "incident_id": "O944-P5-GATE-PENDING-STATUS-001",
+      "category": "phase_protocol",
+      "phase": "P7",
+      "severity": "CHECKLIST_STATUS_VOCABULARY",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le premier préflight après formalisation a bloqué car la phase future P8 utilisait PENDING, statut absent de la grammaire du gate; aucun test fonctionnel n’a été compté sur ce passage.",
+      "impact": "Le gate séquentiel s’arrête sur un statut non autorisé, avant validation des hashes de sauvegarde et de l’exécution.",
+      "evidence": [
+        {
+          "report": "logs/O94_4/preflight_after_python_adapter.json",
+          "status": "BLOCKED",
+          "detail": "unknown O94.4 phase status"
+        },
+        {
+          "report": "logs/O94_4/preflight_after_python_adapter_retest.json",
+          "status": "PASS_BOUNDED",
+          "detail": "Gate séquentiel P5/P6/P7 passe après remplacement du statut PENDING par NOT_STARTED."
+        }
+      ],
+      "resolution": {
+        "report": "checklist_de_travail_O94_4.json",
+        "note": "Retest validé: le statut future NOT_STARTED est accepté et le gate retourne PASS_BOUNDED; les hashes du savepoint O94.4 sont cohérents.",
+        "timestamp": 1792483661.644098
+      }
+    },
+    {
+      "incident_id": "O944-P8-LATEX-SOURCE-COMPILE-001",
+      "phase": "P8",
+      "category": "latex_source_validation",
+      "severity": "DELIVERABLE_SOURCE_COMPILE_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T08:14:54.201225+00:00",
+      "summary": "La validation pdflatex des sources LaTeX a trouvé des délimiteurs Markdown backtick non valides et un usage de booktabs dans une inclusion sans chargement du package.",
+      "impact": "Les fichiers .tex restaient lisibles comme texte, mais la compilation source échouait; aucun PDF n’est un livrable prioritaire.",
+      "remediation": "Convertir les segments de code en \\texttt{\\detokenize{...}}, charger booktabs là où la matrice est incluse, puis recompiler les deux sources principales.",
+      "evidence": [
+        "logs/O94_4/latex_compile/formalisme.stdout.txt",
+        "logs/O94_4/latex_compile/formalisme.exit",
+        "logs/O94_4/latex_compile/laboratoire.stdout.txt",
+        "logs/O94_4/latex_compile/laboratoire.exit"
+      ],
+      "resolved_utc": "2026-10-20T08:16:13.504606+00:00",
+      "resolution_summary": "Les deux sources principales recompilent avec pdflatex -halt-on-error et exit code 0. Le formalisme charge amssymb et les segments de code utilisent texttt/detokenize; le laboratoire charge booktabs pour sa matrice incluse."
+    },
+    {
+      "incident_id": "O945-ENV-002",
+      "phase": "P1",
+      "category": "execution_harness_working_directory",
+      "severity": "HARNESS_COMMAND_NOT_EXECUTED",
+      "status": "RESOLVED",
+      "summary": "La première invocation de compileall n’a pas démarré car la redirection du log était relative au répertoire courant au lieu de la racine O94.5.",
+      "remediation": "Relancer la commande après cd explicite vers la racine du modèle et conserver le code retour et le log sous logs/O94_5.",
+      "evidence": [
+        "scripts/refresh_o945_savepoint.py"
+      ],
+      "created_utc": "2026-10-20T09:55:06.202796+00:00",
+      "resolution_summary": "Commande relancée avec répertoire de travail explicite; le premier essai n’a modifié aucune source ni aucun modèle."
+    },
+    {
+      "incident_id": "O945-ENV-003",
+      "phase": "P1",
+      "category": "pytest_import_path",
+      "severity": "TEST_COLLECTION_IMPORT_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La commande pytest lancée depuis un wrapper n’exposait pas de manière portable la racine du dépôt dans sys.path pour importer aam_o93.",
+      "remediation": "Ajouter pythonpath = . dans pytest.ini puis rejouer la collecte et les tests ciblés avec le lanceur pytest natif.",
+      "evidence": [
+        "pytest.ini",
+        "tests/test_o945_transformers_bundle.py"
+      ],
+      "first_observed_utc": "2026-10-20T10:27:00+01:00",
+      "resolution_summary": "La configuration pytest expose explicitement la racine (`pythonpath = .`); la suite cible du chargeur collecte et passe (5 passed).",
+      "resolution_evidence": "receipts/O94_5/P1_transformers_bundle.json",
+      "resolved_utc": "2026-10-20T10:28:00+01:00"
+    },
+    {
+      "incident_id": "O945-ENV-004",
+      "phase": "P1",
+      "category": "optional_dependency_install_network",
+      "severity": "EXTERNAL_INDEX_UNAVAILABLE",
+      "status": "BLOCKED_ENVIRONMENT",
+      "summary": "Installation des dépendances Transformers échouée : résolution DNS impossible vers l’index PyPI; aucun fichier modèle utilisateur n’est présent dans les archives de cette session.",
+      "command": "python -m pip install --disable-pip-version-check --no-input 'transformers>=4.48,<5' 'accelerate>=1.2,<2' 'sentencepiece>=0.2,<1'",
+      "return_code": 1,
+      "evidence": [
+        "receipts/O94_5/P1_optional_runtime_install.json",
+        "logs/O94_5/P1_optional_runtime_install.stderr.txt"
+      ],
+      "impact": "Le trajet registre→génération est testé avec doubles d’API et les contrats d’intégrité sont vérifiés; une génération réelle Transformers/SmolLM2 n’est pas revendiquée. Les fonctions d’observation et de compilation continuent avec les outils préinstallés.",
+      "created_utc": "2026-10-20T10:30:00+01:00",
+      "updated_utc": "2026-10-20T10:32:00+01:00"
+    },
+    {
+      "incident_id": "O945-ENV-005",
+      "phase": "P2",
+      "category": "test_contract_mismatch",
+      "severity": "ASSERTION_USES_NONEXISTENT_METHOD",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le nouveau test de bout en bout appelle O93Memory.read_events(), méthode absente du contrat; la mémoire expose recent_events(). Le runtime a cependant atteint OCR, empreinte, ingestion RAG et vérification SHA-256 avant cette assertion.",
+      "evidence": [
+        "receipts/O94_5/P2_observation_reward_retest.json",
+        "tests/test_o945_observation_reward.py"
+      ],
+      "remediation": "Utiliser l’API mémoire réellement exposée, inspecter sa forme de retour, puis vérifier l’événement d’observation sans ajouter de méthode de façade uniquement pour satisfaire le test.",
+      "created_utc": "2026-10-20T10:37:00+01:00",
+      "resolution_summary": "Le test utilise O93Memory.recent_events(limit=1000), contrôle la validité de la chaîne d’audit et confirme l’événement observation.multimodal_tool_report; les 3 tests P2 passent.",
+      "resolution_evidence": "receipts/O94_5/P2_observation_reward_final.json",
+      "resolved_utc": "2026-10-20T10:39:00+01:00"
+    },
+    {
+      "incident_id": "O945-ENV-006",
+      "phase": "P2",
+      "category": "preflight_without_refreshed_savepoint",
+      "severity": "PROTOCOL_DEVIATION",
+      "status": "RESOLVED_RETEST_PENDING",
+      "summary": "Le dernier essai a été lancé après modification de observation_tools.py sans exécuter le refresh du savepoint juste avant le gate; O94.5 a donc bloqué l’exécution sur des hashes obsolètes. Aucun test runtime dépendant de cette commande n’est compté comme passé.",
+      "evidence": [
+        "receipts/O94_5/P2_video_output_seek.json",
+        "scripts/refresh_o945_savepoint.py"
+      ],
+      "remediation": "Après chaque modification, relire les checklists, rafraîchir le savepoint O94.5, vérifier validate_o945 PASS_BOUNDED puis relancer le test.",
+      "created_utc": "2026-10-20T10:45:00+01:00"
+    },
+    {
+      "incident_id": "O945-ENV-007",
+      "phase": "P4",
+      "category": "sequential_gate_receipt_schema_mismatch",
+      "severity": "PHASE_GATE_FALSE_BLOCK",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T10:27:05.942560+00:00",
+      "summary": "Le garde séquentiel rencontrait deux défauts de cohérence des preuves P3 : le reçu de test utilise exit_code/passed/failed plutôt que status, puis un journal déclaré comme artefact n’était pas inclus dans le manifeste O94.5.",
+      "impact": "P4 bloqué avant exécution tant que le reçu n’est pas normalisé et que tous les artefacts de phase ne sont pas scellés dans le savepoint.",
+      "remediation": "Normaliser les reçus sans réécrire les reçus historiques; permettre des artefacts de phase séparés des reçus; ajouter les chemins d’artefacts à la liste explicite des fichiers scellés; rejouer le garde.",
+      "evidence": [
+        "receipts/O94_5/P4_savepoint_refresh_and_gate.json",
+        "logs/O94_5/P4_phase_gate_before_test.log",
+        "receipts/O94_5/P3_composition_compiler_retest_final.json"
+      ],
+      "updated_utc": "2026-10-20T10:35:00Z",
+      "followup_evidence": [
+        "receipts/O94_5/P4_gate_fix_retest.json"
+      ],
+      "resolution_summary": "The normalized P3 receipt and explicit artifact inventory are covered by the O94.5 savepoint; sequential validation accepts the gate and P4 gated tests have passed.",
+      "resolution_evidence": [
+        "receipts/O94_5/P4_savepoint_refresh_and_gate.json",
+        "receipts/O94_5/P4_gate_fix_retest.json",
+        "receipts/O94_5/P4_gate_final_retest.json"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-009",
+      "phase": "P4",
+      "category": "phase_receipt_schema_missing_status",
+      "severity": "SEQUENTIAL_PHASE_GATE_BLOCKED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T10:55:00+01:00",
+      "summary": "P3 phase evidence receipts contained exit_code=0 and passed>0 but lacked the root-level status field required by the sequential phase gate.",
+      "remediation": "Add status=PASS_BOUNDED to the already-recorded P3 receipts without changing the command or test result; run the O94.5 sequential gate after refreshing the savepoint.",
+      "evidence": [
+        "receipts/O94_5/P3_composition_compiler_retest_final.json",
+        "receipts/O94_5/P3_composition_artifact_build_final.json",
+        "receipts/O94_5/P3_postbuild_regression_final.json"
+      ],
+      "updated_utc": "2026-10-20T10:35:00Z",
+      "resolution_summary": "The normalized P3 receipt and explicit artifact inventory are covered by the O94.5 savepoint; sequential validation accepts the gate and P4 gated tests have passed."
+    },
+    {
+      "incident_id": "O945-ENV-010",
+      "phase": "P4",
+      "category": "phase_artifact_omitted_from_savepoint_manifest",
+      "severity": "SEQUENTIAL_PHASE_GATE_BLOCKED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:02:00+01:00",
+      "summary": "The phase gate found a P3 build log referenced as a required artifact that was excluded by the savepoint script’s blanket logs/O94_5 exclusion.",
+      "remediation": "The savepoint builder now automatically includes every explicit checklist phase artifact and evidence path, including referenced logs, while continuing to exclude unreferenced volatile logs and the savepoint tree itself.",
+      "evidence": [
+        "scripts/refresh_o945_savepoint.py",
+        "checklist_de_travail_O94_5.json",
+        "logs/O94_5/P3_composition_compiler_postbuild.log"
+      ],
+      "updated_utc": "2026-10-20T11:27:00+01:00",
+      "resolution_summary": "Final P4 regression exited 0: 48 passed, 0 failed in 9.71s; receipt and savepoint evidence updated."
+    },
+    {
+      "incident_id": "O945-ENV-011",
+      "phase": "P4",
+      "category": "test_uses_out_of_contract_memory_event_limit",
+      "severity": "TEST_ASSERTION_ABORT_AFTER_RUNTIME_PATH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:10:00+01:00",
+      "summary": "The expanded P4 test run failed only because a newly added test called recent_events(limit=2000), while O93Memory documents and enforces a maximum of 1000. The runtime solve and reliability event had already succeeded before the test reached that invalid parameter.",
+      "remediation": "Change the test to recent_events(limit=1000), preserving the API contract, then rerun the full targeted P4 regression and record its outcome.",
+      "evidence": [
+        "tests/test_o945_reward_runtime_integration.py",
+        "logs/O94_5/P4_reward_runtime_regression.log"
+      ],
+      "updated_utc": "2026-10-20T11:32:00+01:00",
+      "resolution_summary": "The invalid recent_events limit was corrected to 1000; the follow-up exposed a separate contract mismatch: recent_events returns a redacted read-only projection and intentionally omits payload.data, so causal payload assertions must inspect the verified append-only audit journal. Final P4 regression exited 0: 48 passed, 0 failed in 9.71s; receipt and savepoint evidence updated. Final P4 integrated regression: 50 passed, 0 failed, 9.41s; root cause was test/API contract mismatch, corrected without weakening assertions."
+    },
+    {
+      "incident_id": "O945-ENV-012",
+      "phase": "P4",
+      "category": "test_assumes_private_payload_in_redacted_event_view",
+      "severity": "AUDIT_CAUSAL_ASSERTION_ABORT",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:14:00+01:00",
+      "summary": "The reward integration test queried task_id inside recent_events payload; the public recent_events interface intentionally returns payload_keys only, not payload contents. The audit journal itself stores canonical payload.data.",
+      "remediation": "Keep the redacted UI event view for public contract and assert causal parent hashes from the append-only audit file after verifying recent_events audit_integrity.",
+      "evidence": [
+        "tests/test_o945_reward_runtime_integration.py",
+        "aam_o93/memory.py",
+        "logs/O94_5/P4_reward_runtime_regression_retest.log"
+      ],
+      "updated_utc": "2026-10-20T11:32:00+01:00",
+      "resolution_summary": "The test now reads private audit payloads from the hash-validated append-only journal, while using recent_events only for the documented redacted view and integrity status. A subsequent assertion also showed the event snapshot was captured before rating; the test now reads a fresh snapshot after rate_task. Final P4 regression exited 0: 48 passed, 0 failed in 9.71s; receipt and savepoint evidence updated. Final P4 integrated regression: 50 passed, 0 failed, 9.41s; root cause was test/API contract mismatch, corrected without weakening assertions."
+    },
+    {
+      "incident_id": "O945-ENV-013",
+      "phase": "P4",
+      "category": "test_uses_pre_feedback_event_snapshot",
+      "severity": "CAUSAL_EVENT_ASSERTION_FALSE_NEGATIVE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:23:00+01:00",
+      "summary": "The P4 integration test collected raw audit journal events before calling rate_task, then searched that stale in-memory list for the reward.causal_transition generated by rate_task.",
+      "remediation": "Read the append-only audit journal after the rating action and retain assertions for the rating event, its parent hashes, and the independent-verification dimension remaining unchanged.",
+      "evidence": [
+        "tests/test_o945_reward_runtime_integration.py",
+        "aam_o93/runtime.py"
+      ],
+      "updated_utc": "2026-10-20T11:32:00+01:00",
+      "resolution_summary": "Final P4 regression exited 0: 48 passed, 0 failed in 9.71s; receipt and savepoint evidence updated. Final P4 integrated regression: 50 passed, 0 failed, 9.41s; root cause was test/API contract mismatch, corrected without weakening assertions."
+    },
+    {
+      "incident_id": "O945-ENV-026",
+      "phase": "P8",
+      "category": "new_full_suite_runner_test_expectation_mismatch",
+      "severity": "TEST_ASSERTION_EXPECTED_SUBTEST_COUNT_INSTEAD_OF_PYTEST_TOTAL",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T12:20:58.188370+00:00",
+      "summary": "The first unit test for the generalized P8 runner expected the nested subtest count (21) to be parsed as the pytest total, although the parser correctly reads the first total-count field (419).",
+      "remediation": "Corrected the test expectation to assert 419 pytest tests and separately assert warning/failure counts; no production parser behavior was relaxed.",
+      "evidence": [
+        "scripts/run_o945_full_suite.py",
+        "tests/test_o945_full_suite_runner.py"
+      ],
+      "updated_utc": "2026-10-20T12:20:58.188370+00:00",
+      "resolution_summary": "python -m py_compile succeeded; 3 runner tests passed, including a line that contains both failed and passed counts. This incident is a test assertion correction, not an AAM runtime failure."
+    },
+    {
+      "incident_id": "O945-ENV-027",
+      "phase": "P8",
+      "category": "generated_bytecode_wrongly_tracked_by_savepoint",
+      "severity": "REPRODUCIBILITY_BLOCKER",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T12:33:49.347327+00:00",
+      "summary": "Le premier ZIP candidat a extrait le code et les manifestes correctement, mais le préflight O94.5 a bloqué car le savepoint suivait aam_o93/composed_programs/O94_5_project_compilation_audit.compiled.pyc, un bytecode généré exclu volontairement des ZIP.",
+      "impact": "Le bytecode ne doit pas être une dépendance de restauration ou de livraison; le snapshot précédent produisait des divergences et une cascade de tests bloqués.",
+      "remediation": "Exclure .pyc et __pycache__ de l’overlay de sauvegarde comme ils le sont déjà du manifeste ZIP; rafraîchir sav_AAM_O94_5 puis reconstruire le candidat depuis zéro.",
+      "evidence": [
+        "scripts/refresh_o945_savepoint.py",
+        "scripts/build_o945_delivery.py",
+        "receipts/O94_5/P8_candidate_archive_verification.json",
+        "../release_reports/P8_candidate_outer_retry.log"
+      ],
+      "updated_utc": "2026-10-20T12:35:35.711635+00:00",
+      "resolution_summary": "Le snapshot exclut désormais les .pyc et __pycache__; candidat construit et extrait à nouveau avec préflight, restauration, tests ciblés O94.5, compileall, audit documentaire et les deux compilations LaTeX tous réussis. Le ZIP candidat fait 179481460 octets (sous 220000000) et ses CRC/manifeste passent."
+    },
+    {
+      "incident_id": "O945-ENV-028",
+      "phase": "P8",
+      "category": "test_race_checkpoint_public_status_transition",
+      "severity": "FINAL_PACKAGE_REGRESSION_BLOCKER",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T12:41:37.292262+00:00",
+      "summary": "La suite complète en extraction fraîche a révélé 427 réussites et un échec: le test publie un checkpoint « paused » puis lit aussitôt le status avant que le callback de statut ait fini la transition PAUSE_REQUESTED→PAUSED.",
+      "impact": "P8 ne peut pas être fermé tant que le test ne vérifie pas réellement la persistance du checkpoint ET l’état public terminal, sans dépendre d’un ordonnancement de threads.",
+      "remediation": "Faire attendre le test jusqu’à l’observation simultanée du checkpoint réel et du statut PAUSED (budget limité existant); rejouer le test isolé puis la suite entière à partir d’une nouvelle extraction du ZIP.",
+      "evidence": [
+        "tests/test_p7_training_control.py",
+        "receipts/O94_5/P8_candidate_archive_verification.json",
+        "../release_reports/P8_final_outer.log"
+      ],
+      "updated_utc": "2026-10-20T12:44:00.045382+00:00",
+      "resolution_summary": "Le test attend désormais les deux conditions à la pause: checkpoint atomique avec meta.paused=true et statut public PAUSED; le cas a passé trois exécutions consécutives et la suite ciblée depuis une extraction fraîche du candidat (préflight/restauration/audit/compilation inclus) est PASS_BOUNDED."
+    }
+  ],
+  "o945_items": [
+    {
+      "incident_id": "O945-E001",
+      "phase": "P1",
+      "category": "test_fixture_absent",
+      "severity": "EXTERNAL_TEST_FIXTURE_MISSING",
+      "status": "OPEN",
+      "summary": "Les fichiers de poids SmolLM2-360M et son tokenizer/configuration ne sont pas présents dans les archives livrées pour cette tâche.",
+      "impact": "Impossible de confirmer une génération avec ce checkpoint précis dans cette session; on peut tester un vrai modèle miniature et diagnostiquer un dossier sélectionné par l’utilisateur.",
+      "mitigation": "Implémenter adaptateur natif Transformers et valider l’intégration avec des tests de contrat/tiny fixture locale."
+    },
+    {
+      "incident_id": "O945-E001",
+      "phase": "P1",
+      "category": "pytest_sys_path_harness",
+      "severity": "TEST_COLLECTION_IMPORT_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "L’exécutable système pytest ne plaçait pas le dossier projet dans sys.path et ne trouvait pas aam_o93.",
+      "remediation": "Utiliser python -m pytest depuis la racine de Dmodel_AAM_O94_5.",
+      "evidence": [
+        "logs/O94_5/P1_targeted_tests.txt"
+      ],
+      "resolution_summary": "La même sélection de tests a été relancée via python -m pytest et s’est terminée sur 16 passed, 0 failed.",
+      "updated_utc": "2026-10-20T10:00:54.740992+00:00"
+    },
+    {
+      "incident_id": "O945-E002",
+      "phase": "P1",
+      "category": "test_contract_expectation",
+      "severity": "TEST_ASSERTION_KEY_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Un test mocké demandait model_loaded, un champ qui ne fait pas partie du contrat de retour public du registre.",
+      "remediation": "Vérifier le modèle enregistré dans la mémoire interne de test et les champs publics réellement contractuels (status/backend/text).",
+      "evidence": [
+        "tests/test_o945_transformers_bundle.py",
+        "logs/O94_5/P1_targeted_tests.txt"
+      ],
+      "resolution_summary": "Le test vérifie maintenant status, texte, backend et l’inscription dans le cache runtime; retest 16 passed, 0 failed.",
+      "updated_utc": "2026-10-20T10:00:54.740992+00:00"
+    },
+    {
+      "incident_id": "O945-E003",
+      "phase": "P2",
+      "category": "savepoint_refresh_order_before_runtime_integration_test",
+      "severity": "PREEXECUTION_INTEGRITY_GATE_BLOCKED_TEST",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le test avait été ajouté après le dernier snapshot et fut bloqué avant observe_media. Après journalisation et refresh, le test public image passe depuis un état scellé.",
+      "remediation": "Conserver l’ordre reçus/checklists → refresh savepoint → gate → runtime test.",
+      "evidence": [
+        "receipts/O94_5/P2_preflight_hash_interruption.json",
+        "receipts/O94_5/P2_ffmpeg_sampling_regression.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00"
+    },
+    {
+      "incident_id": "O945-E004",
+      "phase": "P2",
+      "category": "runtime_parameter_contract_regression_found_by_multimodal_suite",
+      "severity": "TARGETED_TEST_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La signature observe_media expose désormais persist_text; tests image/PDF et runtime image→empreinte→RAG réussissent. Le sampler vidéo reste suivi séparément.",
+      "remediation": "Aucun autre correctif pour ce contrat; la régression vidéo est gérée par O945-M008.",
+      "evidence": [
+        "aam_o93/observation_tools.py",
+        "aam_o93/runtime.py",
+        "receipts/O94_5/P2_ffmpeg_sampling_regression.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00"
+    },
+    {
+      "incident_id": "O945-E005",
+      "phase": "P2",
+      "category": "video_frame_timestamp_fixture_mismatch",
+      "severity": "REAL_TOOL_INTEGRATION_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Dans une vidéo à 4 images/4 fps, le sampler visait 0.99 s alors que la dernière image avait un PTS à 0.75 s; le code FFmpeg retournait 0 sans générer la frame.",
+      "remediation": "Aligner les timestamps sur nb_frames / avg_frame_rate et vérifier les fichiers sortants.",
+      "evidence": [
+        "receipts/O94_5/P2_ffmpeg_sampling_regression.json",
+        "receipts/O94_5/P2_ffmpeg_sampling_fix.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00",
+      "resolution_summary": "Timestamp selection was fixed; 7 observation tests pass, including a video motion fixture with unique frame hashes.",
+      "resolution_evidence": [
+        "receipts/O94_5/P2_observation_toolchain_complete.json"
+      ]
+    },
+    {
+      "incident_id": "O945-E006",
+      "phase": "P2",
+      "category": "audio_sample_count_assertion_overconstrained",
+      "severity": "TEST_FIXTURE_THRESHOLD_MISMATCH",
+      "status": "RESOLVED_TEST_CORRECTION_PASS",
+      "summary": "Le test d’une piste AAC attendait >10000 échantillons alors que FFmpeg a réellement décodé 9660 échantillons pour le flux généré; le contrôle RMS positif et le décodage sont valides.",
+      "remediation": "Réviser la borne selon le minimum temporel validé (>8000 échantillons à 8 kHz) et continuer à vérifier le RMS, le probe et l’intégrité.",
+      "evidence": [
+        "tests/test_o945_observation_multimedia_ffmpeg.py",
+        "receipts/O94_5/P2_ffmpeg_sampling_regression.json",
+        "receipts/O94_5/P2_ffmpeg_sampling_fix.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00",
+      "resolution_summary": "The lower bound now requires >8000 decoded PCM samples at 8 kHz on the short encoded AAC fixture and independently checks nonzero RMS, FFprobe, report hashes and source immutability.",
+      "resolution_evidence": [
+        "receipts/O94_5/P2_observation_toolchain_complete.json"
+      ]
+    },
+    {
+      "incident_id": "O945-E007",
+      "phase": "P3",
+      "category": "test_artifact_path_contract_mismatch",
+      "severity": "TEST_ASSERTION_PATH_BASE_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Deux assertions du premier lot LaTeX utilisaient des champs/path bases erronés : les chemins de build sont relatifs au workspace et le résumé public expose source_sha256 + source_unchanged; source_sha256_before est dans le build report.",
+      "evidence": [
+        "logs/O94_5/P3_composition_compiler_first_run.log",
+        "tests/test_o945_compiled_project_audit.py"
+      ],
+      "remediation": "Tests corrigés selon le contrat public réel; hash du build report recalculable après exclusion du champ report_sha256, et source immutabilité contrôlée.",
+      "updated_utc": "2026-10-20T10:18:49.981709+00:00",
+      "resolution_summary": "Les assertions utilisent maintenant le chemin relatif au workspace et les champs du contrat public. Le hash SHA-256 du rapport de build est recalculé indépendamment depuis son contenu canonique; 19 tests passent, dont compilation LaTeX réelle avec source inchangée.",
+      "resolution_evidence": [
+        "logs/O94_5/P3_composition_compiler_retest_3.log",
+        "tests/test_o945_compiled_project_audit.py"
+      ],
+      "resolved_utc": "2026-10-20T10:18:49.981709+00:00"
+    },
+    {
+      "incident_id": "O945-E008",
+      "phase": "P3",
+      "category": "standalone_build_script_import_path",
+      "severity": "REPRODUCIBILITY_SCRIPT_IMPORT_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le script de recompilation des compositions lancé comme python scripts/build_o945_compositions.py n’ajoutait pas la racine du paquet à sys.path, contrairement à une invocation par module.",
+      "evidence": [
+        "logs/O94_5/P3_composition_artifact_build.log",
+        "scripts/build_o945_compositions.py"
+      ],
+      "remediation": "Ajouter explicitement le root déterminé depuis __file__ à sys.path avant l’import, afin que l’outil soit exécutable depuis tout répertoire de travail à condition que Python dispose des dépendances natives du projet.",
+      "updated_utc": "2026-10-20T10:20:13.942696+00:00",
+      "resolution_summary": "Le script de build est relançable depuis la racine et a réellement généré le programme compilé O94_5_project_compilation_audit.py, son .compiled.pyc et son manifeste SHA-256 à partir du DSL JSON. Le code retour final est 0.",
+      "resolution_evidence": [
+        "logs/O94_5/P3_composition_artifact_build_retest.log",
+        "aam_o93/composed_programs/O94_5_project_compilation_audit.py",
+        "aam_o93/composed_programs/O94_5_project_compilation_audit.py.manifest.json"
+      ],
+      "resolved_utc": "2026-10-20T10:20:13.942696+00:00"
+    },
+    {
+      "incident_id": "O945-ENV-010",
+      "phase": "P4",
+      "category": "phase_gate_not_enforced_by_test_wrapper",
+      "severity": "TEST_ORCHESTRATION_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T10:28:10Z",
+      "summary": "The shell wrapper continued into pytest after the pre-test phase gate returned BLOCKED because the gate and test commands were not joined with fail-fast control. AAMRuntime itself rejected the runtime integration cases at preflight.",
+      "impact": "This test attempt is not evidence about reward runtime behavior; it produced one isolated unit pass and three preflight-blocked failures.",
+      "remediation": "The next test invocation is guarded by a Python runner that calls the O94.5 gate and refuses to launch pytest unless it returns PASS_BOUNDED for the active phase; parse failed counts from the actual pytest summary.",
+      "evidence": [
+        "receipts/O94_5/P4_causal_reward_tests.json",
+        "logs/O94_5/P4_causal_reward_tests.stdout.txt"
+      ],
+      "updated_utc": "2026-10-20T10:35:00Z",
+      "resolution_summary": "The guarded same-process phase-gate runner refuses blocked phases; after correcting the audit limit to 1000, the final gated P4 suite passes 7/7."
+    },
+    {
+      "incident_id": "O945-ENV-011",
+      "phase": "P4",
+      "category": "test_exceeds_public_api_limit",
+      "severity": "TEST_CONTRACT_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T10:30:00Z",
+      "summary": "Reward runtime integration reached a successful solve and execution-reliability update, then its audit assertion requested 2000 recent events while O93Memory.recent_events explicitly allows limits only from 1 to 1000.",
+      "remediation": "The test fixture now requests 1000 events. Retest the runtime reward loop after refreshing and checking the O94.5 savepoint.",
+      "evidence": [
+        "receipts/O94_5/P4_causal_reward_tests_retest.json",
+        "tests/test_o945_reward_runtime_integration.py"
+      ],
+      "updated_utc": "2026-10-20T10:35:00Z",
+      "resolution_summary": "The guarded same-process phase-gate runner refuses blocked phases; after correcting the audit limit to 1000, the final gated P4 suite passes 7/7."
+    },
+    {
+      "incident_id": "O945-ENV-012",
+      "phase": "P5",
+      "category": "order_sensitive_pytest_summary_parser",
+      "severity": "TEST_RECEIPT_ACCOUNTING_ERROR",
+      "status": "RESOLVED_RECEIPT_CORRECTED",
+      "opened_utc": "2026-10-20T10:43:01.723876+00:00",
+      "summary": "The test runner parsed the pytest summary only when \"passed\" preceded \"failed\" and recorded failed=0 for a run that exited 1 with \"1 failed, 10 passed\".",
+      "remediation": "Count passed/failed/skipped independently anywhere in the complete summary line; preserve raw stdout log and never infer zero failures solely from a missing regex match.",
+      "evidence": [
+        "logs/O94_5/P5_chat_unified_targeted.log",
+        "receipts/O94_5/P5_chat_unified_targeted.json"
+      ],
+      "resolution_summary": "The receipt now reports 10 passed, 1 failed, exit_code=1 and status=FAIL from the raw pytest log. Future receipts use order-independent counts.",
+      "updated_utc": "2026-10-20T10:43:01.723876+00:00"
+    },
+    {
+      "incident_id": "O945-ENV-013",
+      "phase": "P5",
+      "category": "combined_regression_campaign_exceeded_session_timeout",
+      "severity": "TEST_ORCHESTRATION_TIMEOUT_NO_TEST_SUMMARY",
+      "status": "RESOLVED_BY_SEGMENTED_MATRIX",
+      "opened_utc": "2026-10-20T10:44:09.805384+00:00",
+      "summary": "La campagne combinée P5 avec 12 fichiers dépassait 180 secondes et le wrapper a été interrompu avant de sauvegarder la sortie pytest. Aucun nombre de tests réussis/échoués ne peut être déduit de cette tentative.",
+      "impact": "La campagne intégrée large ne constitue pas une preuve de réussite ou d’échec; une sortie partielle et non persistée n’est pas exploitable.",
+      "remediation": "Exécuter le lot en groupes plus petits avec un délai et un reçu indépendants par groupe, journaux écrits après chaque groupe, puis agréger uniquement les reçus réellement terminés.",
+      "evidence": [
+        "receipts/O94_5/P5_chat_rag_memory_reward_sms_integration_timeout.json",
+        "logs/O94_5/P5_chat_rag_memory_reward_sms_integration_timeout.log"
+      ],
+      "updated_utc": "2026-10-20T10:59:47.799322+00:00",
+      "resolution_summary": "Le lot initial monolithique a bien été interrompu et reste enregistré comme tel. La résolution ne le transforme pas en succès : P5 a été reprise par lots isolés (pipeline/runtime/UI, détails/UI smoke, CLI+dispatch, RAG runtime+corpus SMS), tous avec exit_code=0 et reçus indépendants. Les essais requis de P6 restent eux aussi segmentés.",
+      "resolution_evidence": [
+        "receipts/O94_5/P5_chat_ui_release_identity_regression.json",
+        "receipts/O94_5/P5_ui_detail_smoke_regression.json",
+        "receipts/O94_5/P5_cli_foundation_composition_dispatch.json",
+        "receipts/O94_5/P5_rag_runtime_sms_corpus.json",
+        "receipts/O94_5/P5_ui_e2e_retest.json"
+      ],
+      "resolved_utc": "2026-10-20T10:59:47.799322+00:00"
+    },
+    {
+      "incident_id": "O945-ENV-014",
+      "phase": "P5",
+      "category": "live_tk_chat_end_to_end_test_hangs",
+      "severity": "TEST_HARNESS_OR_UI_TEARDOWN_HANG",
+      "status": "RESOLVED_RETEST_PASS",
+      "created_utc": "2026-10-20T11:00:00+01:00",
+      "summary": "Faulthandler pinpointed the UI E2E hang: the test clicked Send while asynchronous startup/catalog loading had left app.busy=True, so _run opened a modal message box that an unattended test cannot dismiss. The feature execution was not reached by this attempt.",
+      "evidence": [
+        "receipts/O94_5/P5_unified_chat_ui_identity_timeout.json",
+        "receipts/O94_5/P5_ui_stack_diagnostic.json",
+        "logs/O94_5/P5_ui_stack_diagnostic.log",
+        "tests/test_o945_chat_unified_pipeline.py"
+      ],
+      "remediation": "Wait for both app.busy=False and app._initial_catalogs_pending=False before submitting through the real UI; use a hard bounded wait and preserve the diagnostic receipt. Retest the visible chat action and shutdown.",
+      "updated_utc": "2026-10-20T10:58:19.894579+00:00",
+      "resolution_summary": "Le test live Tk isolé passe 1/1 en 2.99 s après avoir attendu busy=False et la fin des catalogues initiaux. La pile de l’essai interrompu a bien identifié le dialogue busy qui attendait un clic dans Xvfb.",
+      "resolution_evidence": [
+        "receipts/O94_5/P5_ui_e2e_retest.json",
+        "logs/O94_5/P5_ui_e2e_retest.log"
+      ],
+      "resolved_utc": "2026-10-20T10:56:26.435429+00:00",
+      "additional_resolution_evidence": [
+        "receipts/O94_5/P5_chat_ui_release_identity_regression.json",
+        "receipts/O94_5/P5_ui_detail_smoke_regression.json",
+        "receipts/O94_5/P5_cli_foundation_composition_dispatch.json"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-015",
+      "phase": "P6",
+      "category": "full_suite_runner_omitted_xvfb",
+      "severity": "UI_TEST_ENVIRONMENT_INVALID",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "The first full pytest run called pytest directly with DISPLAY=:0 but no available X server. Eleven Tk/UI CLI cases failed during tk.Tk() before exercising the feature paths; this run is not valid evidence of UI regressions.",
+      "impact": "The broad regression receipt has 401 passed and 16 failures, but the UI failures attributable to the runner cannot be interpreted as feature failures.",
+      "remediation": "Update scripts/run_o945_full_suite.py to invoke xvfb-run -a when available and persist the actual wrapped command in the receipt; rerun the full suite after gate/savepoint refresh.",
+      "evidence": [
+        "receipts/O94_5/P6_full_suite_preflight.json",
+        "receipts/O94_5/P6_full_suite_regression.json",
+        "logs/O94_5/P6_full_suite_regression.log",
+        "scripts/run_o945_full_suite.py"
+      ],
+      "updated_utc": "2026-10-20T11:54:38.515102+00:00",
+      "resolution_summary": "The final guarded full suite ran with virtual_display_used=true and passed 419 tests with zero failures; the prior DISPLAY=:0 failure is retained historically but is no longer an unresolved release blocker.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T114952Z_19680.log",
+        "scripts/run_o945_full_suite.py"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-016",
+      "phase": "P6",
+      "category": "legacy_release_identity_assertion_stale",
+      "severity": "RELEASE_REGRESSION_TEST_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "A legacy standalone-startup test still expects CLI version 0.94.4 while the current package is O94.5/0.94.5.",
+      "impact": "False failure in release identity verification.",
+      "remediation": "Update only the expected public version in tests/test_o941_standalone_startup.py to 0.94.5; keep assertions for the embedded historical O94.1 savepoint immutable and unchanged. Retest under Xvfb.",
+      "evidence": [
+        "tests/test_o941_standalone_startup.py",
+        "logs/O94_5/P6_full_suite_regression.log"
+      ],
+      "updated_utc": "2026-10-20T11:54:38.515102+00:00",
+      "resolution_summary": "The complete O94.5 suite, including standalone-startup/version assertions, passed 419 tests with zero failures.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T114952Z_19680.log",
+        "scripts/run_o945_full_suite.py"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-017",
+      "phase": "P6",
+      "category": "transformers_registration_test_uses_empty_bundle",
+      "severity": "TEST_FIXTURE_CONTRACT_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "The legacy Transformers test registers an empty local directory and expects success; O94.5 correctly rejects the bundle because config, weights and tokenizer metadata are required.",
+      "impact": "The test no longer reflects the stricter local bundle contract, and must not be made green by weakening validation.",
+      "remediation": "Change the test to assert ModelIntegrationError for an empty bundle or give it a structurally complete fixture while keeping actual weight inference unclaimed.",
+      "evidence": [
+        "tests/test_o941_model_integration.py",
+        "aam_o93/model_integration.py",
+        "logs/O94_5/P6_full_suite_regression.log"
+      ],
+      "updated_utc": "2026-10-20T11:54:38.515102+00:00",
+      "resolution_summary": "The complete O94.5 suite passed; incomplete model bundles are now correctly treated as un-loadable, and adapter/bundle tests pass.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T114952Z_19680.log",
+        "scripts/run_o945_full_suite.py"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-018",
+      "phase": "P6",
+      "category": "autonomy_idempotence_test_counts_global_threads",
+      "severity": "TEST_ISOLATION_INVARIANT_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "The autonomy idempotence test fails when two AAM-O93-autonomy threads are alive process-wide. The implementation allows concurrent runtimes on distinct workspaces; the test counts global threads rather than asserting the same runtime retains one live thread instance.",
+      "impact": "It is not yet established whether this is an autonomy leak or an overbroad test invariant.",
+      "remediation": "Run the test alone under the guarded phase. Change the invariant to compare the same runtime thread identity and assert only one thread owned by that runtime; also ensure all tests close their own runtimes.",
+      "evidence": [
+        "tests/test_p6_autonomy.py",
+        "aam_o93/autonomy.py",
+        "logs/O94_5/P6_full_suite_regression.log"
+      ],
+      "updated_utc": "2026-10-20T11:19:08.344969+00:00",
+      "resolution_summary": "The test now asserts thread identity/ownership for the same runtime, and the isolated guarded rerun passed as part of 24/24 targeted regressions.",
+      "resolution_evidence": [
+        "tests/test_p6_autonomy.py",
+        "receipts/O94_5/P6_targeted_regressions_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-019",
+      "phase": "P6",
+      "category": "invalid_video_fixture_status_expectation_stale",
+      "severity": "TEST_FIXTURE_STATUS_CONTRACT_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "A test writes arbitrary bytes to a .mp4 file but expects the overall solve status PASS_BOUNDED, although FFprobe/FFmpeg identify a malformed container and the result is ERROR. The attachment must stay explicitly NOT_DECODED; a failed decode must not be reported as decoded.",
+      "impact": "The test conflates a correctly reported malformed input with a successful observation request.",
+      "remediation": "Update the assertion to the intended public error/partial contract while verifying decode_status=NOT_DECODED, a non-PASS attachment status, preserved source hash, and a concrete FFprobe/FFmpeg diagnostic.",
+      "evidence": [
+        "tests/test_p7_integrated.py",
+        "aam_o93/observation_tools.py",
+        "logs/O94_5/P6_full_suite_regression.log"
+      ],
+      "updated_utc": "2026-10-20T11:19:08.344969+00:00",
+      "resolution_summary": "The attachment observation path was routed through observe_media; the guarded video-decoder public-contract test passed in the 24-test targeted batch. Decode remains explicitly NOT_DECODED when tools cannot parse the input.",
+      "resolution_evidence": [
+        "aam_o93/runtime.py",
+        "tests/test_p7_integrated.py",
+        "receipts/O94_5/P6_targeted_regressions_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-020",
+      "phase": "P6",
+      "category": "stale_pytest_node_selector_no_tests_executed",
+      "severity": "TEST_INVOCATION_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "A targeted pytest invocation referenced an obsolete O945 test name after the test contract was improved; pytest collected no tests. This was an invocation error and did not test or fail model behavior.",
+      "impact": "The attempted test run produced no functional evidence and could not be counted toward phase criteria.",
+      "remediation": "Use the test name present in the current tree, check collection before interpreting results, and preserve a receipt even for a no-tests-run invocation.",
+      "evidence": [
+        "tests/test_o945_transformers_bundle.py",
+        "logs/O94_5/P6_targeted_regressions_retry01.log"
+      ],
+      "updated_utc": "2026-10-20T11:19:08.344969+00:00",
+      "resolution_summary": "Corrected test selector; subsequent gated batch ran 24 tests and passed 24/24 under Xvfb.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_targeted_regressions_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-021",
+      "phase": "P6",
+      "category": "mutable_suite_outputs_in_static_savepoint",
+      "severity": "PHASE_GATE_SELF_INVALIDATION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:22:53.178649+00:00",
+      "summary": "The full-suite runner overwrote manifest-covered stable log and preflight receipt paths before tests completed. Runtime preflight hashes then mismatched, causing hundreds of secondary failures.",
+      "impact": "The regression output is not a functional pass/fail verdict for tests blocked at AAMRuntime construction; the suite cannot be trusted until runner artifacts are made immutable per attempt.",
+      "remediation": "Runner modifié pour utiliser des chemins de journal/reçu/préflight uniques et ne mettre à jour les alias stables qu’après fin de pytest; une campagne large complète doit confirmer l’absence de cascade de savepoint mismatch.",
+      "evidence": [
+        "scripts/run_o945_full_suite.py",
+        "receipts/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.json",
+        "logs/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.log",
+        "receipts/O94_5/P6_full_suite_regression_20261020T112306Z_15724.json"
+      ],
+      "updated_utc": "2026-10-20T11:54:38.515102+00:00",
+      "resolution_summary": "The detached runner uses unique per-run logs/receipts and only refreshes stable aliases after pytest exits. Final receipt is PASS_BOUNDED, return_code=0, 419 passed, 0 failed; no savepoint mismatch cascade occurred.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T114952Z_19680.log",
+        "scripts/run_o945_full_suite.py"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-022",
+      "phase": "P6",
+      "category": "bounded_success_status_not_accepted_by_legacy_media_tests",
+      "severity": "TEST_CONTRACT_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:44:43.245511+00:00",
+      "summary": "The broad regression exposed two stale assertions that accepted PASS/PARTIAL but not PASS_BOUNDED, although observe_media projects a successful local decoder to PASS_BOUNDED and other O94.5 contracts use that status.",
+      "impact": "Two otherwise valid Tesseract/FFmpeg observation tests fail at status vocabulary assertions; the decoder execution itself returned success. This requires retesting after aligning the expectation, not changing the runtime status to hide bounded coverage.",
+      "remediation": "Update only the two assertions to explicitly accept PASS_BOUNDED while retaining all modality, decoder, file-integrity, raw fingerprint, OCR/acoustic feature, and report-hash assertions. Run both exact failing cases and the full suite under Xvfb.",
+      "evidence": [
+        "aam_o93/observation_tools.py",
+        "tests/test_o945_observation_multimedia_ffmpeg.py",
+        "tests/test_o945_observation_reward.py",
+        "receipts/O94_5/P6_full_suite_regression.json"
+      ],
+      "updated_utc": "2026-10-20T11:45:33.978274+00:00",
+      "resolution_summary": "Both exact failing node tests passed (2/2) under Xvfb in 1.03s. The runtime was unchanged; only the tests were aligned with the documented PASS_BOUNDED success state. Decoder, source immutability, OCR/acoustic, and report hash assertions remain active.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.json",
+        "logs/O94_5/P6_status_contract_fix_targeted_20261020T114506Z_18578.log",
+        "aam_o93/observation_tools.py"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-023",
+      "phase": "P6",
+      "category": "tool_channel_interruption_before_receipt_finalization",
+      "severity": "EXECUTION_ORCHESTRATOR_INTERRUPTION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:49:42.592552+00:00",
+      "summary": "The pytest subprocess reached 100% and emitted 419 passed, 0 failed, 5 warnings, 21 subtests passed, but the calling execution channel timed out after its 120-second window and terminated the runner before it could write the final receipt. The child pytest/Xvfb process was reparented and completed, leaving full stdout but no finalized per-run receipt.",
+      "impact": "The raw test output is useful evidence but the runner return code and final machine receipt were not captured by the original invocation. P6 cannot be closed from this run alone.",
+      "remediation": "Record the interrupted attempt without treating it as the phase receipt; relaunch the same guarded runner detached from the short command window and verify its own exit code, per-run receipt and log hash before closing P6.",
+      "evidence": [
+        "logs/O94_5/P6_full_suite_regression_20261020T114536Z_18667.log",
+        "receipts/O94_5/P6_full_suite_preflight_20261020T114536Z_18667.json"
+      ],
+      "updated_utc": "2026-10-20T11:54:38.515102+00:00",
+      "resolution_summary": "The follow-up detached run produced the expected machine receipt with return_code=0, no timeout, status PASS_BOUNDED, 419 passed and 0 failed. This resolves the prior wrapper interruption; the earlier stdout-only run remains in history.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_full_suite_regression_20261020T114952Z_19680.json",
+        "logs/O94_5/P6_full_suite_regression_20261020T114952Z_19680.log",
+        "scripts/run_o945_full_suite.py"
+      ]
+    },
+    {
+      "incident_id": "O945-ENV-024",
+      "phase": "P7",
+      "category": "validation_harness_non_utf8_output_decode",
+      "severity": "P7_RECEIPT_NOT_WRITTEN_ON_OUTPUT_DECODE_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T12:14:32.133210+00:00",
+      "summary": "The first documentation validation wrapper tried strict UTF-8 decoding on a tool stream containing a non-UTF-8 byte, aborting before it wrote a final receipt.",
+      "remediation": "Use an explicit UTF-8 decoder with errors=replace for captured command output, preserving full text as far as decodable and always writing the execution receipt.",
+      "evidence": [
+        "receipts/O94_5/P7_docs_restore_compile_20261020T121216Z.json",
+        "logs/O94_5/P7_docs_restore_compile_20261020T121216Z.log"
+      ],
+      "updated_utc": "2026-10-20T12:14:32.133210+00:00",
+      "resolution_summary": "The corrected validation harness completed all 14 checks, captured logs and SHA-256, and wrote a PASS_BOUNDED receipt."
+    },
+    {
+      "incident_id": "O945-ENV-025",
+      "phase": "P7",
+      "category": "release_validation_invoked_inherited_cli_preflight",
+      "severity": "VERSIONED_GATE_CONFUSION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T12:14:32.133210+00:00",
+      "summary": "An early manual check used the inherited `python -m aam_o93 preflight` command, which reports the legacy O94.4/O94.3 control stack, not the descendant O94.5 sequential gate.",
+      "remediation": "Create and use scripts/preflight_o945.py, and change all O94.5 launchers and usage documentation to call it before opening the UI.",
+      "evidence": [
+        "scripts/preflight_o945.py",
+        "run_AAM_O94_5.sh",
+        "run_AAM_O94_5.bat",
+        "run_AAM_O94_5.ps1",
+        "tests/test_o945_standalone_preflight.py",
+        "receipts/O94_5/P7_documentation_restore_final.json"
+      ],
+      "updated_utc": "2026-10-20T12:14:32.133210+00:00",
+      "resolution_summary": "The release-specific gate returns PASS_BOUNDED for O94.5 with 49 parent and 168 descendant files checked; the two launcher tests and end-to-end P7 receipt pass."
+    }
+  ],
+  "updated_utc": "2026-10-20T12:44:00.045382+00:00"
+}

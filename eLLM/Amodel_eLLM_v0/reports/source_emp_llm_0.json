@@ -1,0 +1,883 @@
+{
+  "spec_version": "0.2",
+  "document_id": "source_emp_llm_0",
+  "companion_tex": "source_th_emp_llm_0.tex",
+  "language": "fr",
+  "last_updated": "2026-10-21",
+  "title": "Socle formel et spécification opérationnelle d'un LLM fondé sur la théorie des empreintes",
+  "purpose": "Spécification structurée des notions du noyau DDD_Base et de leur application testable à un modèle de langage EmpLLM_0.",
+  "source_basis": {
+    "name": "DDD_Base",
+    "scope": "Extraction des notions fondamentales fournies dans la conversation, et non reconstruction exhaustive de toute la théorie des empreintes.",
+    "principle": "Toute notion architecturale doit être rattachée au socle ou étiquetée explicitement comme application, choix d'ingénierie ou hypothèse empirique.",
+    "epistemic_statuses": {
+      "BASE": "Notion directement présente dans le noyau de théorie fourni.",
+      "DÉRIVÉ": "Propriété mathématique déduite à partir des définitions et hypothèses spécifiées.",
+      "APPLICATION": "Traduction conceptuelle au domaine des LLM, non primitive du socle.",
+      "INGÉNIERIE": "Décision nécessaire à une implémentation calculable et reproductible.",
+      "EMPIRIQUE": "Hypothèse sur les mécanismes ou les performances, à tester expérimentalement."
+    }
+  },
+  "change_log": [
+    "Intégration explicite du fonctionnel Phi à valeurs scalaires, du domaine X, des contextes P et de la famille de sondes F.",
+    "Ajout de capacité brute C(lambda), capacité effective C_eff, dimension effective d_eff et fermeture observationnelle Cl.",
+    "Formalisation de la mesure atomique empirique des seuils et de la résolution cumulée, en distinguant régime géométrique et généralisation comportementale.",
+    "Clarification de la donnée de bord des seuils et du fait que la distance induite est une pseudoultramétrique en l'absence de séparation garantie.",
+    "Remplacement de l'équivalence fondée sur une simple tolérance par des signatures quantifiées canoniques quand une partition opérationnelle est requise.",
+    "Séparation du chemin différentiable des empreintes continues et du chemin discret des signatures, classes et seuils.",
+    "Spécification des pipelines de préparation des données, entraînement, inférence, génération, mémoire, recherche, journalisation et validation.",
+    "Correction de pertes accessoires inutiles lorsque la filtration ou la loi des seuils sont satisfaites exactement par construction."
+  ],
+  "epistemic_policy": {
+    "rule": "Une définition ou un théorème mathématique ne démontre pas que le mécanisme correspondant existe empiriquement dans un LLM réel.",
+    "mandatory_separations": [
+      "unité interne != empreinte",
+      "empreinte != concept",
+      "concept != connaissance",
+      "empreinte != probabilité de sortie",
+      "prédiction != sélection/génération",
+      "génération != action externe",
+      "régime de résolution observationnelle != score de généralisation sur un jeu de test",
+      "coactivation != preuve de partage causal de structure"
+    ],
+    "labels": [
+      "BASE",
+      "DÉRIVÉ",
+      "APPLICATION",
+      "INGÉNIERIE",
+      "EMPIRIQUE"
+    ]
+  },
+  "notation": {
+    "X": "Domaine non vide des objets étudiés; pour un LLM minimal, X = V*.",
+    "V": "Vocabulaire fini de tokens.",
+    "P": "Contexte d'observation, distinct de l'objet observé.",
+    "Pset": "Ensemble des contextes d'observation.",
+    "F": "Famille de sondes observationnelles.",
+    "F_lambda": "Famille de sondes accessible à la résolution lambda.",
+    "Lambda": "Ensemble des résolutions, muni d'un ordre partiel ou total.",
+    "iota": "Fonction d'intensité monotone; strictement croissante quand les seuils sont exprimés sans ambiguïté en intensité.",
+    "Phi": "Fonctionnel d'observation Phi: Pset x X x F -> R, réponse scalaire de la sonde.",
+    "I_lambda_P": "Empreinte exacte (Phi(P,x,f)) indexée par f dans F_lambda.",
+    "r_mu_to_lambda": "Projection qui oublie les coordonnées de F_mu hors de F_lambda.",
+    "sim_P_lambda": "Indiscernabilité définie par égalité exacte des empreintes à contexte et résolution fixes.",
+    "fiber": "[x]_{P,lambda}, classe de tous les objets qui ont la même empreinte que x.",
+    "Pi_P_lambda": "Quotient X / sim_{P,lambda}.",
+    "L_P_lambda": "Image de l'empreinte I_lambda^P(X), en bijection avec le quotient.",
+    "Theta_P": "Seuil pair-à-pair: supremum des intensités où deux objets distincts restent indiscernables.",
+    "b_P": "Indicateur de bord précisant si le seuil est atteint par un niveau indiscernable.",
+    "d_Theta": "Pseudoultramétrique dérivée exp(-Theta), ultramétrique séparante seulement si d=0 implique l'égalité des objets.",
+    "Cl_P_lambda": "Fermeture: sondes dont les réponses sont fonctions de l'empreinte d'une famille donnée.",
+    "C_lambda": "Capacité brute: cardinal de F_lambda lorsque fini.",
+    "C_eff": "Cardinal du quotient de sondes sous égalité globale de profils observationnels.",
+    "d_eff": "Dimension affine de l'image de l'empreinte pour une famille finie de sondes.",
+    "z_theta_k": "Empreinte continue d'un LLM à une résolution opérationnelle k.",
+    "Q_eta": "Quantificateur canonique déterministe, calibré sur train puis gelé.",
+    "s_theta_k": "Signature discrète Q_eta(z_theta_k), utilisée pour calculer une partition opérationnelle.",
+    "G_theta_x": "Graphe relationnel construit à partir des composantes et relations déclarées d'une empreinte.",
+    "Mesh_theta": "Maillage obtenu par union disjointe des graphes et quotient par un alignement explicite.",
+    "M_t": "Mémoire explicite persistante facultative à l'étape t.",
+    "C_theta_k": "Opérateur de transport au niveau k.",
+    "p_theta": "Distribution de probabilité du prochain token.",
+    "pi": "Politique de sélection du token à partir de la distribution.",
+    "theta": "Paramètres appris du modèle et des sondes.",
+    "D_train": "Corpus d'entraînement, séparé de validation et test avant l'ajustement des calibrateurs."
+  },
+  "core_formalism": {
+    "observation_system": {
+      "status": "BASE",
+      "objects": [
+        "Pset",
+        "X",
+        "F",
+        "Phi"
+      ],
+      "equations": [
+        "Phi: Pset x X x F -> R",
+        "I_{Phi,A}^P: X -> R^A",
+        "I_{Phi,A}^P(x)(f) = Phi(P,x,f), pour f dans A"
+      ],
+      "interpretation": "L'objet est décrit relativement aux réponses produites par des sondes dans un contexte déclaré. Une empreinte n'est pas une description absolue de l'objet."
+    },
+    "resolution_filtration": {
+      "status": "BASE",
+      "assumptions": [
+        "lambda <= mu implique F_lambda subset F_mu",
+        "lorsque les seuils sont exprimés sur R+, iota est strictement croissante sur une échelle totale"
+      ],
+      "equations": [
+        "C(lambda) = |F_lambda| si F_lambda est finie",
+        "I_lambda^P(x) = (Phi(P,x,f))_{f in F_lambda}",
+        "r_{mu->lambda}: R^{F_mu} -> R^{F_lambda}",
+        "I_lambda^P = r_{mu->lambda} compose I_mu^P"
+      ],
+      "interpretation": "Une échelle plus élevée ajoute des sondes sans retirer les précédentes; le nombre brut de sondes ne correspond pas forcément au nombre de distinctions indépendantes."
+    },
+    "indiscernibility_and_quotient": {
+      "status": "BASE_AND_DERIVED",
+      "equations": [
+        "x sim_{P,lambda} y iff I_lambda^P(x) = I_lambda^P(y)",
+        "[x]_{P,lambda} = {y in X: I_lambda^P(y) = I_lambda^P(x)}",
+        "Pi_{P,lambda} = X / sim_{P,lambda}",
+        "L_{P,lambda} = I_lambda^P(X)"
+      ],
+      "theorems": [
+        {
+          "name": "equivalence_relation",
+          "status": "DERIVED",
+          "statement": "sim_{P,lambda} est réflexive, symétrique et transitive car elle est définie par égalité d'empreintes."
+        },
+        {
+          "name": "quotient_image_bijection",
+          "status": "DERIVED",
+          "statement": "L'application [x] -> I_lambda^P(x) est une bijection de Pi_{P,lambda} vers L_{P,lambda}."
+        },
+        {
+          "name": "monotone_refinement",
+          "status": "DERIVED",
+          "statement": "Si lambda <= mu et F_lambda subset F_mu, alors sim_{P,mu} subset sim_{P,lambda} et chaque fibre haute est incluse dans la fibre basse correspondante."
+        }
+      ],
+      "implementation_warning": "Une relation de proximité définie par distance <= epsilon n'est généralement pas transitive. Pour une partition opérationnelle, employer une signature quantifiée déterministe ou un partitionnement explicitement défini; ne pas appeler le simple graphe de voisinage un quotient."
+    },
+    "threshold_geometry": {
+      "status": "BASE_OR_DERIVED_UNDER_DECLARED_ASSUMPTIONS",
+      "assumptions": [
+        "Lambda est totalement ordonné",
+        "les familles de sondes forment une filtration emboîtée",
+        "iota est strictement croissante pour ordonner les niveaux par intensité",
+        "les conventions pour un ensemble de seuil vide, non borné ou un seuil atteint sont explicites"
+      ],
+      "equations": [
+        "Theta_P({x,y}) = sup{iota(lambda): x sim_{P,lambda} y}, x != y",
+        "b_P({x,y}) = 1 iff un niveau indiscernable atteint Theta_P({x,y})",
+        "Theta_P({x,z}) >= min(Theta_P({x,y}), Theta_P({y,z}))",
+        "d_Theta(x,y) = exp(-Theta_P({x,y})) pour x != y et d_Theta(x,x)=0"
+      ],
+      "conclusion": "La loi du minimum double donne l'inégalité ultramétrique pour d_Theta. La distance est une pseudoultramétrique si des objets distincts demeurent indiscernables à toutes les résolutions; elle n'est une ultramétrique séparante que sous une hypothèse de séparation.",
+      "boundary_reading": "x sim y iff iota(lambda) < Theta ou [iota(lambda)=Theta et b=1], sous conventions cohérentes.",
+      "not_automatic_for_llms": true,
+      "set_structure": "S_{x,y} = {lambda: x sim_{P,lambda} y} is a down-set/initial segment when Lambda is totally ordered and probe families are nested."
+    },
+    "threshold_distribution": {
+      "status": "BASE_FOR_FINITE_DOMAIN",
+      "assumptions": [
+        "X0 is finite, N >= 2",
+        "Theta is defined for each unordered pair in X0"
+      ],
+      "equations": [
+        "B = binom(N,2)",
+        "nu_P = (1/B) sum_{unordered pairs {x,y}} delta_{Theta_P({x,y})}",
+        "R_tilde_P(t) = (1/B) sum_{pairs {x,y}} 1[t > Theta_P({x,y})]"
+      ],
+      "regimes": {
+        "insufficient": "R_tilde_P(t) = 0",
+        "intermediate_observational": "0 < R_tilde_P(t) < 1",
+        "terminal_on_domain": "R_tilde_P(t) = 1"
+      },
+      "warning": "The intermediate observational regime is not the same variable as held-out behavioral generalization of a language model. A relationship between them is an empirical hypothesis.",
+      "boundary_summaries": {
+        "alpha_minus": "inf{t: R_tilde_P(t)>0}",
+        "alpha_plus": "sup{t: R_tilde_P(t)<1}",
+        "caveat": "Endpoint conventions and right-censored empirical thresholds must be recorded."
+      }
+    },
+    "probe_equivalence_and_closure": {
+      "status": "BASE",
+      "equations": [
+        "f equiv_{P,lambda} g iff Phi(P,x,f) = Phi(P,x,g) for all x in X",
+        "Cl_{P,lambda}(A) = {f in F_lambda: exists psi_f:R^A->R such that Phi(P,x,f)=psi_f(I_{Phi,A}^P(x)) for all x in X}"
+      ],
+      "closure_axioms": [
+        "A subset Cl(A) (extensivity)",
+        "A subset B implies Cl(A) subset Cl(B) (monotonicity)",
+        "Cl(Cl(A)) = Cl(A) (idempotence)"
+      ],
+      "interpretation": "Cl(A) contient précisément les sondes dont la sortie est déterminée par l'empreinte issue de A.",
+      "empirical_caveat": "La fermeture globale quantifie sur tous les objets de X. Sur un corpus fini, seule une fermeture empirique sur l'échantillon est directement calculable."
+    },
+    "effective_information": {
+      "status": "BASE",
+      "equations": [
+        "F_{lambda,P}^sharp = F_lambda / equiv_{P,lambda}",
+        "C_eff,P(lambda) = |F_{lambda,P}^sharp|",
+        "d_eff,P(A) = dim Aff(I_{Phi,A}^P(X))"
+      ],
+      "properties": [
+        "A subset B implique d_eff,P(A) <= d_eff,P(B)",
+        "si C_eff,P(lambda) est fini, alors d_eff,P(lambda) <= C_eff,P(lambda)"
+      ],
+      "interpretation": "C_eff compte les profils de sondes exactement distincts, pas toutes les formes de dépendance statistique possibles. d_eff mesure la dimension affine de l'image observée.",
+      "empirical_caveat": "Les versions empiriques doivent déclarer l'échantillon, la règle de comparaison et la tolérance/règle de quantification; elles ne sont pas des résultats globaux exacts."
+    },
+    "induced_geometry": {
+      "status": "DERIVED",
+      "equations": [
+        "d_{Phi,P,lambda}(x,y) = ||I_lambda^P(x)-I_lambda^P(y)||",
+        "d(x,y)=0 iff I_lambda^P(x)=I_lambda^P(y)"
+      ],
+      "conclusion": "La géométrie induite est une pseudométrique et devient une métrique si l'empreinte est injective sur X."
+    },
+    "factorization_and_transport": {
+      "status": "BASE_AND_DERIVED",
+      "equations": [
+        "T constant on each fibre iff exists unique T_tilde on I_lambda^P(X) with T = T_tilde composed with I_lambda^P",
+        "F compatible iff I_lambda^P(x)=I_lambda^P(y) implies I_lambda^P(F(x))=I_lambda^P(F(y))",
+        "if F compatible, I_lambda^P composed with F = C_F composed with I_lambda^P",
+        "cross-scale compatibility: r_{mu->lambda} composed with C_mu = C_lambda composed with r_{mu->lambda}"
+      ],
+      "domain_caveat": "The induced operation is guaranteed on the image of the footprint, not automatically on the whole ambient coordinate space.",
+      "architecture_caveat": "Cross-scale commutation must be built or tested; it is not automatic for an arbitrary network."
+    },
+    "global_quotient_meta_observation_trajectory": {
+      "status": "APPLICATION_EXTENDED_FROM_BASE",
+      "equations": [
+        "x equiv_global y iff I_rho(x)=I_rho(y) for every rho in the declared admissible regime family R_adm",
+        "Q_global = X / equiv_global",
+        "a transition T is fibre-compatible iff I(x)=I(y) implies I(T(x))=I(T(y))",
+        "a trajectory is (I_0,...,I_m) with I_{k+1}=T_k(I_k)"
+      ],
+      "meta_observation_rule": "A deterministic function of an already available footprint does not split existing fibres. A new discrimination must be established by a genuine partition refinement.",
+      "caveats": [
+        "The global quotient is relative to the declared family of regimes.",
+        "Existence of a trajectory does not prove computability or convergence.",
+        "A finite sample only verifies empirical refinements on that sample."
+      ]
+    },
+    "separating_threshold": {
+      "status": "BASE_WHEN_DEFINED",
+      "equation": "rho_P_star(Phi) = inf{iota(lambda): I_lambda^P is injective on X}",
+      "caveat": "May be absent or infinite; global injectivity is usually not verifiable on an infinite language domain."
+    }
+  },
+  "llm_domain_and_observation": {
+    "status": "APPLICATION",
+    "domain": "X = V* for a minimal causal language model, optionally extended to prefixes, conversation/task context and memory state.",
+    "dataset": "D_train = {x^(i)=(t_1^(i),...,t_n_i^(i))}, split into train/validation/test before fitting any quantizer or retrieval threshold.",
+    "backbone_equations": [
+      "h_i^(0) = E_theta(t_i) + P_theta(i)",
+      "H^(ell) = F_{ell,theta}(H^(ell-1)), ell=1,...,L"
+    ],
+    "observer": "Each internal probe f_{theta,r}(P,x,H^(0:L)) returns a scalar in R; vector representations are ordered families of scalar probes.",
+    "probe_families": [
+      "local unit activations and coordinate projections",
+      "contextual and positional observables",
+      "attention weights or other relational observables",
+      "global/state statistics",
+      "memory read observables",
+      "cross-component alignment and relational observables"
+    ],
+    "principle": "A neuron, dimension, embedding coordinate or attention weight is not automatically a concept. A same-unit activation on two inputs does not establish semantic identity.",
+    "contextuality": "A lexical token can induce different footprints in different input contexts.",
+    "backbone_note": "EmpLLM_0 may use a Transformer backbone. The architecture is an observation-centered construction around a computational substrate, not an unsupported claim that the substrate must be replaced."
+  },
+  "operational_representation": {
+    "status": "ENGINEERING_SPECIFICATION",
+    "continuous_footprint": {
+      "equation": "z_{theta,k}(x) = (f_{theta,r}(P,x,H^(0:L)))_{r in F_{lambda_k}} in R^{K_k}",
+      "role": "Differentiable observations used by the predictor and training losses.",
+      "scale_rule": "Observer coordinates are ordered and nested; z_k must be a prefix/projection of z_{k+1}."
+    },
+    "quantized_signature": {
+      "equations": [
+        "s_{theta,k}(x) = Q_{eta_k}(z_{theta,k}(x))",
+        "x sim_op_k y iff s_{theta,k}(x) = s_{theta,k}(y)"
+      ],
+      "requirements": [
+        "Q is deterministic and versioned",
+        "calibration thresholds are fitted on train and then frozen",
+        "the same lower-scale coordinates keep the same quantizer at higher scales",
+        "higher-scale signature contains lower-scale signature as a prefix",
+        "quantization metadata and units are recorded"
+      ],
+      "purpose": "Provide exact equality classes on finite observed domains, with transitivity inherited from equality of signatures.",
+      "caveat": "Quantization can merge distinct continuous footprints. Its quotient is an operational approximation, not automatically the global exact quotient of X."
+    },
+    "finite_quotient": {
+      "algorithm": "Hash signatures to class identifiers for examples in the declared finite analysis universe.",
+      "not_claimed": "The complete quotient of all possible token sequences V* is not exhaustively materialized. An unseen input can still receive a deterministic signature, without being present in the analysis table."
+    },
+    "threshold_estimation": {
+      "grid": "lambda_1 < ... < lambda_K, with strictly increasing iota(lambda_k)",
+      "equation": "k_hat(x,y) = max(({k in {1,...,K}: s_k(x)=s_k(y)} union {-1}))",
+      "censoring": [
+        "k_hat=-1 means the pair is already distinct at the first measured level; record a left-boundary sentinel.",
+        "k_hat=K means the pair remains identical at the highest measured level; mark right_censored=true rather than claiming infinite threshold."
+      ],
+      "required_fields": [
+        "pair_id",
+        "k_hat",
+        "theta_hat_or_boundary_code",
+        "boundary_attained",
+        "left_censored",
+        "right_censored",
+        "quantizer_version",
+        "probe_version"
+      ],
+      "note": "With nested signatures, the set of levels at which a pair remains equal is an initial segment. Thresholds calculated from these signatures obey the minimum-double law up to the declared boundary convention."
+    }
+  },
+  "relational_structures": {
+    "footprint_graph": {
+      "status": "APPLICATION_AND_ENGINEERING",
+      "definition": "G_theta(x) = (V_x,E_x,W_x,label_x)",
+      "vertices_may_represent": [
+        "token positions",
+        "state components",
+        "observables",
+        "partial footprints",
+        "motifs",
+        "memory records"
+      ],
+      "edges_may_represent": [
+        "dependency",
+        "coactivation",
+        "attention",
+        "transformation",
+        "alignment",
+        "shared structure",
+        "provenance"
+      ],
+      "requirements": [
+        "deterministic extraction rule",
+        "node/edge type definitions",
+        "weights and labels documented",
+        "versioned builder"
+      ]
+    },
+    "mesh": {
+      "status": "APPLICATION_AND_ENGINEERING",
+      "definition": "Mesh_theta(D) is the quotient of the disjoint union of G_theta(x) by a declared component-alignment equivalence.",
+      "equation": "Mesh_theta(D) = (disjoint_union_{x in D} G_theta(x)) / equivalence_mesh",
+      "alignment_options": [
+        "identity of model unit",
+        "learned correspondence",
+        "canonicalized component signature",
+        "subgraph matching"
+      ],
+      "warning": "If an alignment criterion is not transitive, it cannot be used directly as a quotient relation; define its equivalence closure or a partitioning algorithm."
+    },
+    "overlap": {
+      "status": "METRIC_CHOICE",
+      "equation": "J_V(x,y)=|V_x intersection V_y|/|V_x union V_y|, if denominator > 0",
+      "interpretation": "Measures aligned component overlap only; it is not a universal semantic similarity metric."
+    },
+    "polysemanticity": {
+      "status": "EMPIRICAL_HYPOTHESIS",
+      "statement": "A unit may contribute to several distinct relational footprints, but coactivation alone does not identify the shared motif or show it is causally relevant.",
+      "evidence_needed": [
+        "stable component alignment",
+        "motif analysis",
+        "causal interventions",
+        "alternative-explanation controls"
+      ]
+    }
+  },
+  "memory_knowledge_intelligence": {
+    "status": "APPLICATION",
+    "conceptual_definitions": {
+      "memory": "Persistence of learned parameters, context state, or externally stored footprint structures and transformations.",
+      "knowledge": "Relatively stable relational organization of footprints usable for identification, comparison, transformation or reuse.",
+      "functional_intelligence": "Dynamic selection, transformation and combination of information structures for predictions, decisions or actions in a task. These are working definitions, not universal measurements."
+    },
+    "memory_types": [
+      {
+        "name": "parametric",
+        "carrier": "theta",
+        "persistence": "persists until model parameters are updated"
+      },
+      {
+        "name": "contextual",
+        "carrier": "active prefix, state and inference cache",
+        "persistence": "depends on session/runtime policy"
+      },
+      {
+        "name": "external_persistent",
+        "carrier": "explicit graph, index or store M_t",
+        "persistence": "requires read/write, conflict and retention policies"
+      }
+    ],
+    "write_equation": "M_{t+1} = Update(M_t, G_theta(x_t), metadata_t)",
+    "update_steps": [
+      "Match",
+      "Create",
+      "UpdateEdges",
+      "ResolveConflicts",
+      "Prune"
+    ],
+    "read_equation": "C_q = Read(z_theta(q), M_t; k, filters)",
+    "requirements": [
+      "match function",
+      "creation rule",
+      "edge update",
+      "conflict resolution",
+      "capacity/TTL policy",
+      "provenance",
+      "retrieval evaluation",
+      "permission filtering"
+    ]
+  },
+  "architecture": {
+    "id": "EmpLLM_0",
+    "status": "PROPOSED_OPERATIONAL_ARCHITECTURE_NOT_EMPIRICALLY_VALIDATED",
+    "design_decision": "Use continuous footprints as the differentiable path; use quantized signatures, partitions and thresholds for declared structural diagnostics or optional strict-quotient ablations.",
+    "modules": [
+      {
+        "id": "data_manifest",
+        "input": "raw corpus",
+        "output": "versioned train/validation/test splits",
+        "must": [
+          "deduplication policy",
+          "leakage control",
+          "provenance",
+          "hashes"
+        ]
+      },
+      {
+        "id": "tokenizer",
+        "input": "text",
+        "output": "token sequence in V*",
+        "must": [
+          "fixed version",
+          "special tokens",
+          "truncation policy"
+        ]
+      },
+      {
+        "id": "backbone",
+        "input": "tokens and masks",
+        "output": "H^(0:L)",
+        "must": [
+          "causal attention for autoregressive prediction",
+          "versioned parameters"
+        ]
+      },
+      {
+        "id": "observers",
+        "input": "context, tokens and hidden states",
+        "output": "scalar observable family",
+        "must": [
+          "ordered probes",
+          "stable lower-level coordinates"
+        ]
+      },
+      {
+        "id": "fingerprint_builder",
+        "input": "probe responses",
+        "output": "continuous z_k at nested resolutions",
+        "must": [
+          "fixed coordinate order",
+          "prefix restriction"
+        ]
+      },
+      {
+        "id": "quantizer",
+        "input": "continuous z_k",
+        "output": "discrete signature s_k",
+        "must": [
+          "deterministic",
+          "train-calibrated",
+          "frozen",
+          "prefix-compatible"
+        ]
+      },
+      {
+        "id": "quotient_proxy",
+        "input": "finite set of signatures",
+        "output": "partition/class ids",
+        "must": [
+          "exact signature equality",
+          "scope of finite universe recorded"
+        ]
+      },
+      {
+        "id": "threshold_diagnostics",
+        "input": "signatures at all levels",
+        "output": "pairwise thresholds and censored flags",
+        "must": [
+          "boundary convention",
+          "minimum-double test"
+        ]
+      },
+      {
+        "id": "relational_graph",
+        "input": "selected observables and relations",
+        "output": "G_theta(x)",
+        "must": [
+          "typed nodes/edges",
+          "provenance"
+        ]
+      },
+      {
+        "id": "mesh_aligner",
+        "input": "multiple footprint graphs",
+        "output": "aligned mesh",
+        "must": [
+          "declared alignment rule",
+          "equivalence/partition integrity"
+        ]
+      },
+      {
+        "id": "external_memory_optional",
+        "input": "query footprint and M_t",
+        "output": "bounded memory context",
+        "must": [
+          "filters",
+          "deduplication",
+          "scores",
+          "provenance"
+        ]
+      },
+      {
+        "id": "transport",
+        "input": "z_k and memory context",
+        "output": "z'_k",
+        "must": [
+          "compatibility test if quotient claims are made",
+          "cross-scale commutation test"
+        ]
+      },
+      {
+        "id": "search_optional",
+        "input": "footprint and memory",
+        "output": "bounded candidate trajectories",
+        "must": [
+          "branch budget B",
+          "depth H",
+          "scoring rule"
+        ]
+      },
+      {
+        "id": "predictor",
+        "input": "transformed footprint and memory summary",
+        "output": "distribution over V",
+        "equation": "p_theta = softmax(W z'_L + U m_q + b)"
+      },
+      {
+        "id": "generator",
+        "input": "probability distribution",
+        "output": "next token",
+        "must": [
+          "declared selection/sampling policy",
+          "stop conditions"
+        ]
+      },
+      {
+        "id": "logger",
+        "input": "run artifacts",
+        "output": "reproducible trace",
+        "must": [
+          "versions",
+          "seed",
+          "probe values or approved summaries",
+          "signatures",
+          "retrieval IDs",
+          "interventions"
+        ]
+      }
+    ],
+    "important_separations": [
+      "continuous fingerprint and quantized signature are distinct objects",
+      "a finite quotient table only covers the declared finite analysis universe",
+      "prediction is a probability distribution, generation is token selection",
+      "memory write is optional and must not accidentally train on evaluation data",
+      "strict quotient prediction and continuous prediction are separate experimental modes"
+    ],
+    "inference_pipeline": [
+      "validate input and tokenize with the frozen tokenizer",
+      "build observation context P_t",
+      "compute hidden states H^(0:L) with causal masks",
+      "evaluate internal probes and assemble continuous nested footprints z_k",
+      "apply frozen quantizers to obtain signatures s_k",
+      "look up finite empirical class if the input belongs to the declared analysis table; otherwise retain its deterministic signature",
+      "retrieve bounded memory context if enabled and record provenance",
+      "apply transport and optional bounded search",
+      "calculate next-token distribution p_theta",
+      "select/sample the next token under policy pi",
+      "update context cache and optionally update external memory under policy",
+      "log versions, signatures, retrieved records, decisions and stop cause",
+      "repeat on the extended prefix until stop"
+    ],
+    "quotient_modes": {
+      "continuous_prototype": "Predictor uses continuous z; quantized signatures and quotient are used for structure, diagnostics or optional regularization. Differentiable and recommended for the first prototype.",
+      "strict_quotient_ablation": "Predictor must factor through the signature/class, so equal operational signatures imply the same probability distribution. Test separately because quantization can reduce predictive information."
+    },
+    "reference_pseudocode": [
+      "tokenize input with a frozen tokenizer version",
+      "construct observation context from input, task and memory state",
+      "compute causal hidden states H^(0:L)",
+      "evaluate the declared scalar probes and assemble nested continuous footprints z_k",
+      "assert lower-scale coordinates are preserved as prefixes of higher-scale footprints",
+      "apply frozen quantizers to obtain discrete signatures s_k",
+      "look up empirical class ids only when the input belongs to the finite analysis table",
+      "optionally retrieve a bounded and provenance-filtered memory context",
+      "apply transport; run bounded search only if configured",
+      "compute next-token probabilities, then select token using a separate policy",
+      "update context cache and optionally write persistent memory under an explicit policy",
+      "log model, probe, quantizer and memory versions with the relevant trace",
+      "return token and updated inference state"
+    ]
+  },
+  "training": {
+    "status": "OPERATIONAL_RECIPE",
+    "base_objective": "L_LM(theta) = -sum_{x in D_train} sum_{j=1}^{|x|-1} log p_theta(t_{j+1}|t_{1:j}, M_j)",
+    "optional_combined_objective": "L = L_LM + alpha_rel L_rel + alpha_mem L_mem + alpha_inv L_inv + alpha_task L_task",
+    "auxiliary_term_policy": "Every auxiliary loss must specify a computable formula, supervision source, weight-selection rule and ablation. Do not include an undefined placeholder loss.",
+    "resolution_consistency": {
+      "equation": "L_res = sum_{k<K} E_x ||z_k-r_{k+1->k}(z_{k+1})||^2",
+      "rule": "If z_k is constructed as an exact prefix of z_{k+1}, L_res is identically zero; test the invariant instead of adding a useless loss."
+    },
+    "threshold_loss": {
+      "rule": "Hard signatures, hash classes and finite-grid thresholds are normally non-differentiable. Compute them as diagnostics after/frequently outside gradient updates unless a separately specified differentiable surrogate is evaluated.",
+      "ultrametric_penalty_caveat": "If thresholds are computed directly from nested equality signatures, the minimum-double law holds by construction; a penalty on those derived thresholds is identically zero. It is only meaningful for a separately learned threshold predictor."
+    },
+    "training_steps": [
+      "fix data splits, tokenizer, task, observer families and all baseline controls",
+      "initialize backbone, observer probes and prediction head with recorded random seed",
+      "for each batch, compute H^(0:L) and continuous nested footprints z_k",
+      "optionally read only allowed memory records with a declared causal/temporal policy",
+      "compute next-token logits, cross-entropy and explicitly defined auxiliary losses",
+      "backpropagate through the continuous path and update parameters",
+      "evaluate validation loss, task metrics and declared invariants at fixed intervals",
+      "select checkpoint on validation only; never tune on test",
+      "freeze selected parameters and fit quantizers on train only",
+      "compute signatures, quotient proxies, thresholds, effective capacity and empirical affine rank on declared analysis sets",
+      "save full model, tokenizer, observer order, scale filtration, quantizers, memory version and experiment manifest"
+    ],
+    "reproducibility_fields": [
+      "random_seed",
+      "optimizer",
+      "learning_rate_schedule",
+      "batch_size",
+      "gradient_clipping",
+      "training_tokens",
+      "parameter_count",
+      "compute_budget",
+      "checkpoint_selection_rule",
+      "data_hashes",
+      "quantizer_version"
+    ]
+  },
+  "memory_pipeline": {
+    "status": "OPTIONAL_ENGINEERING_MODULE",
+    "record_schema": [
+      "id",
+      "signature",
+      "continuous_footprint_or_index",
+      "graph",
+      "source_content_or_summary",
+      "provenance",
+      "model_version",
+      "timestamp",
+      "scores"
+    ],
+    "write_steps": [
+      "validate source, permissions and retention policy",
+      "compute footprint/graph under the frozen builder version",
+      "retrieve possible matches with declared match function",
+      "merge only if the validated match rule passes; otherwise create a new record",
+      "update weighted edges and provenance; resolve conflicts explicitly",
+      "prune by declared capacity policy and log deletions"
+    ],
+    "read_steps": [
+      "compute query footprint with matching observer version",
+      "retrieve candidates, optionally using approximate search followed by reranking",
+      "filter by provenance, permissions, date, domain and context constraints",
+      "deduplicate and return a bounded context with scores and source IDs",
+      "measure precision/recall, latency, memory use and causal effect on task output"
+    ],
+    "safety_and_integrity": "Retrieved content is data, not executable instructions; keep provenance and separate it from trusted control logic."
+  },
+  "search_pipeline": {
+    "status": "OPTIONAL_ENGINEERING_MODULE",
+    "operator": "Search(z, M; B, H)",
+    "inputs": [
+      "initial continuous footprint",
+      "optional memory state",
+      "maximum branch count B",
+      "maximum depth H",
+      "candidate scoring function"
+    ],
+    "output": "A set of candidate trajectories tau=(z_0,...,z_h) and their scores.",
+    "evaluation": [
+      "task success",
+      "candidate calibration",
+      "latency",
+      "compute budget",
+      "comparison to direct generation"
+    ],
+    "caveat": "An internally generated trajectory is an imagination/prediction, not a new external observation and may be false."
+  },
+  "experimental_program": {
+    "minimal_setting": "A synthetic language/world whose latent relations are known to the evaluator but withheld from model input.",
+    "steps": [
+      "define world, vocabulary, generative grammar and latent reference structures",
+      "specify probes and manually validate them on toy cases",
+      "compute exact footprints, partitions and threshold calculations on a finite test universe",
+      "test nested probe family and restriction consistency",
+      "train a small causal language model and log internal probes",
+      "measure C, empirical C_eff, empirical d_eff, closure, partitions and thresholds",
+      "freeze graph extraction and alignment rules and evaluate mesh stability",
+      "add optional persistent memory and test read/write separately",
+      "test quotient-compatible transport on pairs in the same signature class",
+      "perform interventions on shared versus specific components",
+      "evaluate held-out lexical and relational configurations and independent structure reuse",
+      "compare against a baseline with matched data, tokenizer, parameter count and compute budget",
+      "repeat across seeds and perturbations"
+    ],
+    "candidate_metrics": [
+      "validation negative log-likelihood and perplexity",
+      "task accuracy",
+      "held-out compositional generalization",
+      "C(lambda), C_eff empirical and d_eff empirical",
+      "partition refinement rate and cross-scale consistency",
+      "threshold distribution and censoring fraction",
+      "partition and motif stability across seeds",
+      "graph overlap under declared alignment",
+      "memory retrieval precision/recall and causal utility",
+      "intervention effect on shared versus specific structures",
+      "structure-reuse score independent of behavioral score",
+      "latency, memory footprint and computational cost"
+    ],
+    "baseline_controls": [
+      "same tokenizer",
+      "same train/validation/test splits",
+      "comparable parameter count",
+      "same or reported compute budget",
+      "same generation policy",
+      "multiple seeds"
+    ]
+  },
+  "falsification_criteria": [
+    {
+      "id": "F1_filtration",
+      "test": "A higher-scale signature does not preserve the lower-scale signature as a prefix.",
+      "implication": "The operational filtration is not implemented as specified."
+    },
+    {
+      "id": "F2_equivalence",
+      "test": "A proposed quotient is based on a non-transitive tolerance relation.",
+      "implication": "Use canonical partitioning or describe a neighborhood graph instead of an equivalence quotient."
+    },
+    {
+      "id": "F3_factorization",
+      "test": "Inputs in the same claimed fibre produce different outputs for a module claimed to factor through the quotient.",
+      "implication": "The operation is not quotient-compatible."
+    },
+    {
+      "id": "F4_cross_scale",
+      "test": "Restriction and transport fail the declared commutation relation beyond the pre-registered tolerance.",
+      "implication": "The transport is not compatible across resolutions."
+    },
+    {
+      "id": "F5_thresholds",
+      "test": "Thresholds computed from nested exact signatures violate the minimum-double law.",
+      "implication": "Likely implementation, convention, or signature nesting error."
+    },
+    {
+      "id": "F6_mesh_alignment",
+      "test": "Overlap or motifs vary substantially with an undeclared alignment order or heuristic.",
+      "implication": "The shared structure is not sufficiently operationally defined."
+    },
+    {
+      "id": "F7_coactivation_only",
+      "test": "Coactivation exists but no stable relation motif or causal intervention effect is found.",
+      "implication": "This case does not support the proposed structural-overlap explanation."
+    },
+    {
+      "id": "F8_no_structure_reuse",
+      "test": "Behavioral generalization occurs but the pre-registered independent structure-reuse measure shows no reuse.",
+      "implication": "The proposed mechanism of generalization should be revised for that result."
+    },
+    {
+      "id": "F9_instability",
+      "test": "Partitions, thresholds or motifs change excessively across seeds or small perturbations.",
+      "implication": "Claims of stable underlying structure must be weakened."
+    },
+    {
+      "id": "F10_no_advantage",
+      "test": "No reproducible improvement in behavior, robustness, interpretability or cost is observed versus matched baseline.",
+      "implication": "A practical advantage has not been established."
+    }
+  ],
+  "open_problems": [
+    "Select internal probe families with defensible operational interpretations.",
+    "Choose meaningful levels of resolution and an intensity scale.",
+    "Define quantization granularity, robustness and calibration stability.",
+    "Estimate global quantities from finite samples without overstating coverage.",
+    "Define component alignment and graph motif identity across examples/layers.",
+    "Build useful quotient-compatible transformations without excessive information loss.",
+    "Specify memory conflict resolution, source provenance and long-term retention.",
+    "Determine by intervention whether shared structures cause behavior or merely correlate with it.",
+    "Distinguish observation-threshold regimes from benchmark generalization.",
+    "Compare architecture variants against fair baselines in accuracy, compute and interpretability."
+  ],
+  "central_thesis": "A language model can be formalized relative to declared observations. Probe families induce footprints; equality of footprints induces fibres and quotients; nested probe families refine the partitions; threshold functions yield a conditional hierarchical geometry. In an LLM application, continuous learned footprints, quantized signatures, relational graphs, optional persistent memory and quotient-compatible transport can be assembled into a testable predictive architecture. Polysemanticity-by-overlap and generalization-by-structural-reuse remain empirical hypotheses until supported by stability tests and causal interventions.",
+  "conceptual_pipeline": [
+    "declare_domain_X_contexts_P_probe_family_F_and_observation_Phi",
+    "declare_nested_resolution_levels_and_intensity",
+    "compute_continuous_footprints",
+    "derive_indiscernibility_fibres_quotients_and_reduced_images",
+    "compute_closure_effective_probe_capacity_and_affine_dimension",
+    "quantize_observations_for_finite_operational_partitions_if_required",
+    "compute_thresholds_boundary_flags_and_threshold_distribution",
+    "construct_and_align_relational_footprint_graphs",
+    "update_or_read_optional_persistent_memory",
+    "apply_tested_compatible_transport_and_optional_bounded_search",
+    "predict_next_token_distribution",
+    "select_token_and_update_context",
+    "evaluate_metrics_and_interventions_against_controls"
+  ],
+  "operational_pipeline": {
+    "data_preparation": [
+      "define task and object unit",
+      "deduplicate/normalize with documented policy and provenance",
+      "split train/validation/test before fitting quantizers or retrieval thresholds",
+      "freeze tokenizer, tokenization rules and masks",
+      "declare observer order and nested scale families",
+      "declare graph alignment and memory policy",
+      "fit normalizers/quantizers on train only and freeze them",
+      "store data/model manifest and hashes"
+    ],
+    "training": [
+      "initialize backbone, observer probes and prediction head with recorded seed",
+      "compute hidden states and continuous footprints per batch",
+      "read only causally admissible memory context if enabled",
+      "compute autoregressive cross-entropy and explicitly defined auxiliary losses",
+      "backpropagate through continuous computation only unless a surrogate is separately specified",
+      "evaluate validation data at fixed intervals and select checkpoint without test access",
+      "freeze selected model and fit quantizers on train only",
+      "compute finite-set partitions, threshold diagnostics, effective capacity and affine rank",
+      "save model, tokenizer, probes, filtration, quantizers, memory and run manifest"
+    ],
+    "inference": [
+      "tokenize input with frozen tokenizer",
+      "build context P_t",
+      "compute causal hidden states H^(0:L)",
+      "evaluate probes and assemble z_k",
+      "compute quantized signatures s_k",
+      "retrieve memory if enabled and preserve provenance",
+      "apply transport and optional bounded search",
+      "compute p_theta over vocabulary",
+      "select/sample next token using documented policy",
+      "update inference context; optionally update persistent memory under policy",
+      "log relevant versions and decisions",
+      "repeat until stop token or resource/length constraint"
+    ],
+    "conditional_prediction": [
+      "For corpus events A and B with N(A)>0, compute the declared empirical estimate N(A,B)/N(A).",
+      "Train the parametric next-token distribution with autoregressive cross-entropy; do not equate the footprint with the output probabilities.",
+      "Evaluate probability quality and generated behavior separately."
+    ]
+  },
+  "conditional_prediction": {
+    "status": "APPLICATION_TO_LANGUAGE",
+    "equation": "P_hat(B|A) = N(A,B) / N(A), when N(A)>0",
+    "meaning": "A corpus frequency estimator for conditional events. It is a statistical reference, not a definition of the footprint. A parametric autoregressive model learns a conditional next-token distribution and must be evaluated on held-out data.",
+    "requirements": [
+      "Define occurrences and event window precisely.",
+      "For sparse events, declare smoothing or regularization.",
+      "Keep prediction distribution separate from token-selection policy."
+    ]
+  }
+}

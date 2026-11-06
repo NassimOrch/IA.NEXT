@@ -1,0 +1,188 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry,hyperref,longtable,booktabs,array,amsmath,amssymb,xcolor}
+\geometry{margin=2.15cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Formalisme O94 -- Architecture composée, observation, empreintes et résolution continue}
+\author{Dossier technique AAM}
+\date{Version 0.94.0 -- 18 octobre 2026}
+\newcommand{\AAM}{\textsc{AAM}}
+\newcommand{\status}[1]{\textsf{#1}}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Objet, périmètre et règle de preuve}
+Ce document formalise la version O94, qui prolonge le code et les historiques O92/O93 fournis dans les archives. Le but est d'unifier les mécanismes existants autour d'un cycle partagé : observation, empreinte, sondes, représentation pondérée, sélection/composition de compétences, action, vérification indépendante, retour utilisateur, mémoire et réévaluation. Les références historiques demeurent consultables et ne sont pas réécrites comme si elles étaient natives d'O94.
+
+Une implémentation ou une exécution réussie n'est pas une preuve de généralisation. De même, une absence de résultat dans une exécution bornée n'est pas une preuve d'impossibilité. Chaque état de preuve est donc borné à une plateforme, une configuration, un jeu d'essai et un critère explicite. Les états utilisés dans ce dossier sont : \texttt{VERIFIED\textunderscore LOCAL\textunderscore TESTED\textunderscore BOUNDED}, \texttt{PARTIAL}, \texttt{NOT\textunderscore RUN}, \texttt{NOT\textunderscore VALIDATED}, \texttt{BLOCKED\textunderscore ENVIRONMENT} et \texttt{UNRESOLVED\textunderscore BUDGET}.
+
+La règle ``ne pas injecter la réponse'' est traduite en contraintes testables : aucune réponse cible n'est transmise au générateur de sondes d'acquisition ; les compositions sont déclaratives et ne permettent pas d'exécuter du code arbitraire ; la préférence utilisateur ne constitue jamais une étiquette de vérité ; une résolution continue n'est déclarée vérifiée que si l'appelant fournit un vérificateur indépendant. Ces règles sont des protections de conception, pas une garantie que toute forme de fuite de données ou de biais soit impossible.
+
+\section{Sources et traçabilité}
+Les sources primaires sont les archives fournies \texttt{Amodel\textunderscore AAM\textunderscore O93\textunderscore 0\textunderscore modifier.zip} et \texttt{Dmodel\textunderscore AAM\textunderscore O93\textunderscore 1.zip}, ainsi que l'archive historique imbriquée \texttt{sources\textunderscore AAM\textunderscore 17.zip}. La source théorique mise en avant est \texttt{theorie\textunderscore emp/DDD\textunderscore Base\textunderscore theorie\textunderscore des\textunderscore empreintes\textunderscore complete\textunderscore order\textunderscore 5.tex}. Elle définit notamment des espaces d'observation, familles de sondes, applications d'empreinte, noyaux d'indiscernabilité, quotients et raffinements d'observation. Les sources O92/O93 et dossiers de rapports/formalismes sont conservés pour interpréter les versions et les contrats antérieurs.
+
+Les hashes SHA-256 des fichiers source, des archives d'entrée et des livrables sont consignés dans les manifests et reçus de suivi. Le registre \texttt{registre\textunderscore prouves\textunderscore O94.json} associe chaque exigence à ses points de code, interface, tests et limites. Une entrée de registre ne peut pas remplacer un résultat de test.
+
+\section{Terminologie normalisée : compétences, méthodes et règles}
+\subsection{Compétence de base}
+Une compétence de base est une capacité de service à contrat stable, à domaine d'entrée/sortie explicite et qui reste applicable sans dépendre d'une tâche spécifique. O94 enregistre notamment \texttt{C-OBSERVE}, \texttt{C-PROBE}, \texttt{C-FINGERPRINT}, \texttt{C-COMPOSE}, \texttt{C-ORCHESTRATE} et \texttt{C-VERIFY}. La base de code conserve également des identifiants de compétences historiques ; le catalogue des briques ne prétend pas que tous les appels hérités ont déjà été réécrits en graphes de composition.
+
+\subsection{Méthode de base}
+Une méthode décrit une procédure réutilisable qui organise une ou plusieurs compétences : observation multi-vues, recherche adaptative de sondes, lecture pondérée du RAG, mise à jour causale de préférences, résolution itérative, et écriture atomique portable. Une méthode définit l'ordre d'exécution, les budgets et les critères d'arrêt ; elle n'est pas elle-même un but.
+
+\subsection{Règle de base}
+Une règle est une contrainte transversale vérifiable. Les règles codées incluent : \texttt{R-NO-ORACLE}, \texttt{R-REWARD-NOT-TRUTH}, \texttt{R-PROVENANCE}, \texttt{R-TYPED-CONTRACTS}, \texttt{R-NO-EXEC}, \texttt{R-ACCESS-AUTH}, \texttt{R-CAUSAL-TRACE}, \texttt{R-CORPUS-RELATIVE-WEIGHTS}, \texttt{R-EXPLICIT-CRITERIA}, \texttt{R-PRESERVE-ORIGINAL} et \texttt{R-BOUNDED-STOP}. Le registre technique est dans \texttt{aam\textunderscore o93/base\textunderscore blocks.py}.
+
+\subsection{Composition architecturale}
+Le dictionnaire \texttt{ARCHITECTURE\textunderscore COMPOSITION} décrit quelles briques composent les sous-systèmes runtime, observation, RAG, acquisition, autonomie, persistance et résolution continue. Le validateur vérifie l'existence des identifiants et leurs dépendances. Ce contrôle prouve la cohérence référentielle du catalogue, non que chaque ligne d'O92/O93 ait été remplacée par une interprétation exécutée du graphe. Cette distinction évite de confondre architecture de référence et refonte totale déjà démontrée.
+
+\section{Modèle formel de l'observation et de l'empreinte}
+Soit $X$ l'ensemble des objets accessibles et $P=\{p_1,\ldots,p_n\}$ une famille de sondes déterminée par la politique d'observation. Pour un objet $x\in X$, chaque sonde produit une observation bornée $o_i(x)=p_i(x)$ accompagnée de sa provenance, de son empreinte cryptographique de source et d'un état de décodage. Le vecteur observé est
+\[
+  O_P(x)=(o_1(x),\ldots,o_n(x)).
+\]
+Une application d'empreinte $F_P$ construit une représentation à partir des observations ; l'équivalence observationnelle associée s'écrit
+\[
+  x\sim_P y \iff F_P(O_P(x))=F_P(O_P(y)).
+\]
+Cette équivalence dépend de la famille de sondes, de la résolution des décodeurs et du budget : elle ne signifie pas identité ontologique des objets. En enrichissant les sondes, le noyau de l'application peut se raffiner, sans supposer que le raffinement atteindra toujours une distinction parfaite sous tous budgets.
+
+Chaque rapport d'observation conserve les vues, caractéristiques, statuts des vues, hash de source, politique d'empreinte et compteurs de sondes. Pour une entrée multimodale, l'observation brute et la reconnaissance sémantique sont distinguées : le décodage d'octets n'est pas une compréhension de contenu ; une image ou vidéo n'est pas déclarée sémantiquement interprétée lorsqu'aucun décodeur pertinent n'est présent.
+
+\section{Moteur de sondes et acquisition sans oracle}
+La fabrique de sondes expose une famille de transformations/observations, avec politique de diversité et d'évaluation. L'acquisition peut itérer, observer de nouvelles sorties et mesurer reproduction/généralisation ; elle ne transmet pas les cibles d'entraînement au générateur de sondes. Une sonde peut être nouvelle dans sa définition mais redondante dans sa sortie ; les signatures de sortie et les rondes stables sont donc enregistrées séparément du nombre de sondes produites.
+
+Le protocole attendu est : (1) fixer l'objet et les autorisations ; (2) générer plusieurs sondes ; (3) appliquer chaque sonde aux données disponibles ; (4) comparer vues et produire des empreintes ; (5) dédupliquer et noter la diversité ; (6) mettre à jour les hypothèses uniquement depuis les observations ; (7) mesurer les performances sur des données tenues à l'écart lorsque disponibles ; (8) arrêter sur critère/budget explicite. L'existence du protocole ne prouve pas qu'une compétence observée a été reproduite de manière parfaite : cette conclusion nécessite des tests indépendants représentatifs.
+
+\section{RAG observationnel et espaces sémantiques}
+\subsection{Corpus, vues et index final}
+Les sources sont ingérées sous forme de chunks porteurs d'un hash de source, d'identifiants et d'informations de provenance. Les espaces intermédiaires sont des vues construites depuis le même corpus par différentes familles de sondes. L'index final combine l'information des vues distinctes, conserve les poids itoken/vtoken et les traces de construction, puis peut supprimer les artefacts intermédiaires après écriture validée. L'index ne doit pas être confondu avec une simple liste de morceaux bruts ; sa qualité est mesurée à l'aide de cas indépendants query/références pertinents lorsque ces cas existent.
+
+\subsection{Rôle et poids des tokens}
+Pour le corpus observé $C$ et le token $t$, le RAG stocke un rôle de token, un poids et une provenance. Les rôles \texttt{itoken} et \texttt{vtoken} sont opérationnels : ils indiquent respectivement des candidats invariants et variants selon les sondes et le corpus examinés ; ils ne prouvent pas que le token soit invariant ou variant dans tous les contextes possibles. L'évolution des poids dépend de la récurrence, de la proximité contextuelle et des observations successives. Les poids sont recalculables et corpus-relatifs ; les valeurs et leur version sont enregistrées dans l'espace final.
+
+La recherche combine le lecteur sémantique pondéré et, seulement lorsqu'elle est sélectionnée, la recherche lexicale classique. Le mode lexique n'est pas la politique normative par défaut : c'est un adaptateur explicite. L'assemblage des extraits prend en compte les scores, le chevauchement textuel, les sources et l'allocation de budget ; chaque résultat conserve la provenance et des marqueurs de contenu éventuellement suspects. Une citation identifie une source, mais ne garantit pas à elle seule la pertinence ou la vérité.
+
+\subsection{Adaptation du nombre d'espaces}
+Le nombre de vues dépend de la diversité des sources, du volume des chunks, du volume des tokens, du budget configuré et du nombre de familles de sondes effectivement implémentées. O94 fournit une heuristique par seuils configurables/codés et bornée par six familles de sondes connues au build courant. Le choix peut être fixé explicitement, auquel cas il prime sur l'heuristique. Le rapport final rend le choix, les compteurs et la règle utilisée visibles. Une heuristique adaptative est une optimisation initiale à comparer sur des jeux pertinents ; elle ne prouve pas que les seuils soient optimaux pour tout corpus.
+
+Les modes de budget préservent l'index final précédent en cas de dépassement détecté avant la publication de la nouvelle génération. La promotion du nouvel index et le nettoyage sont des opérations distinctes, auditées et testées. Le plan de tests doit couvrir corpus de taille croissante, sources proches, sources hors domaine, changement de fichiers et recherche des sources non pertinentes.
+
+\section{Modèles de langue : distinction des architectures}
+O92/O93 contient (a) le moteur d'empreintes et son réseau de neurones/fonctions d'acquisition dans le sous-système \texttt{aam\textunderscore o92/learning.py}, (b) une petite architecture de génération de tokens auto-entraînable dans \texttt{aam\textunderscore o92/language.py} (notamment \texttt{FingerprintTokenAttentionLM}), et (c) une passerelle optionnelle vers un serveur de modèle de langue configuré par l'utilisateur. La capsule locale est un modèle compact entraîné sur un corpus local, pas un modèle fondation pré-entraîné généraliste. La passerelle locale peut utiliser un protocole compatible OpenAI ou Ollama ; elle ne télécharge pas ni ne prétend inclure le poids d'un grand modèle. Les URL de boucle locale sont permises selon les réglages ; un hôte distant exige la permission Internet et une allowlist explicite, et les redirections sont refusées. La clé facultative est lue depuis la variable d'environnement \texttt{AAM\textunderscore LOCAL\textunderscore LLM\textunderscore API\textunderscore KEY}, non enregistrée dans les réglages.
+
+Le résultat de génération reste non vérifié. Les contrôles d'éligibilité de texte sont des heuristiques de sortie, pas une validation factuelle. Si le backend demandé ne répond pas, l'erreur doit être reportée sans masquer l'incident sous une fausse preuve de génération.
+
+\section{Observation d'une boîte noire et capture de traces}
+La fonction \texttt{observe\textunderscore trace} accepte une liste bornée d'événements/états et crée un rapport comprenant les observations individuelles, les signatures structurelles et les transitions adjacentes. Une adjacence dans le temps est annotée \texttt{OBSERVED\textunderscore ADJACENCY\textunderscore NOT\textunderscore CAUSAL\textunderscore PROOF} ; une répétition structurelle est \texttt{OBSERVED\textunderscore STRUCTURE\textunderscore ONLY\textunderscore NOT\textunderscore REPRODUCED}. Ces libellés empêchent de présenter une ressemblance comme une reproduction causale. Des capteurs réels doivent être enregistrés comme adaptateurs et ouverts uniquement après autorisation explicite ; leur disponibilité et leur permission doivent être évaluées sur la machine cible.
+
+La reproduction fidèle d'un processus observé doit être démontrée en séparant (a) les observations d'apprentissage, (b) un protocole de reproduction, (c) les traces d'exécution de la reproduction et (d) des essais aveugles/tenus à l'écart. O94 livre la base de trace, mais le registre de preuves doit indiquer quelles formes d'objets, d'événements et de périphériques ont été testées ; il n'affirme pas qu'une compétence arbitraire observée soit déjà reproduite à l'identique.
+
+\section{Résolution continue, budget et arrêt causal}
+La méthode \texttt{resolve\textunderscore continuously} relance la résolution avec des budgets top-$k$ progressifs, enregistre chaque tentative, le hash de sortie, la route sélectionnée et le lien causal de l'itération. Un résultat n'obtient le statut \texttt{VERIFIED\textunderscore BY\textunderscore EXPLICIT\textunderscore CONSTRAINTS} que lorsqu'un vérificateur fourni par l'appelant passe. Sans vérificateur, le résultat final est \texttt{UNRESOLVED\textunderscore BUDGET}, même si une tentative a produit du texte. Les budgets d'itération et de temps sont plafonnés ; un événement d'annulation est respecté. Cette borne est nécessaire pour qu'une boucle continue n'emprisonne pas l'application dans une résolution non terminée.
+
+Un critère tel que ``le chemin $.answer existe'' valide uniquement la présence de ce champ, et non la qualité du contenu. Les vérificateurs sémantiques doivent donc définir précisément des contraintes observables appropriées à la tâche et être idéalement indépendants des données de réglage du solveur.
+
+\section{Récompense, punition et mémoire causale}
+Une note utilisateur pour une tâche explicitement reconnue comme la dernière tâche est convertie en signal borné $r\in[-1,1]$. Pour chaque compétence utilisée, une moyenne exponentielle lissée est mise à jour :
+\[
+  q_{t+1}=\operatorname{clip}_{[-b,b]}\big((1-\alpha)q_t+\alpha r_t\big),
+\]
+avec $\alpha$ et $b$ bornés. Cette valeur influence faiblement la priorité de routage ; elle ne transforme jamais la note en vérité de référence. Les hash des événements de feedback sont mémorisés pour éviter l'application répétée de la même note. Les demandes non liées à la tâche courante sont journalisées sans mise à jour de route.
+
+Le graphe causal ne relie que les champs explicites de parenté métier \texttt{causal\textunderscore parent\textunderscore hashes} ou \texttt{parent\textunderscore event\textunderscore hashes}. Le champ \texttt{prev\textunderscore hash} appartient à la chaîne d'intégrité et ne doit jamais devenir un arc causal. La vue O94 conserve la profondeur complète sur sa fenêtre bornée, utilise une région de défilement dimensionnée et explicite les parents hors fenêtre et les liens invalides. Un graphe propre améliore l'auditabilité ; il n'est pas un moteur causal qui infère automatiquement les causes.
+
+\section{Persistance, WinError32 et concurrence}
+Les remplacements atomiques transitent par \texttt{aam\textunderscore atomic\textunderscore io.safe\textunderscore replace}. La reprise est bornée et ne concerne que les codes de verrouillage/partage Windows 32/33 (ou une erreur de permission équivalente uniquement sous Windows). L'opération ne contourne pas les ACL et ne ferme pas un handle détenu par un autre processus. Les écritures s'effectuent par fichier temporaire sur le même système de fichiers, puis \texttt{os.replace} ; le journal de test conserve le nombre de tentatives. Les erreurs de permissions non transitoires sont propagées immédiatement.
+
+Les sources originales des archives sont préservées et les builds s'effectuent dans l'espace de travail O94. Les hashes sont contrôlés avant/après. Les sauvegardes de développement résident dans \texttt{sav\textunderscore AAM\textunderscore O94} et les chemins canoniques dans \texttt{chemins\textunderscore O94.json}.
+
+\section{Interface et pipeline unifié}
+L'interface héritée Tkinter est gardée pour minimiser le risque de régression, améliorée en place et renommée O94. Les onglets historiques sont conservés ; l'onglet Briques de base expose les contrats/couches/dépendances, et l'onglet Internet/API permet de configurer explicitement un backend de génération. La sélection manuelle ou automatique de compétence demeure distincte de la validation de sa sortie. Le graphe de mémoire précise ce qui est causal et ce qui est simplement intégrité.
+
+Pipeline principal :
+\begin{enumerate}
+\item vérifier les formalismes, checklists, journaux d'erreurs et permissions pertinentes (préflight) ;
+\item observer la demande et/ou l'attachement, garder la provenance et l'empreinte ;
+\item construire et lire les espaces RAG si un corpus local est configuré ;
+\item proposer/choisir des compétences en fonction des contrats, du contexte et de préférences causales bornées ;
+\item exécuter la route ou la composition sous budgets ;
+\item inspecter les résultats, citations et états d'incertitude ;
+\item appliquer uniquement un vérificateur indépendant explicite pour déclarer la vérification ;
+\item consigner résultat, erreur, événements causaux et sauvegarde/checkpoint ;
+\item accepter la note utilisateur comme préférence, jamais comme oracle ;
+\item mettre à jour la checklist seulement avec preuves reproductibles et limites explicites.
+\end{enumerate}
+
+\section{Commandes d'exécution et tests}
+Depuis la racine extraite du modèle, avec Python 3.11 ou plus récent :
+\begin{verbatim}
+python -m aam_o93 status
+python -m aam_o93 --help
+python -m pytest tests/test_o94_base_blocks.py -q
+python -m pytest tests/test_o94_atomic_replace_retry.py -q
+python -m pytest tests/test_o94_rag_adaptive.py -q
+python -m pytest tests/test_o94_trace_resolution_reward.py -q
+python -m pytest tests/test_o94_local_llm_adapter.py -q
+python -m pytest tests/test_p6_memory_causal_graph_view.py -q
+# Pour le lot global, préférer les groupes bornés et les reçus par module.
+python -m pytest --collect-only -q tests
+python scripts/o94_aggregate_test_receipts.py
+\end{verbatim}
+Les tests qui appellent un serveur LLM, un vrai capteur ou une machine Windows ne peuvent être certifiés par une simulation hors de cet environnement. Les essais synthétiques sont identifiés comme tels. La commande \texttt{python -m aam\textunderscore o93 ui} démarre la boucle autonome de l'application de bureau ; l'arrêt reste explicite depuis l'interface.
+
+\section{Template obligatoire des rapports}
+Chaque rapport de phase doit comporter dans cet ordre : (1) description ; (2) architecture ; (3) pipeline complet ; (4) commandes d'exécution ; (5) résultats ; (6) interprétation ; (7) conséquences théoriques ; (8) conséquences conceptuelles ; (9) conséquences opérationnelles ; (10) conclusion ; (11) statut du modèle et limites. Les résultats incluent l'environnement, hashes du test, code retour, erreurs et limites. ``Aucun problème vu'' ne veut pas dire ``absence universelle de problème''.
+
+
+\subsection{État vérifié du banc local (P5, 18 octobre 2026)}
+La matrice locale a collecté 274 cas répartis dans 47 modules; les 47 modules sont couverts par des reçus de retest avec code de sortie zéro, en exécutions segmentées. Le résultat agrégé, le détail des reçus et leurs empreintes sont dans \texttt{logs/O94\_test\_results.json} et \texttt{logs/O94\_P5\_*.json}. Un essai monolithique dépassant la limite du superviseur est conservé comme timeout d'orchestration et n'est pas appelé réussite globale. Cette validation bornée ne change pas les critères d'acceptation externe ni le statut du corpus SMS complet de 5\,574 lignes, qui demeure \texttt{NOT\_VALIDATED}.
+
+\section{Statut final et limites connues}
+Le statut exact d'O94 est défini par la checklist, le registre de preuves et les reçus exécutés, pas par ce texte seul. Le code O94 ajoute les mécanismes listés ci-dessus et doit continuer d'être évalué sur le corpus SMS complet, les scénarios externes, les vrais périphériques, les systèmes Windows présentant des verrouillages et les backends de modèle de langue réellement configurés. Le jeu SMS de 5\,574 lignes signalé dans le statut O93 n'est pas réputé validé tant qu'un reçu O94 complet ne démontre pas le contraire. L'archive de livraison garde donc explicitement les écarts non exécutés.
+\section{Audit de clôture documentaire P6 et registre de preuves}
+\subsection{Description}
+Le registre O94 est un index de traçabilité distinct des artefacts historiques. Il normalise les références aux fonctions par les chemins de code et garde séparées les preuves d’existence du code, les tests de contrat et les acceptations externes.
+\subsection{Architecture}
+Le schéma \texttt{aam-o94-proof-registry-v1} comporte le résumé des phases, les empreintes SHA-256 des entrées, treize entrées d’exigences, les références source/UI/tests/reçus et les limites d’interprétation. Le champ \texttt{implementation\_complete\_claimed} reste faux par construction d’audit afin que la traçabilité locale ne soit pas présentée comme une preuve exhaustive.
+\subsection{Pipeline complet}
+Le registre valide les chemins de code référencés et les fichiers de tests; l’audit de phase rapproche ces références des reçus; le validateur JSON vérifie la syntaxe des checklists et rapports; la sauvegarde construit un manifeste par fichier.
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python scripts/o94_phase_runner.py P6 -- python scripts/o94_build_proof_registry.py
+python scripts/o94_phase_runner.py P6 -- python scripts/o94_validate_json.py
+python scripts/o94_snapshot.py
+\end{verbatim}
+\subsection{Résultats et interprétation}
+Le registre O94 est un index d’audit, non une certification universelle. Une entrée est marquée par un statut borné et sa limite; la présence d’un fichier, d’un test ou d’un reçu n’élargit pas la preuve au-delà de ce qui a réellement été exécuté.
+\subsection{Conséquences : théoriques, conceptuelles et opérationnelles}
+Le modèle obtient une surface d’audit reproductible, un historique non destructif de la correction des outils et une sauvegarde vérifiable. Les essais non exécutés conservent leur état explicite.
+\subsection{Conclusions}
+La porte de phase exige la validation conjointe du registre, des documents, des checklists et du manifeste de sauvegarde, sans sauter à P7 avant ces critères.
+\subsection{Statut du modèle}
+Statut local borné. La complétude universelle, la validation native Windows, le corpus SMS complet et les fournisseurs externes en direct ne sont pas revendiqués.
+
+\section{P7 -- Livraison vérifiable des archives O94}
+Cette phase transforme le dossier de travail validé en trois livrables indépendants et vérifiables : \texttt{Dmodel\_AAM\_O94.zip} (runtime et dépendances livrées), \texttt{Amodel\_AAM\_O94.zip} (audit historique et preuves O94), et \texttt{suivi\_model\_AAM\_O94.zip} (point de sauvegarde et suivis). Les documents normatifs \texttt{laboratoire\_O94.tex} et \texttt{formalisme\_O94.tex} sont également fournis séparément.
+
+\subsection{Invariants d'intégrité}
+Soit $T$ l'arborescence livrée et $M(T)$ son manifeste. Pour tout fichier $f$ recensé, la vérification exige simultanément
+\[
+  |f|=M(T)[f].\mathrm{size}, \qquad
+  \mathrm{SHA256}(f)=M(T)[f].\mathrm{hash}.
+\]
+La vérification échoue également si un fichier non exclu n'est pas répertorié, si un fichier référencé manque, si un chemin d'archive est absolu ou contient un composant parent, si le test CRC détecte un membre défectueux, ou si une archive dépasse $220\,000\,000$ octets. Les fichiers manifeste s'excluent mutuellement de leurs propres tables pour éviter une référence circulaire ; leurs hashes externes figurent dans \texttt{O94\_livraison\_manifest.json}.
+
+\subsection{Point de sauvegarde et chemins}
+Le snapshot \texttt{sav\_AAM\_O94/current} est une copie intégrale et hachée de l'arborescence livrable, accompagnée de \texttt{SAVEPOINT\_MANIFEST.json} et de \texttt{savepoint.json}. \texttt{chemins\_O94.json} distingue les chemins absolus du poste de build des chemins relatifs valides quand les trois archives sont extraites côte à côte. L'archive de suivi transporte le snapshot et la provenance; la présence du manifeste ne prétend pas remplacer un essai de restauration sur le système cible.
+
+\subsection{Protocole de validation de livraison}
+Le protocole de P7 est : (i) relire la checklist et les deux registres d'erreurs ; (ii) vérifier que P0--P6 sont fermées ; (iii) actualiser les manifestes après gel des fichiers ; (iv) construire les archives en préservant les noms UTF-8 ; (v) exécuter le test CRC et contrôler les chemins ; (vi) extraire chaque archive dans un répertoire vide ; (vii) recalculer chaque SHA-256 et comparer les tailles ; (viii) vérifier indépendamment le manifeste du snapshot ; (ix) inscrire les hashes des trois archives dans le manifeste externe de livraison.
+
+Un premier essai de compression avec l'outil système a altéré l'encodage de chemins accentués, CJK et emoji. Cette archive candidate a été rejetée. Le générateur a été remplacé par le module Python \texttt{zipfile}, puis les noms Unicode ont été contrôlés après extraction. L'incident est conservé dans le registre d'erreurs environnementales et ne concerne pas le runtime AAM.
+
+La validation de packaging ne transforme pas des tests locaux en preuve de généralisation. Le statut d'acceptation complet du corpus SMS de 5\,574 lignes, l'acceptation Windows/NTFS native, les capteurs matériels et les services LLM/Internet réels restent gouvernés par leurs propres preuves et ne sont pas modifiés par la réussite de P7.
+
+\end{document}

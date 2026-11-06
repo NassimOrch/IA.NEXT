@@ -1,0 +1,178 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{longtable,booktabs,array}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\geometry{margin=2.3cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\setlist{nosep}
+\sloppy
+\title{Formalisme du modèle AAM O94\_0 : RAG de réponse, génération déléguée et mémoire hiérarchique}
+\author{Dossier technique O94\_0}
+\date{18 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Objet, portée et statut épistémique}
+Ce document formalise l'incrémentation O94\_0 à partir du modèle O94, de ses sources historiques et de la théorie des empreintes livrée dans \path{source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex}. Il traite précisément trois défauts rapportés à l'usage : (R1) mélange de la réponse avec plusieurs enregistrements non pertinents et diagnostics techniques dans le chat ; (R2) parcours de génération qui pouvait ne pas fournir au générateur les preuves RAG sous un contrat distinct ; (R3) lecture trop globale de la mémoire au lieu d'un accès progressif par arbre de résolution.
+
+Le présent formalisme définit des contrats opérationnels et des critères de test. Il ne constitue pas une preuve générale de vérité factuelle, de compétence universelle, ni de compatibilité avec tout fournisseur externe. Un statut \emph{PASS} signifie uniquement que le contrat désigné est satisfait dans l'environnement et le périmètre du reçu associé.
+
+\section{Notions et distinctions}
+\subsection{Observation, empreinte et classes observationnelles}
+Une observation est la sortie d'une sonde appliquée à une source et à une politique explicites. Une empreinte est une représentation dérivée de ces observations ; elle ne doit pas être assimilée au contenu brut, à une preuve de vérité ou à un identifiant globalement unique sans hypothèses complémentaires. Les tokens invariants (itokens) représentent des éléments stables relativement au corpus, aux sondes et à la version considérés ; les tokens variants (vtokens) représentent des éléments sensibles au contexte ou à la variation observée. Les poids sont relatifs à l'index construit et doivent être versionnés avec celui-ci.
+
+La théorie source organise la résolution en niveaux de raffinement : un niveau plus profond distingue des classes observationnelles précédemment confondues. Pour O94\_0, ce principe est interprété comme un mécanisme de routage progressif et non comme une justification pour charger toute la mémoire ni comme une garantie sémantique automatique.
+
+\subsection{Enregistrement atomique}
+Un enregistrement source est l'unité logique minimale à préserver lorsqu'une source structurée est prise en charge : objet JSONL complet par ligne physique, ligne TSV complète selon le séparateur de champs défini pour le format, ou enregistrement issu d'un parseur propre au format. Une segmentation ne doit pas concaténer des enregistrements indépendants de manière à rendre impossible l'attribution de la réponse à son enregistrement d'origine.
+
+\subsection{Réponse utilisateur et détails}
+La \emph{réponse visible} est le contenu rédigé à destination de l'utilisateur. Les identifiants de sources, scores, extraits de preuves, empreintes, statuts d'acceptation, mesures de confiance et traces du modèle sont des \emph{détails techniques}. Ils ont un canal d'affichage séparé et ne doivent pas être concaténés à la réponse visible par le formateur du chat.
+
+\section{Contrat R1 : une seule réponse propre}
+\subsection{Précondition}
+La demande est reçue sous forme de texte ou d'une charge représentable par le runtime. L'index peut être vide ou contenir des preuves pertinentes, non pertinentes ou contradictoires.
+
+\subsection{Postconditions}
+\begin{enumerate}
+\item Le corps principal du chat contient une seule chaîne de réponse, sans liste brute de documents, JSON source, score de classement, hash, statut interne ou diagnostic de génération.
+\item Les preuves sélectionnées et la provenance restent consultables dans une vue ou un panneau \emph{Détails} distinct.
+\item Si aucune preuve appropriée n'est disponible et si le générateur ne peut pas produire une réponse acceptable, le système retourne un message d'absence de preuve lisible ; il ne fabrique pas une réponse en recopiant des enregistrements sans rapport.
+\item Le mode extractif direct du RAG est explicite. Il ne remplace pas silencieusement le mode normal de génération.
+\end{enumerate}
+
+\subsection{Critère de rejet d'une réponse candidate}
+Le générateur peut produire une candidate non utilisable. Le contrôle structurel et d'ancrage peut refuser cette candidate, notamment en présence de marqueurs inconnus, de répétition excessive ou d'un manque d'ancrages dans les preuves. Le rejet n'établit pas à lui seul la fausseté de la candidate ; il indique que le contrat automatique d'acceptation n'est pas satisfait. Dans ce cas, le fallback extractif utilise un champ réponse reconnu de l'enregistrement pertinent ou retourne un message explicite d'absence de preuve.
+
+\section{Contrat R2 : le RAG précède et alimente le générateur}
+\subsection{Pipeline canonique}
+\[
+\begin{aligned}
+\text{question} &\rightarrow \text{observation / sondes}\\
+&\rightarrow \text{RAG maître} \rightarrow \text{micro-RAG}\\
+&\rightarrow \text{preuves bornées} \rightarrow \text{générateur}\\
+&\rightarrow \text{réponse unique}.
+\end{aligned}
+\]
+Le chemin de récupération est exécuté avant la génération, y compris lorsque l'index est vide : le résultat du RAG est alors \texttt{NO\_INDEX} ou \texttt{NO\_MATCH}, distinct d'un état « RAG non exécuté ».
+
+\subsection{Contrat d'entrée du générateur}
+Le générateur reçoit au minimum deux champs distincts :
+\begin{itemize}
+\item \texttt{goal}: la demande utilisateur originale ;
+\item \texttt{evidence}: les enregistrements choisis et leurs champs utiles, avec provenance conservée séparément.
+\end{itemize}
+La preuve n'est pas injectée en préambule dans le texte de la question puis retraitée comme si elle était une demande. Le contexte de travail envoyé au générateur est dédupliqué et borné pour respecter le budget du moteur. Le candidat d'une réponse structurée longue demeure conservé séparément du contexte tronqué de génération, afin que le contrôle/fallback puisse utiliser le champ de réponse complet lorsque la source l'autorise.
+
+\subsection{Sélection du moteur}
+Les modes visibles comprennent le générateur local disponible, un backend AAM explicitement sélectionné, et le mode extractif direct du RAG. La sélection d'un backend AAM nécessite un espace de travail choisi par l'utilisateur. La délégation transfère la question et les preuves sous forme de champs distincts et interdit la délégation récursive implicite. Aucun backend externe ne doit être déclaré vérifié sans test contre ce serveur ou fournisseur réel.
+
+L'absence de sortie acceptable du moteur sélectionné ne doit pas déclencher silencieusement un autre LLM non choisi. Le runtime peut revenir à la réponse extractive déjà appuyée par le RAG, avec un statut de génération visible dans les détails techniques.
+
+\section{Contrat R3 : RAG maître, micro-RAG et profondeur de mémoire}
+\subsection{Index hiérarchique}
+L'architecture comporte trois niveaux fonctionnels :
+\begin{enumerate}
+\item \textbf{Niveau maître :} empreintes/résumés et références vers les micro-RAG, sans recopier le corpus brut complet.
+\item \textbf{Niveau micro-RAG :} regroupement local d'enregistrements atomiques, clé d'empreinte, statistiques et somme d'intégrité.
+\item \textbf{Feuille :} enregistrements bruts sélectionnés, relus à la demande et validés par leur hash avant usage.
+\end{enumerate}
+Les lots d'enregistrements constituent une stratégie d'organisation, non une preuve que deux demandes sont sémantiquement équivalentes. Les frontières des lots et tailles doivent être adaptées au corpus et à la stratégie d'indexation sans casser l'atomicité des documents.
+
+\subsection{Recherche et budgets}
+Pour une requête $q$, le maître classe les unités candidates à partir des empreintes/résumés et des signaux issus des sondes ; le système sélectionne un sous-ensemble de micro-RAG. Le paramètre de profondeur $d$ limite le nombre de niveaux ouverts et le budget de lecture, pas le potentiel du modèle. À profondeur basse, le runtime peut retourner un résumé et des références ; à profondeur supérieure, il charge uniquement les feuilles sélectionnées, puis les enregistrements nécessaires. La complexité effective dépend de la taille du corpus, de l'index et des paramètres ; elle ne peut être résumée par une garantie constante pour tous les jeux de données.
+
+\subsection{Intégrité et mutation}
+Chaque feuille persistée est associée à une empreinte d'intégrité (SHA-256 dans l'implémentation actuelle). La lecture d'une feuille dont l'empreinte diffère est refusée ou signalée ; un index maître périmé doit être resynchronisé. L'intégrité du hash prouve que les octets concordent avec la version attendue, pas que le contenu est véridique.
+
+\subsection{Arbre de résolution mémoire}
+Le journal d'événements append-only reste la source de vérité. L'arbre maître/micro/événement conserve des résumés et des tokens hachés pour acheminer les requêtes. Le niveau de profondeur commande l'accès progressif à l'événement complet et peut autoriser l'exploration de voisins temporels ou de parents causaux lorsque leur lien est disponible. Le lien causal déclaré est distinct de la chaîne d'intégrité du journal, telle que le champ de hash précédent. Les contenus complets ne sont lus qu'après sélection ; le diagnostic de recherche n'enregistre que des empreintes de requête et des mesures résumées.
+
+\section{Contrat d'ingestion et de conservation}
+\subsection{JSONL}
+Chaque ligne non vide qui représente un objet JSON reste un enregistrement entier. Le parseur isole les champs demande, contexte et réponse à l'aide de clés reconnues, puis classe l'enregistrement avec la demande et non seulement avec le contenu de réponse. Le fallback extractif privilégie le champ réponse de l'enregistrement sélectionné et ne renvoie pas le bloc complet de lignes voisines.
+
+\subsection{TSV avec texte libre}
+Le flux TSV SMSSpamCollection est traité comme une ligne physique par exemple. Le premier séparateur tabulation sépare l'étiquette du message ; les guillemets dans le message ne reçoivent pas la sémantique d'échappement CSV. Cette règle évite de rejeter des textes ordinaires contenant des apostrophes/guillemets. Pour un autre schéma tabulaire, la politique de séparateur doit être explicitement déclarée.
+
+\subsection{Optimisation et limites}
+Les budgets sont bornés pour éviter le chargement global involontaire et la répétition redondante. Les index peuvent être réutilisés tant que les versions/hashes des sources concordent. Une nouvelle source, une mutation ou un changement de version de sondes provoque un rafraîchissement/reconstruction adapté. Les résultats d'évaluation sur échantillon ne sont pas extrapolés à l'ensemble du corpus.
+
+\section{Sondes et espaces sémantiques}
+Le moteur actuel construit plusieurs vues : ordre séquentiel, inversion/miroir, ordre lexical, classes de parité, contexte de fréquence et rotation cyclique. Pour chaque vue, l'implémentation dérive des tokens et des poids relatifs. Les vues sont fusionnées en un index maître/micro. Les poids sont dépendants du corpus, de la version et des sondes ; ils ne sont pas des probabilités de vérité. Le nombre de vues et la profondeur sont des budgets configurables/adaptatifs, évalués avec l'état de complétude et le coût de lecture.
+
+\section{Erreurs, récompense et audit causal}
+Une réponse candidate peut entraîner un résultat de contrôle accepté, refusé ou indéterminé. Ces statuts restent distincts d'une vérité objective. Le feedback utilisateur relié à une tâche peut participer au mécanisme de récompense/punition ; l'agent ne modifie pas arbitrairement les paramètres de contrôle de cette politique en dehors des événements autorisés. Le graphe causal distingue : événement source, événement réponse, feedback, ajustement de préférence et conséquence. Les arcs ne doivent pas être déduits du simple ordre des hashes.
+
+\section{Invariants formels de raffinement}
+On représente un index de résolution par un graphe orienté enraciné $T=(V,E)$ dont les niveaux sont $0,1,\ldots,D$. Le niveau $0$ est le maître, les niveaux intermédiaires représentent les micro-RAG ou micro-mémoires, et les feuilles pointent vers des enregistrements/events atomiques. Chaque nœud $v$ peut porter un résumé $s(v)$, une empreinte de routage $f(v)$, une mesure de version et une référence d'intégrité $h(v)$. Le résumé et l'empreinte de routage sont des métadonnées de sélection, pas le contenu complet de la feuille.
+
+Pour une requête $q$ et un budget de profondeur $d$, soit $B_d(q)$ l'ensemble des nœuds visités, et $L_d(q)$ les charges utiles de feuille ouvertes après sélection. Le budget est monotone $b(d+1)\geq b(d)$, mais le nombre de feuilles effectivement ouvertes dépend du corpus, du score, des liens disponibles et des seuils ; la mise en œuvre doit l'enregistrer plutôt que le présumer. Lorsque la même branche est approfondie, le raffinement ajoute des distinctions ou des détails; il ne garantit ni que toute réponse soit vraie, ni que la pertinence augmente pour chaque requête.
+
+Les invariants vérifiables sont :
+\begin{enumerate}
+\item \textbf{Atomicité :} une feuille référence un enregistrement source intact ; aucune segmentation n'est autorisée à couper un record JSONL ou une ligne physique TSV dans les lecteurs pris en charge.
+\item \textbf{Lecture après sélection :} une charge utile brute n'est ouverte qu'après routage vers sa feuille et vérification de l'empreinte attendue.
+\item \textbf{Raffinement explicite :} le niveau demandé, le niveau atteint, les budgets et les nœuds consultés sont présents dans les détails de résolution.
+\item \textbf{Séparation de preuve :} la provenance et l'intégrité des octets ne sont pas assimilées à une vérité factuelle.
+\item \textbf{Pas de causalité implicite :} un hash précédent ou un ordre d'horodatage n'est pas un arc causal sans relation causale explicite.
+\item \textbf{Pas de réponse injectée :} les réponses de référence d'un jeu d'évaluation sont utilisées uniquement après inférence pour mesurer le résultat.
+\end{enumerate}
+
+L'arbre maître/micro peut regrouper par lots séquentiels, par empreintes d'observation ou par affinité du contenu selon la politique choisie. La stratégie de regroupement doit préserver la traçabilité de chaque record; des identifiants de lots ne sont pas traités comme synonymes de concepts. Une mutation de source invalide le cache concerné et force un rafraîchissement local, sans imposer de reconstruire les autres sources si leur version reste concordante.
+
+\section{Algorithmes de référence}
+\subsection{Réponse conversationnelle}
+\begin{enumerate}
+\item Observer la requête et normaliser son contexte sans l'altérer sémantiquement.
+\item Exécuter la recherche maître, y compris pour consigner l'absence d'index ou de correspondance.
+\item Sélectionner les micro-RAG et obtenir les enregistrements candidats, en validant leur intégrité.
+\item Classer/dédupliquer les preuves sur le champ de demande et le champ de réponse.
+\item En mode normal, transmettre question et preuves séparément au moteur explicitement sélectionné.
+\item Contrôler la candidate ; si elle est inutilisable, appliquer le fallback extractif à un champ réponse pertinent ou signaler l'absence de preuve.
+\item Renvoyer uniquement la réponse au corps du chat et placer provenance/diagnostics dans « Détails ».
+\end{enumerate}
+
+\subsection{Lecture de mémoire par raffinement}
+\begin{enumerate}
+\item Calculer la requête normalisée et ses tokens hachés.
+\item Comparer les résumés du maître et sélectionner les micro-branches pertinentes.
+\item À profondeur 1, retourner un résumé et des compteurs sans ouvrir les charges utiles.
+\item À profondeur supérieure, sélectionner les événements et vérifier leurs hashes avant d'ouvrir les plages nécessaires.
+\item Si le mode le demande, explorer les liens temporels ou causaux explicitement stockés, dans un budget borné.
+\item Rendre réponse, détails de résolution, profondeur effective, nœuds et événements consultés, et éventuels rejets d'intégrité.
+\end{enumerate}
+
+\section{Protocole de test et critères de preuve}
+Les tests utilisent des assertions indépendantes : enregistrement atomique, réponse visible unique, absence de preuves étrangères dans le corps du chat, absence d'index différente de RAG non exécuté, contrat séparé question/preuves, non-récursivité de la délégation, intégrité des feuilles, monotonie des profondeurs consultées et mesure du nombre de nœuds visités. Les résultats sont attachés à un reçu machine-readable contenant la commande, le code de sortie, le nombre de tests et les hashes des sources testées.
+
+Un test local avec adaptateur ne démontre pas la disponibilité d'un serveur distant. Un test UI sous Xvfb ne démontre pas tous les chemins matériels de Windows. Une mesure sur 300 SMS ne représente pas une évaluation exhaustive des 5\,574 lignes. Une évaluation de 10 questions sur 32 enregistrements Screenplay a un périmètre limité et ne remplace pas une mesure générale de rappel/précision sur des corpus externes.
+
+\section{Commandes d'exécution reproductibles}
+Depuis la racine du modèle O94\_0 :
+\begin{verbatim}
+python scripts/o940_phase_test_runner.py --help
+python -m pytest -q tests/test_o940_rag_resolution.py
+python -m pytest -q tests/test_o931_chat_pipeline.py
+python -m pytest -q tests/test_o940_memory_resolution.py
+python -m pytest -q tests/test_o940_ui_resolution_details.py
+python -m pytest -q tests/test_o940_real_sms_corpus_sample.py
+python -m pytest -q tests/test_o940_real_sms_retrieval.py
+python scripts/o940_snapshot.py
+\end{verbatim}
+Les arguments spécifiques du runner doivent être consultés par \texttt{--help}; l'exemple pytest direct ne remplace pas le garde de phase pour une exécution normative. Avant toute exécution formelle, lire \texttt{chemins\_O94\_0.json}, \texttt{checklist\_de\_travail\_O94\_0.json}, \texttt{checklist\_erreurs\_no\_model.json} et \texttt{checklist\_erreurs\_model.json}.
+
+\section{Résultats actuels et limites}
+Le registre de preuves associé centralise les reçus. L'état de développement antérieur inclut une matrice locale P5 de 54 modules avec 316 cas pytest et 21 sous-tests réussis, ainsi que les validations ciblées R1--R3 et les tests du sous-corpus réel. Ces résultats sont considérés comme preuve bornée au code et environnement des reçus. L'intégration à un vrai serveur LLM distant, le comportement de tous les modèles AAM arbitraires, la totalité des 5\,574 messages SMS en évaluation de sortie, les capteurs physiques et Windows matériel ne sont pas revendiqués comme validés par ces nombres.
+
+\section{Conclusion et statut du modèle}
+O94\_0 institue un contrat de séparation entre recherche, génération, affichage et détails ; introduit un arbre de routage maître/micro pour RAG et mémoire ; et lie les revendications à des reçus traçables. Le mécanisme hiérarchique permet une lecture contrôlée par profondeur mais n'est pas, à lui seul, une preuve de compréhension générale ou de vérité. Le statut est \textbf{implémentation testée dans un périmètre borné}, avec intégrations externes et essais matériels explicitement non vérifiés. Les phases suivantes doivent finaliser laboratoire/registre, sauvegarde, packaging et vérification de livraison.
+
+\end{document}

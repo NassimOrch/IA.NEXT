@@ -1,0 +1,169 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.35cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,amsthm}
+\usepackage{booktabs,longtable,array,enumitem,xcolor,hyperref,microtype}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\setlist{leftmargin=1.6em,itemsep=2pt,topsep=4pt}
+\emergencystretch=2em
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{definition}[proposition]{Définition}
+\title{Rapport critique et proposition de refondation\\\large Vers une théorie générale de la programmation compositionnelle maillée}
+\author{Analyse critique et proposition de refondation}
+\date{27 octobre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Ce rapport examine conjointement la théorie compositionnelle fournie et le formalisme eGenBrain v4, en séparant les apports solides, les lacunes théoriques, les limites des preuves rapportées et la cible de refondation. La conclusion centrale est que la première source fournit un cadre opératoire riche pour contrats, effets, mémoire, synthèse et activation réversible, tandis que la seconde fournit une représentation de maillage plus explicite pour les identités, occurrences, faits typés, hyperrègles, opérateurs et certificats. Mais aucune des deux, prise isolément ou par simple juxtaposition, ne définit encore un substitut complet à la programmation classique. La nouvelle version doit donc traiter la composition comme principe universel de représentation, définition, exécution, transformation et explication de programmes; traiter le maillage comme structure relationnelle commune aux données, contrôles, effets, preuves et dépendances; et fournir un noyau sémantique capable de préserver l'expressivité du langage cible. Le rapport refuse deux excès symétriques : réduire la composition à un DSL d'orchestration, ou affirmer une garantie universelle de sécurité, de simplicité, de performance et de correction qu'aucun formalisme seul ne peut établir.
+\end{abstract}
+\tableofcontents
+\newpage
+
+\section{Mandat et méthode d'analyse}
+L'objectif analysé ici n'est pas de rendre plus sophistiqué un langage de composition existant. Il est de définir une voie de programmation qui puisse remplacer le mode classique d'écriture des programmes comme expérience dominante, sans réduire la classe de comportements programmables, sans supprimer les contrôles de sécurité ou de pertinence, et en permettant une interaction plus accessible aux personnes non spécialistes. Le remplacement recherché concerne donc à la fois la représentation du programme, son mode de création, son exécution, sa réutilisation et sa vérification.
+
+Les deux textes ne sont pas de même nature. La théorie compositionnelle est principalement un cadre de sémantique et d'architecture de runtime, avec contrat de composant, types, effets, résultat typé, synthèse, checkpoints, mémoire vivante, ASCRC et obligations de validation. Le formalisme eGenBrain v4 est plus centré sur la représentation et l'inférence d'un maillage : identités canoniques, occurrences, faits typés, relations orientées, règles multi-prémisses, opérateurs, provenance et certificats. La bonne intégration doit préserver cette différence de rôle au lieu d'aplatir les deux dans un unique graphe indistinct.
+
+\subsection{Règle d'interprétation des affirmations}
+Le présent rapport traite comme données documentaires les résultats et descriptions explicitement rapportés dans les sources, sans prétendre avoir réexécuté leur runtime ou audité leurs fichiers de code. Une définition mathématique n'est pas une preuve d'implémentation; un test réussi n'établit que le comportement du cas exécuté; un certificat ne garantit que ce que vérifie son protocole; un hash vérifie une intégrité sous hypothèses cryptographiques mais ne prouve pas la vérité sémantique d'un contenu. Cette discipline doit être conservée dans la théorie NG.
+
+\section{Ce que la théorie compositionnelle existante apporte déjà}
+\subsection{Apports importants à conserver}
+\begin{enumerate}
+\item \textbf{Composition comme construction de comportements, non simple chaînage.} La source prend en compte les flux de données, les préconditions et postconditions, les effets, les ressources, les événements et la provenance. C'est le socle pertinent pour rendre les compositions sûres et compréhensibles.
+\item \textbf{Distinction entre structure et garantie.} Elle distingue compilation, test, preuve conditionnelle et observation. Elle interdit de transformer silencieusement un résultat partiel, périmé, inconnu ou réfuté en résultat certifié.
+\item \textbf{Sémantique avec état et effets.} Elle reconnaît que les appels réseau, mutations, horloges, transactions, ressources, erreurs et événements externes ne sont pas de simples fonctions pures.
+\item \textbf{Sûreté de composition.} Les règles de raccord de contrats, les conditions d'indépendance parallèle, les invariants de boucle et les obligations de traduction interpréteur/compilateur sont de bonnes bases formelles.
+\item \textbf{Résilience et continuité.} Les checkpoints, l'idempotence, les compensations, la réconciliation post-crash et les statuts de résultats partiels évitent de présenter une reprise comme un rollback magique.
+\item \textbf{Recherche et évolution.} La synthèse de candidats, le maintien des contre-exemples, les tests holdout, les transformations réversibles et l'analyse de l'explosion combinatoire donnent à la programmation compositionnelle un mécanisme d'évolution au-delà de l'exécution de plans écrits manuellement.
+\item \textbf{Activation réversible.} La séparation entre existence, admissibilité, activation, résidence et statut épistémique est importante : un candidat dormant n'est pas réfuté et un candidat activé n'est pas certifié.
+\item \textbf{Limites déclarées.} Le texte reconnaît que la généralisation, la synthèse complète, la correction de compilation et plusieurs propriétés de bout en bout restent à démontrer.
+\end{enumerate}
+
+\subsection{Pourquoi ces apports ne suffisent pas encore au but universel}
+Le document fournit un langage abstrait extensible et un ensemble riche de constructions, mais la présence de noms d'opérateurs dans une grammaire ne constitue pas encore une définition complète de leur sémantique, de leurs règles de typage, de leurs interactions et de leur traduction. Plusieurs nœuds ont une sémantique contractuelle minimale et d'autres restent explicitement des extensions théoriques. Le document ne présente pas une preuve générale qui relie toutes les constructions à un langage source de référence, ni une démonstration de compilation correcte pour tous les programmes classiques, ni une spécification complète des interfaces vers systèmes d'exploitation, processeurs, bases de données, interfaces graphiques et systèmes distribués.
+
+Le risque est donc que la théorie décrive un très bon environnement d'orchestration de compétences sans offrir un modèle d'exécution assez général pour représenter naturellement tout programme, notamment les structures de données avancées, les types paramétriques, les abstractions mémoire, les exceptions, le contrôle bas niveau, les interruptions, les protocoles, les programmes réactifs, les systèmes concurrents et les contraintes temps réel. Ces éléments doivent être représentables dans le noyau ou exposables par composants natifs dotés d'un contrat complet, et non laissés hors du modèle.
+
+\section{Ce que le formalisme eGenBrain v4 apporte}
+\subsection{Apports structurels du maillage}
+Le tuple de maillage
+\[
+\mathcal M_4=(V,O,q,E,H,\tau,\pi,w,\kappa,\Delta,\Gamma,\Sigma,\mathcal A)
+\]
+est une contribution structurante. Il distingue les identités canoniques des occurrences contextualisées, les relations binaires des règles multi-prémisses, les types de la provenance, les supports observationnels des opérateurs et les certificats des états d'activation. Cette séparation évite de forcer toutes les informations dans des arêtes génériques qui détruiraient la sémantique des règles conjonctives.
+
+Le modèle impose utilement que les faits observés, dérivés et supposés ne soient pas confondus; que la transitivité et la symétrie soient déclarées; que les unités soient prises en compte; que les réponses soient associées à des dérivations et certificats; que le retrieval ASCR reste un signal de recherche et ne soit pas assimilé à une preuve de vérité. Il introduit aussi une discipline saine de persistance avant scoring et de comparaison de modes appariés.
+
+\subsection{Limites que le document reconnaît lui-même}
+Les résultats rapportés — 136 tests de régression, 21 tests de maillage ciblés et 11 micro-mondes comparant six modes — ont une portée bornée. Le 11/11 du mode complet est composé de huit dérivations positives et de trois abstentions attendues; il ne permet pas de conclure à une capacité générale en domaine ouvert. Le document explique aussi que le parsing naturel est borné, que les règles sont déclaratives, que les opérateurs arithmétiques sont fournis comme primitives et que l'induction de règles et le transfert ouvert restent ouverts. Ces limites sont des informations de conception utiles, pas des défauts à dissimuler.
+
+Le maillage v4, même riche, décrit surtout un moteur d'inférence sur faits et règles ainsi qu'une couche d'opérateurs. Il ne définit pas seul toutes les formes de contrôle d'un programme général. Une relation dans le graphe n'est pas nécessairement une instruction d'exécution; une hyperrègle qui déduit un fait n'est pas automatiquement un bloc de contrôle; un certificat de dérivation logique n'est pas à lui seul une preuve de sûreté d'un effet réseau ou d'une commande physique.
+
+\section{Diagnostic : problèmes de cadrage à résoudre}
+\begin{longtable}{p{0.22\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Problème} & \textbf{Manifestation dans les sources} & \textbf{Correction requise en NG}\\
+\midrule
+Réduction possible à l'orchestration & Les constructions de base observées dans le prototype AAM sont limitées; une grande partie des nœuds restent cibles d'extension. & Définir un noyau d'exécution général et montrer comment les constructions classiques s'expriment par traduction sémantiquement préservante.\\
+Maillage confondu avec graphe de connaissances & Le modèle v4 privilégie faits, relations et règles; les programmes ont aussi des dépendances de contrôle, effets, état et ordonnancement. & Définir plusieurs couches de maillage liées par identifiants, avec types d'arêtes et règles de cohérence propres.\\
+Statut de preuve insuffisamment uniforme & Les textes identifient plusieurs niveaux mais leurs étiquettes doivent être utilisables à chaque composant, transition et affirmation. & Imposer un registre d'affirmations qui distingue preuve mathématique, preuve machine, test, observation et hypothèse.\\
+Sémantique globale ouverte & La présence d'opérateurs ne clôt pas leur interaction, leur typage, leurs coûts ou leur traduction. & Définir la configuration d'exécution, les transitions et les règles de toutes les formes du noyau; déclarer toute extension hors noyau.\\
+Universalité non démontrée & Ni un DSL de composition ni le maillage seuls ne prouvent l'expressivité de tout programme classique. & Énoncer un théorème d'expressivité relative à une classe source et un noyau Turing-complet, avec translation et limites explicites.\\
+Simplicité utilisateur à démontrer & Une grammaire formelle sophistiquée peut devenir plus difficile que la programmation actuelle. & Séparer un noyau universel formel d'interfaces multiples : formulaire, bloc, graphe, langage contrôlé, code textuel et génération assistée.\\
+Optimisation et ressources & La veille réduit la résidence, mais pas l'espace de recherche; une politique de score ne garantit pas la meilleure solution. & Séparer expressivité, admissibilité, priorité, coût mesuré et garantie de recherche; préserver les budgets durs et la reprise.\\
+Sécurité dépendante des composants & Une composition correctement typée peut appeler un composant défectueux ou sur-privilégié. & Modèle de capacités, isolation, vérification de frontière, registre de confiance, limites d'effets et révocation transitive.\\
+\bottomrule
+\end{longtable}
+
+\section{Le point central : qu'est-ce qu'une programmation universelle par composition ?}
+La programmation par composition ne doit pas être définie comme « écrire du code plus long en reliant des blocs ». Elle doit être le principe selon lequel tout programme est représenté par une structure de composants et de relations explicites, dont l'exécution est définie par une sémantique commune. Les opérations élémentaires peuvent être primitives, mais la définition du programme, son contrôle, sa mémoire, son interaction, ses contraintes et sa preuve doivent être exprimés dans le même cadre. Le langage de composition doit être à la fois :
+\begin{itemize}
+\item un \textbf{langage de définition} de ce que le programme doit faire;
+\item un \textbf{langage d'exécution} de ce qui est effectivement fait;
+\item un \textbf{langage de relation} entre données, opérations, états et effets;
+\item un \textbf{langage d'explication et de preuve} des raisons pour lesquelles un résultat est ou n'est pas admis;
+\item un \textbf{langage d'évolution} qui permet transformation, synthèse, contrôle de versions et retour arrière.
+\end{itemize}
+
+Le maillage fournit la structure des dépendances et relations; la composition fournit la sémantique de construction et d'exécution. Leur union est un maillage de programme exécutable, mais le système doit distinguer au moins les couches suivantes :
+\begin{enumerate}
+\item maillage des valeurs et identités;
+\item maillage des occurrences, contextes et provenance;
+\item maillage de dépendances de données et de contrôle;
+\item maillage des contrats, types, unités et invariants;
+\item maillage des effets, capacités et ressources;
+\item maillage des preuves, observations, hypothèses et révocations;
+\item maillage du cycle de vie, de l'activation et de la mémoire;
+\item maillage d'évolution et de dérivation des programmes.
+\end{enumerate}
+Une couche ne doit pas emprunter silencieusement la sémantique d'une autre : une dépendance de données ne prouve pas une causalité, une règle de connaissance ne déclenche pas de commande par elle-même et une activation ne promeut pas la validité d'un élément.
+
+\section{Thèses fondatrices recommandées pour la théorie NG}
+\subsection{Thèse 1 — Universalité de représentation, non uniformité forcée}
+Le même noyau doit pouvoir représenter des programmes de calcul pur, des applications avec état, des interfaces utilisateur, des systèmes de données, des flux réactifs, des processus distribués, des systèmes embarqués et des tâches de recherche. Cela n'oblige pas à donner la même interface de surface à tous ces usages. L'universalité appartient au noyau sémantique et à la capacité d'introduire des composants natifs contrôlés; la simplicité appartient aux interfaces adaptées au profil de l'utilisateur.
+
+\subsection{Thèse 2 — Tout bloc est un contrat exécutable}
+Une brique n'est pas seulement un nom et une fonction. Elle a une identité et une version, des ports typés, des préconditions et postconditions, des effets, des ressources, des erreurs possibles, des exigences de capacité, une sémantique de trace, des preuves et une politique de compatibilité. Les garanties sont graduées : déclarée, testée, vérifiée sous hypothèses, auditée, ou observée. Une interface peut masquer la complexité d'un bloc sans masquer ses effets importants.
+
+\subsection{Thèse 3 — Le maillage est typé et multicouche}
+Les objets et liens du maillage reçoivent des types distincts. Les relations sont orientées lorsque le sens l'exige; les règles multi-prémisses sont représentées comme hyperrelations; les dépendances de contrôle sont séparées des dépendances de valeur; les événements sont distincts des faits; les contrats sont distincts des observations; les preuves sont distinctes de leurs conclusions; et les dépendances d'environnement sont explicites. Chaque nœud dérivé garde ses prémisses et ses transformations.
+
+\subsection{Thèse 4 — Composition sémantique avant optimisation}
+La structure de programme définit d'abord le comportement attendu. Toute fusion, réordonnancement, factorisation, parallélisation, spécialisation ou transformation est autorisée seulement si elle préserve l'équivalence d'observation déclarée ou si le changement est explicitement approuvé avec sa nouvelle spécification. Les scores heuristiques peuvent ordonner la recherche, mais ne deviennent jamais des preuves.
+
+\subsection{Thèse 5 — L'utilisateur formule l'intention; le système rend la structure inspectable}
+Une personne non spécialiste doit pouvoir décrire un objectif dans une interface naturelle, formulaire, dialogue contrôlé ou graphe visuel. Le système traduit cette demande en représentation intermédiaire typée, expose les hypothèses et les effets, indique les zones indéterminées, demande une clarification lorsque plusieurs interprétations changent le résultat, et permet une validation avant les effets sensibles. Il ne faut pas prétendre que le langage naturel est toujours non ambigu ni que toute demande peut être exécutée sans supervision.
+
+\section{Proposition d'architecture intégrée}
+\begin{enumerate}
+\item \textbf{Couche d'intention et de présentation.} Interfaces textuelles, visuelles, formulaires, API et éditeurs avancés produisent une spécification d'objectif, contraintes, exemples et autorisations.
+\item \textbf{Normaliseur et analyseur.} Convertit les entrées en représentation intermédiaire versionnée; garde la source, les ambiguïtés, les décisions d'analyse et leur provenance.
+\item \textbf{Noyau compositionnel universel.} Définit les constructeurs essentiels : appel typé, séquence, branchement, choix, itération/récursion, état, gestion d'échec, composition parallèle, événement/réactivité, transaction/compensation, observation, vérification et invocation de composants natifs.
+\item \textbf{Maillage de programme.} Relie AST/DAG d'exécution, données, flux de contrôle, contrats, effets, ressources, preuve, provenance, contexte, événements et cycle de vie.
+\item \textbf{Vérificateurs et politique de capacités.} Contrôlent typage, préconditions, permissions, unités, budgets, sécurité et règles de publication.
+\item \textbf{Interpréteur de référence.} Donne la sémantique normative du noyau. Le comportement d'un programme doit être défini avant toute optimisation.
+\item \textbf{Compilateurs et adaptateurs de runtime.} Traduisent vers une ou plusieurs cibles tout en fournissant une preuve, une simulation ou un statut de validation bornée.
+\item \textbf{Moteur de recherche et de synthèse.} Propose des compositions candidates, avec recherche paresseuse, filtres, contre-exemples, budgets et reprise.
+\item \textbf{Régulateur d'activation.} ASCRC peut choisir les blocs à charger et les candidats à explorer, sans modifier les états épistémiques et sans supplanter ASCR/v3.
+\item \textbf{Mémoire et registre de preuves.} Conserve les artefacts exacts, les versions, les certificats, les tests, les événements, les erreurs, les décisions et les dépendances; les vues compressées ne remplacent pas les sources exactes.
+\item \textbf{Banc d'évaluation.} Mesure expressivité, exactitude, généralisation, coût, latence, mémoire, sécurité, reprise et simplicité d'usage contre des références indépendantes.
+\end{enumerate}
+
+\section{Ce que « sans sacrifice » peut rigoureusement signifier}
+Une promesse absolue de ne sacrifier ni performance, ni sécurité, ni simplicité, ni portée, pour toute tâche et tout environnement, est trop forte pour être garantie par une théorie. Les ressources sont finies; des programmes équivalents peuvent avoir des coûts différents; un nouveau niveau d'abstraction ajoute des mécanismes à vérifier; la clarté dépend du contexte utilisateur; certains effets réels ne sont pas annulables. En revanche, un objectif rigoureux est possible :
+\begin{enumerate}
+\item \textbf{Pas de sacrifice expressif au niveau sémantique :} toute construction d'un langage classique cible peut être traduite vers le noyau compositionnel avec équivalence comportementale, dans le domaine et sous les hypothèses déclarés.
+\item \textbf{Pas de dégradation cachée :} tout coût, approximation, restriction, incertitude ou changement d'effet doit être mesuré ou explicitement exposé.
+\item \textbf{Sûreté non affaiblie par défaut :} un programme refusé par une porte de sécurité ne devient pas admissible parce qu'il est plus court, mieux scoré ou demandé en langage naturel.
+\item \textbf{Amélioration empirique de l'accessibilité :} démontrée par des études d'utilisabilité, taux d'erreur, temps de réalisation et réussite sur tâches contrôlées, et non affirmée à partir de l'architecture seule.
+\item \textbf{Portée extensible :} tout domaine nouveau peut ajouter des primitives et adaptateurs à travers une interface contrôlée, sans modifier la signification des programmes antérieurs.
+\end{enumerate}
+
+\section{Plan de vérification et de mise en œuvre}
+\begin{longtable}{p{0.18\textwidth}p{0.31\textwidth}p{0.38\textwidth}}
+\toprule
+\textbf{Niveau} & \textbf{Question à trancher} & \textbf{Preuve ou test exigé}\\
+\midrule
+Sémantique du noyau & Chaque constructeur a-t-il un sens défini? & Règles formelles, cas normaux et erreurs, petits pas/grands pas cohérents.\\
+Expressivité & Peut-on représenter les contrôles usuels? & Traduction des constructions d'un langage source de référence; test de simulation et preuve d'adéquation.\\
+Maillage & Les liens préservent-ils leur type et leur rôle? & Tests adversariaux sur hyperrègles, dépendances, contextes, révocation et provenance.\\
+Typage/effets & Les connexions invalides et effets non autorisés sont-ils refusés? & Preuves de préservation/progrès pour le noyau pur; tests de refus et vérification des capacités.\\
+Compilation & L'implémentation cible préserve-t-elle la sémantique? & Interpréteur oracle, preuve de compilation lorsque possible, tests différentiels et versionnage.\\
+Sécurité & Le composant peut-il dépasser ses droits? & Isolation, privilège minimal, tests d'évasion, limitation des ressources, revue des frontières de confiance.\\
+Résilience & Un crash peut-il dupliquer ou masquer un effet? & Pannes injectées, clés idempotentes, compensation, réconciliation et reprise reproductible.\\
+Recherche & La synthèse généralise-t-elle au-delà des exemples? & Splits compositionalement disjoints, holdout caché, contre-exemples et budgets appariés.\\
+Activation & La régulation réduit-elle le coût sans famine? & Comparaisons FIFO/best-first/ASCRC, âge maximal, équité, coût de scoring et qualité finale.\\
+Accessibilité & Les non-programmeurs réalisent-ils mieux les tâches? & Études utilisateur préenregistrées, erreurs, temps, modifications sûres et taux de compréhension.\\
+\bottomrule
+\end{longtable}
+
+\section{Conclusion et décision proposée}
+La nouvelle théorie doit être une refondation plutôt qu'une simple extension par opérateurs. Elle conserve le formalisme de contrats, effets, provenance, récupération, synthèse, ASCRC, mémoire réversible et statuts épistémiques de la théorie compositionnelle. Elle conserve du maillage eGenBrain la séparation identités/occurrences, faits/règles, hyperrelations, opérateurs typés, unités, supports d'observation, provenance et certificats. Elle ajoute ce qui manque à la rencontre des deux : un noyau de calcul général, une sémantique exécutable complète, un graphe de programme multicouche, une relation formelle avec les langages classiques, une frontière de capacité et une méthodologie de preuve pour chaque compilation et extension.
+
+La thèse à défendre est alors précise : la composition est universelle comme principe de représentation et de construction; le maillage est universel comme structure typée des relations et dépendances; l'interface peut être adaptée à l'utilisateur; l'exécution demeure gouvernée par un noyau sémantique et des capacités. La généralité doit être démontrée par traduction et tests, la sécurité par des propriétés et des contrôles explicites, la pertinence par des contrats et des oracles, la simplicité par l'usage réel, et l'absence de coûts cachés par une mesure reproductible. Cette position est ambitieuse sans être irréfutable par construction : elle donne une direction de conception et un programme de preuve au lieu de déclarer prématurément l'objectif atteint.
+
+\end{document}

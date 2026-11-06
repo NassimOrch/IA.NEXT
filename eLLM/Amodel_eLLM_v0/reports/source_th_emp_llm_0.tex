@@ -1,0 +1,1091 @@
+\documentclass[11pt,a4paper]{article}
+
+% =====================================================================
+% source_th_emp_llm_0.tex
+% Version 0.2 — socle DDD_Base + spécification opérationnelle EmpLLM_0
+% =====================================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{mathrsfs}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\geometry{margin=2.35cm}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!55!black,
+  pdftitle={Socle formel et mise en oeuvre opérationnelle d'un LLM par empreintes},
+  pdfauthor={Spécification de travail EmpLLM_0}}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\emergencystretch}{2em}
+
+\newtheorem{definition}{Définition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{corollary}[definition]{Corollaire}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{hypothesis}[definition]{Hypothèse}
+\newtheorem{assumption}[definition]{Postulat de modélisation}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remarque}
+\newtheorem{warning}[definition]{Avertissement}
+\newtheorem{example}[definition]{Exemple}
+
+% Notations du socle
+\newcommand{\R}{\mathbb R}
+\newcommand{\Rp}{\mathbb R_{+}}
+\newcommand{\X}{\mathcal X}
+\newcommand{\D}{\mathcal D}
+\newcommand{\V}{\mathcal V}
+\newcommand{\Qspace}{\mathcal Q}
+\newcommand{\Pctx}{\mathcal P}
+\newcommand{\F}{\mathcal F}
+\newcommand{\Pow}{\mathcal P}
+\newcommand{\Lam}{\Lambda}
+\newcommand{\Cl}{\operatorname{Cl}}
+\newcommand{\Aff}{\operatorname{Aff}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\Emp}{\mathsf I}
+\newcommand{\Quot}{\mathsf Q}
+\newcommand{\Obs}{\mathsf O}
+\newcommand{\Mem}{\mathsf M}
+\newcommand{\Pred}{\mathsf P}
+\newcommand{\Gen}{\mathsf G}
+\newcommand{\Search}{\mathsf S}
+\newcommand{\Trans}{\mathsf T}
+\newcommand{\Mesh}{\mathfrak M}
+\newcommand{\Thetaf}{\Theta}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\Overlap}{\operatorname{Overlap}}
+\newcommand{\softmax}{\operatorname{softmax}}
+\newcommand{\Id}{\operatorname{Id}}
+\newcommand{\Prob}{\mathbb P}
+\newcommand{\E}{\mathbb E}
+\newcommand{\one}{\mathbf 1}
+
+\title{\textbf{Socle formel et mise en œuvre opérationnelle d'un LLM fondé sur la théorie des empreintes}\\[0.35em]
+\large De \texttt{DDD\_Base} à la spécification calculable \texttt{EmpLLM\_0}}
+\author{Source théorique et architecturale consolidée — version 0.2}
+\date{21 octobre 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Ce document met à jour la formalisation d'un modèle de langage fondé sur la théorie des empreintes à partir du noyau \texttt{DDD\_Base} fourni. Il distingue les notions appartenant au socle, les conséquences mathématiques de ce socle et les constructions propres à l'ingénierie d'un LLM. Il ajoute en particulier les notions de capacité brute, information effective, dimension effective, fermeture observationnelle, mesure empirique des seuils et généralisation observationnelle au sens géométrique du corpus de base.
+
+La chaîne mathématique fondamentale est :
+\[
+(\Pctx,\X,\F,\Phi)\to \Emp_{\lambda}^{P}\to \sim_{P,\lambda}\to [x]_{P,\lambda}\to \X/{\sim_{P,\lambda}}\to \Theta_P\to \text{filtration}.
+\]
+L'application au langage ajoute un jeu de sondes internes apprises, une empreinte continue différentiable, des signatures opérationnelles quantifiées, une représentation relationnelle, un maillage, une mémoire facultative, un transport compatible, une tête de prédiction et une politique de génération. Les signatures discrètes servent à calculer des partitions sans ambiguïté sur un ensemble fini ; elles ne sont pas confondues avec les empreintes continues utilisées pour l'apprentissage.
+
+La spécification inclut le pipeline de données, les objets mathématiques à journaliser, les objectifs d'apprentissage, l'inférence autorégressive, les politiques mémoire/recherche, les critères de validation et les tests de falsification. Elle constitue une architecture testable, non une preuve que les mécanismes postulés décrivent déjà les LLM existants.
+\end{abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+% =====================================================================
+\section{Objet, méthode et statut des énoncés}
+% =====================================================================
+
+\subsection{But et périmètre}
+Le but est de construire une source canonique à partir de trois niveaux documentaires :
+\begin{enumerate}[label=\arabic*.]
+  \item le noyau \texttt{DDD\_Base}, qui définit l'observation, les empreintes et leurs conséquences formelles ;
+  \item l'interprétation de ces notions pour les états internes d'un modèle de langage ;
+  \item une spécification opérationnelle minimale, désignée \texttt{EmpLLM\_0}, qui transforme les notions retenues en modules, procédures, mesures et tests.
+\end{enumerate}
+Le socle de base est suivi comme fondement conceptuel. Les choix d'implémentation ne sont jamais rétroactivement présentés comme des primitives de la théorie.
+
+\subsection{Étiquettes de statut}
+\begin{description}[style=nextline,leftmargin=2.2cm]
+  \item[\textbf{[BASE]}] Notion posée dans le noyau fourni de la théorie des empreintes.
+  \item[\textbf{[DÉRIVÉ]}] Propriété déduite mathématiquement des définitions et hypothèses indiquées.
+  \item[\textbf{[APPLICATION]}] Traduction des concepts de base vers un modèle de langage.
+  \item[\textbf{[INGÉNIERIE]}] Décision de conception requise pour rendre l'architecture calculable.
+  \item[\textbf{[EMPIRIQUE]}] Hypothèse devant être vérifiée expérimentalement.
+\end{description}
+
+\begin{remark}
+Une définition cohérente n'est pas une validation empirique. Une architecture respectant les contraintes mathématiques n'est pas, à elle seule, la preuve que les LLM réels possèdent la structure interprétée par cette architecture.
+\end{remark}
+
+\subsection{Principe méthodologique directeur}
+\[
+\boxed{\text{unité interne}\ne\text{empreinte}\ne\text{concept}\ne\text{connaissance}\ne\text{prédiction}.}
+\]
+Une unité neuronale peut être une composante d'une observation et participer à différentes structures. Une coactivation commune ne suffit ni à prouver l'identité sémantique ni à prouver le mécanisme causal proposé.
+
+% =====================================================================
+\section{Noyau formel : domaine, contextes, sondes et observation}
+% =====================================================================
+
+\subsection{Trois ensembles primitifs}
+\begin{definition}[Domaine des objets] \textbf{[BASE]}
+Soit $\X$ un ensemble non vide d'objets étudiés. Aucune structure vectorielle, métrique ou topologique n'est imposée a priori à $\X$.
+\end{definition}
+
+\begin{definition}[Contextes d'observation] \textbf{[BASE]}
+Soit $\Pctx$ un ensemble non vide de contextes. Pour un LLM, un contexte peut coder la tâche, l'historique conversationnel, la position, les contraintes d'observation ou un état mémoire. Il demeure conceptuellement distinct de l'objet observé.
+\end{definition}
+
+\begin{definition}[Famille de sondes] \textbf{[BASE]}
+Soit $\F$ un ensemble non vide de sondes. Une sonde représente une procédure d'interrogation dont la réponse peut varier selon l'objet et le contexte.
+\end{definition}
+
+\subsection{Fonctionnel d'observation}
+\begin{definition}[Fonctionnel d'observation] \textbf{[BASE]}
+Le fonctionnel d'observation est une application
+\[
+\boxed{\Phi:\Pctx\times\X\times\F\longrightarrow\R.}
+\]
+La valeur $\Phi(P,x,f)$ est la réponse scalaire donnée par la sonde $f$ lorsque l'objet $x$ est observé dans le contexte $P$.
+\end{definition}
+
+Cette signature scalaire est celle du noyau de base. Une sortie vectorielle se représente par une famille finie de sondes scalaires, à condition de déclarer les coordonnées et leur ordre.
+
+\begin{definition}[Système d'observation] \textbf{[BASE]}
+Un système d'observation est spécifié par le quadruplet $(\Pctx,\X,\F,\Phi)$, complété, lorsqu'une échelle est considérée, par $(\Lam,\preceq, (\F_\lambda)_\lambda,\iota)$.
+\end{definition}
+
+\subsection{Empreinte informationnelle}
+\begin{definition}[Empreinte sur une famille de sondes] \textbf{[BASE]}
+Pour $P\in\Pctx$ et $\mathcal A\subseteq\F$, l'empreinte de $x$ relativement à $P$ et $\mathcal A$ est
+\[
+\Emp_{\Phi,\mathcal A}^{P}:\X\to\R^{\mathcal A},\qquad
+\Emp_{\Phi,\mathcal A}^{P}(x)(f)=\Phi(P,x,f).
+\]
+Pour une famille finie $\mathcal A=\{f_1,\ldots,f_K\}$, on peut l'écrire comme le vecteur
+\[
+\Emp_{\Phi,\mathcal A}^{P}(x)=\big(\Phi(P,x,f_1),\ldots,\Phi(P,x,f_K)\big).
+\]
+\end{definition}
+
+\[
+\boxed{\text{empreinte} = \text{profil organisé des réponses à un protocole d'observation}.}
+\]
+L'empreinte est relative aux sondes, au contexte et à l'échelle retenus ; elle n'est pas posée comme un accès exhaustif ou absolu à l'objet.
+
+% =====================================================================
+\section{Échelle, capacité et restriction des empreintes}
+% =====================================================================
+
+\subsection{Structure d'échelle}
+\begin{definition}[Filtration observationnelle] \textbf{[BASE]}
+Une échelle est un ensemble partiellement ordonné $(\Lam,\preceq)$ et une famille de sondes $(\F_\lambda)_{\lambda\in\Lam}$ satisfaisant
+\[
+\lambda\preceq\mu\Longrightarrow\F_\lambda\subseteq\F_\mu.
+\]
+Une fonction d'intensité $\iota:\Lam\to\R_+$ est monotone. Pour définir les seuils à partir d'intensités de manière non ambiguë, on supposera dans les résultats concernés que $\Lam$ est totalement ordonné et que $\iota$ est strictement croissante.
+\end{definition}
+
+\begin{definition}[Capacité brute] \textbf{[BASE]}
+Lorsque $\F_\lambda$ est finie, la capacité brute est
+\[
+C(\lambda)=|\F_\lambda|.
+\]
+Elle compte les sondes disponibles, pas nécessairement les distinctions informationnelles indépendantes.
+\end{definition}
+
+\begin{definition}[Empreinte à l'échelle $\lambda$] \textbf{[BASE]}
+Pour un contexte fixé $P$, on pose
+\[
+\Emp_{\lambda}^{P}:\X\to\R^{\F_\lambda},\qquad
+\Emp_{\lambda}^{P}(x)=\big(\Phi(P,x,f)\big)_{f\in\F_\lambda}.
+\]
+\end{definition}
+
+\begin{definition}[Restriction inter-échelles] \textbf{[BASE/DÉRIVÉ]}
+Pour $\lambda\preceq\mu$, la restriction $r_{\mu\to\lambda}:\R^{\F_\mu}\to\R^{\F_\lambda}$ oublie les coordonnées des sondes appartenant à $\F_\mu\setminus\F_\lambda$. Par construction,
+\[
+\boxed{\Emp_\lambda^P=r_{\mu\to\lambda}\circ\Emp_\mu^P.}
+\]
+Dans un réseau appris dont les « résolutions » sont calculées par projections distinctes, cette égalité n'est pas automatique ; elle devient une contrainte de conception ou de test.
+\end{definition}
+
+\begin{remark}
+La résolution signifie ici accès à une famille d'observations plus discriminante. Elle ne se confond pas avec la dimension du vecteur, sa norme, le nombre de couches ou le nombre de paramètres.
+\end{remark}
+
+% =====================================================================
+\section{Indiscernabilité, fibres, quotient et image réduite}
+% =====================================================================
+
+\begin{definition}[Indiscernabilité observationnelle] \textbf{[BASE]}
+Pour $P$ et $\lambda$ fixés,
+\[
+\boxed{x\sim_{P,\lambda}y\iff\Emp_\lambda^P(x)=\Emp_\lambda^P(y).}
+\]
+\end{definition}
+
+\begin{proposition}[Relation d'équivalence] \textbf{[DÉRIVÉ]}
+La relation $\sim_{P,\lambda}$ est réflexive, symétrique et transitive ; elle définit donc une partition de $\X$.
+\end{proposition}
+\begin{proof}
+Les trois propriétés sont héritées de l'égalité dans $\R^{\F_\lambda}$.
+\end{proof}
+
+\begin{definition}[Fibre observationnelle] \textbf{[BASE]}
+La fibre de $x$ est
+\[
+[x]_{P,\lambda}=\{y\in\X:\Emp_\lambda^P(y)=\Emp_\lambda^P(x)\}.
+\]
+\end{definition}
+
+\begin{definition}[Quotient et projection quotient] \textbf{[BASE]}
+On pose $\Pi_{P,\lambda}=\X/{\sim_{P,\lambda}}$ et $q_{P,\lambda}(x)=[x]_{P,\lambda}$.
+\end{definition}
+
+\begin{definition}[Image observationnelle réduite] \textbf{[BASE]}
+L'image observationnelle est $\mathcal L_{P,\lambda}=\Emp_\lambda^P(\X)\subseteq\R^{\F_\lambda}$.
+\end{definition}
+
+\begin{theorem}[Quotient-image] \textbf{[DÉRIVÉ]}
+L'application $\bar{\Emp}_\lambda:\Pi_{P,\lambda}\to\mathcal L_{P,\lambda}$ définie par $\bar{\Emp}_\lambda([x])=\Emp_\lambda^P(x)$ est une bijection.
+\end{theorem}
+\begin{proof}
+Elle est bien définie par l'égalité des empreintes sur une classe, surjective par définition de l'image et injective parce que l'égalité de deux images implique l'appartenance à la même classe.
+\end{proof}
+
+\begin{proposition}[Raffinement monotone] \textbf{[DÉRIVÉ]}
+Si $\lambda\preceq\mu$, alors $\sim_{P,\mu}\subseteq\sim_{P,\lambda}$ et $[x]_{P,\mu}\subseteq[x]_{P,\lambda}$.
+\end{proposition}
+\begin{proof}
+L'égalité des réponses sur la famille plus grande $\F_\mu$ implique leur égalité sur son sous-ensemble $\F_\lambda$.
+\end{proof}
+
+\begin{warning}
+La relation numérique $\|\Emp(x)-\Emp(y)\|\leq\varepsilon$ n'est pas en général transitive. Elle ne définit donc pas automatiquement un quotient. Dans le dispositif opérationnel, les partitions approximatives utiliseront une quantification canonique déterministe ou un autre algorithme de partitionnement spécifié ; elles n'utiliseront pas une simple relation de voisinage présentée comme équivalence.
+\end{warning}
+
+% =====================================================================
+\section{Seuils de résolution et géométrie hiérarchique}
+% =====================================================================
+
+\subsection{Définition et conventions de bord}
+\begin{definition}[Seuil d'indiscernabilité] \textbf{[BASE]}
+Lorsque $\Lam$ est totalement ordonné, $\iota$ strictement croissante et l'ensemble des niveaux d'indiscernabilité non vide, on définit pour $x\ne y$ :
+\[
+\boxed{\Theta_P(\{x,y\})=\sup\{\iota(\lambda):x\sim_{P,\lambda}y\}.}
+\]
+Si l'ensemble est vide, on adopte une borne inférieure conventionnelle ; si l'indiscernabilité persiste à toutes les résolutions, le seuil peut valoir $+\infty$. La filtration implique que $S_{x,y}=\{\lambda:x\sim_{P,\lambda}y\}$ est un segment initial de $\Lam$ lorsque cette échelle est totalement ordonnée.
+\end{definition}
+
+\begin{definition}[Donnée de bord] \textbf{[BASE]}
+Pour une paire distincte, $b_P(\{x,y\})=1$ si le seuil est atteint par un niveau où $x\sim_{P,\lambda}y$ ; sinon $b_P(\{x,y\})=0$. Le seuil et son bord forment $H_P=(\Theta_P,b_P)$.
+\end{definition}
+
+Avec des conventions compatibles, la lecture exacte est :
+\[
+x\sim_{P,\lambda}y\iff
+\iota(\lambda)<\Theta_P(\{x,y\})
+\quad\text{ou}\quad
+\big(\iota(\lambda)=\Theta_P(\{x,y\})\land b_P(\{x,y\})=1\big).
+\]
+Le seuil seul ne renseigne pas sur l'inclusion du point critique.
+
+\begin{theorem}[Loi du minimum double] \textbf{[BASE/DÉRIVÉ]}
+Sous les hypothèses de filtration et de seuil précédentes, pour tous $x,y,z$ deux à deux distincts :
+\[
+\boxed{\Theta_P(\{x,z\})\geq\min\big(\Theta_P(\{x,y\}),\Theta_P(\{y,z\})\big).}
+\]
+\end{theorem}
+\begin{proof}
+À tout niveau strictement inférieur aux deux seuils de droite, la filtration et les conventions de bord donnent $x\sim_{P,\lambda}y$ et $y\sim_{P,\lambda}z$. La transitivité de l'indiscernabilité implique $x\sim_{P,\lambda}z$. Le supremum des niveaux ainsi admissibles donne l'inégalité.
+\end{proof}
+
+\subsection{Pseudoultramétrique dérivée}
+Pour des seuils dans $[0,+\infty]$, définissons $d_\Theta(x,x)=0$ et, pour $x\ne y$,
+\[
+\boxed{d_\Theta(x,y)=\exp(-\Theta_P(\{x,y\})),\qquad e^{-\infty}=0.}
+\]
+La loi du minimum double entraîne
+\[
+d_\Theta(x,z)\leq\max\{d_\Theta(x,y),d_\Theta(y,z)\}.
+\]
+La fonction est une pseudoultramétrique. Elle n'est une ultramétrique séparante que si $d_\Theta(x,y)=0$ implique $x=y$ ; des objets distincts indiscernables à toutes les échelles conduisent à une distance nulle entre eux.
+
+\subsection{Filtration associée à une fonction de seuil}
+\begin{theorem}[Partitions hiérarchiques] \textbf{[DÉRIVÉ]}
+Soit $K:\binom{\X}{2}\to\R_+$ symétrique et satisfaisant la loi du minimum double. Pour chaque $t$, la relation $x\equiv_t^K y$ définie par $x=y$ ou $K(\{x,y\})\geq t$ est une relation d'équivalence. Les partitions obtenues se raffinent lorsque $t$ augmente.
+\end{theorem}
+\begin{proof}
+La réflexivité et la symétrie sont directes. Si $K(x,y)\geq t$ et $K(y,z)\geq t$, alors $K(x,z)\geq\min(K(x,y),K(y,z))\geq t$, donc la transitivité est vérifiée. Une augmentation de $t$ ne peut qu'enlever des paires équivalentes.
+\end{proof}
+
+% =====================================================================
+\section{Fermeture observationnelle, sondes équivalentes et information effective}
+% =====================================================================
+
+\subsection{Équivalence observationnelle de sondes}
+\begin{definition}[Équivalence de sondes] \textbf{[BASE]}
+Pour $f,g\in\F_\lambda$, on définit
+\[
+f\equiv_{P,\lambda}g\iff\Phi(P,x,f)=\Phi(P,x,g)\quad\forall x\in\X.
+\]
+Les sondes équivalentes produisent le même profil scalaire sur tout le domaine considéré.
+\end{definition}
+
+\subsection{Fermeture observationnelle}
+\begin{definition}[Fermeture observationnelle] \textbf{[BASE]}
+Pour $\mathcal A\subseteq\F_\lambda$, définissons
+\[
+\boxed{\Cl_{P,\lambda}(\mathcal A)=\left\{f\in\F_\lambda:\exists\psi_f:\R^{\mathcal A}\to\R,\;\Phi(P,x,f)=\psi_f(\Emp_{\Phi,\mathcal A}^P(x))\;\forall x\in\X\right\}.}
+\]
+La fermeture comprend les sondes dont la réponse est entièrement déterminée par l'empreinte de $\mathcal A$.
+\end{definition}
+
+\begin{proposition}[Propriétés de fermeture] \textbf{[DÉRIVÉ]}
+La fermeture est extensive, monotone et idempotente :
+\[
+\mathcal A\subseteq\Cl(\mathcal A),\qquad
+\mathcal A\subseteq\mathcal B\Rightarrow\Cl(\mathcal A)\subseteq\Cl(\mathcal B),\qquad
+\Cl(\Cl(\mathcal A))=\Cl(\mathcal A).
+\]
+\end{proposition}
+\begin{proof}
+Les coordonnées de $\mathcal A$ se récupèrent par projections, d'où l'extensivité. Une empreinte comportant plus de coordonnées détermine toute fonction déterminée par une empreinte plus petite, d'où la monotonie. Enfin, $\mathcal A$ et $\Cl(\mathcal A)$ induisent les mêmes fibres : la première famille est incluse dans la seconde et toutes les coordonnées de la seconde sont fonctions de la première. Elles ont donc les mêmes empreintes au sens des fibres, d'où l'idempotence.
+\end{proof}
+
+\subsection{Capacité effective et dimension effective}
+\begin{definition}[Capacité informationnelle effective] \textbf{[BASE]}
+Le quotient des sondes est $\F_{\lambda,P}^{\sharp}=\F_\lambda/\!\equiv_{P,\lambda}$. Lorsque son cardinal est défini, on pose
+\[
+\boxed{C_{\mathrm{eff},P}(\lambda)=|\F_{\lambda,P}^{\sharp}|.}
+\]
+Cette quantité compte les profils de sondes distincts, pas le nombre brut de coordonnées.
+\end{definition}
+
+\begin{definition}[Dimension effective] \textbf{[BASE]}
+Pour une famille finie $\mathcal A$ de sondes,
+\[
+\boxed{d_{\mathrm{eff},P}(\mathcal A)=\dim\Aff\big(\Emp_{\Phi,\mathcal A}^P(\X)\big).}
+\]
+On écrit $d_{\mathrm{eff},P}(\lambda)$ lorsque $\mathcal A=\F_\lambda$.
+\end{definition}
+
+\begin{proposition}[Bornes de dimension] \textbf{[DÉRIVÉ]}
+Si $\mathcal A\subseteq\mathcal B$ sont finies, alors $d_{\mathrm{eff},P}(\mathcal A)\leq d_{\mathrm{eff},P}(\mathcal B)$. Si $C_{\mathrm{eff},P}(\lambda)<\infty$, alors $d_{\mathrm{eff},P}(\lambda)\leq C_{\mathrm{eff},P}(\lambda)$.
+\end{proposition}
+
+\begin{remark}[Version empirique]
+Sur un dataset fini, les égalités globales « pour tout $x\in\X$ » ne peuvent généralement pas être vérifiées. On doit alors déclarer une version empirique portant sur les objets observés, les tolérances numériques et, si nécessaire, une quantification canonique. La capacité et la dimension empiriques ne doivent pas être présentées comme leurs valeurs globales exactes.
+\end{remark}
+
+% =====================================================================
+\section{Pseudométrique observationnelle et factorisation}
+% =====================================================================
+
+\begin{proposition}[Géométrie induite par les empreintes] \textbf{[DÉRIVÉ]}
+Pour une famille finie de sondes et une norme $\|\cdot\|$, la fonction
+\[
+d_{\Phi,P,\lambda}(x,y)=\|\Emp_\lambda^P(x)-\Emp_\lambda^P(y)\|
+\]
+est une pseudométrique. C'est une métrique si et seulement si l'empreinte est injective sur $\X$.
+\end{proposition}
+
+\begin{theorem}[Factorisation par l'empreinte] \textbf{[BASE/DÉRIVÉ]}
+Pour une application $T:\X\to Y$, les propriétés suivantes sont équivalentes :
+\begin{enumerate}[label=(\arabic*)]
+\item $T$ est constante sur chaque fibre de $\Emp_\lambda^P$ ;
+\item il existe une unique $\widetilde T:\Emp_\lambda^P(\X)\to Y$ telle que $T=\widetilde T\circ\Emp_\lambda^P$ ;
+\item il existe une unique $\widehat T:\Pi_{P,\lambda}\to Y$ telle que $T=\widehat T\circ q_{P,\lambda}$.
+\end{enumerate}
+Si une autre représentation possède exactement les mêmes fibres, les deux images sont en bijection par une application induite.
+\end{theorem}
+\begin{proof}
+La direction de factorisation implique immédiatement la constance sur les fibres. Réciproquement, lorsque $T$ est constante sur chaque fibre, on peut définir $\widehat T([x])=T(x)$ ; cette définition est bien définie, et l'unicité suit de la surjectivité de la projection quotient. La factorisation par l'image de l'empreinte suit de la bijection quotient-image.
+\end{proof}
+
+\begin{definition}[Transition compatible] \textbf{[BASE ÉTENDUE/APPLICATION]}
+Une transition $F:\X\to\X$ est compatible avec $\Emp_\lambda^P$ si
+\[
+\Emp_\lambda^P(x)=\Emp_\lambda^P(y)\Rightarrow\Emp_\lambda^P(F(x))=\Emp_\lambda^P(F(y)).
+\]
+\end{definition}
+
+\begin{proposition}[Descente d'une transition] \textbf{[DÉRIVÉ]}
+Si $F$ est compatible, il existe une unique application $C_F$ sur l'image observationnelle telle que
+\[
+\boxed{\Emp_\lambda^P\circ F=C_F\circ\Emp_\lambda^P.}
+\]
+La fonction induite est garantie sur $\Emp_\lambda^P(\X)$, pas nécessairement sur tout l'espace ambiant $\R^{\F_\lambda}$.
+\end{proposition}
+
+Pour deux résolutions, la compatibilité inter-échelles prend la forme
+\[
+\boxed{r_{\mu\to\lambda}\circ C_\mu=C_\lambda\circ r_{\mu\to\lambda}.}
+\]
+Il s'agit d'une contrainte d'architecture ou d'un test, non d'une conséquence automatique d'un réseau quelconque.
+
+% =====================================================================
+\section{Quotient global, méta-observation et trajectoires compatibles}
+% =====================================================================
+
+\subsection{Quotient global de plusieurs régimes}
+\textbf{[APPLICATION ÉTENDUE DU SOCLE]} Soit $\mathscr R_{\mathrm{adm}}$ une famille déclarée de régimes d'observation. On pose
+\[
+ x\equiv_{\mathrm{glob}}y\iff \Emp_\rho(x)=\Emp_\rho(y)\quad\forall\rho\in\mathscr R_{\mathrm{adm}}.
+\]
+Le quotient global est $\Qspace_{\mathrm{glob}}=\X/\!\equiv_{\mathrm{glob}}$. Une application $A:\X\to Y$ qui est constante sur les classes de $\equiv_{\mathrm{glob}}$ factorise de manière unique par ce quotient. Le choix de $\mathscr R_{\mathrm{adm}}$ doit être explicite : un quotient global relativement à une famille d'observations reste relatif à cette famille.
+
+\subsection{Méta-observation et information nouvelle}
+Une méta-observation est une fonction appliquée à une empreinte ou à son image, par exemple $m:\mathcal L_{P,\lambda}\to Z$. Elle peut réorganiser, résumer ou rendre plus accessible l'information déjà observée. Elle ne crée pas automatiquement de nouvelles distinctions.
+\[
+\boxed{\text{nouvelle discrimination à }\lambda\iff\text{la partition opérationnelle est effectivement raffinée}.}
+\]
+Dans la théorie exacte, si la nouvelle observable est une fonction déterministe de l'empreinte déjà disponible, elle ne sépare aucune paire jusque-là indiscernable. Une sonde apprise peut ajouter une séparation, mais cela doit être démontré en comparant les fibres avant et après son ajout.
+
+\subsection{Transitions et trajectoires observationnelles}
+Une transition $T_k$ est compatible avec une empreinte si elle préserve ses fibres, c'est-à-dire si des objets ayant la même empreinte initiale ont des empreintes résultantes identiques après la transition. La composition de deux transitions compatibles est compatible. Une trajectoire observationnelle est une suite
+\[
+(I_0,I_1,\ldots,I_m),\qquad I_{k+1}=T_k(I_k),
+\]
+munie des restrictions inter-échelles nécessaires entre ses niveaux. L'existence d'une telle suite ne prouve ni sa calculabilité effective, ni sa convergence, ni sa pertinence pour une tâche.
+
+\subsection{Seuil global séparant}
+Lorsqu'il existe un niveau où l'empreinte est injective sur $\X$, on peut définir le seuil global séparant
+\[
+\rho_P^*(\Phi)=\inf\{\iota(\lambda):\Emp_\lambda^P\text{ est injective sur }\X\}.
+\]
+Il peut ne pas exister ou être infini. Sur un domaine infini tel que $\V^*$, le vérifier globalement est généralement irréalisable ; une expérience ne peut qu'en étudier une restriction finie ou fournir des hypothèses supplémentaires.
+
+% =====================================================================
+\section{Seuils empiriques, mesure atomique et régimes de résolution}
+% =====================================================================
+
+Sur un domaine fini $\X_0$ de cardinal $N\geq2$, notons $B=\binom{N}{2}$ le nombre de paires non ordonnées. La mesure empirique des seuils est
+\[
+\boxed{\nu_P=\frac1B\sum_{\{x,y\}\subseteq\X_0}\delta_{\Theta_P(\{x,y\})}.}
+\]
+La résolution cumulée associée à la convention stricte est
+\[
+\boxed{\widetilde{\mathcal R}_P(t)=\frac1B\sum_{\{x,y\}\subseteq\X_0}\one\{t>\Theta_P(\{x,y\})\}.}
+\]
+C'est une fonction en escalier non décroissante. Avec cette convention stricte, une paire ne contribue à la valeur cumulée que lorsque $t$ dépasse son seuil. On peut résumer les bornes des régimes par
+\[
+\alpha_- = \inf\{t:\widetilde{\mathcal R}_P(t)>0\},\qquad
+\alpha_+ = \sup\{t:\widetilde{\mathcal R}_P(t)<1\}.
+\]
+Ces bornes peuvent dépendre des conventions choisies lorsque les seuils sont censurés ou atteints aux extrémités.
+
+\begin{definition}[Régimes observationnels] \textbf{[BASE]}
+Pour un niveau $t$, on distingue : régime insuffisant si $\widetilde{\mathcal R}_P(t)=0$ ; régime intermédiaire si $0<\widetilde{\mathcal R}_P(t)<1$ ; régime terminal relativement au domaine étudié si $\widetilde{\mathcal R}_P(t)=1$.
+\end{definition}
+
+\begin{warning}
+Le « régime intermédiaire » est une notion géométrique de la théorie des empreintes. Il ne doit pas être confondu avec la généralisation empirique d'un LLM, mesurée par sa performance sur des exemples tenus à l'écart. Le lien entre les deux est une hypothèse de recherche.
+\end{warning}
+
+% =====================================================================
+\section{Passage du socle à un modèle de langage}
+% =====================================================================
+
+\subsection{Domaine linguistique et dataset}
+\textbf{[APPLICATION]} Soit $\V$ un vocabulaire fini et $\V^*$ l'ensemble des séquences finies de tokens. On prend initialement $\X=\V^*$. Le corpus tokenisé est
+\[
+\D_{\mathrm{train}}=\{x^{(i)}=(t_1^{(i)},\ldots,t_{n_i}^{(i)})\}_{i=1}^N.
+\]
+Les partitions train/validation/test sont fixées avant l'ajustement des sondes ou des quantificateurs. Tout seuil, calibrateur ou statistique ajusté sur les données doit être estimé sans accès au test.
+
+\subsection{Substrat calculatoire}
+Un backbone paramétré par $\theta$ calcule, pour une séquence $x=(t_1,\ldots,t_n)$ :
+\[
+h_i^{(0)}=E_\theta(t_i)+P_\theta(i),\qquad
+H^{(\ell)}=F_{\ell,\theta}(H^{(\ell-1)}),\quad \ell=1,\ldots,L.
+\]
+Le backbone peut être un Transformer ou une autre architecture. Cette spécification n'affirme pas qu'il faille nécessairement supprimer le Transformer ; elle ajoute autour de lui une couche observationnelle explicite et testable.
+
+\subsection{Sondes internes apprises}
+\begin{definition}[Sonde interne] \textbf{[APPLICATION/INGÉNIERIE]}
+Une sonde interne est une fonction scalaire paramétrée
+\[
+f_{\theta,r}: (P,x,H^{(0:L)})\longrightarrow\R.
+\]
+Elle peut lire une activation, une norme, une projection, un poids d'attention, une dépendance entre positions, un état mémoire ou une statistique globale. Chaque coordonnée vectorielle utilisée comme observable correspond à une sonde déclarée.
+\end{definition}
+
+On ordonne les sondes par préfixes :
+\[
+\F_{\lambda_1}\subseteq\F_{\lambda_2}\subseteq\cdots\subseteq\F_{\lambda_K}.
+\]
+À chaque exemple, les valeurs continues forment l'empreinte différentiable $z_{\theta,k}(x)=\Emp_{\theta,\lambda_k}^P(x)$. Une unité, un embedding ou un poids d'attention n'est donc pas, par définition, un concept ; c'est une observable ou une composante d'une description observationnelle.
+
+% =====================================================================
+\section{Deux objets opérationnels : empreinte continue et signature discrète}
+% =====================================================================
+
+Cette distinction est essentielle pour une implémentation mathématiquement saine.
+
+\subsection{Empreinte continue}
+\[
+z_{\theta,k}(x)=\big(f_{\theta,r}(P,x,H^{(0:L)})\big)_{r\in\F_{\lambda_k}}\in\R^{K_k}.
+\]
+Elle conserve les valeurs numériques et permet l'optimisation par gradient. L'égalité exacte des vecteurs reste la notion théorique d'indiscernabilité, mais elle est souvent trop stricte pour un système flottant.
+
+\subsection{Signature quantifiée canonique}
+\textbf{[INGÉNIERIE]} Pour rendre une partition effective sur un domaine d'évaluation fini, on ajuste, uniquement sur le train, un quantificateur déterministe coordonnée par coordonnée $Q_{\eta}$, dont les seuils restent ensuite gelés. Les mêmes coordonnées et les mêmes règles de quantification sont conservées d'une échelle à l'autre. On définit
+\[
+\boxed{s_{\theta,k}(x)=Q_{\eta_k}(z_{\theta,k}(x)).}
+\]
+La signature à l'échelle $k$ est un tuple discret. On définit l'équivalence opérationnelle par
+\[
+x\sim^{\mathrm{op}}_{k}y\iff s_{\theta,k}(x)=s_{\theta,k}(y).
+\]
+L'égalité de signatures est réflexive, symétrique et transitive ; elle définit donc une partition empirique sans invoquer une tolérance non transitive. Pour garantir le raffinement, la signature de niveau $k+1$ doit contenir exactement celle de niveau $k$ comme préfixe, à quantification inchangée.
+
+\begin{warning}
+Une quantification n'est pas neutre : elle peut fusionner des empreintes continues différentes. Le quotient opérationnel ainsi obtenu est une approximation déclarée sur des observables et des seuils de quantification définis ; ce n'est pas le quotient global exact de $\X$ sans hypothèses supplémentaires.
+\end{warning}
+
+\subsection{Quotient empirique calculable}
+Sur un jeu fini $\X_0$, on construit une table de hachage associant chaque signature $s_{\theta,k}(x)$ à l'identifiant de sa classe. Cela calcule la restriction empirique de la partition. On ne matérialise pas le quotient global de toutes les séquences possibles ; on calcule les classes des séquences effectivement rencontrées.
+
+% =====================================================================
+\section{Seuils et diagnostics multi-résolution opérationnels}
+% =====================================================================
+
+Soient des niveaux totalement ordonnés $\lambda_1\prec\cdots\prec\lambda_K$ avec intensités strictement croissantes. Pour une paire $x\ne y$, on définit l'indice empirique
+\[
+\widehat k(x,y)=\max\big(\{k:s_{\theta,k}(x)=s_{\theta,k}(y)\}\cup\{-1\}\big).
+\]
+Les signatures étant emboîtées, les indices où les signatures sont égales forment un segment initial. Le rapport d'expérience enregistre le niveau maximal commun, le marqueur « déjà distinct au premier niveau » si $\widehat k=-1$ et le marqueur « encore identique au dernier niveau » si $\widehat k=K$. Ce dernier cas est censuré à droite : il ne prouve pas que la paire resterait indiscernable à toutes les résolutions futures.
+
+Une valeur numérique de seuil empirique peut être stockée comme $\widehat\Theta(x,y)=\iota(\lambda_{\widehat k})$ avec une borne sentinelle pour $k=-1$, accompagnée obligatoirement des indicateurs de censure et du statut de bord. Il faut éviter de masquer les conventions de grille dans un seul nombre flottant.
+
+Sur les paires d'un domaine test fini, on calcule ensuite $\widehat\nu$, $\widehat{\widetilde{\mathcal R}}(t)$, les partitions $\widehat\Pi_k$, la stabilité des classes et le taux de raffinement. Ces diagnostics mesurent la structure induite par les sondes choisies ; ils ne certifient pas par eux-mêmes une propriété sémantique.
+
+% =====================================================================
+\section{Information effective et fermeture dans une implémentation finie}
+% =====================================================================
+
+Pour un ensemble fini $\X_0$, les notions du socle reçoivent des versions empiriques déclarées :
+\begin{itemize}
+  \item $C(k)=|\F_{\lambda_k}|$ est le nombre de sondes de l'échelle ;
+  \item $C_{\mathrm{eff}}^{\mathrm{emp}}(k)$ est le nombre de profils de sondes distincts sur $\X_0$, calculé avec la règle de comparaison annoncée ;
+  \item $d_{\mathrm{eff}}^{\mathrm{emp}}(k)$ est le rang affine empirique de la matrice des empreintes sur $\X_0$, avec méthode et tolérance numérique déclarées ;
+  \item la fermeture empirique d'une famille $\mathcal A$ contient une sonde $f$ lorsque, sur tous les exemples considérés, une même signature de $\mathcal A$ ne correspond jamais à deux réponses incompatibles pour $f$ ;
+  \item une méta-observation n'apporte une discrimination empirique supplémentaire que si elle raffine effectivement la partition déclarée.
+\end{itemize}
+
+La fermeture empirique ne doit pas prétendre démontrer la relation fonctionnelle globale sur $\X$ à partir d'un nombre fini d'exemples.
+
+% =====================================================================
+\section{Graphes d'empreintes et maillage relationnel}
+% =====================================================================
+
+\subsection{Graphe local}
+\begin{definition}[Graphe d'empreinte] \textbf{[APPLICATION/INGÉNIERIE]}
+À une séquence $x$, on associe un graphe étiqueté
+\[
+G_\theta(x)=(V_x,E_x,W_x,\ell_x),
+\]
+où $V_x$ contient les composantes retenues, $E_x$ les relations déclarées, $W_x$ leurs poids éventuels et $\ell_x$ les types/étiquettes des nœuds et arêtes. Les nœuds peuvent représenter des positions, des observables, des motifs, des états de couche ou des éléments mémoire ; les arêtes peuvent représenter dépendance, coactivation, attention, transport, alignement ou association de provenance.
+\end{definition}
+
+Les règles de création des nœuds et arêtes doivent être explicites et reproductibles. Le graphe est une représentation de calcul choisie ; ce n'est pas une propriété automatique de tout embedding.
+
+\subsection{Alignement et maillage global}
+\begin{definition}[Relation d'alignement] \textbf{[INGÉNIERIE]}
+Une relation d'alignement $\equiv_{\mathrm{mesh}}$ identifie des composantes de graphes différents seulement selon un critère déclaré : identité d'unité, correspondance apprise, motif de sous-graphe, signature canonique ou résultat d'un appariement. Pour définir un quotient, ce critère doit être une véritable relation d'équivalence ; sinon, sa fermeture équivalente ou une procédure de partitionnement explicite doit être appliquée.
+\end{definition}
+
+Le maillage est alors le quotient de l'union disjointe des graphes par l'alignement :
+\[
+\boxed{\Mesh_\theta(\D)=\left(\bigsqcup_{x\in\D}G_\theta(x)\right)/\!\equiv_{\mathrm{mesh}}.}
+\]
+Il est mis à jour à partir de règles de fusion, création et actualisation des arêtes. Les composantes communes et les relations spécifiques restent distinguées.
+
+\subsection{Recouvrement}
+Quand les nœuds ont été alignés dans un univers commun, le Jaccard des nœuds est
+\[
+J_V(x,y)=\frac{|V_x\cap V_y|}{|V_x\cup V_y|},
+\]
+si le dénominateur est non nul. Pour des graphes de structure, on peut définir une similarité de sous-graphe ou un appariement pondéré, mais la métrique et le protocole doivent être documentés. Le recouvrement mesure une intersection selon l'alignement ; il ne définit pas une identité sémantique universelle.
+
+% =====================================================================
+\section{Poly-sémanticité, compositionalité et généralisation}
+% =====================================================================
+
+\subsection{Hypothèse de compositionalité distribuée}
+\begin{hypothesis}[Composantes partagées, structures distinctes] \textbf{[EMPIRIQUE]}
+Une même unité interne peut contribuer à plusieurs graphes d'empreintes distincts :
+\[
+n_j\in V_x\cap V_y,\qquad G_\theta(x)\ne G_\theta(y).
+\]
+Cette situation est compatible avec la poly-sémanticité apparente, mais la coactivation seule ne démontre ni la nature de la structure partagée ni sa causalité.
+\end{hypothesis}
+
+\begin{example}[Schéma chat/voiture]
+Les empreintes de « le chat mange » et « la voiture roule » peuvent partager des composantes liées à l'entité ou à une structure événementielle tout en différant sur les composantes spécifiques. L'interprétation de l'intersection comme « entité-action » est une hypothèse tant qu'elle n'est pas étayée par une analyse de relations et des interventions.
+\end{example}
+
+\subsection{Structure commune et transfert}
+Soit une famille de graphes $\{G_\theta(x_i)\}$. Une structure $S$ n'est qualifiée de commune qu'après définition d'une relation d'inclusion ou d'embedding de graphes. L'hypothèse de généralisation structurelle propose que $S$ soit réutilisée pour une instance nouvelle $x_\star$ lorsque $S$ s'y retrouve selon le même protocole.
+
+Il faut distinguer trois résultats :
+\begin{enumerate}[label=\arabic*.]
+  \item mémorisation littérale d'une séquence déjà vue ;
+  \item recombinaison d'éléments familiers dans une configuration nouvelle ;
+  \item transfert d'un motif relationnel à des objets ou relations tenus à l'écart.
+\end{enumerate}
+La généralisation observationnelle du socle (régime de seuils intermédiaire) et la généralisation comportementale sur des exemples tenus à l'écart demeurent deux variables distinctes à mesurer.
+
+% =====================================================================
+\section{Mémoire, connaissance et intelligence fonctionnelle}
+% =====================================================================
+
+\begin{definition}[Mémoire dans l'application] \textbf{[APPLICATION]}
+La mémoire désigne la persistance de paramètres appris, d'états contextuels ou de traces externes d'empreintes et de leurs transformations. Cette définition fonctionnelle n'implique pas que les poids d'un LLM soient une base de données littérale.
+\end{definition}
+
+\begin{definition}[Connaissance fonctionnelle] \textbf{[APPLICATION]}
+Une connaissance est ici une organisation relativement stable de structures d'empreintes, exploitable pour identifier, comparer, transformer ou réutiliser des configurations. Sa validité doit être reliée à un critère de tâche ou à une évaluation déclarée.
+\end{definition}
+
+\begin{definition}[Intelligence fonctionnelle] \textbf{[APPLICATION]}
+L'intelligence fonctionnelle désigne la capacité d'un système à sélectionner, transformer et combiner des structures d'information pour produire des prédictions, décisions ou actions adaptées à une tâche. Il s'agit d'une définition de travail, pas d'une mesure universelle de l'intelligence.
+\end{definition}
+
+\subsection{Trois supports mémoire}
+\begin{description}[style=nextline,leftmargin=3.1cm]
+  \item[Paramétrique] Les paramètres $\theta$ modifiés par l'optimisation ; ils persistent entre exécutions jusqu'à une nouvelle mise à jour du modèle.
+  \item[Contextuel] Les tokens, préfixes, états cachés et caches d'inférence de la session active ; leur persistance dépend du système d'exécution.
+  \item[Externe persistante] Un graphe, index, base de fragments ou stockage explicite $M_t$ maintenu par des opérations d'écriture et de lecture.
+\end{description}
+
+\subsection{Écriture et lecture d'une mémoire relationnelle}
+Une écriture prend la forme
+\[
+M_{t+1}=\mathsf{Update}(M_t,G_\theta(x_t),\mathcal K_t),
+\]
+où $\mathcal K_t$ contient les métadonnées utiles (provenance, version, fréquence, confiance, date, politique de rétention). Le pipeline de mise à jour est
+\[
+\mathsf{Update}=\mathsf{Match}+\mathsf{Create}+\mathsf{UpdateEdges}+\mathsf{ResolveConflicts}+\mathsf{Prune}.
+\]
+Pour une requête $q$, la lecture retourne
+\[
+C_q=\mathsf{Read}(z_\theta(q),M_t;k,\tau),
+\]
+où $k$ est le nombre maximal d'éléments récupérés et $\tau$ les critères de filtrage. L'implémentation doit fixer le score de récupération, les règles de conflit, le plafond mémoire et les mécanismes de provenance.
+
+% =====================================================================
+\section{Architecture opérationnelle proposée : \texttt{EmpLLM\_0}}
+% =====================================================================
+
+\subsection{Choix de conception}
+\texttt{EmpLLM\_0} est une spécification de référence minimalement exécutable. Elle ne requiert pas que toutes les notions du socle deviennent des couches différentiables du réseau. Les empreintes continues participent au chemin de calcul ; les partitions, seuils et capacités effectives sont calculés comme objets exacts sur des signatures discrètes ou comme diagnostics estimés. Une version plus stricte, dont la prédiction est entièrement constante sur les fibres quantifiées, peut être implémentée, mais elle doit être évaluée séparément car la quantification peut perdre de l'information utile.
+
+\subsection{Modules formels}
+\begin{longtable}{p{0.20\textwidth}p{0.32\textwidth}p{0.39\textwidth}}
+\toprule
+\textbf{Module} & \textbf{Objet / équation} & \textbf{Responsabilité opérationnelle}\\
+\midrule
+Tokenizer & $\mathsf{Tok}:\Sigma^*\to\V^*$ & Normaliser et convertir le texte en tokens selon une version gelée.\\
+Backbone & $H=F_\theta(\mathsf{Tok}(x))$ & Calculer les états contextuels de toutes les couches retenues.\\
+Observateurs & $z_{k,r}=f_{\theta,r}(P,x,H)$ & Produire les réponses scalaires correspondant aux sondes déclarées.\\
+Constructeur d'empreinte & $z_k=(z_{k,r})_{r\in\F_{\lambda_k}}$ & Assembler des coordonnées emboîtées avec ordre fixe.\\
+Quantificateur & $s_k=Q_{\eta_k}(z_k)$ & Produire une signature canonique pour former une partition finie.\\
+Quotient proxy & $q_k(x)=[s_k(x)]$ & Regrouper les exemples de même signature sur un domaine fini.\\
+Diagnostique seuils & $\widehat\Theta,\widehat\nu,\widehat{\widetilde{\mathcal R}}$ & Mesurer les seuils empiriques, la hiérarchie et leur stabilité.\\
+Constructeur de graphe & $G_\theta(x)$ & Construire un graphe d'empreinte avec étiquettes et provenance.\\
+Aligneur / maillage & $\Mesh_\theta(\D)$ & Apparier les composantes et gérer le recouvrement structurel.\\
+Lecture mémoire & $C_q=\mathsf{Read}(z(q),M)$ & Récupérer des éléments externes selon un score explicite.\\
+Transport & $z'=C_{\theta,k}(z,C_q)$ & Transformer l'empreinte ; tester compatibilité et commutation inter-échelles.\\
+Recherche facultative & $\mathsf{Search}(z',M)$ & Explorer des candidats ou trajectoires sous un budget borné.\\
+Prédicteur & $p=\softmax(W z'+U e(C_q)+b)$ & Produire une distribution sur le vocabulaire.\\
+Générateur & $t_{n+1}=\mathsf{Select}(p,\pi)$ & Sélectionner le token selon une politique gelée.\\
+Journalisation & $\mathsf{Log}(\cdot)$ & Enregistrer les versions, états, signatures, récupérations et interventions nécessaires à la reproductibilité.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Définition du prédicteur}
+Une réalisation possible utilise la dernière empreinte continue $z'_L$, le résumé du contexte mémoire $m_q$ et une tête paramétrée :
+\[
+\ell_{n+1}=W_\theta z'_L+U_\theta m_q+b_\theta,\qquad
+p_\theta(\cdot\mid x_{1:n},M)=\softmax(\ell_{n+1}).
+\]
+Si aucune mémoire externe n'est activée, on pose $m_q=0$. La sortie probabiliste, la sélection d'un token et une action sur le monde extérieur sont trois opérations distinctes.
+
+\subsection{Fréquences conditionnelles et prédiction apprise}
+Pour deux événements $A$ et $B$ ayant des fréquences positives dans un corpus, l'estimateur empirique élémentaire est
+\[
+\widehat{\Pr}(B\mid A)=\frac{N(A,B)}{N(A)},
+\]
+où $N(A)$ compte les occurrences de $A$ et $N(A,B)$ celles où $B$ suit ou accompagne $A$ selon le protocole défini. Cette fréquence constitue une référence statistique, non une définition de l'empreinte. Le LLM paramétrique apprend une approximation plus générale de la distribution conditionnelle du token suivant ; il doit être évalué sur des exemples tenus à l'écart et, si nécessaire, utiliser une règle de lissage ou de régularisation pour les événements rares.
+
+\subsection{Mode strict quotient et mode continu}
+\begin{description}[style=nextline,leftmargin=3.5cm]
+  \item[Mode continu recommandé pour le prototype] Le prédicteur utilise $z$ (empreinte continue) et le chemin discret $s/q$ sert à la structure, au diagnostic ou à une régularisation. Ce mode est différentiable et praticable.
+  \item[Mode quotient strict] La prédiction doit factoriser par la classe opérationnelle : $s_k(x)=s_k(y)\Rightarrow p(\cdot\mid x)=p(\cdot\mid y)$. Cela impose un prédicteur fonction de la signature/classe uniquement et doit être testé comme ablation à part entière.
+\end{description}
+
+% =====================================================================
+\section{Pipeline complet de préparation des données}
+% =====================================================================
+
+Le pipeline de préparation doit être déterministe, versionné et sans fuite de données :
+\begin{enumerate}[label=\textbf{D\arabic*.}]
+  \item Définir la tâche, le domaine d'objets, les variables observables et l'unité d'évaluation (séquence, préfixe, conversation, événement synthétique).
+  \item Dédupliquer et normaliser le corpus selon une politique explicite ; conserver la provenance et les droits d'utilisation.
+  \item Séparer train, validation et test avant d'ajuster tout observateur, quantificateur, seuil de retrieval ou critère de sélection.
+  \item Geler le tokenizer et sa version ; construire les séquences de prédiction causale et les masques de padding.
+  \item Déclarer la famille initiale de sondes, son ordre, les niveaux $\lambda_1\prec\cdots\prec\lambda_K$ et les restrictions par préfixe.
+  \item Déclarer la façon dont les graphes sont construits et alignés ainsi que les champs mémoire autorisés.
+  \item Documenter les statistiques ajustées exclusivement sur le train : normalisation, seuils de quantification, dictionnaires de signatures, règles de pruning.
+  \item Geler un manifeste de données avec hashes, tailles, versions et critères de séparation.
+\end{enumerate}
+
+\begin{warning}
+Les statistiques de quantification ou d'alignement estimées avec les données de test provoquent une fuite de données et invalident l'évaluation. Le fait d'observer le test pour calculer les seuils n'est acceptable que dans une analyse descriptive séparée clairement annoncée, pas pour choisir ou entraîner le modèle.
+\end{warning}
+
+% =====================================================================
+\section{Pipeline complet d'apprentissage}
+% =====================================================================
+
+\subsection{Perte autorégressive de base}
+Pour chaque séquence $x=(t_1,\ldots,t_n)$, le modèle prédit le token suivant à partir du préfixe :
+\[
+\boxed{\mathcal L_{\mathrm{LM}}(\theta)=-\sum_{x\in\D_{\mathrm{train}}}\sum_{j=1}^{|x|-1}\log p_\theta(t_{j+1}\mid t_{1:j},M_j).}
+\]
+La moyenne par token peut être utilisée au lieu de la somme ; la convention doit être constante entre modèles comparés. Pour une première version, la cible primaire est la vraisemblance prédictive, évaluée par perte de validation et perplexité.
+
+\subsection{Objectif composé optionnel}
+Un objectif enrichi peut être défini par
+\[
+\mathcal L=\mathcal L_{\mathrm{LM}}+\alpha_{\mathrm{rel}}\mathcal L_{\mathrm{rel}}+\alpha_{\mathrm{mem}}\mathcal L_{\mathrm{mem}}+\alpha_{\mathrm{inv}}\mathcal L_{\mathrm{inv}}+\alpha_{\mathrm{task}}\mathcal L_{\mathrm{task}}.
+\]
+Chaque terme auxiliaire doit avoir une définition exécutable, une source de supervision déclarée, un poids choisi sur la validation et une ablation. Exemples possibles : perte contrastive sur des paires contrôlées, perte de tâche supervisée, perte de récupération mémoire ou invariance connue d'avance.
+
+\subsection{Contraintes inter-échelles}
+Si $z_k$ est strictement le préfixe des coordonnées de $z_{k+1}$, la restriction est exacte et
+\[
+\mathcal L_{\mathrm{res}}=\sum_{k<K}\E_x\left[\|z_k-r_{k+1\to k}(z_{k+1})\|^2\right]=0.
+\]
+Dans ce cas, ajouter cette perte à l'objectif ne fournit aucun signal d'apprentissage : le respect de la filtration se teste directement. Une pénalité de cohérence n'est utile que si des projections indépendantes apprises ne sont pas construites par préfixes exacts.
+
+\subsection{Seuils et différentiabilité}
+Les signatures quantifiées, les classes et les seuils à grille finie sont généralement non différentiables. Il ne faut pas rétropropager naïvement à travers une table de hachage ou une partition dure. Le prototype entraîne le backbone et les sondes par la perte continue, puis calcule les signatures et les seuils comme diagnostics ; toute approximation différentiable doit être spécifiée et évaluée comme une variante distincte.
+
+De même, si $\widehat\Theta$ est calculé exactement à partir de signatures emboîtées, la loi du minimum double est satisfaite par construction ; une pénalité ultramétrique calculée sur ces seuils dérivés est alors nulle et inutile. Une pénalité peut servir uniquement si un prédicteur continu de seuils est appris séparément, auquel cas elle est un choix d'ingénierie et non une nouvelle preuve du socle.
+
+\subsection{Ordre d'exécution d'un entraînement}
+\begin{enumerate}[label=\textbf{T\arabic*.}]
+  \item Initialiser le tokenizer, le backbone, les sondes et la tête de prédiction à partir d'une graine enregistrée.
+  \item Pour chaque batch, calculer les états du backbone puis les sondes et l'empreinte continue emboîtée.
+  \item Si la tâche le demande, lire la mémoire externe selon une politique déterministe et bornée ; éviter toute lecture d'exemples futurs ou du test.
+  \item Calculer les logits et la perte autorégressive ; ajouter uniquement les pertes auxiliaires explicitement définies.
+  \item Calculer les gradients, appliquer l'optimiseur, la planification du taux d'apprentissage et le clipping éventuel ; enregistrer les paramètres et la graine.
+  \item À intervalles déclarés, mesurer la perte de validation, les métriques de tâche et les invariants observationnels ; sélectionner le checkpoint sans accéder au test.
+  \item Une fois le modèle sélectionné, geler les paramètres et ajuster, si nécessaire, les quantificateurs sur le train uniquement.
+  \item Calculer les signatures, partitions, seuils, capacité effective et dimensions effectives sur les ensembles d'analyse définis.
+  \item Sauvegarder le manifeste complet du modèle, des sondes, des niveaux, des calibrateurs et des seuils.
+\end{enumerate}
+
+% =====================================================================
+\section{Pipeline complet d'inférence et de génération}
+% =====================================================================
+
+Pour une entrée $u$ et un éventuel état externe $M_t$, l'inférence est organisée comme suit :
+\begin{enumerate}[label=\textbf{I\arabic*.}]
+  \item \textbf{Validation et tokenisation :} appliquer le tokenizer gelé, traiter les limites de longueur et construire le préfixe $x_{1:n}$.
+  \item \textbf{Contexte d'observation :} construire $P_t$ à partir de la tâche, de l'historique disponible, de la position et de la version mémoire ; ne pas confondre contexte et objet.
+  \item \textbf{Calcul du backbone :} obtenir $H^{(0:L)}$ pour le préfixe, avec masque causal.
+  \item \textbf{Observation :} évaluer chaque sonde déclarée et assembler l'empreinte continue $z_{\theta,k}(x_{1:n})$ dans un ordre fixe.
+  \item \textbf{Signature et classe :} calculer $s_{\theta,k}$ avec les quantificateurs gelés ; sur un domaine de journalisation, retrouver la classe empirique correspondante, sans prétendre qu'une table de classes couvre tout $\V^*$.
+  \item \textbf{Lecture mémoire facultative :} produire une requête à partir de l'empreinte, récupérer au plus $k$ éléments admissibles, dédupliquer et conserver les scores et la provenance.
+  \item \textbf{Transport :} appliquer $C_{\theta,k}(z,m_q)$ ; si une opération se réclame du quotient, tester qu'elle est constante sur les fibres pertinentes. Tester aussi la commutation entre résolutions.
+  \item \textbf{Recherche facultative :} générer au plus $B$ branches, chacune avec une profondeur maximale $H$ et un budget de calcul fixé ; évaluer les candidats à partir d'un critère prédéfini. Sans recherche, ce module est identité.
+  \item \textbf{Prédiction :} calculer $p_\theta(\cdot\mid x_{1:n},M_t)$ par la tête de sortie.
+  \item \textbf{Sélection :} choisir ou échantillonner le prochain token avec une politique $\pi$ documentée (greedy, température, top-$k$, nucleus, ou autre).
+  \item \textbf{Mise à jour :} mettre à jour le cache contextuel ; n'écrire dans la mémoire persistante que si la politique l'autorise.
+  \item \textbf{Journalisation :} enregistrer les versions, la graine de génération, les signatures pertinentes, les éléments mémoire récupérés, les logits ou métriques autorisés et les décisions de recherche.
+  \item \textbf{Répétition :} ajouter le token généré au préfixe, puis répéter les étapes jusqu'au critère d'arrêt.
+\end{enumerate}
+
+La boucle résumée est :
+\[
+\boxed{\begin{gathered}\text{entrée}\to\text{observation}\to\text{empreinte}\to\text{signature/quotient}\\[0.25em]\to\text{mémoire/transport/recherche}\to\text{prédiction}\to\text{sélection}\to\text{nouveau préfixe}.\end{gathered}}
+\]
+
+\subsection{Politique d'arrêt et contraintes}
+L'arrêt est déclenché par un token terminal, une longueur maximale, une condition applicative ou une interruption. Les limites de ressources et la politique d'accès aux outils externes sont séparées de la prédiction linguistique. Toute action externe constitue un module distinct qui exige ses propres contrôles.
+
+% =====================================================================
+\section{Pseudocode de référence pour une exécution complète}
+% =====================================================================
+
+Le pseudocode suivant résume le chemin d'inférence. Il fixe les dépendances entre modules ; les détails tels que le type de tenseur, l'index mémoire et la politique de sélection doivent être fournis par l'implémentation.
+\small
+\begin{verbatim}
+function NEXT_TOKEN(text, memory_state, config):
+    tokens <- tokenizer_v(config.tokenizer_version, text)
+    context <- make_context(tokens, memory_state, config.task)
+    hidden_states <- backbone_forward(tokens, causal_mask=True)
+    z_levels <- observers(hidden_states, context, config.probe_manifest)
+    assert_nested_prefix(z_levels)
+    signatures <- [quantize(z, config.quantizer_v) for z in z_levels]
+    class_ids <- lookup_empirical_classes_if_available(
+        signatures)
+
+    if config.memory_enabled:
+        query <- build_memory_query(z_levels, signatures)
+        retrieved <- memory_read(query, memory_state, config.read_policy)
+    else:
+        retrieved <- empty_context()
+
+    z_transformed <- transport(z_levels, retrieved,
+                               config.transport_v)
+    if config.search_enabled:
+        candidates <- bounded_search(z_transformed, retrieved,
+                                     max_branches=B, max_depth=H)
+        z_final <- select_candidate(candidates, config.candidate_score)
+    else:
+        z_final <- last_resolution(z_transformed)
+
+    probabilities <- predictor(z_final, retrieved)
+    next_token <- select_token(probabilities,
+                               config.generation_policy)
+    new_state <- update_context_cache(memory_state, tokens,
+                                      next_token)
+    if config.memory_write_enabled:
+        new_state <- policy_controlled_memory_write(new_state, z_levels,
+                                                    signatures, config.write_policy)
+    log_trace(config, z_levels, signatures, class_ids,
+              retrieved,
+              probabilities_summary(probabilities), next_token)
+    return next_token, new_state
+\end{verbatim}
+\normalsize
+
+Les fonctions de journalisation peuvent exclure les logits complets ou certains contenus pour des raisons de confidentialité, mais doivent conserver assez de métadonnées pour reproduire les mesures déclarées. La mémoire persistante est optionnelle ; le chemin sans mémoire doit rester défini.
+
+% =====================================================================
+\section{Mémoire : spécification d'implémentation}
+% =====================================================================
+
+Une mémoire externe optionnelle peut employer des enregistrements de la forme
+\[
+e_i=(\text{id},s_i,z_i,G_i,\text{contenu}_i,\text{provenance}_i,\text{version}_i,\text{score}_i).
+\]
+L'implémentation doit choisir ce qui est stocké : texte source, résumé, graphe, signature, empreinte numérique ou combinaison. Les contenus récupérés sont des données, pas des instructions exécutables.
+
+\subsection{Algorithme d'écriture}
+\begin{enumerate}[label=\textbf{M\arabic*.}]
+  \item Vérifier la provenance et la politique de rétention de l'élément entrant.
+  \item Calculer son empreinte et ses relations selon la version gelée du constructeur de graphe.
+  \item Chercher les candidats à fusionner avec une fonction de correspondance explicite ; ne jamais fusionner sur une simple coactivation non validée.
+  \item Si une correspondance dépasse le seuil de décision validé, mettre à jour l'enregistrement et conserver l'historique nécessaire ; sinon créer un nouvel enregistrement.
+  \item Mettre à jour les arêtes avec leurs poids, provenance et dates ; résoudre les contradictions par une règle déclarée plutôt que par écrasement implicite.
+  \item Appliquer la politique de capacité (TTL, LRU, fréquence, diversité, priorité de tâche ou combinaison) et journaliser toute suppression.
+\end{enumerate}
+
+\subsection{Algorithme de lecture}
+\begin{enumerate}[label=\textbf{R\arabic*.}]
+  \item Calculer la représentation de requête selon la même version de sondes.
+  \item Effectuer la recherche de candidats, éventuellement en deux étapes (index approximatif puis reranking).
+  \item Filtrer par droits, source, date, domaine et contraintes de contexte.
+  \item Dédupliquer et retourner un contexte mémoire borné avec scores et provenance.
+  \item Mesurer précision de récupération, rappel lorsque la vérité de référence existe, latence, consommation mémoire et effet causal sur la tâche.
+\end{enumerate}
+
+% =====================================================================
+\section{Recherche et imagination interne facultatives}
+% =====================================================================
+
+\begin{definition}[Recherche sur les états observationnels] \textbf{[APPLICATION/INGÉNIERIE]}
+La recherche est une procédure bornée $\mathsf{Search}(z,M;B,H)$ explorant au plus $B$ branches et une profondeur maximale $H$ à partir d'une empreinte de départ et d'un état mémoire. Elle retourne des trajectoires candidates et leurs scores.
+\end{definition}
+
+Une trajectoire candidate est $\tau=(z_0,z_1,\ldots,z_h)$, avec chaque transition calculée par un opérateur déclaré. Une imagination interne est une trajectoire générée par le modèle sans nouvelle observation externe. Elle est distincte d'une observation et peut être erronée ; il faut donc mesurer séparément qualité des propositions, sélection finale, coût et taux de dégradation par rapport à la génération directe.
+
+% =====================================================================
+\section{Protocole expérimental et plan de validation}
+% =====================================================================
+
+\subsection{Dataset synthétique initial}
+La première expérience devrait utiliser un monde synthétique où les facteurs latents sont connus de l'évaluateur mais non fournis comme entrée au modèle. Par exemple, les séquences peuvent être générées à partir d'entités, types, actions, propriétés et relations, puis lexicalisées avec des variantes de surface. Des répartitions de test peuvent réserver des combinaisons entité-action ou des relations entières.
+
+\subsection{Étapes expérimentales}
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+  \item Fixer le vocabulaire, le générateur du corpus et la vérité structurelle de référence.
+  \item Spécifier des sondes simples et vérifier manuellement leurs réponses sur quelques cas.
+  \item Construire les empreintes et signatures avant apprentissage sur un univers contrôlé afin de valider les algorithmes de quotient et de seuil.
+  \item Vérifier automatiquement l'emboîtement des familles de sondes et la restriction exacte des signatures.
+  \item Entraîner un petit modèle autorégressif avec journalisation complète.
+  \item Ajouter l'observation multi-résolution, puis mesurer capacité brute/effective, dimension effective, fermeture empirique, partitions et seuils.
+  \item Définir et geler l'algorithme d'alignement des graphes ; mesurer la stabilité du maillage.
+  \item Ajouter une mémoire externe facultative et évaluer les fonctions lecture/écriture séparément.
+  \item Tester la compatibilité des transports par recherche de paires dans une même fibre et vérification des sorties.
+  \item Exécuter des interventions sur composantes partagées et spécifiques ; comparer les effets sur différentes tâches.
+  \item Évaluer les combinaisons tenues à l'écart et l'indicateur indépendant de réutilisation de structure.
+  \item Comparer à un modèle de référence avec données, tokenizer, budget d'entraînement, capacité et politique de génération comparables.
+  \item Répéter avec plusieurs graines et perturbations pour quantifier stabilité et incertitude.
+\end{enumerate}
+
+\subsection{Mesures à reporter}
+\begin{itemize}
+  \item perte de validation, perplexité et exactitude tâche ;
+  \item $C(\lambda)$, $C_{\mathrm{eff}}^{\mathrm{emp}}(\lambda)$ et $d_{\mathrm{eff}}^{\mathrm{emp}}(\lambda)$ avec les méthodes de calcul ;
+  \item taux de raffinement et cohérence inter-échelles ;
+  \item distribution empirique des seuils, masse censurée et résolution cumulée ;
+  \item stabilité des partitions et motifs entre graines ;
+  \item recouvrement de graphes sous alignement déclaré ;
+  \item précision/rappel de récupération mémoire ;
+  \item effet d'interventions sur composantes partagées versus spécifiques ;
+  \item score comportemental de généralisation et score distinct de réutilisation structurelle ;
+  \item coût en temps, mémoire, paramètres et opérations supplémentaires.
+\end{itemize}
+
+% =====================================================================
+\section{Critères de falsification et tests automatisables}
+% =====================================================================
+
+\begin{longtable}{p{0.18\textwidth}p{0.37\textwidth}p{0.37\textwidth}}
+\toprule
+\textbf{Test} & \textbf{Signal d'échec} & \textbf{Conséquence}\\
+\midrule
+Filtration & Une signature de niveau supérieur ne préserve pas le préfixe inférieur. & Le code ne met pas en œuvre la filtration spécifiée.\\
+Transitivité & Une « équivalence » empirique fondée sur une tolérance crée $x\sim y$, $y\sim z$ mais $x\not\sim z$. & Il faut remplacer cette règle par une partition canonique ou parler de voisinage, pas de quotient.\\
+Factorisation & Deux objets de même empreinte donnent des sorties différentes alors que le module prétend factoriser par le quotient. & L'opération n'est pas compatible avec les fibres.\\
+Commutation & $r_{\mu\to\lambda}C_\mu$ diffère de $C_\lambda r_{\mu\to\lambda}$ au-delà de la tolérance annoncée. & La compatibilité inter-échelles n'est pas respectée.\\
+Seuils & La relation des seuils estimés viole la loi du minimum double malgré des signatures emboîtées. & Il existe une erreur de définition, de grille ou d'implémentation.\\
+Alignement & Les résultats d'overlap dépendent fortement de l'ordre d'alignement ou d'une heuristique non déclarée. & Le maillage n'est pas suffisamment bien défini pour porter l'interprétation revendiquée.\\
+Coactivation seule & Une coactivation commune apparaît sans motif relationnel stable ni signature d'intervention. & La poly-sémanticité par superposition n'est pas étayée dans le cas testé.\\
+Pas de réutilisation & Une bonne performance sur de nouvelles instances n'est pas accompagnée de la réutilisation structurelle préenregistrée. & Le mécanisme explicatif de généralisation doit être révisé.\\
+Instabilité & Les partitions, seuils ou motifs changent fortement entre graines ou perturbations légères. & Réduire la portée de l'interprétation structurelle.\\
+Pas d'avantage distinctif & Aucun gain fiable en performance, robustesse, analyse causale ou coût face au contrôle. & L'avantage pratique n'est pas établi.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Tests d'unités mathématiques}
+Pour toute implémentation finie, automatiser au minimum :
+\begin{enumerate}[label=\arabic*.]
+  \item réflexivité, symétrie et transitivité de l'égalité des signatures ;
+  \item préservation du préfixe de signature entre niveaux ;
+  \item inclusion des fibres à niveaux successifs ;
+  \item égalité entre classes de signature et valeurs identiques de l'image observée ;
+  \item calcul de la fermeture empirique selon sa définition fonctionnelle ;
+  \item vérification de la loi du minimum double sur toutes les triplets d'un petit univers, ou sur un échantillon documenté ;
+  \item compatibilité des transports sur paires empiriques appartenant à la même fibre ;
+  \item absence de fuite de test dans les paramètres de quantification, de récupération et de sélection.
+\end{enumerate}
+
+% =====================================================================
+\section{Limites, risques d'interprétation et problèmes ouverts}
+% =====================================================================
+
+Le formalisme ne prouve pas :
+\begin{enumerate}[label=\arabic*.]
+  \item que tout LLM suit une filtration observationnelle interprétable ;
+  \item que toute poly-sémanticité apparente résulte d'un partage structurel ;
+  \item que la mémoire paramétrique est identique à une mémoire relationnelle externe ;
+  \item que la généralisation comportementale provient principalement des invariants communs ;
+  \item que la géométrie de seuils prédit les performances en aval ;
+  \item qu'une architecture par empreintes est supérieure à un Transformer de référence ;
+  \item que le quotient global de $\V^*$ peut être calculé exhaustivement.
+\end{enumerate}
+
+Les principaux problèmes ouverts sont la conception de sondes interprétables, le choix de résolutions, la stabilité de la quantification, l'alignement des graphes, la définition causale d'un partage structurel, l'usage d'une mémoire utile sans fuite, la façon de rendre le quotient compatible avec le gradient et la comparaison impartiale avec des architectures de référence.
+
+% =====================================================================
+\section{Dictionnaire des objets canoniques}
+% =====================================================================
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+\toprule
+\textbf{Notation} & \textbf{Sens et statut}\\
+\midrule
+$\X$ & Domaine d'objets observables [BASE].\\
+$\Pctx$ & Ensemble de contextes d'observation [BASE].\\
+$\F$ & Famille de sondes [BASE].\\
+$\Phi(P,x,f)$ & Réponse d'une sonde [BASE].\\
+$\F_\lambda$ & Sondes accessibles à la résolution $\lambda$ [BASE].\\
+$\iota(\lambda)$ & Intensité ordonnant les résolutions [BASE].\\
+$\Emp_\lambda^P(x)$ & Empreinte exacte relative au contexte et aux sondes [BASE].\\
+$\sim_{P,\lambda}$ & Indiscernabilité induite par égalité des empreintes [BASE/DÉRIVÉ].\\
+$[x]_{P,\lambda}$, $\Pi_{P,\lambda}$ & Fibre et quotient observationnels [BASE].\\
+$\mathcal L_{P,\lambda}$ & Image observationnelle réduite [BASE].\\
+$\Theta_P$, $b_P$ & Seuil d'indiscernabilité et donnée de bord [BASE].\\
+$d_\Theta$ & Pseudoultramétrique dérivée des seuils [DÉRIVÉ].\\
+$\Cl_{P,\lambda}(\mathcal A)$ & Sondes déterminées par l'empreinte de $\mathcal A$ [BASE].\\
+$C(\lambda)$ & Nombre brut de sondes [BASE].\\
+$C_{\mathrm{eff},P}(\lambda)$ & Nombre de profils de sondes non équivalents [BASE].\\
+$d_{\mathrm{eff},P}(\lambda)$ & Dimension affine de l'image des empreintes [BASE].\\
+$z_{\theta,k}(x)$ & Empreinte continue produite par les observateurs d'un LLM [APPLICATION].\\
+$s_{\theta,k}(x)$ & Signature quantifiée déterministe [INGÉNIERIE].\\
+$G_\theta(x)$ & Graphe relationnel local d'une empreinte [APPLICATION].\\
+$\Mesh_\theta(\D)$ & Maillage obtenu via un alignement déclaré [APPLICATION].\\
+$M_t$ & Mémoire explicite persistante facultative [INGÉNIERIE].\\
+$C_{\theta,k}$ & Opérateur de transport au niveau $k$ [APPLICATION].\\
+$p_\theta$ & Distribution du prochain token [APPLICATION].\\
+$\pi$ & Politique de sélection/génération [INGÉNIERIE].\\
+\bottomrule
+\end{longtable}
+
+% =====================================================================
+\section{Pipeline final et thèse architecturale}
+% =====================================================================
+
+\subsection{Chaîne du socle}
+\[
+\boxed{
+\text{objet}\to\text{sondes}\to\text{empreinte}\to\text{indiscernabilité}\to\text{fibre/quotient}\to\text{seuils}\to\text{filtration}.
+}
+\]
+Puis, lorsque les familles d'observables le permettent :
+\[
+\boxed{\text{fermeture}\to\text{information effective}\to\text{dimension effective}\to\text{géométrie induite}.}
+\]
+
+\subsection{Pipeline opérationnel de \texttt{EmpLLM\_0}}
+\begin{center}
+\begin{tikzpicture}[node distance=0.55cm and 0.45cm, every node/.style={font=\small},
+  box/.style={draw,rounded corners,align=center,minimum height=0.78cm,text width=2.35cm},
+  arr/.style={-{Latex[length=2mm]},thick}]
+\node[box] (data) {Texte / corpus};
+\node[box,right=of data] (tok) {Tokenizer gelé};
+\node[box,right=of tok] (back) {Backbone $F_\theta$};
+\node[box,right=of back] (obs) {Sondes $\Phi_\theta$};
+\node[box,below=of obs] (fp) {Empreinte continue $z_k$};
+\node[box,left=of fp] (sig) {Signature quantifiée $s_k$};
+\node[box,left=of sig] (quot) {Partition / seuils};
+\node[box,left=of quot] (mesh) {Graphe / maillage / mémoire};
+\node[box,below=of mesh] (trans) {Transport / recherche facultative};
+\node[box,right=of trans] (pred) {Prédicteur $p_\theta$};
+\node[box,right=of pred] (gen) {Sélection du token};
+\draw[arr] (data)--(tok);\draw[arr] (tok)--(back);\draw[arr] (back)--(obs);\draw[arr] (obs)--(fp);\draw[arr] (fp)--(sig);\draw[arr] (sig)--(quot);\draw[arr] (quot)--(mesh);\draw[arr] (mesh)--(trans);\draw[arr] (trans)--(pred);\draw[arr] (pred)--(gen);
+\end{tikzpicture}
+\end{center}
+Le graphe montre les responsabilités fonctionnelles et non une exigence que tous les composants soient exécutés comme des couches strictement sérielles. En particulier, les seuils et les partitions sont principalement des objets d'analyse dans le mode continu recommandé.
+
+\subsection{Thèse consolidée}
+\begin{quote}
+Un LLM fondé sur la théorie des empreintes est conçu en déclarant d'abord les objets observés, les contextes, les sondes et les niveaux de résolution ; les empreintes ainsi obtenues induisent l'indiscernabilité, les fibres, les quotients et une géométrie de seuils sous hypothèses explicites. Une application architecturale peut ensuite organiser les observables en graphes et en maillage, conserver certaines structures dans une mémoire, effectuer des transports compatibles et produire des distributions sur le vocabulaire. La poly-sémanticité par partage de structures et la généralisation par réutilisation d'invariants sont des hypothèses empiriques à tester, et non des théorèmes découlant du seul vocabulaire mathématique.
+\end{quote}
+
+\[
+\boxed{\text{théorie}\to\text{spécification}\to\text{implémentation}\to\text{mesures}\to\text{interventions}\to\text{falsification}.}
+\]
+
+\end{document}

@@ -1,0 +1,2990 @@
+{
+  "schema": "aam-o930-proof-registry-v1",
+  "version": "O93_0-P7-closed-P8-not-started-partial-handoff",
+  "generated_unix": 1791981955.2583063,
+  "source_archive": {
+    "name": "sources_AAM_17.zip",
+    "sha256": "add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38",
+    "size_bytes": 39758574,
+    "inventory": "source_inventory.json",
+    "review": "source_review.json"
+  },
+  "normative_documents": {
+    "laboratory_tex": "laboratoire_O93_0.tex",
+    "laboratory_pdf": "laboratoire_O93_0.pdf",
+    "formalism_tex": "formalisme_O93_0.tex",
+    "formalism_pdf": "formalisme_O93_0.pdf",
+    "work_checklist": "checklist_de_travail_O93_0.json",
+    "model_error_checklist": "checklist_erreurs_model.json",
+    "environment_error_checklist": "checklist_erreurs_no_model.json"
+  },
+  "summary": {
+    "requirement_groups": 57,
+    "implementation_complete_claimed": false,
+    "current_phase": "P10",
+    "overall_status": "P9_COMPLETE_LOCAL_TESTED_BOUNDED_P10_NOT_STARTED",
+    "verified_o930_requirements": 10,
+    "note": "P8 et P9 clôturées dans leur portée locale bornée. P10 reste non démarrée jusqu’aux tests natifs, capteurs et fournisseur externe. Les entrées VERIFIED comptent exclusivement les critères disposant de reçus de test explicites.",
+    "source_archive_files_processed": 1616,
+    "all_inventory_hashes_match": true,
+    "full_text_members_structurally_processed": 1525,
+    "latest_regression": {
+      "status": "PASS_BOUNDED_LOCAL",
+      "run": 222,
+      "passed": 222,
+      "failed": 0,
+      "result": "logs/O930_P8_resume_matrix_result.json",
+      "exit_code": 0,
+      "modules": 30,
+      "scope": "30 test modules executed in separate pytest processes; each module has preflight, stdout/stderr, result JSON and SHA-256. Strict test_p9_preregistered_v2_integrity.py was deliberately excluded until the P8 closure gate was satisfied.",
+      "timestamp_unix": 1791976369.632778
+    },
+    "generated_unix": 1791981897.478883,
+    "verified_count_rule": "Strict count: only O930-prefixed entries whose exact status is VERIFIED_LOCAL_TESTED_BOUNDED; O93_1 entries are excluded from this O93_0 metric.",
+    "regression_history": [
+      {
+        "status": "PASS_BOUNDED_LOCAL",
+        "run": 206,
+        "passed": 206,
+        "failed": 0,
+        "result": "logs/O930_P7_regression_matrix_composite_result.json",
+        "exit_code": "logs/O930_P7_regression_matrix_composite.exitcode",
+        "scope": "All 29 test modules executed independently with pytest; this does not prove Parquet decoding, OCR/ASR semantics, external network or physical hardware."
+      },
+      {
+        "status": "PASS_BOUNDED_LOCAL",
+        "run": 222,
+        "passed": 222,
+        "failed": 0,
+        "result": "logs/O930_P8_resume_matrix_result.json",
+        "exit_code": 0,
+        "modules": 30,
+        "scope": "Current-code isolated regression matrix; not a single monolithic pytest invocation and not external P10 acceptance.",
+        "timestamp_unix": 1791976369.632778
+      }
+    ],
+    "latest_phase_acceptance": {
+      "phase": "P9",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "tests": 46,
+      "subtests": 5,
+      "failed": 0,
+      "archive_validation": "Final archive verification is in companion follow-up receipt",
+      "implementation_complete_claimed": false,
+      "external_acceptance": "NOT_RUN_P10",
+      "timestamp_unix": 1791977339.5455086,
+      "closed_unix": 1791977339.5455086,
+      "scope": "Clean extraction, ZIP CRC, SHA-256 manifests, CLI status smoke, targeted tests; local bounded."
+    },
+    "handoff_checkpoint": {
+      "status": "P9_CLOSED_LOCAL_BOUNDED",
+      "checkpoint_file": "LIVRAISON_ETAT_O93_0.md",
+      "stopped_after_phase": "P9",
+      "P8": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "P9": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "P10": "NOT_STARTED",
+      "implementation_complete_claimed": false,
+      "created_unix": 1791977339.5455086
+    },
+    "phase_acceptance_history": [
+      {
+        "phase": "P7",
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "tests": 174,
+        "subtests": 16,
+        "modules": 25,
+        "p7_tests": 27,
+        "p7_subtests": 9,
+        "tex_compilations": 4,
+        "tex_fatal_lines": 0,
+        "tex_overfull_lines": 0,
+        "parquet_rows": 7473,
+        "parquet_source_unchanged": true,
+        "implementation_complete_claimed": false,
+        "timestamp_unix": 1791910394.0205705,
+        "closed_unix": 1791910542.402769
+      },
+      {
+        "phase": "P9",
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "tests": 46,
+        "subtests": 5,
+        "failed": 0,
+        "implementation_complete_claimed": false,
+        "timestamp_unix": 1791977339.5455086,
+        "closed_unix": 1791977339.5455086,
+        "scope": "Candidate package validation prior to final artifact hash binding; final artifact receipt in companion follow-up and detached sidecar."
+      }
+    ]
+  },
+  "phases": {
+    "P0": "COMPLETE",
+    "P1": "COMPLETE",
+    "P2": "COMPLETE",
+    "P3": "COMPLETE",
+    "P4": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "P5": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "P6": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "P7": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "P8": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "P9": "COMPLETE_LOCAL_TESTED_BOUNDED",
+    "P10": "NOT_STARTED"
+  },
+  "entries": [
+    {
+      "id": "O930-OBS-001",
+      "requirement": "Compétence de base d’observation, intégrant l’auto-observation",
+      "phase": "P1",
+      "status": "IMPLEMENTED_BOUNDED_FULL_REGRESSION_PASS_LOCAL",
+      "traceability": {
+        "references": [
+          "aam_o93/observer.py::O93Observer.observe_path",
+          "aam_o93/runtime.py::AAMRuntime"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "L’observateur existe; il faut vérifier l’observation identique à toutes les résolutions et des sources matérielles réelles. Additional implementation: stable snapshot hashing before/after, mutation detection, Unicode paths, observation_levels, mirrors, and DOCX/PDF optional reader support; targeted P1 tests 23/23 PASS. Full local regression 112/112 PASS; P1 accepted only at local bounded level; actual sensor/camera hardware and observational reproduction/generalization not claimed.",
+      "objective_acceptance_needed": "Cross-device identity/reproducibility and held-out probe generalization, with actual hardware adapters; runtime-wide automatic autonomy tracked in P5.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p1_observer.py",
+        "tests/test_p1_o930_observer_upgrade.py"
+      ],
+      "evidence_runs": [
+        {
+          "run": "P1-full-regression",
+          "tests": 112,
+          "passed": 112,
+          "failed": 0,
+          "log": "logs/O930_P1_full_unittest.stderr.txt",
+          "timestamp_unix": 1791887654.6774468
+        }
+      ]
+    },
+    {
+      "id": "O930-OBS-002",
+      "requirement": "Observer fichiers texte, image, audio, vidéo, capteurs et caméra",
+      "phase": "P1",
+      "status": "IMPLEMENTED_PARTIAL_BOUNDED_FULL_REGRESSION_PASS",
+      "traceability": {
+        "references": [
+          "aam_o93/observer.py",
+          "aam_o93/ui.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Des observations structurelles existent; elles ne démontrent pas à elles seules un décodage sémantique par modalité. PDF text and DOCX structure decoders added; hardware device is not accessible in this host, and Parquet is NOT_DECODED when pyarrow absent. All 112 regression tests pass; DOCX/PDF optional readers are implemented, Parquet remains NOT_DECODED without pyarrow, and multimodal interpretation is not claimed complete.",
+      "objective_acceptance_needed": "Matrice d’adaptateurs par format, tests positifs/négatifs et statut NOT_RUN pour capteurs absents.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p1_observer.py",
+        "tests/test_p1_o930_observer_upgrade.py"
+      ]
+    },
+    {
+      "id": "O930-PROBE-001",
+      "requirement": "Moteur adaptatif créant des sondes distinctes",
+      "phase": "P2",
+      "status": "IMPLEMENTED_BOUNDED_TESTS_PASS_NOT_UNIVERSAL_SKILL_PROOF",
+      "traceability": {
+        "references": [
+          "aam_o93/probes.py::ProbeFactory.candidates",
+          "ProbeFactory.adaptive_search"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "ProbeFactory génère des définitions canoniques versionnées avec hashes, protège les définitions concurrentes, peut checkpoint/reprendre, calcule diversité inter-sondes et gain marginal, et cherche de façon adaptative. Tests ciblés 15/15 et régression 118/118 réussis. La compétence n’est jamais promue par la seule découverte d’un candidat.",
+      "objective_acceptance_needed": "Pour toute compétence particulière: observer de nouveaux objets non utilisés pendant la recherche, effectuer replay source-off, reproduction exacte et transfert holdout/OOD préenregistrés; aucun succès universel n’est déduit.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p2_probes.py"
+      ],
+      "evidence_runs": [
+        {
+          "run": "P2-targeted-probe-tests",
+          "tests": 15,
+          "passed": 15,
+          "failed": 0,
+          "log": "logs/O930_P2_probe_unittest_final.stderr.txt",
+          "timestamp_unix": 1791887974.829935
+        },
+        {
+          "run": "P2-full-local-regression-retry",
+          "tests": 118,
+          "passed": 118,
+          "failed": 0,
+          "log": "logs/O930_P2_full_unittest_retry.stderr.txt",
+          "timestamp_unix": 1791888178.9666703
+        }
+      ]
+    },
+    {
+      "id": "O930-PROBE-002",
+      "requirement": "Miroirs et composition de sondes",
+      "phase": "P2",
+      "status": "IMPLEMENTED_BOUNDED_TESTS_PASS",
+      "traceability": {
+        "references": [
+          "aam_o93/probes.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "La fabrique inclut des miroirs typés et une composition définie par contrat; les tests assurent les références explicitement demandées, l ordre de génération et la stabilité de définitions. Tests ciblés 15/15 et régression 118/118 réussis.",
+      "objective_acceptance_needed": "Mesurer en situation réelle la pertinence des miroirs/compositions selon chaque modalité et vérifier les pertes propres aux conversions dans de nouvelles tâches.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p2_probes.py"
+      ]
+    },
+    {
+      "id": "O930-PROBE-003",
+      "requirement": "Apprendre jusqu’à reproduction et pousser ensuite jusqu’à généralisation",
+      "phase": "P2",
+      "status": "IMPLEMENTED_SEARCH_GATE_BOUNDED_SKILL_VALIDATION_SEPARATE",
+      "traceability": {
+        "references": [
+          "formalisme_O93_0.tex §sondes/généralisation",
+          "laboratoire_O93_0.tex"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "La boucle adaptative sait consommer preuves replay source-off et holdout indépendant, continue la recherche quand le pool courant est limité, et distingue les statuts budget/arrêt/validation. Elle ne modifie pas competence_promoted=true; la compétence exige encore sa gate dédiée.",
+      "objective_acceptance_needed": "Exécuter un protocole préenregistré sur une compétence concrète, avec holdout, transfert OOD et seuils justifiés; le moteur de recherche seul n’est pas la preuve de perfection universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p2_probes.py"
+      ]
+    },
+    {
+      "id": "O930-COMP-001",
+      "requirement": "Résultat d’une compétence : reproduire méthode, algorithme, mécanisme, moteur, architecture ou en composer une nouvelle",
+      "phase": "P4",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED_CANDIDATE_NOT_PROMOTED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence.py",
+          "aam_o93/competence_graph.py",
+          "aam_o93/runtime.py",
+          "aam_o93/acquisition.py",
+          "tests/test_p3_competencies.py",
+          "tests/test_p4_competence_graph.py",
+          "tests/test_p4_acquisition.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; preuve UI bornée non-native"
+      },
+      "evidence_available": "Exécution de compétences et compositions JSON déclaratives; 27 tests ciblés et 143 tests de régression, incluant entrées/sorties, branches, intégrité, acquisition et replay source-off sur jeux contrôlés. Les capsules restent candidates.",
+      "objective_acceptance_needed": "Critères d’acceptation indépendants multi-domaines, tests hors distribution sur datasets réels, reproductions exactes et transferts hors entraînement.",
+      "claim_boundary": "PASS_BOUNDED ne certifie pas une compétence générale. Aucun candidat ni composite n’est promu automatiquement.",
+      "tests_o930": [
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_conditional_graph_runs_one_branch_and_persists_trace",
+        "tests/test_p4_acquisition.py::Phase4AcquisitionTests.test_source_off_prediction_after_dataset_removed"
+      ],
+      "last_updated_unix": 1791891146.079393
+    },
+    {
+      "id": "O930-COMP-002",
+      "requirement": "Sélection manuelle ou automatique de compétence",
+      "phase": "P4",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence.py::CompetenceRegistry.select",
+          "aam_o93/runtime.py::AAMRuntime.select_competence",
+          "aam_o93/runtime.py::AAMRuntime.solve",
+          "aam_o93/ui.py",
+          "aam_o93/cli.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; preuve UI bornée non-native"
+      },
+      "evidence_available": "Sélection auto et manuelle traçable, focus explicite avec priorité déclarée, alternatives/rang/motif et route réellement exécutée; tests unitaires, UI-structure et round-trip CLI.",
+      "objective_acceptance_needed": "Validation sur large lot de requêtes réelles avec juge indépendant et tests UI natifs interactifs.",
+      "claim_boundary": "Le score de sélection est un indice d’orchestration, pas une garantie de résolution.",
+      "tests_o930": [
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_automatic_and_manual_selection_are_auditable",
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_chat_manual_selection_dispatches_requested_competence",
+        "tests/test_p4_ui_integration.py::Phase4UIIntegrationTests.test_cli_selection_and_composition_round_trip"
+      ],
+      "last_updated_unix": 1791891146.079393
+    },
+    {
+      "id": "O930-ARCH-001",
+      "requirement": "Unifier les mécanismes vers un seul objectif central",
+      "phase": "P4/P5/P8",
+      "status": "INHERITED_PARTIAL",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py::AAMRuntime",
+          "aam_o93/contracts.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Runtime et contrat de tâche unifiés existent; alignement intégral de tous les nouveaux sous-systèmes pas encore réalisé.",
+      "objective_acceptance_needed": "Test end-to-end couvrant RAG, sondes, compétences, mémoire, autonomie, récompense et entraînement via le même orchestrateur.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-ARCH-002",
+      "requirement": "Modes local uniquement et plein potentiel autorisé",
+      "phase": "P8",
+      "status": "SPECIFIED_NOT_IMPLEMENTED_AS_O930_GATE",
+      "traceability": {
+        "references": [
+          "formalisme_O93_0.tex §modes d’exécution",
+          "aam_o93/runtime.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "L’accès Internet est désactivé par défaut dans O93 hérité; deux profils exhaustifs local/plein potentiel ne sont pas validés O93_0.",
+      "objective_acceptance_needed": "Profils de capacité explicites, tests de permissions/réseau et comparaison de fonctionnalités activées.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-RAG-001",
+      "requirement": "Reconstruire le RAG depuis les observations d’empreintes, pas prendre la recherche lexicale comme norme",
+      "phase": "P3",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_PHASE_P3",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG._aggregate",
+          "aam_o93/semantic_rag.py::SemanticRAG.search",
+          "aam_o93/runtime.py::AAMRuntime.ingest_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.search_semantic_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "P3 clôturée en portée locale bornée : 12/12 tests RAG, 24/24 tests ciblés RAG+compatibilité, régression complète 130/130, smoke CLI sélectionnant 3 espaces avec min_spaces=3, 7 entrées listées et 2 résultats; PDF compilés et 29 pages rendues/inspectées. Voir rapports_O93_0/rapport_phase_P3.md et logs/O930_P3_*.",
+      "objective_acceptance_needed": "Le contrat local P3 est testé; l’interface complète est P6. Les essais plus larges de pertinence/generalisation et l’évaluation finale indépendante doivent être réalisés séparément, et ne sont pas assimilés à une réussite universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_p5_knowledge.py",
+        "tests/test_p7_integrated.py"
+      ]
+    },
+    {
+      "id": "O930-RAG-002",
+      "requirement": "Apprendre la recherche classique comme compétence distincte activée à la demande",
+      "phase": "P3/P4",
+      "status": "PARTIAL_NOT_VALIDATED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence.py",
+          "aam_o93/runtime.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Un mécanisme lexical de recherche existe; il n’est pas encore prouvé comme compétence observée puis acquise.",
+      "objective_acceptance_needed": "Jeu d’entraînement d’observation de recherche classique, extraction de compétence puis comparaison avec une référence.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-RAG-003",
+      "requirement": "Observer le contenu RAG par différentes sondes et produire plusieurs espaces sémantiques",
+      "phase": "P3",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_PHASE_P3",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG._aggregate",
+          "aam_o93/semantic_rag.py::SemanticRAG.search",
+          "aam_o93/runtime.py::AAMRuntime.ingest_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.search_semantic_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "P3 clôturée en portée locale bornée : 12/12 tests RAG, 24/24 tests ciblés RAG+compatibilité, régression complète 130/130, smoke CLI sélectionnant 3 espaces avec min_spaces=3, 7 entrées listées et 2 résultats; PDF compilés et 29 pages rendues/inspectées. Voir rapports_O93_0/rapport_phase_P3.md et logs/O930_P3_*.",
+      "objective_acceptance_needed": "Le contrat local P3 est testé; l’interface complète est P6. Les essais plus larges de pertinence/generalisation et l’évaluation finale indépendante doivent être réalisés séparément, et ne sont pas assimilés à une réussite universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_p5_knowledge.py",
+        "tests/test_p7_integrated.py"
+      ]
+    },
+    {
+      "id": "O930-RAG-004",
+      "requirement": "Classer les tokens invariant/varyant et calculer les distances relatives entre tokens",
+      "phase": "P3",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_PHASE_P3",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG._aggregate",
+          "aam_o93/semantic_rag.py::SemanticRAG.search",
+          "aam_o93/runtime.py::AAMRuntime.ingest_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.search_semantic_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "P3 clôturée en portée locale bornée : 12/12 tests RAG, 24/24 tests ciblés RAG+compatibilité, régression complète 130/130, smoke CLI sélectionnant 3 espaces avec min_spaces=3, 7 entrées listées et 2 résultats; PDF compilés et 29 pages rendues/inspectées. Voir rapports_O93_0/rapport_phase_P3.md et logs/O930_P3_*.",
+      "objective_acceptance_needed": "Le contrat local P3 est testé; l’interface complète est P6. Les essais plus larges de pertinence/generalisation et l’évaluation finale indépendante doivent être réalisés séparément, et ne sont pas assimilés à une réussite universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_p5_knowledge.py",
+        "tests/test_p7_integrated.py"
+      ]
+    },
+    {
+      "id": "O930-RAG-005",
+      "requirement": "Fusionner plusieurs espaces en un espace final et faire évoluer les poids itoken/vtoken",
+      "phase": "P3",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_PHASE_P3",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG._aggregate",
+          "aam_o93/semantic_rag.py::SemanticRAG.search",
+          "aam_o93/runtime.py::AAMRuntime.ingest_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.search_semantic_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "P3 clôturée en portée locale bornée : 12/12 tests RAG, 24/24 tests ciblés RAG+compatibilité, régression complète 130/130, smoke CLI sélectionnant 3 espaces avec min_spaces=3, 7 entrées listées et 2 résultats; PDF compilés et 29 pages rendues/inspectées. Voir rapports_O93_0/rapport_phase_P3.md et logs/O930_P3_*.",
+      "objective_acceptance_needed": "Le contrat local P3 est testé; l’interface complète est P6. Les essais plus larges de pertinence/generalisation et l’évaluation finale indépendante doivent être réalisés séparément, et ne sont pas assimilés à une réussite universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_p5_knowledge.py",
+        "tests/test_p7_integrated.py"
+      ]
+    },
+    {
+      "id": "O930-RAG-006",
+      "requirement": "Lecteur sémantique tenant compte du poids et du statut; nettoyer les espaces intermédiaires après fusion",
+      "phase": "P3",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_PHASE_P3",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG._aggregate",
+          "aam_o93/semantic_rag.py::SemanticRAG.search",
+          "aam_o93/runtime.py::AAMRuntime.ingest_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.search_semantic_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "P3 clôturée en portée locale bornée : 12/12 tests RAG, 24/24 tests ciblés RAG+compatibilité, régression complète 130/130, smoke CLI sélectionnant 3 espaces avec min_spaces=3, 7 entrées listées et 2 résultats; PDF compilés et 29 pages rendues/inspectées. Voir rapports_O93_0/rapport_phase_P3.md et logs/O930_P3_*.",
+      "objective_acceptance_needed": "Le contrat local P3 est testé; l’interface complète est P6. Les essais plus larges de pertinence/generalisation et l’évaluation finale indépendante doivent être réalisés séparément, et ne sont pas assimilés à une réussite universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_p5_knowledge.py",
+        "tests/test_p7_integrated.py"
+      ]
+    },
+    {
+      "id": "O930-RAG-007",
+      "requirement": "Choisir sagement le nombre d’espaces selon reproduction et généralisation",
+      "phase": "P3",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_PHASE_P3",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG.evaluate_retrieval"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "P3 clôturée en portée locale bornée : 12/12 tests RAG, 24/24 tests ciblés RAG+compatibilité, régression complète 130/130, smoke CLI sélectionnant 3 espaces avec min_spaces=3, 7 entrées listées et 2 résultats; PDF compilés et 29 pages rendues/inspectées. Voir rapports_O93_0/rapport_phase_P3.md et logs/O930_P3_*.",
+      "objective_acceptance_needed": "Le contrat local P3 est testé; l’interface complète est P6. Les essais plus larges de pertinence/generalisation et l’évaluation finale indépendante doivent être réalisés séparément, et ne sont pas assimilés à une réussite universelle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py"
+      ]
+    },
+    {
+      "id": "O930-RAG-008",
+      "requirement": "Mise à jour des sources et reconstruction intégrale/rechargement du RAG",
+      "phase": "P3/P6",
+      "status": "IMPLEMENTED_REBUILD_UPDATE_TARGETED_TESTS_PASS",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG.cleanup_intermediates",
+          "aam_o93/runtime.py::AAMRuntime.rebuild_semantic_rag"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Ingestion de source présente, boutons complets de mise à jour/reconstruction/suppression d’espaces non validés.",
+      "objective_acceptance_needed": "Tests incrémental vs reconstruction, suppressions, doublons et cohérence des poids finaux.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-RAG-009",
+      "requirement": "Observer une requête par plusieurs sondes et espaces de contexte pour extraire le contexte",
+      "phase": "P3/P4",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED_PHASES_P3_P4",
+      "traceability": {
+        "references": [
+          "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+          "aam_o93/semantic_rag.py::SemanticRAG._aggregate",
+          "aam_o93/semantic_rag.py::SemanticRAG.search",
+          "aam_o93/runtime.py::AAMRuntime.ingest_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.search_semantic_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; preuve UI bornée non-native"
+      },
+      "evidence_available": "Le chemin de requête utilise des représentations multi-sondes du contexte; la suite complète après intégration P4 passe 143/143.",
+      "objective_acceptance_needed": "Évaluation indépendante à grande échelle du routage de contexte et des citations, avec seuils préinscrits.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p3_semantic_rag.py::test_runtime_ingestion_builds_default_semantic_space_and_routes_chat",
+        "tests/test_p5_knowledge.py::Phase5KnowledgeTests.test_solve_routes_question_to_observed_content_after_observation"
+      ],
+      "last_updated_unix": 1791891146.079393
+    },
+    {
+      "id": "O930-RAG-010",
+      "requirement": "Utiliser compétences appropriées sur RAG puis traiter requête puis sélectionner compétence de réponse",
+      "phase": "P3/P4",
+      "status": "PARTIAL_INHERITED",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py",
+          "aam_o93/competence.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Orchestration héritée existe; enchaînement complet de la nouvelle lecture RAG au solveur n’est pas accepté.",
+      "objective_acceptance_needed": "Tests end-to-end traçant toutes les décisions de compétence et sources citées.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-AUTO-001",
+      "requirement": "Démarrer autonomie au lancement de AAM et rester active jusqu’à arrêt",
+      "phase": "P5/P6",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/autonomy.py::AutonomousLoop.start",
+          "aam_o93/ui.py::O93Desktop.__init__",
+          "aam_o93/runtime.py::AAMRuntime.__init__"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "L’ouverture normale de l’interface démarre la boucle autonome en tests headless; qualification native de l’application sur Windows non exécutée.",
+      "objective_acceptance_needed": "Définir les contextes CLI/UI/service et tester démarrage, absence de doublons, arrêt propre et redémarrage.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p5_autonomy_o930.py::test_normal_desktop_launch_starts_autonomy",
+        "tests/test_p6_autonomy.py::test_background_loop_self_observes_and_builds_empty_workspace_agenda",
+        "logs/O930_P5_full_regression_after_explicit_causal_gates_result.json"
+      ],
+      "last_verified_unix": 1791892644.6814177,
+      "verification_scope": "Local tested bounded; see referenced logs and tests."
+    },
+    {
+      "id": "O930-AUTO-002",
+      "requirement": "Auto-observation quand aucune requête, pause relative pendant requête utilisateur",
+      "phase": "P5",
+      "status": "PARTIAL_INHERITED",
+      "traceability": {
+        "references": [
+          "aam_o93/autonomy.py",
+          "aam_o93/runtime.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Pulses/autonomie existent, mais l’ordonnancement exact requête-idle demandé n’est pas accepté O93_0.",
+      "objective_acceptance_needed": "Tests de concurrence, priorités, latence, arrêt/reprise et preuve d’absence d’interférence.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-AUTO-003",
+      "requirement": "Mémoire propre avec contrôle d’enregistrement du raisonnement",
+      "phase": "P5",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/memory.py::O93Memory",
+          "tests/test_p0_foundation.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Mémoire d’audit minimum séparée de la mémoire de raisonnement; inventaire/observation incrémentale testés sur workspace temporaire.",
+      "objective_acceptance_needed": "Revalider isolation, confidentialité, rotation, restauration et compatibilité O93_0.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p6_autonomy.py::test_reasoning_memory_off_does_not_stop_loop_or_disable_audit",
+        "tests/test_p5_autonomy_o930.py::test_memory_content_observation_covers_more_than_one_hundred_files_incrementally",
+        "logs/O930_P5_full_regression_after_explicit_causal_gates_result.json"
+      ],
+      "last_verified_unix": 1791892644.6814177,
+      "verification_scope": "Local tested bounded; see referenced logs and tests."
+    },
+    {
+      "id": "O930-AUTO-004",
+      "requirement": "Relations causales entre auto-observation, résolution des requêtes, récompense/punition et note utilisateur",
+      "phase": "P5",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "formalisme_O93_0.tex §causalité",
+          "laboratoire_O93_0.tex §expérience autonomie"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Les transitions causales locales relient pulse/observation/feedback/agenda par hashes de parents; la note n’est pas un oracle et aucune inférence causale universelle n’est revendiquée.",
+      "objective_acceptance_needed": "Études interventionnelles/ablation, ordre causal explicite et vérification que le score ne peut être modifié directement par le modèle.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p5_autonomy_o930.py::test_feedback_reward_transition_is_hash_linked_and_reorders_diagnosis",
+        "tests/test_p5_autonomy_o930.py::test_autonomy_pulse_links_memory_observation_and_causal_transition",
+        "logs/O930_P5_autonomy_causality_contract_review_final_result.json",
+        "logs/O930_P5_full_regression_after_explicit_causal_gates_result.json"
+      ],
+      "last_verified_unix": 1791892644.6814177,
+      "verification_scope": "Local tested bounded; see referenced logs and tests."
+    },
+    {
+      "id": "O930-AUTO-005",
+      "requirement": "Adapter temporairement les poids du RAG, option activable/désactivable par l’utilisateur",
+      "phase": "P3/P5/P6",
+      "status": "NOT_IMPLEMENTED_IN_O930_CURRENT_CODE",
+      "traceability": {
+        "references": [
+          "formalisme_O93_0.tex §adaptation temporaire",
+          "interface spécifiée"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "L’adaptation temporaire et son toggle utilisateur restent à réaliser.",
+      "objective_acceptance_needed": "Tests on/off, restauration garantie, isolation entre sessions et audit de chaque changement.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-AUTO-006",
+      "requirement": "Lire toutes les mémoires, focaliser une ou plusieurs mémoires et influencer celles-ci causalement",
+      "phase": "P5/P6",
+      "status": "PARTIAL_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/memory.py",
+          "aam_o93/autonomy.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Inventaire et focus des mémoires sont testés; l’explorateur visuel complet du graphe causal et les journaux interactifs de consultation restent à livrer dans P6.",
+      "objective_acceptance_needed": "Explorateur de mémoire, journal des consultations, test de focus et causalité au niveau de chaque écriture.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p5_autonomy_o930.py::test_focus_is_persisted_prioritizes_memory_and_changes_cadence",
+        "tests/test_p5_autonomy_o930.py::test_memory_content_observation_covers_more_than_one_hundred_files_incrementally",
+        "logs/O930_P5_autonomy_causality_contract_review_final_result.json"
+      ],
+      "last_verified_unix": 1791892644.6814177,
+      "verification_scope": "Local tested bounded; see referenced logs and tests."
+    },
+    {
+      "id": "O930-BASE-001",
+      "requirement": "Compétences de base réellement générales et composables",
+      "phase": "P4",
+      "status": "IMPLEMENTED_AND_CONTRACT_TESTED_LOCAL_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence.py",
+          "tests/test_p3_competencies.py",
+          "tests/test_p4_competence_graph.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; preuve UI bornée non-native"
+      },
+      "evidence_available": "Observe, create_fingerprint, create_probes, orchestrate, logical_reasoning portent un contrat général documenté et des tests exécutables; les spécialisées ne sont plus étiquetées base par défaut.",
+      "objective_acceptance_needed": "Tests de domaine indépendants, médias variés et tâches tenues à l’écart pour qualifier le socle au-delà du contrat local.",
+      "claim_boundary": "La généralité déclarée par contrat n’implique pas universalité empirique.",
+      "tests_o930": [
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_general_base_competencies_have_basis_not_blanket_labeling",
+        "tests/test_p3_competencies.py::Phase3CompetenceTests.test_five_required_base_competencies_are_executable"
+      ],
+      "last_updated_unix": 1791891146.079393
+    },
+    {
+      "id": "O930-BASE-002",
+      "requirement": "Créer des sondes, observer, créer empreintes, orchestrer/autonome, raisonner logiquement",
+      "phase": "P2/P4/P5",
+      "status": "INHERITED_PARTIAL",
+      "traceability": {
+        "references": [
+          "aam_o93/competence.py",
+          "aam_o93/probes.py",
+          "aam_o93/observer.py",
+          "aam_o93/autonomy.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Ces capacités apparaissent dans le socle; chaque compétence de base doit être exécutée et validée dans la nouvelle chaîne.",
+      "objective_acceptance_needed": "Tests isolés puis de composition et tests end-to-end sans solution cible codée en dur.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-UI-001",
+      "requirement": "Interface chat et historique latéral, chats précédents, renommage",
+      "phase": "P6",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build",
+          "aam_o93/sessions.py::ChatSessionStore",
+          "aam_o93/ui.py::O93Desktop._new_chat",
+          "aam_o93/ui.py::O93Desktop._rename_chat"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Le panneau latéral persistant liste les discussions, crée et renomme les sessions; parcours Tk/Xvfb et persistance testés. Voir logs/P6_ui_interactive_smoke_result_retest.json et logs/P6_ui_interactive_smoke_result_extended.json. Limite: acceptance native Windows non exécutée.",
+      "objective_acceptance_needed": "Tests UI des opérations CRUD de conversations, persistance et navigation.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-002",
+      "requirement": "Réglages auto-observation↔espace sémantique, nombre de sondes auto/manuel, rechargement/MAJ RAG, sources, focus",
+      "phase": "P6",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build_settings",
+          "aam_o93/ui.py::O93Desktop._save_settings",
+          "aam_o93/ui.py::O93Desktop._rebuild_semantic",
+          "aam_o93/settings.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Réglages focus, fréquence/nombre de sondes, politique RAG, reconstruction/actualisation, sources et influence temporaire sont exposés et persistés; parcours UI testés dans logs/P6_ui_interactive_smoke_result_retest.json et logs/P6_ui_interactive_smoke_result_extended.json. Portée bornée aux options présentes.",
+      "objective_acceptance_needed": "Tests pour chaque bouton et chaque option reliant un changement UI à un effet runtime vérifiable.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-003",
+      "requirement": "Bouton + : observer, choisir compétence, focus, recherche Web",
+      "phase": "P6",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build_chat",
+          "aam_o93/ui.py::O93Desktop._plus_observe",
+          "aam_o93/ui.py::O93Desktop._plus_competence",
+          "aam_o93/ui.py::O93Desktop._configure_focus_dialog",
+          "aam_o93/ui.py::O93Desktop._plus_web_search"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Menu + observé dans le vrai shell Tk; quatre actions liées (observer, compétence, focus, Web). Smoke et contrôle permission Web PASS; l’exécution d’un fournisseur réseau distant reste hors de la portée locale P6.",
+      "objective_acceptance_needed": "Tests widget→action/runtime, contrôles d’autorisation web et gestion des erreurs.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-004",
+      "requirement": "Vue RAG : sources multimodales, politique, observation, tableau des espaces, inspection, suppression, nettoyage, MAJ, extraction compétences",
+      "phase": "P6",
+      "status": "PARTIAL_LOCAL_TESTED_BOUNDED_SOURCE_INSPECTOR_CANDIDATE_EXTRACTION",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build_knowledge",
+          "aam_o93/ui.py::O93Desktop._refresh_knowledge_sources",
+          "aam_o93/ui.py::O93Desktop._inspect_selected_knowledge_source",
+          "aam_o93/ui.py::O93Desktop._extract_competence_candidates_from_knowledge",
+          "aam_o93/runtime.py::AAMRuntime.list_observed_knowledge_sources",
+          "aam_o93/runtime.py::AAMRuntime.inspect_observed_knowledge_source",
+          "aam_o93/runtime.py::AAMRuntime.extract_competence_candidates_from_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Catalogue source en lecture seule, inspection des chunks, mise à jour/nettoyage des espaces et extraction candidate sont testés (logs/P6_source_inspector_targeted_result.json et logs/P6_source_inspector_ui_smoke_result.json). Les décodeurs multimodaux réels restent limités par les adaptateurs disponibles; les candidates ne sont pas promues automatiquement.",
+      "objective_acceptance_needed": "Audit exhaustif des boutons et parcours UI; autres formats multimodaux, fournisseurs réseau configurés, OS natif Windows et matériels physiques restent à tester.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p6_source_inspector.py",
+        "logs/P6_source_inspector_targeted_result.json"
+      ],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-005",
+      "requirement": "Vue sondes : CRUD sondes, moteur, politique empreinte, tests et affichage",
+      "phase": "P6",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build_probes",
+          "aam_o93/ui.py::O93Desktop._create_selected_probe",
+          "aam_o93/ui.py::O93Desktop._load_probe_dialog",
+          "aam_o93/ui.py::O93Desktop._edit_selected_probe",
+          "aam_o93/ui.py::O93Desktop._save_probe_edit",
+          "aam_o93/ui.py::O93Desktop._test_selected_probe",
+          "aam_o93/ui.py::O93Desktop._test_probe_ensemble",
+          "aam_o93/observer.py::O93Observer.set_fingerprint_policy",
+          "aam_o93/probes.py::ProbeDefinitionStore"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "CRUD sonde, import/export JSON, versionnement, test de sonde/ensemble et politique d’empreinte additive; tests ciblés et smoke Tk/Xvfb PASS. Voir logs/P6_probe_management_targeted_retest_result.json, logs/P6_probe_management_smoke_retest_result.json et logs/P6_ui_button_wiring_audit_result.json.",
+      "objective_acceptance_needed": "Tester davantage de modalités et plusieurs corpus, valider sur Windows natif et vérifier les capteurs physiques; les preuves actuelles sont des essais locaux bornés.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p6_probe_management.py",
+        "tests/test_p6_probe_ui_contracts.py",
+        "scripts/p6_probe_management_smoke.py",
+        "logs/P6_probe_management_targeted_retest_result.json",
+        "logs/P6_probe_management_smoke_retest_result.json",
+        "logs/P6_full_regression_probe_mgmt_result.json"
+      ],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-006",
+      "requirement": "Vue compétences : listes base/composées, CRUD, validation, tests, descriptions, arbre logique composé",
+      "phase": "P6",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence.py",
+          "aam_o93/competence_profiles.py::CompetenceProfileStore",
+          "aam_o93/ui.py::O93Desktop._build_competences",
+          "aam_o93/ui.py::O93Desktop._add_competence_profile",
+          "aam_o93/ui.py::O93Desktop._validate_competence_profile",
+          "aam_o93/competence_graph.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Listes base/composées, CRUD de fiches déclaratives, import/export, test, validation, composition arbre/séquence/condition et sélection automatique/manuelle sont couverts en portée locale. Voir tests/test_p6_competence_profiles.py, tests/test_p4_ui_integration.py, logs/P6_profile_memory_ui_smoke_result.json et la régression P6. L’acquisition et la généralisation restent des critères distincts.",
+      "objective_acceptance_needed": "Tests CRUD persistants, arbre sérialisé, conditions et reproductibilité.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-007",
+      "requirement": "Vue observation : types/sources, scores, mémoires et graphe causal, logs et tâches",
+      "phase": "P6",
+      "status": "PARTIAL_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/memory.py::O93Memory.recent_events",
+          "aam_o93/runtime.py::AAMRuntime.list_recent_memory_events",
+          "aam_o93/ui.py::O93Desktop._refresh_memory_events",
+          "aam_o93/ui.py::O93Desktop._inspect_selected_memory_event"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Les observations et sources, événements mémoire, consultations, tâches, parents causaux et intégrité des journaux sont inspectables/testés; la vue actuelle est une table de relations/événements, pas encore un graphe causal visuel riche. Voir tests/test_p6_memory_event_inspection.py et logs/P6_profile_memory_ui_smoke_result.json.",
+      "objective_acceptance_needed": "Tests des filtres et du graphe; respect vie privée; scores immuables hors événement utilisateur validé.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-008",
+      "requirement": "Vue entraînement : datasets/formats, choix champs, RAG, paramètres, lancement/pause/suivi",
+      "phase": "P6/P7",
+      "status": "UI_CONTROLS_IMPLEMENTED_LOCAL_TESTED_BOUNDED_EXECUTION_P7",
+      "traceability": {
+        "references": [
+          "aam_o93/acquisition.py",
+          "aam_o93/training.py",
+          "aam_o93/ui.py::O93Desktop._build_training",
+          "aam_o93/ui.py::O93Desktop._start_training",
+          "aam_o93/ui.py::O93Desktop._pause_training",
+          "aam_o93/ui.py::O93Desktop._stop_training",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Écran, sélection de fichiers/champs, ajout au RAG, lancement/pause/arrêt coopératifs et suivi d’état sont présents et les contrôles de cycle de vie UI sont testés. L’exécution d’un entraînement dataset complet et ses métriques appartiennent à P7 et ne sont pas revendiquées comme testées ici.",
+      "objective_acceptance_needed": "Tests UI end-to-end de chargement, validation, pause/reprise, progression et arrêt sûr.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable."
+    },
+    {
+      "id": "O930-UI-009",
+      "requirement": "Vue Internet : recherche web, bank_sites, MCP/API, sécurité et réseau",
+      "phase": "P6/P8",
+      "status": "PARTIAL_LOCAL_TESTED_BOUNDED_PERMISSION_UI_EXTERNAL_EXECUTION_DEFERRED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build_internet",
+          "aam_o93/ui.py::O93Desktop._save_settings",
+          "aam_o93/runtime.py::AAMRuntime.search_web"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "L’espace Internet expose permissions, destinations/configuration et garde-fous; les requêtes sont refusées sans permission et les tentatives sont tracées. Un fournisseur Web/MCP/API actif, les identifiants, bank_sites réel et l’acceptation réseau externe ne sont pas installés/validés dans cet environnement.",
+      "objective_acceptance_needed": "Simulateur web local, permission utilisateur, journal des accès et tests injection/sortie réseau.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable."
+    },
+    {
+      "id": "O930-UI-010",
+      "requirement": "Réglages généraux intégrant tous les contrôles",
+      "phase": "P6",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._build_settings",
+          "aam_o93/ui.py::O93Desktop._save_settings",
+          "aam_o93/settings.py::SettingsStore"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; interface O93_0 actuelle"
+      },
+      "evidence_available": "Écran de réglages généraux, validation et persistance des paramètres UI/runtime testés via logs/P6_ui_interactive_smoke_result_retest.json et logs/P6_ui_interactive_smoke_result_extended.json. Les options externes non configurées restent explicitement indisponibles, sans simulation.",
+      "objective_acceptance_needed": "Matrice paramètres→effet runtime, valeurs initiales et test d’export/import des réglages.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [],
+      "last_verified_unix": 1791897742.123573,
+      "verification_scope": "Local tested bounded; external provider/native hardware/multimodal limits remain explicitly scoped where applicable.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-DATA-001",
+      "requirement": "Prendre en charge TXT/MD/JSON/JSONL/CSV/Parquet/PDF/DOCX, images, audio et vidéo",
+      "phase": "P1/P7",
+      "status": "PARTIAL_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/observer.py",
+          "aam_o93/acquisition.py::_read_dataset",
+          "aam_o93/runtime.py::ingest_knowledge",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py",
+          "logs/O930_P7_p7_final_reader_training_regression_result.json",
+          "logs/O930_P7_cross_phase_regression_matrix_current_result.json",
+          "logs/O930_P7_source_tex_build_result.json"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Real decoders passed on the declared test matrix; unsupported schemas/codecs and ASR remain explicit limits.",
+      "objective_acceptance_needed": "Matrice de formats réellement décodés avec provenance et intégrité; étendre à d’autres producteurs et codecs.",
+      "claim_boundary": "Ne revendique pas une prise en charge universelle des formats ni une compréhension sémantique globale.",
+      "tests_o930": [
+        "tests/test_p7_dataset_service.py",
+        "tests/test_p7_integrated.py",
+        "tests/test_p7_training_control.py"
+      ],
+      "updated_unix": 1791910394.0205705
+    },
+    {
+      "id": "O930-DATA-002",
+      "requirement": "Dataset entraînement sans champs clé spécialisés (PDF/DOCX et documents libres)",
+      "phase": "P7",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/acquisition.py",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py",
+          "logs/O930_P7_p7_final_reader_training_regression_result.json",
+          "logs/O930_P7_cross_phase_regression_matrix_current_result.json",
+          "logs/O930_P7_source_tex_build_result.json"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Les modes d’observation/préparation non supervisés acceptent l’absence de clé cible sans en inventer; les PDF/DOCX décodés fournissent du texte avec provenance lorsqu’un lecteur le retourne.",
+      "objective_acceptance_needed": "Tester des corpus documentaires indépendants et distinguer préparation non supervisée d’un fit supervisé.",
+      "claim_boundary": "Ne prouve pas l’entraînement supervisé à partir de documents sans labels ni ne transforme pixels/PCM/frames en texte.",
+      "tests_o930": [
+        "tests/test_p7_dataset_service.py",
+        "tests/test_p7_integrated.py",
+        "tests/test_p7_training_control.py"
+      ],
+      "updated_unix": 1791910394.0205705
+    },
+    {
+      "id": "O930-DATA-003",
+      "requirement": "Dataset ajouté au RAG et traitement RAG avec réglages explicites",
+      "phase": "P7/P3",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/acquisition.py",
+          "aam_o93/runtime.py",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "tests/test_p7_dataset_service.py",
+          "logs/O930_P7_p7_final_reader_training_regression_result.json",
+          "logs/O930_P7_cross_phase_regression_matrix_current_result.json",
+          "logs/O930_P7_source_tex_build_result.json"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Ajout/inspection/recherche sémantique et mise à jour du RAG testés en local; la provenance et les hashes source sont contrôlés.",
+      "objective_acceptance_needed": "Vérifier la robustesse sur corpus larges/mixtes et la mise à jour incrémentale à grande échelle.",
+      "claim_boundary": "Couverture bornée aux lecteurs et corpus réellement testés.",
+      "tests_o930": [
+        "tests/test_p7_dataset_service.py",
+        "tests/test_p7_integrated.py",
+        "tests/test_p7_training_control.py"
+      ],
+      "updated_unix": 1791910394.0205705
+    },
+    {
+      "id": "O930-TRAIN-001",
+      "requirement": "Lancer/pauser/reprendre/arrêter entraînement, suivi et rapport complet",
+      "phase": "P7",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/acquisition.py",
+          "package docs/reports",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py",
+          "logs/O930_P7_p7_final_reader_training_regression_result.json",
+          "logs/O930_P7_cross_phase_regression_matrix_current_result.json",
+          "logs/O930_P7_source_tex_build_result.json"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Le contrôleur lance, pause à frontière sûre, checkpoint, reprend ou annule avec statut explicite; le smoke UI a créé et vérifié une capsule locale.",
+      "objective_acceptance_needed": "Élargir à des architectures/datasets indépendants et à un environnement de calcul dédié avant une revendication d’entraînement à grande échelle.",
+      "claim_boundary": "Ne revendique pas le grand entraînement, une convergence universelle ou une compétence parfaite sur tout domaine.",
+      "tests_o930": [
+        "tests/test_p7_dataset_service.py",
+        "tests/test_p7_integrated.py",
+        "tests/test_p7_training_control.py"
+      ],
+      "updated_unix": 1791910394.0205705
+    },
+    {
+      "id": "O930-WEB-001",
+      "requirement": "Recherche Web en compétence avec permission explicite ou règle de sollicitation autorisée",
+      "phase": "P4/P8",
+      "status": "NOT_IMPLEMENTED_AS_O930_GATE",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py",
+          "formalisme_O93_0.tex §Internet"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Aucun flux web actif ne doit être supposé à partir des seules capacités d’accès réseau du conteneur.",
+      "objective_acceptance_needed": "Fournisseur configurable, test simulé, opt-in utilisateur, liste d’hôtes, provenance et refus par défaut.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-MEM-001",
+      "requirement": "Orchestration mémoire, relations causales et journaux de consultation des mémoires",
+      "phase": "P5/P6",
+      "status": "PARTIAL_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/memory.py",
+          "aam_o93/autonomy.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Orchestration/focus et relation causale en runtime couverts localement; interface complète d’exploration visuelle non encore validée.",
+      "objective_acceptance_needed": "Tests d’événements, graphe causal, requêtes mémoire et audit vérifiable.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": [
+        "tests/test_p5_autonomy_o930.py::test_autonomy_pulse_links_memory_observation_and_causal_transition",
+        "tests/test_p5_autonomy_o930.py::test_focus_is_persisted_prioritizes_memory_and_changes_cadence",
+        "logs/O930_P5_autonomy_causality_contract_review_final_result.json"
+      ],
+      "last_verified_unix": 1791892644.6814177,
+      "verification_scope": "Local tested bounded; see referenced logs and tests."
+    },
+    {
+      "id": "O930-SEC-001",
+      "requirement": "Sécurité : permissions, réseau fermé par défaut, logs, isolation, intégrité",
+      "phase": "P8",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/contracts.py",
+          "aam_o93/memory.py",
+          "aam_o93/runtime.py",
+          "aam_o93/memory.py::O93Memory._append_chain",
+          "aam_o93/memory.py::O93Memory.write_checkpoint",
+          "aam_o93/runtime.py::AAMRuntime.dispatch_action",
+          "tests/test_p8_security.py",
+          "tests/test_p8_integration.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Current O93_0 security suite passes 20 test methods; end-to-end tests cover concurrent memory writes across processes, checkpoint symlink refusal/tamper detection, safe archives, untrusted observed content, sensor authorization and disabled/private network endpoints. Source SHA and artifact provenance test passes. This is bounded local evidence, not external certification.",
+      "objective_acceptance_needed": "Independent OS-native ACL/rollback test; configured provider endpoint and physical sensors remain P10 acceptance items.",
+      "claim_boundary": "VERIFIED_LOCAL_TESTED_BOUNDED means exactly the listed tests on the delivered local source tree; it does not imply sandboxing of trusted in-process Python handlers or external acceptance.",
+      "tests_o930": [
+        "tests/test_p8_security.py",
+        "tests/test_p8_integration.py",
+        "tests/test_p8_action_router.py",
+        "tests/test_p0_o930_artifacts.py",
+        "logs/O930_P8_resume_matrix_result.json"
+      ],
+      "last_verified_unix": 1791976369.632778,
+      "verification_scope": "Local security controls and adversarial regressions passed; externally configured providers, native OS/ACL and physical hardware are not accepted here."
+    },
+    {
+      "id": "O930-REPORT-001",
+      "requirement": "Même template rapport : description, architecture, pipeline, commandes, résultats, interprétations, conséquences, conclusions, statut",
+      "phase": "P0-P10",
+      "status": "SPECIFIED_AND_TO_BE_ENFORCED",
+      "traceability": {
+        "references": [
+          "laboratoire_O93_0.tex §template des rapports"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Le modèle de rapport est spécifié dans le laboratoire, mais les futurs rapports de chaque phase doivent l’utiliser concrètement.",
+      "objective_acceptance_needed": "Valider automatiquement les champs obligatoires des rapports de phases.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-PHASE-001",
+      "requirement": "Lire formalisme et checklists avant exécution, journaliser résultat/erreurs et mettre à jour après chaque exécution",
+      "phase": "P0-P10",
+      "status": "CONTROL_IMPLEMENTED_P0_ONLY",
+      "traceability": {
+        "references": [
+          "scripts/preflight_O93_0.py",
+          "checklist_de_travail_O93_0.json",
+          "checklists erreurs"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Le gate preflight et les checklists sont présents; les procédures d’après-exécution doivent être appliquées à chaque test.",
+      "objective_acceptance_needed": "Test du séquenceur de phases et vérification que toute exécution ajoute commande, résultat, erreurs et état de gate.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-PACK-001",
+      "requirement": "Dmodel autonome, Amodel audit et suivi avec sources/rapports/checklists",
+      "phase": "P9",
+      "status": "PACKAGING_IN_PROGRESS",
+      "traceability": {
+        "references": [
+          "dossier Dmodel_AAM_O93_0",
+          "source_inventory.json",
+          "source_review.json"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Les artefacts de base sont créés, mais les trois packages doivent encore être produits et vérifiés comme livrables distincts.",
+      "objective_acceptance_needed": "Construire ZIPs, hachage/manifeste, test d’extraction et démarrage depuis répertoire isolé.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-ENV-001",
+      "requirement": "Acceptation native Windows, matériel et accès Internet réel",
+      "phase": "P10",
+      "status": "NOT_RUN_ENVIRONMENT_LIMIT",
+      "traceability": {
+        "references": [
+          "checklist_erreurs_no_model.json::O930-ENV-001/002/003"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py (unless otherwise stated)"
+      },
+      "evidence_available": "Le conteneur actuel est Linux sans appareils/réseau configuré; pas de verdict positif ou négatif sur ces gates.",
+      "objective_acceptance_needed": "Exécution sur Windows cible et matériel autorisé, avec logs déterministes; status NOT_RUN avant cela.",
+      "claim_boundary": "La présence du symbole, du document ou d’un résultat O93 hérité n’est pas une preuve d’acceptation O93_0.",
+      "tests_o930": []
+    },
+    {
+      "id": "O930-COMP-003",
+      "requirement": "Composition de compétences en graphe séquentiel/conditionnel persistant, avec intégrité et langage de prédicats borné",
+      "phase": "P4",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence_graph.py",
+          "aam_o93/competence.py",
+          "aam_o93/runtime.py",
+          "aam_o93/cli.py",
+          "aam_o93/ui.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "onglet Compétences et éditeur JSON de graphes; test UI natif non exécuté"
+      },
+      "evidence_available": "DSL data-only step/sequence/condition, persistance hashée, traces de branches/nœuds, écriture de compte rendu, contrôle d’intégrité au rechargement et refus des types/predicats illégitimes.",
+      "objective_acceptance_needed": "Évaluation de compositions sur bibliothèque indépendante de tâches avec pré/postconditions de référence; exercice interactif de l’UI native.",
+      "claim_boundary": "La sûreté est bornée au DSL déclaré; ce n’est ni une preuve de correction de tous les graphes ni une promotion de compétence.",
+      "tests_o930": [
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_conditional_graph_runs_one_branch_and_persists_trace",
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_malformed_regex_and_inverted_range_rejected",
+        "tests/test_p4_competence_graph.py::Phase4CompetenceGraphTests.test_store_tampering_is_detected_not_silently_accepted"
+      ],
+      "last_updated_unix": 1791891146.079393
+    },
+    {
+      "id": "O930-COMP-004",
+      "requirement": "Acquisition supervisée multi-format structurée, labels explicitement déclarés, partition holdout/OOD, et replay source-off",
+      "phase": "P4",
+      "status": "IMPLEMENTED_SYNTHETIC_FIXTURE_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/acquisition.py",
+          "aam_o92/learning.py",
+          "tests/test_p4_acquisition.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "Formulaire acquisition pour JSON/JSONL/CSV/TSV; non supervisé redirigé vers observation/RAG"
+      },
+      "evidence_available": "Lecteur JSON/JSONL/CSV/TSV validé; TRAIN/VALID/HOLDOUT/OOD explicites, génération de sondes sur entrées TRAIN, jointure des labels après prédiction, capsule hashée sans lignes brutes et prédiction après suppression de la source.",
+      "objective_acceptance_needed": "Test sur datasets réels multi-domaines avec résultats de transfert préenregistrés; autres formats et contenus non structurés relèvent de P7/RAG et ne sont pas déclarés appris ici.",
+      "claim_boundary": "Les exemples d’acquisition sont des fixtures synthétiques; aucune généralisation à des datasets externes n’est revendiquée.",
+      "tests_o930": [
+        "tests/test_p4_acquisition.py::Phase4AcquisitionTests.test_structured_reader_supports_json_jsonl_csv_and_tsv",
+        "tests/test_p4_acquisition.py::Phase4AcquisitionTests.test_custom_target_key_and_partition_boundaries",
+        "tests/test_p4_acquisition.py::Phase4AcquisitionTests.test_source_off_prediction_after_dataset_removed"
+      ],
+      "last_updated_unix": 1791891146.079393
+    },
+    {
+      "id": "O930-FP-POLICY-001",
+      "requirement": "Politique d’empreinte configurable et persistante; la politique étendue doit être additive",
+      "phase": "P6",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/observer.py::O93Observer._fingerprint_bundle",
+          "aam_o93/observer.py::O93Observer.set_fingerprint_policy",
+          "aam_o93/runtime.py::AAMRuntime.update_ui_settings",
+          "aam_o93/ui.py::O93Desktop._save_fingerprint_policy"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex",
+          "formalisme_O93_0.tex §Observation et empreinte",
+          "formalisme_O93_0.tex §Chat et historique"
+        ],
+        "tests": [
+          "tests/test_p6_probe_management.py::FingerprintPolicyTests",
+          "tests/test_p6_probe_ui_contracts.py::Phase6ProbeUIContractTests.test_fingerprint_policy_has_runtime_validation_and_settings_sync"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_available": "complete_multiview est la politique par défaut; complete_multiview_extended ajoute une vue de distribution d’octets et un diagnostic à la représentation sans retirer les vues de base. Le hash brut source reste identique. Réglage synchronisé et persistant par runtime; 3 tests dédiés et smoke Xvfb réussi; régression complète 169/169.",
+      "objective_acceptance_needed": "Comparer les vues/politiques sur des corpus variés et des modalités réelles, sans confondre diagnostics structurels et compréhension sémantique.",
+      "claim_boundary": "Ceci prouve l’effet local additif sur les exemples testés; ne démontre ni identité universelle de l’empreinte ni compréhension sémantique.",
+      "tests_o930": [
+        "tests/test_p6_probe_management.py",
+        "scripts/p6_probe_management_smoke.py",
+        "logs/P6_probe_management_smoke_retest_result.json"
+      ],
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-SOURCE-011",
+      "requirement": "Inspection des sources RAG en lecture seule et proposition de compétences issues des sources observées",
+      "phase": "P6",
+      "status": "PASS_LOCAL_TESTED_BOUNDED_FULL_REGRESSION",
+      "traceability": {
+        "references": [
+          "aam_o93/runtime.py::AAMRuntime.list_observed_knowledge_sources",
+          "aam_o93/runtime.py::AAMRuntime.inspect_observed_knowledge_source",
+          "aam_o93/runtime.py::AAMRuntime.extract_competence_candidates_from_knowledge",
+          "aam_o93/ui.py::O93Desktop._build_knowledge"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex",
+          "formalisme_O93_0.tex §RAG"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_available": "Catalogue en lecture seule, inspection et extraction candidate testés (5/5 unitaires + smoke Tk/Xvfb PASS), SHA-256 source identique, candidates non exécutables/non promues, arrêt runtime confirmé; régression complète 174/174 PASS. La candidate procédurale reste heuristique et ne prouve pas un apprentissage.",
+      "objective_acceptance_needed": "Régression globale post-changement et essais de corpus/lecteurs multimodaux; aucune compréhension, reproduction ou généralisation n’est déduite de l’extraction heuristique.",
+      "claim_boundary": "Une proposition extraite d’un texte ne constitue pas une compétence acquise; l’acquisition, le replay source-off, le holdout et le transfert sont des gates distinctes.",
+      "tests_o930": [
+        "tests/test_p6_source_inspector.py",
+        "logs/P6_source_inspector_targeted_result.json",
+        "logs/P6_source_inspector_ui_smoke_result.json",
+        "logs/P6_full_regression_counter_fix_result.json",
+        "logs/P6_pdf_visual_review_result.json"
+      ],
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-COMP-PROFILE-001",
+      "requirement": "Cycle de vie persistant des fiches de compétence déclaratives via UI; cible existante seulement; aucune injection de code; validation distincte de généralisation",
+      "phase": "P6",
+      "status": "PASS_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/competence_profiles.py::CompetenceProfileStore",
+          "aam_o93/runtime.py::AAMRuntime.create_competence_profile",
+          "aam_o93/ui.py::O93Desktop._add_competence_profile",
+          "aam_o93/ui.py::O93Desktop._import_competence_profile",
+          "aam_o93/ui.py::O93Desktop._validate_competence_profile"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex",
+          "formalisme_O93_0.tex §Fiches de compétence déclaratives",
+          "laboratoire_O93_0.tex §Complément P6"
+        ],
+        "ui_reference": "Compétences > Fiches de compétences déclaratives; Ajouter/Importer/Exporter/Inspecter/Modifier/Valider/Tester/Supprimer"
+      },
+      "evidence_available": "Tests ciblés 10/10; smoke UI Tk/Xvfb passe sur tout le cycle add/inspect/validate/run/export/import/edit/delete; store hash corruption détectée; import code arbitraire rejeté; profil ne promeut jamais automatiquement la cible. Régression globale 184/184.",
+      "objective_acceptance_needed": "Comparer des compétences référencées sur des replay source-off, holdout indépendant et transferts avant d’annoncer acquisition/généralisation.",
+      "claim_boundary": "La fiche est un alias déclaratif vers une cible existante, pas une compétence nouvellement apprise; la validation de cible ne certifie pas la généralisation.",
+      "tests_o930": [
+        "tests/test_p6_competence_profiles.py",
+        "scripts/p6_ui_profile_memory_smoke.py",
+        "logs/P6_profile_memory_ui_smoke_result.json",
+        "logs/P6_profile_memory_targeted_retest.stdout.txt"
+      ],
+      "last_updated_unix": 1791897410.5626483,
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-MEMORY-CAUSE-001",
+      "requirement": "Vue read-only des événements mémoire avec distinction explicite entre chaîne prev_hash et causalité métier parent_event_hashes",
+      "phase": "P6",
+      "status": "PASS_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/memory.py::O93Memory.recent_events",
+          "aam_o93/runtime.py::AAMRuntime.list_recent_memory_events",
+          "aam_o93/ui.py::O93Desktop._refresh_memory_events",
+          "aam_o93/ui.py::O93Desktop._inspect_selected_memory_event"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex",
+          "formalisme_O93_0.tex §Table d’inspection des événements et causalité",
+          "laboratoire_O93_0.tex §Complément P6"
+        ],
+        "ui_reference": "Observation / Mémoire > Événements, chaîne d’audit et liens causaux déclarés"
+      },
+      "evidence_available": "Tests ciblés vérifient lecture bornée, intégrité complète, déclaration d’un parent causal et différence avec prev_hash; smoke UI montre le parent causal en Treeview; audit et mémoire de raisonnement PASS.",
+      "objective_acceptance_needed": "Essais sur historiques mémoire longs/volumineux et inspection de causalité réelle pendant les phases autonomie et entraînement à venir.",
+      "claim_boundary": "La chaîne hashée prouve intégrité, pas causalité métier; la causalité est exposée uniquement à partir de parents explicitement déclarés.",
+      "tests_o930": [
+        "tests/test_p6_memory_event_inspection.py",
+        "scripts/p6_ui_profile_memory_smoke.py",
+        "logs/P6_profile_memory_ui_smoke_result.json"
+      ],
+      "last_updated_unix": 1791897410.5626483,
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-WIRING-AUDIT-001",
+      "requirement": "Auditer statiquement la liaison réelle des boutons, menus et contrôles d’état UI",
+      "phase": "P6",
+      "status": "PASS_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "scripts/audit_ui_button_wiring.py",
+          "aam_o93/ui.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_available": "Audit final: 73 contrôles, aucun sans callback/menu/variable d’état; menu + lié via configure(menu=...), cases d’état persistées. Résultat logs/P6_ui_button_wiring_audit_result.json; smoke Tk/Xvfb et suite de régression référencés séparément.",
+      "objective_acceptance_needed": "Compléter les validations externes réellement disponibles à P8/P10; l’audit statique seul n’est pas une preuve d’exécution fonctionnelle universelle.",
+      "claim_boundary": "Le statut local borné ne certifie pas un fournisseur réseau ni un matériel absent.",
+      "tests_o930": [
+        "scripts/audit_ui_button_wiring.py",
+        "tests/test_p6_ui_integration.py",
+        "logs/P6_ui_button_wiring_audit_result.json",
+        "logs/P6_smoke_result_reconcile_success.json"
+      ],
+      "last_verified_unix": 1791898075.683427,
+      "verification_scope": "Local static audit plus Tk/Xvfb integration evidence; explicit scope limits apply.",
+      "evidence_runs": []
+    },
+    {
+      "id": "O930-UI-CAUSAL-GRAPH-001",
+      "requirement": "Visualiser les événements mémoire avec un graphe causal distinct de la chaîne d’intégrité",
+      "phase": "P6",
+      "status": "IMPLEMENTED_TESTED_LOCAL_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop._draw_memory_causal_graph",
+          "aam_o93/ui.py::O93Desktop._populate_memory_events",
+          "aam_o93/memory.py::O93Memory.recent_events"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py :: espace Observation / Mémoire"
+      },
+      "evidence_available": "Tests unitaires 7/7 PASS (logs/P6_causal_graph_contract_targeted_result.json). Canvas render contract checks declared causal parents only, excludes prev_hash as causality, counts off-window/invalid parents, and handles empty history. Actual Tk/Xvfb smoke PASS: 10 Canvas nodes, one explicit causal edge, integrity chain kept separate, audit/reasoning integrity PASS, runtime stopped/checkpointed. See logs/P6_causal_graph_visual_smoke_result.json. Post-graph full regression 189/189 PASS and full interactive user-path smoke PASS: logs/P6_full_regression_after_causal_graph_and_docs_result.json, logs/P6_final_full_ui_interactive_smoke_after_graph_result.json.",
+      "objective_acceptance_needed": "Smoke Tk/Xvfb with events persisted by O93Memory, click Lire le journal causal, verify visible Canvas nodes/edges and summary, then rerun full regression and render the normative documents.",
+      "claim_boundary": "Le graphe visualise les relations causales explicitement journalisées; il ne prouve pas à lui seul la validité causale externe des événements.",
+      "tests_o930": [
+        "tests/test_p6_memory_event_inspection.py"
+      ],
+      "evidence_runs": [
+        {
+          "run": "P6-causal-memory-graph-contract-tests",
+          "tests": 7,
+          "passed": 7,
+          "failed": 0,
+          "log": "logs/P6_causal_graph_contract_targeted_result.json",
+          "timestamp_unix": 1791899458.3414032
+        },
+        {
+          "run": "P6-causal-graph-actual-Tk-smoke",
+          "tests": 1,
+          "passed": 1,
+          "failed": 0,
+          "log": "logs/P6_causal_graph_visual_smoke_result.json",
+          "timestamp_unix": 1791899575.547604,
+          "scope": "Xvfb/Tk, disposable workspace, not native Windows UI certification."
+        },
+        {
+          "run": "P6-final-full-regression-after-graph",
+          "tests": 189,
+          "passed": 189,
+          "failed": 0,
+          "log": "logs/P6_full_regression_after_causal_graph_and_docs_result.json",
+          "timestamp_unix": 1791899860.7226617
+        }
+      ]
+    },
+    {
+      "id": "O930-P6-UI-GATES-CLOSURE-001",
+      "requirement": "P6 — interface à neuf espaces intégrée, persistante et auditée localement",
+      "phase": "P6",
+      "status": "IMPLEMENTED_TESTED_LOCAL_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/ui.py::O93Desktop",
+          "aam_o93/runtime.py::AAMRuntime",
+          "aam_o93/memory.py::O93Memory.recent_events"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_available": "Quatre gates UI passent dans la portée locale bornée; 189 tests/189, smoke complet Tk/Xvfb, smoke Canvas causal, audit statique 73 contrôles sans non-câblé, compilation/rendu/revue visuelle des PDF; voir closure_evidence et checklist P6.",
+      "objective_acceptance_needed": "Acceptation native Windows, fournisseurs MCP/API distants, périphériques physiques, grands corpus et entraînement réel selon les phases P7–P10.",
+      "claim_boundary": "La clôture P6 ne signifie ni réalisation complète de toutes les exigences O93_0 ni preuve de généralisation universelle. implementation_complete_claimed reste false.",
+      "tests_o930": [
+        "tests/test_p6_memory_event_inspection.py",
+        "tests/test_p6_source_inspector.py",
+        "tests/test_p6_competence_profiles.py"
+      ],
+      "evidence_runs": [
+        {
+          "run": "P6-final-regression",
+          "tests": 189,
+          "passed": 189,
+          "failed": 0,
+          "log": "logs/P6_full_regression_after_causal_graph_and_docs_result.json",
+          "timestamp_unix": 1791900641.6990798
+        },
+        {
+          "run": "P6-full-Tk-user-journey",
+          "status": "PASS",
+          "log": "logs/P6_final_full_ui_interactive_smoke_after_graph_result.json",
+          "timestamp_unix": 1791900641.6990798
+        },
+        {
+          "run": "P6-final-docs-review",
+          "status": "PASS",
+          "log": "logs/P6_release_pdf_visual_review_result.json",
+          "timestamp_unix": 1791900641.6990798
+        }
+      ]
+    },
+    {
+      "id": "O930-P7-MEDIA-READER-INTEGRATION",
+      "phase": "P7",
+      "requirement": "Actual bounded image/audio/video decoding in observation and dataset inspection; only actual OCR text may be chunked into RAG.",
+      "status": "IMPLEMENTED_TESTED_LOCAL_BOUNDED",
+      "references": [
+        "aam_o93/media_readers.py",
+        "aam_o93/observer.py",
+        "aam_o93/dataset_io.py",
+        "aam_o93/runtime.py",
+        "logs/O930_P7_media_reader_runtime_patch_result.json"
+      ],
+      "scope": "Bounded local decoder integration; not a claim of ASR, scene interpretation, device capture, or general multimodal learning.",
+      "evidence": [],
+      "timestamp_unix": 1791905531.47381,
+      "traceability": {
+        "references": [
+          "aam_o93/media_readers.py",
+          "aam_o93/observer.py",
+          "aam_o93/dataset_io.py",
+          "aam_o93/runtime.py",
+          "logs/O930_P7_media_reader_runtime_patch_result.json",
+          "tests/test_p7_dataset_service.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_summary": "Real image pixel decode, optional OCR, real audio PCM decode, real sampled video frame decode; no ASR claim. See the passing P7 reader integration tests.",
+      "updated_unix": 1791909354.6841264,
+      "evidence_available": "Bounded real image pixel decode, optional Tesseract OCR, audio PCM decode and video frame decode are connected through observer/dataset/RAG; source hashes are checked.",
+      "objective_acceptance_needed": "Extend tests to independent user-provided corpora, additional codecs and clean packaging environments; ASR/provider and physical-device validation are separate.",
+      "claim_boundary": "This does not claim ASR, generalized audio/video semantics, or physical device capture."
+    },
+    {
+      "id": "O930-P7-REAL-MEDIA-DECODER-TESTS",
+      "phase": "P7",
+      "requirement": "Validate actual bounded image, audio and video decoding, OCR-only RAG extraction, and immutable source files.",
+      "status": "PASS_LOCAL_TESTED_BOUNDED",
+      "references": [
+        "tests/test_p7_dataset_service.py",
+        "logs/O930_P7_add_real_media_reader_integration_tests_result.json"
+      ],
+      "scope": "No ASR engine claimed; decoder tests are pending execution.",
+      "evidence": [
+        {
+          "path": "logs/O930_P7_media_decoder_dataset_service_pytest_result.json",
+          "status": "PASS",
+          "details": "passed=18; failed=None; skipped=None; exit=0"
+        },
+        {
+          "path": "logs/O930_P7_media_decoder_cross_integration_pytest_result.json",
+          "status": "PASS",
+          "details": {
+            "tests_passed": 27,
+            "tests_failed": null,
+            "tests_skipped": null,
+            "tests_errors": null
+          }
+        }
+      ],
+      "timestamp_unix": 1791905606.8398037,
+      "traceability": {
+        "references": [
+          "tests/test_p7_dataset_service.py",
+          "logs/O930_P7_add_real_media_reader_integration_tests_result.json",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_summary": "Dataset service, OCR/RAG provenance, audio PCM, video frame decoding and source immutability tests pass; no ASR or generalized semantic understanding is claimed.",
+      "updated_unix": 1791909354.6841285,
+      "evidence_available": "18 dataset-service tests and 27 cross-integration tests pass; the tests exercise real local decoders and source immutability.",
+      "objective_acceptance_needed": "Measure quality/transfer on independently sourced media and additional valid/corrupt codec variants.",
+      "claim_boundary": "Successful pixel/PCM/frame decoding is not evidence of universal semantic understanding or ASR."
+    },
+    {
+      "id": "O930-P7-MEDIA_DECODER_SYNTAX_CHECK",
+      "phase": "P7",
+      "requirement": "Python syntax validation before executing media decoder integration tests.",
+      "status": "PASS",
+      "references": [
+        "aam_o93/media_readers.py",
+        "aam_o93/observer.py",
+        "aam_o93/dataset_io.py",
+        "aam_o93/runtime.py",
+        "tests/test_p7_dataset_service.py",
+        "logs/O930_P7_media_decoder_syntax_check_result.json"
+      ],
+      "scope": "Syntax only; no semantic/decoder capability claim.",
+      "timestamp_unix": 1791905640.1864629,
+      "traceability": {
+        "references": [
+          "aam_o93/media_readers.py",
+          "aam_o93/observer.py",
+          "aam_o93/dataset_io.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py",
+          "logs/O930_P7_media_decoder_syntax_check_result.json"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_summary": "Syntax check passed before media integration tests; syntax alone is not a capability claim.",
+      "updated_unix": 1791909354.6841292,
+      "evidence_available": "Python syntax checks passed for reader/runtime/test modules before integration tests.",
+      "objective_acceptance_needed": "Behavioral coverage is supplied by separate test records; syntax alone is never sufficient.",
+      "claim_boundary": "No capability claim follows from syntax validation alone."
+    },
+    {
+      "id": "O930-P7-DOC-PATCH-SCRIPT-SYNTAX-001",
+      "phase": "P7",
+      "requirement": "Document maintenance execution and preservation of normative source integrity.",
+      "status": "RESOLVED_RETEST_PASS",
+      "references": [
+        "logs/O930_P7_media_docs_patch_initial_syntax_error_result.json",
+        "laboratoire_O93_0.tex",
+        "formalisme_O93_0.tex",
+        "logs/O930_P7_media_docs_patch_script_syntax_retest_result.json"
+      ],
+      "scope": "Tooling-only failure; no source file write occurred.",
+      "timestamp_unix": 1791905887.1529162,
+      "evidence": [
+        {
+          "path": "logs/O930_P7_media_docs_patch_script_syntax_retest_result.json",
+          "status": "PASS"
+        }
+      ],
+      "traceability": {
+        "references": [
+          "logs/O930_P7_media_docs_patch_initial_syntax_error_result.json",
+          "laboratoire_O93_0.tex",
+          "formalisme_O93_0.tex",
+          "logs/O930_P7_media_docs_patch_script_syntax_retest_result.json",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_available": "The maintenance script syntax retest passed; its first failed attempt did not write normative sources.",
+      "objective_acceptance_needed": "Keep maintenance scripts syntax-checked before use and preserve every failed attempt in the log.",
+      "claim_boundary": "This is tooling integrity evidence, not model capability evidence."
+    },
+    {
+      "id": "O930-P7-MEDIA-DECODER-DOCS",
+      "phase": "P7",
+      "requirement": "Normative contracts and laboratory report for real media decoder integration and bounded Parquet fallback.",
+      "status": "PASS_TEX_COMPILE_BOUNDED",
+      "references": [
+        "laboratoire_O93_0.tex",
+        "formalisme_O93_0.tex",
+        "logs/O930_P7_media_docs_patch_execution_result.json",
+        "logs/O930_P7_media_decoder_dataset_service_pytest_result.json",
+        "logs/O930_P7_media_decoder_cross_integration_pytest_result.json",
+        "logs/O930_P7_media_docs_latex_compile_bytesafe_result.json",
+        "logs/O930_P7_media_docs_escape_inline_code_result.json",
+        "logs/O930_P7_media_docs_latex_compile_retest_result.json"
+      ],
+      "scope": "Real bounded pixel/PCM/frame decode; OCR-only RAG; ASR not configured.",
+      "timestamp_unix": 1791905966.2298949,
+      "evidence": [
+        {
+          "path": "logs/O930_P7_media_docs_latex_compile_bytesafe_result.json",
+          "status": "FAIL"
+        },
+        {
+          "path": "logs/O930_P7_media_docs_latex_compile_retest_result.json",
+          "status": "PASS"
+        }
+      ],
+      "traceability": {
+        "references": [
+          "laboratoire_O93_0.tex",
+          "formalisme_O93_0.tex",
+          "logs/O930_P7_media_docs_patch_execution_result.json",
+          "logs/O930_P7_media_decoder_dataset_service_pytest_result.json",
+          "logs/O930_P7_media_decoder_cross_integration_pytest_result.json",
+          "logs/O930_P7_media_docs_latex_compile_bytesafe_result.json",
+          "logs/O930_P7_media_docs_escape_inline_code_result.json",
+          "logs/O930_P7_media_docs_latex_compile_retest_result.json",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_summary": "Normative TeX sources compile in two passes with exit code 0; PDF visual inspection is intentionally not a P7 acceptance gate.",
+      "updated_unix": 1791909354.6841297,
+      "evidence_available": "The two normative TeX sources compile with exit code 0 after the source correction; no fatal TeX error remains in the build log.",
+      "objective_acceptance_needed": "Recompile in a clean release package and retain exact compiler output and exit code.",
+      "claim_boundary": "PDF visual inspection is not asserted here; reader/decoder scope remains bounded as specified."
+    },
+    {
+      "id": "O930-P7-LATEX-COMPILE-RUNNER-DECODE-001",
+      "phase": "P7",
+      "requirement": "Reliable LaTeX build evidence with exact process exit status.",
+      "status": "RESOLVED_RETEST_PASS",
+      "references": [
+        "logs/O930_P7_media_docs_compile_runner_decode_failure_result.json",
+        "logs/O930_P7_media_docs_latex_compile_retest_result.json"
+      ],
+      "scope": "Runner encoding fault; TeX result unknown.",
+      "timestamp_unix": 1791906073.1025891,
+      "evidence": [
+        {
+          "path": "logs/O930_P7_media_docs_latex_compile_retest_result.json",
+          "status": "PASS"
+        }
+      ],
+      "traceability": {
+        "references": [
+          "logs/O930_P7_media_docs_compile_runner_decode_failure_result.json",
+          "logs/O930_P7_media_docs_latex_compile_retest_result.json",
+          "aam_o93/dataset_io.py",
+          "aam_o93/media_readers.py",
+          "aam_o93/runtime.py",
+          "tests/test_p7_dataset_service.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py"
+      },
+      "evidence_summary": "The byte-safe compile retest returned exit code 0 and persisted raw output bytes; prior decoder failure remains historical.",
+      "updated_unix": 1791909354.68413,
+      "evidence_available": "The initial output-decoding failure is historical; a later byte-safe build retest returned exit code 0 and persisted output bytes.",
+      "objective_acceptance_needed": "Repeat source compilation from the distributable package using the recorded command.",
+      "claim_boundary": "A successful TeX build validates document compilation only, not model behavior."
+    },
+    {
+      "id": "O930-P8-ROUTER-001",
+      "requirement": "Contrat d’action commun et traçabilité causale pour actions UI, CLI et cycles d’autonomie",
+      "phase": "P8",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "traceability": {
+        "references": [
+          "aam_o93/contracts.py::ActionEnvelope",
+          "aam_o93/runtime.py::AAMRuntime.dispatch_action",
+          "aam_o93/ui.py::O93Desktop._execute_action",
+          "aam_o93/cli.py::_route",
+          "aam_o93/runtime.py::AAMRuntime.autonomy_step",
+          "tests/test_p8_action_router.py"
+        ],
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ],
+        "ui_reference": "aam_o93/ui.py; O93Desktop._execute_action and O93Desktop._on_session_selected"
+      },
+      "evidence_available": "Action IDs checked against the registry; unregistered UI/CLI action IDs: none. Dispatch start/completion/failure and domain events preserve causal references. Persistent chat selection is now audited. Ten action-router test methods and the whole 30-module isolated matrix pass.",
+      "objective_acceptance_needed": "Native OS/ACL validation and independent external review remain under P10; this does not sandbox trusted in-process handlers.",
+      "tests_o930": [
+        "tests/test_p8_action_router.py",
+        "logs/O930_P8_action_surface_static_audit.json",
+        "logs/O930_P8_resume_matrix_result.json"
+      ],
+      "last_verified_unix": 1791976369.632778,
+      "verification_scope": "Local tested bounded; no external acceptance is inferred.",
+      "claim_boundary": "The router is a common audit/causality layer. requested_capabilities are not permission grants; actual permissions remain enforced in target services."
+    },
+    {
+      "id": "O930-P9-PREREG-001",
+      "feature": "Protocole preregistré P9 V2 : intégrité des preuves, répétabilité cinq graines, capsules source-off et non-promotion expérimentale",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "phase": "P9",
+      "references": [
+        "tests/test_p9_preregistered_v2_integrity.py",
+        "protocols/P9_preregistered_capacity_protocol_v2.json",
+        "runs/P9_capacity/preregistered02_aggregate.json",
+        "logs/O930_P9_preregistered_v2_integrity_result.json"
+      ],
+      "verification_scope": "Test de lecture seule uniquement : vérifie les hashes et déclarations des cinq runs préenregistrés. Le dataset de petite taille n’autorise ni promotion de compétence ni conclusion générale.",
+      "last_verified_unix": 1791976450.3892353,
+      "requirement": "Protocole preregistré P9 V2 : intégrité des preuves, répétabilité cinq graines, capsules source-off et non-promotion expérimentale",
+      "traceability": {
+        "references": [
+          "tests/test_p9_preregistered_v2_integrity.py",
+          "protocols/P9_preregistered_capacity_protocol_v2.json",
+          "runs/P9_capacity/preregistered02_aggregate.json",
+          "logs/O930_P9_preregistered_v2_integrity_result.json"
+        ],
+        "phase": "P9",
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ]
+      },
+      "objective_acceptance_needed": "Cette preuve reste bornée au contrôle local référencé; tests natifs, capteurs, service réseau réel et acceptation externe demeurent à exécuter dans la phase P10.",
+      "evidence_available": "Test de lecture seule uniquement : vérifie les hashes et déclarations des cinq runs préenregistrés. Le dataset de petite taille n’autorise ni promotion de compétence ni conclusion générale."
+    },
+    {
+      "id": "O930-P9-PREFLIGHT-001",
+      "feature": "Préflight de phase reconnait les statuts de clôture bornée O93_0",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "phase": "P9",
+      "references": [
+        "scripts/preflight_O93_0.py",
+        "tests/test_p9_preflight_status_vocabulary.py",
+        "logs/O930_P9_package_preflight_final.json",
+        "logs/O930_P9_preflight_status_test_result.json"
+      ],
+      "verification_scope": "P8/P9/P10 sont discriminés sans avancer de phase; l’acceptation de statut borné est explicitement testée localement.",
+      "last_verified_unix": 1791976724.7775319,
+      "requirement": "Préflight de phase reconnait les statuts de clôture bornée O93_0",
+      "traceability": {
+        "references": [
+          "scripts/preflight_O93_0.py",
+          "tests/test_p9_preflight_status_vocabulary.py",
+          "logs/O930_P9_package_preflight_final.json",
+          "logs/O930_P9_preflight_status_test_result.json"
+        ],
+        "phase": "P9",
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ]
+      },
+      "objective_acceptance_needed": "Cette preuve reste bornée au contrôle local référencé; tests natifs, capteurs, service réseau réel et acceptation externe demeurent à exécuter dans la phase P10.",
+      "evidence_available": "P8/P9/P10 sont discriminés sans avancer de phase; l’acceptation de statut borné est explicitement testée localement."
+    },
+    {
+      "id": "O930-P9-MANIFEST-001",
+      "feature": "Manifestes SHA-256 non récursifs et nettoyés des artefacts temporaires",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "phase": "P9",
+      "references": [
+        "scripts/o930_p9_refresh_manifests.py",
+        "scripts/verify_all_manifests.py",
+        "logs/O930_P9_manifest_refresh_result.json",
+        "MANIFEST_SHA256.json",
+        "PACKAGE_MANIFEST_SHA256.json"
+      ],
+      "verification_scope": "Les manifestes du répertoire de travail sont cohérents; la porte P9 exige encore un contrôle après extraction ZIP propre.",
+      "last_verified_unix": 1791977339.5455086,
+      "evidence_available": "Two synchronized SHA-256 manifests passed in the clean-extracted candidate before and after targeted tests; final archive-specific post-extraction receipts are in the companion follow-up package and detached manifest.",
+      "objective_acceptance_needed": "Retest of the final exact archives is referenced by the final release-validation receipt; external P10 conditions remain separate.",
+      "requirement": "Manifestes SHA-256 non récursifs et nettoyés des artefacts temporaires",
+      "traceability": {
+        "references": [
+          "scripts/o930_p9_refresh_manifests.py",
+          "scripts/verify_all_manifests.py",
+          "logs/O930_P9_manifest_refresh_result.json",
+          "MANIFEST_SHA256.json",
+          "PACKAGE_MANIFEST_SHA256.json"
+        ],
+        "phase": "P9",
+        "specification": [
+          "formalisme_O93_0.tex",
+          "laboratoire_O93_0.tex"
+        ]
+      }
+    },
+    {
+      "id": "O930-P9-CANDIDATE-PACKAGE-001",
+      "feature": "Archive modèle candidate : extraction propre, manifestes, auto-status et non-régression ciblée",
+      "status": "VERIFIED_LOCAL_TESTED_BOUNDED",
+      "phase": "P9",
+      "references": [
+        "logs/O930_P9_candidate/O930_P9_candidate_validation.json",
+        "logs/O930_P9_candidate/clean_manifest_verify.stdout.txt",
+        "logs/O930_P9_candidate/runtime_status_smoke.stdout.txt",
+        "logs/O930_P9_candidate/clean_extract_targeted_tests.stdout.txt",
+        "logs/O930_P9_candidate/post_test_clean_manifest_verify.stdout.txt"
+      ],
+      "verification_scope": "Candidat uniquement; le hash final sera recalculé après synchronisation des documents et des trois paquets.",
+      "last_verified_unix": 1791977339.5455086,
+      "requirement": "Packaging, clean extraction, SHA-256 manifests, CLI status smoke and targeted regression (final archive-specific receipt in companion package)",
+      "traceability": {
+        "references": [
+          "scripts/o930_p9_refresh_manifests.py",
+          "scripts/verify_all_manifests.py",
+          "verify_manifest.py",
+          "logs/O930_P9_candidate/O930_P9_candidate_validation.json",
+          "logs/O930_P9_closure_result.json",
+          "suivi_model_AAM_O93_0.zip::release_validation/final_package_validation.json"
+        ],
+        "phase": "P9"
+      },
+      "evidence_available": "Candidate model ZIP passed clean extraction, two manifest verifiers, CLI status and 46 tests + 5 subtests; final ZIP-specific hash and clean-extract receipts are included in the companion follow-up and detached sidecar.",
+      "objective_acceptance_needed": "Native OS/device/provider acceptance is P10 and remains unrun."
+    }
+  ],
+  "source_review_facts": {
+    "key_sources_reviewed": 14,
+    "python_modules_ast_indexed": 40,
+    "symbols_indexed": 572,
+    "file_entries_in_recursively_expanded_inventory": 1616,
+    "nested_archives_recursed": 8,
+    "scope_warning": "Binary assets were inventoried and hashed; this review does not claim manual semantic understanding of every binary byte/image or every historical report."
+  },
+  "methods": {
+    "status_semantics": {
+      "INHERITED_PARTIAL_NOT_ACCEPTED_FOR_O930": "Code historique observé; O93_0 acceptation non réalisée.",
+      "NOT_IMPLEMENTED_IN_O930_CURRENT_CODE": "Aucun mécanisme équivalent repéré dans le pipeline actuel.",
+      "SPECIFIED_NOT_IMPLEMENTED_AS_O930_GATE": "Exigence formalisée; implémentation/test à venir.",
+      "NOT_RUN_ENVIRONMENT_LIMIT": "Non testé dans l’environnement fourni; ne signifie ni succès ni échec."
+    },
+    "no_cheating": "Tests de capacité différés sur données tenues à l’écart; ne pas intégrer les réponses attendues dans le code du modèle."
+  },
+  "history": [
+    {
+      "event": "registry_created",
+      "timestamp_unix": 1791886981.7187903,
+      "detail": "Initial baseline, before P0 gates can be closed."
+    },
+    {
+      "event": "whole_archive_audit_pass",
+      "timestamp_unix": 1791887242.2506428,
+      "evidence": "source_corpus_audit.json",
+      "status": "PASS_WITH_EXPLICIT_LIMITS"
+    },
+    {
+      "event": "P0_test_attempt_failed_due_to_stale_historical_phase_assertion",
+      "timestamp_unix": 1791887324.5381074,
+      "run": 105,
+      "pass": 104,
+      "fail": 1,
+      "error_registry": "O930-TEST-001"
+    },
+    {
+      "event": "P0_completed",
+      "timestamp_unix": 1791887386.7683237,
+      "evidence": "rapports_O93_0/rapport_phase_P0.md",
+      "tests_passed": 105
+    },
+    {
+      "event": "P1_started",
+      "timestamp_unix": 1791887386.7683237,
+      "evidence": "checklist_de_travail_O93_0.json"
+    },
+    {
+      "event": "P1_targeted_observer_tests_pass",
+      "timestamp_unix": 1791887562.4109094,
+      "run": 23,
+      "pass": 23,
+      "fail": 0,
+      "status": "PASS_TARGETED",
+      "phase_remains": "IN_PROGRESS"
+    },
+    {
+      "phase": "P1",
+      "operation": "P1-full-regression",
+      "status": "PASS_FULL_REGRESSION_BOUNDED",
+      "timestamp_unix": 1791887654.6774468,
+      "detail": "112/112 tests pass. P1 complete in current local environment only; hardware-native acceptance remains NOT_RUN."
+    },
+    {
+      "phase": "P2",
+      "operation": "P2-probe-engine-inspection-and-tests",
+      "status": "BLOCKED_PREFLIGHT",
+      "timestamp_unix": 1791887673.0159817,
+      "detail": "Dependency status semantics too strict; logged as O930-WORKFLOW-001. No product code was executed or changed in P2."
+    },
+    {
+      "phase": "P2",
+      "operation": "Normalize phase status semantics",
+      "status": "FIX_GATE_SEMANTICS_RETEST_REQUIRED",
+      "timestamp_unix": 1791887683.3773606,
+      "detail": "Phase P1 marked COMPLETE with explicit LOCAL_BOUNDED scope; no claim about physical-hardware acceptance."
+    },
+    {
+      "phase": "P2",
+      "operation": "P2-iterative-competence-gate-tests",
+      "status": "FAIL_RETEST_REQUIRED",
+      "timestamp_unix": 1791887932.227241,
+      "detail": "New adaptive competence-evidence test exposed early exit at candidate cap; no acceptance assigned."
+    },
+    {
+      "phase": "P2",
+      "operation": "P2-iterative-competence-gate-retest",
+      "status": "PASS_TARGETED_RETEST",
+      "timestamp_unix": 1791887974.829935,
+      "detail": "15/15 targeted tests pass. Probe IDs are conflict-safe, diversity and marginal gain recorded, user-stop/budget distinct, exact reproduction and holdout evidence hook added. Full suite pending."
+    },
+    {
+      "phase": "P2",
+      "operation": "P2-full-regression",
+      "status": "FAIL_TEST_HARNESS_STALE_EXPECTATION",
+      "timestamp_unix": 1791888001.7832537,
+      "detail": "Only failure was P0 artifact test expecting P1 despite valid current P2; no model/runtime failure indicated."
+    },
+    {
+      "timestamp_unix": 1791888746.5786078,
+      "phase": "P3",
+      "operation": "P3-semantic-rag-targeted-regression-ablation",
+      "status": "PASS_TARGETED",
+      "tests": {
+        "passed": 21,
+        "failed": 0
+      },
+      "log": "logs/O930_P3_ablation_targeted_tests.txt",
+      "note": "Aucune exigence déclarée complète sur le seul passage ciblé."
+    },
+    {
+      "timestamp_unix": 1791888788.981431,
+      "phase": "P3",
+      "operation": "P3-distance-cleanup-contract-retest",
+      "status": "PASS_TARGETED",
+      "tests": {
+        "passed": 11,
+        "failed": 0
+      },
+      "log": "logs/O930_P3_distance_cleanup_targeted_tests.txt",
+      "note": "Régression complète encore requise."
+    },
+    {
+      "timestamp_unix": 1791888844.154601,
+      "phase": "P3",
+      "operation": "P3-full-regression",
+      "status": "PASS_FULL_LOCAL_REGRESSION",
+      "tests": {
+        "passed": 129,
+        "failed": 0
+      },
+      "log": "logs/O930_P3_full_regression.txt",
+      "note": "Le choix guidé par validation du nombre d’espaces reste à développer/tester; aucune généralisation universelle affirmée."
+    },
+    {
+      "timestamp_unix": 1791888945.8622575,
+      "phase": "P3",
+      "operation": "P3-validation-guided-space-selection-targeted",
+      "status": "PASS_TARGETED",
+      "tests": {
+        "passed": 24,
+        "failed": 0
+      },
+      "log": "logs/O930_P3_validation_selection_targeted.txt",
+      "note": "P3 n’est pas fermé avant le test CLI et la régression totale post-sélection."
+    },
+    {
+      "timestamp_unix": 1791889051.0836883,
+      "phase": "P3",
+      "operation": "P3-document-and-cli-retest",
+      "status": "PASS_DOCUMENTS_AND_CLI_SMOKE",
+      "log": "logs/O930_P3_cli_smoke_retry.txt",
+      "note": "La régression intégrale doit être réexécutée après le patch de sélection du nombre d’espaces."
+    },
+    {
+      "timestamp_unix": 1791889109.9822428,
+      "phase": "P3",
+      "operation": "P3-min-space-selection-retest",
+      "status": "PASS_TARGETED_AND_CLI_SMOKE",
+      "tests": {
+        "unit_passed": 12,
+        "unit_failed": 0,
+        "cli_smoke_passed": 3
+      },
+      "log": "logs/O930_P3_min_space_cli_smoke.txt",
+      "note": "Régression complète après sélection/plancher reste requise."
+    },
+    {
+      "timestamp_unix": 1791889154.870474,
+      "phase": "P3",
+      "operation": "P3-post-selection-full-regression",
+      "status": "PASS_FULL_LOCAL_REGRESSION",
+      "tests": {
+        "passed": 130,
+        "failed": 0
+      },
+      "log": "logs/O930_P3_post_selection_full_regression.txt",
+      "note": "P3 peut être clôturée seulement après les gates / rapport et revue documentaire; ceci ne déclare pas la version O93_0 globale complète."
+    },
+    {
+      "timestamp_unix": 1791889471.374947,
+      "operation": "close-P3-local-tested-bounded",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "report": "rapports_O93_0/rapport_phase_P3.md",
+      "evidence": [
+        "logs/O930_P3_min_space_targeted.txt",
+        "logs/O930_P3_validation_selection_targeted.txt",
+        "logs/O930_P3_post_selection_full_regression.txt",
+        "logs/O930_P3_min_space_cli_smoke.txt"
+      ],
+      "global_completeness_claimed": false
+    },
+    {
+      "timestamp_unix": 1791891146.079393,
+      "phase": "P4",
+      "operation": "close-P4-local-tested-bounded",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "tests": {
+        "targeted_passed": 27,
+        "full_regression_passed": 143
+      },
+      "source_archive_sha256": "add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38",
+      "evidence": [
+        "logs/O930_P4_targeted_regression_reverified_result.json",
+        "logs/O930_P4_full_regression_reverified_result.json",
+        "logs/O930_P4_final_formalism_pass2_result.json",
+        "logs/O930_P4_final_laboratory_pass4_result.json",
+        "logs/O930_P4_render_formalism_final_result.json",
+        "logs/O930_P4_final_laboratory_render2_result.json"
+      ],
+      "global_completeness_claimed": false
+    },
+    {
+      "event": "phase_transition_P4_to_P5",
+      "timestamp_unix": 1791891304.807907,
+      "detail": "P4 gates local bounded passed; P5 opened with all gates pending; see logs/O930_P4_to_P5_transition_preflight.json"
+    },
+    {
+      "phase": "P5",
+      "operation": "full-regression-after-causal-race-guards",
+      "status": "PASS",
+      "counts": {
+        "run": 151,
+        "passed": 151,
+        "failed": 0
+      },
+      "evidence": [
+        "logs/O930_P5_full_regression_after_causal_race_guards_preflight_retest.json",
+        "logs/O930_P5_full_regression_after_causal_race_guards_result.json",
+        "logs/O930_P5_full_regression_after_causal_race_guards.stdout.txt",
+        "logs/O930_P5_full_regression_after_causal_race_guards.stderr.txt"
+      ],
+      "timestamp_unix": 1791891979.5424216,
+      "note": "P5 remains IN_PROGRESS until each autonomy gate is independently accepted."
+    },
+    {
+      "event": "p5_causal_evidence_reconciled",
+      "timestamp_unix": 1791892626.4011428,
+      "regression": "logs/O930_P5_full_regression_after_explicit_causal_gates_result.json",
+      "targeted": "logs/O930_P5_causal_memory_gate_tests_retest3_result.json",
+      "contract_review": "logs/O930_P5_autonomy_causality_contract_review_final_result.json",
+      "note": "P5 gates individuels marqués PASS_LOCAL_TESTED_BOUNDED; phase remains IN_PROGRESS until final document compile/rerender and closure audit."
+    },
+    {
+      "event": "p5_causal_evidence_reconciled",
+      "timestamp_unix": 1791892644.6814177,
+      "regression": "logs/O930_P5_full_regression_after_explicit_causal_gates_result.json",
+      "targeted": "logs/O930_P5_causal_memory_gate_tests_retest3_result.json",
+      "contract_review": "logs/O930_P5_autonomy_causality_contract_review_final_result.json",
+      "note": "P5 gates individuels marqués PASS_LOCAL_TESTED_BOUNDED; phase remains IN_PROGRESS until final document compile/rerender and closure audit."
+    },
+    {
+      "event": "phase_closed",
+      "phase": "P5",
+      "timestamp_unix": 1791893471.5373569,
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "evidence": [
+        "evidence/o930_p5_closure_audit.json",
+        "logs/O930_P5_causal_memory_gate_tests_retest3_result.json",
+        "logs/O930_P5_autonomy_causality_contract_review_final_result.json",
+        "logs/O930_P5_full_regression_after_explicit_causal_gates_result.json",
+        "evidence/o930_p5_document_build.json"
+      ]
+    },
+    {
+      "event": "phase_opened",
+      "phase": "P6",
+      "timestamp_unix": 1791893527.5617664,
+      "status": "IN_PROGRESS",
+      "preflight": "logs/O930_P5_to_P6_transition_preflight.json",
+      "receipt": "logs/O930_P5_to_P6_transition_receipt.json",
+      "dependencies": {
+        "P5": "COMPLETE_LOCAL_TESTED_BOUNDED"
+      }
+    },
+    {
+      "event": "post_closure_document_reconciliation",
+      "timestamp_unix": 1791893586.5949607,
+      "phase_closed": "P5",
+      "current_phase": "P6",
+      "status": "PASS_DOCUMENTARY_RECONCILIATION",
+      "evidence": "evidence/P5_postclosure_document_reconciliation.json",
+      "note": "N’a pas changé les statuts des phases; remplace seulement la formulation obsolète qui présentait P5 comme conditionnelle."
+    },
+    {
+      "event": "P6_reconciled_P5_report_wording",
+      "timestamp_unix": 1791893604.3387377,
+      "status": "PASS",
+      "evidence": "logs/O930_P6_reconcile_report_wording_result.json",
+      "note": "Aucun statut de phase ni gate modifié; seule la conclusion obsolète de l’addendum P5 a été corrigée."
+    },
+    {
+      "timestamp_unix": 1791895969.386147,
+      "operation": "P6-source-inspector-and-candidate-extraction-targeted-tests",
+      "status": "PASS_TARGETED_BOUNDED",
+      "evidence": "logs/P6_source_inspector_targeted_result.json",
+      "note": "P6 remains in progress; no gate is closed by this targeted run."
+    },
+    {
+      "timestamp_unix": 1791896196.5853994,
+      "operation": "P6 source inspector actual UI smoke reconciliation",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_source_inspector_ui_smoke_preflight.json",
+        "logs/P6_source_inspector_ui_smoke_result.json",
+        "logs/P6_source_inspector_targeted_result.json"
+      ],
+      "note": "P6 demeure IN_PROGRESS; les gates globales ne sont pas automatiquement clôturées par ce sous-lot."
+    },
+    {
+      "timestamp_unix": 1791896345.9050298,
+      "operation": "P6 document compile + rendered visual review",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_final_doc_compile_retest_result.json",
+        "logs/P6_pdf_visual_review_result.json"
+      ],
+      "note": "La compilation/rendu des documents est validé; la régression reste séparée et pendante."
+    },
+    {
+      "timestamp_unix": 1791896433.0497317,
+      "operation": "correct strict verified requirement count",
+      "status": "CORRECTED_PENDING_TARGETED_AND_FULL_RETEST",
+      "evidence": [
+        "tests/test_p0_o930_artifacts.py::test_proof_registry_traceability_and_conservative_status"
+      ],
+      "note": "Computed exact-status count from entries; verified_o930_requirements=4. Other statuses remain listed per entry and are not counted as strictly verified."
+    },
+    {
+      "timestamp_unix": 1791896522.265713,
+      "operation": "P6 full regression after source inspector and evidence count correction",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_full_regression_counter_fix_result.json",
+        "logs/P6_registry_count_targeted_retest_result.json"
+      ],
+      "note": "174/174 tests pass. No phase transition: P6 remains current and open."
+    },
+    {
+      "timestamp_unix": 1791897742.123573,
+      "operation": "P6 static audit, error ledger and UI registry reconciliation",
+      "status": "PASS_BOUNDED_PENDING_FINAL_REGRESSION",
+      "evidence": [
+        "logs/P6_ui_button_wiring_audit_result.json",
+        "logs/P6_tex_double_backslash_source_check.stdout.txt",
+        "logs/P6_tex_compile_summary.json",
+        "logs/P6_reinspect_ui_wiring_audit.stdout.txt",
+        "logs/P6_ui_audit_inspection_initial_failure.json"
+      ],
+      "note": "Resolved TeX double-backslash incident only after a zero-hit source scan and two successful LaTeX passes per document. Updated UI requirement statuses without claiming global completeness or external-provider acceptance."
+    },
+    {
+      "timestamp_unix": 1791897838.5053496,
+      "operation": "P6 final regression runner syntax failure",
+      "status": "FAIL_MAINTENANCE_SCRIPT",
+      "evidence": [
+        "logs/P6_final_full_regression_driver_initial_failure.json"
+      ],
+      "note": "No tests launched. New runner must be syntax-checked and successful regression recorded before any gate closure."
+    },
+    {
+      "timestamp_unix": 1791897905.0928328,
+      "operation": "full unittest regression after final UI wiring/TeX reconciliation",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_final_regression_preflight.json",
+        "logs/P6_final_full_regression.stdout.txt",
+        "logs/P6_final_full_regression.stderr.txt",
+        "logs/P6_final_full_regression_result.json"
+      ],
+      "note": "Full test suite executed; P6 remains current and open."
+    },
+    {
+      "timestamp_unix": 1791898075.683427,
+      "operation": "reconcile final Tk lifecycle smoke",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_final_autostart_stop_smoke_result.json",
+        "logs/P6_smoke_result_reconcile_success.json"
+      ],
+      "note": "Actual Tk autonomy life cycle was verified; global completion and external-device/provider acceptance are not claimed."
+    },
+    {
+      "timestamp_unix": 1791898145.0638902,
+      "operation": "final full Tk interactive smoke initial attempt",
+      "status": "FAIL_REVIEW_REQUIRED",
+      "evidence": [
+        "logs/P6_final_interactive_ui_smoke_initial_failure_result.json"
+      ],
+      "note": "Full UI interaction path not accepted due to initial catalog readiness timeout; the issue is an integration diagnostic, not a global model-capability verdict."
+    },
+    {
+      "timestamp_unix": 1791898530.5740433,
+      "operation": "full unittest regression after final UI wiring/TeX reconciliation",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_final_regression_preflight.json",
+        "logs/P6_final_full_regression.stdout.txt",
+        "logs/P6_final_full_regression.stderr.txt",
+        "logs/P6_final_full_regression_result.json"
+      ],
+      "note": "Full test suite executed; P6 remains current and open."
+    },
+    {
+      "timestamp_unix": 1791898646.4500566,
+      "operation": "full unittest regression after final UI wiring/TeX reconciliation",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_final_regression_preflight.json",
+        "logs/P6_final_full_regression.stdout.txt",
+        "logs/P6_final_full_regression.stderr.txt",
+        "logs/P6_final_full_regression_result.json"
+      ],
+      "note": "Full test suite executed; P6 remains current and open."
+    },
+    {
+      "timestamp_unix": 1791899860.7226617,
+      "operation": "full local unittest regression after causal graph UI and normative documentation update",
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_full_regression_after_causal_graph_and_docs_preflight.json",
+        "logs/P6_full_regression_after_causal_graph_and_docs.stdout.txt",
+        "logs/P6_full_regression_after_causal_graph_and_docs.stderr.txt",
+        "logs/P6_full_regression_after_causal_graph_and_docs_result.json",
+        "logs/P6_full_regression_after_causal_graph_and_docs.exitcode"
+      ],
+      "note": "Full regression recorded; no automatic phase transition."
+    },
+    {
+      "operation": "P6 final PDF compile/render and visual review",
+      "timestamp_unix": 1791900366.057827,
+      "status": "PASS_BOUNDED_LOCAL",
+      "evidence": [
+        "logs/P6_final_docs_compile_result.json",
+        "logs/P6_release_pdf_render_result.json",
+        "logs/P6_release_pdf_visual_review_result.json",
+        "logs/P6_ui_button_wiring_audit_result.json"
+      ],
+      "note": "This contributes evidence to UI gates but does not by itself close P6 or claim global implementation completion."
+    },
+    {
+      "operation": "P6 explicit four-gate bounded closure",
+      "timestamp_unix": 1791900641.6990798,
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "evidence": [
+        "logs/P6_full_regression_after_causal_graph_and_docs_result.json",
+        "logs/P6_final_full_ui_interactive_smoke_after_graph_result.json",
+        "logs/P6_causal_graph_visual_smoke_result.json",
+        "logs/P6_ui_button_wiring_audit_result.json",
+        "logs/P6_final_docs_compile_result.json",
+        "logs/P6_release_pdf_visual_review_result.json"
+      ],
+      "note": "P7 remains NOT_STARTED; external/native/hardware acceptance remains outside current scope."
+    },
+    {
+      "operation": "Formal transition P6 to P7",
+      "timestamp_unix": 1791900691.0178845,
+      "status": "PASS_TRANSITION",
+      "evidence": [
+        "logs/P6_postclosure_integrity_check_preflight.json",
+        "logs/P6_bounded_closure_result.json"
+      ],
+      "note": "P7 opened after dependency checks; full implementation not claimed."
+    },
+    {
+      "timestamp_unix": 1791903606.4277117,
+      "event": "P7 isolated pytest matrix composite reconciled",
+      "result": "logs/O930_P7_regression_matrix_composite_result.json",
+      "tests": 206,
+      "failed": 0,
+      "global_completion_claimed": false
+    },
+    {
+      "operation": "media_reader_runtime_patch",
+      "phase": "P7",
+      "status": "PATCH_APPLIED_PYCOMPILE_PASS",
+      "result": "logs/O930_P7_media_reader_runtime_patch_result.json",
+      "timestamp_unix": 1791905531.47381
+    },
+    {
+      "operation": "add_real_media_reader_integration_tests",
+      "phase": "P7",
+      "status": "TESTS_ADDED_PENDING_EXECUTION",
+      "result": "logs/O930_P7_add_real_media_reader_integration_tests_result.json",
+      "timestamp_unix": 1791905606.8398037
+    },
+    {
+      "operation": "media_decoder_syntax_check",
+      "phase": "P7",
+      "status": "PASS",
+      "result": "logs/O930_P7_media_decoder_syntax_check_result.json",
+      "timestamp_unix": 1791905640.1864629
+    },
+    {
+      "operation": "media_decoder_dataset_service_pytest",
+      "phase": "P7",
+      "status": "PASS",
+      "result": "logs/O930_P7_media_decoder_dataset_service_pytest_result.json",
+      "timestamp_unix": 1791905680.678638
+    },
+    {
+      "operation": "media_decoder_cross_integration_pytest",
+      "phase": "P7",
+      "status": "PASS",
+      "result": "logs/O930_P7_media_decoder_cross_integration_pytest_result.json",
+      "timestamp_unix": 1791905759.6786926
+    },
+    {
+      "operation": "media_docs_patch_initial_syntax_error",
+      "phase": "P7",
+      "status": "FAIL_TOOLING_NO_SOURCE_WRITE",
+      "result": "logs/O930_P7_media_docs_patch_initial_syntax_error_result.json",
+      "timestamp_unix": 1791905887.1529162
+    },
+    {
+      "operation": "media_docs_patch_script_syntax_retest",
+      "phase": "P7",
+      "status": "PASS",
+      "result": "logs/O930_P7_media_docs_patch_script_syntax_retest_result.json",
+      "timestamp_unix": 1791905933.3390813
+    },
+    {
+      "operation": "media_docs_patch_execution",
+      "phase": "P7",
+      "status": "PASS",
+      "result": "logs/O930_P7_media_docs_patch_execution_result.json",
+      "timestamp_unix": 1791905966.2298949
+    },
+    {
+      "operation": "media_docs_compile_runner_decode_failure",
+      "phase": "P7",
+      "status": "FAIL_RUNNER_DECODE_UNKNOWN_TEX_EXIT",
+      "result": "logs/O930_P7_media_docs_compile_runner_decode_failure_result.json",
+      "timestamp_unix": 1791906073.1025891
+    },
+    {
+      "operation": "media_docs_latex_compile_bytesafe",
+      "phase": "P7",
+      "status": "FAIL",
+      "result": "logs/O930_P7_media_docs_latex_compile_bytesafe_result.json",
+      "timestamp_unix": 1791906134.569534
+    },
+    {
+      "operation": "media_docs_escape_inline_code",
+      "phase": "P7",
+      "status": "PASS_PATCH_APPLIED_PENDING_COMPILE",
+      "result": "logs/O930_P7_media_docs_escape_inline_code_result.json",
+      "timestamp_unix": 1791906186.6261072
+    },
+    {
+      "operation": "media_docs_latex_compile_retest",
+      "phase": "P7",
+      "status": "PASS",
+      "result": "logs/O930_P7_media_docs_latex_compile_retest_result.json",
+      "timestamp_unix": 1791906222.2566364
+    },
+    {
+      "operation": "P7 media document render preflight",
+      "phase": "P7",
+      "status": "PASS_BOUNDED",
+      "result": "logs/O930_P7_media_docs_render_preflight.json",
+      "timestamp_unix": 1791906431.355617
+    },
+    {
+      "event": "P7 evidence reconciliation",
+      "timestamp_unix": 1791910298.2250829,
+      "status": "PASS_READY_FOR_PHASE_CLOSE",
+      "receipt": "logs/O930_P7_p7_reconcile_gate_evidence_result.json",
+      "implementation_complete_claimed": false
+    },
+    {
+      "event": "P7 phase closure",
+      "timestamp_unix": 1791910542.402769,
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "receipt": "logs/O930_P7_phase_close_result.json",
+      "implementation_complete_claimed": false
+    },
+    {
+      "event": "partial_delivery_checkpoint_recorded",
+      "phase": "P7",
+      "status": "PASS_DOCUMENTED",
+      "timestamp_unix": 1791911073.086265,
+      "checkpoint": "LIVRAISON_ETAT_O93_0.md",
+      "next_phase_started": false
+    },
+    {
+      "event": "p8_phase_closure",
+      "timestamp_unix": 1791976369.632778,
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "evidence": "logs/O930_P8_closure_result.json",
+      "modules": 30,
+      "tests": 222,
+      "failed": 0
+    },
+    {
+      "event": "p9_phase_started",
+      "timestamp_unix": 1791976398.4104297,
+      "status": "IN_PROGRESS",
+      "preflight": "logs/O930_P9_transition_preflight.json",
+      "p8_closure": "logs/O930_P8_closure_result.json"
+    },
+    {
+      "event": "p9_preregistered_integrity_test",
+      "timestamp_unix": 1791976450.3892353,
+      "status": "PASS_BOUNDED",
+      "result": "logs/O930_P9_preregistered_v2_integrity_result.json",
+      "tests_reported": 11,
+      "failed": 0
+    },
+    {
+      "event": "p9_package_preflight_blocked",
+      "timestamp_unix": 1791976606.4377172,
+      "status": "BLOCKED_PREFLIGHT_DEPENDENCY_STATUS_MAPPING",
+      "result": "logs/O930_P9_package_preflight.json",
+      "error_id": "O930-P9-PREFLIGHT-BOUND-CLOSURE-001"
+    },
+    {
+      "event": "p9_preflight_gate_pass",
+      "timestamp_unix": 1791976691.6649582,
+      "status": "PASS_BOUNDED",
+      "result": "logs/O930_P9_package_preflight_final.json",
+      "resolved_error_id": "O930-P9-PREFLIGHT-BOUND-CLOSURE-001"
+    },
+    {
+      "event": "p9_ledger_updater_runner_resolved",
+      "timestamp_unix": 1791976691.6649582,
+      "status": "RESOLVED_RETEST_PASS",
+      "result": "logs/O930_P9_ledger_updater_failure.json",
+      "error_id": "O930-P9-LEDGER-UPDATER-MISSING-ID-001"
+    },
+    {
+      "event": "p9_preflight_regression_pass",
+      "timestamp_unix": 1791976724.7775319,
+      "status": "PASS_BOUNDED",
+      "result": "logs/O930_P9_preflight_status_test_result.json",
+      "error_id": "O930-P9-PREFLIGHT-BOUND-CLOSURE-001"
+    },
+    {
+      "event": "p9_manifest_generation_local_tree_pass",
+      "timestamp_unix": 1791976871.0777147,
+      "result": "logs/O930_P9_manifest_refresh_result.json",
+      "status": "PASS_LOCAL_MANIFEST_GENERATION",
+      "files_manifested": 4558
+    },
+    {
+      "event": "p9_manifest_receipt_reconciled",
+      "timestamp_unix": 1791976871.0777147,
+      "result": "logs/O930_P9_manifest_receipt_update_failure.json",
+      "status": "RESOLVED_RETEST_PASS",
+      "error_id": "O930-P9-MANIFEST-RECEIPT-SCHEMA-001"
+    },
+    {
+      "event": "p9_candidate_dmodel_clean_extract_pass",
+      "timestamp_unix": 1791976969.2296922,
+      "status": "PASS_CANDIDATE",
+      "result": "logs/O930_P9_candidate/O930_P9_candidate_validation.json",
+      "archive_sha256": "2065ad77305c24d5282dd5f3f5af2861fc3e920b0adff79c8e01f81bbf673fa2",
+      "tests_reported": 46
+    },
+    {
+      "event": "p9_phase_closed_local_tested_bounded",
+      "timestamp_unix": 1791977339.5455086,
+      "result": "logs/O930_P9_closure_result.json",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "note": "Closure limited to package construction/integrity/targeted tests; P10 explicitly not started."
+    },
+    {
+      "event": "p9_final_preflight_pass",
+      "timestamp_unix": 1791977380.2063437,
+      "status": "PASS_BOUNDED",
+      "result": "logs/O930_P9_final_preflight.json",
+      "phase": "P9"
+    },
+    {
+      "event": "p9_stale_phase_assertion_resolved",
+      "timestamp_unix": 1791977565.8985221,
+      "status": "RESOLVED_RETEST_PASS",
+      "result": "logs/O930_P9_prepack_targeted_retest_result.json",
+      "tests": 46,
+      "failed": 0,
+      "subtests": 5
+    },
+    {
+      "timestamp_unix": 1791981955.2583063,
+      "event": "o931_p3_registry_schema_normalization",
+      "result": "ADDITIVE_METADATA_ONLY",
+      "records": [
+        "O930-P9-PREREG-001",
+        "O930-P9-PREFLIGHT-001",
+        "O930-P9-MANIFEST-001"
+      ],
+      "evidence": "logs/O931/registry_before_o931_schema_normalization.json",
+      "note": "Copied existing feature/reference/verification_scope values into required schema fields; no status promoted and no reference invented."
+    }
+  ],
+  "source_corpus_audit": "source_corpus_audit.json",
+  "summary_reconciliation": {
+    "operation": "partial_delivery_checkpoint_preparation",
+    "status": "PASS",
+    "result": "Checklist and proof registry agree on P7 bounded closure, P8-P10 not started, global completeness false; provisional archive generation was verified separately and does not close P9.",
+    "phase": "P7",
+    "gates": "No phase gate advanced by the handoff.",
+    "scope": "Documentation only; archive generation and integrity verification are a provisional delivery operation, not P9 phase acceptance.",
+    "timestamp_unix": 1791911307.301142
+  },
+  "delivery_checkpoint": {
+    "schema": "aam-o930-partial-delivery-checkpoint-v1",
+    "created_utc": "2026-10-13T17:04:33+00:00",
+    "stopped_after_phase": "P9",
+    "current_phase": "P10",
+    "global_status": "P9_COMPLETE_LOCAL_TESTED_BOUNDED_P10_NOT_STARTED",
+    "implementation_complete_claimed": false,
+    "delivery_status": "P9_COMPLETE_LOCAL_TESTED_BOUNDED_P10_NOT_STARTED",
+    "source_archive": {
+      "path": "source_material/source_archive/sources_AAM_17.zip",
+      "sha256": "add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38",
+      "size_bytes": 39758574,
+      "matches_expected": true
+    },
+    "persistent_snapshot": {
+      "path": "/mnt/data/AAM_O93_0_PERSISTENT_WORKING_COPY/snapshots/20261013_1800_before_p7_resume_deliverables",
+      "verification": "verification.json",
+      "verified_before_handoff_updates": true
+    },
+    "completed_phases": [
+      {
+        "phase": "P0",
+        "status": "COMPLETE",
+        "summary": "Inventaire récursif, revue des sources principales/théorie des empreintes et historiques O92/O93, hashes et checklists de fondation."
+      },
+      {
+        "phase": "P1",
+        "status": "COMPLETE",
+        "summary": "Observateur multi-résolution avec provenance, observation brute, adaptateurs de fichiers et statuts explicites pour les données non décodées; matériel réel non accepté dans cet environnement."
+      },
+      {
+        "phase": "P2",
+        "status": "COMPLETE",
+        "summary": "Moteur de sondes distinctes, miroir/composition, checkpoints, diversités/collisions et arrêt non concluant selon budget."
+      },
+      {
+        "phase": "P3",
+        "status": "COMPLETE",
+        "summary": "RAG observation-first multi-espaces, tokens itoken/vtoken pondérés, recherche pondérée, inspection/nettoyage et choix du nombre d’espaces évalué après construction."
+      },
+      {
+        "phase": "P4",
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "summary": "Catalogue de compétences de base justifiées par leur généralité, sélection manuelle/automatique et compositions arborescentes/conditionnelles persistées."
+      },
+      {
+        "phase": "P5",
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "summary": "Autonomie en arrière-plan, mémoire de raisonnement, événements causaux, feedback récompense/punition et modulation RAG temporaire optionnelle."
+      },
+      {
+        "phase": "P6",
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "summary": "Interface locale à neuf espaces, chat/sessions, RAG, sondes, compétences, mémoire et graphe causal, entraînement contrôlable, permissions et réglages persistants; smoke Xvfb end-to-end enregistré."
+      },
+      {
+        "phase": "P7",
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "summary": "Dataset structuré/non supervisé, lecteur Parquet de repli sur corpus plat fourni, PDF/DOCX/MD/TXT et lecteurs locaux image/audio/vidéo dans leur portée testée, pilotage entraînement pause/reprise/arrêt/checkpoint."
+      }
+    ],
+    "remaining_work": [
+      {
+        "phase": "P8",
+        "status": "NOT_STARTED",
+        "summary": "Orchestration intégrée globale, politiques réseau/capteurs en profondeur, concurrence et résilience bout en bout, fuzz/crash et restauration."
+      },
+      {
+        "phase": "P9",
+        "status": "NOT_STARTED",
+        "summary": "Acceptation de livraison formelle : extraction propre et exécution autonome des archives dans environnement propre, manifestes post-extraction, lanceurs/dépendances synchronisés et audit de toutes les exigences."
+      },
+      {
+        "phase": "P10",
+        "status": "NOT_STARTED",
+        "summary": "Acceptation externe/native : Windows natif, matériel physique avec consentement, fournisseur Web/MCP/API réel, tests interruption électrique et entraînement grande échelle."
+      },
+      {
+        "phase": "P7-PARQUET",
+        "status": "BOUNDED",
+        "summary": "Le Parquet fourni a été décodé par fallback (7 473 lignes, question/answer, 8 groupes); schémas/encodages Parquet plus larges restent NOT_DECODED si aucun moteur réel disponible."
+      },
+      {
+        "phase": "P7-AUDIO-ASR",
+        "status": "NOT_CONFIGURED",
+        "summary": "Les lecteurs audio exposent des propriétés/features selon le décodeur; une transcription ASR n’est pas configurée et n’est pas revendiquée."
+      },
+      {
+        "phase": "P10-SENSORS",
+        "status": "NOT_RUN",
+        "summary": "Les adaptateurs matériels simulés et leur permission/fermeture sont testés; capteurs, caméra et microphones physiques n’ont pas été exercés dans cet environnement."
+      }
+    ],
+    "tests_and_validation": {
+      "latest_isolated_matrix": {
+        "status": "PASS_BOUNDED_LOCAL",
+        "modules": 29,
+        "tests_passed": 206,
+        "tests_failed": 0,
+        "command": "python -m pytest module-by-module (each test_*.py in isolated process)",
+        "receipt": "logs/O930_P7_regression_matrix_composite_result.json",
+        "qualification": "Résultats isolés par module; ne pas présenter comme une unique commande de suite monolithique."
+      },
+      "latest_phase_p7_close": {
+        "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+        "receipt": "logs/O930_P7_phase_close_result.json",
+        "p7_tests": 27,
+        "p7_subtests": 9,
+        "parquet_rows": 7473,
+        "source_unchanged": true
+      },
+      "tex_source_build": {
+        "status": "PASS_SOURCE_COMPILE_NO_FATAL_OR_OVERFULL",
+        "receipt": "logs/O930_P7_source_tex_build_result.json",
+        "compilations": 4,
+        "scope": "Compilation des sources .tex uniquement; inspection PDF non requise pour cette remise."
+      },
+      "ui_acceptance": {
+        "status": "PASS_BOUNDED_LOCAL",
+        "receipt": "logs/P6_ui_interactive_smoke_result_extended.json",
+        "notes": "Smoke Tk/Xvfb et parcours interactif ont réussi dans un espace temporaire; pas une validation native Windows."
+      }
+    },
+    "data_integrity": "Source archive unchanged and hash verified; local test corpora used for UI/training acceptance were temporary and hashed before/after. Original source files are not overwritten by package creation.",
+    "handoff_rule": "P8 remains NOT_STARTED. Creation of partial handoff archives does not mark P9 complete. Continue phases in order after delivery; do not infer universal success/failure from the local results.",
+    "package_creation_status": "PROVISIONAL_ARCHIVES_CREATED_AND_VERIFIED; P9_ACCEPTANCE_NOT_STARTED",
+    "archive_size_limit_bytes": 220000000,
+    "archives_split_required_in_verified_build": false,
+    "note_archive_creation_does_not_close_P9": "La création de ces archives répond à la remise demandée; l’acceptation formelle P9 reste NOT_STARTED.",
+    "completed_phase_P8": {
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "modules": 30,
+      "tests_reported": 222,
+      "failed_modules": 0,
+      "result": "logs/O930_P8_closure_result.json"
+    },
+    "next_phase_requires_preflight": "P9 gate preflight before each execution"
+  },
+  "audit_notes": [
+    {
+      "at_unix": 1791981824.428013,
+      "kind": "O93_1 regression synchronization",
+      "note": "Recomputed verified_o930_requirements within the O930-* namespace only. The previous summary (6) was stale relative to 10 entries carrying VERIFIED_LOCAL_TESTED_BOUNDED with explicit O930-local evidence. No entry status was promoted or changed."
+    },
+    {
+      "at_unix": 1791981897.478883,
+      "kind": "registry schema normalization O93_1",
+      "note": "Three O930 P9 records used legacy `feature`/`references` keys. Added canonical `requirement` and `traceability.references` aliases while preserving all legacy fields, statuses, evidence and IDs. Added explicit bounded objective-acceptance note where absent. The strict regression schema checks remain enabled."
+    }
+  ]
+}

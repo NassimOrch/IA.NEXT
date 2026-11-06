@@ -1,0 +1,517 @@
+\documentclass[11pt,a4paper,oneside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=2.15cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs}
+\usepackage{booktabs,longtable,tabularx,array,enumitem}
+\usepackage{hyperref,bookmark,fancyhdr}
+\usepackage{xurl}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black,pdftitle={Étude et formalisme de la sonde adaptative — version 1},pdfauthor={Etude de corpus source ng adapt 0}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}\setlength{\emergencystretch}{2em}\sloppy
+\setlist{itemsep=2pt,topsep=3pt}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Sonde adaptative — version 1}\fancyhead[R]{\thepage}\renewcommand{\headrulewidth}{0.4pt}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{theorem}{Théorème}[chapter]
+\newtheorem{lemma}{Lemme}[chapter]
+\newtheorem{corollary}{Corollaire}[chapter]
+\newtheorem{remark}{Remarque}[chapter]
+\newcommand{\R}{\mathbb R}
+\newcommand{\X}{\mathcal X}
+\newcommand{\Hcal}{\mathcal H}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Fcal}{\mathcal F}
+\newcommand{\Dcal}{\mathcal D}
+\newcommand{\I}{\mathsf I}
+\newcommand{\E}{\mathbb E}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\Lip}{\operatorname{Lip}}
+\newcommand{\MAE}{\operatorname{MAE}}
+\newcommand{\RMSE}{\operatorname{RMSE}}
+\newcommand{\Rtwo}{R^2}
+\begin{document}
+\hypersetup{pageanchor=false}
+\pagenumbering{roman}
+\begin{titlepage}
+\centering
+{\Large Version incrémentale 1 — étude théorique et expérimentale}\par\vspace{1.0cm}
+{\Huge\bfseries Sonde adaptative et neurone artificiel}\par\vspace{0.5cm}
+{\LARGE Formalisme opérationnel, résultats expérimentaux, conditions d'équivalence et statut logique de l'hypothèse}\par\vspace{1.4cm}
+\begin{tabular}{rl}
+\textbf{Archive source :} & \texttt{sources\_ng\_adapt\_0.zip}\\
+\textbf{Version de projet :} & \texttt{sonde\_adapt\_1}\\
+\textbf{Rapport :} & \texttt{etude\_et\_formalisme\_sonde\_adaptative\_1.tex}\\
+\textbf{Date :} & 29 octobre 2026\\
+\textbf{Statut :} & formalisation conditionnelle + synthèse des expériences archivées
+\end{tabular}
+\vfill
+\textit{L'hypothèse n'est ni présupposée vraie ni présupposée fausse. Les résultats favorables, défavorables, non identifiés et conditionnels sont distingués par leur domaine de validité.}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\chapter*{Résumé exécutif}
+\addcontentsline{toc}{chapter}{Résumé exécutif}
+L'expression « les neurones dans l'IA ne sont qu'une forme particulière de sondes adaptatives » n'est pas une proposition unique tant que les mots \emph{neurone}, \emph{sonde}, \emph{adaptative} et \emph{ne sont que} ne sont pas définis. Une interprétation triviale est vraie : si une sonde est par définition n'importe quelle fonction qui lit un état interne et renvoie la sortie d'un neurone, alors un neurone est représentable comme sonde. Cette re-description n'explique pas le mécanisme et ne prouve pas que des sondes apprises indépendamment peuvent remplacer les neurones. Une interprétation substantielle exige une classe de sondes spécifiée indépendamment, un budget, une règle d'apprentissage/adaptation, une métrique, un domaine et des tests tenus à part.
+
+Le formalisme proposé sépare cinq prétentions : représentation opérationnelle; inclusion exacte dans une classe de fonctions; approximation avec une erreur bornée; identification de la fonction à partir de données finies; et équivalence de mécanisme ou remplacement d'un réseau composé. Les implications entre ces niveaux sont unidirectionnelles seulement sous hypothèses précises. En particulier, une approximation locale d'une activation ne garantit pas le comportement du réseau après composition, et un comportement identique sur un domaine d'observation ne prouve pas l'identité des paramètres ou du mécanisme.
+
+Les données fournies soutiennent l'étude empirique de sondes RBF adaptatives sur des tâches synthétiques et quelques benchmarks publics, ainsi que l'imitation de neuf unités artificielles et des essais de remplacement de composants. Les résultats sont mixtes : certaines approximations d'activation atteignent des \(R^2\) élevés sur les domaines testés; la performance en classification dépend de la tâche; le méta-apprentissage de quatre taux ne gagne pas systématiquement; le remplacement de plusieurs unités augmente souvent l'écart aux logits; le lecteur de sortie source est conservé dans les tests de composition. Un supplément distinct de NGeGenBrain v3.1 observe/intervient sur des modèles locaux plus grands, mais n'est pas un test de substitution de chaque neurone par une sonde RBF.
+
+Le verdict scientifique est donc formulé sans anticipation : la version forte « tout neurone de tout modèle d'IA est exactement et universellement une sonde adaptative apprenable dans une classe bornée préspécifiée » n'est pas démontrée par les données présentes. La version opérationnelle plus faible « toute activation neuronale peut être traitée comme une fonction cible d'observation, et certaines peuvent être approchées par des sondes adaptatives dans les domaines mesurés » est mathématiquement bien définie et étayée sur les exemples fournis. Les deux énoncés n'ont pas le même contenu; l'un ne doit pas être substitué à l'autre.
+
+\chapter{Description, architecture des sources et méthode}
+\section{Sources primaires effectivement utilisées}
+Cette étude est une incrémentation de la version 0; les fichiers originaux et rapports antérieurs sont préservés. Les éléments de référence sont copiés dans le sous-répertoire \path{references/} de cette livraison, avec des manifestes SHA-256.
+\begin{itemize}
+\item \path{references/theory/DDD_Base_theorie_des_empreintes_complete_order_5.tex} : noyau abstrait objet--sonde--observation--empreinte.
+\item \path{references/observation/NGeGenBrain_observation_formalisme_full_0.tex} et sa suite : spécification opérationnelle d'observation, de trace, d'intervention, d'identifiabilité et de provenance.
+\item \path{references/adaptive_base/} : script et résultats du premier benchmark \emph{two moons}, cinq initialisations.
+\item \path{references/adaptive_v1_2/} : formalisme de sonde RBF, rapport final, protocole d'isolation stricte v1.2, audits et tableaux CSV résumés.
+\item \path{references/ngbrain_v1/}, \path{references/ngbrain_v2/}, \path{references/ngbrain_v3/} : audits et rapports qui établissent la portée réelle du logiciel NGeGenBrain.
+\item \path{references/datasets/dataset_inventory.tsv} : inventaire des jeux de données à la racine de l'archive.
+\end{itemize}
+
+Le nom primaire attendu dans la description initiale, \path{theorie_des_empreintes_complete_order_5.tex}, n'apparaît pas littéralement; la source extraite porte le nom \path{DDD_Base_theorie_des_empreintes_complete_order_5.tex}. Cette divergence est consignée sans changer la source. De même, le bundle observationnel contient une révision \texttt{full\_0}, des sources \texttt{next\_0}/\texttt{next\_1}, un audit et un CSV de traçabilité; les versions ne sont pas fusionnées sans les nommer.
+
+\section{NGeGenBrain v1, v2, v3 : ce qui est pertinent pour l'hypothèse}
+\begin{itemize}
+\item \textbf{NGeGenBrain v1.} Le rapport d'audit décrit un laboratoire logiciel instrumentable et un banc de tests fonctionnels. Le score annoncé de 15/15 concerne ce banc livré et ne constitue pas une preuve sur la nature de tout neurone d'IA.
+\item \textbf{NGeGenBrain v2.} Le README définit des adaptateurs, de la capture d'activations, des interventions et des expériences synthétiques. Il dit explicitement qu'aucun checkpoint LLM externe n'a été chargé dans l'environnement de validation; un petit Transformer synthétique et un adaptateur mock ne doivent pas être décrits comme un test de modèle pré-entraîné réel.
+\item \textbf{NGeGenBrain v3.1.} Le rapport inclus dans l'archive rapporte l'exécution d'artefacts locaux de types distincts, dont un modèle de la famille Llama au format GGUF et TinyLLM PyTorch, capture de blocs et interventions. Le rapport indique une identité bit à bit du chemin de génération v3.0/v3.1 sur 24 textes, mais précise que le mécanisme des modèles sources n'a pas été reconstruit. Le routeur d'observation à huit vues obtient 2/16 sur validation et 9/32 sur le test documentaire final; ce résultat n'établit pas un routeur d'observation robuste. Ces expériences sont utiles au concept d'observation intrusive/active, mais ne sont pas une expérience de remplacement universel des neurones par des sondes adaptatives.
+\end{itemize}
+
+\section{Statuts méthodologiques}
+Un énoncé est classé comme définition, hypothèse, proposition démontrée, résultat empirique, résultat rapporté, interprétation ou non établi. Les valeurs des rapports sources sont citées comme des résultats enregistrés dans l'archive, non comme des résultats ré-entraînés indépendamment dans le présent cycle. Les audits existants sont relus et croisés avec les CSV; leurs statuts \texttt{PASS\_WITH\_LIMITATIONS} sont conservés tels quels.
+
+\subsection{Contrôles réellement exécutés pour la version 1}
+\begin{itemize}
+\item L'archive principale et les 29 ZIP présents dans l'arborescence extraite passent \texttt{unzip -tq}; le hash SHA-256 de l'archive source est enregistré dans \path{logs/source_archive.sha256}.
+\item Le benchmark de base a été relancé à partir d'une copie propre du script. Les CSV de résultats et le JSON de synthèse produits par cette nouvelle exécution sont identiques octet par octet aux deux fichiers historiques correspondants (mêmes données, cinq initialisations, même protocole).
+\item Le validateur fourni dans le bundle v1.2 a été relancé depuis une copie indépendante du bundle : 16 contrôles sur 16 passent et le statut reste \texttt{PASS\_WITH\_LIMITATIONS}. Cela valide les fichiers, métriques et contrôles d'accès explicitement couverts par le validateur.
+\item Une commande monolithique \texttt{stage=all} a d'abord dépassé la fenêtre d'exécution configurée à 600 secondes pendant la classification (6 des 12 groupes tâche--graine de cette phase). Ce fait demeure au journal comme un incident du mode d'orchestration et n'est pas utilisé comme résultat scientifique.
+\item Pour ne pas faire dépendre la vérification du seul mode monolithique, les trois phases de la réplication stricte ont ensuite été exécutées séparément par le contrôleur source inchangé, avec l'espace de rôles placé dans le répertoire persistant du projet : classification, imitation et composition. Les trois commandes se sont terminées avec un code de retour nul et ont chacune rendu un audit \texttt{PASS\_WITH\_LIMITATIONS}. La composition a généré six modèles enseignants et 96 modèles substituts de composants.
+\item Une comparaison structurée des nouveaux tableaux avec les fichiers du bundle source gelé a passé 7 contrôles sur 7 : 48 lignes de classification, 13\,392 prédictions, 81 lignes d'imitation, 324\,000 prédictions d'imitation, 18 lignes de composition, 96 évaluations de fidélité de composant et 4\,752 prédictions de composition. Les différences numériques maximales sont nulles pour chacune des métriques et prédictions comparées (tolérance déclarée \(10^{-6}\)); les seuls éléments ignorés sont les jetons opaques propres à l'exécution et les horodatages. Le rapport machine lisible est dans \path{logs/v1_2_phase_rerun/result_comparison.json}.
+\item Après ces reprises par phase, le validateur source a été relancé : 16/16 contrôles, statut \texttt{PASS\_WITH\_LIMITATIONS}. Les contrôles se bornent à ce que le validateur et les tables comparent réellement; ils n'établissent pas une proposition universelle sur les neurones.
+\end{itemize}
+La tentative monolithique et la reprise par phases sont deux faits distincts : la première a dépassé le délai, les trois phases de la seconde ont terminé. La comparaison 7/7 démontre la concordance des artefacts sémantiques couverts avec les résultats gelés pour ces phases; elle ne remplace ni une preuve mathématique de la thèse universelle ni des réplications sur des distributions indépendantes. Les journaux de l'incident initial et de la reprise complète sont conservés.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Artefact comparé & Source gelée & Reprise & Écart numérique maximal\\
+\midrule
+Classification par graine & 48 & 48 & 0\\
+Prédictions de classification & 13\,392 & 13\,392 & 0\\
+Imitation par cible & 81 & 81 & 0\\
+Prédictions d'imitation & 324\,000 & 324\,000 & 0\\
+Composition par graine & 18 & 18 & 0\\
+Fidélité des composants & 96 & 96 & 0\\
+Prédictions de composition & 4\,752 & 4\,752 & 0\\
+\bottomrule
+\end{tabular}
+\caption{Comparaison sémantique des trois phases de la réplication stricte. Les clés et effectifs doivent concorder; les métriques numériques sont comparées à une tolérance de \(10^{-6}\). Aucun écart n'a été observé.}
+\end{table}
+
+\section{Pipeline complet}
+Le pipeline est organisé en phases : (1) intégrer et hacher les sources; (2) formaliser les types et la portée de « sonde adaptative »; (3) établir les liens avec empreinte et observation; (4) analyser le code du RBF, de l'imitateur de neurone et du code de composition; (5) auditer les résultats des deux bundles; (6) analyser les versions NGeGenBrain et les datasets; (7) démontrer les résultats conditionnels et la non-identifiabilité lorsque pertinente; (8) rédiger les implications et les expériences discriminantes à mener; (9) compiler, valider et sauvegarder.
+
+\chapter{Problème scientifique : énoncés différents sous une phrase unique}
+\section{Définitions à fixer}
+\begin{definition}[Neurone artificiel, comme fonction locale]
+Un neurone artificiel scalaire est, dans un réseau feed-forward standard, une fonction \(n_\theta:\R^d\to\R\) de la forme
+\[
+n_\theta(h)=\sigma(w^\top h+b),
+\]
+où \(w\in\R^d\), \(b\in\R\), et \(\sigma\) est une non-linéarité spécifiée. Pour un Transformer, une « unité » peut plutôt désigner une coordonnée de résiduel, une coordonnée d'une représentation MLP, une tête, un bloc ou une sortie post-normalisation; le point exact dans le graphe de calcul doit alors faire partie du type de la cible.
+\end{definition}
+
+\begin{definition}[Sonde d'observation]
+Une sonde \(f\) est un opérateur versionné qui, sur un objet \(x\), un contexte \(p\) et des préconditions satisfaites, produit une observation \(\Phi(p,x,f)\) dans un codomaine annoncé. La fiche de sonde indique au minimum la cible, le domaine, le codomaine, les préconditions, la procédure d'acquisition, le coût, l'intrusion, le traitement des erreurs, la sérialisation, le contexte et la provenance.
+\end{definition}
+
+\begin{definition}[Sonde adaptative apprise]
+Une sonde adaptative est un triplet \(\mathsf P=(\mathcal F, U, \eta_0)\) comprenant une classe de fonctions candidates \(\mathcal F=\{f_\theta:\theta\in\Theta\}\), une règle d'actualisation \(U\) qui produit \(\theta_{t+1}=U(\theta_t,d_t,\xi_t)\) à partir d'une observation autorisée \(d_t\) et de toute donnée de contrôle déclarée \(\xi_t\), et une initialisation \(\eta_0\). L'état complet d'adaptation inclut, si nécessaire, l'optimiseur, ses moments, son taux, ses buffers, l'état aléatoire, la mémoire et le compteur d'étapes. Une sonde qui change ses paramètres selon un optimiseur fixe est adaptative au premier sens; une sonde dont la règle \(U\) est elle-même apprise est méta-adaptative. Ces deux cas ne sont pas synonymes.
+\end{definition}
+
+\begin{definition}[Cible d'imitation]
+Une cible d'imitation est une fonction \(g:D\to Y\) accessible seulement via un protocole de requêtes déclaré. Une sonde \(f_\theta\) imite \(g\) sur un domaine \(D_0\subseteq D\) relativement à une métrique \(d_Y\) et une mesure d'évaluation \(\mu\) si une erreur annoncée satisfait le critère fixé, par exemple \(\sup_{x\in D_0}d_Y(f_\theta(x),g(x))\leq\varepsilon\) ou \(\E_{x\sim\mu}d_Y(f_\theta(x),g(x))^2\leq\varepsilon^2\). Le mot « imite » est incomplet sans cette métrique et ce domaine.
+\end{definition}
+
+\section{Cinq niveaux de revendication}
+\begin{enumerate}
+\item \textbf{Représentation observationnelle.} L'activation d'un neurone peut être observée comme une coordonnée d'état au point exact prévu par un hook ou un accès interne.
+\item \textbf{Inclusion fonctionnelle exacte.} Chaque fonction neuronale cible appartient à la classe de sonde préspécifiée : \(\forall g\in\mathcal N,\ \exists\theta\in\Theta:f_\theta=g\) sur le domaine déclaré.
+\item \textbf{Approximation.} Pour chaque cible et un domaine, on obtient une erreur \(\leq\varepsilon\), avec métrique, budget et protocole de mesure.
+\item \textbf{Identifiabilité/apprentissage à partir de données.} Le protocole de données et les hypothèses garantissent que l'observation permet de choisir une fonction de la classe et de généraliser au domaine revendiqué.
+\item \textbf{Équivalence mécaniste ou remplacement de réseau.} La substitution préserve non seulement une activation isolée mais aussi les sorties du système composé, les interventions pertinentes et éventuellement l'état dynamique, sous une relation d'équivalence définie.
+\end{enumerate}
+
+Aucun niveau supérieur n'est une conséquence automatique du niveau inférieur. En particulier, « un neurone peut être représenté comme une sonde » peut simplement dire que ses sorties sont mesurables; cela ne démontre ni que toute classe de sondes adaptatives peut les apprendre, ni que la sonde possède le même rôle computationnel et causal.
+
+\begin{remark}[Neurone et feature ne sont pas des termes interchangeables]
+La cible doit être typée : une activation scalaire, un neurone, une coordonnée résiduelle, une tête, un bloc et une feature représentée par une combinaison de directions d'activation sont des estimands distincts. Des travaux publiés sur les modèles jouets de superposition étudient explicitement des représentations où le nombre de features dépasse le nombre de dimensions neuronales; le travail d'extraction de features par dictionary learning traite également des combinaisons d'activations plutôt que d'un appariement bijectif feature--neurone. Ces observations externes ne démontrent ni ne réfutent l'hypothèse générale ici étudiée; elles imposent de préciser le niveau d'analyse et empêchent de supposer qu'une feature sémantique correspond toujours à une unité unique.\end{remark}
+
+\chapter{Formalisation intégrée : du système observé à la sonde apprise}
+\section{Objet, contexte, état interne et activation cible}
+Soit \(M\) un modèle paramétré et \(D\) un domaine d'entrées/conversations. Pour un contexte \(p\) et une entrée \(x\), notons \(h_{\ell-1}(x,p)\) l'état au point déclaré du graphe et
+\[
+g_{\ell,j}(x,p)=\pi_j\!\left(T_\ell(h_{\ell-1}(x,p);\omega_\ell)\right)
+\]
+la sortie cible de l'unité \(j\) de la couche \(\ell\), où \(T_\ell\) est le calcul précis de la couche et \(\pi_j\) la projection de sortie. Le contexte inclut les variables qui peuvent changer la cible : token et position, masque d'attention, état précédent, mode d'évaluation, précision numérique, version du modèle et configuration d'exécution. Pour un Transformer, il faut distinguer entrée du bloc, sortie d'attention, résiduel après addition, entrée MLP, sortie MLP et sortie normalisée; une étiquette comme « neurone 15 » sans point du graphe n'est pas un estimand suffisamment défini.
+
+\section{Opérateur de sonde et règle d'adaptation}
+On fixe un espace d'états \(\Hcal\), une cible \(g:\Hcal\times\Pcal\to Y\), une classe de sondes \(\mathcal F_\Theta\), un budget d'observations \(B\), un budget de calcul/paramètres \(C\) et une règle d'échantillonnage \(\nu\). Le jeu d'observations autorisées est
+\[
+\Dcal_B=\{(h_i,p_i,y_i): y_i=g(h_i,p_i),\ i=1,\dots,B\},
+\]
+avec la provenance des requêtes et le statut de chaque observation. L'apprentissage choisit \(\hat\theta=A(\Dcal_{\mathrm{train}},\Dcal_{\mathrm{val}};s)\), où \(s\) inclut la graine, l'optimiseur, le nombre d'étapes, l'arrêt et toutes les sélections. Le jeu d'évaluation est séparé et n'est pas autorisé pour choisir architecture, graine, hyperparamètres ou variante, sinon le résultat reste exploratoire.
+
+La sonde est définie par \(\hat g_{\hat\theta}(h,p)\). Sa sortie peut être un scalaire, un vecteur ou une distribution; le type de sortie doit correspondre à l'estimand. Une sonde qui prédit l'étiquette de classe de tout le réseau n'est pas automatiquement une sonde qui imite l'activation d'un neurone. Une sonde qui lit les activations du modèle n'est pas automatiquement une sonde capable de les remplacer.
+
+\section{Fonction d'objectif et protocole d'évaluation}
+Pour une cible scalaire, une perte usuelle est la perte quadratique empirique
+\[
+\widehat L(\theta)=\frac1{n}\sum_{i=1}^{n}\bigl(f_\theta(h_i,p_i)-y_i\bigr)^2.
+\]
+La perte empirique n'est pas l'erreur de généralisation. Une définition populationnelle séparée est
+\[
+L_\mu(\theta)=\E_{(H,P)\sim\mu}\left[d_Y(f_\theta(H,P),g(H,P))^2\right],
+\]
+si l'espérance existe. Un contrôle d'imitation doit publier au moins MAE/RMSE ou une métrique propre au codomaine, les quantiles/maxima si les queues comptent, les métriques par cible, le budget, le nombre de cibles indépendantes, la partition, les graines, le protocole de sélection, et les résultats sur des contextes hors distribution si une généralisation est revendiquée.
+
+\section{Statuts de sonde}
+Un élément du registre a les états distincts suivants : \texttt{PROPOSED}, \texttt{TRAINED}, \texttt{SEALED}, \texttt{EVALUATED}, \texttt{COMPOSITION\_TESTED}, \texttt{VALIDATED\_ON\_DOMAIN} ou \texttt{REJECTED}. La transition \texttt{SEALED} signifie que paramètres et configuration ont été gelés avant l'évaluation; elle n'implique pas que le modèle est exact. La transition \texttt{VALIDATED\_ON\_DOMAIN} signifie validé selon un critère préenregistré dans un domaine précis, non « vrai pour tout contexte ».
+
+\chapter{Résultats mathématiques démontrables}
+\section{Théorème 1 : représentation exacte par définition d'une sonde}
+\begin{theorem}[Représentation opérationnelle exacte]
+Soit un neurone cible \(g:\Hcal\to Y\). Si la classe de sondes est définie comme \(\mathcal F=\{f:f:\Hcal\to Y\}\) ou contient exactement la fonction \(g\), alors il existe une sonde \(f\in\mathcal F\) telle que \(f(h)=g(h)\) pour tout \(h\in\Hcal\).
+\end{theorem}
+\begin{proof}
+Dans le premier cas, \(g\) est elle-même une fonction de \(\Hcal\) vers \(Y\), donc \(g\in\mathcal F\); prendre \(f=g\). Dans le second cas, la clause d'appartenance dit précisément que \(g\in\mathcal F\); le même choix convient. L'égalité est point par point par identité de fonction.\end{proof}
+\begin{remark}[Portée]
+Cette proposition est exacte mais peut être tautologique : elle ne dit pas que l'algorithme d'apprentissage peut découvrir \(g\), que la classe est simple, que la sonde n'utilise pas la cible, ou que le mécanisme interne de la sonde est semblable à celui du neurone. Pour une hypothèse scientifique non triviale, \(\mathcal F\) et la règle d'apprentissage doivent être préspécifiées et indépendantes de la cible évaluée.
+\end{remark}
+
+\section{Théorème 2 : neurone affine suivi d'une activation}
+\begin{theorem}[Inclusion exacte dans une classe alignée sur l'architecture]
+Supposons que la classe de sondes contienne les fonctions \(f_{(w,b)}(h)=\sigma(w^\top h+b)\) pour tous paramètres \((w,b)\) autorisés. Alors toute unité cible de la forme \(g(h)=\sigma(w_*^\top h+b_*)\) appartient à cette classe et est exactement représentée par \(f_{(w_*,b_*)}\).
+\end{theorem}
+\begin{proof}
+Les paramètres \((w_*,b_*)\) de la cible satisfont la définition de la classe. En choisissant \(\theta_*=(w_*,b_*)\), on obtient pour tout \(h\), \(f_{\theta_*}(h)=\sigma(w_*^\top h+b_*)=g(h)\).\end{proof}
+
+Cette preuve n'établit pas que les paramètres \((w_*,b_*)\) sont observables, récupérables à partir d'échantillons finis ou obtenus avec l'algorithme utilisé dans les expériences. Elle est une preuve d'inclusion représentationnelle, conditionnelle à la classe choisie. Elle ne s'étend pas automatiquement à un bloc Transformer entier, dont la cible dépend du contexte, des opérations de normalisation, des résiduels, de l'attention et d'autres états.
+
+\section{Proposition 3 : non-identifiabilité d'une fonction avec des observations finies}
+\begin{theorem}[Deux cibles compatibles avec les mêmes observations finies]
+Soit \(D\) un domaine contenant un ensemble fini de points d'entraînement \(S=\{x_1,\dots,x_n\}\) et au moins un point \(x_*\notin S\). Sans restriction fonctionnelle supplémentaire, il existe deux fonctions \(g_0,g_1:D\to\R\) qui coïncident sur tous les points de \(S\) mais diffèrent en \(x_*\).
+\end{theorem}
+\begin{proof}
+Choisissons une fonction quelconque \(g_0:D\to\R\). Définissons \(q(x)=\prod_{i=1}^n\norm{x-x_i}^2\) lorsque \(D\subseteq\R^d\), avec points d'entraînement distincts et \(x_*\) différent de chacun d'eux. Alors \(q(x_i)=0\) pour tout \(i\), tandis que \(q(x_*)>0\). Pour un scalaire \(c\ne0\), posons \(g_1(x)=g_0(x)+c q(x)\). Sur chaque \(x_i\), \(g_1(x_i)=g_0(x_i)\); mais \(g_1(x_*)-g_0(x_*)=cq(x_*)\ne0\). Les données observées sur \(S\) sont identiques pour les deux fonctions, mais les cibles diffèrent ailleurs.\end{proof}
+\begin{remark}
+Dans un autre domaine ou codomaine, la construction peut être remplacée par deux fonctions qui diffèrent seulement sur un point non observé. La conclusion générale est que la prédiction hors échantillon nécessite des restrictions de classe, de régularité, un modèle probabiliste ou de nouvelles observations. Le théorème ne dit pas que l'approximation est impossible; il dit que les observations finies n'impliquent pas à elles seules une cible unique.
+\end{remark}
+
+\section{Théorème 4 : stabilité de sortie sous composition Lipschitz}
+\begin{theorem}[Propagation de l'erreur d'une unité remplacée]
+Soient \(H:X\to\Hcal\), une cible intermédiaire \(g:\Hcal\to\R\), une sonde \(\hat g:\Hcal\to\R\) et un lecteur aval \(G:\R\to Y\). Supposons que \(G\) soit \(L\)-Lipschitz sur les valeurs considérées, c'est-à-dire \(d_Y(G(a),G(b))\leq L|a-b|\). Si \(\sup_{h\in H(X)}|g(h)-\hat g(h)|\leq\varepsilon\), alors
+\[
+\sup_{x\in X}d_Y\bigl(G(g(H(x))),G(\hat g(H(x)))\bigr)\leq L\varepsilon.
+\]
+\end{theorem}
+\begin{proof}
+Pour tout \(x\in X\), la propriété lipschitzienne de \(G\) donne \(d_Y(G(g(H(x))),G(\hat g(H(x))))\leq L|g(H(x))-\hat g(H(x))|\). Par l'hypothèse uniforme, le dernier terme est au plus \(L\varepsilon\). Prendre le supremum sur \(x\) conserve cette borne.\end{proof}
+
+\begin{corollary}[Plusieurs composants remplacés]
+Soit \(G:Y_1\times\cdots\times Y_k\to Z\) et supposons que, pour les coordonnées modifiées, \(G\) soit séparément lipschitzienne avec constantes \(L_i\). Si chaque remplacement satisfait \(\sup_x d_i(g_i(x),\hat g_i(x))\leq\varepsilon_i\), alors
+\[
+\sup_x d_Z(G(g_1(x),\ldots,g_k(x)),G(\hat g_1(x),\ldots,\hat g_k(x)))\leq\sum_{i=1}^k L_i\varepsilon_i,
+\]
+si le chemin entre sorties peut être décomposé par remplacement d'une coordonnée à la fois et les constantes valent le long de ce chemin.
+\end{corollary}
+\begin{proof}
+Construire les états intermédiaires où l'on remplace les coordonnées une à une. Par l'inégalité triangulaire, l'écart entre le système original et final est inférieur ou égal à la somme des écarts intermédiaires. Chaque écart intermédiaire est borné par \(L_i\varepsilon_i\) avec la propriété lipschitzienne déclarée. La somme donne le résultat.\end{proof}
+
+Le corollaire exprime pourquoi la bonne fidélité d'une activation isolée ne suffit pas : le nombre de remplacements, le conditionnement du chemin aval, les interactions entre unités et le décalage d'état peuvent amplifier la divergence. Si les constantes ne sont pas connues ou si la fonction aval n'est pas lipschitzienne sur le domaine, cette garantie ne peut pas être annoncée.
+
+\section{Proposition 5 : comportement identique ne signifie pas mécanisme identique}
+\begin{proposition}[L'observation fonctionnelle n'identifie pas automatiquement les paramètres]
+Si deux paramétrisations \(\theta\) et \(\theta'\) satisfont \(f_\theta(x)=f_{\theta'}(x)\) pour tout \(x\) dans un domaine d'observation, alors les mesures de sorties sur ce domaine ne distinguent pas ces paramètres. Il peut exister plusieurs paramétrisations ou mécanismes distincts dans la même classe comportementale.
+\end{proposition}
+\begin{proof}
+Le protocole qui ne voit que \(f_\theta(x)\) reçoit pour chaque \(x\) la même valeur que sous \(\theta'\). Les distributions de données induites par ces sorties sont donc identiques pour ce protocole déterministe; le critère observé ne permet pas de choisir l'un des paramètres. Pour conclure à l'identifiabilité, il faudrait montrer l'injectivité de l'application de paramètre à la loi d'observation, ou ajouter des sondes/interventions qui les séparent.\end{proof}
+
+\chapter{Le modèle RBF adaptatif : architecture réelle des bundles}
+\section{Sonde RBF de classification}
+Le code v1.2 fourni définit des centres \(c_j\), des largeurs positives \(s_j\), des poids \(a_j\) et un biais \(b\). Pour une entrée \(x\in\R^d\), l'activation de base est
+\[
+\phi_j(x)=\exp\!\left(-\frac{\norm{x-c_j}_2^2}{2s_j^2}\right),\quad j=1,\ldots,m,
+\]
+et le score du classifieur
+\[
+f_\theta(x)=b+\sum_{j=1}^{m}a_j\phi_j(x).
+\]
+Dans la variante adaptative, les centres et les logarithmes des largeurs sont des paramètres appris; \(a_j\) et \(b\) sont appris aussi. Les largeurs sont exponentiées puis limitées à l'intervalle du code (.03 à 100). Dans le contrôle fixe, les centres et largeurs restent fixés; poids et biais sont appris. La restriction matérielle sur les largeurs et le nombre de centres fait partie de la classe effectivement utilisée; ce n'est pas une sonde universelle illimitée.
+
+Pour la RBF régresseur d'imitation de composant, le code dispose de centres et largeurs ajustables, une lecture linéaire et un biais. Si le nombre de centres est \(m\) et la dimension d'entrée \(d\), le nombre de paramètres entraînables est, dans la variante simple décrite,
+\[
+N_{\mathrm{param}}=md+m+m+1=md+2m+1.
+\]
+Cette formule ne compte pas le coût en données, le coût de recherche d'hyperparamètres, les buffers, ni le lecteur aval conservé dans l'expérience de composition.
+
+\section{Variante B : taux d'actualisation méta-appris}
+Le code v1.2 initialise quatre paramètres de taux (centres, logarithmes des largeurs, poids, biais) de manière symétrique. Les taux sont transformés par \(\alpha_i=0.03\,\sigma(r_i)\), puis utilisés dans une mise à jour paramétrique fondée sur les gradients de perte de support normalisés coordonnée par coordonnée. Les hypergradients apprennent les quatre taux sur des épisodes train/validation. Ce mécanisme apprend quatre taux de groupes dans un schéma préspécifié; il ne découvre pas de zéro un optimiseur universel ni une loi arbitraire d'adaptation.
+
+\section{Alignement avec la notion abstraite de sonde}
+La définition observationnelle permet qu'une sonde soit passive ou active et spécifie la façon dont elle recueille une valeur. Le RBF est une \emph{instanciation fonctionnelle apprise} de cette notion : il reçoit un vecteur d'état/entrée et produit une approximation de la sortie cible. Son entraînement ne devient pas automatiquement une observation du système source; pour un imitateur, les valeurs cible utilisées comme supervision doivent avoir été acquises par une sonde autorisée, enregistrées et séparées en train/validation/test.
+
+Il faut distinguer (a) la sonde instrumentale qui lit directement l'activation d'un neurone dans un modèle ouvert, (b) l'imitateur qui prédit cette activation depuis une entrée accessible et (c) le composant substitut injecté à la place de l'unité source. L'expérience v1.2 sépare précisément imitation et composition, et signale que le lecteur aval source reste dans les compositions testées.
+
+\chapter{Analyse des deux bundles de sondes adaptatives}
+\section{Bundle de base : classification synthétique}
+Le rapport de base utilise \emph{two moons}, 1\,200 exemples d'entraînement et un test fixe de 4\,000 points, bruit annoncé 0,22, normalisation ajustée sur le train, Adam, 500 époques, cinq graines d'initialisation (101, 202, 303, 404, 505). Les résultats résumés par le JSON livré sont :
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Méthode & Exactitude & AUC & Log-loss & Paramètres\\
+\midrule
+MLP de référence & 95,870\% & 0,99189 & 0,11086 & 49\\
+RBF adaptative & 96,005\% & 0,99064 & 0,11740 & 49\\
+RBF fixe (ablation) & 86,230\% & 0,91991 & 0,35498 & 13\\
+\bottomrule
+\end{tabular}
+\end{center}
+Les résultats sont compatibles avec l'idée qu'une RBF apprenable peut être compétitive sur ce problème synthétique et que l'adaptation des centres/largeurs apporte une différence par rapport à un contrôle fixe de capacité plus petite. Ils n'isolent pas parfaitement l'effet d'adaptation du contrôle fixe puisque les nombres de paramètres diffèrent. Sur ce test précis, l'exactitude RBF est légèrement supérieure à celle du MLP mais AUC et log-loss sont moins bonnes. Les écarts-types sont calculés sur cinq initialisations pour un même test : ils ne mesurent pas toute l'incertitude de population ni le changement de distribution.
+
+\section{Bundle final v1.2 : plan de réplication strictement isolée}
+Le bundle final contient plusieurs générations de protocoles, un rapport consolidé, des résultats exploratoires, un supplément chiffres manuscrits et une réplication isolée v1.2. Ces campagnes ne doivent pas être agrégées comme si toutes les observations provenaient d'un seul protocole. La réplication v1.2 utilise quatre tâches (circles, two moons, XOR produit, Wine binaire), trois graines neuves (1501, 1607, 1717), quatre méthodes et 48 groupes de classification. Le manifeste rapporte 13\,392 prédictions de classification évaluées et une séparation des rôles de processus. L'audit de livraison a le statut \texttt{PASS\_WITH\_LIMITATIONS}, avec les contrôles de fichiers, partitions, accès, prédictions gelées et tableaux décrits dans le JSON.
+
+\begin{longtable}{llrrrr}
+\toprule
+Tâche & Méthode & Accuracy & F1 & AUC & Log-loss\\
+\midrule\endhead
+Circles & A RBF adaptative & 94,63\% & 0,9463 & 0,9872 & 0,1607\\
+Circles & B taux méta-appris & 94,54\% & 0,9454 & 0,9864 & 0,1535\\
+Circles & MLP & 94,44\% & 0,9442 & 0,9867 & 0,1638\\
+Circles & RBF fixe & 91,11\% & 0,9169 & 0,9822 & 0,4030\\
+\midrule
+Two moons & A RBF adaptative & 94,72\% & 0,9466 & 0,9858 & 0,1776\\
+Two moons & B taux méta-appris & 97,59\% & 0,9759 & 0,9947 & 0,0835\\
+Two moons & MLP & 93,52\% & 0,9352 & 0,9850 & 0,1738\\
+Two moons & RBF fixe & 86,30\% & 0,8597 & 0,9414 & 0,3158\\
+\midrule
+Wine binaire & A RBF adaptative & 98,15\% & 0,9697 & 1,0000 & 0,0945\\
+Wine binaire & B taux méta-appris & 99,07\% & 0,9855 & 1,0000 & 0,0385\\
+Wine binaire & MLP & 100,00\% & 1,0000 & 1,0000 & 0,0075\\
+Wine binaire & RBF fixe & 94,44\% & 0,9091 & 0,9942 & 0,1966\\
+\midrule
+XOR produit & A RBF adaptative & 93,89\% & 0,9364 & 0,9459 & 0,2938\\
+XOR produit & B taux méta-appris & 93,61\% & 0,9340 & 0,9454 & 0,2679\\
+XOR produit & MLP & 93,15\% & 0,9292 & 0,9470 & 0,2737\\
+XOR produit & RBF fixe & 88,70\% & 0,8802 & 0,9365 & 0,4459\\
+\bottomrule
+\end{longtable}
+Les valeurs ci-dessus sont des moyennes sur trois graines. Elles décrivent seulement les quatre tâches et la configuration choisie. B est nettement meilleure sur two moons, proche d'A sur circles et XOR produit, et légèrement derrière MLP sur Wine binaire; le contrôle fixe est généralement inférieur, mais il est plus contraint. Ces valeurs ne fournissent pas une hiérarchie universelle entre architectures.
+
+\section{Imitation d'unités neuronales isolées}
+Le protocole strict v1.2 contient 9 cibles artificielles appartenant aux familles d'activation ReLU, sigmoid et tanh, trois budgets d'observations (64, 256, 1024), trois graines de sonde (1011, 2022, 3033) et 4\,000 lignes d'évaluation par ajustement. L'audit indique 81 ajustements, 324\,000 prédictions, zéro recouvrement exact train/test par hash de ligne pour la campagne d'imitation et des contrôles d'accès dédiés. Ce sont des contrôles vérifiables du protocole; ils ne démontrent pas l'absence absolue de tout canal auxiliaire.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Famille cible & Budget & MAE moyenne & \(R^2\) moyenne\\
+\midrule
+ReLU & 64 & 0,08091 & 0,98039\\
+ReLU & 256 & 0,06454 & 0,98738\\
+ReLU & 1024 & 0,06442 & 0,98854\\
+Sigmoid & 64 & 0,01563 & 0,99459\\
+Sigmoid & 256 & 0,01306 & 0,99636\\
+Sigmoid & 1024 & 0,01309 & 0,99660\\
+Tanh & 64 & 0,03917 & 0,99106\\
+Tanh & 256 & 0,02924 & 0,99488\\
+Tanh & 1024 & 0,03518 & 0,99335\\
+\bottomrule
+\end{tabular}
+\end{center}
+Les valeurs de \(R^2\) sont élevées sur ces familles de cibles et ce protocole synthétique, mais ne suffisent pas à conclure à une récupération exacte. L'amélioration avec le budget n'est pas strictement monotone pour toutes les familles (par exemple MAE tanh est plus élevée à 1024 qu'à 256 dans le résumé). Ce constat doit être conservé; le budget plus grand ne garantit pas mécaniquement une meilleure cible finale sous tous les choix d'optimisation.
+
+\section{Composition : remplacement de composants}
+L'expérience de composition remplace une, quatre ou seize unités cachées du MLP source dans deux tâches (two moons et Wine binaire), sur trois graines dédiées. Le rapport d'audit rappelle explicitement que le lecteur final du MLP source est conservé; l'expérience n'est donc pas un remplacement autonome de tout le réseau.
+\begin{center}
+\small
+\begin{tabular}{p{1.5cm}rrrp{4.2cm}}
+\toprule
+Tâche & Unités remplacées & Accuracy source & Accuracy composée & Écart moyen absolu de logits\\
+\midrule
+Two moons & 1 & 95,74\% & 94,91\% & 0,0827\\
+Two moons & 4 & 95,74\% & 94,44\% & 0,2201\\
+Two moons & 16 & 95,74\% & 90,56\% & 0,6546\\
+Wine binaire & 1 & 98,15\% & 100,00\% & 0,0834\\
+Wine binaire & 4 & 98,15\% & 99,07\% & 0,3123\\
+Wine binaire & 16 & 98,15\% & 100,00\% & 1,0824\\
+\bottomrule
+\end{tabular}
+\end{center}
+L'exactitude seule peut masquer des changements importants de marge : pour Wine, le niveau 16 donne 100\% d'exactitude mais l'écart moyen absolu de logits est 1,082. Un remplacement local peut donc préserver les labels sur le petit jeu test tout en altérant la distribution des scores. L'augmentation de l'erreur de logits avec le nombre d'unités remplacées est marquée dans les résultats rapportés; elle n'est toutefois pas strictement monotone sur toutes les métriques et tâches, ce qui rend nécessaire de publier plusieurs métriques.
+
+\section{Complément multiclasse réel : chiffres manuscrits}
+Le supplément utilisant \texttt{sklearn.datasets.load\_digits} contient 1\,797 images 8x8, 64 caractéristiques et dix classes, avec trois partitions/graines. Les scores rapportés sont :
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Méthode & Accuracy & Balanced acc. & F1 macro & Paramètres\\
+\midrule
+RBF fixe & 76,67\% & 76,66\% & 0,7648 & 170\\
+RBF adaptative A & 87,31\% & 87,34\% & 0,8734 & 1\,210\\
+RBF taux méta-appris B & 78,33\% & 78,28\% & 0,7800 & 1\,210\\
+MLP & 96,76\% & 96,77\% & 0,9677 & 1\,210\\
+\bottomrule
+\end{tabular}
+\end{center}
+Le résultat défavorable est important : l'apprentissage de quatre taux d'adaptation n'améliore pas automatiquement la performance et B est nettement sous A sur la tâche multiclasse, tandis que le MLP reste supérieur. Les trois familles principales ont le même nombre de paramètres déclarés (1\,210), ce qui évite ici le déséquilibre de paramètres entre A/B/MLP, mais non les différences de biais inductif ou d'optimisation. Le contrôle fixe n'a que 170 paramètres.
+
+Un supplément séparé sur les chiffres 3-versus-8 rapporte A=95,37\%, B=96,76\%, MLP=99,07\% en moyenne, et un remplacement de 1/4/16 unités qui accroît l'écart moyen absolu des logits de 0,122 à 0,494 puis 1,969. Il ne doit pas être fusionné avec la tâche dix classes : l'échantillon, le nombre d'étiquettes, le protocole et le budget diffèrent.
+
+\section{Portée des résultats empiriques}
+Les données permettent de conclure que la RBF est une candidate pratique pour apprendre certaines fonctions de sortie de composants neuronaux sur les distributions simulées et les benchmarks enregistrés. Elles ne prouvent pas que la classe RBF utilisée contient exactement toute activation d'un réseau arbitraire dans toutes les dimensions avec budget borné, ni qu'elle peut l'apprendre à partir de tout échantillon fini. Les audits de séparation des rôles et de rejeu d'inférence augmentent la confiance dans les artefacts de la campagne, sans transformer les mesures finies en garantie universelle.
+
+\section{Réexécution phase par phase et concordance indépendante des sorties}
+La tentative monolithique initiale a dépassé la fenêtre de 600 secondes. Afin de distinguer un problème d'orchestration d'un problème propre à une phase, le protocole v1.2 a été relancé dans des espaces de travail séparés, sans changement des modèles, pertes, budgets, graines ni critères d'évaluation. Seule la racine du runtime a été déplacée afin de préserver la référence. Les sorties de phases sont conservées dans \path{references/adaptive_v1_2/full_bundle/results/}; les journaux de lancement, codes de retour, audits et comparaison sémantique sont conservés dans \path{logs/v1_2_phase_rerun/}.
+
+\begin{center}
+\small
+\begin{tabular}{p{2.8cm}p{2.6cm}p{2.2cm}p{5.0cm}}
+\toprule
+Phase & Volume vérifié & Audit & Réserve à conserver\\
+\midrule
+Classification & 48 lignes; 13\,392 prédictions & Pass avec réserves; 12/12 contrôles d'accès & 4 tâches; graines 1501, 1607, 1717; portée finie et définie par le protocole.\\
+Imitation boîte noire & 81 ajustements; 27 cibles-budget; 324\,000 prédictions & Pass avec réserves; 8/8 contrôles d'accès; recouvrement exact des lignes train/test nul & Cibles artificielles ReLU, sigmoid, tanh seulement; non représentatif de tous les neurones possibles.\\
+Composition & 6 systèmes; 96 composants; 18 lignes agrégées; 4\,752 prédictions & Pass avec réserves; 14/14 contrôles d'accès; 6/6 contrôles de partition & Lecteur aval original conservé; substitution partielle, pas étudiant autonome.\\
+Concordance des sorties & 7 vérifications de tables & \texttt{PASS}, 7/7 & Écart maximal nul pour les métriques numériques comparées (tolérance \(10^{-6}\)); jetons opaques et horodatages exclus de la comparaison.\\
+Validateur fourni & 16 contrôles & Pass avec réserves, 16/16 & Contrôles d'artefacts et d'invariants, pas preuve universelle.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La comparaison des sorties couvre exactement les tables de classification par graine et les prédictions gelées, l'imitation par cible et ses prédictions, la composition par graine, la fidélité des composants et les prédictions de composition. Le fichier de contrôle \texttt{logs/v1\_2\_phase\_rerun/result\_comparison.json} indique 7/7 comparaisons réussies, avec 48, 13\,392, 81, 324\,000, 18, 96 et 4\,752 lignes respectivement. Le résultat établit la concordance du protocole exécuté avec les artefacts gelés pour les champs comparés; il ne prouve pas que les mêmes modèles ont été réentraînés cinq fois indépendamment, ni que toutes les expériences annexes sur \texttt{load\_digits} et 3-versus-8 ont été réentraînées à nouveau.
+
+Les tentatives redondantes/interrompues de composition sont inscrites dans les journaux et ne servent pas de preuve de résultat. La source de référence du bundle final a ensuite été restaurée; les 529 fichiers couverts par son manifeste de checksums correspondent tous aux empreintes SHA-256 d'origine. Le processus de composition final a produit l’audit déclaré et tous les artefacts attendus; le wrapper shell a explicitement capturé le code de retour 0 dans \texttt{logs/v1\_2\_phase\_rerun/composition\_persistent.exitcode}. Une note préliminaire indiquant que le code n’était pas capturé est donc remplacée par cette trace directe.
+
+\chapter{Relation avec NGeGenBrain et les datasets}
+\section{Observation directe sur des modèles plus grands}
+Le rapport NGeGenBrain v3.1 décrit la capture de sorties de blocs et des interventions sur un modèle source SmolLM2 quantifié et TinyLLM, ainsi que sur un étudiant GRU de 55\,568 paramètres. Il rapporte 30 sorties de blocs capturées pour SmolLM2 et 8 pour TinyLLM; les interventions changent les logits selon la profondeur et la définition du point d'injection. Le rapport reconnaît un défaut historique de l'opération \texttt{zero} qui effaçait l'état post-bloc complet et décrit des modes résiduels corrigés. Ces observations appuient l'idée qu'un système neuronal peut être étudié via des opérateurs de mesure/intervention et que les détails du point d'intervention comptent.
+
+Ce n'est pas la même question que l'imitation des activations par RBF. Les sondes de v3.1 servent surtout à capter/intervenir sur des états; l'imitateur RBF de v1.2 est ajusté comme approximant d'une fonction cible. L'identité bit à bit entre les chemins génératifs v3.0/v3.1 prouve la non-régression de ce chemin sur les 24 textes déclarés, pas une équivalence du modèle étudiant aux modèles sources ni une reconstruction de leurs neurones.
+
+\section{Dataset de l'archive principale}
+L'inventaire racine de l'archive comporte notamment \texttt{Screenplay\_dataset.jsonl} (4\,000 lignes), \texttt{batch\_dataset.jsonl} (783 lignes), \texttt{0000.parquet} (2\,306\,545 octets; footer Parquet décodé par un lecteur Thrift dédié : 7\,473 lignes, 8 row-groups, champs \texttt{question} et \texttt{answer} de type BYTE\_ARRAY/UTF-8 optionnel; valeurs des pages non décodées) et un ZIP de la collection SMS Spam. Une vérification en lecture seule couvre 430 fichiers JSONL à travers les versions/sauvegardes NGeGenBrain : 5\,825 lignes physiques, 5\,824 objets valides et une ligne finale invalide dans le dataset racine. Les 53 groupes SHA-256 dupliqués rassemblent 421 fichiers présents dans des groupes de snapshots identiques; ils ne constituent pas autant de réplications indépendantes. Le préfixe valide de 783 lignes et la ligne brute 784 ont été séparés dans les résultats d’audit sans modifier l’original. Le footer Parquet est également décodé par un lecteur Thrift compact dédié : 7\,473 lignes, 8 groupes, deux champs optionnels \texttt{question}/\texttt{answer} UTF-8; les valeurs de pages demeurent non décodées. Ces grands corpus textuels ne sont pas les jeux directement listés dans les résultats des expériences RBF rapportées. Les résultats de classification utilisent plutôt des données synthétiques et des benchmarks \texttt{scikit-learn} (breast cancer, digits) conformément aux manifestes du bundle.
+
+Il serait incorrect de suggérer qu'un corpus de screenplays démontre la propriété d'une sonde neuronale ou que tous les datasets de l'archive ont été utilisés dans les expériences résumées. L'inventaire et les hachages de la source permettent de les retrouver; leur analyse sémantique/qualitative est hors de la portée empirique des CSV de sondes, à moins qu'une campagne spécifique ne les utilise avec un protocole et des mesures explicites.
+
+\chapter{Architecture de validation et commandes d'exécution}
+\section{Pipeline opérationnel proposé}
+\begin{enumerate}
+\item \textbf{Définir la cible.} Cibler une activation scalaire/vectorielle exacte avec nom de couche, token, position, point du graphe, normalisation et contexte.
+\item \textbf{Geler les sources.} Hacher le modèle, le code d'extraction, la sonde, les données et les dépendances; enregistrer version/architecture.
+\item \textbf{Créer les observations.} Enregistrer entrée/état accessible, sortie cible, statut d'erreur, provenance et coût. Un échec d'acquisition ne doit pas être converti en zéro.
+\item \textbf{Séparer les rôles.} Distinguer producteur de cible, entraîneur de sonde, évaluateur et auditeur lorsque les ressources le permettent; fermer les accès aux labels et résultats test jusqu'au gel.
+\item \textbf{Ajuster et sceller.} Entraîner selon le protocole préenregistré, arrêter selon une règle fixée, enregistrer les paramètres et hacher la sonde scellée.
+\item \textbf{Tester l'imitation.} Rapporter erreur moyenne, queue/max, performance par cible, budgets 64/256/1024 ou autre budget déclaré, cibles indépendantes, évaluation IID et OOD.
+\item \textbf{Tester la composition.} Remplacer 1, 4, 16 unités ou une échelle appropriée; comparer logits, distribution, classe, calibration et critères de tâche. Rapporter le lecteur aval conservé ou remplacé.
+\item \textbf{Contrôler le budget.} Comparer coût et paramètres à un neurone cible, à un MLP de référence, à une RBF fixe et à un contrôle simple; ne pas inférer un gain d'adaptation d'une comparaison à capacité différente.
+\item \textbf{Falsifier.} Ajouter des contextes, tâches, domaines et architectures indépendants; rechercher les cas qui contredisent une loi universelle; ne pas supprimer les graines défavorables.
+\item \textbf{Conclure par portée.} Distinguer représentation, approximation, identification et mécanisme; publier les limites et les contre-exemples.
+\end{enumerate}
+
+\section{Commandes d'exécution disponibles dans les sources}
+Les instructions ci-dessous sont celles des bundles source; elles supposent leurs dépendances et permissions déclarées. Elles sont fournies pour la reproduction, pas comme une affirmation qu'elles ont toutes été réexécutées dans ce cycle.
+\begin{verbatim}
+# Benchmark de base (dans un dossier exp_base extrait)
+python experience_sondes_adaptatives.py
+
+# Validation de la livraison v1.2 sans réentraîner les modèles
+python src/validate_delivery_v1_2.py
+
+# Réexécution complète documentée par le bundle strict v1.2
+python src/run_strict_isolated_replication_v1_2.py setup
+python src/run_strict_isolated_replication_v1_2.py classification
+python src/run_strict_isolated_replication_v1_2.py imitation
+python src/run_strict_isolated_replication_v1_2.py composition
+python src/validate_delivery_v1_2.py
+python src/package_delivery_v1_2.py
+\end{verbatim}
+Le bundle explique que la campagne strictement isolée requiert sous Linux des permissions adaptées et un espace temporaire neuf. Les dossiers temporaires historiques cités dans les audits n'existent pas nécessairement dans le nouvel environnement; la présence des résultats archivés ne signifie pas que ces chemins temporaires ont été conservés. La reproduction fraîche doit créer un nouvel espace privé, pas écraser les résultats archivés.
+
+\chapter{Conséquences théoriques, conceptuelles et opérationnelles}
+\section{Conséquences théoriques}
+La formulation peut se décliner en un théorème exact d'inclusion, un problème d'approximation, un problème statistique d'apprentissage et un problème d'équivalence comportementale/mécaniste. Ces problèmes sont reliés mais pas identiques.
+\begin{itemize}
+\item Une classe de sondes de même forme qu'un neurone scalaire contient ses fonctions si elle autorise tous les paramètres nécessaires. C'est une propriété de représentation, non une garantie d'identification des paramètres.
+\item Les théorèmes d'approximation universelle connus pour certaines classes de réseaux, y compris des réseaux sigmoïdes et RBF sous conditions, sont des théorèmes d'approximation de fonctions dans un domaine approprié. Ils ne donnent pas automatiquement une borne d'échantillonnage fini, la réussite d'un optimiseur donné, l'égalité des mécanismes, ni la préservation de l'exécution composée. Références indicatives : Cybenko (1989), Park et Sandberg (1991).
+\item Une erreur d'activation uniforme borne l'erreur aval seulement si l'application aval est lipschitzienne sur les valeurs considérées; pour plusieurs unités, une borne additive nécessite les hypothèses de régularité le long du chemin de remplacement.
+\item Les observations finies ne déterminent pas une fonction arbitraire sur un domaine plus large. Pour dépasser cette non-identifiabilité, il faut des hypothèses de classe ou de régularité et vérifier qu'elles sont satisfaites, ou collecter des observations discriminantes supplémentaires.
+\end{itemize}
+
+\section{Conséquences conceptuelles}
+Le sens faible de l'hypothèse est une re-description instrumentale : une activation neuronale est une réponse associée à un point du calcul et peut servir d'observable. Le sens moyen est une hypothèse d'approximation : une sonde apprise à partir des réponses du neurone peut approximer sa fonction. Le sens fort est une proposition architecturale universelle : les neurones et leurs fonctions pourraient tous être considérés comme une classe commune de sondes adaptatives avec une loi d'adaptation et un budget explicites. Le sens encore plus fort, parfois suggéré par « ne sont que », est une réduction explicative ou mécaniste; il exige de montrer que cette abstraction conserve les capacités pertinentes et ne masque aucune différence causale essentielle.
+
+L'ambition conceptuelle n'est pas limitée par ce découpage : celui-ci donne à chaque version de l'hypothèse un critère qui permet de la tester au lieu de confondre un sens trivial démontré avec une version forte encore en cours d'examen.
+
+\section{Conséquences opérationnelles}
+Dans un système comme NGeGenBrain, il serait utile que chaque cible possède une fiche typée (modèle, version, couche, composant, emplacement, token/position, codomaine), que chaque sonde possède une fiche d'acquisition/approximation, que les mises à jour soient enregistrées séparément du calcul observé et que chaque substitution ait un plan de restauration. Les observations doivent conserver l'état d'origine, la sonde scellée, l'identité du lecteur aval, les différences de logits, les données de validation, les erreurs, les hashes et les résultats défavorables. La sonde ne doit pas recevoir en secret les poids/labels de la cible pendant le fitting si l'objectif déclaré est l'imitation à partir d'observations seule.
+
+\chapter{Verdict par hypothèse et prochains tests discriminants}
+\section{Statuts logiques}
+\begin{longtable}{p{4.8cm}p{3.0cm}p{7.1cm}}
+\toprule
+\textbf{Hypothèse} & \textbf{Statut ici} & \textbf{Raison et critère manquant}\\
+\midrule\endhead
+H1. Un neurone peut être traité comme une fonction observable. & Démontré sous définition typée & Il faut nommer le point du calcul, l'entrée et le codomaine; l'activation devient une coordonnée mesurable.\\
+H2. Une fonction de neurone affine+activation appartient à une classe qui contient tous les mêmes paramètres. & Démontré conditionnellement & La preuve est une substitution de paramètres; il reste à établir accès aux paramètres ou procédure pour les apprendre.\\
+H3. Une RBF adaptative peut approximer certaines cibles neuronales sur un domaine. & Soutenu par résultats finis & R² élevés sur neuf cibles artificielles; la portée est limitée aux familles et tâches étudiées.\\
+H4. Le mécanisme d'actualisation B est universel. & Non établi & La méthode apprend quatre taux de groupe dans un schéma donné; la classe d'optimiseurs et les données demeurent spécifiées.\\
+H5. Toute unité de tout réseau est exactement une sonde RBF apprise avec budget borné. & Non établi & Il faut un théorème d'inclusion de toute la classe cible dans une classe RBF définie avant la cible, avec dimensions, régularité et coûts fixés.\\
+H6. Le remplacement de plusieurs unités préserve un réseau complet autonome. & Non démontré par les expériences fournies & Le lecteur aval du modèle source reste conservé dans les compositions et l'écart de logits augmente avec le nombre de remplacements dans plusieurs cas.\\
+H7. Les mécanismes internes sont identifiés à partir des empreintes observées. & Non établi en général & Nécessite injectivité ou conditions d'identifiabilité spécifiques et des interventions discriminantes.\\
+H8. La proposition est vraie ou fausse dans tous les sens possibles. & Non décidé par une formule unique & Plusieurs énoncés de force différente ont été distingués; ils peuvent recevoir des verdicts différents.\\
+\bottomrule
+\end{longtable}
+
+\section{Prochaine phase expérimentale à haut pouvoir discriminant}
+Une expérience plus forte doit choisir avant l'entraînement : (a) une classe d'architectures source et une classe de sonde commune, toutes deux indépendamment définies; (b) un domaine de contextes et un domaine OOD; (c) une limite de paramètres et de calcul commune; (d) une suite de cibles plus large, choisie sans sélection sur test; (e) une méthode de reproduction des activations, d'apprentissage de la règle d'adaptation et de composition; (f) des critères de sortie sur activations et sur logits; (g) des interventions causales qui séparent modèles mécanistes encore compatibles. Une règle d'arrêt et tous les échecs doivent être préenregistrés.
+
+Pour rendre une revendication universelle crédible, il faudrait dériver une borne théorique portant sur toute la classe choisie, vérifier les préconditions (par exemple compacité du domaine, régularité de la cible, densité de la classe, borne du budget), puis séparer cette garantie d'une expérience empirique sur un échantillon fini. Les limites de capacité, d'accès ou de formalisme ne doivent pas servir de verdict anticipé; elles doivent apparaître comme paramètres de la proposition à résoudre.
+
+\chapter{État final du modèle et conclusion}
+\section{Résultats consolidés}
+L'étude fournit maintenant un formalisme typé de sonde adaptative; prouve l'inclusion représentationnelle dans le cas où la classe contient explicitement la forme de neurone cible; démontre une construction de non-identifiabilité finie; donne une borne de propagation sous hypothèses Lipschitz; compare la définition abstraite des sondes aux implémentations RBF; relit les données de classification, imitation, composition et chiffres manuscrits; et sépare ces expériences des observations de modèles NGeGenBrain v1-v3.1.
+
+Les expériences archivées sont compatibles avec des sondes adaptatives utiles sur certaines cibles et tâches, mais elles ne prouvent ni que toute sonde RBF utilisée contient tout neurone artificiel, ni que tout neurone peut être appris à l'identique, ni que la composition entière est préservée. Cette conclusion décrit la portée des preuves présentes, sans prédire les résultats de futures classes ou expériences.
+
+\section{Statut final}
+\begin{itemize}
+\item \textbf{Formalisme :} définitions et théorèmes conditionnels établis dans le document.
+\item \textbf{Empirique :} les valeurs sont issues des CSV et audits livrés, non agrégées entre protocoles incompatibles.
+\item \textbf{Reproductibilité :} scripts, protocoles, audits et résultats sélectionnés sont copiés dans \path{references/}; les commandes sources sont données.
+\item \textbf{Généralité :} non universellement établie par ce corpus; toute extension doit être évaluée sur sa classe et son domaine annoncés.
+\item \textbf{Absence de biais de conclusion :} aucune réussite ou impossibilité universelle n'a été postulée; chaque revendication est jugée selon ses définitions, preuves et données disponibles.
+\end{itemize}
+
+\appendix
+\chapter{Tables et métriques supplémentaires à consulter}
+Les tableaux complets et les erreurs-type descriptives demeurent dans les CSV copiés sous \path{references/adaptive_v1_2/results/}. Les sources d'audit incluent les manifests de classification, d'imitation et de composition; le rejeu gelé rapporte 18 sorties attendues, 18 identiques, zéro divergence. Ces nombres valident un sous-ensemble défini des artefacts et ne constituent pas une certification formelle exhaustive.
+
+\chapter{Bibliographie externe et documentation}
+\begin{itemize}
+\item G. Cybenko (1989), ``Approximation by superpositions of a sigmoidal function'', \emph{Mathematics of Control, Signals, and Systems}, 2, 303--314. DOI : \url{https://doi.org/10.1007/BF02551274}.
+\item J. Park et I. W. Sandberg (1991), ``Universal Approximation Using Radial-Basis-Function Networks'', \emph{Neural Computation}, 3(2), 246--257. DOI : \url{https://doi.org/10.1162/neco.1991.3.2.246}.
+\item N. Elhage et al. (2022), ``Toy Models of Superposition'', arXiv:2209.10652, \url{https://arxiv.org/abs/2209.10652}; voir aussi Anthropic, ``Towards Monosemanticity: Decomposing Language Models With Dictionary Learning'' (2023), \url{https://www.anthropic.com/research/towards-monosemanticity-decomposing-language-models-with-dictionary-learning}. Ces références encadrent la différence entre unités et features, mais ne décident pas l'hypothèse de sonde adaptative.
+\item Sources primaires NGeGenBrain : audits V1/V2, rapport comparatif v3.1, formalismes des empreintes et de l'observation, protocoles et résultats des deux bundles adaptatifs copiés dans la livraison.
+\end{itemize}
+\end{document}

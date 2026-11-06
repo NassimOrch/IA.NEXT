@@ -1,0 +1,195 @@
+{
+  "date": "2026-10-30",
+  "prompt_revision": "1.1",
+  "prompt_sha256": "88f67fc34bf34c5ca0817da42a057ed71dfb092cfb33720be5532da96bab3291",
+  "workspace_versions": [
+    "v001",
+    "v002",
+    "v003",
+    "v004",
+    "v005",
+    "v006",
+    "v007"
+  ],
+  "integrity": {
+    "json_files_valid": 1850,
+    "json_parse_errors": 0,
+    "jsonl_files": 53,
+    "jsonl_valid_lines": 1720,
+    "jsonl_parse_errors": 0,
+    "checkpoint_hash_refs": 1313,
+    "checkpoint_hash_failures": 0,
+    "canonical_prediction_hash_refs": 1162,
+    "canonical_prediction_hash_failures": 0,
+    "legacy_superseded_prediction_pointers": 40,
+    "raw_prediction_json_files_recalculated": 826,
+    "metric_recalculation_errors": 0,
+    "MLP_ge4x_ratio_rows": 437,
+    "MLP_ge4x_below_4": 0,
+    "minimum_MLP_to_probe_ratio": 4.000735294117647,
+    "unique_run_registries": 53
+  },
+  "overall_data_integrity_pass": true,
+  "OOF_pairing": {
+    "links": 20,
+    "unique_mlp_models": 10,
+    "mlp_retrained": false,
+    "oof_candidates": 2,
+    "seeds": [
+      1501,
+      1607,
+      1717,
+      2029,
+      3037
+    ],
+    "metric_recalculation_max_abs_diff": 0.0,
+    "all_prediction_hashes_ok": true,
+    "all_checkpoint_hashes_ok": true,
+    "all_MLP_ge4x": true,
+    "matched_rows": 10,
+    "ge4x_rows": 10
+  },
+  "v007_profile": {
+    "torchscript_trace_parity_pass_seeds": 5,
+    "torchscript_optimize_for_inference_eligible": false,
+    "numba_v1_valid": false,
+    "numba_v2_probe_parity_pass_seeds": 1,
+    "numba_v2_mlp_parity_pass_seeds": 5,
+    "test_accessed": false,
+    "profiled_models": 5
+  },
+  "tests": {
+    "v001_final_integrity": "PASS",
+    "v001_adam_freeze_semantics": "PASS",
+    "v002_alternating_freeze": "PASS",
+    "v002_adam_freeze_semantics": "PASS",
+    "v003_external_split": "PASS",
+    "v004": "2 passed",
+    "v005": "1 passed",
+    "v006": "3 passed",
+    "v007": "3 individual test functions PASS; full pytest collection not claimed (time window exceeded)",
+    "workspace_oof_linkage": "4 passed (test_oof_mlp_pairing.py + test_oof_artifacts_complete.py)",
+    "global_audit": "PASS",
+    "whole_workspace_integrity": "PASS (3951 files; 1865 JSON; 1720 JSONL lines; 61 rectangular CSV; prompt hashes and containment pass)"
+  },
+  "audit_exceptions": [
+    {
+      "id": "V006_DUPLICATE_REGISTRY_ROWS",
+      "handling": "38 probe rows/30 unique keys, 53 MLP rows/40 unique keys; identical checkpoint/prediction/history by duplicate group; raw kept and analytical summaries deduplicated by candidate/seed; maximum elapsed time retained."
+    },
+    {
+      "id": "V1_RETRO_DUPLICATE",
+      "handling": "retro_linear seed1501 duplicate; identical checkpoint/prediction refs but incompatible elapsed values; both kept, conservative maximum used for timing."
+    },
+    {
+      "id": "V1_V4_METADATA_FLAG",
+      "handling": "supervised joint two-level raw row had overbroad Q-only flag; correction recorded in sidecar, raw kept."
+    },
+    {
+      "id": "V3_EXTERNAL_LEGACY_PATHS",
+      "handling": "40 stale shared path pointers preserved as superseded; per-seed canonical sidecars checked."
+    },
+    {
+      "id": "V007_NUMBA_V1",
+      "handling": "invalid prototype (incorrect MLP primitive/activation), measurements excluded."
+    },
+    {
+      "id": "V007_NUMBA_V2",
+      "handling": "probe parity threshold 1e-6 passed on 1/5 only; not accepted as candidate backend."
+    },
+    {
+      "id": "EX4_V007_HISTORICAL",
+      "handling": "old EX4 mixed registry has 95 rows vs historical test expectation70; separate filtered audit retained."
+    }
+  ],
+  "scientific_conclusion": "Aucune candidate ne respecte simultanément la non-infériorité prédictive et toutes les dimensions obligatoires de ressources. Les axes réalisables ont été exécutés/audités; les transferts Banknote/MAGIC, l’énergie, la VRAM et les MACs complets de training restent bloqués/non mesurés. EX5 n’est pas une réussite scientifique globale.",
+  "blocked_or_unmeasured": [
+    "Banknote/MAGIC could not be materialized because DNS resolution failed in runtime",
+    "GPU VRAM unavailable on CPU-only environment",
+    "Energy instrumentation unavailable",
+    "Complete training MACs not measured",
+    "Uniform peak RSS/checkpoint/optimizer-state telemetry incomplete across legacy versions"
+  ],
+  "archive_created": true,
+  "archive_file": "/mnt/data/sondes_ex5_workspace_20261030.zip",
+  "source_reference_hash_audit": {
+    "checked": 7,
+    "passed": 7,
+    "failed": 0
+  },
+  "workspace_integrity": {
+    "scanned_noncache_files": 3951,
+    "scanned_bytes": 186910433,
+    "json_files_valid": 1865,
+    "json_parse_errors": 0,
+    "jsonl_files": 53,
+    "jsonl_valid_lines": 1720,
+    "jsonl_parse_errors": 0,
+    "csv_files": 60,
+    "csv_rectangular": 60,
+    "csv_errors": 0,
+    "prompt_outer_and_inner_sha256_match": true,
+    "prompt_sha256": "88f67fc34bf34c5ca0817da42a057ed71dfb092cfb33720be5532da96bab3291",
+    "external_symlinks": 0,
+    "overall_pass": true,
+    "manifest": "deliverables/sha256_manifest_workspace_final.csv",
+    "manifest_excludes_itself_and_audit_report": true
+  },
+  "archive_sha256": null,
+  "archive_hash_sidecar": "/mnt/data/sondes_ex5_workspace_20261030.zip.sha256",
+  "archive_hash_note": "Detached SHA-256 sidecar verifies the archive; the archive cannot contain its own final hash.",
+  "OOF_artifact_audit": {
+    "manifest_entries": 162,
+    "missing_required": 0,
+    "fold_models": 25,
+    "fold_complete_markers": 25,
+    "fold_optimizer_resume_states": 25,
+    "final_composites": 10,
+    "final_metrics": 10,
+    "final_prediction_files": 10,
+    "answer_optimizer_resume_states": 10,
+    "MLP_comparison_links": 20,
+    "matched_links": 10,
+    "ge4x_links": 10,
+    "minimum_ge4x_ratio": 4.007758620689655,
+    "OOF_prediction_max_abs_diff": 0.0,
+    "validation_logits_max_abs_diff": 0.0,
+    "full_composite_prediction_max_abs_diff": 0.0,
+    "metric_max_abs_diff": 0.0,
+    "forward_signature": "(self, x)",
+    "test_partition_accessed": false,
+    "pass": true
+  },
+  "variant_catalogue": {
+    "versions": [
+      "v001",
+      "v002",
+      "v003",
+      "v004",
+      "v005",
+      "v006",
+      "v007"
+    ],
+    "raw_jsonl_registries": 53,
+    "candidate_registry_rows": 338,
+    "rows_with_candidate_id": 1608,
+    "canonical_families": 9,
+    "files": [
+      "deliverables/catalogue_variantes_ex5.csv",
+      "deliverables/catalogue_registres_ex5.csv",
+      "deliverables/catalogue_campagnes_ex5.csv",
+      "deliverables/catalogue_artifacts_versions_ex5.json",
+      "deliverables/nomenclature_registry_ex5.json"
+    ]
+  },
+  "nomenclature": {
+    "MIXA": "MIXA_GENERAL",
+    "mixa": "alias:MIXA_GENERAL",
+    "MiXA": "alias:MIXA_GENERAL",
+    "micro-MIXA": "MICRO_MIXA",
+    "micro-mixa": "alias:MICRO_MIXA",
+    "micro-MiXA": "alias:MICRO_MIXA",
+    "mixa_micro_d4_k8": "legacy_alias:MICRO_MIXA",
+    "separate_models_for_case_aliases": false
+  }
+}

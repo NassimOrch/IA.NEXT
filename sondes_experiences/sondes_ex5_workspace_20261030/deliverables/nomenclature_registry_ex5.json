@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-10-30",
+  "source_documents": [
+    "inputs/reference_prompts/prompt_ex3.json",
+    "inputs/reference_prompts/prompt_ex4.json",
+    "inputs/prompt_ex5.json",
+    "versions/sondes_ex5_v001__2026-10-30/src/run_twolevel_oof_residual.py",
+    "versions/sondes_ex5_v001__2026-10-30/src/run_mixa_proportions.py"
+  ],
+  "canonical_entities": {
+    "MIXA_GENERAL": {
+      "canonical_display": "MIXA",
+      "code_family": "mixa",
+      "definition": "Famille générale décrite dans EX3 : branche adaptative + banque de sondes RBF fixes + mélange appris, avec ablations et comptage intégral.",
+      "source": "prompt_ex3.json section 7",
+      "distinct_from": ["MICRO_MIXA"],
+      "implementations": [
+        "versions/sondes_ex5_v001__2026-10-30/src/run_mixa_proportions.py",
+        "versions/sondes_ex5_v001__2026-10-30/src/run_mixa_gate_refine.py",
+        "versions/sondes_ex5_v001__2026-10-30/src/run_mixa_geometry_sweep.py",
+        "versions/sondes_ex5_v001__2026-10-30/src/run_mixa_gate_geometry.py"
+      ]
+    },
+    "MICRO_MIXA": {
+      "canonical_display": "micro-MIXA",
+      "code_family": "micro_mixa",
+      "definition": "Reconstruction compacte spécifique de la piste micro évoquée dans les débris EX3 et explicitée dans EX4 section 7.4 ; point de départ d4/k8, branche adaptative + RBF fixe, puis variantes proportions, gates, géométries, partage de centres/encodeurs et PCA-Q.",
+      "source": "prompt_ex4.json section 7.4; EX5 sections 9-10",
+      "legacy_unverified_reference": {
+        "identifier": "mixa_micro_d4_k8",
+        "reported_coefficients": 528,
+        "status": "reported_non_verifiable_without_original_EX3_checkpoint_or_code",
+        "note": "Le chiffre 528 est une mention de debrit_0.txt ; ce n'est pas un résultat mesuré dans EX5."
+      },
+      "variant_versions": ["v001", "v003", "v004", "v005", "v006", "v007"]
+    },
+    "MiXA": {
+      "canonical_display": "MiXA",
+      "alias_of": "MIXA_GENERAL",
+      "separate_implementation_exists": false,
+      "note": "Aucune définition ou implémentation distincte portant exactement cette casse n'a été trouvée dans les prompts EX3/EX4, les sources extraites ou le code EX5. Alias orthographique seulement."
+    },
+    "micro-MiXA": {
+      "canonical_display": "micro-MiXA",
+      "alias_of": "MICRO_MIXA",
+      "separate_implementation_exists": false,
+      "note": "Alias de casse de micro-MIXA ; ne constitue pas une cinquième architecture distincte."
+    }
+  },
+  "normalization_rules": [
+    "Les rapports et identifiants canoniques utilisent MIXA_GENERAL et MICRO_MIXA.",
+    "Les chaînes legacy MiXA et micro-MiXA sont conservées dans le registre des alias et normalisées vers leur entité canonique.",
+    "MIXA_GENERAL et MICRO_MIXA restent deux niveaux conceptuels distincts ; ils ne doivent jamais être fusionnés dans les tableaux de résultats.",
+    "Les noms de candidats, fichiers et journaux bruts ne sont jamais renommés ni réécrits pour normaliser la casse."
+  ]
+}

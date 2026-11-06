@@ -1,0 +1,540 @@
+\documentclass[11pt,a4paper,openany]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.25cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,amsthm,stmaryrd}
+\usepackage{booktabs,longtable,array,enumitem,xcolor,hyperref,microtype,listings}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\emergencystretch=2em
+\setlist{leftmargin=1.7em,itemsep=2pt,topsep=4pt}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\kw}[1]{\textsf{#1}}
+\newcommand{\IR}{\mathsf{IR}}
+\newcommand{\Mesh}{\mathcal{M}}
+\newcommand{\Prog}{\mathcal{P}}
+\newcommand{\Comp}{\mathcal{C}}
+\newcommand{\Eff}{\mathcal{E}}
+\newcommand{\Capabilities}{\mathcal{K}}
+\newcommand{\Res}{\mathcal{R}}
+\newcommand{\Trace}{\mathcal{T}}
+\newcommand{\Obs}{\mathsf{Obs}}
+\newcommand{\Pre}{\mathsf{Pre}}
+\newcommand{\Post}{\mathsf{Post}}
+\newcommand{\Valid}{\mathsf{Valid}}
+\newcommand{\Success}{\mathsf{Success}}
+\newcommand{\Unknown}{\mathsf{Unknown}}
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{invariant}[definition]{Invariant}
+\newtheorem{hypothesis}[definition]{Hypothèse}
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemme}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remarque}
+\newenvironment{abstract}{\begin{center}\bfseries Résumé\end{center}\quotation}{\endquotation}
+\title{Théorie générale de la programmation compositionnelle maillée\\\large Noyau universel, sémantique, vérification, évolution et interfaces accessibles}
+\author{Théorie NG intégrant la composition et le maillage eGenBrain}
+\date{27 octobre 2026}
+\begin{document}
+\frontmatter
+\maketitle
+\begin{abstract}
+Cette théorie propose une refondation de la programmation compositionnelle en combinant (i) l'algèbre et la sémantique des programmes composés, (ii) le maillage stratifié d'eGenBrain : identités canoniques, occurrences, faits typés, règles multi-prémisses, opérateurs, provenance, supports d'observation, certificats et activation. L'ambition est que la composition devienne le mode général de définition et de construction des programmes, y compris les programmes classiques, au lieu de rester un DSL spécialisé d'orchestration. Le maillage n'est pas assimilé à un graphe de connaissances : il est une structure multicouche reliant données, contrôle, état, effets, ressources, contrats, preuves et cycle de vie sans confondre leur sémantique. Le langage possède un noyau de calcul universel, une représentation intermédiaire canonique, une sémantique d'exécution, un système de types et d'effets, des frontières de capacités, des règles de compilation, une gestion des erreurs et de la reprise, ainsi qu'un cadre de synthèse et d'évaluation.
+
+La théorie établit des résultats conditionnels de correction compositionnelle, de sécurité de typage sur un sous-langage défini, de soundness des dérivations maillées sous règles saines, d'invalidation des dépendances et de préservation par compilation sous une simulation vérifiée. Elle démontre également l'expressivité du noyau pour les fonctions partielles calculables, sous les hypothèses classiques d'un modèle de calcul à mémoire non bornée et d'opérations de contrôle appropriées. Elle ne prétend pas prouver qu'une interface est toujours plus simple, que chaque optimisation est plus rapide, que tout composant est correct, ni que la sécurité d'un système concret découle du seul formalisme. Ces propriétés requièrent respectivement des études utilisateur, des mesures, des preuves propres aux composants et des audits du runtime. Le principe directeur est donc ambitieux mais réfutable : aucune perte, approximation, permission, limite de ressources ou incertitude importante ne doit être cachée; l'extensibilité passe par des extensions spécifiées et contrôlées, non par une fermeture du langage ni par une confiance implicite.
+\end{abstract}
+\chapter*{Statut et portée de ce texte}
+Ce document définit une théorie cible cohérente au niveau du noyau abstrait et un programme explicite de fermeture pour ses extensions. Il ne prétend pas que le runtime eGenBrain v4 existant implémente déjà toutes les constructions ici définies. Les références aux résultats eGenBrain reproduisent la portée déclarée dans le formalisme fourni; les résultats chiffrés ne sont pas réexécutés ni audités à nouveau par le seul fait de leur intégration dans ce texte.
+
+Les étiquettes de statut employées sont :
+\begin{itemize}
+\item \kw{DÉFINITION} : objet introduit par le formalisme;
+\item \kw{PREUVE SOUS HYPOTHÈSES} : résultat déduit uniquement lorsque toutes les prémisses nommées sont satisfaites;
+\item \kw{OBLIGATION MACHINE} : résultat qu'une implémentation doit vérifier par assistant de preuve ou outil formel;
+\item \kw{IMPLÉMENTATION À VÉRIFIER} : construction cible qui doit être reliée au code et aux tests;
+\item \kw{EMPIRIQUE} : propriété de performance, d'utilisabilité ou de généralisation à établir par mesure;
+\item \kw{NON ÉTABLI} : propriété dont aucune preuve suffisante n'est disponible dans le périmètre courant.
+\end{itemize}
+\tableofcontents
+\mainmatter
+
+\part{Mandat, principes et critère d'universalité}
+\chapter{Mandat et exigences non négociables}
+\section{Objectif exact}
+La programmation compositionnelle maillée (PCM) vise à remplacer la programmation classique comme méthode de création et de maintenance des logiciels, sans perdre leur expressivité. Le programme est décrit comme une composition explicite de composants reliés par des ports, contrats et dépendances. La structure est analysable et inspectable; l'exécution obéit à une sémantique commune; les composants et les transformations sont versionnés; les effets sont contrôlés; les résultats gardent leur provenance; et l'utilisateur peut agir par plusieurs interfaces au-dessus de la même représentation.
+
+La cible ne consiste pas à interdire le code textuel ni à supposer que tout utilisateur doit manipuler directement des graphes. Elle consiste à faire du même noyau compositionnel le fondement de l'éditeur visuel, du langage textuel, de la saisie structurée, des interfaces naturelles et des adaptateurs de bas niveau. Le code écrit à la main reste possible en tant que surface ou composant natif; il n'obtient pas de privilège sémantique implicite.
+
+\section{Critère fort, mais vérifiable, de « sans sacrifice »}
+L'expression « sans sacrifice » est précisée comme un ensemble d'obligations distinctes :
+\begin{enumerate}
+\item \textbf{Expressivité :} toute fonction ou transition représentable dans un langage source de référence peut être représentée dans le noyau PCM ou par un composant natif de frontière ayant un contrat explicite, sous les hypothèses et limites de ressources déclarées.
+\item \textbf{Sémantique :} la traduction de ce langage source préserve les comportements observables convenus, y compris les effets et erreurs pertinents, et pas seulement la valeur finale.
+\item \textbf{Sécurité :} la composition ne peut pas élargir implicitement les capacités autorisées; un composant natif doit être isolé et vérifié à sa frontière. La sécurité concrète reste une propriété conjointe du noyau, du runtime, des composants, du système hôte et de la configuration.
+\item \textbf{Pertinence :} les objectifs, contraintes, préconditions, sources et critères d'acceptation sont représentés explicitement. Un score de recherche ou une proximité lexicale ne vaut pas preuve de satisfaction.
+\item \textbf{Coûts :} les coûts sont déclarés ou mesurés; aucun gain de performance universel n'est postulé. L'équivalence sémantique ne promet pas l'égalité du temps d'exécution ou de la consommation mémoire.
+\item \textbf{Accessibilité :} des interfaces de haut niveau réduisent le besoin d'écrire du code manuel; l'amélioration doit être démontrée empiriquement et ne peut pas être inférée du seul nombre de blocs ou de lignes.
+\item \textbf{Évolutivité :} toute nouvelle capacité est intégrable par un protocole de spécification, typage, effets, preuve, test, versionnement et révocation, sans devoir figer le noyau ni changer silencieusement les anciens programmes.
+\end{enumerate}
+
+\begin{remark}
+Aucune théorie ne peut garantir à elle seule l'absence de toute régression de performance, la perfection d'une interface pour toute personne, ni la sûreté d'un composant inconnu. La proposition PCM remplace la promesse vague par des obligations observables et un théorème d'expressivité relative.
+\end{remark}
+
+\chapter{Principes fondamentaux}
+\begin{enumerate}
+\item \textbf{Composition universelle :} les programmes sont construits avec le même noyau de composition, quel que soit le domaine.
+\item \textbf{Maillage typé :} chaque relation du programme possède un type et une interprétation déclarée; les relations binaires ne remplacent pas les hyperrègles.
+\item \textbf{Séparation des couches :} donnée, contrôle, effet, preuve, provenance, activation et statut épistémique sont distincts mais reliés.
+\item \textbf{Contrats vérifiables :} une signature de type ne suffit pas; les préconditions, postconditions, effets et niveaux de garantie sont exposés.
+\item \textbf{Code et données séparés :} une valeur fournie par l'utilisateur n'est pas exécutée comme code arbitraire; toute opération exécutable passe par le registre et le système de capacités.
+\item \textbf{Résultats sans faux succès :} échec, résultat partiel, incertitude, épuisement de budget et abstention sont des issues normales et typées.
+\item \textbf{Preuve proportionnée :} on ne revendique que la propriété effectivement démontrée, sur son domaine, sous ses hypothèses.
+\item \textbf{Évolution réversible :} toute modification propose un nouvel artefact versionné; l'ancienne version reste identifiable et restaurable selon les contraintes de conservation.
+\item \textbf{Interfaces adaptables :} la surface change selon l'utilisateur, mais le programme normalisé conserve la même sémantique.
+\end{enumerate}
+
+\part{Modèle mathématique unifié : programme, contrat et maillage}
+\chapter{Univers de base}
+\section{Types, valeurs et états}
+Soit $\mathsf{Ty}$ l'ensemble inductif des types et $\mathsf{Val}(\tau)$ l'ensemble des valeurs bien formées de type $\tau$. Le noyau inclut au minimum : unité, booléens, entiers naturels et signés, réels ou rationnels selon le contrat numérique, chaînes, octets, listes, vecteurs, produits, sommes, enregistrements, variantes, références, fonctions, flux, événements, ressources et résultats typés. Les unités physiques et autres dimensions sont des annotations de type; une conversion d'unité est une opération explicite. Les types peuvent être paramétriques, récursifs et enrichis de prédicats de raffinement. Les types dynamiques opaques ne sont acceptés qu'à des frontières déclarées et doivent être contrôlés avant usage concret.
+
+Un état du programme est
+\[
+s=(D,H,M,Q,L,Ctx),
+\]
+où $D$ est l'état local mutable, $H$ l'état du monde hôte accessible (fichiers, réseau, base, périphériques), $M$ la mémoire durable de PCM, $Q$ les files d'événements, $L$ les ressources et leases actives, et $Ctx$ le contexte versionné de l'exécution. Les composants ne peuvent accéder qu'aux parties de cet état autorisées par leur contrat et leurs capacités.
+
+\section{Effets, capacités et ressources}
+Les effets sont des éléments typés tels que
+\[\begin{aligned}
+\Eff ::= {}&\mathsf{Read}(r)\mid\mathsf{Write}(r)\mid\mathsf{Network}(h)\mid\mathsf{Clock}\mid\mathsf{Random}\\
+&\mid\mathsf{Observe}(d)\mid\mathsf{Spawn}(d)\mid\mathsf{Device}(d)\mid\mathsf{UserPrompt}(u).
+\end{aligned}\]
+Les ensembles d'effets peuvent contenir des paramètres et des régions de données. Les capacités $\Capabilities$ sont des autorisations explicites, limitées par sujet, action, ressource, durée, contexte et éventuelle approbation humaine. Un effet annoncé n'est pas automatiquement autorisé : il faut une capacité correspondante à l'exécution.
+
+Les ressources sont un vecteur $b=(cpu,mem,time,io,net,external,energy,\ldots)$ dans un domaine ordonné. Un budget $B$ fixe des bornes physiques ou opérationnelles. Une estimation de coût n'est pas une borne stricte; la conformité à un plafond est garantie uniquement si le runtime applique réellement la limite ou si une preuve de coût existe.
+
+\chapter{Le composant : unité contractuelle de composition}
+\begin{definition}[Composant PCM]
+Un composant versionné est le tuple
+\[
+c=(id,v,I,O,P,Q,E,R,\delta,\pi,V,T,\chi),
+\]
+où : $id,v$ désignent identité et version; $I,O$ les ports d'entrée et de sortie typés; $P,Q$ les précondition et postcondition; $E$ les effets possibles; $R$ les ressources exigées et limites annoncées; $\delta$ la sémantique opérationnelle; $\pi$ le schéma de provenance; $V$ le protocole ou vérificateur; $T$ les tests et preuves disponibles; $\chi$ les capacités requises, hypothèses et restrictions de contexte. Les composants peuvent être purs, avec état, réactifs, concurrents ou natifs, mais leur catégorie est explicite.
+\end{definition}
+
+Le contrat distingue cinq niveaux : (1) signature déclarée; (2) cohérence statique vérifiée; (3) tests exécutés; (4) preuve formelle sous hypothèses; (5) comportement observé dans un environnement précis. Le niveau le plus élevé ne supprime pas les limites de portée des niveaux inférieurs. Un composant peut avoir plusieurs affirmations de garantie indépendantes, par exemple une preuve de typage mais seulement un test de performance.
+
+\begin{definition}[Résultat d'un composant]
+Toute invocation rend un résultat dans le type somme
+\[\begin{aligned}
+Y(B)={}&\mathsf{Success}(B,w)\mid\mathsf{Partial}(B,\rho,w)\mid\mathsf{Unknown}(U,w)\\
+&\mid\mathsf{Rejected}(r,w)\mid\mathsf{Failed}(e,w)\mid\mathsf{Cancelled}(w)\\
+&\mid\mathsf{BudgetExhausted}(k,w).
+\end{aligned}\]
+où $w$ est la trace/provenance, $\rho$ décrit ce qui manque, $U$ l'ensemble des alternatives non résolues, $r$ le motif de refus, $e$ l'erreur, et $k$ l'information de reprise. Ces variantes ne sont pas interchangeables. Un appelant ne peut promouvoir un résultat en $\mathsf{Success}$ sans une règle explicite qui justifie la promotion.
+\end{definition}
+
+\chapter{Maillage de programme stratifié}
+\section{Structure formelle}
+\begin{definition}[Maillage PCM]
+Un maillage de programme est le tuple versionné
+\[
+\Mesh=(V,O,q,E_d,E_c,E_e,E_t,E_p,E_v,E_l,H,\tau,\Gamma,\Sigma,\Pi,\mathcal A),
+\]
+où :
+\begin{itemize}
+\item $V$ est l'ensemble des identités canoniques des valeurs, composants, programmes et ressources;
+\item $O$ est l'ensemble des occurrences contextualisées, avec $q:O\to V$ la fonction d'identité canonique;
+\item $E_d$ contient les liens de dépendance de données et de flux de valeurs;
+\item $E_c$ contient les liens de contrôle et d'ordre d'exécution;
+\item $E_e$ contient les liens d'effet, capacité, ressource et cible externe;
+\item $E_t$ contient les contraintes de type, d'unité et de raffinement;
+\item $E_p$ contient les liens de preuve, d'hypothèse, de réfutation et de validation;
+\item $E_v$ contient les liens de provenance et d'origine des valeurs/événements;
+\item $E_l$ contient les liens de cycle de vie, activation, résidence, version et invalidation;
+\item $H$ est l'ensemble typé des hyperrelations multi-prémisses et des règles;
+\item $\tau$ attribue des types aux nœuds, ports et relations;
+\item $\Gamma$ est le registre des opérateurs et composants;
+\item $\Sigma$ est le registre des certificats et jugements vérifiables;
+\item $\Pi$ contient les politiques versionnées de résolution, recherche, ressources et droits;
+\item $\mathcal A$ est l'état d'activation et de requête.
+\end{itemize}
+Un sous-graphe absent est explicitement marqué absent ou non pris en charge; il n'est pas simulé par une arête d'une autre couche.
+\end{definition}
+
+\section{Relations et hyperrelations}
+Une relation binaire typée $R(x,y)$ peut représenter un lien orienté d'une seule nature. Une règle multi-prémisses est une hyperrelation $h=(P_h,C_h,\theta_h,\chi_h,\pi_h)$, où $P_h$ est un ensemble fini de motifs de prémisses, $C_h$ un ensemble de conclusions, $\theta_h$ une substitution, $\chi_h$ les contraintes de type et de contexte, et $\pi_h$ la provenance. Elle est activable seulement si toutes ses prémisses et contraintes sont satisfaites. Le passage d'une hyperrègle conjonctive à plusieurs liens binaires est interdit lorsqu'il change la condition d'applicabilité.
+
+\begin{invariant}[Non-confusion des couches]
+Aucun lien n'est interprété comme un autre type de lien sans une transformation explicitement définie et versionnée. Une arête d'observation ne prouve ni causalité ni contrôle; un lien de dépendance ne prouve pas une implication logique; un lien de preuve ne produit pas un effet du monde; un statut d'activation ne modifie pas un statut de vérité ou de preuve.
+\end{invariant}
+
+\section{Programme, graphe d'exécution et maillage de connaissance}
+Le programme exécutable possède un sous-graphe d'exécution $G_{exec}$ dont les nœuds sont les opérations et dont les liens décrivent flux de valeurs, ordre, branchements, synchronisation et effets. Le maillage de données $G_{data}$ décrit les valeurs et leurs relations; le maillage de connaissance $G_{know}$ contient observations, faits, hypothèses et règles; le maillage de preuve $G_{proof}$ relie jugements et certificats; le maillage de provenance $G_{prov}$ relie toute donnée dérivée à ses sources. Ces sous-graphes sont coordonnés par des identifiants communs mais restent sémantiquement distincts.
+
+Le même objet peut apparaître dans plusieurs couches : par exemple une valeur calculée est un nœud de données, une sortie de port dans le graphe d'exécution, une conclusion de dérivation dans le graphe de connaissance et un artefact cité dans la provenance. Il ne s'agit pas de quatre valeurs indépendantes; une fonction de liaison versionnée en garantit l'identité et précise les transformations intervenues.
+
+\chapter{Algèbre et syntaxe du noyau universel}
+\section{Grammaire abstraite}
+Le noyau d'exécution est défini par la grammaire indicative suivante. Chaque forme possède une règle de typage et une sémantique dans les chapitres suivants.
+\begin{align*}
+p ::= {}& \mathsf{Id}\mid\mathsf{Const}(v)\mid\mathsf{Call}(c,e)\mid\mathsf{Let}(x,e,p)\\
+&\mid\mathsf{Seq}(p_1,\ldots,p_n)\mid\mathsf{If}(g,p_t,p_f)\mid\mathsf{Match}(e,\{k_i\mapsto p_i\})\\
+&\mid\mathsf{Pair}(p_1,p_2)\mid\mathsf{Record}(\{k_i:p_i\})\mid\mathsf{Project}(p,k)\\
+&\mid\mathsf{Map}(p,e,\rho,n)\mid\mathsf{Fold}(p,e,a,\rho)\\
+&\mid\mathsf{While}(g,p,I,\mu?)\mid\mathsf{Fix}(x,p)\mid\mathsf{Choose}(p_1,\ldots,p_n)\\
+&\mid\mathsf{Par}(p_1,\ldots,p_n,\omega)\mid\mathsf{Await}(q,\pi)\mid\mathsf{Emit}(e,\pi)\\
+&\mid\mathsf{Handle}(p,h)\mid\mathsf{Recover}(p,r,\kappa)\mid\mathsf{Txn}(p,\kappa)\\
+&\mid\mathsf{Acquire}(a,\kappa)\mid\mathsf{Release}(a)\mid\mathsf{Checkpoint}(p,k)\mid\mathsf{Resume}(k)\\
+&\mid\mathsf{Observe}(q)\mid\mathsf{Derive}(G,D)\mid\mathsf{Assert}(\varphi)\mid\mathsf{Verify}(p,v)\\
+&\mid\mathsf{Synthesize}(G,D,B)\mid\mathsf{Transform}(p,t)\mid\mathsf{Deploy}(p,\kappa)\\
+&\mid\mathsf{Capability}(K,p)\mid\mathsf{Sandbox}(p,b)\mid\mathsf{Hibernate}(c)\mid\mathsf{Wake}(c,q).
+\end{align*}
+Ici $\rho$ est une politique de résultat par élément, $n$ une borne, $I$ un invariant, $\mu$ une mesure de terminaison facultative, $\omega$ une politique d'ordonnancement/fusion, $q$ une requête ou un événement typé, $\pi$ une politique de livraison, $h$ un gestionnaire d'erreur, $\kappa$ une politique transactionnelle, $B$ un budget, et $t$ une transformation déclarée.
+
+\section{Portée de la grammaire}
+La grammaire est un noyau, pas une liste fermée de toutes les primitives de tous les domaines. Les structures, boucles, appels, état, réactions, concurrence, erreurs, transactions, observations, preuves et évolutions sont représentés au niveau du noyau; les opérations spécifiques (accès fichier, calcul matriciel, interface graphique, protocole réseau, dispositif industriel, cryptographie, etc.) sont des composants du registre. Toute extension syntaxique doit fournir sa signature, sa règle de typage, sa sémantique de transition, ses effets, ses capacités, ses ressources, ses erreurs, ses preuves et ses tests. Tant que ce dossier n'est pas fermé, l'extension est marquée non prise en charge.
+
+\section{Composition par ports}
+Un programme est une structure typée de nœuds dont les ports d'entrée et de sortie sont connectés. Si la sortie d'un composant a le type $B$ et l'entrée suivante le type $A$, la connexion est valide seulement si $B$ est assignable à $A$ selon la relation de sous-typage ou de raffinement définie. Toute conversion nécessaire est un nœud explicite, avec sémantique propre et potentielle perte d'information. Les conversions implicites dangereuses ou dépendantes du contexte sont interdites.
+
+La composition est ainsi plus générale qu'une chaîne : elle inclut graphes de contrôle, branches, cycles, flux réactifs, échanges d'événements, mémoire et effets. Sa représentation peut être un AST, un DAG ou un graphe cyclique contrôlé; le maillage complet conserve aussi les dépendances et preuves qui ne sont pas des arêtes de contrôle.
+
+\chapter{Types, contrats et règles de jugement}
+\section{Jugement de programme}
+Soient $\Delta$ l'environnement des variables, $\Gamma$ le registre versionné des composants, $K$ l'ensemble des capacités disponibles, $C$ le contexte, et $B$ le budget dur. Le jugement principal est
+\[
+\Delta;\Gamma;K;C;B\vdash p:A\Rightarrow B'\;!\;E\;[P,Q]\;\triangleright R,
+\]
+qui signifie que le programme $p$ prend une entrée de type $A$, produit un résultat de type $B'$, annonce les effets $E$, exige la précondition $P$, promet la postcondition $Q$ sous les niveaux de garantie des composants utilisés, et porte le profil de ressources $R$. Le symbole $B$ à droite du point-virgule désigne le budget disponible, tandis que $B'$ désigne le type de sortie; ces symboles sont distincts par leur position et peuvent être renommés en implémentation pour éviter toute ambiguïté.
+
+Une règle de typage ne prouve une propriété sémantique que dans la mesure où ses prémisses de contrat sont elles-mêmes établies. Les triples précondition-programme-postcondition relèvent de la tradition axiomatique de la logique de Hoare \cite{Hoare1969}. Les annotations d'effets et de coûts peuvent être conservatrices : annoncer un sur-ensemble d'effets est acceptable, en omettre un effet réel est une violation du contrat.
+
+\section{Règles fondamentales}
+\paragraph{Identité.}
+\[
+\frac{}{\Delta;\Gamma;K;C;B\vdash\mathsf{Id}:A\Rightarrow A\;!\varnothing\;[\mathsf{true},\mathsf{true}]\triangleright 0}.
+\]
+La trace ne reçoit aucun événement sémantiquement visible, sauf si le mode d'audit indique expressément un événement d'observation.
+
+\paragraph{Appel.} Si $\Gamma(c)$ déclare les ports $(A,B')$, contrat $(P_c,Q_c)$, effets $E_c$, ressources $R_c$ et capacités $K_c$, alors l'appel est statiquement admissible si l'argument a le type attendu et si le programme possède les capacités nécessaires dans le contexte. À l'exécution, le runtime recontrôle les préconditions dépendant de données dynamiques; le contrôle statique n'est pas traité comme un remplacement de contrôle de frontière lorsque les hypothèses peuvent changer.
+
+\paragraph{Séquence.} Pour $p_1:A\Rightarrow B\;!E_1[P,Q_1]$ et $p_2:B\Rightarrow C\;!E_2[P_2,Q_2]$, si $Q_1\Rightarrow P_2$ dans la même sémantique de contrat, la composition est $p_2\circ p_1:A\Rightarrow C\;!(E_1\cup E_2)[P,Q_2]$. Si la postcondition est seulement probable ou mesurée, et non garantie, le résultat global ne reçoit pas un statut de preuve plus fort que celui autorisé par cette incertitude.
+
+\paragraph{Branchement.} Le garde doit produire un booléen ou un résultat explicitement à trois valeurs. Les branches doivent produire des types compatibles et déclarer l'union de leurs effets possibles. Si la garde est indéterminée, une politique explicite choisit entre clarification, résultat non résolu ou exploration contrôlée; aucune branche n'est choisie silencieusement.
+
+\paragraph{Parallélisme.} Deux branches peuvent être exécutées concurremment si leurs effets sont compatibles ou si une politique formelle d'arbitrage, de sérialisation ou de fusion existe. En l'absence de preuve d'indépendance, le compilateur doit conserver l'ordre prescrit ou refuser l'optimisation parallèle, plutôt que supposer l'indépendance.
+
+\paragraph{Itération et récursion.} Une boucle est bien typée si son état satisfait les types attendus par le garde et le corps. La terminaison n'est déduite que si l'on prouve qu'une mesure $\mu$ décroît strictement dans un ordre bien fondé sur chaque étape non terminale et que chaque étape termine. Sans ces hypothèses, une limite d'exécution peut arrêter la boucle, mais ne prouve pas qu'elle aurait terminé naturellement.
+
+\paragraph{Map et fold.} Les types de l'élément, du résultat et de l'accumulateur sont indiqués. L'ordre, les erreurs, l'agrégation et la concurrence éventuelle font partie de la politique. Une réduction parallèle n'est valide que sous une loi de combinaison appropriée et démontrée dans le domaine; l'associativité n'est jamais présumée pour un effet arbitraire.
+
+\paragraph{Effets.} La composition agrège les effets possibles par une union ou un calcul d'effet plus précis. Une annotation ne peut retirer un effet observable d'une implémentation sous-jacente. Si l'analyse ne parvient pas à borner un effet, il est considéré opaque et soumis à une capacité de frontière restrictive.
+
+\chapter{Sémantique opérationnelle de bout en bout}
+\section{Configuration et transition}
+Une configuration d'exécution est
+\[
+\langle p,s,\eta,\Trace,b,K\rangle,
+\]
+où $p$ est le programme restant, $s$ l'état, $\eta$ l'environnement d'évaluation, $\Trace$ la trace append-only, $b$ le budget restant et $K$ les capacités valides. La relation opérationnelle, dans la tradition des règles structurelles de réduction décrites par Plotkin \cite{Plotkin1981},
+\[
+\langle p,s,\eta,\Trace,b,K\rangle\longrightarrow\langle p',s',\eta',\Trace',b',K'\rangle
+\]
+est définie uniquement par les règles du noyau et les sémantiques vérifiées des composants. Les événements de trace comprennent les appels, branchements, validations, refus, effets externes, valeurs de retour, allocations, annulations, checkpoints et décisions d'activation.
+
+\section{Séquence et terminaison d'une étape}
+La séquence exécute le second programme seulement après que le premier a rendu un résultat dont la politique de séquencement autorise la continuation et dont la sortie satisfait le contrat de raccord. Un résultat $\mathsf{Failed}$ ou $\mathsf{Rejected}$ arrête la séquence par défaut; une politique de continuation doit traiter explicitement le type de résultat. Un timeout ou budget épuisé retourne un statut reprenable si un checkpoint cohérent existe, sinon un statut incomplet sans promesse de reprise exacte.
+
+\section{Effets et événements}
+Avant chaque effet sensible, le runtime vérifie la capacité, sa portée, son expiration, les budgets et les préconditions. Après l'effet, il enregistre l'accusé de réception lorsque le système cible le fournit. Si l'effet a eu lieu mais que l'accusé est inconnu, le résultat est « issue à réconcilier » et non « échec sans effet ». La trace ne garantit pas que le monde extérieur est honnête; elle rend les observations et déclarations d'effet auditables.
+
+\section{Résultats partiels et abstention}
+Un résultat partiel est conservé dans son type et dans la trace. Une composition aval ne peut l'utiliser que si son entrée accepte explicitement ce statut et si sa postcondition prend en compte les informations manquantes. En particulier, une réponse absente, une preuve inconnue et un budget épuisé restent distincts. L'abstention est une sortie valide quand le contrat de tâche interdit une affirmation insuffisamment soutenue.
+
+\chapter{Lois de composition et preuves de correction}
+\section{Correction séquentielle}
+\begin{proposition}[Raccord séquentiel]
+Soient $f$ et $g$ des programmes dans une sémantique commune. Supposons (i) que $\{P\}f\{Q\}$ soit valide, (ii) que $\{Q\}g\{R\}$ soit valide, (iii) que les exécutions considérées respectent leurs effets et contrats, et (iv) qu'aucune interférence entre la sortie de $f$ et le début de $g$ ne rende $Q$ faux. Alors $\{P\}g\circ f\{R\}$ est valide.
+\end{proposition}
+\begin{proof}
+Prenons un état initial satisfaisant $P$. Par (i), l'exécution admise de $f$ produit un état qui satisfait $Q$. Par (iv), cet état reste admissible pour l'application de $g$. La prémisse (ii) garantit alors que l'état final satisfait $R$. L'argument n'établit rien si un composant viole son contrat ou si l'interférence omise survient; ces cas sont hors des hypothèses.
+\end{proof}
+
+\section{Associativité}
+\begin{proposition}[Associativité des compositions pures]
+Pour des fonctions pures $f:A\to B$, $g:B\to C$ et $h:C\to D$, la composition fonctionnelle satisfait $h\circ(g\circ f)=(h\circ g)\circ f$ sur le domaine où les trois expressions sont définies.
+\end{proposition}
+\begin{proof}
+Pour toute entrée $x$ de ce domaine, les deux côtés s'évaluent à $h(g(f(x)))$. L'égalité est donc pointwise. Cette preuve ne s'étend pas automatiquement aux traces, exceptions, effets ou frontières transactionnelles; pour ces programmes, l'associativité syntaxique ne peut être utilisée comme loi de réécriture qu'après définition d'une observation qui préserve les détails pertinents.
+\end{proof}
+
+\section{Indépendance et exécution parallèle}
+\begin{proposition}[Commutation sous indépendance]
+Soient $f$ et $g$ des transitions déterministes dont les ensembles d'écriture n'intersectent ni les lectures ni les écritures de l'autre, dont les effets externes ne se concurrencent pas, dont les ressources sont allouées sans conflit, et dont les traces sont comparées après projection explicitement autorisée sur l'ordre des événements indépendants. Alors les exécutions $f;g$ et $g;f$ ont le même état final et la même observation projetée.
+\end{proposition}
+\begin{proof}
+Les transitions modifient des composantes disjointes de l'état et ne changent pas les données dont l'autre transition dépend. Chaque transition conserve donc le résultat qu'elle aurait produit dans l'autre ordre. Les mises à jour commutent; la projection de trace néglige uniquement l'ordre préalablement déclaré non observable. Si l'une des conditions d'indépendance échoue, la conclusion n'est pas applicable.
+\end{proof}
+
+\section{Sûreté de typage du fragment pur}
+\begin{theorem}[Progression et préservation — fragment fini pur]
+Considérons le fragment sans effets externes comprenant constantes bien typées, identité, appel à des composants purs totaux conformes à leurs signatures, liaison locale, séquence, branchement, produits, projections, map sur une collection finie et vérification totale. Supposons que la grammaire et le typage soient correctement implémentés et que chaque valeur du registre respecte son type. Alors une expression bien typée est soit une valeur de son type, soit peut effectuer une étape de réduction, soit renvoie une erreur appartenant explicitement au type d'erreur du fragment; elle ne se bloque pas à cause d'une opération inconnue ou d'une incompatibilité de type cachée.
+\end{theorem}
+\begin{proof}
+La preuve suit par induction sur la dérivation de typage. Les constantes sont des valeurs; l'identité retourne sa valeur; l'appel réduit par la sémantique totale du composant après vérification des arguments. Pour la séquence, la préservation du type de sortie du premier terme rend l'entrée du second valide. Pour le branchement, le garde booléen sélectionne une branche dont le type de sortie est celui annoncé. Les produits et projections sont contrôlés par leur structure. Le map traite un nombre fini d'éléments et applique l'hypothèse d'induction à chaque élément. Le vérificateur total renvoie un cas de son type somme. Les seules erreurs de domaine sont transformées en erreurs typées par les règles du fragment; aucune opération inconnue ne peut être exécutée puisqu'elle doit être résolue dans le registre avant réduction.
+\end{proof}
+
+La preuve suppose une implémentation fidèle du typage et des sémantiques; elle ne certifie pas automatiquement le code machine d'un runtime réel. Le parallélisme, les effets non déterministes, la récursion générale et les composants non totaux sont hors du fragment couvert.
+
+\chapter[Universalité et rapport classique]{Universalité et rapport avec la programmation classique}
+\section{Noyau computationnel universel}
+Le sous-langage universel contient : (i) un type de configuration finie ou codable; (ii) un type de compteurs naturels non bornés dans le modèle abstrait; (iii) un registre de contrôle fini; (iv) les opérations incrémenter, tester zéro et décrémenter avec saturation à zéro; (v) le branchement; (vi) un opérateur d'itération qui répète une transition tant que l'état n'est pas terminal. Le noyau implémenté peut utiliser mémoire bornée et budget; la proposition d'universalité porte sur le modèle abstrait idéal, tandis que les exécutions concrètes sont limitées par les ressources disponibles.
+
+\section{Théorème d'expressivité relative}
+\begin{theorem}[Expressivité Turing du noyau PCM]
+Supposons que le noyau sémantique réalise fidèlement les opérations de compteurs mentionnées ci-dessus, permette un état de contrôle et deux compteurs naturels abstraitement non bornés, supporte le branchement conditionnel et l'itération jusqu'à l'état terminal, et que les programmes aient le droit de poursuivre tant que les ressources abstraites le permettent. Alors le noyau peut simuler toute machine à deux compteurs et donc calculer toute fonction partielle calculable sur les entiers encodés. La puissance universelle des machines à deux compteurs est un résultat classique de théorie du calcul \cite{Minsky1967}.
+\end{theorem}
+\begin{proof}
+Une machine à deux compteurs possède un nombre fini d'instructions : incrémenter un compteur puis sauter, ou tester un compteur et, selon qu'il est nul ou non, sauter ou le décrémenter puis sauter; une instruction terminale arrête la machine. On représente sa configuration par $(pc,n_1,n_2)$, avec $pc$ le compteur de programme et $n_1,n_2$ les compteurs. Pour chaque instruction, on construit une branche compositionnelle qui effectue exactement la mise à jour prescrite et modifie $pc$. On compose ces branches dans une fonction de transition $Step$, puis on exécute $While(pc\neq halt,Step)$. Par induction sur le nombre d'étapes, la configuration PCM après $k$ itérations est identique à la configuration de la machine après $k$ instructions. La machine PCM termine si et seulement si la machine simulée atteint son état d'arrêt; ses sorties encodées sont alors identiques. Le résultat utilise le fait classique que les machines à deux compteurs simulent les machines de Turing. Il établit l'expressivité du noyau abstrait, pas une borne pratique de temps ou de mémoire sur un ordinateur réel.
+\end{proof}
+
+\section{Traduction des langages classiques}
+Soit $L$ un langage source doté d'une sémantique opérationnelle définie. Une traduction $T_L:L\to\IR$ est adéquate si pour tout programme admissible $p$ de $L$, l'exécution source et l'exécution PCM sont reliées par une relation de simulation qui préserve les observations déclarées : valeurs de sortie, mutations, entrées/sorties, exceptions, ordre pertinent des événements, terminaison ou divergence observée et statut de sécurité des effets. La preuve se formule relativement au sous-ensemble précis de $L$, au modèle mémoire, aux primitives du runtime et aux observations retenues.
+
+\begin{proposition}[Préservation par traduction]
+Si une traduction $T_L$ est démontrée par simulation dans les deux sens pour une classe de programmes $L_0$, et si les composants natifs utilisés par cette traduction satisfont leurs contrats dans l'environnement considéré, alors tout programme $p\in L_0$ et son image $T_L(p)$ ont les mêmes observations contractuelles.
+\end{proposition}
+\begin{proof}
+La simulation dans le sens source-vers-PCM relie chaque étape source à zéro ou plusieurs étapes PCM sans perdre l'observation contractuelle. La simulation inverse empêche l'image PCM d'ajouter un comportement observable non admis par le programme source. La satisfaction des contrats des composants assure que les étapes primitives de la traduction correspondent aux étapes source prévues. La relation de simulation donne donc l'égalité d'observation sur les exécutions admissibles. Sans simulation inverse ou hypothèse de contrat, seule une préservation unidirectionnelle plus faible pourrait être affirmée.
+\end{proof}
+
+La promesse universelle doit être établie langage par langage ou par classes sémantiques communes; l'expressivité Turing du noyau ne garantit pas, à elle seule, que toute particularité d'un runtime historique est reproduite. Il faut formaliser les comportements dépendant de l'ordre mémoire, des threads, des signaux, du temps réel ou des appels natifs quand ils font partie de l'interface visée.
+
+\chapter{Maillage de connaissance et dérivation vérifiable}
+\section{Faits typés et statuts épistémiques}
+Un fait est $f=(s,p,o,\tau_s,\tau_p,\tau_o,c,prov,status)$, avec sujet, prédicat, objet, types, contexte, provenance et statut parmi observé, dérivé, supposé, contesté, périmé ou réfuté. Un fait observé n'est pas infaillible : il est observé par une méthode versionnée, dans un contexte donné et avec un niveau de confiance propre. Le statut de provenance ne vaut pas preuve de vérité.
+
+Un certificat de dérivation contient l'identifiant et la version des règles/opérateurs, les prémisses exactes, substitutions, signatures de type, contexte, valeurs intermédiaires, résultat canonique, hypothèses, statut et empreinte. Un validateur contrôle les octets et la structure du certificat ainsi que la validité de chaque règle dans sa portée annoncée. Le hachage protège l'intégrité sous hypothèses cryptographiques; il ne transforme pas un axiome faux en vérité.
+
+\section{Règles d'inférence}
+Une règle $r$ de la forme
+\[
+(f_1\land\cdots\land f_n\land\chi)\Rightarrow(g_1\land\cdots\land g_m)
+\]
+est applicable si chaque prémisse est instanciée, si les variables partagées unifient, si les contraintes de types et de contexte sont satisfaites et si la règle est active et non révoquée. La clôture du maillage n'est calculée que sous une stratégie spécifiée : saturation monotone, recherche bornée, ordre de priorité ou demande d'un fait cible. Si l'espace est infini ou si des règles non monotones sont présentes, l'arrêt n'est pas garanti sans hypothèses supplémentaires.
+
+\begin{theorem}[Soundness conditionnelle d'une dérivation]
+Supposons que chaque règle utilisée soit logiquement valide dans une interprétation $I$, que chaque prémisse du certificat soit vraie dans $I$, que les substitutions préservent les types, et que les opérateurs utilisés ont une sémantique conforme à leur contrat dans le même $I$. Alors toute conclusion produite par une dérivation finie certifiée est vraie dans $I$.
+\end{theorem}
+\begin{proof}
+Par induction sur la hauteur de l'arbre de dérivation. À la hauteur zéro, la conclusion est une prémisse vraie. Pour une dérivation de hauteur $n+1$, toutes les prémisses dérivées des sous-arbres sont vraies par hypothèse d'induction; les prémisses d'entrée sont vraies par hypothèse; la validité de la règle utilisée implique alors sa conclusion. Les opérateurs sont traités comme des règles sémantiques dont la conformité est une prémisse explicite. Si une règle n'est valide que sous hypothèse, cette hypothèse doit apparaître parmi les prémisses; elle ne peut être omise.
+\end{proof}
+
+\section{Point fixe dans le cas fini monotone}
+\begin{proposition}[Terminaison d'une clôture finie]
+Soit $L$ un treillis fini des ensembles de faits bien typés et $F:L\to L$ un opérateur monotone extensif correspondant à l'ajout des conclusions de règles monotones. L'itération $X_{i+1}=F(X_i)$ atteint un point fixe en un nombre fini d'étapes.
+\end{proposition}
+\begin{proof}
+Par extensivité, $X_i\subseteq X_{i+1}$ pour tout $i$. Comme $L$ est fini, il ne peut exister qu'un nombre fini d'inclusions strictes successives. Il existe donc $k$ tel que $X_k=X_{k+1}=F(X_k)$, ce qui est un point fixe. Le résultat ne couvre pas un domaine infini, une génération de nouvelles valeurs non bornée ou des règles non monotones.
+\end{proof}
+
+\section{Séparation du retrieval et de la preuve}
+Le retrieval historique ASCR peut proposer des éléments candidats, mais le rang, le nombre de mots partagés ou la présence d'un chemin dans un graphe ne certifie pas une conclusion. Les dérivations PCM et les retours du moteur historique demeurent séparés dans la provenance et dans l'arbitrage. Une réponse certifiée est publiée seulement si le validateur de son certificat réussit dans la portée pertinente; à défaut, le système peut retourner une réponse historique non certifiée, un résultat inconnu ou une abstention conforme à la politique.
+
+\part{Effets, sécurité, ressources et fiabilité}
+\chapter{Capacités et sécurité de l'exécution}
+\section{Principe de moindre privilège}
+Chaque composant est exécuté avec le sous-ensemble minimal des capacités requises. Les capacités sont accordées par un contexte d'autorisation; une composition ne peut pas créer une capacité en assemblant des composants qui la demandent. Les opérations de réseau, écriture, exécution de processus, contrôle matériel, accès secret et publication externe exigent une capacité explicitement accordée et sont inscrites dans la trace.
+
+\begin{invariant}[Pas d'élévation implicite]
+Si une composition ne possède pas de capacité requise pour un effet et qu'aucune capacité n'est accordée par une frontière de confiance approuvée, aucune réécriture, branche alternative, synthèse ou optimisation ne peut rendre cet effet admissible implicitement.
+\end{invariant}
+
+\section{Code natif, frontière de confiance et sandbox}
+Le registre peut référencer du code natif ou des services externes, car un langage universel ne peut pas anticiper toutes les opérations matérielles et métier. Mais l'appel natif est une frontière de confiance. Elle doit préciser ABI/API, types d'entrée/sortie, gestion mémoire, effets réels, erreurs, coût et limites, modèle de menace, version, tests adversariaux et voie de révocation. Une déclaration mensongère d'effets est une défaillance du composant, pas une propriété que le type garantit automatiquement.
+
+L'isolation par sandbox, processus, conteneur, permissions système, limites de ressources ou vérification de code est un mécanisme d'exécution. La théorie spécifie les obligations; elle ne remplace pas ces mécanismes par une formule.
+
+\section{Budgets et refus explicites}
+Le runtime impose des plafonds sur le temps, la mémoire, la profondeur, la taille des graphes, le nombre d'itérations, le fan-out, les accès réseau et les effets externes selon la tâche. Si une limite est atteinte, l'exécution s'arrête avec un statut de budget épuisé, et reprend seulement si un checkpoint valide existe. Le budget ne doit pas être utilisé pour simuler un succès. Un candidat trop cher peut être non admissible dans le contexte actuel sans être réfuté.
+
+\chapter{Transactions, reprise et sémantique des effets externes}
+\section{Atomicité locale et transactions distribuées}
+Une transaction locale bénéficie d'une atomicité uniquement si le stockage sous-jacent l'assure. Les effets sur plusieurs services externes ne sont pas supposés atomiques. Ils exigent une saga de compensations, des clés d'idempotence, un protocole transactionnel partagé ou un statut d'incertitude à réconcilier. La restauration d'un état en mémoire n'annule pas un message livré, un courriel transmis, une commande physique ou une écriture distante déjà confirmée.
+
+\section{Reprise idempotente}
+\begin{proposition}[Absence de duplication par clé idempotente]
+Supposons que le destinataire applique l'effet et enregistre durablement, de manière atomique, la clé et le résultat; qu'une répétition avec la même clé renvoie le résultat enregistré avant de réappliquer l'effet; et que le domaine de déduplication soit conservé durant toute la période de reprise. Alors un rejeu du même appel avec la même clé ne duplique pas cet effet.
+\end{proposition}
+\begin{proof}
+Au premier appel, l'effet et le couple clé/résultat sont persistés atomiquement. Au rejeu, la clé est trouvée et le destinataire retourne le résultat mémorisé sans seconde application. L'atomicité et la conservation excluent l'état où l'effet serait fait sans que la clé soit enregistrée ou où la clé serait oubliée avant la fin de la période de reprise. Sans ces propriétés, la conclusion ne tient pas.
+\end{proof}
+
+\section{Checkpoint et réconciliation}
+Un checkpoint comprend la version du programme, les composants et versions, l'état sérialisé, les messages reçus et émis, l'état des opérations externes, les capacités non réutilisables, le budget, la trace, les dépendances et l'état du front de recherche. Après redémarrage, le runtime valide l'intégrité et les versions, puis classe chaque effet en confirmé, non exécuté ou indéterminé. Les opérations indéterminées sont réconciliées plutôt que rejouées à l'aveugle. Les événements de révocation et de sécurité sont durables et prioritaires sur les optimisations de cache.
+
+\chapter{Provenance, mémoire vivante et activation réversible}
+\section{Provenance et dépendances}
+Chaque résultat dérivé est relié aux entrées, versions de composants, paramètres normalisés, contexte, effets, artefacts, tests et certificats qui le justifient. Les dépendances distinguent au moins données, contrôle, preuve, environnement, versions et capacité. Le graphe de dépendance doit être suffisamment complet pour la politique d'invalidation annoncée; une dépendance cachée rend la garantie de révocation inapplicable.
+
+\begin{proposition}[Invalidation transitive]
+Soit un graphe de dépendances $G$ où $u\to v$ signifie que la garantie ou la validité de $v$ dépend de $u$. Si $u$ est révoqué, tout descendant de $u$ est marqué stale ou à revalider avant sa réutilisation comme prémisse certifiée.
+\end{proposition}
+\begin{proof}
+Chaque descendant dépend de $u$ par une chaîne d'arêtes. La révocation retire donc au moins une prémisse de sa justification antérieure. En parcourant les descendants ou les composantes fortement connexes pertinentes, le système marque chaque élément à revalider. Un élément peut redevenir certifié uniquement si une nouvelle justification valide est construite. La preuve dépend de l'exhaustivité du graphe de dépendance.
+\end{proof}
+
+\section{Cycle de vie}
+Les états opérationnels au minimum sont $\mathsf{CATALOGUED}$, $\mathsf{ELIGIBLE}$, $\mathsf{ACTIVE}$, $\mathsf{DORMANT}$, $\mathsf{STALE}$, $\mathsf{REVALIDATING}$, $\mathsf{BLOCKED}$, $\mathsf{ARCHIVED}$ et $\mathsf{REVOKED}$. Ils sont indépendants du statut épistémique (supposé, observé, dérivé, testé, certifié, réfuté, inconnu). Une transition d'activation n'est pas une preuve; une mise en veille n'est pas une réfutation; un réveil ne restaure pas la fraîcheur si une dépendance a changé.
+
+\begin{proposition}[Invariance épistémique de l'activation]
+Si les transitions d'activation changent uniquement la résidence, l'admission opérationnelle et les ressources, en conservant les preuves, données et dépendances, alors elles préservent le statut épistémique d'un objet.
+\end{proposition}
+\begin{proof}
+Par définition, les transitions d'activation ne modifient que les champs opérationnels. Le statut épistémique appartient à un champ distinct, dont les modifications sont réservées à un événement de preuve, observation, réfutation ou révocation doté de provenance. L'invariance suit de cette séparation des champs et des transitions.
+\end{proof}
+
+\section{Compression}
+Trois opérations sont distinctes : factorisation structurelle sans changement de sémantique; compression sans perte avec aller-retour canonique vérifié; résumé avec perte limité à un domaine de questions explicite. Un résumé avec perte pointe vers sa source exacte et indique la métrique et les distinctions préservées. Il ne remplace jamais une preuve originale ni un artefact auquel un contrat impose fidélité exacte. Une compression peut diminuer le coût de stockage sans réduire l'espace de recherche ou le temps de calcul.
+
+\section{Événements et vagues d'information}
+Un événement est typé et contient un identifiant stable, une source/version, un destinataire ou une règle de routage, un payload, un contexte, une priorité, une séquence, une politique d'expiration et sa provenance. La diffusion applique déduplication, limite de fan-out, backpressure et ordre causal lorsque nécessaire. Les invalidations, révocations et événements de sécurité ne sont pas abandonnés par un TTL ordinaire. Les événements de faible priorité peuvent expirer seulement si cette expiration est permise et tracée.
+
+\part{Recherche, synthèse, transformation et activation}
+\chapter{Recherche et synthèse de programmes}
+\section{Problème de synthèse}
+Soit un objectif $G$, un contexte $C$, des exemples observés $D$, un ensemble de contraintes $H$, une grammaire $\mathcal G$ et un budget $B$. La synthèse produit un flux reprenable de candidats $p\in\mathcal G$. Le vecteur d'évaluation peut contenir l'adéquation aux exemples, les contraintes violées, la robustesse, le transfert, le coût, le risque d'effet et l'incertitude. Ces dimensions restent séparées avant arbitrage; aucun score composite ne remplace les contraintes dures.
+
+Le moteur suit : formaliser l'objectif; définir les observables; générer paresseusement; filtrer par types/contrats/effets; exécuter ou simuler sous sandbox; chercher des contre-exemples; raffiner; tester hors échantillon; vérifier les certificats; comparer aux versions précédentes; persister le candidat, les éliminations et les raisons; activer uniquement selon une porte explicite. Le générateur ne peut accéder aux réponses cachées du jeu d'évaluation.
+
+\section{Explosion combinatoire}
+Si chaque nœud possède jusqu'à $b$ prolongements et la profondeur est $d$, une énumération naïve peut explorer $\sum_{i=0}^{d}b^i$ nœuds, ce qui est exponentiel en $d$ pour $b>1$. La veille réduit la résidence mais pas le nombre d'expansions. Les mécanismes complémentaires sont : génération paresseuse, filtrage précoce, index par signature, partage de DAG lorsque la sémantique est identique, normalisation, équivalence prouvée, recherche best-first/anytime, exploration diversifiée, contre-exemples, checkpoints et budgets.
+
+\begin{proposition}[Équité de recherche à rang fini]
+Supposons que tout candidat cible ait un nombre fini de prédécesseurs dans le graphe de génération, que chaque expansion soit finie, que les checkpoints reprennent sans perte, qu'une part positive de ressources continue d'être allouée à la classe pertinente et que l'ordonnanceur soit équitable. Alors chaque candidat de rang fini sera éventuellement examiné.
+\end{proposition}
+\begin{proof}
+La propriété se démontre par induction sur la longueur minimale d'un chemin de génération. Le cas initial est examiné par hypothèse d'équité. Pour un candidat ayant un chemin de longueur $n+1$, ses prédecesseurs de rang inférieur sont finis et sont examinés par hypothèse d'induction; l'expansion finie finit donc par générer le candidat, et l'équité assure son examen. Le résultat n'offre ni borne de temps ni complétude pour un espace infini sans rang fini.
+\end{proof}
+
+\chapter{ASCRC et compatibilité eGenBrain}
+\section{Séparation d'avec ASCR}
+ASCR/v3 reste le moteur de récupération historique dans les interfaces existantes. PCM et ASCRC l'utilisent au moyen d'un adaptateur non destructif; ils ne modifient pas sa sémantique ni ses données internes. ASCR fournit des candidats ou résultats historiques avec leur propre provenance et statut. Le maillage v4 ajoute la couche de faits/règles/opérateurs et ses certificats; il ne réinterprète pas les scores du retrieval comme preuves.
+
+\section{Contrat d'ASCRC}
+ASCRC reçoit objectif versionné, contexte, candidats, budgets, dépendances et événements récents. Il produit une décision traçable d'admission, priorités, allocations, activations, mises en veille, réveils, refus et continuation. Un score peut utiliser utilité contextuelle, nouveauté, information attendue, diversité, âge, coût et risque; ces variables sont des heuristiques à calibrer. Les contraintes dures de type, contrat, capacité, statut périmé et sûreté dominent tout score.
+
+Le budget est un plafond physique, pas une politique. Pour toute ressource $r$, l'allocation doit respecter $\sum_i b_i^{(r)}\leq B^{(r)}$. L'ordonnanceur réserve, lorsque la tâche le requiert, des budgets distincts à l'exploitation, l'exploration, la vérification et la maintenance. Les protections pin, lease, transaction ouverte, checkpoint non confirmé et révocation prioritaire interdisent l'éviction ordinaire.
+
+\section{Anti-famine}
+Une garantie anti-famine s'applique seulement aux candidats continuellement admissibles, de coût payable, dans un ensemble fini ou une classe servie équitablement. Si les ressources allouables sont insuffisantes pour le coût minimal d'un candidat, ou si de nouveaux candidats arrivent sans borne, l'anti-famine universel n'est pas démontrable sans politique d'admission, fractionnement ou saturation. Les hypothèses de ces garanties sont enregistrées dans la trace.
+
+\section{Intégration du formalisme eGenBrain v4}
+La définition du maillage v4 est incorporée comme couche de faits et dérivations typées. Sont conservées : identité canonique et occurrence, relation binaire et hyperrelation, contraintes de types, provenance, supports d'observation, signatures d'observation, transitions autorisées, opérateurs, certificats et états d'activation. L'extension PCM est que ces éléments sont reliés au graphe général d'exécution, aux effets, budgets, capacités et résultats sans que le maillage d'inférence se substitue à la sémantique de programme.
+
+Les chiffres expérimentaux du document v4 restent des résultats rapportés et bornés à leurs artefacts. Le 11/11 du laboratoire, dont huit cas positifs et trois abstentions correctes, ne prouve pas une généralité ouverte. Le facteur de conversion et les opérateurs arithmétiques sont des primitives déclarées; cela établit une composition de primitives dans les cas considérés, non l'induction autonome de l'arithmétique.
+
+\chapter{Transformations et équivalence observable}
+\section{Définition}
+Pour une observation contractuelle $\Obs$ et un domaine $D$, on pose
+\[
+p\simeq_{\Obs,D}q\quad\Longleftrightarrow\quad \forall x\in D,\ \Obs(\llbracket p\rrbracket(x))=\Obs(\llbracket q\rrbracket(x)).
+\]
+L'observation doit préciser si elle comprend sorties, état final, ordre des effets, traces, erreurs, latence, consommation, exceptions et signaux externes. Une équivalence sur tests s'écrit $\mathsf{EquivalentOn}(D_{test})$ et n'est jamais renommée équivalence universelle.
+
+\begin{proposition}[Remplacement certifié]
+Si une transformation $T$ dispose d'un certificat valide de $p\simeq_{\Obs,D}T(p)$ sous hypothèses $H$, et si l'environnement d'exécution satisfait encore $H$, alors remplacer $p$ par $T(p)$ préserve les propriétés exprimées par $\Obs$ sur $D$.
+\end{proposition}
+\begin{proof}
+Pour toute entrée $x\in D$, l'équivalence certifiée donne l'égalité des observations de $p$ et $T(p)$ sous $H$. Toute propriété qui dépend uniquement de ces observations a donc la même valeur avant et après remplacement. Les propriétés non incluses dans $\Obs$, les entrées hors de $D$ et les environnements qui violent $H$ ne sont pas couvertes.
+\end{proof}
+
+Les transformations typiques sont : factorisation, remplacement de composant, spécialisation, généralisation, parallélisation, fusion, ajout d'une validation, changement d'ordonnancement, compression, transformation de stockage et adaptation à une cible. Une transformation non prouvée peut être proposée et testée comme candidate, mais elle ne peut pas être activée comme équivalente certifiée; si elle change le contrat, cette différence doit être spécifiée et approuvée.
+
+\part{Interfaces universelles et expérience utilisateur}
+\chapter{Un noyau, plusieurs interfaces}
+\section{Principe}
+La programmation compositionnelle universelle n'exige pas une interface universelle unique. Au-dessus de l'IR canonique, des surfaces distinctes peuvent coexister : langage textuel, éditeur visuel, blocs typés, formulaires guidés, dialogue en langage naturel contrôlé, API et édition de composants bas niveau. Toutes doivent produire des programmes qui passent par le même pipeline de normalisation, typage, vérification des effets et exécution.
+
+\section{De l'intention au programme vérifiable}
+L'entrée utilisateur se transforme en un dossier d'intention comprenant objectif, contraintes, critères d'acceptation, contexte, permissions, préférences et incertitudes. L'analyse produit une ou plusieurs interprétations candidates. Si deux interprétations compatibles avec le texte conduisent à des actions sensiblement différentes, le système demande une clarification ou rend l'ambiguïté explicite. L'interface ne doit ni prétendre comprendre une demande sous-déterminée ni transformer une description en permission d'effet sensible.
+
+Le programme normalisé expose : graphe d'étapes, entrées et sorties, décisions conditionnelles, dépendances, effets prévus, ressources, erreurs possibles, preuves disponibles, éléments inconnus et décisions nécessitant consentement. Des vues de complexité différentes peuvent masquer les détails internes tout en gardant une voie d'inspection et de contrôle.
+
+\section{Mesurer la simplicité}
+La simplicité est une propriété empirique. Les études doivent comparer programmation classique et PCM sur les mêmes tâches, avec groupes d'utilisateurs pertinents, en mesurant réussite, temps, taux de correction, compréhension des effets, facilité de modification, erreurs de sécurité et maintien du programme après changement. Le nombre de lignes, de blocs ou de clics ne suffit pas comme indicateur isolé. Les tâches choisies doivent couvrir opérations simples, branches, états, erreurs, données, interactions et scénarios multi-étapes.
+
+\chapter{Validation, preuves et expérimentation}
+\section{Portes indépendantes}
+Une version de programme passe par des portes séparées :
+\begin{enumerate}
+\item syntaxe et structure;
+\item typage, unités et contrats de raccord;
+\item effets et capacités;
+\item préconditions et postconditions;
+\item validité des certificats et fraîcheur de provenance;
+\item tests positifs, négatifs et adversariaux;
+\item comportement à l'exécution et gestion des erreurs;
+\item équivalence ou rapport de changement après transformation;
+\item sécurité du déploiement, ressources et reprise;
+\item adéquation au besoin et évaluation holdout;
+\item documentation, version, réversibilité et approbation.
+\end{enumerate}
+Le résultat global est un vecteur de statuts et non un seul « vert » qui masquerait un échec. Toute dimension non mesurée est indiquée non évaluée.
+
+\section{Benchmark de compositionnalité}
+Les benchmarks doivent séparer les primitives vues des combinaisons vues et des contextes vus. Les niveaux sont rapportés distinctement : G0 copie; G1 recombinaison de faits/règles connus; G2 combinaison inédite de primitives connues; G3 induction de règle ou de composant; G4 transfert vers un nouveau domaine. Il faut des tests de renommage, permutation, profondeur, ordre, perturbation, entrées adversariales, assertions de sécurité et budget comparable. Un succès G2 ne prouve ni G3 ni G4.
+
+Les comparaisons eGenBrain doivent inclure au moins le retrieval ASCR seul, le maillage sans règles, le maillage avec règles, le maillage avec opérateurs, puis PCM complet. Les réponses cibles restent cachées au générateur. Chaque inférence brute, trace, certificat, temps, coût, abstention et erreur est persistée avant l'ouverture des références.
+
+\section{Mesures d'activation et de mémoire}
+Évaluer sur budgets et graines appariés : candidats générés, matérialisés, scorés, activés, exécutés, certifiés et rejetés; taille du front; ratio de partage; mémoire résidente et froide; coût de veille/réveil; délai de service; âge maximal; famine; consommation CPU, mémoire et I/O; taux de réveils utiles; erreurs de fraîcheur; succès vérifiés et régressions. Comparer FIFO, best-first, politique stratifiée, ASCRC avec/sans exploration et avec/sans veille. Aucun gain n'est présumé avant mesure.
+
+\chapter{Limites, hypothèses et obligations de clôture}
+\section{Limites fondamentales}
+La PCM n'abolit pas les limites du calcul : un programme peut diverger, un problème peut être indécidable, un espace de synthèse peut être infini, un programme sûr dans le noyau peut appeler un composant défectueux, une donnée observée peut être fausse et un certificat peut avoir une portée limitée. Il est impossible de garantir une solution toujours correcte, minimale, rapide et peu coûteuse pour toute demande arbitraire. La théorie doit répondre à l'incertitude par résultat typé, preuve de portée, budget et abstention, non par une déclaration de généralité absolue.
+
+\section{Registre d'obligations}
+\begin{longtable}{p{0.24\textwidth}p{0.47\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Obligation} & \textbf{Travail de clôture} & \textbf{Statut initial}\\
+\midrule
+Noyau formel & Définir et vérifier les règles de réduction et de typage de chaque nœud central. & À formaliser machine\\
+Compilateur & Prouver la simulation pour chaque cible supportée; conserver tests différentiels et cas de rejet. & À implémenter/vérifier\\
+Composants natifs & Contrats, ABI, effets, isolation, tests adversariaux et révocation de dépendances. & Par composant\\
+Maillage de provenance & Garantir la couverture des dépendances de données, contrôle, preuve, environnement et versions. & À mesurer/auditer\\
+Synthèse générale & Évaluer sur des tâches et combinaisons inédites avec oracles cachés, contre-exemples et budgets. & Empirique\\
+Interface accessible & Études utilisateurs préenregistrées et comparaisons aux pratiques classiques. & Empirique\\
+Sécurité concrète & Modèle de menace, revue du runtime, système hôte et composants, tests d'évasion. & Par déploiement\\
+Performance & Mesures représentatives, profils, coûts d'abstraction et régressions. & Empirique\\
+Compatibilité historique & Traductions pour chaque langage et comportement cible qui doivent être préservés. & Par langage/cible\\
+\bottomrule
+\end{longtable}
+
+\chapter{Conclusion générale}
+La programmation compositionnelle maillée constitue une architecture plausible pour faire de la composition le principe général de programmation : elle offre un noyau universel d'exécution, un maillage typé multicouche, des composants contractuels, une sémantique commune, des capacités contrôlées, des preuves traçables, des interfaces adaptées et un mécanisme d'évolution réversible. Elle conserve les apports de la théorie précédente — contrats, effets, gestion des erreurs, recherche, ASCRC, mémoire vivante, checkpoints et vérification — et ceux du formalisme eGenBrain v4 — identités, occurrences, hyperrègles, opérateurs typés, provenance, observations et certificats.
+
+La différence décisive est l'ajout d'un noyau de calcul universel et d'un théorème d'expressivité relatif : le programme classique devient une représentation que la PCM doit pouvoir traduire avec préservation des observations, et non un domaine extérieur qu'elle ne ferait qu'orchestrer. Le maillage n'est pas un simple graphe de connaissances ni une décoration visuelle; il structure les relations entre données, contrôle, effets, contexte, contrats, preuves et mémoire. L'interface pour l'utilisateur ordinaire est une couche à valider, pas une conséquence automatique de la théorie.
+
+Le principe final est donc : \emph{aucun programme ne doit gagner en simplicité apparente en cachant une perte de comportement, une permission, une incertitude, une dépendance ou un coût}. La composition devient universelle lorsque l'expressivité est établie, la sémantique est stable, les effets sont gouvernés, les transformations sont justifiées et les limites restent visibles. La théorie définit un noyau complet à ce niveau abstrait et un protocole explicite pour les obligations qui ne peuvent être fermées qu'avec une implémentation, un assistant de preuve et des évaluations réelles.
+
+\backmatter
+\begin{thebibliography}{9}
+\bibitem{Hoare1969}
+C. A. R. Hoare, « An Axiomatic Basis for Computer Programming », \emph{Communications of the ACM}, vol. 12, no 10, 1969, p. 576--580 et 583. DOI : \url{https://doi.org/10.1145/363235.363259}.
+
+\bibitem{Minsky1967}
+M. L. Minsky, \emph{Computation: Finite and Infinite Machines}, Prentice-Hall, Englewood Cliffs, 1967.
+
+\bibitem{Plotkin1981}
+G. D. Plotkin, \emph{A Structural Approach to Operational Semantics}, DAIMI FN-19, Computer Science Department, Aarhus University, 1981.
+
+\end{thebibliography}
+\end{document}

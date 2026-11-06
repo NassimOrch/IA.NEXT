@@ -1,0 +1,76 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}\usepackage{amsmath,amssymb,booktabs,longtable,geometry,hyperref}
+\geometry{margin=2.1cm}
+\title{ORDER71 -- Rapport complet de séparation \textit{modèle} vs World Model\newline\large Analyse causale, architecture, expériences et conséquences pour O72}
+\author{Rapport scientifique}
+\date{24 septembre 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Ce rapport répond à la question : si deux versions ORDER71 utilisant des WM différents résolvent les mêmes tâches au même niveau, quel rôle causal le WM joue-t-il réellement ? L'analyse croise les sources O71 v1, la variante O71 v0 + attention O70-att1, les audits, la théorie des empreintes et une campagne indépendante. La conclusion principale est structurelle : sur les tâches publiques finies certifiées, le WM n'est pas le solveur de vérité ; sur les recherches ouvertes, son influence existe dans le code mais reste faible dans le régime de budget testé. La différence entre « présence du WM » et « utilité causale du WM » est ainsi rendue explicite et mesurable.
+\end{abstract}
+\tableofcontents
+\section{Question scientifique}
+La question n'est pas de savoir si un WM peut être utile en général, mais où son information entre réellement dans la chaîne causale de ORDER71. Il faut distinguer : (a) représentation, (b) prédiction, (c) sélection de candidats, (d) certification.
+\section{Corpus audité}
+Le dossier O71 v1 contient notamment \texttt{run\_order71.py}, \texttt{src/order71/agent.py}, \texttt{search.py}, \texttt{wm.py}, \texttt{attention\_wm.py}, \texttt{experiment\_builder.py}, les poids O65, les trois poids attention O70-att1, les tests, \texttt{RG.jsonl}, les documents théoriques et les rapports historiques O69/O70. La variante \texttt{model\_order\_71\_v\_0\_att\_0.zip} conserve le logiciel O71 v0 et remplace le WM par l'ensemble attention O70-att1.
+\section{Architecture ORDER71}
+Le modèle combine : empreintes et quotient observationnel, raffinements, algèbre de sondes, recherche active, portefeuille de trajectoires, mémoire temporelle, budget, vérificateur externe, constructeur d'expérience public et WM gelé. Les composants logiques produisent des contrats et des décisions ; le WM produit des représentations et des prédictions.
+\subsection{Chemin de certification public exact}
+Lorsque \texttt{env.plan.status == READY} et que le contrat public est certifié, le noyau effectue une expérience exhaustive sur les actions légales. Pour chaque $a$ :
+\[
+out_a=S(a),\qquad j_a=J(out_a).
+\]
+Il certifie ensuite une action uniquement lorsque toutes les actions légales ont été couvertes et qu'un optimum unique est établi :
+\[
+a^*=\operatorname*{arg\,ext}_{a\in A}J(out_a).
+\]
+Ce calcul est indépendant du score WM.
+\section{Architecture O65 WM}
+Un membre O65 utilise un encodeur d'observation latent 96, mélange local convolutionnel, agrégation relationnelle, encodeur global et tête de dynamique. Chaque checkpoint compte 746\,718 paramètres ; l'ensemble de trois membres compte 2\,240\,154 paramètres. Le WM a été entraîné sur 12 familles : arithmétique, logique, séquence, tri/partition, graphes/relations, planification, contraintes, transformations symboliques, spatial, causalité, raisonnement par contre-exemple et interaction partiellement observable.
+\section{Architecture attention O70-att1}
+Le WM attentionnel utilise un encodeur par attention croisée à requête unique sur 95 tokens mémoire, quatre têtes et largeur d=48, avec sortie latente 96. Chaque membre compte 598\,302 paramètres ; l'ensemble de trois membres compte 1\,794\,906 paramètres. Son entraînement a été spécialisé sur la récupération clé-valeur associative. Les précisions hors clés entraînées documentées pour les trois graines sont environ 0,7906, 0,9794 et 0,9611, ce qui montre à la fois une capacité de transfert et une sensibilité à la graine.
+\section{Résultats O71 déjà obtenus}
+La release O71 v1 documente 40/40 tests logiciels, 36/36 équivalences structurées choix/sans-choix, 6/6 convergences de graines, 4/4 tâches textuelles et 400/400 scénarios aléatoires de choix. L'ablation O71 v0 + attention donne 34/34 tests logiciels, 9/9 équivalences choix/sans-choix, 3/3 convergences et 4/4 tâches difficiles, avec validation jusqu'à 500\,000 candidats. Ces chiffres établissent la reproductibilité du protocole existant mais ne mesurent pas encore l'utilité causale du WM.
+\section{Expérience 1 : instrumentation du chemin exact}
+Deux environnements publics finis ont été exécutés avec instrumentation du WM. Pour chacun des backends O65 et att1 : une observation a été encodée, zéro prédiction WM n'a été appelée, et l'action certifiée a été identique à l'évaluation publique exhaustive. Résultat :
+\begin{center}\begin{tabular}{lrrr} \toprule Backend & encodes & predict & résultat \\ \midrule O65 & 1 & 0 & identique \\ att1 & 1 & 0 & identique \\ \bottomrule\end{tabular}\end{center}
+Cette expérience démontre une propriété causale forte : sur ce chemin, changer la capacité prédictive du WM ne peut pas changer la réponse tant que l'encodeur reste contractuellement valide.
+\section{Expérience 2 : prédiction trans-famille}
+Sur 15 transitions par famille et 12 familles, l'écart moyen latent entre la prédiction de transition et l'encodage du prochain état a été de 0,00441 pour O65 contre 0,10765 pour att1. L'erreur absolue moyenne sur la récompense était respectivement 3,3506 et 3,8552. Cette comparaison n'est pas un benchmark de « meilleur modèle » : O65 a été conçu pour ces 12 familles alors qu'att1 a été entraîné pour l'association clé-valeur. Elle montre néanmoins que la spécialisation attentionnelle ne remplace pas automatiquement une couverture prédictive générale.
+\section{Expérience 3 : ablation causale WM nul}
+Un WM nul de contrôle a été construit avec même interface et latence minimale, mais latente et prédiction constantes. Sur 24 tâches de recherche à profondeur 3 et budget de 25 nœuds, les résultats moyens étaient :
+\begin{center}\begin{tabular}{lrrr} \toprule WM & regret moyen & score moyen & temps moyen (s) \\ \midrule O65 & 4,2198 & 6,2979 & 0,1171 \\ att1 & 4,2615 & 6,2563 & 0,0693 \\ nul & 4,2615 & 6,2563 & 0,0206 \\ \bottomrule\end{tabular}\end{center}
+Le résultat le plus discriminant est att1 = WM nul sur ce banc. L'O65 apporte un gain faible mais mesurable : la prédiction WM commence donc à avoir une influence, mais la recherche O71 reste dominée par les observations simulées et les heuristiques structurelles.
+\section{Expérience 4 : pourquoi les mêmes résultats ne prouvent pas l'inutilité du WM}
+Trois mécanismes empêchent une telle conclusion :
+\begin{enumerate}
+\item la certification exacte ne dépend structurellement pas du WM ;
+\item les recherches actuelles appellent \texttt{simulate} pour obtenir directement les conséquences, ce qui réduit le travail que le WM pourrait économiser ;
+\item att1 a été entraîné pour l'association et non pour la dynamique générale des 12 familles O65.
+\end{enumerate}
+Ainsi, « même réponse » et « même causalité » sont deux propositions différentes.
+\section{Rôle exact du WM}
+Le WM est utile lorsqu'il réduit le nombre d'expériences réelles nécessaires, améliore la couverture d'une recherche sous budget, prévoit des transitions non encore observées, ou fournit un signal d'incertitude permettant une stratégie d'exploration. Il n'a pas à démontrer la vérité externe.
+\section{Petit WM ou WM plus grand ?}
+La comparaison O65/att1 ne constitue pas une loi de scaling pure, car architectures et jeux d'entraînement diffèrent. O65 a plus de paramètres par membre et une couverture plus large ; att1 est plus petit et spécialisé. Le résultat observé montre qu'un petit WM peut suffire sur un sous-domaine et qu'un WM plus grand ne gagne pas automatiquement une tâche lorsqu'il n'est pas utilisé par le chemin causal concerné. La question scientifiquement pertinente est :
+\[
+\eta=\frac{\text{réduction de regret/temps/expériences à protocole égal}}{\text{coût supplémentaire du WM}}.
+\]
+Il n'existe dans le corpus présent aucune justification pour choisir la taille uniquement par nombre de paramètres.
+\section{Révélation sur le modèle lui-même}
+Le diagnostic révèle que le cœur ORDER71 est davantage un système de transport, recherche, certification et orchestration de l'information qu'un moteur neuronal dont le WM ferait toute la computation. Cela peut être une force architecturale : la vérité reste auditable. Mais cela révèle aussi une faiblesse : le WM n'exploite pas encore pleinement son potentiel causal dans la recherche ouverte.
+\section{Conséquence architecturale : O72}
+La suite logique n'est pas de remplacer O71 par un gros WM. Il faut introduire un portefeuille de WM complémentaires, un calibrateur fondé sur des retours publics, un routeur mesurable, un registre de rôle WM et une barrière de vérité. Le WM devient un composant causally-useful de priorisation, tout en restant séparé du vérificateur.
+\section{Architecture O72 proposée}
+Le pipeline O72 est : empreinte -- contraintes -- mode CERTIFY/SEARCH -- portefeuille WM -- pilotage -- recherche -- expérience -- vérificateur -- mémoire -- raffinement.
+La certification exhaustive conserve le chemin direct. La recherche ouverte réserve une petite partie du budget à la calibration du WM ; le reste est consommé par la recherche. Le coût du pilotage est donc visible et non gratuit.
+\section{Limites et points non démontrés}
+Le corpus ne démontre pas une universalité sémantique absolue ni une AGI générale au sens fort. Il démontre des mécanismes généralisables sous contrats explicites. Les mesures restent limitées par la qualité des environnements simulés, par le nombre de familles et par la différence de distribution d'entraînement entre O65 et att1. O72 doit élargir ces épreuves plutôt que de transformer ces résultats en conclusion universelle.
+\section{Conclusion}
+L'absence de différence entre WM sur une tâche O71 certifiée signifie principalement que le WM n'est pas dans la chaîne de vérité de cette tâche. Le petit WM est donc potentiellement suffisant pour le chemin exact. Pour les tâches ouvertes, la question devient la qualité de la priorisation et de la prédiction ; les résultats actuels montrent que le WM att1 n'ajoute pas encore de valeur sur le banc choisi, tandis que l'O65 en ajoute légèrement. La conception O72 doit rendre cette utilité explicite, mesurée et falsifiable.
+\appendix
+\section{Traçabilité des sources}
+Sources principales : run\_order71.py ; src/order71/agent.py ; search.py ; wm.py ; attention\_wm.py ; experiment\_builder.py ; RG.jsonl ; DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex ; infini\_vs\_fini\_0/1/2.tex ; rapports O69/O70/O71 et audits associés.
+\section{Principe de non-circularité}
+Les références externes utilisées pour évaluer les scores dans les expériences de recherche sont des instruments d'audit hors modèle. Aucun champ caché n'est transmis au WM controller. Le code O72 rejette explicitement les champs de type oracle dans les payloads destinés au routeur.
+\end{document}

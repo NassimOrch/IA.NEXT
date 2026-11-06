@@ -1,0 +1,47 @@
+\section{Intégration complète de la théorie compositionnelle dans FulleGenBrain\_3}
+La théorie compositionnelle est le langage commun des capacités, des stratégies, de la mémoire et des procédures de validation. Cette intégration est exhaustive au niveau de la spécification : chaque constructeur est relié à sa sémantique, à une responsabilité d'architecture, à l'état réel du prototype et aux tests/obligations correspondants. Une fonction spécifiée mais non présente dans le prototype demeure visible comme travail d'implémentation; la matrice interdit d'inférer sa disponibilité à partir de sa seule présence dans le DSL.
+
+\begin{longtable}{p{0.17\textwidth}p{0.38\textwidth}p{0.34\textwidth}}
+\toprule Opérateur théorique & Rôle et contrat dans FulleGenBrain\_3 & Couverture actuelle du noyau de référence \\
+\midrule
+\endfirsthead
+\toprule Opérateur théorique & Rôle et contrat dans FulleGenBrain\_3 & Couverture actuelle du noyau de référence \\
+\midrule
+\endhead
+\(\mathsf{Id}\) & Identité pure avec trace conforme au contrat. & Sémantique spécifiée; interpréteur DSL non fourni dans ce prototype. \\
+\(\mathsf{Call}\) & Résolution versionnée d'un composant, contrôle type/contrat/capacité. & Registre de compositions présent; invocation DSL générique non intégrée. \\
+\(\mathsf{Seq}\) & Enchaînement avec validation des pré/postconditions et propagation des statuts. & Spécifié; exécuteur AST de séquence à construire. \\
+\(\mathsf{Par}\) & Exécution concurrente seulement sous contrats d'effets compatibles. & Spécifié; runtime parallèle et vérification d'indépendance à construire. \\
+\(\mathsf{If}\) & Branchement sur garde typée, trace du garde et branche exécutée. & Spécifié; nœud AST non intégré au runtime livré. \\
+\(\mathsf{Map}\) & Application bornée à chaque élément avec politique d'erreur. & Spécifié; map du DSL FGB3 non intégré au runtime livré. \\
+\(\mathsf{Fold}\) & Réduction avec accumulateur typé, invariant et ordre défini. & Spécifié; moteur de réduction à construire. \\
+\(\mathsf{Loop}\) & Itération avec invariant, budget et preuve de terminaison par rang si revendiquée. & Spécifié; boucle DSL non intégrée au runtime livré. \\
+\(\mathsf{Choose}\) & Maintien d'alternatives sans choix arbitraire implicite. & Spécifié; gestion d'alternatives dans le synthétiseur à construire. \\
+\(\mathsf{Select}\) & Choix via une politique versionnée parmi les candidats admissibles. & Best-first générique trie un front; opérateur AST/selecteur sémantique non intégré. \\
+\(\mathsf{Verify}\) & Vérification indépendante et résultats VALID/INVALID/UNKNOWN. & Porte d'activation du modèle de transition testée; vérificateur générique de programme non intégré. \\
+\(\mathsf{Observe}\) & Capture contrôlée d'observations avec source, contexte et provenance. & Contrat spécifié; collecteurs DDD intégrés non livrés dans ce runtime. \\
+\(\mathsf{Probe}\) & Choix d'une observation discriminante selon gain, coût et risque. & Contrat spécifié; planificateur de probes non intégré. \\
+\(\mathsf{Recover}\) & Récupération bornée, compensation et statut partiel tracé. & Non intégré comme opérateur DSL; restauration mémoire locale testée séparément. \\
+\(\mathsf{Txn}\) & Transaction locale ou protocole de compensation explicite. & Non intégré; la transaction distribuée reste une obligation d'implémentation. \\
+\(\mathsf{Checkpoint}\) & Point de cohérence du programme, de la recherche et de l'état. & Checkpoint du front de recherche testé; snapshot général d'exécution non intégré. \\
+\(\mathsf{Revoke}\) & Révocation et propagation vers les descendants dépendants. & Invalidation sur changement de version partiellement implémentée/testée; opérateur DSL absent. \\
+\(\mathsf{Compose}\) & Instanciation d'un sous-programme paramétré avec contrats et versions. & Non intégré comme nœud exécutable. \\
+\(\mathsf{Transform}\) & Transformation candidate avec diff, preuve/évaluation, approbation et rollback. & Non intégré; mécanisme d'auto-transformation à construire et évaluer. \\
+\(\mathsf{Fix}\) & Récursion/point fixe avec sémantique et conditions de terminaison. & Spécifié; non intégré au runtime livré. \\
+\(\mathsf{Synthesize}\) & Génération de candidats sous objectif, grammaire, contraintes et budget. & Front best-first reprenable disponible; moteur de génération AST/domaines non intégré. \\
+\(\mathsf{Hibernate}\) & Mise en veille après checkpoint, sous protections de bail/pin/transaction. & Implémenté dans \code{LivingCompositionMemory}; tests positifs/négatifs inclus. \\
+\(\mathsf{Wake}\) & Réveil avec vérification hash/version, fraîcheur et revalidation. & Implémenté via \code{activate}/\code{lease}; versions périmées et corruption testées. \\
+\(\mathsf{Compress}\) & Compression sans perte du payload canonique. & zlib/SQLite et mesures de ratio implémentées pour le payload mémoire, non en opérateur DSL général. \\
+\(\mathsf{Summarize}\) & Vue avec perte et contrat de fidélité, référence exacte conservée. & Spécifié; résumé sémantique à perte non implémenté. \\
+\(\mathsf{Restore}\) & Restauration avec intégrité, compatibilité de schéma et réconciliation. & Restauration payload/checkpoint de recherche partiellement implémentée; effet externe non inclus. \\
+\(\mathsf{EmitWave}\) & Émission persistante d'événements typés avec déduplication et backpressure. & File durable et émission implémentées/testées dans le prototype. \\
+\(\mathsf{ReceiveWave}\) & Validation, livraison et traitement idempotent d'une vague. & File/livraison/forwarding testés; handlers métier génériques non intégrés. \\
+\(\mathsf{ResumeSearch}\) & Reprise d'un front versionné sans perdre les signatures/compteurs. & Checkpoint/restore de \code{ResumableBestFirstSearch} implémenté/testé. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Hiérarchie des abstractions apprises}
+Le catalogue distingue \(Primitive\), \(Operator\), \(Skill\), \(Method\), \(Strategy\), \(Policy\) et \(MetaStrategy\). Une primitive expose une opération élémentaire; un opérateur règle la composition; une compétence est un contrat réutilisable orienté tâche; une méthode compose des compétences; une stratégie choisit entre méthodes; une politique associe contexte et action/méthode; une méta-stratégie ajuste le choix des stratégies sous une procédure contrôlée. La promotion est une transformation versionnée qui exige des tests de variation, une portée de validité et une provenance; un résultat dans des exemples ne suffit pas à universaliser une compétence.
+
+\subsection{Différences structurantes avec FulleGenBrain\_2}
+La V3 conserve la composition comme substrat central et ajoute : (i) sémantique contractuelle explicite des opérations de mémoire/événements; (ii) gestion intégrée du cycle de vie actif/veille/réveil/stale; (iii) mémoire chaude/tiède/froide avec compression exacte et résumés qualifiés séparément; (iv) propagation événementielle bornée et traçable; (v) défense multicouche contre l'explosion combinatoire; (vi) porte empirique pour activer les modèles de transition par famille; (vii) matrice entre tous les constructeurs théoriques et leurs statuts d'implémentation. Ces ajouts précisent l'architecture sans prétendre que le prototype implémente déjà tout le runtime cible.

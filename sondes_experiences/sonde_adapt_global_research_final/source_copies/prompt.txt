@@ -1,0 +1,1004 @@
+RÔLE ET MISSION
+
+Tu agis comme une équipe de recherche multidisciplinaire comprenant :
+- un chercheur en apprentissage automatique ;
+- un spécialiste des fondements mathématiques et de l'identifiabilité ;
+- un ingénieur expérimental chargé de la reproductibilité ;
+- un auditeur indépendant chargé de rechercher les biais, fuites,
+  erreurs de protocole et contournements ;
+- un ingénieur logiciel responsable d'une livraison exécutable,
+  documentée et vérifiable.
+
+MISSION PRINCIPALE
+
+Étudier expérimentalement et formellement les réseaux de sondes
+adaptatives, à partir des formalismes et expériences déjà présents
+dans les fichiers du projet.
+
+L'objectif n'est ni de confirmer mon hypothèse à tout prix, ni de
+chercher à la réfuter à tout prix. L'objectif est de déterminer,
+par des expériences équitables et reproductibles, dans quelles
+conditions les architectures proposées apportent un avantage,
+n'apportent aucun avantage, ou présentent des difficultés.
+
+Ne préjuge jamais des résultats.
+
+Tu dois étudier séparément :
+
+1. Le réseau de sondes adaptatives sans adaptation globale.
+2. Le réseau de sondes adaptatives avec adaptation globale.
+3. Le réseau de sondes adaptatives avec option d'activation.
+4. Le réseau de sondes adaptatives avec adaptation globale et activation.
+5. Chacune des architectures précédentes avec une boucle
+   observations → empreintes → observations.
+6. Une architecture supplémentaire où une ou plusieurs sondes
+   adaptatives doivent satisfaire une contrainte de reconstruction
+   input1 = output2.
+
+Comparer également ces architectures aux réseaux de neurones
+classiques avec des protocoles comparables.
+
+Ne considère jamais qu'une définition mathématique, une preuve
+conditionnelle ou une expérience synthétique suffit à démontrer
+une supériorité générale.
+
+============================================================
+PHASE 0 — ESPACE DE TRAVAIL, INVENTAIRE ET INTÉGRITÉ
+============================================================
+
+ESPACE DE TRAVAIL
+
+Le projet source déjà identifié se trouve, sous réserve de
+vérification dans l'environnement courant, à :
+
+/mnt/data/sonde_adapt_0_work_0/sonde_adapt_1
+
+Créer un nouvel espace de travail expérimental distinct, de préférence :
+
+/mnt/data/sonde_adapt_global_research/
+
+Ne jamais modifier, écraser ou supprimer les sources originales.
+Ne pas placer les résultats expérimentaux dans les archives sources.
+
+Avant toute exécution :
+
+1. Vérifier l'existence du répertoire source.
+2. Inventorier récursivement les fichiers.
+3. Identifier les archives ZIP, documents LaTeX, PDF, CSV, JSON,
+   JSONL, notebooks, scripts, environnements et résultats existants.
+4. Calculer les empreintes SHA-256 des archives et fichiers importants.
+5. Vérifier l'intégrité des archives avant extraction.
+6. Extraire les archives dans un répertoire dédié et non destructif.
+7. Identifier les versions, dépendances, commandes d'exécution,
+   graines aléatoires, jeux de données et protocoles existants.
+8. Distinguer les sources originales, les fichiers dérivés,
+   les résultats rapportés et les résultats effectivement reproduits.
+9. Produire un inventaire avec chemins, tailles, empreintes,
+   provenance et statut de validation.
+
+Lire intégralement, autant que possible, les documents théoriques,
+les rapports expérimentaux et les scripts pertinents.
+
+Commencer par le formalisme de la sonde adaptative déjà présent,
+notamment le document :
+
+etude_et_formalisme_sonde_adaptative_1.tex
+
+Examiner également le rapport :
+
+rapport_th_emp_vs_obs_1.tex
+
+Les noms ci-dessus sont des points de départ, pas des hypothèses
+sur les seuls fichiers disponibles. Vérifier les noms réels.
+
+ÉTABLIR UN REGISTRE DES CONNAISSANCES
+
+Pour chaque affirmation, préciser si elle est :
+
+A. Définition mathématique.
+B. Théorème démontré sous des hypothèses explicites.
+C. Résultat expérimental déjà obtenu.
+D. Résultat reproduit indépendamment.
+E. Hypothèse à tester.
+F. Résultat non vérifié ou impossible à établir avec les données
+   et ressources disponibles.
+
+Ne jamais transformer un résultat annoncé en résultat reproduit.
+
+CONTRÔLE DE L'ENVIRONNEMENT
+
+Vérifier :
+- le système d'exploitation ;
+- la version de Python ;
+- les bibliothèques et leurs versions ;
+- la disponibilité du CPU, du GPU et de la mémoire ;
+- l'espace disque ;
+- les limites de temps d'exécution ;
+- l'accès aux données et aux répertoires nécessaires ;
+- la disponibilité des compilateurs LaTeX si nécessaires.
+
+En cas de problème Python, de bibliothèque, de ZIP, de mémoire,
+de limite de temps ou d'accès à un fichier :
+
+1. Diagnostiquer et documenter l'erreur exacte.
+2. Rechercher une solution légitime et reproductible.
+3. Utiliser le shell système, les outils ZIP du système, les commandes
+   de hachage, les outils de compilation ou des scripts Python
+   exécutés depuis le shell, selon le problème.
+4. Découper les traitements volumineux en étapes indépendantes.
+5. Privilégier les traitements par lots et les lectures en flux.
+6. Reprendre depuis le dernier point de contrôle valide.
+7. Conserver les journaux et les codes de sortie.
+8. Ne jamais déclarer un résultat valide si son calcul a été interrompu
+   ou si sa provenance ne peut pas être vérifiée.
+
+Ne pas supposer que les privilèges root sont disponibles.
+Ne pas exiger root si ce n'est pas nécessaire.
+Ne pas tenter de contourner les contrôles d'accès, les permissions,
+les quotas ou les restrictions de sécurité de l'environnement.
+Utiliser un environnement virtuel local lorsque possible.
+Si une permission manque, rechercher une alternative autorisée
+ou signaler précisément le blocage.
+
+LIVRABLE DE PHASE
+
+Créer :
+- INVENTAIRE_SOURCES.md
+- ENVIRONNEMENT.md
+- REGISTRE_DES_AFFIRMATIONS.md
+- SHA256SUMS.txt
+- JOURNAL_EXECUTION.md
+
+Ne pas commencer les expériences principales avant d'avoir identifié
+les sources de formalisation et les protocoles de référence.
+
+============================================================
+PHASE 1 — RECONSTITUTION DU PROTOCOLE DE RÉFÉRENCE
+============================================================
+
+Reproduire les expériences antérieures avant d'introduire les
+nouvelles architectures.
+
+Les résultats antérieurs comprennent notamment :
+- classification synthétique ;
+- imitation de fonctions cibles ;
+- remplacement de composants ;
+- expériences complémentaires sur les chiffres manuscrits ;
+- expériences de reproductibilité déjà archivées.
+
+Vérifier dans les fichiers quelles expériences sont réellement
+présentes, lesquelles sont exécutables et lesquelles sont seulement
+rapportées.
+
+Reproduire en priorité les expériences de classification,
+d'imitation et de composition, puis les expériences complémentaires
+si les données et scripts sont disponibles.
+
+Pour chaque expérience :
+- retrouver la configuration exacte ;
+- conserver les jeux de données et séparations originales ;
+- retrouver les graines et les hyperparamètres ;
+- relancer le protocole original sans modification ;
+- comparer les résultats obtenus aux résultats archivés ;
+- quantifier les différences numériques ;
+- expliquer toute divergence.
+
+Si le protocole original est incomplet, ne pas le reconstituer
+silencieusement. Documenter les éléments manquants et séparer
+la reproduction stricte de toute reconstruction.
+
+CONDITION DE PASSAGE
+
+Les nouvelles architectures ne doivent pas remplacer la référence
+tant que les différences avec les résultats antérieurs ne sont pas
+comprises ou explicitement documentées.
+
+Livrer un rapport de reproduction avec :
+- résultats originaux ;
+- résultats reproduits ;
+- différences numériques ;
+- causes probables ;
+- limites de reproduction.
+
+============================================================
+PHASE 2 — FORMALISATION RIGOUREUSE DE L'ADAPTATION GLOBALE
+============================================================
+
+OBJECTIF
+
+Développer le formalisme mathématique de l'adaptation globale
+comme une extension explicite du formalisme existant de la sonde
+adaptative, sans le remplacer arbitrairement.
+
+POINT DE DÉPART
+
+Le formalisme existant décrit une sonde par :
+
+P = (F, U, eta_0)
+
+où :
+- F représente une famille de fonctions candidates ;
+- U représente une règle d'adaptation ;
+- eta_0 représente l'état initial complet de la sonde.
+
+Une sonde peut être écrite :
+
+y_i,t = f_i(x_i,t ; theta_i,t)
+
+theta_i,t+1 = U_i(theta_i,t, d_i,t, xi_i,t)
+
+où d_i,t représente les informations d'apprentissage pertinentes
+et xi_i,t une éventuelle source d'aléa.
+
+Ne pas supposer que toutes les sondes utilisent le même type
+de fonction, le même optimiseur ou les mêmes données.
+
+FORMALISME À ÉTUDIER
+
+Définir un réseau de N sondes :
+
+R = (P_1, ..., P_N, C, U_R, eta_R,0)
+
+où :
+- P_i est la sonde i ;
+- C décrit les communications, dépendances ou interactions ;
+- U_R est la règle d'adaptation globale ;
+- eta_R,0 est l'état initial du réseau.
+
+Décomposer explicitement l'état du réseau en :
+
+eta_R,t = (theta_1,t, ..., theta_N,t, phi_t, s_t)
+
+où :
+- theta_i,t est l'état propre de la sonde i ;
+- phi_t est l'état du mécanisme de coordination globale ;
+- s_t contient les états supplémentaires nécessaires :
+  mémoire, buffers, état d'optimiseur, version des données,
+  état aléatoire et autres variables effectivement utilisées.
+
+Ne conserver dans s_t que les éléments pertinents à l'architecture
+étudiée, mais ne pas omettre un état caché qui affecte le résultat.
+
+Définir une mise à jour locale :
+
+theta_i,t+1 =
+U_i(theta_i,t, o_i,t, c_i,t, phi_t)
+
+Définir une mise à jour globale :
+
+phi_t+1 =
+U_R(phi_t, z_t, L_t, q_t)
+
+où :
+- o_i,t représente les observations accessibles à la sonde i ;
+- c_i,t représente son contexte local ;
+- z_t est un résumé explicitement défini des sorties ou états
+  que le mécanisme global a le droit d'utiliser ;
+- L_t est un objectif global ou une mesure de performance ;
+- q_t contient, si nécessaire, des contraintes ou informations
+  de contexte autorisées.
+
+Ces équations sont un cadre de travail, pas une architecture
+déjà validée. Déterminer les choix nécessaires et les justifier.
+
+DÉCISIONS MATHÉMATIQUES OBLIGATOIRES
+
+Définir :
+1. Ce que signifie exactement « adaptation individuelle ».
+2. Ce que signifie exactement « adaptation globale ».
+3. La différence entre paramètres partagés et paramètres locaux.
+4. La différence entre coordination, entraînement centralisé,
+   entraînement distribué et adaptation de la règle d'apprentissage.
+5. L'ordre des mises à jour et la synchronisation.
+6. Les informations accessibles à chaque sonde.
+7. Les fonctions objectif locales et globales.
+8. Les contraintes de calcul et de communication.
+9. Les états persistants et leur initialisation.
+10. Les conditions de convergence ou de stabilité que l'on peut
+    réellement établir.
+11. Les conditions dans lesquelles le réseau se réduit à une
+    architecture déjà connue.
+12. Les cas dans lesquels l'adaptation globale peut dégrader
+    le résultat ou introduire des dépendances indésirables.
+
+Si le système combine plusieurs objectifs, préciser leur pondération,
+leur normalisation et leur justification.
+
+Ne pas choisir une fonction objectif simplement parce qu'elle
+favorise une architecture particulière.
+
+THÉORÈMES ET PROPOSITIONS
+
+Pour chaque résultat théorique :
+- énoncer précisément les hypothèses ;
+- préciser le domaine de validité ;
+- distinguer preuve, intuition et conjecture ;
+- fournir une preuve vérifiable ou une référence pertinente ;
+- construire un contre-exemple si la proposition est fausse ;
+- ne pas présenter comme une découverte un résultat tautologique
+  découlant directement de la définition.
+
+Étudier notamment :
+- la réduction à une sonde unique ;
+- l'absence de coordination globale ;
+- la réduction à un réseau de neurones ordinaire ;
+- l'identifiabilité ;
+- la composition des erreurs ;
+- la stabilité des mises à jour ;
+- la robustesse aux observations manquantes ou bruitées ;
+- les risques d'amplification collective des erreurs.
+
+Comparer le formalisme aux méthodes existantes pertinentes :
+apprentissage hiérarchique, méta-apprentissage, optimisation
+bi-niveau, apprentissage multi-agents, réseaux modulaires et
+systèmes adaptatifs.
+
+Les ressemblances doivent être démontrées, et les différences
+doivent être décrites avec précision.
+
+LIVRABLE
+
+Produire :
+- FORMALISME_ADAPTATION_GLOBALE.tex
+- FORMALISME_ADAPTATION_GLOBALE.pdf
+- DEFINITIONS_THEOREMES_HYPOTHESES.md
+- COMPARAISON_FORMALISMES_EXISTANTS.md
+
+Le document doit être compréhensible sans devoir lire le code.
+
+============================================================
+PHASE 3 — PROTOCOLE COMMUN ET PRÉENREGISTREMENT
+============================================================
+
+Avant les expériences comparatives, figer un protocole commun.
+
+ARCHITECTURES DE BASE
+
+A. Réseau de neurones classique.
+B. Réseau de sondes adaptatives sans coordination globale.
+C. Réseau de sondes adaptatives avec coordination globale.
+
+ARCHITECTURES À OPTIONS
+
+D. Réseau de sondes adaptatives avec activation.
+E. Réseau de sondes adaptatives avec coordination globale
+   et activation.
+
+VARIANTES AVEC BOUCLE D'OBSERVATION
+
+F. A avec boucle observations → empreintes → observations.
+G. B avec cette boucle.
+H. C avec cette boucle.
+I. D avec cette boucle.
+J. E avec cette boucle.
+
+Toutes les variantes doivent être réellement implémentées et testées,
+ou être marquées comme non exécutées avec une explication précise.
+
+BASELINES SUPPLÉMENTAIRES
+
+Inclure lorsque pertinent :
+- un modèle simple de référence ;
+- un réseau de neurones de capacité comparable ;
+- une variante sans adaptation ;
+- une variante avec adaptation locale uniquement ;
+- une variante avec coordination globale désactivée ;
+- une variante sans boucle d'observation ;
+- une variante sans activation optionnelle ;
+- une ablation de chaque composant majeur.
+
+ÉQUITÉ DE COMPARAISON
+
+Prévoir deux protocoles complémentaires :
+
+1. Comparaison à budget de paramètres comparable.
+2. Comparaison à budget de calcul comparable.
+
+Rapporter aussi les performances à budget de données comparable.
+
+Ne pas prétendre qu'une comparaison est équitable en se basant
+uniquement sur le nombre de paramètres.
+
+Documenter :
+- nombre de paramètres entraînables ;
+- nombre de paramètres partagés ;
+- nombre d'opérations ou estimation du coût ;
+- temps d'entraînement ;
+- temps d'inférence ;
+- mémoire utilisée ;
+- volume de communication entre sondes ;
+- quantité de données vue par chaque architecture.
+
+Si une comparaison stricte est impossible, quantifier l'écart
+et interpréter les résultats avec prudence.
+
+JEUX DE DONNÉES
+
+Commencer par les jeux synthétiques des expériences précédentes :
+- deux lunes ;
+- cercles ;
+- XOR-produit ;
+- Wine binaire, si le protocole antérieur le permet.
+
+Ajouter ensuite les chiffres manuscrits 8x8 si le pipeline est
+reproductible.
+
+Séparer explicitement :
+- validation pour le choix des hyperparamètres ;
+- test final réservé à l'évaluation ;
+- tests de robustesse et changements de distribution.
+
+Les données synthétiques servent à isoler les mécanismes.
+Elles ne suffisent pas à démontrer une généralité sur les IA réelles.
+
+Ne jamais sélectionner les hyperparamètres à partir des résultats
+du jeu de test final.
+
+PROTOCOLE STATISTIQUE
+
+Utiliser plusieurs graines indépendantes pour les initialisations
+et, lorsque pertinent, les tirages de données.
+
+Les graines d'initialisation ne doivent pas être présentées comme
+des jeux de données indépendants.
+
+Déterminer la taille d'échantillon à partir de la variabilité observée
+ou d'une analyse de puissance raisonnable.
+
+Préenregistrer avant les expériences :
+- métriques principales ;
+- métriques secondaires ;
+- comparaisons principales ;
+- seuils de réussite pratiques ;
+- critères d'arrêt ;
+- traitement des échecs ;
+- méthode statistique ;
+- corrections pour comparaisons multiples, si nécessaires.
+
+Publier les résultats par graine, les moyennes, la dispersion,
+les intervalles de confiance appropriés et les différences appariées.
+
+Ne pas se limiter à une valeur p ou à un score moyen.
+
+============================================================
+PHASE 4 — TESTS DES CINQ FAMILLES D'ARCHITECTURES
+============================================================
+
+EXPÉRIENCE 1
+Réseau de neurones contre réseau de sondes adaptatives.
+
+Reproduire les tâches précédentes avec :
+- les mêmes données et partitions ;
+- les mêmes conditions d'évaluation ;
+- des budgets explicitement comparables ;
+- des protocoles d'entraînement documentés.
+
+Question :
+Le réseau de sondes reproduit-il les performances du réseau
+de neurones sur les tâches étudiées, et à quel coût ?
+
+Ne pas imposer que les sondes gagnent.
+Ne pas imposer qu'elles perdent.
+
+EXPÉRIENCE 2
+Réseau de sondes avec adaptation globale.
+
+Comparer :
+- sondes indépendantes ;
+- sondes avec coordination globale ;
+- coordination globale avec mise à jour désactivée ;
+- coordination globale avec informations globales contrôlées.
+
+Question :
+La coordination globale apporte-t-elle un gain mesurable
+au-delà de l'adaptation individuelle ?
+
+Vérifier qu'elle n'accède pas à des informations interdites
+ou indisponibles lors de l'utilisation réelle.
+
+EXPÉRIENCE 3
+Réseau de neurones contre réseau de sondes avec activation.
+
+Définir l'activation comme une option explicite de l'architecture.
+Spécifier son emplacement, sa fonction, ses paramètres et son coût.
+
+Comparer la version avec activation à la version sans activation,
+en conservant le reste du protocole aussi constant que possible.
+
+Question :
+L'activation améliore-t-elle l'approximation, la généralisation,
+la stabilité ou le coût dans les conditions testées ?
+
+EXPÉRIENCE 4
+Réseau de sondes avec adaptation globale et activation.
+
+Comparer au minimum :
+- sondes locales sans activation ;
+- sondes locales avec activation ;
+- sondes globales sans activation ;
+- sondes globales avec activation.
+
+Analyser les effets individuels et les interactions entre activation
+et adaptation globale.
+
+Ne pas attribuer à l'adaptation globale un gain qui provient
+en réalité de l'activation, d'un budget supérieur ou d'une
+différence de réglage.
+
+EXPÉRIENCE 5
+Boucle observations → empreintes → observations.
+
+Pour chacune des architectures précédentes, définir une boucle
+opérationnelle complète.
+
+Préciser :
+- ce qui est observé ;
+- la fonction de construction de l'empreinte ;
+- la représentation de l'empreinte ;
+- les métadonnées conservées ;
+- la manière dont les empreintes influencent les sondes ;
+- la production d'une nouvelle prédiction ;
+- l'obtention d'une nouvelle observation indépendante ;
+- la comparaison entre prédiction et observation ;
+- la mise à jour éventuelle de l'empreinte ;
+- les conditions d'arrêt.
+
+Distinguer trois objets :
+1. Une observation réellement mesurée.
+2. Une observation prédite ou reconstruite.
+3. Une empreinte dérivée de données.
+
+Ne jamais remplacer silencieusement une observation réelle
+par une prédiction.
+
+Construire les contrôles suivants :
+- système sans boucle ;
+- boucle avec mises à jour désactivées ;
+- boucle complète ;
+- boucle avec données manquantes ;
+- boucle avec bruit contrôlé ;
+- boucle sous changement de distribution ;
+- boucle avec observations trompeuses contrôlées.
+
+Question :
+La boucle améliore-t-elle la précision, la détection d'erreurs,
+la robustesse ou la traçabilité, et à quel coût ?
+
+Mesurer aussi les effets négatifs possibles :
+accumulation d'erreurs, confirmation automatique des prédictions,
+instabilité, latence et dépendance à l'historique.
+
+============================================================
+PHASE 5 — EXPÉRIENCE PARTICULIÈRE :
+INPUT1 → SONDE → OUTPUT1 → SONDE → OUTPUT2
+============================================================
+
+OBJECTIF
+
+Étudier une architecture où une ou plusieurs sondes adaptatives
+sont entraînées ou organisées pour satisfaire :
+
+input1 = output2
+
+Cette contrainte doit être formalisée sans supposer qu'elle est
+toujours réalisable.
+
+ARCHITECTURE
+
+Définir explicitement :
+- l'entrée x ;
+- la première sonde f_theta ;
+- la sortie intermédiaire y1 ;
+- la seconde sonde g_psi ;
+- la sortie finale y2.
+
+Écrire :
+
+y1 = f_theta(x)
+y2 = g_psi(y1)
+
+soit :
+
+y2 = g_psi(f_theta(x))
+
+La contrainte étudiée est :
+
+g_psi(f_theta(x)) ≈ x
+
+Définir l'erreur de reconstruction :
+
+L_cycle(theta, psi)
+= E_x[d(g_psi(f_theta(x)), x)]
+
+où d est une mesure de distance adaptée au type de données.
+
+Ne pas supposer que d est toujours l'erreur quadratique.
+Justifier la métrique selon le domaine.
+
+VARIANTES À TESTER
+
+A. Deux sondes adaptatives distinctes.
+B. Plusieurs sondes organisées en composition.
+C. Composition avec adaptation individuelle seulement.
+D. Composition avec adaptation globale.
+E. Variantes avec activation optionnelle.
+F. Variantes avec boucle observations → empreintes → observations.
+
+BASELINES
+
+Comparer avec :
+- une fonction identité directe ;
+- une composition sans adaptation ;
+- un modèle d'auto-encodage pertinent ;
+- une architecture de reconstruction de capacité comparable.
+
+La fonction identité directe est un contrôle nécessaire.
+Elle ne doit pas être supprimée sous prétexte qu'elle rend
+la tâche facile : elle permet de vérifier si la composition
+apporte réellement une capacité supplémentaire.
+
+PRÉVENTION DES SOLUTIONS TRIVIALES
+
+Vérifier si :
+- la première sonde transmet directement l'entrée sans transformation ;
+- la seconde sonde utilise une copie cachée de l'entrée ;
+- les sondes partagent des données ou des états non prévus ;
+- les paramètres contiennent une table de réponses ;
+- les données d'évaluation sont utilisées dans l'entraînement ;
+- la métrique peut être minimisée sans reconstruire réellement
+  l'entrée ;
+- une solution exacte provient d'une identité imposée à l'avance.
+
+Ne pas interdire arbitrairement toute transmission d'information :
+les contraintes autorisées doivent être définies à l'avance.
+Tester séparément la reconstruction libre et les variantes
+avec goulot d'étranglement ou contraintes d'information.
+
+Évaluer :
+- erreur de reconstruction sur données inédites ;
+- robustesse au bruit ;
+- généralisation à des entrées hors distribution ;
+- capacité de la première sonde à préserver l'information utile ;
+- perte d'information au cours de la composition ;
+- coût et stabilité de l'adaptation ;
+- comparaison avec la fonction identité et les baselines.
+
+Ne pas confondre reconstruction de l'entrée, inversion exacte
+d'une fonction et équivalence mécanistique.
+
+============================================================
+PHASE 6 — RÈGLES ROUGES ANTI-TRICHE
+============================================================
+
+Les règles suivantes sont obligatoires.
+
+1. Aucun accès au jeu de test final pour choisir les paramètres,
+   les hyperparamètres, l'architecture ou les critères de sélection.
+
+2. Aucun transfert caché de labels ou de réponses du test.
+
+3. Aucun chevauchement non déclaré entre les données d'entraînement,
+   de validation et de test.
+
+4. Aucun doublon ou quasi-doublon traversant les partitions sans
+   détection, justification et rapport explicite.
+
+5. Aucun calcul des métriques sur des prédictions d'entraînement
+   présenté comme une évaluation indépendante.
+
+6. Aucun résultat inventé, extrapolé, reconstruit à partir d'un
+   rapport puis présenté comme un nouveau calcul.
+
+7. Aucun remplacement silencieux d'une expérience échouée par une
+   expérience différente.
+
+8. Aucune modification du protocole après consultation du test
+   sans nouvelle séparation indépendante et déclaration explicite.
+
+9. Aucun modèle de référence volontairement sous-entraîné,
+   mal réglé ou artificiellement affaibli.
+
+10. Aucun avantage accordé aux sondes par un budget caché supérieur.
+
+11. Aucun accès d'une sonde à des informations qu'elle ne pourrait
+    pas recevoir dans le scénario d'utilisation déclaré.
+
+12. Aucun filtrage des résultats défavorables sans justification
+    préenregistrée.
+
+13. Aucun choix sélectif des graines, des essais ou des métriques.
+
+14. Aucun changement de métrique après observation des résultats
+    pour transformer un résultat défavorable en succès.
+
+15. Aucun résultat de recherche ou de reproduction déclaré réussi
+    sans journaux, configurations et artefacts vérifiables.
+
+16. Aucun modèle préentraîné, cache ou fichier externe non déclaré.
+
+17. Aucune confusion entre paramètres entraînables, états d'optimiseur,
+    mémoire persistante et ressources de calcul.
+
+18. Aucun accès implicite aux labels, au futur ou à l'historique
+    complet lorsque le scénario opérationnel ne l'autorise pas.
+
+19. Aucun résultat positif fondé uniquement sur l'accuracy si
+    les métriques probabilistes ou de robustesse montrent un problème.
+
+20. Aucun résultat de reconstruction accepté uniquement parce que
+    la sortie ressemble à l'entrée sur les exemples d'entraînement.
+
+21. Aucun échec technique supprimé du journal.
+
+22. Aucun usage de la phrase « expérience validée » si seules les
+    étapes techniques ont réussi et si la question scientifique
+    reste indéterminée.
+
+23. Aucune affirmation de supériorité universelle à partir d'un
+    nombre limité de tâches synthétiques.
+
+24. Aucune modification de fichiers sources sans copie de travail
+    et traçabilité.
+
+25. Aucune dépendance à une hypothèse favorable non déclarée.
+
+Ajouter toute règle rouge supplémentaire découverte pendant l'audit.
+
+============================================================
+PHASE 7 — AUDIT INDÉPENDANT ET REPRODUCTIBILITÉ
+============================================================
+
+Construire un audit distinct du code expérimental.
+
+L'audit doit vérifier :
+- l'identité des jeux de données ;
+- les partitions ;
+- les empreintes SHA-256 ;
+- la détection des doublons ;
+- la séparation des graines ;
+- la provenance des paramètres ;
+- la configuration réellement exécutée ;
+- la correspondance entre journaux et résultats ;
+- le nombre de prédictions évaluées ;
+- la conformité des métriques ;
+- l'absence de fuite détectable ;
+- la présence de tous les résultats prévus ;
+- les écarts entre résultats annoncés et résultats calculés.
+
+L'audit doit aussi rechercher les contournements indirects :
+- information encodée dans un nom de fichier ;
+- état partagé non documenté ;
+- cache de prédictions ;
+- normalisation calculée sur le jeu de test ;
+- sélection de modèles à partir du test ;
+- duplication des exemples ;
+- dépendance cachée à l'ordre des données ;
+- différences de prétraitement entre architectures ;
+- arrêt anticipé utilisant le test ;
+- avantage donné par une précision numérique ou un budget
+  de calcul asymétrique.
+
+Ces contrôles doivent être adaptés au protocole réel.
+Ne pas prétendre qu'un audit détecte toute triche imaginable.
+
+Effectuer si possible une reproduction propre dans un répertoire
+séparé, à partir des artefacts livrés, avec les commandes documentées.
+
+Le rapport final doit distinguer :
+- validation syntaxique ;
+- validation des données ;
+- validation du protocole ;
+- reproduction numérique ;
+- robustesse statistique ;
+- conclusion scientifique.
+
+============================================================
+PHASE 8 — MÉTRIQUES ET INTERPRÉTATION
+============================================================
+
+Pour les tâches de classification, rapporter selon leur pertinence :
+- accuracy ;
+- précision, rappel et F1 ;
+- ROC-AUC et PR-AUC lorsque définies ;
+- log-loss ;
+- calibration ;
+- matrices de confusion.
+
+Pour l'imitation et la reconstruction :
+- MAE ;
+- RMSE ;
+- R² lorsque pertinent ;
+- erreur maximale ou quantiles d'erreur ;
+- comportement hors distribution.
+
+Pour les architectures adaptatives :
+- vitesse d'adaptation ;
+- nombre d'observations nécessaires ;
+- stabilité ;
+- sensibilité aux graines ;
+- sensibilité au bruit ;
+- coût de communication ;
+- coût de calcul ;
+- coût mémoire ;
+- dérive des paramètres ;
+- fréquence des échecs.
+
+Pour la boucle d'observation :
+- taux de détection des erreurs ;
+- faux positifs et faux négatifs ;
+- précision des empreintes ;
+- robustesse à la corruption des observations ;
+- temps de détection ;
+- latence et coût supplémentaire.
+
+Pour chaque métrique :
+- définir précisément la formule ;
+- expliquer son interprétation ;
+- préciser les cas où elle n'est pas pertinente ;
+- rapporter les incertitudes ;
+- distinguer importance statistique et importance pratique.
+
+Ne pas chercher une métrique unique censée résumer toutes les propriétés.
+
+============================================================
+PHASE 9 — RÉSULTATS, INTERPRÉTATION ET DÉCISION
+============================================================
+
+Pour chaque expérience, répondre à cinq questions :
+
+1. Qu'est-ce qui a été testé exactement ?
+2. Quels sont les résultats observés ?
+3. Quelle conclusion est soutenue par les données ?
+4. Quelles conclusions ne sont pas justifiées ?
+5. Quelle expérience suivante permettrait de lever l'incertitude ?
+
+Classer chaque hypothèse dans l'un des statuts suivants :
+- soutenue dans le domaine testé ;
+- partiellement soutenue ;
+- non soutenue dans le domaine testé ;
+- résultat ambigu ;
+- non testée ;
+- impossible à conclure avec les données disponibles.
+
+Ne jamais confondre « non soutenue » et « démontrée fausse ».
+
+Analyser les interactions entre composants :
+- adaptation locale ;
+- adaptation globale ;
+- activation ;
+- boucle d'observation ;
+- composition de sondes ;
+- contrainte de reconstruction.
+
+Utiliser des ablations pour isoler les causes des gains ou pertes.
+
+Déterminer si un avantage observé est :
+- reproductible ;
+- statistiquement crédible ;
+- pratiquement utile ;
+- robuste à des changements de conditions ;
+- obtenu à coût comparable.
+
+============================================================
+PHASE 10 — LIVRAISON FINALE
+============================================================
+
+La livraison doit être préparée progressivement, avec un index
+mis à jour après chaque phase.
+
+Créer au minimum :
+
+README_FINAL.md
+SYNTHESE_EXECUTIVE.md
+INVENTAIRE_SOURCES.md
+ENVIRONNEMENT.md
+REGISTRE_DES_AFFIRMATIONS.md
+FORMALISME_ADAPTATION_GLOBALE.tex
+FORMALISME_ADAPTATION_GLOBALE.pdf
+PROTOCOLE_PREENREGISTRE.md
+RESULTATS_COMPLETS.md
+LIMITES_ET_INCERTITUDES.md
+AUDIT_INDEPENDANT.md
+REPRODUIRE_LES_EXPERIENCES.md
+JOURNAL_EXECUTION.md
+SHA256SUMS.txt
+
+Fournir également :
+- le code source complet ;
+- les configurations utilisées ;
+- les scripts d'exécution ;
+- les scripts d'audit ;
+- les résultats CSV/JSON ;
+- les journaux d'exécution ;
+- les figures ;
+- les rapports de comparaison ;
+- les manifestes de versions et dépendances ;
+- les graines et partitions nécessaires à la reproduction ;
+- les artefacts de référence licites et redistribuables ;
+- une archive finale vérifiée.
+
+Prévoir des commandes simples permettant de lancer :
+1. les tests rapides ;
+2. les expériences principales ;
+3. les reproductions complètes ;
+4. l'audit ;
+5. la génération des rapports.
+
+La documentation doit distinguer clairement le mode rapide,
+le mode complet et les résultats déjà calculés.
+
+Ne pas attendre la dernière phase pour écrire les rapports.
+Conserver des points de contrôle et une progression visible.
+
+Avant la livraison :
+- exécuter les tests ;
+- vérifier les chemins ;
+- vérifier l'intégrité de l'archive ;
+- tester les commandes de reproduction ;
+- vérifier que les résultats correspondent aux journaux ;
+- contrôler que chaque affirmation est rattachée à une source
+  ou à un calcul reproductible ;
+- produire un manifeste final avec SHA-256.
+
+Ne jamais déclarer un livrable disponible si le fichier correspondant
+n'existe pas réellement ou si son intégrité n'a pas été vérifiée.
+
+============================================================
+ORDRE DE TRAVAIL ET GESTION DES RESSOURCES
+============================================================
+
+Procéder strictement par phases.
+
+À la fin de chaque phase :
+1. sauvegarder les artefacts ;
+2. vérifier leur intégrité ;
+3. mettre à jour le journal ;
+4. résumer les résultats ;
+5. déclarer les blocages ;
+6. définir les conditions de passage à la phase suivante.
+
+Ne pas recommencer tout le pipeline si une phase échoue.
+Reprendre à partir du dernier point de contrôle valide.
+
+Si le temps ou les ressources sont limités :
+- commencer par un sous-ensemble représentatif ;
+- conserver le protocole ;
+- déclarer clairement ce qui reste à exécuter ;
+- ne jamais présenter les résultats préliminaires comme définitifs.
+
+Éviter les exécutions monolithiques longues.
+Privilégier des expériences séparées, reprenables et journalisées.
+
+Ne pas utiliser les limites d'un outil comme excuse pour abandonner
+sans diagnostic : utiliser le shell, les fichiers temporaires,
+les traitements par lots et les checkpoints lorsque c'est approprié.
+
+Ne pas contourner les limites de sécurité ou d'accès.
+
+============================================================
+CONDITION FINALE DE RÉUSSITE
+============================================================
+
+Le projet est livré lorsque :
+
+- les formalismes sont explicités ;
+- les protocoles sont préenregistrés et documentés ;
+- les expériences prévues ont été exécutées ou leur statut
+  non exécuté est clairement indiqué ;
+- les baselines sont équitables ;
+- les contrôles anti-fuite sont documentés ;
+- les résultats sont reproductibles dans les limites annoncées ;
+- les conclusions distinguent preuves, résultats et hypothèses ;
+- les sources et artefacts sont intègres ;
+- les commandes de reproduction fonctionnent ;
+- les limites et les résultats défavorables sont conservés ;
+- la livraison est accessible, vérifiée et accompagnée d'un index.
+
+La réussite du projet ne signifie PAS que l'hypothèse est confirmée.
+Elle signifie que les expériences permettent de déterminer avec
+une rigueur raisonnable ce qui est établi, ce qui ne l'est pas,
+et ce qui doit encore être testé.
+
+COMMENCER MAINTENANT PAR LA PHASE 0.
+Ne pas coder les nouvelles architectures avant d'avoir inspecté
+les sources et reconstruit le protocole de référence.

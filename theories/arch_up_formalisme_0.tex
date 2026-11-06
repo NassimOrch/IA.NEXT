@@ -1,0 +1,964 @@
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+% Packages et mise en page
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\geometry{margin=2.0cm}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist{nosep,leftmargin=*}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+
+% Graphes contenus dans la largeur du texte
+\tikzset{
+  nodebox/.style={
+    draw,rounded corners,align=center,
+    text width=2.7cm,minimum height=0.8cm,
+    font=\small
+  },
+  smallbox/.style={
+    draw,rounded corners,align=center,
+    text width=2.2cm,minimum height=0.7cm,
+    font=\footnotesize
+  },
+  arrow/.style={-{Stealth[length=2mm]},thick},
+  dashedarrow/.style={-{Stealth[length=2mm]},thick,dashed}
+}
+
+\title{\textbf{EX12 -- Organisation adaptative des centres AdaptiveRBF}\\
+\large Sélection progressive, guidage des centres faibles et empreintes relationnelles}
+\author{Protocole expérimental}
+\date{Version 1.0 -- Spécification pré-enregistrable}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Ce protocole étudie si une organisation explicite des centres d'un réseau
+AdaptiveRBF améliore la précision, la stabilité et l'efficacité de
+l'apprentissage. Trois mécanismes sont séparés :
+(i) sélection progressive des centres selon leur contribution prédictive ;
+(ii) guidage des centres peu utiles par les centres utiles et par les
+résidus du modèle ;
+(iii) organisation relationnelle des centres à partir d'une empreinte
+calculée sur leur position, leur activation, leur contribution et leur
+redondance.
+
+Les mécanismes sont évalués séparément puis combinés. L'objectif n'est
+pas de présumer leur efficacité, mais de déterminer dans quelles conditions
+ils améliorent ou dégradent AdaptiveRBF.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Question scientifique}
+% ============================================================
+
+\textbf{Question principale :}
+
+Peut-on améliorer un réseau AdaptiveRBF en apprenant explicitement
+l'utilité, la spécialisation et les relations entre ses centres,
+plutôt que de laisser tous les centres être optimisés uniquement
+par la perte globale ?
+
+Les hypothèses sont :
+
+\begin{itemize}
+  \item H1 : la contribution prédictive d'un centre est un meilleur
+  critère de sélection que sa seule activation moyenne.
+  \item H2 : une sélection progressive avec réentraînement peut
+  réduire le nombre de centres sans perte importante de précision.
+  \item H3 : les centres faibles peuvent devenir utiles s'ils sont
+  guidés vers les régions où le modèle commet encore des erreurs.
+  \item H4 : une empreinte multidimensionnelle permet d'identifier
+  les centres redondants, sous-utilisés ou complémentaires.
+  \item H5 : une organisation relationnelle des centres améliore
+  la stabilité entre graines et la généralisation.
+  \item H6 : les bénéfices éventuels persistent face à des variantes
+  AdaptiveRBF de capacité et de budget comparables.
+\end{itemize}
+
+Toutes les hypothèses sont falsifiables. Une amélioration sur une seule
+fonction ou une seule graine ne suffit pas à confirmer une hypothèse.
+
+% ============================================================
+\section{Architecture de référence : AdaptiveRBF classique}
+% ============================================================
+
+\subsection{Notation}
+
+Soit un jeu d'entraînement :
+\[
+\mathcal{D}_{\mathrm{train}}
+=\{(x_n,y_n)\}_{n=1}^{N},
+\quad x_n\in\mathbb{R}^{p},
+\quad y_n\in\mathbb{R}^{q}.
+\]
+
+L'encodeur transforme l'entrée :
+\[
+z_n=\tanh(W_e x_n+b_e),
+\qquad z_n\in\mathbb{R}^{d}.
+\]
+
+Le réseau possède \(K\) centres :
+\[
+C=\{c_1,\ldots,c_K\},\qquad c_k\in\mathbb{R}^{d}.
+\]
+
+Chaque centre possède une largeur positive :
+\[
+\sigma_k=\sigma_{\min}
++(\sigma_{\max}-\sigma_{\min})\operatorname{sigmoid}(s_k).
+\]
+
+L'activation du centre \(k\) pour l'entrée \(x_n\) est :
+\[
+\phi_{nk}
+=
+\exp\left(
+-\frac{\|z_n-c_k\|_2^2}{2\sigma_k^2}
+\right).
+\]
+
+Les activations sont assemblées :
+\[
+\phi_n=[\phi_{n1},\ldots,\phi_{nK}].
+\]
+
+La sortie est :
+\[
+\hat y_n=W_o\phi_n+b_o.
+\]
+
+La perte de référence est :
+\[
+\mathcal{L}_{\mathrm{task}}
+=
+\frac{1}{N}\sum_{n=1}^{N}
+\ell(\hat y_n,y_n).
+\]
+
+Pour une régression, la métrique d'entraînement principale est la MSE.
+La MAE et la RMSE sont également rapportées.
+
+\subsection{Initialisation et entraînement de référence}
+
+\begin{enumerate}
+  \item Ajuster les éventuelles normalisations uniquement sur
+  \(\mathcal{D}_{\mathrm{train}}\).
+  \item Entraîner l'encodeur de référence ou l'initialiser selon
+  la configuration pré-enregistrée.
+  \item Initialiser les centres par KMeans sur les représentations
+  latentes des exemples d'entraînement uniquement.
+  \item Initialiser les largeurs à partir des distances entre centres,
+  puis les rendre apprenables.
+  \item Entraîner encodeur, centres, largeurs et readout avec
+  l'optimiseur et le budget fixés.
+  \item Sélectionner le checkpoint uniquement sur validation.
+\end{enumerate}
+
+\subsection{Graphe de référence}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\linewidth}
+\begin{tikzpicture}[node distance=0.65cm]
+\node[nodebox] (x) {Entrée \(x\)};
+\node[nodebox,right=of x] (enc) {Encodeur\\\(z=\tanh(W_ex+b_e)\)};
+\node[nodebox,right=of enc] (rbf) {Centres RBF\\\(\phi_k(z,c_k,\sigma_k)\)};
+\node[nodebox,right=of rbf] (out) {Readout linéaire\\\(\hat y=W_o\phi+b_o\)};
+\node[nodebox,right=of out] (y) {Prédiction \(\hat y\)};
+\draw[arrow] (x)--(enc);
+\draw[arrow] (enc)--(rbf);
+\draw[arrow] (rbf)--(out);
+\draw[arrow] (out)--(y);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{AdaptiveRBF classique : les centres sont optimisés par la perte
+globale, sans mécanisme explicite d'organisation entre centres.}
+\end{figure}
+
+% ============================================================
+\section{Mesurer la force réelle d'un centre}
+% ============================================================
+
+\subsection{Pourquoi l'activation seule ne suffit pas}
+
+Un centre peut avoir une activation élevée sans être indispensable :
+un autre centre peut fournir une réponse similaire.
+
+Inversement, un centre rarement activé peut être essentiel dans une
+région rare de l'espace d'entrée.
+
+La force d'un centre ne sera donc pas définie uniquement par
+\(\mathbb{E}[\phi_k]\). Elle sera mesurée par plusieurs indicateurs.
+
+\subsection{Activation moyenne}
+
+\[
+A_k=\frac{1}{N}\sum_{n=1}^{N}\phi_{nk}.
+\]
+
+Cet indicateur mesure la fréquence et l'intensité d'activation.
+Il ne mesure pas directement l'utilité prédictive.
+
+\subsection{Contribution par ablation}
+
+Soit \(\mathcal{L}_{\mathrm{full}}\) la perte du modèle complet.
+On retire le centre \(k\), on réajuste le readout selon une procédure
+fixée, puis on mesure la perte \(\mathcal{L}_{-k}\).
+
+\[
+\Delta_k^{\mathrm{abl}}
+=
+\mathcal{L}_{-k}-\mathcal{L}_{\mathrm{full}}.
+\]
+
+Interprétation :
+\begin{itemize}
+  \item \(\Delta_k^{\mathrm{abl}}>0\) : le centre apporte une contribution utile ;
+  \item \(\Delta_k^{\mathrm{abl}}\approx0\) : le centre est possiblement redondant ;
+  \item \(\Delta_k^{\mathrm{abl}}<0\) : le centre nuit à la solution actuelle.
+\end{itemize}
+
+L'ablation doit être réalisée sur validation, avec une procédure identique
+pour tous les centres. Le test scellé ne sert jamais à classer les centres.
+
+\subsection{Contribution résiduelle}
+
+Le résidu du modèle est :
+\[
+r_n=y_n-\hat y_n.
+\]
+
+Pour mesurer si un centre explique une partie du résidu, on considère
+une mise à jour locale du readout utilisant uniquement son activation.
+La réduction de perte obtenue est notée :
+\[
+\Delta_k^{\mathrm{res}}.
+\]
+
+Cette mesure estime si le centre peut corriger une erreur que le modèle
+commet encore.
+
+\subsection{Redondance entre centres}
+
+La similarité d'activation entre deux centres est :
+\[
+R_{kj}
+=
+\frac{
+\sum_n(\phi_{nk}-\bar\phi_k)(\phi_{nj}-\bar\phi_j)
+}{
+\sqrt{\sum_n(\phi_{nk}-\bar\phi_k)^2}
+\sqrt{\sum_n(\phi_{nj}-\bar\phi_j)^2}
++\epsilon
+}.
+\]
+
+Une valeur proche de \(1\) indique des profils d'activation similaires.
+La redondance doit être interprétée avec la contribution : deux centres
+similaires peuvent néanmoins avoir des poids de sortie différents.
+
+% ============================================================
+\section{Empreinte d'un centre}
+% ============================================================
+
+\subsection{Définition}
+
+L'empreinte du centre \(k\) est un vecteur descriptif :
+\[
+e_k=
+[
+\tilde c_k,\,
+\log\sigma_k,\,
+A_k,\,
+\Delta_k^{\mathrm{abl}},\,
+\Delta_k^{\mathrm{res}},\,
+v_k,\,
+u_k
+].
+\]
+
+Où :
+
+\begin{itemize}
+  \item \(\tilde c_k\) : position normalisée du centre dans l'espace latent ;
+  \item \(\log\sigma_k\) : largeur du centre ;
+  \item \(A_k\) : activation moyenne ;
+  \item \(\Delta_k^{\mathrm{abl}}\) : contribution mesurée par ablation ;
+  \item \(\Delta_k^{\mathrm{res}}\) : capacité à réduire le résidu ;
+  \item \(v_k\) : variance ou dispersion de ses activations ;
+  \item \(u_k\) : mesure d'utilisation sur les données.
+\end{itemize}
+
+Les composantes sont normalisées avec des statistiques calculées
+uniquement sur le train ou la validation autorisée. Les valeurs de
+contribution sont estimées sur validation.
+
+\subsection{Graphe des empreintes}
+
+Chaque centre devient un nœud. Une arête relie deux centres si leurs
+empreintes sont proches ou si leurs profils d'activation sont similaires.
+
+\[
+d_{kj}^{e}=\|e_k-e_j\|_2.
+\]
+
+\[
+G_C=(V_C,E_C),\qquad
+V_C=\{1,\ldots,K\}.
+\]
+
+Une arête est créée si :
+\[
+(k,j)\in E_C
+\quad\Longleftrightarrow\quad
+d_{kj}^{e}<\tau_e
+\]
+ou si \(j\) appartient aux \(m\) plus proches voisins de \(k\).
+
+La règle retenue, le seuil \(\tau_e\) ou le nombre de voisins \(m\),
+doivent être fixés sur validation et non sur test.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=0.85\linewidth}
+\begin{tikzpicture}[node distance=1.1cm]
+\node[smallbox] (c1) {Centre 1\\empreinte \(e_1\)};
+\node[smallbox,right=of c1] (c2) {Centre 2\\empreinte \(e_2\)};
+\node[smallbox,below=of c1] (c3) {Centre 3\\empreinte \(e_3\)};
+\node[smallbox,below=of c2] (c4) {Centre 4\\empreinte \(e_4\)};
+\draw[arrow] (c1)--(c2);
+\draw[arrow] (c1)--(c3);
+\draw[arrow] (c2)--(c4);
+\draw[dashedarrow] (c3)--(c4);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Graphe relationnel des centres. Les arêtes décrivent des
+similarités ou relations apprises ; elles ne remplacent pas les
+activations RBF.}
+\end{figure}
+
+\subsection{Mise à jour des empreintes}
+
+Les empreintes sont recalculées périodiquement, et non à chaque exemple,
+pour limiter le coût et le bruit.
+
+À l'époque \(t\) :
+\[
+e_k^{(t)}=\operatorname{Fingerprint}(c_k^{(t)},\sigma_k^{(t)},
+\Phi^{(t)},r^{(t)},W_o^{(t)}).
+\]
+
+Le graphe relationnel est ensuite reconstruit ou mis à jour selon
+une cadence pré-enregistrée.
+
+Important : les empreintes sont des statistiques descriptives.
+Elles ne doivent pas utiliser les labels du test ni les prédictions
+du test pour orienter l'apprentissage.
+
+% ============================================================
+\section{Variantes expérimentales}
+% ============================================================
+
+\subsection{B0 -- AdaptiveRBF classique}
+
+Architecture et entraînement de référence.
+Aucun classement, guidage ou graphe d'empreintes.
+
+\subsection{B1 -- Classement des centres}
+
+Les centres sont classés selon :
+\[
+S_k=
+\alpha\widehat{\Delta}_k^{\mathrm{abl}}
++\beta\widehat{\Delta}_k^{\mathrm{res}}
+-\gamma\widehat{\mathrm{Redundancy}}_k.
+\]
+
+Les coefficients sont fixés avant la campagne confirmatoire.
+Le classement est rapporté, mais aucun centre n'est supprimé.
+
+Objectif : vérifier si le classement identifie des centres utiles
+et si cette utilité est stable entre graines.
+
+\subsection{B2 -- Sélection progressive avec réentraînement}
+
+Procédure :
+
+\begin{enumerate}
+  \item Entraîner le modèle complet.
+  \item Mesurer \(S_k\) pour tous les centres.
+  \item Retirer un petit groupe de centres de score faible.
+  \item Réentraîner le modèle restant avec le même budget défini.
+  \item Recalculer les contributions dans le nouveau modèle.
+  \item Répéter jusqu'à atteindre le budget minimal ou un critère d'arrêt.
+\end{enumerate}
+
+Le retrait est progressif, car la contribution d'un centre dépend
+des autres centres présents.
+
+Critère d'arrêt possible :
+\[
+\mathcal{L}_{\mathrm{val}}^{(t)}
+>
+\mathcal{L}_{\mathrm{val}}^{(0)}+\delta
+\]
+ou lorsque le nombre minimal de centres est atteint.
+
+Le seuil \(\delta\) est fixé avant les expériences.
+
+\subsection{B3 -- Guidage des centres faibles par les centres forts}
+
+Les centres forts sont définis par leur contribution prédictive,
+pas seulement par leur activation.
+
+On sépare :
+\[
+\mathcal{S}=\{k:S_k\geq\tau_S\},
+\qquad
+\mathcal{W}=\{k:S_k<\tau_S\}.
+\]
+
+Les centres faibles sont guidés vers les régions où le modèle commet
+encore des erreurs, tout en utilisant les centres forts comme référence.
+
+On définit un score d'erreur locale :
+\[
+q_n= \|r_n\|_2.
+\]
+
+La distribution de responsabilité cible d'un centre faible \(k\) est :
+\[
+p_{nk}
+=
+\frac{
+\phi_{nk}\,q_n
+}{
+\sum_{m\in\mathcal{W}}\phi_{nm}q_n+\epsilon
+}.
+\]
+
+Cette distribution encourage les centres faibles à se concentrer
+sur les exemples mal expliqués, sans copier directement les centres forts.
+
+Une perte de spécialisation possible est :
+\[
+\mathcal{L}_{\mathrm{special}}
+=
+-\frac{1}{N}\sum_n
+q_n\log\left(
+\sum_{k\in\mathcal{W}}\phi_{nk}+\epsilon
+\right).
+\]
+
+Une perte de séparation évite que les centres faibles se rapprochent
+tous du même centre fort :
+\[
+\mathcal{L}_{\mathrm{sep}}
+=
+\frac{1}{|\mathcal{W}||\mathcal{S}|}
+\sum_{k\in\mathcal{W}}\sum_{j\in\mathcal{S}}
+\exp\left(-\frac{\|c_k-c_j\|_2^2}{2\rho^2}\right).
+\]
+
+La perte totale devient :
+\[
+\mathcal{L}_{B3}
+=
+\mathcal{L}_{\mathrm{task}}
++\lambda_s\mathcal{L}_{\mathrm{special}}
++\lambda_d\mathcal{L}_{\mathrm{sep}}.
+\]
+
+Les coefficients \(\lambda_s,\lambda_d,\rho\) sont sélectionnés sur
+validation et verrouillés avant le test.
+
+\textbf{Précaution :} une forte activation d'un centre fort ne doit pas
+être utilisée comme cible à copier. Le guidage vise la complémentarité
+et les zones mal expliquées.
+
+\subsection{B4 -- Organisation par empreintes}
+
+B4 ajoute un module qui traite les empreintes des centres et produit
+des corrections de position ou de largeur.
+
+\[
+\delta c_k,\delta s_k
+=
+F_\psi(e_k,\mathcal{N}(k)),
+\]
+
+où \(\mathcal{N}(k)\) est le voisinage du centre \(k\) dans le graphe
+relationnel.
+
+Les paramètres effectifs deviennent :
+\[
+c_k^{\mathrm{eff}}=c_k+\eta_c\delta c_k,
+\]
+\[
+s_k^{\mathrm{eff}}=s_k+\eta_s\delta s_k,
+\qquad
+\sigma_k^{\mathrm{eff}}
+=\sigma_{\min}
++(\sigma_{\max}-\sigma_{\min})
+\operatorname{sigmoid}(s_k^{\mathrm{eff}}).
+\]
+
+Le module \(F_\psi\) peut être un petit réseau partagé appliqué
+à chaque centre. Le partage limite le nombre de paramètres.
+
+\subsection{Graphe complet de B4}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\linewidth}
+\begin{tikzpicture}[node distance=0.55cm]
+\node[nodebox] (x) {Entrée \(x\)};
+\node[nodebox,right=of x] (enc) {Encodeur\\latent \(z\)};
+\node[nodebox,right=of enc] (rbf) {Centres RBF\\activations \(\phi_k\)};
+\node[nodebox,right=of rbf] (out) {Readout\\prédiction \(\hat y\)};
+\draw[arrow] (x)--(enc);
+\draw[arrow] (enc)--(rbf);
+\draw[arrow] (rbf)--(out);
+
+\node[nodebox,below=1.0cm of rbf] (fp) {Empreintes\\\(e_k\)};
+\node[nodebox,left=of fp] (stats) {Statistiques\\activation, erreur,\\contribution};
+\node[nodebox,right=of fp] (graph) {Graphe des\\centres};
+\node[nodebox,right=of graph] (org) {Organisateur\\\(F_\psi\)};
+\draw[arrow] (rbf.south)--(fp.north);
+\draw[arrow] (stats)--(fp);
+\draw[arrow] (fp)--(graph);
+\draw[arrow] (graph)--(org);
+\draw[arrow] (org.north) |- (rbf.south);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{B4 : les empreintes décrivent les centres ; le graphe exprime
+leurs relations ; l'organisateur ajuste leur configuration.}
+\end{figure}
+
+\textbf{Contraintes :}
+\begin{itemize}
+  \item l'organisateur ne reçoit pas les labels du test ;
+  \item les empreintes sont calculées sur train et validation uniquement ;
+  \item la mise à jour des empreintes est périodique et déterministe ;
+  \item les corrections sont bornées pour éviter des déplacements instables ;
+  \item le graphe relationnel est distinct du graphe CNC des opérations.
+\end{itemize}
+
+\subsection{B5 -- Variante combinée}
+
+B5 combine B2, B3 et B4 :
+\begin{itemize}
+  \item sélection progressive ;
+  \item guidage des centres faibles ;
+  \item organisation relationnelle par empreintes.
+\end{itemize}
+
+B5 est évaluée seulement après l'analyse séparée de B2, B3 et B4.
+Elle ne remplace pas les expériences isolées, car une amélioration
+combinée ne permettrait pas d'identifier le mécanisme responsable.
+
+% ============================================================
+\section{Protocole d'entraînement}
+% ============================================================
+
+\subsection{Phases}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=0.88\linewidth}
+\begin{tikzpicture}[node distance=0.55cm]
+\node[nodebox] (d) {Données train\\validation\\test scellé};
+\node[nodebox,below=of d] (base) {Entraîner\\AdaptiveRBF B0};
+\node[nodebox,below=of base] (measure) {Mesurer les centres\\et calculer empreintes};
+\node[nodebox,below=of measure] (variant) {Appliquer B1/B2/B3/B4};
+\node[nodebox,below=of variant] (retrain) {Réentraînement\\selon la variante};
+\node[nodebox,below=of retrain] (select) {Sélection checkpoint\\sur validation};
+\node[nodebox,below=of select] (test) {Évaluation finale\\sur test scellé};
+\draw[arrow] (d)--(base);
+\draw[arrow] (base)--(measure);
+\draw[arrow] (measure)--(variant);
+\draw[arrow] (variant)--(retrain);
+\draw[arrow] (retrain)--(select);
+\draw[arrow] (select)--(test);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Pipeline expérimental. Le test n'intervient qu'à l'évaluation finale.}
+\end{figure}
+
+\subsection{Budget et comparateurs}
+
+Chaque variante doit être comparée à :
+
+\begin{itemize}
+  \item B0 AdaptiveRBF classique avec le même nombre initial de centres ;
+  \item AdaptiveRBF avec nombre de centres réduit, mais sans sélection ;
+  \item MLP direct de capacité comparable ;
+  \item MLP plus large, comme référence de capacité ;
+  \item variante sans empreintes, mais avec le même coût d'entraînement
+  lorsque cela est possible.
+\end{itemize}
+
+Les comparaisons doivent rapporter à la fois :
+(i) résultats à paramètres comparables et
+(ii) résultats à budget de calcul comparable.
+
+\subsection{Graines}
+
+Utiliser au minimum dix graines pré-enregistrées :
+\[
+\{1501,1607,1717,2029,3037,4099,4517,5003,6011,7013\}.
+\]
+
+La graine contrôle :
+\begin{itemize}
+  \item l'échantillonnage des données synthétiques ;
+  \item l'initialisation des poids ;
+  \item l'initialisation KMeans ;
+  \item l'ordre des mini-batches.
+\end{itemize}
+
+Les variantes d'une même graine utilisent les mêmes données et les
+mêmes splits. Les comparaisons sont appariées.
+
+\subsection{Données}
+
+Utiliser deux familles de tâches.
+
+\textbf{Famille A -- fonctions synthétiques :}
+\[
+f_1(x)=\sin(x),
+\]
+\[
+f_2(x_1,x_2)=x_1x_2,
+\]
+\[
+f_3(x_1,x_2)=x_1^2+x_2,
+\]
+\[
+f_4(x_1,x_2,x_3)=\sin(x_1x_2)+x_3.
+\]
+
+\textbf{Famille B -- fonctions supplémentaires :}
+\[
+f_5(x_1,x_2)=\sin(x_1)+0.5\cos(2x_2),
+\]
+\[
+f_6(x_1,x_2,x_3)=x_1x_2+0.25x_3^2.
+\]
+
+Les domaines, tailles train/validation/test, distributions et
+règles d'extrapolation doivent être définis dans les configurations
+versionnées avant lancement.
+
+\textbf{Famille C -- données tabulaires :}
+
+Utiliser les mêmes splits contrôlés que les expériences de référence.
+Les données tabulaires servent à vérifier que les résultats ne sont
+pas limités aux fonctions synthétiques.
+
+\subsection{Optimisation}
+
+Configuration initiale recommandée :
+\begin{itemize}
+  \item optimiseur : Adam ;
+  \item learning rate : \(10^{-3}\) ;
+  \item weight decay : \(10^{-5}\) ;
+  \item batch size : 128 ;
+  \item maximum : 800 époques ;
+  \item early stopping : patience 50 ;
+  \item checkpoint : meilleure MAE validation ;
+  \item normalisation des cibles : train uniquement.
+\end{itemize}
+
+Toute modification de budget doit être appliquée de façon équitable
+aux variantes comparées et documentée.
+
+% ============================================================
+\section{Métriques}
+% ============================================================
+
+\subsection{Précision}
+
+Rapporter :
+\[
+\mathrm{MAE}=\frac{1}{N}\sum_n|y_n-\hat y_n|,
+\]
+\[
+\mathrm{MSE}=\frac{1}{N}\sum_n(y_n-\hat y_n)^2,
+\]
+\[
+\mathrm{RMSE}=\sqrt{\mathrm{MSE}}.
+\]
+
+\subsection{Stabilité}
+
+Pour chaque variante, rapporter :
+\begin{itemize}
+  \item moyenne et écart-type entre graines ;
+  \item médiane et intervalle interquartile ;
+  \item pire résultat ;
+  \item taux de runs dépassant le seuil d'erreur pré-enregistré.
+\end{itemize}
+
+\subsection{Structure des centres}
+
+Rapporter :
+\begin{itemize}
+  \item distribution des scores \(S_k\) ;
+  \item nombre de centres retenus ;
+  \item taux de centres redondants ;
+  \item diversité des profils d'activation ;
+  \item évolution des empreintes au cours de l'entraînement ;
+  \item stabilité du classement entre graines ;
+  \item proportion de centres qui changent de catégorie.
+\end{itemize}
+
+\subsection{Coût}
+
+Rapporter :
+\begin{itemize}
+  \item nombre de paramètres ;
+  \item taille du checkpoint ;
+  \item temps d'entraînement ;
+  \item latence p50, p95 et p99 ;
+  \item mémoire maximale si mesurée de manière fiable ;
+  \item coût supplémentaire de calcul des empreintes ;
+  \item coût de reconstruction du graphe relationnel.
+\end{itemize}
+
+Aucune revendication énergétique n'est permise sans mesure directe
+de consommation.
+
+% ============================================================
+\section{Analyse statistique}
+% ============================================================
+
+Pour chaque tâche et chaque graine, calculer la différence appariée :
+\[
+d_s=\mathrm{MAE}_{\mathrm{variant},s}
+-\mathrm{MAE}_{B0,s}.
+\]
+
+Une valeur négative favorise la variante.
+
+Rapporter :
+\begin{itemize}
+  \item moyenne des différences appariées ;
+  \item intervalle de confiance bootstrap à 95\% sur les graines ;
+  \item taille d'effet ;
+  \item nombre de graines gagnées, perdues et ex æquo.
+\end{itemize}
+
+Les graines, et non les lignes du test, constituent l'unité de répétition
+pour l'inférence entre entraînements.
+
+Les résultats par fonction sont rapportés séparément. Une moyenne globale
+ne doit pas masquer des gains sur certaines fonctions et des pertes
+sur d'autres.
+
+Les comparaisons multiples entre B1--B5 sont corrigées selon une méthode
+pré-enregistrée, par exemple Holm.
+
+% ============================================================
+\section{Ablations obligatoires}
+% ============================================================
+
+\begin{enumerate}
+  \item Empreinte sans contribution par ablation.
+  \item Empreinte sans résidu.
+  \item Graphe relationnel sans correction des centres.
+  \item Correction des centres sans graphe relationnel.
+  \item Guidage sans terme de séparation.
+  \item Sélection progressive sans réentraînement.
+  \item Même nombre de centres retirés au hasard.
+  \item Centres faibles guidés par les résidus, sans référence aux forts.
+  \item B4 avec graphe aléatoire de même densité.
+\end{enumerate}
+
+Ces ablations permettent de vérifier si l'amélioration vient réellement
+des empreintes et des relations entre centres, plutôt que d'une simple
+augmentation de capacité ou d'un entraînement supplémentaire.
+
+% ============================================================
+\section{Risques et contrôles}
+% ============================================================
+
+\begin{longtable}{p{0.27\linewidth}p{0.63\linewidth}}
+\toprule
+\textbf{Risque} & \textbf{Contrôle} \\
+\midrule
+Activation forte confondue avec utilité &
+Mesurer contribution par ablation et réduction du résidu. \\
+Centres faibles supprimés trop tôt &
+Réévaluer les scores après chaque réentraînement. \\
+Centres faibles copient les forts &
+Utiliser résidus et terme de séparation. \\
+Empreintes instables &
+Lissage temporel et cadence de mise à jour pré-enregistrée. \\
+Fuite de données &
+Aucune statistique de centre calculée sur le test. \\
+Surapprentissage validation &
+Limiter les choix d'hyperparamètres et conserver le test scellé. \\
+Gain dû au budget supplémentaire &
+Comparer à budget de calcul équivalent. \\
+Graphe relationnel arbitraire &
+Comparer au graphe aléatoire et aux ablations. \\
+Résultat dépendant d'une graine &
+Au moins dix graines appariées. \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\section{Critères de conclusion}
+% ============================================================
+
+\textbf{Sélection progressive soutenue} si elle réduit le nombre de
+centres tout en conservant une précision comparable et une stabilité
+au moins équivalente à B0.
+
+\textbf{Guidage soutenu} si B3 améliore les erreurs sur plusieurs tâches
+et graines, et si les centres faibles deviennent plus complémentaires
+plutôt que simplement plus activés.
+
+\textbf{Empreintes soutenues} si B4 améliore de manière reproductible
+la précision, la stabilité ou le compromis précision/coût, et si les
+ablations montrent que le graphe relationnel apporte une contribution
+spécifique.
+
+\textbf{Hypothèse rejetée ou non soutenue} si les gains sont limités à
+une tâche, disparaissent sur plusieurs graines, ou sont expliqués par
+un budget supérieur.
+
+Une variante plus précise mais beaucoup plus coûteuse n'est pas
+automatiquement considérée comme meilleure. Le compromis doit être
+rapporté explicitement.
+
+% ============================================================
+\section{Livrables et reproductibilité}
+% ============================================================
+
+Structure recommandée :
+\begin{verbatim}
+EX12/
+  README_EX12.md
+  protocol/
+    EX12_protocol.tex
+    preregistration.yaml
+  configs/
+    datasets/
+    variants/
+    optimizer/
+  src/
+    adaptive_rbf.py
+    center_scores.py
+    progressive_selection.py
+    weak_center_guidance.py
+    center_fingerprints.py
+    center_graph.py
+    fingerprint_organizer.py
+  tests/
+  runs/
+    <task>/<variant>/<seed>/
+      config.yaml
+      checkpoint.pt
+      predictions_val.csv
+      metrics.json
+      center_fingerprints.csv
+      center_graph.json
+      training_log.csv
+  reports/
+    aggregate_metrics.csv
+    seed_stability.csv
+    center_analysis/
+    figures/
+  manifests/
+    checksums.sha256
+\end{verbatim}
+
+Chaque run doit enregistrer :
+\begin{itemize}
+  \item hash du code et de la configuration ;
+  \item graine et versions logicielles ;
+  \item checkpoint sélectionné ;
+  \item prédictions train/validation ;
+  \item métriques ;
+  \item empreintes et graphe des centres ;
+  \item historique de sélection et de réentraînement.
+\end{itemize}
+
+Les résultats négatifs, runs échoués et checkpoints non retenus
+doivent être conservés dans les journaux.
+
+% ============================================================
+\section{Conclusion du protocole}
+% ============================================================
+
+EX12 teste une modification explicite d'AdaptiveRBF :
+les centres ne sont plus seulement des unités locales optimisées par
+la perte globale ; ils sont également évalués selon leur contribution,
+guidés vers les erreurs restantes et organisés par un graphe de
+relations entre leurs empreintes.
+
+Le protocole sépare ces mécanismes afin de déterminer :
+\begin{enumerate}
+  \item si les centres peuvent être sélectionnés de façon fiable ;
+  \item si les centres faibles peuvent devenir complémentaires ;
+  \item si les empreintes capturent une structure utile ;
+  \item si cette structure améliore les résultats au-delà d'un
+  AdaptiveRBF classique à budget comparable.
+\end{enumerate}
+
+Aucune supériorité n'est présumée. La conclusion dépendra des résultats
+confirmatoires, de la stabilité entre graines et des ablations.
+
+\end{document}

@@ -1,0 +1,191 @@
+{
+  "version": "AAM O82 implementation checklist",
+  "status": "PASS",
+  "rule": "Une phase suivante est interdite tant que la phase précédente n’est pas PASS avec preuves enregistrées.",
+  "phases": [
+    {
+      "id": "P00",
+      "title": "Preflight et gouvernance",
+      "acceptance": "Avant chaque exécution, relire les deux registres d’erreurs indépendants et vérifier l’artefact précédent.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Independent model/no-model checklists read before every execution; no open entries."
+      ],
+      "defects": []
+    },
+    {
+      "id": "P01",
+      "title": "Intégrité du corpus O82",
+      "acceptance": "Vérifier archive, SHA-256, présence de tous les fichiers et cohérence manifest/README.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "zipfile.testzip=None",
+        "16 entries present",
+        "15 deliverable hashes in MANIFEST verified exactly"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P02",
+      "title": "Audit formel de model_AAM_O82.tex",
+      "acceptance": "Auditer définitions, transitions, contrats, invariants, anti-fuite, commandes, interfaces et ambiguïtés.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Formal object audit",
+        "CLI/state/protocol audit",
+        "LaTeX two-pass compile",
+        "static delimiter/environment checks",
+        "render inspection pages 1,11,19,21,30"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P03",
+      "title": "Correction et verrouillage de la spécification",
+      "acceptance": "Corriger toutes les anomalies P02 sans introduire de règle métier codée; re-auditer jusqu’à zéro défaut connu bloquant.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Undefined c_t fixed",
+        "verification predicate typed",
+        "contract field projections typed",
+        "state/UNRESOLVED semantics tightened",
+        "CLI made normative",
+        "30-page PDF with zero LaTeX/package/warning/overfull/underfull notices"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P04",
+      "title": "Socle exécutable PC",
+      "acceptance": "Créer environnement portable, CLI normative, configuration, journal et doctor sans dépendance obligatoire externe.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "doctor PASS",
+        "episode create/run/observe/replay PASS",
+        "resume rehydration PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P05",
+      "title": "Observation et empreintes",
+      "acceptance": "Implémenter probes, contrats, raw ledger, empreintes partielles, poset/witnesses et budgets.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Observation/raw/fingerprint/witness/budget suite PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P06",
+      "title": "Mémoire quotient",
+      "acceptance": "Implémenter retrieval après chaque observation, corrections, invalidation, consolidation non-destructive et replay index.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Memory retrieval/invalidation/consolidation/recovery/tamper suite PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P07",
+      "title": "Suffisance et politique",
+      "acceptance": "Implémenter candidats, certificats de suffisance, ordre lexicographique, Pareto, valeur marginale et bundles.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Sufficiency/policy/Pareto/bundle suite PASS; 19-test gate reached PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P08",
+      "title": "Apprentissage/correction",
+      "acceptance": "Implémenter induction comportementale générique, holdout/OOD, CEGIS, capsules de compétences et teacher cutover.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "CEGIS/holdout/OOD/teacher-cutover suite PASS; 23-test gate reached PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P09",
+      "title": "Auto-observation et méta-acquisition",
+      "acceptance": "Implémenter événements causaux, mesure d’intervention, méta-politique candidate et garde de certification.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Auto-observation integration and causal meta-policy suite PASS; 31-test gate reached PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P10",
+      "title": "Découverte/composition/récursivité",
+      "acceptance": "Implémenter décomposition, root-retest, peer probes, composition de compétences et découverte de sondes sous validation.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Discovery/composition/hierarchy/root-retest suite PASS; 37-test gate reached PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P11",
+      "title": "Validation adverse et ablations",
+      "acceptance": "Tests fonctionnels, fuzzing, corruption recovery, random/adversarial controls, ablations mémoire/fingerprint/hierarchy/teacher.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "45-test adverse/ablation gate PASS; final validate_o82 status PASS"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P12",
+      "title": "Performance et expérience PC",
+      "acceptance": "Mesurer latence/coût/mémoire, modes scarce/rich, déterminisme, UX CLI et trajectoire de ressources.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "Final benchmark status PASS; scarce/rich, repeatability, CLI smoke and memory-size checks"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P13",
+      "title": "Documentation et rapports",
+      "acceptance": "README complet de bout en bout; rapports au format description/architecture/pipeline complet/commandes/résultats.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "README path/CLI structural audit PASS; 11 local references present; reports normalized; spec included in release"
+      ],
+      "defects": []
+    },
+    {
+      "id": "P14",
+      "title": "Audit final et packaging",
+      "acceptance": "Audit statique anti-hardcode, traçabilité, hashes, exécution depuis archive propre, création Dmodel_AAM_O82.zip et Amodel_AAM_O82.zip.",
+      "gate": "BLOCKING",
+      "status": "PASS",
+      "evidence": [
+        "anti-hardcode audit PASS; 25 runtime source files scanned, 0 hits",
+        "portable-content scan PASS; 0 machine-specific absolute paths",
+        "ZIP candidate testzip=None",
+        "clean extraction lifecycle PASS: doctor/probe/run/observe/replay/acquire/evaluate holdout/evaluate OOD",
+        "ResourceWarning-as-error full suite 49/49 PASS",
+        "Editable pip install offline limitation documented as NM-0030; autonomous no-install path validated."
+      ],
+      "defects": []
+    }
+  ],
+  "current_gate": "RELEASED"
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "project_id": "NGeGenBrain_v1",
+  "run_id": "cli_smoke_20261027_release",
+  "timestamp": "2026-10-27T11:58:44+01:00",
+  "environment": {
+    "os": "linux",
+    "python": "3.13.5"
+  },
+  "status": "PASS",
+  "commands_run": 6,
+  "failed_commands": 0,
+  "database_path": "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+  "commands": [
+    {
+      "name": "initialize",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+        "init"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "6a7dfac587d15b54a9aecfa41617633411797c9539dcefe98d459f52dd2b4fa2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "keys=action,at,ok,result,status"
+    },
+    {
+      "name": "status",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+        "status"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "88c826beb407e461f9e6bffa0d0d5a822fe9d9e1225df40e76b2df100f6b6a69",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "keys=health,stats"
+    },
+    {
+      "name": "actions",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+        "actions"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "05b05e3a9cc4d76507e14e3d5aae9b28bbbbd147374cf19c26ac0544ac4268a3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "action_count=51"
+    },
+    {
+      "name": "run_example_ast",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+        "run",
+        "--program",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/examples/add.json",
+        "--input",
+        "null",
+        "--capabilities",
+        "[]",
+        "--budget",
+        "1000"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "245989ad4487e540088921d4c1461223fb92a6477e28e289b476c52ab9bdf297",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "result_status=Success"
+    },
+    {
+      "name": "verify_database",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+        "verify"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "70e21b16fd79b3eb2fa9cddb3f684d94904ed52e5bd00b3af2841cdc37f79455",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "database_valid=True"
+    },
+    {
+      "name": "action_registry",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1/build/cli_smoke_v1.sqlite3",
+        "action",
+        "system.actions",
+        "--data",
+        "{}"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "e285fe093ee1ce6be19ac025816ea1161573cbdfbb162b19839c3dd9e6c1b60a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "ok=True; result_type=list"
+    }
+  ],
+  "scope": "Black-box CLI smoke only; web protocol and action parity are covered by the runtime regression suite."
+}

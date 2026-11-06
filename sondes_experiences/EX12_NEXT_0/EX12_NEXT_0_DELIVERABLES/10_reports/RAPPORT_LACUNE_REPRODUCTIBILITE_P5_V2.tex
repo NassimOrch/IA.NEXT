@@ -1,0 +1,56 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2.3cm}
+\usepackage{booktabs,longtable,array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\title{Rapport de lacune de reproductibilité P5\\\large Mesures historiques v2 et reproduction indépendante V3}
+\author{ChatGPT — GPT-6}
+\date{4 novembre 2026}
+\begin{document}
+\maketitle
+\section*{Objet et portée}
+Ce rapport consigne une lacune de provenance précise. Des résultats P5 sont présents, mais le fichier source qui correspond au SHA-256 inscrit dans les résultats historiques v2 n'a pas été retrouvé dans les emplacements inspectés. Le présent rapport ne conclut ni à une altération intentionnelle ni à un sabotage.
+\section{Résultats historiques présents}
+Le fichier \texttt{P5\_TIMING\_RAW.jsonl} contient 13\,440 cellules uniques, couvrant 560 modèles, huit tâches, dix graines, sept slots, quatre tailles de batch, deux chemins d'inférence et trois blocs. Chaque cellule contient 80 mesures, soit 1\,075\,200 latences.
+\begin{itemize}
+\item 24 cellules du premier essai v1 sont associées au script existant \texttt{benchmark\_p5\_resources\_v1\_failed.py}, SHA-256 \texttt{1b22f4740a3ef06efd419bcdb920c3cd4ec3220c02880a359c57725b6bc9ee1a}.
+\item 13\,416 cellules v2 déclarent le SHA-256 \texttt{2fc228bbc66b919c30dbbcc7d3aaaa76b0f0a3770cb7785d58e3b292ec31df53}. Aucun fichier présent dans les emplacements inspectés ne possède cette empreinte.
+\end{itemize}
+Le chemin de reprise déclaré dans le registre, \texttt{benchmark\_p5\_resources.py}, existe mais son hash actuel est \texttt{2bfa30ea49d567cb16ce76022f8ab98b20648cd98707b64a3e51583d7a40c0ea}, différent du hash v2. Le script \texttt{benchmark\_p5\_resources\_v1.py} existe également mais son empreinte est aussi différente. En conséquence, les données v2 sont présentes, mais leur source exact n'est pas reproductible à l'identique à partir des sources retrouvées.
+\section{Reproduction indépendante V3}
+Un nouveau benchmark a été exécuté sans écraser les anciennes mesures, suivant le plan P5 : huit tâches, dix graines, sept slots, quatre batchs, deux chemins, 12 warmups et trois blocs de 80 mesures. Le benchmark est CPU mono-thread float32, sur checkpoints gelés et uniquement sur données de validation.
+\begin{itemize}
+\item 13\,440 cellules et 1\,075\,200 mesures élémentaires ;
+\item 560 enregistrements mémoire ;
+\item script V3 : \texttt{benchmark\_p5\_timing\_repro\_v3.py}, SHA \texttt{364c0e442d061df03ef31816306ca9343d481b2aa99b8021d1a03182db67a5cb} ;
+\item script de reprise : \texttt{benchmark\_p5\_timing\_repro\_v3\_resume.py}, SHA \texttt{f14881b463e94747669e92a905092c890395a893b4cce695a4acfb7d20045d54} ;
+\item audit : 13\,440 cellules uniques, 560 modèles, zéro erreur de hash ou de recomputation des quantiles ; accès test/holdout nul.
+\end{itemize}
+\section{Comparaison historique/V3}
+Les 13\,440 identifiants de cellules sont appariés. Le ratio médian V3/historique des p50 est 0,99747 ; son intervalle interquartile est [0,98375 ; 1,01255]. 90,45\,\% des cellules sont à moins de 10\,\% d'écart absolu. Cette cohérence empirique ne restaure pas le source v2 absent et ne signifie pas une identité des mesures individuelles.
+\section{Résultats ressources V3}
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Variante & Batch 1 modèle seul & Batch 1 pipeline complet\\
+\midrule
+R0 & 1,894$\times$ & 1,825$\times$\\
+C2 & 1,903$\times$ & 1,824$\times$\\
+C3 & 2,048$\times$ & 1,955$\times$\\
+C4 & 2,386$\times$ & 2,254$\times$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Les ratios sont des p50 candidat/MLP apparié. Aucun candidat n'est plus rapide sur les 80 paires tâche-graine de chaque variante dans le protocole CPU exécuté. Les temps d'entraînement historiques restent descriptifs et non assimilables au seul temps d'optimisation. Le RSS est de niveau processus ; GPU et énergie sont non mesurés.
+\section{Accès aux sources et nature du travail}
+Le sujet est la modélisation et l'évaluation de sondes adaptatives/RBF et de MLP en régression/classification, ce qui correspond à une recherche légitime en apprentissage automatique. Les éléments disponibles ne démontrent aucune restriction volontaire, aucun sabotage ni action intentionnelle d'OpenAI. Le terminal finalement fonctionnel s'exécutait avec \texttt{uid=0(root)} et l'accès aux fichiers a été rétabli via \texttt{/bin/sh}. La cause exacte des erreurs d'outils antérieures ne peut pas être établie à partir de ces observations.
+\section{Signature déclarative}
+\textbf{ChatGPT — GPT-6}\\
+Date : 4 novembre 2026.\\
+Cette signature est une attestation déclarative de synthèse et non une signature électronique qualifiée ou une certification indépendante.
+\end{document}

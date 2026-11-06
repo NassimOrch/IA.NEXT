@@ -1,0 +1,656 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.25cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,tabularx,longtable,array,multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{url}
+
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black,
+  pdftitle={Rapport d'analyse et programme expérimental EX12 NEXT 0},
+  pdfauthor={OpenAI - analyse des sources fournies}}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{leftmargin=1.4em,itemsep=0.15em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=0.2em,topsep=0.25em}
+\renewcommand{\arraystretch}{1.16}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\src}[1]{\textbf{[#1]}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\MAE}{\mathrm{MAE}}
+\newcommand{\RMSE}{\mathrm{RMSE}}
+\newcommand{\NMAE}{\mathrm{NMAE}}
+\newcommand{\softmax}{\mathrm{softmax}}
+\newcommand{\HC}{\textsc{HC-RBF}}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{EX12 NEXT 0 -- rapport scientifique}
+\rhead{4 novembre 2026}
+\cfoot{\thepage}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{1.7cm}
+{\Large Programme de recherche sur les sondes adaptatives\par}
+\vspace{1.0cm}
+{\Huge\bfseries Rapport d'analyse et de confrontation\par}
+\vspace{0.25cm}
+{\Huge\bfseries EX12\_NEXT\_0\par}
+\vspace{0.7cm}
+{\Large Formalismes, résultats EX3--EX11, ARCH\_UP\_TEST\_1 et nouvelle stratégie expérimentale\par}
+\vspace{1.3cm}
+\rule{0.88\textwidth}{0.6pt}
+\vspace{0.65cm}
+{\large Rapport scientifique et proposition de pré-enregistrement\par}
+\vspace{0.4cm}
+{\large 4 novembre 2026\par}
+\vspace{0.65cm}
+\rule{0.88\textwidth}{0.6pt}
+\vfill
+\begin{minipage}{0.88\textwidth}
+\textbf{Objet.} Évaluer les preuves actuellement disponibles sur les sondes adaptatives et les architectures multi-centres, confronter le programme EX12 proposé aux artefacts réellement livrés, puis définir une architecture candidate et un protocole confirmatoire dans lequel la qualité, le coût d'apprentissage, la latence, la mémoire, la généralisation et la reproductibilité sont évalués conjointement.
+
+\textbf{Règle de lecture.} Les résultats consignés dans les rapports et registres archivés sont distingués des hypothèses et propositions EX12. Aucune performance non mesurée n'est présentée comme acquise.
+\end{minipage}
+\vfill
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Résumé exécutif et décision scientifique}
+
+\subsection{Verdict général}
+
+Le corpus permet de défendre trois conclusions simultanées.
+
+\begin{enumerate}
+  \item \textbf{La famille des sondes adaptatives possède une base théorique cohérente et une capacité d'approximation empirique réelle.} Les formalismes établissent des propriétés d'observation, d'indiscernabilité, de factorisation et d'adaptation. Les expériences CNG et ARCH\_UP\_TEST\_1 montrent que des représentations RBF compactes ou augmentées peuvent apprendre certaines fonctions avec une erreur nettement réduite.
+  \item \textbf{La spécialisation, la composition et la généralisation ne sont pas automatiques.} Les résultats EX9, EX10 et EX11 montrent des dépendances fortes à la tâche, des échecs de composition de spécialistes gelés, des renversements en extrapolation et l'absence de supériorité régulière face aux MLP.
+  \item \textbf{L'efficacité informatique est désormais le verrou principal.} ARCH\_UP\_TEST\_1 améliore la qualité interpolative, mais avec environ 20 fois plus de paramètres, 4,6--4,7 fois plus de temps d'entraînement et jusqu'à environ 22 fois plus de latence p50 sur batch 64 que sa RBF classique. À l'inverse, D1/D2 dans EX11 fournit un signal concret : une réorganisation vectorisée peut accélérer une fonction mathématiquement équivalente de 1,75 à 4,04 fois en forward.
+\end{enumerate}
+
+\subsection{Décision recommandée}
+
+\textbf{EX12 doit être un programme d'efficacité de bout en bout, et non un nouveau programme d'empilement de branches.} La direction la plus défendable est une architecture hybride à couverture globale et adaptation locale, organisée autour d'un calcul RBF vectorisé, d'un nombre contrôlé de centres fixes et adaptatifs, d'une correction globale de faible capacité, et d'une modulation conditionnelle de faible rang uniquement si son bénéfice est confirmé. Les messages multi-tours entre centres doivent rester un bras de comparaison et non devenir l'architecture principale par défaut.
+
+Aucune supériorité sur MLP n'est actuellement démontrée par ARCH\_UP\_TEST\_1 : ce pilote compare trois variantes RBF, sans baseline MLP. EX12 doit donc introduire une comparaison MLP strictement appariée en nombre de paramètres et en budget d'optimisation.
+
+\subsection{Tableau des niveaux de preuve}
+
+\begin{tabularx}{\textwidth}{P{3.3cm}YY}
+\toprule
+\textbf{Objet} & \textbf{Ce qui est établi} & \textbf{Ce qui ne l'est pas}\\
+\midrule
+Formalismes d'empreintes & Quotient observationnel, fermeture, factorisation sous constance sur les fibres, hiérarchie de résolution sous hypothèses. & Apprentissage efficace de la factorisation, généralisation, interprétation sémantique des centres ou causalité.\\
+Sonde RBF & Approximation de familles de fonctions sur certains domaines ; résultats CNG positifs sur plusieurs fonctions. & Extrapolation robuste et avantage général contre MLP.\\
+Coordination multi-centres & ARCH\_UP\_TEST\_1 démontre une modulation conditionnée par l'entrée et des messages effectifs entre centres. & Valeur universelle de la topologie issue des empreintes ; efficacité ou avantage face à un MLP apparié.\\
+Composition CNC & Le fine-tuning conjoint améliore fortement les spécialistes gelés. & Composition zéro-shot réutilisable ; parité avec MLP direct.\\
+Optimisation informatique & D1/D2 est équivalent numériquement dans les tests livrés et D2 est plus rapide dans le microbenchmark. & Gain universel sur tous matériels, toutes tailles ou toutes architectures.\\
+\bottomrule
+\end{tabularx}
+
+\section{Périmètre documentaire, extraction et limites d'accès}
+
+\subsection{Archive effectivement examinée}
+
+L'archive \code{last\_sources\_3.zip} était présente dans \code{/mnt/data} et sa structure ZIP principale a passé le test d'intégrité sans erreur CRC. Elle contenait 34 entrées. L'extraction récursive a traité 18 archives ZIP imbriquées supplémentaires, pour environ 1,9 Go de données extraites et 22\,744 fichiers de source hors marqueurs internes d'extraction. Le corpus a été conservé dans \code{/last\_sources\_3}, conformément à la demande. Les dossiers EX4--EX11, les sources théoriques, les scripts, les CSV, les registres JSONL, les checkpoints et les audits sont présents.
+
+\subsection{Point bloquant : ARCH\_UP\_TEST\_0 absent}
+
+Le fichier \code{arch\_up\_test\_1.zip} est inclus et a été extrait. En revanche, aucune archive ou arborescence \code{arch\_up\_test\_0} n'a été trouvée dans l'archive principale, dans les 18 ZIP imbriqués, ni dans les répertoires accessibles \code{/mnt/data}, \code{/last\_sources\_3} et \code{/tmp}. La version 0 est seulement décrite qualitativement dans le \code{CHANGELOG\_FR.md} d'ARCH\_UP\_TEST\_1 : elle utilisait un organisateur statique et une correction fondée sur des empreintes agrégées, sans échange de messages conditionné par chaque entrée.
+
+Il n'est donc pas possible de vérifier les chiffres, scripts, paramètres, données, contrôles ou performances propres à ARCH\_UP\_TEST\_0. Toute comparaison quantitative entre TEST\_0 et TEST\_1 serait spéculative. Le présent rapport compare TEST\_1 aux expériences antérieures et à la stratégie EX12, et signale explicitement cette lacune.
+
+\subsection{Méthode d'analyse et protection des holdouts}
+
+L'analyse s'appuie sur les rapports finaux, les sources Python, les CSV et JSON persistés, les manifestes de hachage, les registres append-only et les audits. Les expériences archivées n'ont pas été réentraînées. En particulier, le dossier ARCH\_UP\_TEST\_1 annonce un verrou d'entraînement et un verrou de scoring ; les holdouts ont été ouverts une seule fois après gel des 60 checkpoints. Le rapport s'appuie sur les prédictions et métriques persistées et ne relance pas le scoring. Les holdouts tabulaires EX11 demeurent scellés. Cette décision préserve la validité des campagnes et évite une nouvelle sélection sur test.
+
+\section{Confrontation des formalismes théoriques}
+
+\subsection{Sonde adaptative : fonction et dynamique d'apprentissage}
+
+Le formalisme de sonde adaptative distingue la famille de fonctions candidates, la règle d'actualisation et l'état initial. Une écriture synthétique est
+\[
+  \mathsf P=(\mathcal F,U,\eta_0),\qquad
+  \theta_{t+1}=U(\theta_t,d_t,\xi_t).
+\]
+La distinction entre paramètres du modèle et état complet de l'optimiseur est pertinente : deux systèmes ayant les mêmes poids instantanés peuvent poursuivre des trajectoires différentes si les moments Adam, les compteurs, les buffers ou les états aléatoires diffèrent. Le formalisme sépare aussi adaptation des paramètres et méta-adaptation de la règle d'apprentissage. Cette séparation évite de qualifier abusivement d'optimiseur universel un modèle dont seuls quelques taux ou coefficients sont appris. \src{S1,S2,S4}
+
+\subsection{Empreinte, indiscernabilité et factorisation}
+
+Pour une famille de sondes \(\mathcal G\), une empreinte peut être écrite
+\[
+ I_{\mathcal G}^{P}(x)=\bigl(\Phi(P,x,g_1),\ldots,\Phi(P,x,g_K)\bigr).
+\]
+La relation
+\[
+ x\sim_{\mathcal G}y\quad\Longleftrightarrow\quad
+ I_{\mathcal G}^{P}(x)=I_{\mathcal G}^{P}(y)
+\]
+est une relation d'équivalence et définit un quotient observationnel. Si une famille de sondes est enrichie sans retirer les précédentes, les classes d'indiscernabilité ne peuvent que se raffiner. Le théorème de factorisation est également important : une fonction \(A\) se factorise par l'empreinte, \(A=\bar A\circ I_{\mathcal G}^{P}\), si et seulement si elle est constante sur chaque fibre de l'empreinte.
+
+Ces résultats apportent une discipline conceptuelle utile à EX12 : une représentation observationnelle ne peut porter que les distinctions qu'elle conserve. Toutefois, la factorisation est un résultat d'existence. Elle ne garantit pas que \(\bar A\) soit aisément calculable, stable, identifiable à partir d'un échantillon fini ou rapide à exécuter. De même, une fermeture de sondes exprime une redondance fonctionnelle au sens retenu par le formalisme ; elle ne fournit pas automatiquement un algorithme efficace de sélection de centres. \src{S3,S6}
+
+\subsection{Dimension effective et prudence sémantique}
+
+Le décompte des fonctions observationnellement distinctes et la dimension affine de l'ensemble des empreintes sont des invariants différents. Aucun des deux ne doit être assimilé sans hypothèse supplémentaire à l'information de Shannon, au nombre de degrés de liberté statistiques, à la capacité de généralisation ou à la dimension intrinsèque d'une variété. EX12 devra donc définir séparément : (i) le nombre de centres effectivement stockés, (ii) la dimension géométrique de leur espace latent, (iii) le rang numérique de la matrice d'activations, (iv) le nombre de centres activés par entrée et (v) le coût matériel correspondant.
+
+\subsection{Adaptation globale et adaptation conditionnée par l'entrée}
+
+Le formalisme d'adaptation globale modélise plusieurs sondes locales et un coordinateur partagé. Il met correctement en évidence qu'une moyenne fixe de sorties n'est pas nécessairement une adaptation globale. Une coordination globale forte exige que des variables partagées modifient le comportement de plusieurs sondes, avec un état et une règle d'actualisation clairement définis. \src{S5}
+
+ARCH\_UP\_TEST\_1 ajoute une forme différente et plus circonscrite : les paramètres appris sont partagés entre exemples, tandis que les états des centres, l'attention, les messages et les centres effectifs sont recalculés pour chaque entrée. Il n'existe pas d'état persistant transmis d'une requête à la suivante, et la topologie du graphe ne change pas par entrée. Il faut donc parler de \emph{modulation conditionnée par l'entrée}, et non d'une adaptation continue en temps réel ou d'un apprentissage global en ligne.
+
+\subsection{Ce que la théorie autorise à conclure sur les graphes d'empreintes}
+
+La théorie des empreintes justifie l'étude de similarités et de redondances observationnelles. Elle ne démontre pas que la proximité euclidienne de deux vecteurs d'empreinte entraîne une complémentarité prédictive, une spécialisation stable ou un lien causal. Dans ARCH\_UP\_TEST\_1, les composantes de l'empreinte sont ingénieuses -- positions normalisées, largeur, activation moyenne et dispersion, contribution d'ablation, gain résiduel, taux d'usage et corrélation -- mais les arêtes obtenues par k plus proches voisins et corrélation restent un choix algorithmique à tester. Elles ne deviennent pas des relations sémantiques par le seul fait d'être construites à partir de mesures.
+
+\section{Bilan expérimental historique : EX3 à EX11}
+
+\subsection{EX3--EX4 : contrat et compacité}
+
+EX3 définit des comparaisons contre des MLP, des variantes de coordination et des critères de qualité et de ressources. Les livrables de campagne EX3 d'origine ne sont pas suffisamment présents pour reconstruire une exécution complète à partir de ce corpus : il faut donc distinguer le contrat de son exécution. EX4 fournit une comparaison Wisconsin plus exploitable. La configuration d8/k4 rapporte 356 paramètres pour la sonde contre 1\,448 pour le MLP, soit un ratio de 4,07. Les accuracies sont identiques à 97,65\%, mais la log-loss est moins bonne pour la sonde (0,05952 contre 0,05394). Aucune des 12 familles ne satisfait simultanément toutes les conditions de qualité et de ressources. La compacité paramétrique est donc démontrée dans certains cas, mais pas l'efficacité opérationnelle globale. \src{S8,S17}
+
+\subsection{EX5--EX7 : coordination, correcteurs et récursion}
+
+Les campagnes suivantes explorent RETRO, MIXA, OOF, PCA-Q, partage d'encodeur et centres, orchestration multi-sondes et coordination externe. Elles montrent que l'absence de fuite dans un correcteur exige une construction OOF stricte et que geler des paramètres ne suffit pas toujours à geler un optimiseur si son état persistant continue d'être mis à jour. Elles montrent aussi que la réduction du nombre d'opérations théoriques ne garantit pas une baisse de latence réelle.
+
+EX6/EX7 confirment le coût de la coordination. Dans EX7 V003, OuterCoord-Lite utilise 1\,341 paramètres contre 6\,712 pour le MLP, mais obtient 97,88\% d'accuracy contre 98,12\%, une log-loss de 0,06806 contre 0,05136 et une latence p50 batch 1 de 0,290 ms contre 0,0251 ms. La sonde est donc plus compacte, mais environ 11,6 fois plus lente. Les poids de coordination presque uniformes (entropie proche du maximum) ne correspondent pas à une sélection parcimonieuse des branches : toutes sont exécutées. \src{S17}
+
+\subsection{EX8--EX9 : résultats dépendants du domaine}
+
+EX8 obtient des résultats favorables à B10 sur Wisconsin, mais l'écart avec B11 reste fragile avec cinq graines (test exact bilatéral rapporté à \(p=0,0625\)). Les variantes B10/B11 perdent sur le domaine SMS face aux MLP. EX9 étend l'évaluation à Concentric2 et Rotated-moons2 : les candidates testées perdent contre les comparateurs MLP sur les cinq graines dans les configurations rapportées. Le signal Wisconsin ne constitue donc pas une preuve de supériorité inter-domaines. \src{S17,S8}
+
+\subsection{EX10 : résultat positif en interpolation, limite nette hors support}
+
+EX10 comprend 460 runs CNG et 90 runs CNC, soit 550 modèles, 1\,695 évaluations one-shot et 3\,037 empreintes verrouillées. L'audit livré recalcule 1\,695/1\,695 métriques sans écart, vérifie 90/90 diagnostics de nœuds et 3\,037/3\,037 empreintes. Ce niveau d'intégrité documentaire constitue un point fort. \src{S8,S9}
+
+Pour CNG, l'architecture G3/M7 donne des résultats intéressants en test interpolatif :
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Fonction & MAE sonde & MAE MLP & Victoires & Lecture\\
+\midrule
+$\sin(x)$ & 0,00257 & 0,00407 & 5/5 & Favorable\\
+$x_1x_2$ & 0,00714 & 0,02139 & 5/5 & Favorable\\
+$x_1^2+x_2$ & 0,01249 & 0,02115 & 4/5 & Favorable\\
+$\sin(x_1x_2)+x_3$ & 0,08580 & 0,10524 & 3/5 & Faible / variable\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Mais les résultats se renversent en extrapolation pour plusieurs tâches : pour le produit, la MAE G3/M7 vaut 0,47468 contre 0,43178 pour le MLP ; pour le carré-plus, 0,97701 contre 0,73299. Ce point est central pour EX12 : une base locale peut interpoler efficacement et rester fragile hors de sa couverture.
+
+CNC expose une difficulté plus profonde encore. Pour les graphes de composition G1, G2 et G3, les spécialistes gelés C1 obtiennent respectivement des MAE moyennes de 0,53605, 0,49343 et 0,51552 ; le fine-tuning conjoint C2 les améliore à 0,08217, 0,08621 et 0,02021, mais les MLP directs restent à 0,01611, 0,02469 et 0,00963. La réussite de C2 n'est pas une démonstration de composition zéro-shot : elle montre que l'adaptation conjointe répare une partie du décalage.
+
+Sur les ressources EX10, 180/550 durées d'entraînement sont contended ou non vérifiées ; les 370 restantes sont descriptives, non une preuve de vitesse générale. Aucun compteur d'énergie fiable n'est fourni. \src{S8,S9}
+
+\subsection{EX11 : validation partielle, équivalence logicielle positive}
+
+Le snapshot archivé est étiqueté \code{SNAPSHOT\_38\_OF\_65}. Le registre append-only présent dans ce snapshot contient effectivement 38 entrées REPLICA-U v004, toutes marquées \code{COMPLETED\_VALIDATION\_ONLY}, du 3 novembre 2026 à 12:14:56Z jusqu'à 12:52:47Z. Certains rapports intermédiaires plus anciens affichent 11, 31 ou 33 blocs ; un addendum ultérieur indique 37/65. Cette dernière valeur n'est pas cohérente avec les 38 enregistrements du registre du snapshot et doit être réconciliée lors de la prochaine livraison. Le chiffre 38/65 est donc celui du paquet snapshot auditable, mais la documentation de progression n'est pas parfaitement synchronisée. \src{S10}
+
+Le v003 65/65 est explicitement exploratoire, car le refit final n'a pas utilisé tout le train extérieur. Le v004 corrige ce protocole, mais reste partiel dans le snapshot. Sur les données de validation, le student64 améliore nettement le backbone sur Spambase, sans avantage établi contre le MLP apparié (différence de log-loss -0,00500, IC95\% [-0,01667 ; 0,00667], 3/5 graines). Sur Tic-Tac-Toe, le MLP apparié est meilleur sur cinq graines (différence student moins MLP +0,01626, IC95\% [0,00437 ; 0,02815]). Le teacher peut lui-même être inférieur au backbone, par exemple sur GINA. Les temps d'entraînement student/MLP sont supérieurs à 1 dans les sept jeux dont les ratios sont rapportés, entre 1,06 et 4,65. Aucun holdout tabulaire scellé n'a été ouvert.
+
+Le résultat D1/D2 est beaucoup plus propre du point de vue informatique : 40/40 tests d'équivalence sortie et gradients passent sous une tolérance de $10^{-6}$ ; les erreurs maximales rapportées sont de $1,788\times10^{-7}$ sur les sorties, $3,725\times10^{-9}$ sur les gradients d'entrée et $2,980\times10^{-8}$ sur les gradients des paramètres. Le microbenchmark mono-thread donne un gain D2/D1 de 1,75 à 4,04 fois en forward et de 1,97 à 3,21 fois en train-step suivant le batch. C'est une preuve d'amélioration d'implémentation, non une preuve que D2 apprend mieux. \src{S10}
+
+\section{ARCH\_UP\_TEST\_1 : examen détaillé du pilote}
+
+\subsection{Question et architecture effectivement testées}
+
+ARCH\_UP\_TEST\_1 demande si des échanges de messages conditionnés par l'entrée entre centres AdaptiveRBF améliorent la RBF classique, et si le graphe relationnel issu des empreintes apporte plus qu'un graphe de même degré randomisé. Le modèle de base est
+\[
+ z(x)=\tanh(W_e x+b_e),\qquad
+ \phi_k(x)=\exp\!\left(-\frac{\|z(x)-c_k\|^2}{2\sigma_k^2}\right),
+\]
+\[
+ f_{B0}(x)=b+\sum_{k=1}^{K}v_k\phi_k(x),\qquad K=8.
+\]
+La dimension latente est 4. Pour les bras interactifs, chaque centre reçoit des caractéristiques d'entrée et une empreinte train-only, puis les états échangent des messages sur trois tours successifs :
+\[
+ a_{kj}^{(t)}(x)=\softmax_{j\in N(k)\cup\{k\}}
+ \left(\frac{h_k^{(t)}(x)^\top h_j^{(t)}(x)}{\sqrt H}\right),
+\]
+\[
+ m_k^{(t)}(x)=\sum_{j\in N(k)\cup\{k\}}a_{kj}^{(t)}(x)h_j^{(t)}(x),\quad
+ h_k^{(t+1)}(x)=\tanh(h_k^{(t)}(x)+W_t m_k^{(t)}(x)).
+\]
+Les têtes finales produisent une correction du centre, de la largeur et une porte dépendant de l'entrée. Les messages et l'attention sont recalculés à chaque forward. La topologie du graphe, elle, reste fixe pour une paire fonction/graine. Il ne s'agit ni d'une topologie reconfigurée à chaque ligne ni d'une mémoire inter-requêtes. \src{S11,S12}
+
+\subsection{Bras expérimentaux et protocole}
+
+\begin{itemize}
+  \item \textbf{B0\_CLASSIC :} AdaptiveRBF sans messages.
+  \item \textbf{B4\_DYNAMIC\_GRAPH :} même base augmentée par trois tours de communication sur le graphe d'empreintes.
+  \item \textbf{B4\_RANDOM\_GRAPH :} même architecture, initialisation, nombre d'arêtes et degrés individuels ; le graphe est randomisé par échanges d'arêtes non orientées.
+\end{itemize}
+
+Le graphe de référence est construit à partir du checkpoint B0 et de statistiques calculées uniquement sur les données d'entraînement : positions, largeurs, activations, contribution d'ablation, gain résiduel, usage et redondance/corrélation. Chaque centre relie ses deux voisins les plus proches en espace d'empreinte et un centre à la corrélation absolue la plus élevée, avec symétrisation. Le contrôle randomisé conserve exactement les degrés de chaque centre et le nombre d'arêtes. La randomisation n'est toutefois pas un échantillon uniforme de tous les graphes ayant cette séquence de degrés. \src{S12}
+
+Le protocole comprend quatre fonctions synthétiques, cinq graines (13007, 14009, 15013, 16001, 17011), vingt jeux appariés et soixante entraînements. Chaque jeu contient 900 observations : 630 train, 135 validation et 135 test, plus 250 points d'extrapolation évalués séparément. Le coût de sélection des centres KMeans est train-only. L'optimisation utilise Adam, batch 128, au plus 500 époques, patience 30, sélection par MAE validation et CPU mono-thread. Aucun dataset tabulaire ou réel n'est inclus. \src{S11,S12}
+
+\subsection{Qualité test par fonction}
+
+MAE moyenne sur cinq graines ; plus bas est meilleur.
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Fonction & B0 classique & B4 graphe réel & B4 graphe random\\
+\midrule
+$\sin(x)$ & 0,026302 & 0,005452 & 0,005439\\
+$x_1x_2$ & 0,511875 & 0,183950 & 0,168162\\
+$x_1^2+x_2$ & 1,027846 & 0,109047 & 0,103073\\
+$\sin(x_1x_2)+x_3$ & 0,423898 & 0,214773 & 0,314971\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Sur les vingt paires test, B4 bat B0 dans 19/20 cas et B4-Random bat B0 dans 20/20 cas. B4 réel bat B4-Random dans 11/20 cas. Le pilote montre donc que le mécanisme interactif a une capacité utile par rapport à cette petite AdaptiveRBF de base. Il ne permet pas d'attribuer tout le gain à la topologie d'empreintes, car B4 et B4-Random ont tous deux environ vingt fois plus de paramètres que B0.
+
+\subsection{Valeur spécifique du graphe d'empreintes}
+
+On définit $\Delta=\MAE_{B4}-\MAE_{Random}$ ; une valeur négative favorise le graphe réel.
+\begin{center}
+\small
+\begin{tabular}{lrrrl}
+\toprule
+Fonction & $\Delta$ moyen & IC bootstrap 95\% & Victoires B4 & Lecture\\
+\midrule
+$\sin(x)$ & +0,000013 & [-0,001934 ; 0,002709] & 3/5 & Égalité pratique\\
+$x_1x_2$ & +0,015788 & [-0,016008 ; 0,064515] & 3/5 & Incertain\\
+$x_1^2+x_2$ & +0,005975 & [+0,000893 ; 0,011843] & 1/5 & Random favorisé\\
+$\sin(x_1x_2)+x_3$ & -0,100198 & [-0,192793 ; -0,016663] & 4/5 & Graphe réel favorisé\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le bénéfice topologique est donc conditionnel à la fonction. Le graphe réel est favorisé sur la composition sinus-produit, alors que le random est favorisé sur carré-plus. Sur sinus et produit, les cinq graines ne départagent pas clairement les deux bras. Les intervalles sont exploratoires et reposent sur cinq différences appariées ; ils ne remplacent pas une confirmation avec davantage de graines et de familles fonctionnelles.
+
+\subsection{Extrapolation}
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Fonction & B0 & B4 réel & B4 random\\
+\midrule
+$\sin(x)$ & 0,672109 & 0,657129 & 0,646552\\
+$x_1x_2$ & 2,204729 & 1,665231 & 1,543718\\
+$x_1^2+x_2$ & 3,627903 & 2,129063 & 2,134167\\
+$\sin(x_1x_2)+x_3$ & 0,906087 & 0,698687 & 0,790988\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+L'interaction améliore les moyennes d'extrapolation par rapport à B0 sur ces quatre tâches, mais les erreurs restent importantes, notamment sur multiplication et carré-plus. B4 réel ne domine pas systématiquement le graphe random. Le résultat ne permet donc pas de conclure à une extrapolation robuste ; il indique seulement que le mécanisme peut améliorer ce pilote particulier.
+
+\subsection{Dynamisme réellement instrumenté}
+
+Les audits de 40/40 modèles interactifs confirment trois tours, une attention variable selon l'entrée, des déplacements de centres, des ajustements de largeur et des portes dépendant de l'entrée. L'attention masquée est nulle, les lignes d'un batch sont indépendantes et la sortie du forward diagnostiqué coïncide avec le forward normal dans la tolérance prévue. La variation des états est donc réelle et non une simple étiquette architecturale. Cependant, une attention plus variable n'est pas une meilleure attention : elle prouve la dépendance à l'entrée, pas la qualité de la coordination.
+
+\subsection{Coût informatique observé}
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Mesure médiane & B0 & B4 réel & B4 random\\
+\midrule
+Paramètres entraînables & 61 & 1\,219 & 1\,219\\
+Temps entraînement (s) & 4,32 & 20,09 & 19,34\\
+Latence p50 batch 1 (ms) & 0,03996 & 0,37308 & 0,37055\\
+Latence p95 batch 1 (ms) & 0,10387 & 1,20478 & 1,15028\\
+Latence p50 batch 64 (ms) & 0,04863 & 1,04852 & 1,06108\\
+Latence p95 batch 64 (ms) & 0,14433 & 2,42882 & 2,37371\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Les ratios médians appariés fournis par le rapport sont : paramètres 19,98 fois ; temps d'entraînement 4,73 fois pour B4 et 4,63 fois pour B4-Random ; latence p50 batch 1 9,39 et 9,24 fois ; latence p50 batch 64 21,85 et 21,99 fois. L'environnement est CPU mono-thread, sans CUDA. Aucune mesure énergétique ou mémoire maximale attribuable par variante n'est fournie.
+
+Ce résultat invalide toute revendication d'efficacité globale de cette version B4. La capacité ajoutée est importante, les opérations attentionnelles sont séquentielles sur trois tours et tous les centres participent encore au calcul. Aucun mécanisme top-k parcimonieux n'est évalué. La vectorisation des tenseurs à l'intérieur de chaque tour n'empêche donc pas le coût total d'augmenter fortement.
+
+\subsection{Validité interne et limites de portée}
+
+Le statut d'audit est PASS : 60/60 entraînements verrouillés, 60/60 scores, 60 fichiers de données vérifiés par SHA-256, 40/40 graphes contrôlés, 40/40 branches interactives auditées, six tests unitaires, écart maximal nul entre métriques recalculées depuis les prédictions persistées et métriques livrées. Une correction de métadonnées de graphes n'a pas modifié les checkpoints ni les prédictions. Ces éléments renforcent la confiance dans l'intégrité des artefacts couverts. \src{S13,S14}
+
+Les limites principales restent : (i) quatre fonctions synthétiques seulement ; (ii) cinq graines ; (iii) absence de MLP ; (iv) comparaison principale B4 contre B0 avec capacité non appariée ; (v) absence de jeux réels ; (vi) pas de mémoire et d'énergie mesurées ; (vii) topologie de graphe fixe par fonction/graine ; (viii) contrôle randomisé degree-preserving non uniforme ; (ix) pas de preuve que les centres ont acquis des rôles sémantiques distincts. Le pilote valide une capacité de modulation, pas un remplacement d'architecture.
+
+\section{Diagnostic transversal : ce que les expériences disent ensemble}
+
+\subsection{Couverture du domaine avant multiplication des branches}
+
+L'échec d'extrapolation CNG/CNC et les résultats d'ARCH\_UP\_TEST\_1 suggèrent d'étudier explicitement la couverture latente. Pour chaque entrée, EX12 doit mesurer au minimum
+\[
+ q_{\max}(x)=\max_k\phi_k(x),\qquad
+ q_{\Sigma}(x)=\sum_k\phi_k(x),\qquad
+ d_{\min}(x)=\min_k\|z(x)-c_k\|.
+\]
+Ces indicateurs ne sont pas eux-mêmes une garantie de généralisation. Ils permettent cependant de relier l'erreur à la proximité des centres, à la masse d'activation et au régime de support. Les seuils de couverture doivent être définis sur les seules données d'entraînement, ou sur une validation utilisée exclusivement pour la sélection prévue.
+
+\subsection{La capacité supplémentaire doit être séparée de l'effet architectural}
+
+Le contraste B4/B0 confond communication, contrôleur, adaptation des centres et nombre de paramètres. Le contraste B4/B4-Random isole mieux la topologie, car il apparie l'architecture, les initialisations, le degré et la densité. EX12 doit conserver cette logique : chaque mécanisme nouveau doit avoir son témoin ablatif de même capacité. Un modèle plus grand ne peut pas être déclaré meilleur grâce à une propriété particulière qui n'a pas été isolée.
+
+\subsection{La spécialisation ne se lit pas dans les poids de fusion}
+
+Des poids presque uniformes ou une attention variable ne prouvent pas une spécialisation. Une preuve de complémentarité demande des ablations avec et sans réentraînement du composeur, une diversité des erreurs, une stabilité des rôles entre graines, une analyse des permutations de centres et un effet causal mesuré de la suppression de chaque centre sur le jeu gelé. EX12 doit traiter la spécialisation comme une hypothèse secondaire testable.
+
+\subsection{La composition doit être évaluée sur les distributions intermédiaires}
+
+CNC montre que des spécialistes isolés peuvent échouer une fois assemblés. EX12 devra suivre les distributions aux nœuds intermédiaires, les distances au support d'apprentissage des opérateurs, la propagation des erreurs et la sensibilité des opérations sensibles ($\exp$, $\log$, division). Le simple fine-tuning conjoint ne doit pas être appelé composition réutilisable.
+
+\subsection{La vitesse est une propriété de l'implémentation réelle}
+
+Les résultats D1/D2 montrent qu'une équivalence mathématique bien instrumentée peut être réalisée avec une organisation de calcul beaucoup plus efficace. EX12 doit donc mesurer les opérations réellement lancées, les accès mémoire, la fusion des noyaux, les coûts de sélection top-k, la taille des tenseurs intermédiaires et les coûts de construction de centres. Une estimation MAC théorique est utile, mais ne remplace pas les latences et les mesures mémoire.
+
+\section{Architecture candidate proposée pour EX12}
+
+\subsection{Nom et statut}
+
+Je propose de tester une \textbf{Hybrid Coverage-Adaptive RBF} (\HC), c'est-à-dire une RBF hybride à couverture globale et adaptation locale. Ce nom désigne une hypothèse de travail, pas une architecture validée. Le principe est de répartir le budget de calcul entre un petit ensemble d'ancres de couverture globale, un ensemble plus restreint de centres adaptatifs concentrés sur les régions utiles, et une correction globale de faible capacité.
+
+\subsection{Définition mathématique}
+
+Un encodeur partagé produit
+\[
+ z(x)=f_{\theta}(x)\in\R^d.
+\]
+Les centres sont séparés en deux ensembles :
+\[
+ C=C^{\mathrm{global}}\cup C^{\mathrm{local}},\qquad
+ |C^{\mathrm{global}}|=K_g,\quad |C^{\mathrm{local}}|=K_l.
+\]
+Les centres globaux sont initialisés par une méthode de couverture train-only (par exemple échantillonnage déterministe de type faible-discrépance dans l'espace latent ou farthest-point sampling) ; les centres locaux sont initialisés à partir des données train-only, par exemple par KMeans ou par réallocation des zones ayant les résidus d'entraînement les plus élevés. Les centres locaux peuvent ensuite être optimisés par gradient ou déplacés selon une règle de mise à jour strictement définie et auditée.
+
+Pour un centre $k$ :
+\[
+ d_k^2(x)=(z(x)-c_k)^\top\Lambda_k^{-1}(z(x)-c_k),\qquad
+ \phi_k(x)=\exp\left(-\frac12d_k^2(x)\right),
+\]
+où $\Lambda_k$ est diagonale et strictement positive, obtenue par une paramétrisation bornée des largeurs. En version dense, toutes les activations sont calculées. En version parcimonieuse, un masque $S_q(x)$ ne conserve que les $q$ activations dominantes :
+\[
+ S_q(x)=\operatorname{TopQ}_k\{\phi_k(x)\}.
+\]
+La parcimonie est optionnelle : elle ne sera retenue que si le coût du tri/sélection est inférieur au coût d'évaluation qu'elle évite sur le matériel visé.
+
+Une correction globale de faible capacité prend la forme affine
+\[
+ g_{\psi}(z)=u^\top z+b_g,
+\]
+ce qui donne une voie de correction partagée sans introduire subrepticement un MLP complet. La prédiction de base est
+\[
+ \widehat y(x)=g_{\psi}(z(x))+b+
+ \sum_{k\in S(x)}v_k\,\gamma_k(x)\,\phi_k(x),
+\]
+où $S(x)$ est l'ensemble de tous les centres dans la version dense.
+
+\subsection{Modulation locale de faible rang : extension conditionnelle}
+
+Si la version de base est stable et efficace, une modulation par entrée peut être ajoutée sans reprendre le mécanisme de trois tours de messages. On introduit un contexte partagé de rang $r$ :
+\[
+ q(x)=\tanh(Uz(x)+a)\in\R^r,\qquad r\ll d+K.
+\]
+Chaque centre reçoit un embedding appris $e_k\in\R^r$. Une modulation de faible rang peut alors s'écrire
+\[
+ \delta c_k(x)=\alpha_c W_c\bigl(e_k\odot q(x)\bigr),
+\]
+\[
+ \log\sigma_k(x)=\log\sigma_k+
+ \alpha_\sigma w_\sigma^\top(e_k\odot q(x)),
+\quad
+ \gamma_k(x)=1+\alpha_\gamma\tanh\!\left(w_\gamma^\top(e_k\odot q(x))\right).
+\]
+Les amplitudes $\alpha_c,\alpha_\sigma,\alpha_\gamma$ sont bornées et initialisées à zéro ou proches de zéro pour préserver la fonction de base. Cette extension doit être évaluée après la version de couverture seule ; elle ne doit pas être activée d'office.
+
+\subsection{Calcul vectorisé}
+
+La distance peut être calculée par la forme matricielle
+\[
+ \|z-c_k\|^2=\|z\|^2+\|c_k\|^2-2z^\top c_k,
+\]
+avec une opération batched matrix multiplication, sans boucle Python sur les centres. Les largeurs et poids sont diffusés en tenseurs. Les calculs de couverture, d'activation, de normalisation et de readout sont regroupés autant que possible. Le code doit exposer une implémentation de référence simple et une implémentation optimisée, soumises à tests d'équivalence de sorties et de gradients comme D1/D2.
+
+\subsection{Pourquoi cette architecture est cohérente avec les résultats}
+
+\begin{itemize}
+  \item Elle répond à la faiblesse d'extrapolation en explicitant la couverture au lieu de supposer que les centres locaux couvrent tout le domaine.
+  \item Elle conserve une adaptation locale par centres apprenables, mais limite le nombre de centres et de paramètres conditionnels.
+  \item Elle garde un chemin global affine pour réduire les erreurs systématiques de faible ordre.
+  \item Elle évite par défaut l'attention multi-tours entre tous les centres, mécanisme coûteux dans ARCH\_UP\_TEST\_1.
+  \item Elle offre des ablations interprétables : couverture fixe, centres adaptatifs, correction globale, modulation de faible rang et top-k.
+\end{itemize}
+
+\section{Hypothèses EX12 à préenregistrer}
+
+\begin{longtable}{P{1.25cm}P{4.1cm}P{8.4cm}}
+\toprule
+\textbf{ID} & \textbf{Hypothèse} & \textbf{Test décisif}\\
+\midrule
+H1 & Une couverture globale fixe augmente la robustesse hors support par rapport à une initialisation KMeans seule. & Comparer KMeans, farthest-point et couverture faible-discrépance, à nombre de centres et budget identiques ; mesurer interpolation, frontière et extrapolation.\\
+H2 & Un petit ensemble de centres locaux adaptatifs réduit l'erreur sans coût disproportionné. & Comparer $K_g$ seul, $K_l$ seul et hybride $K_g+K_l$ ; mesurer MAE/NMAE et temps total.\\
+H3 & Une correction globale affine améliore les erreurs systématiques sans reconstituer un MLP complet. & Ablation avec/sans voie affine, paramètre-ajustée et sans différence d'optimisation.\\
+H4 & Une modulation conditionnelle de faible rang apporte un bénéfice supérieur à son surcoût. & Comparer HC-RBF et HC-RBF-LR à paramètres appariés, puis mesurer latence p50/p95.\\
+H5 & Une activation parcimonieuse accélère réellement l'inférence. & Comparer dense et top-$q$ pour plusieurs $K,q$, y compris le coût du top-k, sur CPU et GPU si disponibles.\\
+H6 & La vectorisation améliore le débit sans modifier le calcul mathématique. & Tests numériques et gradients entre référence et optimisée ; microbenchmarks isolés D1/D2-like.\\
+H7 & Des centres différents acquièrent des contributions complémentaires et stables. & Ablations LOO, diversité d'erreurs, permutations, stabilité entre graines et entre tâches.\\
+H8 & L'architecture hybride est non-inférieure au MLP apparié tout en améliorant au moins une ressource réelle. & Comparaison confirmatoire à paramètres égaux ; qualité, temps, latence, mémoire mesurés sur mêmes conditions.\\
+\bottomrule
+\end{longtable}
+
+\section{Programme expérimental EX12 proposé}
+
+\subsection{Phase P0 : gel documentaire et contrat de reproduction}
+
+\begin{enumerate}
+  \item Créer un nouveau workspace EX12, sans modifier ni relancer les répertoires EX10, EX11 ou ARCH\_UP\_TEST\_1.
+  \item Geler les sources, versions, configs, dépendances, seeds, splits, budgets, commandes, métriques, règles de décision et SHA-256.
+  \item Ajouter au dossier d'entrée ARCH\_UP\_TEST\_0 si sa récupération est possible. Tant qu'il manque, inscrire cette absence dans le manifeste et ne pas inventer de chiffres.
+  \item Documenter séparément les résultats exploratoires déjà vus et les tests confirmatoires nouvellement générés.
+\end{enumerate}
+
+\subsection{Phase P1 : banc d'essai informatique avant apprentissage}
+
+Construire des microbenchmarks indépendants pour : (i) distance latente dense, (ii) activation gaussienne, (iii) normalisation, (iv) readout, (v) top-k, (vi) modulation faible rang, (vii) message passing trois tours comme bras de référence. Mesurer le coût par opération, les allocations, le trafic mémoire estimé et la latence de bout en bout. Les résultats D1/D2 invitent à commencer par l'équivalence numérique et la mise en page mémoire avant les campagnes d'apprentissage.
+
+Les mesures doivent inclure le coût de préparation/initialisation des centres, le coût de compilation éventuelle, le temps froid de première inférence et la latence chaude stabilisée. Une optimisation ne sera jamais créditée d'un gain en ignorant le coût qu'elle déplace vers l'initialisation ou le pre-processing.
+
+\subsection{Phase P2 : criblage architectural contrôlé}
+
+Comparer un petit ensemble de variantes, avec une seule différence planifiée à chaque contraste :
+\begin{center}
+\small
+\begin{tabular}{P{2.0cm}P{4.0cm}P{7.2cm}}
+\toprule
+\textbf{Code} & \textbf{Variante} & \textbf{Question isolée}\\
+\midrule
+M0 & MLP apparié & Référence de qualité et de coût à capacité équivalente.\\
+R0 & AdaptiveRBF KMeans & Référence de base historique, vectorisée.\\
+C1 & RBF couverture globale & Effet de la stratégie de couverture des centres.\\
+C2 & RBF centres locaux adaptatifs & Effet de l'adaptation locale seule.\\
+C3 & HC-RBF hybride & Complémentarité couverture globale + centres locaux.\\
+C4 & HC-RBF + correction affine & Valeur de la correction globale faible capacité.\\
+C5 & HC-RBF-LR & Valeur de la modulation d'entrée faible rang.\\
+C6 & HC-RBF sparse top-$q$ & Gain matériel réel de l'activation parcimonieuse.\\
+G1 & B4 dynamique apparié & Bras témoin de coordination par graphe, réduit à budget comparable.\\
+G2 & B4 graphe randomisé & Contrôle de la valeur spécifique de la topologie.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le criblage doit utiliser une grille limitée : $K_g\in\{8,16,32\}$, $K_l\in\{0,4,8,16\}$, $d\in\{4,8,16\}$, et $q\in\{2,4,8,K\}$ si la parcimonie est testée. Les grilles exactes peuvent être resserrées après le benchmark matériel, mais elles doivent être gelées avant ouverture du test.
+
+\subsection{Phase P3 : tâches et généralisation}
+
+\textbf{Bloc synthétique.} Conserver les quatre fonctions historiques pour comparabilité, mais créer des graines de données distinctes et des domaines de test contrôlés. Ajouter des compositions inédites qui ne sont pas utilisées pour choisir les hyperparamètres. Séparer strictement interpolation, frontière, extrapolation et décalage de distribution.
+
+\textbf{Bloc tabulaire.} Utiliser des jeux nouveaux pour EX12, non exploités pour le réglage antérieur, avec partitions groupées et documentées. Ne pas ouvrir les tests scellés EX11. Inclure classification et régression si les sources de données et les budgets le permettent. Toute donnée déjà exposée historiquement doit être étiquetée comme développement ou réplication, jamais comme test indépendant.
+
+\textbf{Graines.} Réaliser un pilote avec au moins 10 graines pour estimer la variance, puis une campagne confirmatoire de 20 graines par tâche lorsque le coût le permet. Le nombre final doit être justifié par une analyse de puissance utilisant les différences appariées du pilote ; cinq graines ne suffisent pas pour revendiquer une généralisation robuste.
+
+\subsection{Phase P4 : comparaison MLP réellement équitable}
+
+Le comparateur principal est un MLP ayant un nombre de paramètres entraînables à $\pm 1\%$ de la candidate, ou le plus proche nombre réalisable documenté. Le budget de recherche d'hyperparamètres et le nombre d'essais doivent être comparables. Un second MLP de référence, avec réglage raisonnable et largeur/profondeur choisies sur validation, peut être rapporté pour éviter qu'une seule configuration artificiellement faible ne serve de baseline.
+
+Il faut distinguer :
+\begin{itemize}
+  \item nombre de paramètres entraînables ;
+  \item nombre total de scalaires stockés, y compris centres fixes et buffers ;
+  \item taille des checkpoints en octets ;
+  \item mémoire de travail maximale par processus ;
+  \item coût de prétraitement et d'initialisation.
+\end{itemize}
+
+La condition EX12 n'est pas un ratio de compacité de quatre. La comparaison est à capacité égale, sans obligation de dépasser un seuil arbitraire de réduction paramétrique. Tout gain de mémoire de modèle doit rester séparé du nombre de paramètres entraînables.
+
+\subsection{Phase P5 : mesures de qualité, coût et stabilité}
+
+Pour chaque tâche :
+\begin{itemize}
+  \item classification : accuracy, balanced accuracy, macro-F1, log-loss, Brier et calibration ;
+  \item régression : MAE, RMSE et NMAE normalisée par une échelle calculée sur train ;
+  \item généralisation : score test in-domain, frontière, extrapolation, OOD et écart au domaine de train ;
+  \item ressources : temps total d'entraînement, temps de sélection et d'initialisation, latence p50/p95 en batch 1, 16, 64 et 256, débit, mémoire maximale, taille de checkpoint ;
+  \item stabilité : moyenne, écart-type, quantiles et taux de victoire par graines, et non seulement une moyenne agrégée.
+\end{itemize}
+
+Les benchmarks doivent être effectués avec environnement fixé et journalisé : CPU mono-thread, nombre de threads explicite, warm-up identique, répétitions suffisantes et ordre randomisé des modèles. Si GPU disponible, présenter un tableau séparé, sans agréger des mesures CPU et GPU. L'énergie reste \code{NOT\_MEASURED} si aucun compteur matériel fiable n'est disponible.
+
+\subsection{Phase P6 : ablations et preuve de complémentarité}
+
+Pour chaque candidate multi-centres, effectuer : (i) retrait de chaque centre sans réentraînement du readout ; (ii) retrait avec réentraînement du readout ; (iii) permutation des identifiants de centres avec correspondance des paramètres ; (iv) mesure de la similarité des erreurs par centre ; (v) stabilité des rôles entre graines ; (vi) vérification que les gains ne proviennent pas seulement de l'augmentation de capacité. Une branche n'est qualifiée de spécialiste que si son rôle est reproductible et sa contribution utile démontrée.
+
+\subsection{Phase P7 : verrouillage, scoring et audit}
+
+Après sélection sur validation, geler les checkpoints et leur SHA-256, geler les prédictions de validation et la configuration, puis ouvrir les holdouts une seule fois. Recalculer les métriques depuis les prédictions persistées. Conserver les runs défavorables, échoués ou non conformes. Les audits doivent vérifier les splits, prétraitements train-only, absence de fuite, hashes, nombre de paramètres, équivalence numérique des kernels optimisés, et conformité des mesures de ressources. Les scripts doivent refuser de relancer entraînement et scoring dans un workspace déjà verrouillé.
+
+\section{Critères de décision et règles d'arrêt}
+
+\subsection{Règle générale}
+
+Une candidate EX12 ne sera pas qualifiée de meilleure architecture parce qu'elle gagne une seule métrique. La conclusion doit être une décision multi-critère : qualité, ressources, généralisation et stabilité doivent être examinées ensemble, tâche par tâche.
+
+\subsection{Seuils proposés à ratifier avant P0}
+
+Les seuils suivants sont une proposition de pré-enregistrement, à confirmer selon le domaine d'application avant tout entraînement confirmatoire :
+\begin{itemize}
+  \item \textbf{Qualité non inférieure :} pour la régression, différence de NMAE candidate moins MLP au plus $+0,02$ ; pour la classification, différence d'accuracy au moins $-0,5$ point de pourcentage et différence de log-loss au plus $+0,01$. Ces marges ne doivent être utilisées que si elles sont défendables pour les tâches retenues.
+  \item \textbf{Latence :} p50 et p95 au plus 1,10 fois celles du MLP apparié sur les tailles de batch déclarées pour revendiquer une efficacité concurrentielle. Une meilleure p50 ne compense pas une p95 dégradée de façon importante.
+  \item \textbf{Entraînement :} temps de bout en bout au plus 1,25 fois celui du MLP apparié, en incluant initialisation et étapes spécifiques à la sonde.
+  \item \textbf{Mémoire :} mémoire maximale par processus ne dépassant pas 1,10 fois le MLP apparié, sauf si une amélioration mesurée sur une autre ressource répond explicitement à la cible opérationnelle.
+  \item \textbf{Généralisation :} aucun gain d'interpolation ne peut masquer une dégradation significative sur les splits de frontière, extrapolation ou OOD ; l'écart candidate--MLP doit être reporté séparément sur chaque régime.
+  \item \textbf{Stabilité :} aucun résultat ne doit dépendre d'une ou deux graines atypiques ; les contrastes primaires doivent être appariés et leurs intervalles corrigés pour la multiplicité prévue.
+\end{itemize}
+
+\subsection{Statistiques}
+
+Les contrastes primaires doivent être nommés avant entraînement. Les différences sont calculées par tâche et par graine appariées. Les intervalles à 95\% sont rapportés avec les différences brutes et tailles d'effet. Pour les comparaisons multiples, appliquer une correction de Holm aux contrastes confirmatoires secondaires. Pour un ensemble de tâches, présenter les effets spécifiques à chaque tâche et une synthèse hiérarchique ; ne pas moyenner naïvement des MAE dont les échelles de sortie diffèrent. Un résultat exploratoire ne devient pas confirmatoire par la seule publication d'un intervalle bootstrap.
+
+\subsection{Décision go/no-go}
+
+\begin{tabularx}{\textwidth}{P{2.3cm}YY}
+\toprule
+\textbf{Décision} & \textbf{Condition} & \textbf{Action}\\
+\midrule
+GO architecture & Non-infériorité qualité et objectifs de latence/entraînement/mémoire atteints sur tâches confirmatoires. & Étendre à de nouveaux domaines et augmenter le budget de graines.\\
+GO optimisation & Fonction équivalente à tolérance près et accélération reproductible, même si la qualité n'est pas meilleure. & Conserver la version optimisée comme implémentation de référence.\\
+GO partiel & Qualité favorable mais coût hors seuil, ou gain limité à certaines tâches. & Publier comme compromis spécialisé ; ne pas revendiquer un remplacement général.\\
+NO-GO dynamique & Le faible-rang ou graphe ajoute du coût sans gain stable à budget égal. & Retirer la dynamique et garder HC-RBF de base.\\
+NO-GO extrapolation & Couverture n'améliore pas les régimes hors support contre MLP. & Réviser la représentation et le détecteur de support ; ne pas multiplier les centres sans hypothèse nouvelle.\\
+\bottomrule
+\end{tabularx}
+
+\section{Risques méthodologiques et contrôles nécessaires}
+
+\begin{enumerate}
+  \item \textbf{Couverture mal définie.} Un grand nombre de centres peut créer une impression de couverture sans améliorer la prédiction. Mesurer les distances, masses d'activation et erreurs conditionnelles ; ne pas confondre couverture géométrique et couverture statistique.
+  \item \textbf{Effondrement des centres.} L'optimisation peut rapprocher plusieurs centres ou les pousser vers les mêmes régions. Suivre les distances inter-centres, utiliser des contraintes de séparation ou pénalités préenregistrées et signaler les duplications.
+  \item \textbf{Largeurs instables.} Paramétrer les largeurs par une transformation positive bornée et surveiller les saturations aux bornes.
+  \item \textbf{Top-k contre-intuitif.} Le tri peut coûter davantage que les multiplications économisées pour un petit $K$. Mesurer le coût total et garder une référence dense.
+  \item \textbf{Correction globale trop puissante.} Une branche globale trop large peut reconstituer un MLP et masquer l'apport des centres. Limiter sa capacité et fournir une baseline équivalente.
+  \item \textbf{Fuite par les résidus.} Toute relocalisation de centres à partir des résidus doit utiliser le train uniquement. Les statistiques d'ablation et de corrélation ne doivent pas utiliser validation ou test pour créer le graphe.
+  \item \textbf{Biais de sélection.} Les hyperparamètres, le nombre de centres et la sparsité sont choisis sur validation avec budget égal. Le test n'est jamais utilisé pour relancer une variante.
+  \item \textbf{Coût déplacé.} Les centres déterministes ou KMeans ont un coût d'initialisation ; le compilateur a un coût à froid ; les caches ont une consommation mémoire. Tous doivent être inclus dans le coût de production.
+  \item \textbf{Interprétabilité surinterprétée.} Une activation ou un poids d'attention ne prouve pas un concept. La spécialisation exige stabilité et ablations.
+  \item \textbf{Petit nombre de tâches/graines.} Les résultats historiques à cinq graines sont des pilotes. La puissance confirmatoire doit être dimensionnée sur la variance observée, et chaque tâche garde son résultat individuel.
+\end{enumerate}
+
+\section{Livrables attendus d'EX12}
+
+\begin{itemize}
+  \item Spécification mathématique de \HC{} et définition explicite des variantes et hypothèses.
+  \item Pré-enregistrement versionné, plan des graines, tâches, splits, budgets, métriques, marges de non-infériorité et règles d'arrêt.
+  \item Code de référence et code vectorisé, tests d'équivalence des sorties et gradients.
+  \item Manifestes de données train/validation/test, provenance, SHA-256, règles train-only et registre append-only.
+  \item Checkpoints verrouillés, prédictions de validation et test, métriques recalculables.
+  \item Profilage ressources séparé par matériel : temps d'entraînement de bout en bout, p50/p95, mémoire maximale, taille modèle et, si matériellement disponible, énergie.
+  \item Tableau par tâche et par graine, ablations, intervalles statistiques, analyse OOD et extrapolation.
+  \item Audit final indépendant et rapport de conformité distinguant runs terminés, exploratoires, échoués et incomplets.
+\end{itemize}
+
+\section{Conclusion}
+
+Les sources confirment que le projet dispose d'une théorie de l'observation structurée, d'une capacité RBF démontrée sur plusieurs problèmes synthétiques, de résultats CNG encourageants en interpolation et d'une implémentation de coordination dynamique effectivement instrumentée dans ARCH\_UP\_TEST\_1. Elles confirment aussi trois limites qui doivent gouverner EX12 : les performances ne se transfèrent pas toujours hors du domaine d'apprentissage ; la topologie issue des empreintes n'apporte pas un avantage universel par rapport au graphe randomisé ; et le coût de l'interaction peut annuler tout gain de compacité.
+
+Le résultat ARCH\_UP\_TEST\_1 est particulièrement instructif : la communication multi-centres peut faire progresser la qualité, mais cette progression n'est pas gratuite. En l'absence de baseline MLP à capacité égale, le pilote ne répond pas à la question du remplacement. Son apport principal est d'avoir montré une coordination conditionnée par l'entrée, avec un contrôle topologique intéressant et des audits solides, tout en quantifiant le surcoût.
+
+La voie recommandée pour EX12 est donc une base à couverture globale et adaptation locale, vectorisée de bout en bout, avec modulation de faible rang et sélection parcimonieuse seulement en tant qu'extensions testées séparément. Le MLP doit être apparié en nombre de paramètres et en budget d'optimisation ; la qualité, la latence, le temps d'apprentissage, la mémoire, la stabilité et les régimes OOD doivent être traités conjointement. D1/D2 montre qu'une optimisation de l'organisation des calculs peut produire un gain net sans changer la fonction, et cette piste doit être exploitée avant de réintroduire des mécanismes de coordination plus lourds.
+
+\textbf{Décision finale :} EX12 est scientifiquement justifié comme programme ciblé de couverture et d'efficacité. Il ne faut pas lancer une nouvelle architecture multi-branches complexe avant d'avoir établi, à capacité égale, qu'une RBF hybride vectorisée peut être non inférieure au MLP sur la qualité et compétitive sur le coût de bout en bout. L'architecture \HC{} est une hypothèse prioritaire à tester, pas une conclusion déjà acquise.
+
+\newpage
+\appendix
+\section{Sources archivées examinées}
+
+Les identifiants ci-dessous renvoient aux artefacts présents dans \code{/\allowbreak{}last\_\allowbreak{}sources\_\allowbreak{}3}. Les chemins sont abrégés lorsque les mêmes fichiers existent en plusieurs copies.
+
+\begin{description}[leftmargin=1.2cm,labelwidth=0.9cm,style=nextline]
+  \item[S1] \code{th\_\allowbreak{}sondes\_\allowbreak{}core\_\allowbreak{}test\_\allowbreak{}0.tex} et sa copie EX10 : définition de la sonde, CNG, CNC, mesures et critères.
+  \item[S2] \code{th\_\allowbreak{}sondes\_\allowbreak{}core\_\allowbreak{}test\_\allowbreak{}1.tex} : protocole étendu, ablations, généralisation et tests scellés.
+  \item[S3] \code{DDD\_\allowbreak{}Base\_\allowbreak{}theorie\_\allowbreak{}des\_\allowbreak{}empreintes\_\allowbreak{}complete\_\allowbreak{}order\_\allowbreak{}5.tex} : empreintes, quotients, fermeture, factorisation, seuils et résolution.
+  \item[S4] \code{etude\_\allowbreak{}et\_\allowbreak{}formalisme\_\allowbreak{}sonde\_\allowbreak{}adaptative\_\allowbreak{}1.tex} : sonde adaptative, état d'optimisation et imitation.
+  \item[S5] \code{FORMALISME\_\allowbreak{}ADAPTATION\_\allowbreak{}GLOBALE.tex} : organisation multi-sondes et coordination globale.
+  \item[S6] \code{NGeGenBrain\_\allowbreak{}observation\_\allowbreak{}formalisme\_\allowbreak{}full\_\allowbreak{}0.tex} et \code{NGeGenBrain\_\allowbreak{}observation\_\allowbreak{}formalisme\_\allowbreak{}next\_\allowbreak{}1.tex} : observation, invariants, reconstruction et limites d'identifiabilité.
+  \item[S7] \code{EX7\_\allowbreak{}formalisme\_\allowbreak{}hybride\_\allowbreak{}arch\_\allowbreak{}0.tex} : familles RBF, Matrix, Matrix-Vector et Hybrid proposées.
+  \item[S8] EX10 : rapports finaux de résultats, rapport complet CNG/CNC et audit final d'intégrité.
+  \item[S9] EX10 : CSV de résultats, statistiques appariées, mesures de ressources, pré-enregistrement et artefacts complémentaires.
+  \item[S10] EX11 snapshot : statut de livraison, registres JSONL append-only, rapports REPLICA-U, statistiques appariées et rapport d'efficacité D1/D2.
+  \item[S11] ARCH\_UP\_TEST\_1 : README et protocoles du pilote, des règles de décision et du changelog.
+  \item[S12] ARCH\_UP\_TEST\_1 : code du modèle, script d'entraînement, configuration du pilote et tests unitaires.
+  \item[S13] ARCH\_UP\_TEST\_1 : résultats détaillés, résumé par fonction, comparaisons appariées et résultats par exécution.
+  \item[S14] ARCH\_UP\_TEST\_1 : manifestes expérimentaux, verrouillages d'entraînement et de scoring, audit final et checksums.
+  \item[S15] EX6/\allowbreak{}EX7/\allowbreak{}EX8/\allowbreak{}EX9 : rapports finaux, audits, résultats et spécifications des architectures et comparateurs historiques.
+  \item[S16] Archive principale \code{last\_\allowbreak{}sources\_\allowbreak{}3.zip} : 34 entrées, test CRC PASS ; 18 ZIP imbriqués extraits.
+\end{description}
+
+\section{Points explicitement non établis}
+
+\begin{itemize}[itemsep=0.04em,topsep=0.08em,parsep=0pt]
+\small
+  \item Aucun résultat chiffré propre à ARCH\_UP\_TEST\_0 n'est disponible dans les pièces jointes accessibles.
+  \item Aucun résultat d'ARCH\_UP\_TEST\_1 contre un MLP n'est disponible : le bras B0 est une AdaptiveRBF classique.
+  \item Aucune mesure d'énergie fiable ou de mémoire maximale attribuable par variante n'est livrée dans ARCH\_UP\_TEST\_1.
+  \item Les résultats EX11 tabulaires sont des résultats de validation dans ce snapshot ; les tests scellés ne sont pas ouverts.
+  \item Les campagnes confirmatoires CNG v004, CNC v005 et D3Q v004 affichées à zéro run dans le snapshot EX11 ne peuvent pas être considérées comme exécutées.
+  \item Les performances de \HC, de sa modulation faible rang, de sa sparsité et de sa couverture globale restent entièrement à mesurer.
+\end{itemize}
+
+\end{document}

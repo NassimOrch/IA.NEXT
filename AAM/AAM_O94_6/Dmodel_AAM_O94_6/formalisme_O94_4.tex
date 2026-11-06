@@ -1,0 +1,99 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{longtable,booktabs,hyperref,amsmath,amssymb,xcolor}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Formalisme incrémental AAM O94\_4\\Couverture d'entraînement et sélection RAG pertinente}
+\author{Dossier technique AAM}
+\date{Version 0.94.4 -- 20 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Description et périmètre}
+O94\_4 prolonge O94\_3 avec deux corrections incrémentales observées expérimentalement : la couverture des fenêtres d'entraînement et la pertinence du contexte RAG en sortie. Le moteur d'observation, les adaptateurs de modèles et le compilateur de composition ne sont pas réécrits. L'audit O94\_3 a révélé, sur une exécution réelle de \texttt{\detokenize{train-language-model}}, que l'ensemble d'entraînement comportait 8\,707 fenêtres next-token alors que le moteur n'en consommait que 5\,000 par époque. La validation disposait de 1\,708 fenêtres et n'en évaluait que 1\,000. Ces plafonds étaient cachés dans les valeurs par défaut et n'étaient pas configurables depuis l'interface CLI.
+
+Le changement O94\_4 rend les plafonds d'entraînement facultatifs et explicites : en absence d'option de budget, la totalité des fenêtres train et validation disponibles est utilisée. Le test d'usage RAG a aussi montré que des documents à faible score positif pouvaient rester dans les résultats, et que la phrase d'identification pouvait être mieux classée que la phrase donnant une fréquence, même pour une question « How often ». O94\_4 applique un seuil relatif transparent au niveau des chunks et ajoute un signal générique d'intention fréquentielle à la sélection de phrases observées. L'opérateur conserve la possibilité de demander un plafond positif et visible pour une exécution contrainte. Le mécanisme ne promet aucun niveau de performance ; il garantit la traçabilité du nombre de fenêtres disponibles et réellement traitées. Les caps d'epochs, vocabulaire, dimension, contexte, budget d'exécution global et arrêt coopératif demeurent indépendants et déclarés.
+
+\section{Contrat de pertinence RAG et sélection d'une phrase de réponse}
+Soit les chunks candidates triés selon un score non négatif $s_1\geq s_2\geq\cdots\geq0$. O94\_4 définit $s_{\max}=s_1$ et conserve le chunk $i$ seulement si
+\[
+ s_i\geq\tau,\qquad \tau=\max(0.28s_{\max},s_{\max}-1.0).
+\]
+Cette règle relative reprend le seuil déjà utilisé par le routage des feuilles de micro-RAG, et évite qu'un faible chevauchement positif obtenu par élargissement contextuel suffise à injecter des documents éloignés. Le nombre de candidats classés, conservés et écartés, le meilleur score et le seuil sont inscrits dans les diagnostics. Ce seuil est un critère de sélection borné, pas une preuve d'absence de tout document utile hors résultats.
+
+Pour les passages en prose, la sélection extractive fonctionne sur des phrases complètes et observe l'intention générique de la question. Si la formulation signale une fréquence (« how often », « how frequently », « à quelle fréquence », « tous les combien »), une phrase contenant un marqueur d'intervalle attesté dans la source reçoit un bonus de classement. Le bonus ne génère aucun contenu : il ne fait que réordonner les phrases déjà présentes. La provenance reste le passage source signé, et une réponse extractive est toujours déclarée non vérifiée.
+
+\section{Architecture}
+\begin{center}
+\fbox{\parbox{0.91\linewidth}{\centering
+Corpus local décodé $\to$ segments/documents dédupliqués $\to$ partition par document TRAIN / VALIDATION / TEST $\to$ vocabulaire ajusté sur TRAIN seulement\\[2pt]
+$\downarrow$\\
+Séquences next-token $\to$ configuration de couverture des fenêtres $\to$ modèle attention à tokens-empreintes $\to$ Adam et checkpoints\\[2pt]
+$\downarrow$\\
+Validation sur les fenêtres sélectionnées par politique explicite $\to$ sélection du checkpoint de validation $\to$ évaluation TEST indépendante $\to$ capsule hashée et registre de chat
+}}
+\end{center}
+
+Les modules concernés sont : \texttt{\detokenize{aam_o92/language.py}} (plan de couverture et boucle d'apprentissage), \texttt{\detokenize{aam_o92/engine.py}} (propagation vers le service), \texttt{\detokenize{aam_o93/runtime.py}} (validation et enregistrement des paramètres), \texttt{\detokenize{aam_o93/cli.py}} (options explicites), \texttt{\detokenize{aam_o93/semantic_rag.py}} (seuil des chunks) et \texttt{\detokenize{aam_o93/resolution_tree.py}} (classement des phrases par intention). \texttt{\detokenize{aam_o93/preflight.py}}, le gate O94\_3 et le nouveau gate O94\_4 assurent la coexistence des versions : le point de sauvegarde O94\_3 reste conservé, les différences O94\_4 sont acceptées uniquement si elles ont un hash vérifiable dans le manifeste descendant.
+
+\section{Définitions de couverture}
+Soit $T$ l'ensemble fini des fenêtres d'entraînement après partitionnement et tokenisation, et $V$ l'ensemble des fenêtres de validation. Les tailles disponibles sont $N_T=|T|$ et $N_V=|V|$. Pour un budget explicite $b_T\in\mathbb{N}_{>0}\cup\{\bot\}$, le nombre traité à chaque époque est
+\[
+U_T=\begin{cases}N_T,&b_T=\bot,\\\min(N_T,b_T),&b_T\ne\bot.\end{cases}
+\]
+De même, pour $b_V$ :
+\[
+U_V=\begin{cases}N_V,&b_V=\bot,\\\min(N_V,b_V),&b_V\ne\bot.\end{cases}
+\]
+Le symbole $\bot$ signifie « aucun plafond demandé par l'opérateur », et non zéro. Les valeurs absentes utilisent $\bot$. Les valeurs nulles, négatives ou booléennes sont rejetées. L'ordre des exemples TRAIN est mélangé par le générateur déterministe associé à la graine ; quand un plafond est expressément activé, il porte sur cet ordre mélangé.
+
+Le reçu d'entraînement distingue au minimum les tailles disponibles, les tailles effectivement traitées par époque, la politique de plafonnement et l'évaluation TEST. La valeur \texttt{\detokenize{PASS_BOUNDED}} qualifie une exécution et son périmètre, pas la vérité générale de la compétence apprise.
+
+\section{Pipeline d'exécution complet}
+\begin{enumerate}
+\item Lire les formalismes, les checklists de phases et d'erreurs ainsi que \texttt{\detokenize{chemins_O94.json}}; valider le gate avant la commande.
+\item Calculer le manifeste de sources et lire le corpus sans modifier les sources originales.
+\item Dédupliquer les documents et créer les partitions au niveau du document ; ne pas mélanger les fenêtres d'un même document entre partitions.
+\item Ajuster le vocabulaire sur TRAIN seulement et construire toutes les fenêtres train, validation et test.
+\item Valider les options de budget. Par défaut, ne pas tronquer les listes TRAIN ou VALIDATION. Si l'opérateur a demandé un plafond, le reporter dans les paramètres, les reçus et l'artefact.
+\item Entraîner sur les fenêtres retenues, respecter les demandes pause/arrêt aux frontières de gradient et écrire des checkpoints.
+\item Choisir le meilleur checkpoint sur la validation déclarée ; calculer la perte et la perplexité sur les données TEST, sans les utiliser pour choisir les poids.
+\item Écrire une capsule sans texte brut d'entraînement, vérifier ses hashes, puis enregistrer les comptes et la politique de couverture.
+\item Enregistrer résultats, erreurs et preuves, mettre à jour les checklists dans l'ordre séquentiel, rafraîchir le savepoint et valider les manifests avant d'emballer la release.
+\end{enumerate}
+
+\section{Commandes d'exécution}
+Entraînement sans plafond caché :
+\begin{verbatim}
+python -m aam_o93 preflight
+python -m aam_o93 train-language-model ./corpus \\
+  --epochs 5 --max-vocab 128 --dim 16 --context-size 5 --seed 94
+\end{verbatim}
+Dans ce cas, toutes les fenêtres train et validation produites sont utilisées. Pour un profil de calcul explicitement limité :
+\begin{verbatim}
+python -m aam_o93 train-language-model ./corpus \\
+  --epochs 3 --max-steps-per-epoch 5000 --max-validation-windows 1000
+\end{verbatim}
+Ces deux options sont des budgets explicites ; le reçu précise les compteurs disponibles et utilisés. Dans l'interface graphique, le bouton d'entraînement conserve la politique sans plafond de fenêtres par défaut. Les boutons Pause/Arrêt servent au contrôle opérationnel et les checkpoints ne sont pas assimilés automatiquement à une capsule publiée.
+
+\section{Résultats et interprétation de l'audit}
+La reproduction préalable du défaut utilisait \texttt{\detokenize{examples/training_corpus}}, \texttt{\detokenize{--epochs 1 --max-vocab 48 --dim 8 --context-size 4 --seed 94}}. Elle comptait 8\,707 fenêtres d'entraînement, 1\,708 fenêtres de validation et 2\,940 fenêtres de test. Le moteur n'en utilisait que 5\,000 à l'entraînement et 1\,000 à la validation. Les proportions effectives étaient donc respectivement $5000/8707\approx57.42\%$ et $1000/1708\approx58.55\%$. Ce constat motive le correctif ; il ne permet pas à lui seul de conclure à une meilleure qualité générative.
+
+La version O94\_4 est considérée validée pour ces corrections seulement si : (i) par défaut, les compteurs traités égalent les compteurs disponibles ; (ii) les plafonds explicites sont appliqués sans dépasser le nombre disponible ; (iii) les entrées non valides sont refusées ; (iv) entraînement, publication de capsule et tests existants restent fonctionnels ; (v) le gate parent et le gate descendant passent ; (vi) un scénario à deux sources éloignées exclut le score faible et une question de fréquence choisit le passage qui contient l'intervalle observé.
+
+\section{Résultats, conséquences et limites de portée}
+\textbf{Théoriques :} la couverture empirique devient une donnée observable du protocole ; une valeur de perte calculée sur une validation partielle ne se présente plus comme une évaluation de l'ensemble de validation lorsque la limite est implicite.
+
+\textbf{Conceptuelles :} un plafond de calcul reste utile comme politique d'exécution, mais il doit être un paramètre explicite distinct de la capacité du modèle. L'absence de plafond de fenêtres ne garantit pas la généralisation, la qualité du corpus ou la justesse des générations.
+
+\textbf{Opérationnelles :} le comportement par défaut couvre la totalité des fenêtres construites ; des plafonds sont accessibles dans le CLI et sont consignés. Les budgets de durée, nombre d'époques, dimension et vocabulaire restent disponibles pour maîtriser les ressources, sans cacher une réduction du corpus effectivement parcouru.
+
+La correction ne remplace pas l'attention à tokens-empreintes par un LLM pré-entraîné, n'ajoute pas d'accès Internet ou de GPU, et ne transforme pas un modèle de corpus compact en modèle fondation. Les adaptateurs O94\_3 pour TorchScript, Transformers local, PyTorch architecture-specific, Ollama et API compatibles restent inchangés hors étiquettes de release.
+
+\section{Conclusion et statut}
+O94\_4 corrige le plafonnement silencieux des fenêtres train/validation et un défaut observé de sélection RAG (source secondaire à faible score et phrase extractive non alignée sur une question de fréquence). Le statut final est dans \texttt{\detokenize{checklist_de_travail_O94_4.json}}, le reçu de couverture dans \texttt{\detokenize{receipts/O94_4/}}, et les erreurs dans \texttt{\detokenize{checklist_erreurs_model_O94_4.json}} et \texttt{\detokenize{checklist_erreurs_no_model_O94_4.json}}. Un statut de phase n'est accordé qu'après exécution des critères listés et vérification des hashes. Aucun succès ou échec global de l'objectif de long terme AAM n'est déduit de cette correction locale.
+\input{cible_fonctionnelle_AAM_O94_4.tex}
+
+\end{document}

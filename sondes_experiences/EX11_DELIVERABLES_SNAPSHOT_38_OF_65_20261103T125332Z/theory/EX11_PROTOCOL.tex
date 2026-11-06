@@ -1,0 +1,69 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,booktabs,longtable,geometry,hyperref}
+\geometry{margin=2.4cm}
+\title{EX11 — Formalisation scientifique et protocole expérimental}
+\author{Dossier de recherche EX11}
+\date{3 novembre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Mission et principe de vérité}
+EX11 étudie séparément REPLICA-U, CNG/CNC et l'efficacité d'implémentation D1/D2/D3. La règle d'inférence est empirique : aucune supériorité ni aucun échec n'est présumé. Toute mesure doit être rattachée à une configuration, une version de code, un dataset ou générateur, une graine, des prédictions et un checkpoint persistés.
+\section{Sonde AdaptiveRBF}
+Pour $x\in\mathbb R^p$, une sonde calcule
+\[
+z(x)=\tanh(W_ex+b_e),\qquad
+\phi_k(x)=\exp\left(-\frac{\|z(x)-c_k\|_2^2}{2\sigma_k^2}\right),\quad k=1,\ldots,K,
+\]
+\[
+P(x)=V\phi(x)+b.
+\]
+La configuration de départ retient $d=4$, $K=8$, centres initialisés sur les seules représentations d'entraînement par KMeans et largeurs positives apprises. La comptabilité distingue paramètres optimisables, buffers persistants et paramètres visibles à l'inférence.
+\section{CNG : multi-sondes et agrégation}
+Pour $M$ sondes indépendantes $P_i$ :
+\[
+h(x)=\begin{bmatrix}P_1(x)\\\vdots\\P_M(x)\end{bmatrix},\qquad
+f_{\rm mean}(x)=\frac{1}{M}\sum_{i=1}^M P_i(x),\qquad
+f_{\rm learned}(x)=W_ch(x)+b_c.
+\]
+A1 utilise une sonde ; A2 utilise $M=2,4,7$ et une moyenne fixe ; A3 utilise $M=2,4,7$ et un composeur linéaire appris. Le MLP apparié et le MLP GE4X sont les contrôles. Le ratio GE4X doit satisfaire exactement $P_{\rm MLP}/P_{\rm sonde}\geq4$.
+\subsection{Fonctions}
+\begin{align*}
+f_1(x)&=\sin x, & x&\in[-\pi,\pi],\\
+f_2(x_1,x_2)&=x_1x_2, & (x_1,x_2)&\in[-2,2]^2,\\
+f_3(x_1,x_2)&=x_1^2+x_2, & (x_1,x_2)&\in[-2,2]^2,\\
+f_4(x_1,x_2,x_3)&=\sin(x_1x_2)+x_3, & x&\in[-2,2]^3,\\
+f_5(x_1,x_2)&=\sin(x_1)+0.5\cos(2x_2), & x&\in[-\pi,\pi]^2,\\
+f_6(x_1,x_2,x_3)&=x_1x_2+0.25x_3^2, & x&\in[-2,2]^3.
+\end{align*}
+Par tâche et graine, la spécification demande 4096 observations d'entraînement, 1024 de validation et 8192 de test scellé ; les tests de bord et d'extrapolation sont séparés. Les seeds sont $1501,1607,1717,2029,3037,4099,4517,5003,6011,7013$.
+\subsection{Ablations}
+L'ablation LOO doit mesurer chaque sonde retirée selon deux conditions : sondes restantes gelées avec composeur réappris, puis système réduit réentraîné depuis une initialisation indépendante. Sans ces deux conditions, la coopération ne peut être affirmée.
+\section{CNC : composition d'opérations}
+Un graphe acyclique $G=(V,E)$ associe à chaque nœud $v$ un opérateur approché $\widehat z_v=P_v(z_{u_1},\ldots,z_{u_k})$. Les spécialistes de base sont ADD, SUB, MUL, DIV, EXP et LOG. Les domaines sont ADD/SUB/MUL dans $[-2,2]$, DIV avec numérateur $[-4,4]$ et dénominateur $[-1,-0.25]\cup[0.25,3]$, EXP dans $[-2,2]$, LOG dans $[0.1,9]$.
+\[
+\begin{aligned}
+g_1(a,b,c)&=ab+e^c, & g_2(a,b,c)&=\frac{ab}{c+1},\\
+g_3(a,b,c)&=\log(a^2+b^2+1)+e^c, & g_4(a,b,c)&=e^{ab}+c,\\
+g_5(a,b,c)&=\log(ab+5)+c^2.
+\end{aligned}
+\]
+Les graphes $g_1,g_2,g_3$ servent à l'apprentissage et à la sélection. $g_4,g_5$ sont des compositions inédites générées après gel des modèles. C1 gèle les spécialistes, C2 les ajuste conjointement, C3 est un MLP direct, C4 une AdaptiveRBF directe, C5 l'oracle exact non appris. Chaque nœud fait l'objet d'une mesure d'erreur et de propagation.
+\section{REPLICA-U}
+Le teacher est défini par
+\[
+z_T=z_B+\sum_{i=1}^{7}\alpha_i r_i,\qquad z_i=z_B+r_i,\qquad \alpha_i\geq0,\quad\sum_i\alpha_i=1.
+\]
+Le routeur reçoit la représentation du backbone, les résidus des spécialistes et leur désaccord. Les spécialistes sont initialisés et ajustés sur train seulement. La loss initiale opérationnelle est
+\[
+\mathcal L_T=\mathcal L_{task}(z_T,y)+0.10\,\frac1{7}\sum_i CE(z_i,y)+0.01\,KL_{disagreement}.
+\]
+Le student autonome minimise une combinaison de CE sur les labels et de KL à température $T=2$ vers les logits teacher OOF. Le fold propriétaire ne doit jamais avoir participé à l'entraînement du teacher qui génère sa cible. À l'inférence, le student ne conserve ni banque de spécialistes ni routeur.
+\section{Efficacité D1/D2/D3}
+D1 exécute les sondes séquentiellement. D2 regroupe les calculs en opérations vectorisées tout en conservant exactement les poids et la fonction. L'équivalence de sorties et gradients doit satisfaire $|\Delta|\leq10^{-6}$ en float32. D3 partage un encodeur ; c'est une hypothèse architecturale distincte, pas une équivalence exacte. Le profilage utilise un CPU mono-thread, au moins 30 échauffements, 200 répétitions et batchs 1, 16, 64, 256. Latence p50/p95/p99, débit, temps forward/backward/optimizer/train complet et RSS sont consignés. L'énergie n'est déclarée que si un compteur fiable existe.
+\section{Règles statistiques et scellage}
+Les comparaisons sont appariées par graine, tâche et split. Le niveau de réplication est la graine ou le domaine, jamais le nombre de lignes d'un même dataset. Train ajuste les transformations ; validation sélectionne ; test demeure scellé jusqu'au gel de tous les artefacts et du scorer. Tous les échecs, reprises et écarts restent enregistrés. La qualification `GE4X` exige un ratio réel au moins égal à quatre.
+\end{document}

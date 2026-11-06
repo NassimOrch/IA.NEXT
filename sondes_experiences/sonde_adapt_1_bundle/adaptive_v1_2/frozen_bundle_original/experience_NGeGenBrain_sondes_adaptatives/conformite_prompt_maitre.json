@@ -1,0 +1,182 @@
+{
+  "title": "Audit de conformité du PROMPT MAÎTRE",
+  "created_utc": "2026-10-28T22:41:12Z",
+  "basis": "Examen de fichiers, scripts, CSV et audits existants ; aucune expérience d’entraînement lancée pour établir cette matrice.",
+  "overall_status": "PASS_WITH_LIMITATIONS",
+  "rows": [
+    {
+      "requirement": "Lire les deux sources obligatoires",
+      "status": "CONFORME",
+      "evidence": [
+        "references/NGeGenBrain_observation_formalisme_full_0.tex",
+        "references/rapport_experience_sondes_adaptatives.tex"
+      ],
+      "notes": "Copies hachées et identiques aux originaux."
+    },
+    {
+      "requirement": "Traçabilité théorie/extension",
+      "status": "CONFORME",
+      "evidence": [
+        "rapport_experience_sondes_adaptatives_complet.pdf",
+        "formalisme_sonde_adaptative.tex"
+      ],
+      "notes": "L’apprentissage est une extension expérimentale, non une propriété automatique de la définition de sonde."
+    },
+    {
+      "requirement": "Condition A sonde adaptative naturelle",
+      "status": "CONFORME",
+      "evidence": [
+        "results/resultats_taches_classification_par_graine.csv",
+        "results/digits_classification_par_graine.csv"
+      ],
+      "notes": "Classifieurs comparés sur les mêmes splits ; contrôle fixe plus petit."
+    },
+    {
+      "requirement": "Condition B apprentissage de son mécanisme",
+      "status": "PARTIELLEMENT_CONFORME",
+      "evidence": [
+        "results/vitesses_adaptation_apprises.csv",
+        "protocole_preregistere.md"
+      ],
+      "notes": "Quatre taux de mise à jour par hypergradient appris ; architecture et mécanisme de gradient préspécifiés."
+    },
+    {
+      "requirement": "Condition C imitation boîte noire",
+      "status": "CONFORME_DANS_LE_DOMAINE_TESTE",
+      "evidence": [
+        "results/imitation_neurone_isole.csv",
+        "results/fidelite_sondes_par_neurone.csv"
+      ],
+      "notes": "Neuf cibles synthétiques, trois familles d’activation ; domaine et familles limités."
+    },
+    {
+      "requirement": "Condition D neurone de référence",
+      "status": "CONFORME_COMME_BASELINE",
+      "evidence": [
+        "results/resultats_taches_classification_par_graine.csv",
+        "results/digits_classification_par_graine.csv"
+      ],
+      "notes": "MLP de référence de laboratoire ; pas un système industriel."
+    },
+    {
+      "requirement": "Contrôles/baselines",
+      "status": "CONFORME_AVEC_LIMITES",
+      "evidence": [
+        "results/resultats_taches_classification_par_graine.csv"
+      ],
+      "notes": "La RBF fixe a moins de paramètres ; les résultats le signalent."
+    },
+    {
+      "requirement": "Tâches contrôlées et neurones isolés",
+      "status": "CONFORME_DANS_LE_DOMAINE_TESTE",
+      "evidence": [
+        "results/imitation_neurone_isole.csv",
+        "protocole_preregistere.md"
+      ],
+      "notes": "Fonctions, tâches synthétiques et neuf cibles neuronales."
+    },
+    {
+      "requirement": "Composition et substitution",
+      "status": "CONFORME_COMME_REMPLACEMENT_LOCAL",
+      "evidence": [
+        "results/composition_remplacement_neurones.csv",
+        "results/digits_composition_remplacement.csv"
+      ],
+      "notes": "La tête/readout aval de la source est conservée."
+    },
+    {
+      "requirement": "Plusieurs tâches",
+      "status": "CONFORME",
+      "evidence": [
+        "results/resultats_taches_classification_par_graine.csv",
+        "results/digits_classification_par_graine.csv",
+        "results/digits_3_vs_8_classification_exploratoire.csv"
+      ],
+      "notes": "Plusieurs tâches synthétiques et benchmarks publics séparés."
+    },
+    {
+      "requirement": "Cas réel complexe",
+      "status": "PARTIELLEMENT_CONFORME",
+      "evidence": [
+        "protocole_cas_reel_multiclasse_v1.md",
+        "rapport_supplement_cas_reel_digits.pdf",
+        "rapport_experience_sondes_adaptatives_complet.pdf"
+      ],
+      "notes": "Benchmarks réels compacts, pas validation de production."
+    },
+    {
+      "requirement": "Métriques/statistiques",
+      "status": "CONFORME_AVEC_PUISSANCE_LIMITEE",
+      "evidence": [
+        "results/digits_synthese_intervalles_95.csv",
+        "results/digits_composition_intervalles_95.csv"
+      ],
+      "notes": "Trois graines ; intervalles descriptifs."
+    },
+    {
+      "requirement": "Préenregistrement et corrections",
+      "status": "CONFORME_AVEC_CORRECTIONS_DOCUMENTEES",
+      "evidence": [
+        "protocole_preregistere.md",
+        "protocole_preregistere_composition_v1_2.md",
+        "audit/audit_integrite.json"
+      ],
+      "notes": "Les chunks erronés v1.1 sont marqués superseded et exclus."
+    },
+    {
+      "requirement": "Règle rouge / audit données",
+      "status": "CONFORME_AUX_CONTROLES_EXECUTES_PAS_ABSOLU",
+      "evidence": [
+        "audit/audit_integrite_finale.json",
+        "audit/audit_integrite_digits_3_vs_8_finale.json",
+        "audit/partition_ledger_evaluation_only.csv"
+      ],
+      "notes": "Pas de sandbox adversarial durci ; aucune garantie absolue sur tous les canaux auxiliaires."
+    },
+    {
+      "requirement": "Intégrité du supplément 3-vs-8",
+      "status": "CONFORME",
+      "evidence": [
+        "audit/audit_integrite_digits_3_vs_8_finale.json",
+        "audit/digits_before_audit_fix_sha256/results.sha256",
+        "audit/digits_after_audit_fix_sha256/results.sha256"
+      ],
+      "notes": "Pas de nouvel entraînement ; SHA des sorties inchangés."
+    },
+    {
+      "requirement": "Code/données reproductibles",
+      "status": "CONFORME_PAR_RÉEXÉCUTION",
+      "evidence": [
+        "src/",
+        "requirements.txt",
+        "README.md"
+      ],
+      "notes": "Pas de checkpoints de poids entraînés conservés ; reproduction par les scripts et graines gelées."
+    },
+    {
+      "requirement": "Rapport, résultats, manifeste et archive",
+      "status": "CONFORME",
+      "evidence": [
+        "rapport_experience_sondes_adaptatives_complet.pdf",
+        "manifest_checksums.json"
+      ],
+      "notes": "Archive ZIP validée ; tous les SHA internes concordent."
+    },
+    {
+      "requirement": "Conclusion circonscrite",
+      "status": "CONFORME",
+      "evidence": [
+        "rapport_experience_sondes_adaptatives_complet.pdf"
+      ],
+      "notes": "Pas de preuve d’équivalence mathématique universelle."
+    }
+  ],
+  "global_limits": [
+    "Condition B apprend seulement des taux de mise à jour par groupe ; elle ne découvre pas un optimiseur depuis zéro.",
+    "Compositions gardent la tête aval du réseau source ; elles ne sont pas autonomes.",
+    "Les jeux réels sont des benchmarks compacts, pas un système opérationnel de production.",
+    "Trois graines et petite taille des données limitent la puissance statistique.",
+    "Audit local, pas un bac à sable adversarial durci.",
+    "Le pipeline historique n’a pas conservé les checkpoints de poids entraînés ; le code et les graines servent à la reproduction."
+  ]
+}

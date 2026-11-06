@@ -1,0 +1,2086 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{report}
+
+% ============================================================
+% EX7 - DOCUMENT DE SYNTHESE DU PROJET
+% ============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,tabularx,array,multirow}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta,
+  positioning,
+  calc,
+  fit,
+  backgrounds,
+  shapes.geometric,
+  shapes.misc
+}
+
+\geometry{
+  a4paper,
+  left=2.15cm,
+  right=2.15cm,
+  top=2.2cm,
+  bottom=2.2cm
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!55!black,
+  pdftitle={EX7 - Synthese generale du projet},
+  pdfsubject={Architecture modulaire a sondes RBF et matricielles}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Projet EX7}
+\fancyhead[R]{Synthèse technique et vision}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=2pt}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=2pt}
+
+\definecolor{blueblock}{RGB}{220,235,250}
+\definecolor{greenblock}{RGB}{222,242,229}
+\definecolor{purpleblock}{RGB}{235,226,248}
+\definecolor{orangeblock}{RGB}{250,234,211}
+\definecolor{grayblock}{RGB}{240,240,240}
+\definecolor{redblock}{RGB}{250,225,225}
+
+\tikzset{
+  exblock/.style={
+    draw,
+    rounded corners=2pt,
+    thick,
+    align=center,
+    text width=3.0cm,
+    minimum height=0.85cm,
+    inner sep=5pt,
+    font=\small
+  },
+  input/.style={
+    exblock,
+    fill=grayblock
+  },
+  local/.style={
+    exblock,
+    fill=greenblock
+  },
+  rbf/.style={
+    exblock,
+    fill=purpleblock
+  },
+  global/.style={
+    exblock,
+    fill=orangeblock
+  },
+  warning/.style={
+    exblock,
+    fill=redblock
+  },
+  flow/.style={
+    -{Latex[length=2mm]},
+    thick
+  },
+  optionalflow/.style={
+    -{Latex[length=2mm]},
+    thick,
+    dashed
+  }
+}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\softmax}{\operatorname{softmax}}
+\newcommand{\ReLU}{\operatorname{ReLU}}
+\newcommand{\RBF}{\operatorname{RBF}}
+\newcommand{\concat}{\operatorname{concat}}
+\newcommand{\vect}[1]{\bm{#1}}
+
+\title{
+  \Huge\textbf{EX7}\\[0.3cm]
+  \Large Synthèse générale du projet\\[0.2cm]
+  \large Architecture modulaire à sondes, coordination RBF,
+  calcul matriciel et perspectives linguistiques
+}
+
+\author{Document de recherche et de conception}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce document rassemble la réflexion technique, architecturale
+et prospective autour du projet EX7.
+
+Le point de départ est une architecture expérimentale composée
+de sept sondes AdaptiveRBF indépendantes et d'un coordinateur
+global. À partir de cette expérience, plusieurs évolutions
+ont été envisagées : remplacement des calculs RBF locaux par
+des transformations matricielles, conservation des RBF dans
+un coordinateur global, vectorisation des sondes, distribution
+du calcul entre unités spécialisées et extension possible
+vers le traitement du langage naturel.
+
+La vision à long terme est d'explorer une architecture dans
+laquelle des unités de traitement relativement petites
+coopèrent pour produire des représentations complexes,
+modéliser des relations et traiter des séquences linguistiques.
+
+Cette vision est une hypothèse de recherche, non un résultat
+déjà démontré. Le document distingue donc systématiquement
+l'implémentation existante, les propositions architecturales
+et les questions scientifiques ouvertes.
+\end{abstract}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+% ============================================================
+\chapter{Origine et philosophie du projet}
+% ============================================================
+
+\section{Point de départ}
+
+Le projet EX7 part d'une question architecturale :
+
+\begin{quote}
+Est-il possible de construire un système d'apprentissage
+composé de plusieurs unités spécialisées, capables de traiter
+des informations localement puis de coopérer au moyen d'un
+mécanisme de coordination global ?
+\end{quote}
+
+L'objectif n'est pas simplement de remplacer un réseau
+de neurones classique par plusieurs réseaux plus petits.
+
+L'idée centrale est de déplacer une partie de la complexité
+du modèle vers son organisation :
+
+\begin{itemize}
+  \item plusieurs unités locales ;
+  \item des paramètres et des transformations propres
+  à chaque unité ;
+  \item une éventuelle spécialisation fonctionnelle ;
+  \item une coordination des informations produites ;
+  \item une possibilité d'évolution indépendante des unités.
+\end{itemize}
+
+La nouveauté potentielle peut donc résider dans l'organisation
+et la coordination de composants connus, et non nécessairement
+dans l'invention d'une nouvelle fonction mathématique élémentaire.
+
+\section{Une distinction fondamentale}
+
+Il faut distinguer trois niveaux :
+
+\begin{enumerate}
+  \item \textbf{Le composant :} une fonction de calcul locale,
+  par exemple une unité RBF ou un petit bloc matriciel.
+
+  \item \textbf{L'organisation :} la manière dont plusieurs
+  composants sont distribués, entraînés et connectés.
+
+  \item \textbf{Le comportement global :} les capacités
+  émergentes ou apprises par leur coopération.
+\end{enumerate}
+
+Une fonction connue peut participer à une architecture
+nouvelle. Toutefois, l'intérêt scientifique de cette
+organisation doit être démontré par des comparaisons
+expérimentales et par rapport aux architectures existantes.
+
+\section{La notion de sonde}
+
+Dans le projet, une sonde désigne une unité de traitement
+qui reçoit des informations, effectue une transformation
+et produit une représentation ou une contribution.
+
+Une sonde n'est donc pas nécessairement un neurone scalaire
+classique.
+
+Elle peut être un module relativement autonome, composé
+de plusieurs opérations et de plusieurs paramètres.
+
+Dans EX7 V003, une sonde est un petit expert vectoriel
+à base de fonctions radiales, et non une unité élémentaire
+équivalente à un seul neurone d'un MLP.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[input] (x) {Entrée\\Informations};
+  \node[local,below=of x,text width=7cm] (p) {
+    Sonde\\
+    Transformation locale\\
+    Extraction d'une représentation
+  };
+  \node[global,below=of p] (g) {
+    Coordination\\
+    Combinaison des résultats
+  };
+  \node[input,below=of g] (y) {Sortie globale};
+
+  \draw[flow] (x) -- (p);
+  \draw[flow] (p) -- (g);
+  \draw[flow] (g) -- (y);
+\end{tikzpicture}
+\caption{Principe général d'une unité de traitement et de sa coordination.}
+\end{figure}
+
+% ============================================================
+\chapter{EX7 V003 : architecture effectivement implémentée}
+% ============================================================
+
+\section{Vue d'ensemble}
+
+EX7 V003 est désigné \textit{OuterCoord-Lite-7x1}.
+
+Il comprend :
+
+\begin{itemize}
+  \item sept sondes AdaptiveRBF indépendantes ;
+  \item un coordinateur global ;
+  \item un mécanisme de combinaison des sorties ;
+  \item un prétraitement des caractéristiques.
+\end{itemize}
+
+Le problème de référence utilise le jeu Wisconsin Diagnostic
+Breast Cancer :
+
+\[
+D=30,\qquad C=2,\qquad M=7.
+\]
+
+Le nombre de caractéristiques est \(D=30\), le nombre
+de classes est \(C=2\), et le nombre de sondes est \(M=7\).
+
+\section{Architecture générale}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[input] (x) {
+    Entrée standardisée\\
+    \(\vect{x}\in\R^{30}\)
+  };
+
+  \node[local,below=of x,text width=9.4cm] (p) {
+    Sept sondes AdaptiveRBF indépendantes\\[2pt]
+    \(\RBF_1(\vect{x}),\ldots,\RBF_7(\vect{x})\)
+  };
+
+  \node[global,below=of p,text width=6cm] (rho) {
+    Coordinateur global\\
+    \(\vect{\rho}=\softmax(\vect{a})\)
+  };
+
+  \node[input,below=of rho] (out) {
+    Logits de classification\\
+    \(\vect{y}\in\R^2\)
+  };
+
+  \draw[flow] (x) -- (p);
+  \draw[flow] (p) -- (rho);
+  \draw[flow] (rho) -- (out);
+\end{tikzpicture}
+\caption{Architecture conceptuelle de EX7 V003.}
+\end{figure}
+
+\section{Structure interne d'une sonde}
+
+Chaque sonde reçoit les 30 caractéristiques d'entrée.
+
+Elle possède un encodeur appris :
+
+\[
+\vect{z}_i
+=
+\tanh(W_i\vect{x}+\vect{b}_i).
+\]
+
+Avec :
+
+\[
+W_i\in\R^{4\times 30},
+\qquad
+\vect{z}_i\in\R^4.
+\]
+
+Chaque sonde utilise huit centres RBF :
+
+\[
+\vect{c}_{i,k}\in\R^4,
+\qquad k=1,\ldots,8.
+\]
+
+La distance au centre \(k\) est :
+
+\[
+d_{i,k}^{2}
+=
+\|\vect{z}_i-\vect{c}_{i,k}\|_2^2.
+\]
+
+La largeur radiale est :
+
+\[
+s_{i,k}=\exp(\ell_{i,k}).
+\]
+
+L'activation radiale est :
+
+\[
+\phi_{i,k}(\vect{x})
+=
+\exp\left(
+-\frac{d_{i,k}^{2}}{2s_{i,k}^{2}}
+\right).
+\]
+
+La sonde produit ensuite ses logits :
+
+\[
+\vect{q}_i(\vect{x})
+=
+A_i^\top\vect{\phi}_i(\vect{x})
++\vect{c}_i^{out}.
+\]
+
+\section{Coordination globale}
+
+Le coordinateur utilise un vecteur de poids appris :
+
+\[
+\vect{\rho}
+=
+\softmax(\vect{a}).
+\]
+
+La sortie globale est :
+
+\[
+\boxed{
+\vect{y}(\vect{x})
+=
+\sum_{i=1}^{7}
+\rho_i\vect{q}_i(\vect{x})
+}
+\]
+
+Une caractéristique importante est que \(\vect{\rho}\)
+est indépendant de l'entrée.
+
+Le coordinateur ne choisit donc pas dynamiquement une sonde
+différente selon chaque exemple. Il applique une pondération
+globale apprise.
+
+\section{Organisation des données d'entraînement}
+
+Les exemples d'entraînement sont répartis entre les sept
+sondes au moyen de partitions stratifiées disjointes.
+
+La répartition concerne les exemples, et non les dimensions
+d'entrée.
+
+Chaque sonde reçoit néanmoins les 30 caractéristiques
+complètes des exemples qui lui sont attribués pendant
+son entraînement.
+
+À l'inférence, toutes les sondes sont exécutées sur chaque
+nouvel exemple.
+
+Il faut donc distinguer :
+
+\begin{itemize}
+  \item spécialisation par partition des exemples
+  pendant l'entraînement ;
+  \item exécution de toutes les sondes pendant l'inférence ;
+  \item absence de partition dimensionnelle dans V003.
+\end{itemize}
+
+\section{Paramètres}
+
+Les chiffres de référence sont :
+
+\[
+P_{\mathrm{train}}=1281,
+\]
+
+\[
+P_{\mathrm{préprocesseur}}=60,
+\]
+
+\[
+P_{\mathrm{total}}=1341.
+\]
+
+Les comparateurs historiques mentionnés sont :
+
+\begin{itemize}
+  \item MLP apparié : 1349 paramètres ;
+  \item MLP large : 5375 paramètres ;
+  \item Orchestra historique : 6712 paramètres.
+\end{itemize}
+
+Le comptage des paramètres ne doit pas être confondu
+avec le coût total d'exécution ou la consommation mémoire.
+
+% ============================================================
+\chapter{Résultats expérimentaux et interprétation}
+% ============================================================
+
+\section{Résultats disponibles}
+
+Les résultats communiqués pour les expériences de référence
+sont résumés ci-dessous.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}X
+  r r r
+}
+\toprule
+Modèle & Accuracy & Log-loss & Paramètres\\
+\midrule
+EX7 V003 & 97,88 \% & 0,06806 & 1341\\
+Orchestra OuterCoord-only & 98,59 \% & 0,06013 & 6712\\
+Orchestra récursive & 98,35 \% & 0,06187 & 6712\\
+MLP apparié & 98,12 \% & 0,05136 & 1349\\
+MLP large & 98,59 \% & 0,05222 & 5375\\
+\bottomrule
+\end{tabularx}
+\caption{Résultats de référence communiqués pour les expériences EX7.}
+\end{table}
+
+Ces résultats montrent qu'EX7 atteint une accuracy proche
+de celle du MLP apparié, avec un nombre de paramètres
+comparable.
+
+Cependant, le MLP apparié possède une log-loss plus faible.
+L'accuracy seule ne suffit donc pas à conclure à une
+équivalence de qualité prédictive.
+
+\section{Latence}
+
+Les latences p50 communiquées sont :
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Modèle & Latence p50\\
+\midrule
+EX7 V003 & \(0,290\ \mathrm{ms}\)\\
+Orchestra & \(1,49\ \mathrm{ms}\) environ\\
+MLP apparié & \(0,025\ \mathrm{ms}\)\\
+MLP large & \(0,026\ \mathrm{ms}\)\\
+\bottomrule
+\end{tabularx}
+\caption{Latences p50 communiquées.}
+\end{table}
+
+EX7 est donc environ :
+
+\[
+\frac{0,290}{0,025}=11,6
+\]
+
+fois plus lent que le MLP apparié sur cette mesure.
+
+Il est cependant nettement plus rapide que l'Orchestra
+historique dans le benchmark considéré.
+
+\section{Pourquoi EX7 est-il plus lent ?}
+
+Le coût d'EX7 vient notamment de la succession de nombreuses
+petites opérations :
+
+\begin{enumerate}
+  \item sept encodeurs indépendants ;
+  \item sept calculs de distances ;
+  \item sept ensembles d'activations exponentielles ;
+  \item sept lectures RBF ;
+  \item coordination finale.
+\end{enumerate}
+
+Un MLP réalise principalement des opérations matricielles
+et des additions, particulièrement optimisées dans les
+bibliothèques de calcul.
+
+Le nombre de paramètres similaire ne garantit donc pas
+une latence similaire.
+
+\section{Interprétation équilibrée}
+
+Les résultats permettent de retenir plusieurs constats :
+
+\begin{itemize}
+  \item EX7 est une architecture compacte.
+  \item Sa performance est proche de celle du MLP apparié
+  en accuracy.
+  \item Le MLP apparié est meilleur en log-loss dans les
+  résultats communiqués.
+  \item EX7 est nettement plus lent que le MLP apparié.
+  \item EX7 est plus rapide que l'Orchestra historique
+  dans le benchmark communiqué.
+\end{itemize}
+
+Ces observations justifient des optimisations et de nouvelles
+expériences, mais ne démontrent pas une supériorité générale
+de l'architecture à sondes.
+
+\section{Limites des résultats}
+
+Les résultats disponibles ne démontrent pas :
+
+\begin{itemize}
+  \item une généralisation à des jeux de données externes ;
+  \item une supériorité statistique robuste ;
+  \item une interprétabilité causale ;
+  \item une efficacité énergétique ;
+  \item une meilleure efficacité mémoire totale ;
+  \item une aptitude clinique au déploiement.
+\end{itemize}
+
+L'audit indépendant de 91 contrôles mentionné dans le projet
+renforce la cohérence des artefacts examinés, mais ne remplace
+pas une validation externe indépendante.
+
+Le problème médical utilisé est ici un banc d'essai
+expérimental. Aucun usage clinique ne peut être déduit
+de ces résultats.
+
+% ============================================================
+\chapter{Le problème de la latence et EX7-Matrix}
+% ============================================================
+
+\section{Constat}
+
+La question soulevée est la suivante :
+
+\begin{quote}
+Pourquoi ne pas modifier EX7 pour que les sondes utilisent
+principalement des multiplications matricielles et des
+additions, comme un MLP ?
+\end{quote}
+
+Cette proposition vise à conserver l'organisation modulaire
+tout en simplifiant les opérations locales.
+
+\section{Sonde matricielle}
+
+Une sonde matricielle peut être définie par :
+
+\[
+\vect{h}_i
+=
+\sigma(W_i\vect{x}+\vect{b}_i),
+\]
+
+avec :
+
+\[
+W_i\in\R^{d_h\times D}.
+\]
+
+Une projection de sortie peut être ajoutée :
+
+\[
+\vect{q}_i
+=
+V_i\vect{h}_i+\vect{c}_i.
+\]
+
+Une fonction d'activation non linéaire reste nécessaire.
+
+En effet, une composition d'opérations affines reste affine :
+
+\[
+W_2(W_1\vect{x}+\vect{b}_1)+\vect{b}_2
+=
+W'\vect{x}+\vect{b}'.
+\]
+
+ReLU est un choix possible :
+
+\[
+\ReLU(u)=\max(0,u).
+\]
+
+\section{Architecture EX7-Matrix}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[input] (x) {Entrée complète};
+  \node[local,below left=1cm and 0.2cm of x] (p1) {
+    Sonde 1\\
+    Matrices + ReLU
+  };
+  \node[local,below=1cm of x] (p2) {
+    Sonde 2\\
+    Matrices + ReLU
+  };
+  \node[local,below right=1cm and 0.2cm of x] (p7) {
+    Sonde 7\\
+    Matrices + ReLU
+  };
+  \node[global,below=1.1cm of p2,text width=5cm] (g) {
+    Coordinateur\\
+    Fusion des contributions
+  };
+  \node[input,below=of g] (y) {Sortie};
+
+  \draw[flow] (x) -- (p1);
+  \draw[flow] (x) -- (p2);
+  \draw[flow] (x) -- (p7);
+  \draw[flow] (p1) -- (g);
+  \draw[flow] (p2) -- (g);
+  \draw[flow] (p7) -- (g);
+  \draw[flow] (g) -- (y);
+\end{tikzpicture}
+\caption{Principe d'EX7-Matrix.}
+\end{figure}
+
+Les sondes restent indépendantes, mais leur moteur local
+est matriciel.
+
+\section{Coordination matricielle}
+
+Une première variante conserve le principe de pondération
+globale :
+
+\[
+\vect{\rho}=\softmax(\vect{a}).
+\]
+
+La sortie devient :
+
+\[
+\boxed{
+\vect{y}
+=
+\sum_{i=1}^{M}
+\rho_i
+\left[
+V_i\sigma(W_i\vect{x}+\vect{b}_i)
++\vect{c}_i
+\right]
+}
+\]
+
+Cette variante permet d'isoler l'effet du remplacement
+des calculs RBF locaux.
+
+\section{Vectorisation}
+
+Les sept sondes peuvent être regroupées dans un tenseur
+de poids :
+
+\[
+\mathcal{W}
+\in\R^{M\times d_h\times D}.
+\]
+
+Pour un batch :
+
+\[
+X\in\R^{B\times D},
+\]
+
+le calcul peut être organisé sous forme d'opérations
+matricielles batchées.
+
+La vectorisation peut réduire le coût d'orchestration
+des petites opérations, mais son efficacité dépend
+du matériel et de la taille des batchs.
+
+Il faut mesurer séparément :
+
+\begin{itemize}
+  \item batch de taille 1 ;
+  \item batchs de tailles intermédiaires ;
+  \item batchs plus grands ;
+  \item latences p50, p95 et p99.
+\end{itemize}
+
+La vectorisation est une optimisation d'implémentation,
+pas nécessairement une nouvelle architecture mathématique.
+
+% ============================================================
+\chapter{Architecture hybride : RBF global et Matrix local}
+% ============================================================
+
+\section{Origine de la proposition}
+
+Une question importante a émergé :
+
+\begin{quote}
+Pourquoi choisir entre EX7 original et une architecture
+matricielle qui abandonnerait les RBF ?
+Ne pourrait-on pas transférer la fonction RBF vers la
+coordination globale et conserver des sondes matricielles
+locales ?
+\end{quote}
+
+Cette proposition constitue une troisième voie.
+
+Elle conserve :
+\begin{itemize}
+  \item les sondes indépendantes ;
+  \item les transformations locales rapides ;
+  \item la non-linéarité RBF ;
+  \item une coordination globale.
+\end{itemize}
+
+La différence est que les RBF ne sont plus calculées
+dans chaque sonde, mais dans un module global.
+
+\section{Définition de EX7-Hybrid}
+
+Chaque sonde calcule :
+
+\[
+\vect{h}_i
+=
+\sigma(W_i\vect{x}+\vect{b}_i).
+\]
+
+Les représentations sont concaténées :
+
+\[
+\vect{H}
+=
+\concat(\vect{h}_1,\ldots,\vect{h}_M).
+\]
+
+On peut ensuite utiliser une projection globale :
+
+\[
+\vect{u}=P\vect{H}+\vect{b}_P.
+\]
+
+Le coordinateur RBF reçoit \(\vect{u}\).
+
+Pour chaque centre global \(\vect{\mu}_k\) :
+
+\[
+\psi_k(\vect{u})
+=
+\exp\left(
+-\frac{
+\|\vect{u}-\vect{\mu}_k\|_2^2
+}{
+2\tau_k^2
+}
+\right).
+\]
+
+La sortie finale est :
+
+\[
+\boxed{
+\vect{y}
+=
+A_g^\top\vect{\psi}(\vect{u})
++\vect{b}_g
+}
+\]
+
+\section{Schéma de l'architecture hybride}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.62cm]
+  \node[input] (x) {Entrée};
+  \node[local,below=of x,text width=8cm] (local) {
+    Sept sondes matricielles\\
+    \(\vect{h}_i=\sigma(W_i\vect{x}+\vect{b}_i)\)
+  };
+  \node[local,below=of local,text width=8cm] (fusion) {
+    Fusion des représentations\\
+    \(\vect{H}=\concat(\vect{h}_1,\ldots,\vect{h}_7)\)
+  };
+  \node[rbf,below=of fusion,text width=8cm] (rbf) {
+    Coordinateur RBF global\\
+    Centres, distances, largeurs et activations
+  };
+  \node[input,below=of rbf] (out) {Prédiction};
+
+  \draw[flow] (x) -- (local);
+  \draw[flow] (local) -- (fusion);
+  \draw[flow] (fusion) -- (rbf);
+  \draw[flow] (rbf) -- (out);
+\end{tikzpicture}
+\caption{Architecture hybride proposée.}
+\end{figure}
+
+\section{Hypothèse scientifique}
+
+L'hypothèse est que les RBF pourraient être particulièrement
+utiles pour reconnaître des configurations globales dans
+les représentations produites localement.
+
+Cela permettrait de séparer :
+
+\begin{itemize}
+  \item l'extraction locale de caractéristiques ;
+  \item la reconnaissance de configurations globales ;
+  \item la production de la sortie.
+\end{itemize}
+
+Ce bénéfice n'est pas démontré. Le coordinateur global
+pourrait devenir coûteux si sa dimension ou son nombre
+de centres est trop important.
+
+\section{Comparaison des quatre variantes}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{2.4cm}
+  X
+  >{\raggedright\arraybackslash}p{2.4cm}
+}
+\toprule
+Variante & Calcul local & Coordination\\
+\midrule
+EX7-RBF
+&
+Encodeur et fonctions RBF
+&
+Pondération globale\\
+
+EX7-Matrix
+&
+Matrices et activation
+&
+Pondération globale\\
+
+EX7-Matrix-Vector
+&
+Matrices batchées
+&
+Pondération globale\\
+
+EX7-Hybrid
+&
+Matrices et activation
+&
+RBF globale\\
+\bottomrule
+\end{tabularx}
+\caption{Les quatre architectures à comparer.}
+\end{table}
+
+% ============================================================
+\chapter{Répartition du travail entre les sondes}
+% ============================================================
+
+\section{La question des dimensions}
+
+Une autre idée discutée est la possibilité de ne pas demander
+à chaque sonde de traiter l'intégralité d'une grande
+représentation.
+
+Pour un vecteur de dimension :
+
+\[
+D=4096,
+\]
+
+on pourrait imaginer :
+
+\[
+M=16,\qquad d_{\mathrm{local}}=256.
+\]
+
+Chaque sonde recevrait alors un sous-espace différent.
+
+\section{Distinction avec EX7 V003}
+
+Cette organisation n'existe pas dans EX7 V003.
+
+Dans V003 :
+
+\[
+\vect{x}_i=\vect{x}
+\qquad
+\forall i.
+\]
+
+Chaque sonde reçoit les 30 caractéristiques complètes.
+
+La spécialisation actuelle concerne les partitions d'exemples
+d'entraînement, pas les dimensions.
+
+La distribution dimensionnelle est donc une proposition
+future, distincte de l'implémentation de référence.
+
+\section{Proposition de partition dimensionnelle}
+
+On peut écrire :
+
+\[
+\vect{x}
+=
+\begin{bmatrix}
+\vect{x}_1\\
+\vect{x}_2\\
+\vdots\\
+\vect{x}_M
+\end{bmatrix}.
+\]
+
+Chaque sonde traite son sous-espace :
+
+\[
+\vect{h}_i
+=
+f_i(\vect{x}_i).
+\]
+
+Le système fusionne ensuite les représentations :
+
+\[
+\vect{H}
+=
+\concat(\vect{h}_1,\ldots,\vect{h}_M).
+\]
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[input] (x) {
+    Vecteur global\\
+    \(4096\) dimensions
+  };
+
+  \node[local,below left=1cm and 0.3cm of x] (p1) {
+    Sonde 1\\
+    256 dimensions
+  };
+  \node[local,below=1cm of x] (p2) {
+    Sonde 2\\
+    256 dimensions
+  };
+  \node[local,below right=1cm and 0.3cm of x] (p3) {
+    Sonde 16\\
+    256 dimensions
+  };
+
+  \node[global,below=1.15cm of p2,text width=5.4cm] (g) {
+    Fusion des représentations
+  };
+
+  \draw[flow] (x) -- (p1);
+  \draw[flow] (x) -- (p2);
+  \draw[flow] (x) -- (p3);
+  \draw[flow] (p1) -- (g);
+  \draw[flow] (p2) -- (g);
+  \draw[flow] (p3) -- (g);
+\end{tikzpicture}
+\caption{Exemple conceptuel de distribution des dimensions.}
+\end{figure}
+
+Le schéma ne représente que trois sondes sur seize
+pour conserver sa lisibilité.
+
+\section{Le problème des interactions}
+
+Un découpage strict peut faire perdre des relations
+entre dimensions différentes.
+
+Par exemple, si deux informations importantes sont situées
+dans deux sous-espaces distincts, une sonde isolée ne peut
+pas les combiner directement.
+
+Plusieurs solutions sont envisageables :
+
+\begin{enumerate}
+  \item sous-espaces chevauchants ;
+  \item projections apprises ;
+  \item échanges de messages entre sondes ;
+  \item coordinateur global ;
+  \item coordination hiérarchique ;
+  \item traitement itératif avec retours d'information.
+\end{enumerate}
+
+La distribution du calcul ne doit donc pas devenir une
+fragmentation qui détruit les relations utiles.
+
+\section{Principe général}
+
+Le véritable objectif n'est pas simplement de réduire
+la dimension d'entrée de chaque sonde.
+
+Il est de répartir le travail tout en préservant
+la possibilité de recombiner les informations.
+
+La complexité peut être distribuée entre les unités,
+mais les interactions entre leurs résultats doivent
+rester accessibles au système.
+
+% ============================================================
+\chapter{Coordination, communication et spécialisation}
+% ============================================================
+
+\section{Du coordinateur fixe à la coordination dynamique}
+
+Le coordinateur EX7 V003 utilise :
+
+\[
+\vect{\rho}=\softmax(\vect{a}).
+\]
+
+Ce mécanisme attribue des poids globaux aux sondes.
+
+Il ne réalise pas de communication conditionnelle entre
+les sondes.
+
+Une évolution possible serait de rendre les poids
+dépendants de l'entrée :
+
+\[
+\vect{\rho}(\vect{x})
+=
+\softmax(g(\vect{H})).
+\]
+
+La sortie deviendrait :
+
+\[
+\vect{y}
+=
+\sum_{i=1}^{M}
+\rho_i(\vect{x})\vect{q}_i.
+\]
+
+Cette variante introduirait un mécanisme de routage
+ou de pondération dynamique.
+
+Elle doit être distinguée du coordinateur fixe actuel.
+
+\section{Communication entre sondes}
+
+On peut également envisager que chaque sonde reçoive
+des informations produites par les autres.
+
+Une formulation générique est :
+
+\[
+\vect{m}_i^{(t)}
+=
+\sum_{j\neq i}
+\alpha_{ij}^{(t)}
+\,g_{ij}(\vect{h}_j^{(t)}).
+\]
+
+La sonde met alors à jour son état :
+
+\[
+\vect{h}_i^{(t+1)}
+=
+f_i\left(
+\vect{h}_i^{(t)},
+\vect{m}_i^{(t)}
+\right).
+\]
+
+Cette organisation est un mécanisme de passage de messages.
+
+Elle permettrait à des unités locales de combiner
+progressivement des informations provenant d'autres unités.
+
+\section{Spécialisation fonctionnelle}
+
+Il est tentant d'attribuer des rôles explicites aux sondes :
+
+\begin{itemize}
+  \item relations lexicales ;
+  \item relations syntaxiques ;
+  \item relations sémantiques ;
+  \item relations contextuelles.
+\end{itemize}
+
+Mais ces rôles sont des hypothèses de conception.
+
+Une architecture ne devient pas spécialisée simplement
+parce que ses composants portent des noms différents.
+
+Il faut vérifier que les sondes apprennent effectivement
+des fonctions distinctes.
+
+On peut utiliser :
+
+\begin{itemize}
+  \item des ablations individuelles ;
+  \item des permutations de sondes ;
+  \item des perturbations ciblées ;
+  \item des mesures de similarité des représentations ;
+  \item des tests sur des tâches spécialisées.
+\end{itemize}
+
+% ============================================================
+\chapter{Vers le langage naturel et une architecture linguistique}
+% ============================================================
+
+\section{La vision à long terme}
+
+La discussion a progressivement conduit à une ambition
+plus large :
+
+\begin{quote}
+Construire un modèle capable de traiter le langage naturel
+par coopération d'un grand nombre de sondes relativement
+petites, plutôt que de concentrer toute la capacité de
+traitement dans un ensemble de blocs denses traditionnels.
+\end{quote}
+
+Dans cette vision, les sondes ne seraient plus uniquement
+des experts de classification.
+
+Elles pourraient participer à la construction de
+représentations linguistiques, à l'analyse de relations
+et à la prédiction du token suivant.
+
+Cette hypothèse ne signifie pas que le système comprendrait
+automatiquement le langage par le seul fait de posséder
+beaucoup de sondes.
+
+Il faut une architecture et un objectif d'apprentissage
+capables de traiter les séquences, les dépendances
+et le contexte.
+
+\section{Le passage de la classification au langage}
+
+EX7 V003 traite un vecteur de caractéristiques :
+
+\[
+\vect{x}\in\R^{30}.
+\]
+
+Un modèle linguistique doit traiter une séquence :
+
+\[
+X=(x_1,x_2,\ldots,x_T),
+\]
+
+où chaque \(x_t\) représente un token ou une représentation
+de token.
+
+Le système doit prendre en compte :
+
+\begin{itemize}
+  \item l'ordre des tokens ;
+  \item leur position ;
+  \item les dépendances locales ;
+  \item les dépendances éloignées ;
+  \item les ambiguïtés ;
+  \item les relations entre concepts ;
+  \item le contexte accumulé.
+\end{itemize}
+
+Il faut donc ajouter une architecture séquentielle,
+un mécanisme de mémoire ou une autre méthode permettant
+de conserver et de transmettre le contexte.
+
+\section{Objectif d'apprentissage possible}
+
+Pour un modèle autorégressif, l'objectif classique
+est de prédire le token suivant :
+
+\[
+P(x_{t+1}\mid x_1,\ldots,x_t).
+\]
+
+La perte moyenne de prédiction peut être écrite :
+
+\[
+\mathcal{L}_{\mathrm{LM}}
+=
+-\frac{1}{T-1}
+\sum_{t=1}^{T-1}
+\log P(x_{t+1}\mid x_1,\ldots,x_t).
+\]
+
+Une architecture à sondes pourrait être entraînée avec
+cet objectif.
+
+La difficulté ne réside pas uniquement dans la sortie
+du token suivant : elle réside dans la construction
+de représentations qui conservent les relations utiles
+du contexte.
+
+\section{Architecture linguistique conceptuelle}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[input] (tokens) {
+    Séquence de tokens\\
+    \(x_1,\ldots,x_T\)
+  };
+
+  \node[local,below=of tokens,text width=8.5cm] (embed) {
+    Représentations d'entrée\\
+    Embeddings et informations de position
+  };
+
+  \node[local,below=of embed,text width=8.5cm] (probes) {
+    Groupe de sondes\\
+    Transformations locales et représentations
+  };
+
+  \node[global,below=of probes,text width=8.5cm] (coord) {
+    Coordination sémantique\\
+    Échanges et combinaison des informations
+  };
+
+  \node[rbf,below=of coord,text width=8.5cm] (memory) {
+    Mémoire et contexte\\
+    Représentation actualisée de la séquence
+  };
+
+  \node[input,below=of memory] (pred) {
+    Prédiction du token suivant
+  };
+
+  \draw[flow] (tokens) -- (embed);
+  \draw[flow] (embed) -- (probes);
+  \draw[flow] (probes) -- (coord);
+  \draw[flow] (coord) -- (memory);
+  \draw[flow] (memory) -- (pred);
+\end{tikzpicture}
+\caption{Vision conceptuelle d'un modèle linguistique à sondes.}
+\end{figure}
+
+Ce schéma représente une piste de conception, et non
+un modèle déjà implémenté.
+
+% ============================================================
+\chapter{L'attention est-elle nécessaire ?}
+% ============================================================
+
+\section{La question}
+
+Un modèle linguistique doit établir des relations entre
+les éléments d'une séquence.
+
+La question n'est pas obligatoirement de conserver
+l'attention standard, mais de savoir comment le modèle
+va représenter et exploiter ces relations.
+
+\section{Fonction de l'attention}
+
+Dans un Transformer, l'attention utilise des projections
+Query, Key et Value :
+
+\[
+Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V.
+\]
+
+Le calcul standard est :
+
+\[
+\operatorname{Attention}(Q,K,V)
+=
+\softmax\left(
+\frac{QK^\top}{\sqrt{d_k}}
+\right)V.
+\]
+
+Ce mécanisme permet à chaque position de combiner
+des informations provenant d'autres positions.
+
+Il est efficace, mais il n'est pas le seul mécanisme
+possible de communication contextuelle.
+
+\section{Trois stratégies envisagées}
+
+\subsection{Option A : conserver l'attention}
+
+On conserve l'attention du Transformer et on remplace
+les blocs MLP par des sondes.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.55cm]
+  \node[input] (x) {Tokens};
+  \node[global,below=of x,text width=6cm] (att) {
+    Attention standard
+  };
+  \node[local,below=of att,text width=6cm] (p) {
+    Sondes matricielles
+  };
+  \node[input,below=of p] (y) {Nouvelle représentation};
+
+  \draw[flow] (x) -- (att);
+  \draw[flow] (att) -- (p);
+  \draw[flow] (p) -- (y);
+\end{tikzpicture}
+\caption{Transformer hybride avec sondes.}
+\end{figure}
+
+Cette approche est la plus simple pour mesurer
+l'apport des sondes sans modifier simultanément
+le mécanisme relationnel.
+
+\subsection{Option B : remplacer l'attention}
+
+Les sondes pourraient communiquer entre elles
+au moyen d'un mécanisme de passage de messages.
+
+\[
+\vect{m}_i
+=
+\sum_j
+\alpha_{ij}g(\vect{h}_j).
+\]
+
+Les mises à jour seraient :
+
+\[
+\vect{h}_i'
+=
+f_i(\vect{h}_i,\vect{m}_i).
+\]
+
+Cette voie pourrait remplacer l'attention si les échanges
+permettent de capturer les dépendances pertinentes.
+
+\subsection{Option C : mémoire et coordination récurrente}
+
+Une autre possibilité consiste à maintenir un état global :
+
+\[
+\vect{s}_{t+1}
+=
+F(\vect{s}_t,\vect{h}_t).
+\]
+
+La mémoire évolue au fil de la séquence et fournit
+un contexte aux sondes suivantes.
+
+Cette solution peut éviter de calculer une attention
+complète entre toutes les positions, mais elle doit
+éviter de perdre les informations importantes du passé.
+
+\section{Conclusion sur l'attention}
+
+L'attention standard n'est pas une nécessité théorique
+absolue.
+
+En revanche, le modèle doit fournir une fonction équivalente
+ou complémentaire permettant :
+
+\begin{itemize}
+  \item de relier des éléments éloignés ;
+  \item de gérer les ambiguïtés contextuelles ;
+  \item de transmettre des informations entre positions ;
+  \item de préserver les relations importantes ;
+  \item de construire une représentation cohérente.
+\end{itemize}
+
+Supprimer l'attention sans remplacer ses fonctions
+ne suffit pas.
+
+% ============================================================
+\chapter{Interprétabilité et compréhension des mécanismes}
+% ============================================================
+
+\section{Hypothèse}
+
+Une architecture modulaire pourrait faciliter l'analyse
+du fonctionnement interne d'un modèle.
+
+Au lieu d'observer un très grand bloc opaque, on pourrait
+examiner :
+
+\begin{itemize}
+  \item les entrées de chaque sonde ;
+  \item ses transformations ;
+  \item ses activations ;
+  \item ses sorties ;
+  \item sa contribution à la prédiction ;
+  \item ses interactions avec les autres sondes.
+\end{itemize}
+
+Cela pourrait rendre l'analyse plus structurée.
+
+\section{Modularité et interprétabilité}
+
+Il faut néanmoins distinguer modularité et interprétabilité.
+
+Un système composé de modules distincts n'est pas
+automatiquement interprétable.
+
+Une sonde peut elle-même apprendre une représentation
+complexe et difficile à expliquer.
+
+Il faut donc mesurer si les modules ont réellement
+des fonctions identifiables et stables.
+
+\section{Méthodes de vérification}
+
+\begin{enumerate}
+  \item \textbf{Ablation :} retirer une sonde et mesurer
+  la dégradation du résultat.
+
+  \item \textbf{Intervention :} modifier une représentation
+  locale et observer les conséquences.
+
+  \item \textbf{Permutation :} échanger les sorties de deux
+  sondes pour vérifier si leurs rôles sont différents.
+
+  \item \textbf{Analyse des activations :} étudier les
+  représentations produites pour des catégories de données.
+
+  \item \textbf{Tests contrefactuels :} modifier une partie
+  de l'entrée en maintenant le reste constant.
+
+  \item \textbf{Analyse de communication :} mesurer quelles
+  informations circulent entre les unités.
+\end{enumerate}
+
+\section{Vers une boîte noire partiellement inspectable}
+
+La vision est de construire un système dont le fonctionnement
+peut être étudié à plusieurs niveaux :
+
+\begin{itemize}
+  \item niveau local : fonctionnement d'une sonde ;
+  \item niveau intermédiaire : coopération entre sondes ;
+  \item niveau global : coordination et décision ;
+  \item niveau séquentiel : évolution du contexte.
+\end{itemize}
+
+Cela pourrait améliorer la traçabilité, mais ne garantit
+pas à lui seul une explication causale ou complète.
+
+% ============================================================
+\chapter{Limites conceptuelles et risques}
+% ============================================================
+
+\section{Une sonde ne remplace pas automatiquement un neurone}
+
+Une sonde EX7 est un module comportant plusieurs paramètres
+et plusieurs opérations.
+
+Dire qu'une sonde remplace un neurone peut être trompeur.
+
+Il faut distinguer :
+
+\begin{itemize}
+  \item remplacement d'un neurone scalaire ;
+  \item remplacement d'un petit bloc MLP ;
+  \item remplacement d'un bloc fonctionnel d'un Transformer ;
+  \item remplacement d'un mécanisme de communication.
+\end{itemize}
+
+La portée de l'équivalence doit être définie
+par l'expérience et par la fonction calculée.
+
+\section{Un grand nombre de sondes ne garantit pas l'intelligence}
+
+Multiplier les unités ne garantit pas :
+
+\begin{itemize}
+  \item la spécialisation ;
+  \item la généralisation ;
+  \item la compréhension sémantique ;
+  \item le raisonnement ;
+  \item l'efficacité ;
+  \item la stabilité.
+\end{itemize}
+
+Ces propriétés doivent être apprises et évaluées.
+
+\section{Le coût de communication}
+
+Répartir le calcul entre de petites unités peut réduire
+la taille des opérations locales.
+
+Mais il peut aussi introduire :
+
+\begin{itemize}
+  \item des transferts de données ;
+  \item des synchronisations ;
+  \item des calculs de fusion ;
+  \item des représentations intermédiaires ;
+  \item des dépendances entre modules.
+\end{itemize}
+
+Le coût global peut donc augmenter si la communication
+est trop importante.
+
+\section{Le risque de fragmentation}
+
+Une partition trop rigide des dimensions peut empêcher
+les sondes de combiner des informations complémentaires.
+
+Il faut préserver la possibilité de construire
+des relations entre sous-espaces.
+
+\section{Le risque de complexité du coordinateur}
+
+Dans l'architecture hybride, le coordinateur RBF global
+peut devenir le composant le plus coûteux.
+
+Il faudra contrôler :
+
+\[
+d_g,\qquad K_g,\qquad M,\qquad d_h.
+\]
+
+Le nombre de centres et la dimension de l'espace global
+devront être évalués expérimentalement.
+
+% ============================================================
+\chapter{Programme expérimental proposé}
+% ============================================================
+
+\section{Étape 1 : optimiser EX7 existant}
+
+Avant de modifier la fonction mathématique des sondes,
+il faut mesurer le coût de l'implémentation actuelle.
+
+Travaux proposés :
+
+\begin{itemize}
+  \item profiler chaque étape d'EX7 ;
+  \item mesurer le coût des encodeurs ;
+  \item mesurer les distances RBF ;
+  \item mesurer les exponentielles ;
+  \item mesurer le coordinateur ;
+  \item vérifier les possibilités de vectorisation.
+\end{itemize}
+
+\section{Étape 2 : EX7-Matrix}
+
+Construire une variante où les sondes locales utilisent
+des matrices et des activations non linéaires.
+
+Comparer les résultats à EX7-RBF avec un budget
+paramétrique contrôlé.
+
+\section{Étape 3 : EX7-Matrix-Vector}
+
+Conserver la même fonction mathématique qu'EX7-Matrix,
+mais vectoriser les opérations.
+
+Comparer les latences à batch égal et sur le même matériel.
+
+\section{Étape 4 : EX7-Hybrid}
+
+Construire la variante avec :
+
+\[
+\text{Sondes matricielles}
+\longrightarrow
+\text{Fusion}
+\longrightarrow
+\text{Coordinateur RBF}.
+\]
+
+Mesurer si la coordination RBF apporte une amélioration
+réelle par rapport à une coordination matricielle.
+
+\section{Étape 5 : spécialisation et communication}
+
+Explorer progressivement :
+
+\begin{itemize}
+  \item les rôles distincts des sondes ;
+  \item la pondération dynamique ;
+  \item les sous-espaces dimensionnels ;
+  \item les connexions croisées ;
+  \item le passage de messages ;
+  \item la coordination hiérarchique.
+\end{itemize}
+
+\section{Étape 6 : expérience linguistique}
+
+Commencer par une tâche linguistique limitée :
+
+\begin{itemize}
+  \item classification de phrases ;
+  \item identification de relations ;
+  \item désambiguïsation ;
+  \item prédiction de tokens ;
+  \item modélisation de séquences.
+\end{itemize}
+
+Il serait prématuré de commencer directement par
+un grand modèle linguistique.
+
+\section{Tableau général des expériences}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{3.0cm}
+  X
+  >{\raggedright\arraybackslash}p{2.1cm}
+}
+\toprule
+Expérience & Question & Statut\\
+\midrule
+EX7-RBF
+&
+Architecture de référence
+&
+Implémentée\\
+
+EX7-Matrix
+&
+Les matrices accélèrent-elles les sondes ?
+&
+À construire\\
+
+EX7-Matrix-Vector
+&
+La vectorisation réduit-elle la latence ?
+&
+À construire\\
+
+EX7-Hybrid
+&
+La RBF globale apporte-t-elle un avantage ?
+&
+À construire\\
+
+Coordination dynamique
+&
+Les poids doivent-ils dépendre de l'entrée ?
+&
+À explorer\\
+
+Partition dimensionnelle
+&
+Peut-on distribuer les sous-espaces ?
+&
+À explorer\\
+
+Communication entre sondes
+&
+Les unités peuvent-elles coopérer ?
+&
+À explorer\\
+
+Modèle linguistique
+&
+Les sondes peuvent-elles traiter les séquences ?
+&
+Vision long terme\\
+\bottomrule
+\end{tabularx}
+\caption{Programme de recherche proposé.}
+\end{table}
+
+% ============================================================
+\chapter{Vision architecturale à long terme}
+% ============================================================
+
+\section{Le principe général}
+
+La vision à long terme est celle d'une architecture
+composée d'un grand nombre d'unités de traitement
+relativement petites.
+
+Chaque unité pourrait :
+
+\begin{itemize}
+  \item recevoir une partie ou une projection des données ;
+  \item effectuer des transformations locales ;
+  \item produire une représentation ;
+  \item communiquer avec d'autres unités ;
+  \item participer à une coordination globale.
+\end{itemize}
+
+La capacité du système ne serait donc pas nécessairement
+concentrée dans un unique bloc dense.
+
+Elle pourrait être distribuée entre plusieurs unités
+et leurs interactions.
+
+\section{Architecture conceptuelle générale}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.7cm]
+  \node[input] (input) {
+    Entrée\\
+    Données ou séquence
+  };
+
+  \node[local,below=of input,text width=9cm] (local) {
+    Couche de sondes\\
+    Transformations locales spécialisées
+  };
+
+  \node[global,below=of local,text width=9cm] (comm) {
+    Couche de communication\\
+    Échanges et relations entre sondes
+  };
+
+  \node[rbf,below=of comm,text width=9cm] (coord) {
+    Coordination globale\\
+    Fusion, sélection et modélisation non linéaire
+  };
+
+  \node[global,below=of coord,text width=9cm] (memory) {
+    Mémoire et contexte\\
+    États persistants ou représentations séquentielles
+  };
+
+  \node[input,below=of memory] (output) {
+    Sortie ou prédiction
+  };
+
+  \draw[flow] (input) -- (local);
+  \draw[flow] (local) -- (comm);
+  \draw[flow] (comm) -- (coord);
+  \draw[flow] (coord) -- (memory);
+  \draw[flow] (memory) -- (output);
+\end{tikzpicture}
+\caption{Vision générale d'une architecture distribuée à sondes.}
+\end{figure}
+
+Ce diagramme est un modèle conceptuel.
+Il ne décrit pas une architecture déjà réalisée.
+
+\section{La question de l'échelle}
+
+Une architecture linguistique pourrait comporter :
+
+\begin{itemize}
+  \item des sondes locales ;
+  \item des groupes de sondes ;
+  \item des coordinateurs intermédiaires ;
+  \item un ou plusieurs coordinateurs globaux ;
+  \item des mécanismes de mémoire.
+\end{itemize}
+
+Une organisation hiérarchique pourrait être étudiée :
+
+\[
+\text{Sondes}
+\rightarrow
+\text{Groupes}
+\rightarrow
+\text{Coordinateurs}
+\rightarrow
+\text{Sortie}.
+\]
+
+Cette organisation pourrait répartir la complexité,
+mais elle introduit aussi des problèmes de communication,
+de stabilité et de coût.
+
+\section{Compréhension sémantique}
+
+Pour qu'un modèle traite la sémantique, il ne suffit pas
+de répartir les mots entre plusieurs sondes.
+
+Il doit apprendre des relations telles que :
+
+\begin{itemize}
+  \item la coréférence ;
+  \item les relations sujet-verbe-objet ;
+  \item les dépendances entre propositions ;
+  \item les relations causales exprimées ;
+  \item les ambiguïtés lexicales ;
+  \item les relations entre concepts ;
+  \item l'évolution du sens avec le contexte.
+\end{itemize}
+
+Une organisation spécialisée pourrait faciliter
+l'analyse de ces phénomènes, à condition que les
+interactions entre sondes soient suffisamment riches.
+
+% ============================================================
+\chapter{Synthèse des idées et décisions architecturales}
+% ============================================================
+
+\section{Ce qui est établi}
+
+\begin{enumerate}
+  \item EX7 V003 utilise sept sondes AdaptiveRBF.
+  \item Chaque sonde reçoit les caractéristiques complètes.
+  \item Les partitions concernent les exemples d'entraînement.
+  \item Le coordinateur utilise des poids globaux appris.
+  \item Toutes les sondes sont exécutées à l'inférence.
+  \item L'architecture possède un nombre de paramètres
+  comparable au MLP apparié.
+  \item Sa latence mesurée est supérieure à celle du MLP.
+\end{enumerate}
+
+\section{Ce qui est proposé}
+
+\begin{enumerate}
+  \item Remplacer les sondes RBF par des sondes matricielles.
+  \item Vectoriser les calculs locaux.
+  \item Déplacer les fonctions RBF vers un coordinateur global.
+  \item Distribuer éventuellement les dimensions entre sondes.
+  \item Introduire une communication entre unités.
+  \item Rendre la coordination éventuellement dynamique.
+  \item Explorer des organisations hiérarchiques.
+\end{enumerate}
+
+\section{Ce qui relève de la vision à long terme}
+
+\begin{enumerate}
+  \item Construire une architecture linguistique à sondes.
+  \item Étudier une spécialisation fonctionnelle des unités.
+  \item Apprendre des relations sémantiques.
+  \item Traiter des séquences et maintenir un contexte.
+  \item Explorer des alternatives à l'attention standard.
+  \item Améliorer la traçabilité des calculs internes.
+  \item Étudier si la coopération de nombreuses petites unités
+  peut produire des capacités complexes.
+\end{enumerate}
+
+\section{Tableau de distinction des niveaux de preuve}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{4cm}
+  X
+}
+\toprule
+Énoncé & Niveau de preuve\\
+\midrule
+EX7 V003 fonctionne sur le jeu de référence
+&
+Résultat expérimental communiqué\\
+
+EX7 possède une latence supérieure au MLP apparié
+&
+Résultat expérimental communiqué\\
+
+Les sondes matricielles seront plus rapides
+&
+Hypothèse à tester\\
+
+Le coordinateur RBF global améliorera la qualité
+&
+Hypothèse à tester\\
+
+Les sondes apprendront des rôles sémantiques distincts
+&
+Hypothèse à tester\\
+
+L'attention pourra être remplacée
+&
+Hypothèse de recherche à long terme\\
+
+Une architecture à sondes pourra traiter le langage
+&
+Objectif de recherche à long terme\\
+
+La modularité facilitera l'interprétabilité
+&
+Hypothèse à vérifier expérimentalement\\
+\bottomrule
+\end{tabularx}
+\caption{Séparation entre faits, hypothèses et objectifs.}
+\end{table}
+
+% ============================================================
+\chapter{Conclusion générale}
+% ============================================================
+
+EX7 explore une idée architecturale : construire un système
+composé d'unités de traitement relativement autonomes,
+capables de produire des représentations locales et de
+contribuer à une décision globale.
+
+La première implémentation utilise des sondes RBF.
+Elle démontre qu'une telle organisation peut être entraînée
+sur une tâche de classification avec un budget paramétrique
+proche de celui d'un petit MLP.
+
+Les résultats disponibles sont encourageants pour poursuivre
+la recherche, mais ne montrent pas une supériorité générale.
+Le MLP apparié reste meilleur en log-loss et en latence
+dans les mesures communiquées.
+
+L'une des pistes les plus intéressantes est l'architecture
+hybride :
+
+\[
+\boxed{
+\text{Sondes matricielles locales}
++
+\text{Coordination RBF globale}
+}
+\]
+
+Elle permettrait de conserver le principe de modularité
+tout en testant une répartition différente des fonctions
+de calcul.
+
+À plus long terme, le projet pourrait explorer une architecture
+linguistique dans laquelle les sondes traitent des informations
+locales, échangent des représentations, construisent des
+relations et contribuent à une mémoire contextuelle.
+
+L'attention standard n'est pas nécessairement obligatoire,
+mais ses fonctions relationnelles doivent être assurées
+par un mécanisme alternatif.
+
+La question centrale du projet peut ainsi être formulée :
+
+\begin{quote}
+Peut-on construire un système d'apprentissage complexe
+en répartissant les transformations, les représentations
+et la coordination entre de nombreuses unités spécialisées,
+tout en conservant une communication suffisante pour
+apprendre des relations globales et traiter des séquences ?
+\end{quote}
+
+La réponse ne peut être obtenue par la seule conception
+théorique. Elle exige une progression expérimentale,
+des comparaisons contrôlées, des ablations et des validations
+sur des tâches de complexité croissante.
+
+% ============================================================
+\appendix
+\chapter{Sources et périmètre documentaire}
+% ============================================================
+
+\section{Sources du projet}
+
+Les éléments décrivant l'implémentation de référence
+s'appuient notamment sur les fichiers de l'archive
+\texttt{sondes\_ex7\_v003.zip} :
+
+\begin{enumerate}
+  \item
+  \texttt{reports/ARCHITECTURE\_V003.md} :
+  description de l'organisation EX7 V003, des sondes,
+  des partitions d'entraînement et de l'inférence.
+
+  \item
+  \texttt{inputs/reference\_v002/src/ex6\_common.py} :
+  implémentation de la classe \texttt{AdaptiveRBF},
+  encodeur, centres, largeurs et lecture radiale.
+\end{enumerate}
+
+Les chiffres expérimentaux sont repris des résultats
+communiqués dans le cadre de l'analyse du projet.
+
+Les propositions EX7-Matrix, EX7-Matrix-Vector,
+EX7-Hybrid et les architectures linguistiques ne sont
+pas présentées comme des implémentations déjà validées.
+
+\section{Références conceptuelles externes}
+
+Les mécanismes utilisés dans les propositions appartiennent
+à des familles connues de l'apprentissage automatique :
+
+\begin{itemize}
+  \item réseaux à fonctions de base radiales ;
+  \item perceptrons multicouches ;
+  \item calcul matriciel batché ;
+  \item modèles à experts et mécanismes de routage ;
+  \item réseaux de neurones à passage de messages ;
+  \item Transformers et attention ;
+  \item modèles séquentiels et mécanismes de mémoire.
+\end{itemize}
+
+Cette note ne prétend pas établir une nouveauté
+bibliographique de ces mécanismes. Une étude de l'état
+de l'art sera nécessaire pour situer précisément
+la contribution originale du projet.
+
+\end{document}

@@ -1,0 +1,297 @@
+{
+  "schema": "NGeGenBrain.IndependentHardBenchmark/1",
+  "benchmark_id": "NG0-INDEP-HARD-20261027-01",
+  "model_id": "NGeGenBrain_v1",
+  "model_version": "1.0.0",
+  "model_root": "/mnt/data/NGeGenBrain_v1_work_1/Dmodel_NGeGenBrain_v1",
+  "source_archive": "/mnt/data/NGeGenBrain_v1_work_0/Dmodel_NGeGenBrain_v1.zip",
+  "source_sha256": "b1ae52f289c1f6aa27785141ca162d5a3074304fc5983e70fbb9a9d4e3680966",
+  "harness_sha256": "9325f55cf7e8694fd88c6f6df928e5b4a9f568f447fd41e6b80014659749b816",
+  "seed": 20261027,
+  "run_started": "2026-10-27T10:49:39+00:00",
+  "run_ended": "2026-10-27T10:49:40+00:00",
+  "database_path": "/tmp/ngegenbrain_independent_hard_i6vsuuz4/bench.sqlite3",
+  "test_count": 15,
+  "passed": 15,
+  "failed": 0,
+  "tests": [
+    {
+      "id": "ARITH-001",
+      "category": "property-based exact arithmetic",
+      "expected": "2400 exact matches",
+      "observed": "2400 matches; 0 mismatches",
+      "verdict": "PASS",
+      "details": {
+        "seed": 20261027,
+        "generated_pairs": 600,
+        "failures": []
+      },
+      "duration_seconds": 0.017992048999985855
+    },
+    {
+      "id": "MESH-001",
+      "category": "independent graph-closure oracle",
+      "expected": "all 35 reachable pairs; no extra pairs",
+      "observed": "35 pairs; missing=0 extra=0",
+      "verdict": "PASS",
+      "details": {
+        "nodes": 12,
+        "input_edges": 16,
+        "closure_pairs": 35,
+        "new_facts": 23,
+        "status": "FIXPOINT_REACHED",
+        "missing": [],
+        "extra": []
+      },
+      "duration_seconds": 0.20515150900064327
+    },
+    {
+      "id": "MESH-002",
+      "category": "typed identity collision",
+      "expected": "typed derived fact with object type Int",
+      "observed": {
+        "new_facts": 1,
+        "q_fact_types": [
+          "String",
+          "Int"
+        ]
+      },
+      "verdict": "PASS",
+      "details": {
+        "rule": "same SPO but target type differs",
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.033385147000444704
+    },
+    {
+      "id": "WM-001",
+      "category": "world-model output contract",
+      "expected": "reject output type violation and prevent activation",
+      "observed": {
+        "activation": {
+          "enabled": false,
+          "reason": "incomplete_holdout_predictions"
+        },
+        "model_exact_match_rate": null,
+        "record_keys": [
+          "id",
+          "model_id",
+          "model_version",
+          "evaluation",
+          "created_at",
+          "activation_state"
+        ]
+      },
+      "verdict": "PASS",
+      "details": {
+        "model_output_type": "Int",
+        "actual_transition_output": "String",
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.21949683599996206
+    },
+    {
+      "id": "BUDGET-001",
+      "category": "non-finite budget validation",
+      "expected": "non-finite limits rejected or treated conservatively; 200KB value cannot pass 1KB memory cap",
+      "observed": {
+        "finite_status": "Partial",
+        "nonfinite_status": "Rejected",
+        "nonfinite_reason": "budget.cpu must be a finite, non-negative number"
+      },
+      "verdict": "PASS",
+      "details": {
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.009749740000188467
+    },
+    {
+      "id": "BUDGET-002",
+      "category": "component resource_cost validation",
+      "expected": "NaN resource cost rejected",
+      "observed": {
+        "accepted": false,
+        "error": "ValueError: resource_cost must use known dimensions and finite, non-negative numbers"
+      },
+      "verdict": "PASS",
+      "details": {
+        "reproduced_defect": false
+      },
+      "duration_seconds": 3.3269999221374746e-05
+    },
+    {
+      "id": "TRACE-001",
+      "category": "concurrent event append/hash chain",
+      "expected": "200 events and valid hash chain",
+      "observed": {
+        "visible_events": 200,
+        "chain": {
+          "valid": true,
+          "count": 200,
+          "problems": [],
+          "head_hash": "58f6205c1cb0434d0740a9241d92edf0d181a06abcedd307404724207ca8e425"
+        },
+        "errors": []
+      },
+      "verdict": "PASS",
+      "details": {
+        "workers": 8,
+        "events_each": 25
+      },
+      "duration_seconds": 0.3425493370004915
+    },
+    {
+      "id": "MEM-001",
+      "category": "memory corruption detection",
+      "expected": "payload_error present and no payload trusted",
+      "observed": {
+        "payload_error": "CRC check failed",
+        "payload_returned": true
+      },
+      "verdict": "PASS",
+      "details": {
+        "payload_error": "CRC check failed"
+      },
+      "duration_seconds": 0.01572584800032928
+    },
+    {
+      "id": "MESH-003",
+      "category": "invalid rule admission",
+      "expected": "all three structurally invalid rules rejected",
+      "observed": {
+        "accepted_indices": [],
+        "persisted_count": 0
+      },
+      "verdict": "PASS",
+      "details": {
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.011538052999640058
+    },
+    {
+      "id": "CERT-001",
+      "category": "certificate re-derivation",
+      "expected": "valid cert accepted; altered conclusion rejected even with recalculated hash",
+      "observed": {
+        "valid_certificate": {
+          "valid": true,
+          "problems": [],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        },
+        "forged_certificate": {
+          "valid": false,
+          "problems": [
+            "conclusion_not_entailed_by_rule_and_premises"
+          ],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        }
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.028211514999384235
+    },
+    {
+      "id": "TYPE-001",
+      "category": "mixed JSON values and typed identity",
+      "expected": "all 10 JSON-shaped input forms supported by Any identity",
+      "observed": {
+        "checks": 10,
+        "errors": []
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.027246646000094188
+    },
+    {
+      "id": "SEC-001",
+      "category": "source-in-data boundary",
+      "expected": "string remains inert data and process does not execute it",
+      "observed": {
+        "status": "Success",
+        "value_equals_payload": true,
+        "value": "__import__(\"os\").system(\"echo SHOULD_NOT_RUN\")"
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.0020473619997574133
+    },
+    {
+      "id": "ROBUST-001",
+      "category": "deeply nested AST",
+      "expected": "bounded typed rejection/failure instead of uncaught runtime exception",
+      "observed": {
+        "returned": true,
+        "status": "Rejected",
+        "reason": "maximum JSON/AST nesting depth exceeded",
+        "details": {
+          "preflight": {
+            "valid": false,
+            "reason": "maximum JSON/AST nesting depth exceeded",
+            "path": "$.steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0]",
+            "max_depth": 128,
+            "observed_depth_at_least": 129,
+            "node_count": 128
+          },
+          "program_shape": {
+            "valid": false,
+            "reason": "maximum JSON/AST nesting depth exceeded",
+            "path": "$.steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0]",
+            "max_depth": 128,
+            "observed_depth_at_least": 129,
+            "node_count": 128
+          },
+          "input_shape": {
+            "valid": true,
+            "max_depth": 1,
+            "node_count": 0
+          },
+          "environment_shape": {
+            "valid": true,
+            "max_depth": 2,
+            "node_count": 1
+          }
+        }
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.006036929000401869
+    },
+    {
+      "id": "MESH-005",
+      "category": "context-scoped fact queries",
+      "expected": "only the fact in the requested context is returned",
+      "observed": {
+        "subjects": [
+          "alice"
+        ],
+        "count": 1
+      },
+      "verdict": "PASS",
+      "details": {
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.0212133229997562
+    },
+    {
+      "id": "MESH-006",
+      "category": "bounded unsuccessful join exploration",
+      "expected": "no more than one fact-match attempt when cap=1",
+      "observed": {
+        "observed_match_calls": 1,
+        "reported_status": "BUDGET_EXHAUSTED",
+        "rule_match_attempts": 0
+      },
+      "verdict": "PASS",
+      "details": {
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.1391708680002921
+    }
+  ],
+  "environment": {
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "python_implementation": "CPython",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "system": "linux"
+  }
+}

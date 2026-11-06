@@ -1,0 +1,100 @@
+{
+  "campaign_status": "INCOMPLET",
+  "prompt_ex6_created_and_structurally_audited": true,
+  "source_zip_crc_audit": "PASS",
+  "prompt_json_validation": "PASS",
+  "metric_recalculation": "PASS: 62 prediction files",
+  "experiments": {
+    "replica_inference_only_fold_partition": {
+      "status": "PILOT_EXECUTED",
+      "seeds": 5,
+      "notes": "Frozen duplicate; train benefit NON MESURÉ."
+    },
+    "replica_training_shared_computation": {
+      "status": "NOT_EXECUTED"
+    },
+    "replica_internal_kernel_partition": {
+      "status": "NOT_EXECUTED"
+    },
+    "emplica_simple_heterogeneous_7x5": {
+      "status": "PILOT_EXECUTED",
+      "seeds": 5
+    },
+    "emplica_homogeneous_best_variant_nested_selection": {
+      "status": "NOT_EXECUTED"
+    },
+    "emplica_layer_specialist_oof": {
+      "status": "NOT_EXECUTED"
+    },
+    "emplica_interlayer_oof_correctors": {
+      "status": "NOT_EXECUTED"
+    },
+    "orchestra_heterogeneous_outer_scalar_gate": {
+      "status": "PILOT_EXECUTED",
+      "seeds": 5
+    },
+    "orchestra_homogeneous_mixa_global": {
+      "status": "PILOT_EXECUTED",
+      "seeds": 5
+    },
+    "orchestra_input_conditioned_outer_gate": {
+      "status": "NOT_EXECUTED"
+    },
+    "orchestra_specialist_per_layer": {
+      "status": "NOT_EXECUTED"
+    },
+    "orchestra_interlayer_oof_error_correction": {
+      "status": "NOT_EXECUTED"
+    },
+    "orchestra_full_cascade_confirmatory": {
+      "status": "NOT_EXECUTED"
+    },
+    "early_exit_threshold_diagnostic": {
+      "status": "EXPLORATORY_ONLY",
+      "validation_seed": 1501
+    },
+    "external_unexposed_domains": {
+      "status": "NOT_EXECUTED"
+    },
+    "confirmatory_test": {
+      "status": "NOT_EXECUTED"
+    }
+  },
+  "required_measures": {
+    "parameters_and_ratio": "MEASURED_FOR_FOUR_PILOT_FAMILIES",
+    "validation_quality": "MEASURED_AND_RECALCULATED",
+    "training_wall_time": "MEASURED_FOR_EMP/HETERO_ORCHESTRA/HOMO; Replica training NOT MESURÉ",
+    "batch1_latency": "MEASURED",
+    "batch16_64_latency": "MEASURED_FOR_PILOTS; not all paths/batches",
+    "batch256_latency": "NOT MESURÉ",
+    "p99_latency": "NOT MESURÉ",
+    "peak_rss_activation_memory": "NOT MESURÉ_CONSISTENTLY",
+    "VRAM": "NOT_APPLICABLE_GPU_UNAVAILABLE",
+    "energy": "NOT MESURÉ",
+    "full_end_to_end_pipeline": "NOT MESURÉ_CONSISTENTLY",
+    "MAC_FLOP_and_kernel_counts": "PARTIAL_OR_NOT_MEASURED",
+    "generalization_external": "NOT_EXECUTED",
+    "NI_margins": "NOT_PREREGISTERED"
+  },
+  "overall_verdict": "INCOMPLET — parameter ratio passed in pilots, but measured latency/training criteria fail; point quality is below MLP-ge4x; confirmatory and resource measures remain incomplete.",
+  "prompt_ex6_revision": "1.0.1",
+  "additional_audits": {
+    "checkpoint_parameter_recount": "PASS: 20 candidate/MLP-ge4x checkpoint pairs; tensor state counts match P_total minus 60 scaler coefficients",
+    "replica_frozen_clone_state_equality": "PASS: primary and replica state_dict tensors match exactly for all five seeds",
+    "deployment_exports": "CREATED: 20 paired candidate/MLP-ge4x weights-plus-scaler exports; byte sizes recorded",
+    "packaged_scripts_smoke_test": "PASS: --help and import/forward smoke tests",
+    "pareto_frontier": "CREATED as descriptive, development-only table; Replica fit metric missing so its full-dimension dominance is not scored"
+  },
+  "final_workspace_audit": {
+    "prompt_validation": "PASS",
+    "prompt_copies_identical": "PASS",
+    "prompt_sections": 19,
+    "json_files_validated": 161,
+    "jsonl_files_validated": 3,
+    "prediction_metrics_recalculated": 62,
+    "checkpoint_parameter_pairs_crosschecked": 20,
+    "minimum_MLP_ge4x_parameter_ratio": 4.000855920114122,
+    "overall_campaign_status": "INCOMPLET",
+    "note": "Cette validation porte sur les artefacts enregistrés ; elle ne transforme pas les pilotes rétrospectifs en expérience confirmatoire."
+  }
+}

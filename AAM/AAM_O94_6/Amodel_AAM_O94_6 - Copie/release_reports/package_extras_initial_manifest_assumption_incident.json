@@ -1,0 +1,16 @@
+{
+  "schema": "aam-o946-release-tooling-incident-v1",
+  "incident_id": "O946-DELIVERY-001",
+  "phase": "P8",
+  "severity": "RELEASE_PACKAGER_CONFIGURATION",
+  "status": "RESOLVED_RETEST_PASS",
+  "opened_utc": "2026-10-20T18:55:00Z",
+  "summary": "La première tentative de construction des paquets auxiliaires s’est arrêtée avant la création des ZIP, car le script supposait que les manifestes AUDIT_MANIFEST_SHA256.json et FOLLOWUP_MANIFEST_SHA256.json existaient à la racine du workspace. Le workspace ne produit que MANIFEST_SHA256.json et PACKAGE_MANIFEST_SHA256.json; les paquets auxiliaires disposent de leur propre PACKAGE_CONTENTS_SHA256.json.",
+  "impact": "Aucun ZIP n’a été validé sur la première tentative; aucun code ou donnée du modèle n’a été modifié par cette erreur de configuration.",
+  "remediation": "Ajuster la sélection aux deux manifestes réellement présents, générer un manifeste interne par archive et reconstruire les trois ZIP.",
+  "resolution": {
+    "status": "PASS_BOUNDED",
+    "note": "Le second build a produit audit, suivi et démonstrateur compositionnel; la validation extraite et le manifeste final vérifieront chaque contenu.",
+    "resolved_utc": "2026-10-20T18:57:31Z"
+  }
+}

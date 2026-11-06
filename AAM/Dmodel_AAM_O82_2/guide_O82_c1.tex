@@ -1,0 +1,185 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry,hyperref,booktabs,longtable,tabularx,enumitem,amsmath,amssymb}
+\geometry{margin=2.4cm}
+\setlist{nosep}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,hypertexnames=false}
+\title{GUIDE D'UTILISATION AAM O82\_c1}
+\author{ROCA-D / AAM}
+\date{6 octobre 2026}
+\begin{document}
+\setlength{\emergencystretch}{2em}
+\maketitle
+\tableofcontents
+
+\chapter{Description}
+Ce guide décrit l'installation, l'exécution, l'apprentissage, l'observation, la mémoire, la vérification, la généralisation, l'auto-observation et la récupération de la version AAM O82\_c1. Le modèle est non-LLM, standard-library-first et exécutable localement. Aucun service externe n'est obligatoire pour le chemin de base.
+
+Le modèle ne contient pas de réponse métier pré-écrite. Les exemples fournis servent uniquement à vérifier l'installation et la chaîne d'exécution. Pour une compétence réelle, les données doivent être acquises par le protocole d'apprentissage.
+
+\chapter{Architecture}
+Le pipeline général est :
+\begin{align*}
+&\text{problème}+\text{contrat}+\text{budget}\\
+&\rightarrow\text{OBSERVE}\rightarrow\text{empreinte partielle}\\
+&\rightarrow\text{retrieval mémoire}\rightarrow\text{suffisance}\\
+&\rightarrow\text{VERIFY}\rightarrow\text{MEMORIZE}\rightarrow\text{ACT/DONE}.
+\end{align*}
+Lorsque la preuve n'est pas suffisante, la politique sélectionne une nouvelle observation, un bundle, une correction, une décomposition ou une opération d'apprentissage. En mode expérimenté, une candidate généralisée peut être produite sans devenir automatiquement certifiée.
+
+\section{Observation dégradée}
+La mémoire est consultée avant chaque choix de sonde. Lorsqu'une compétence indique les vues minimales nécessaires, le runtime tente ces probes en priorité et réévalue après chaque observation. Une exploration plus large n'est utilisée que lorsque la mémoire ne suffit pas ou lorsqu'un bundle est justifié par les contraintes de ressources.
+
+\section{Mémoire}
+Les raw sont conservés séparément de l'index. Les empreintes, témoins, invalidations et vues peuvent être reconstruits à partir des journaux. Une compétence ne doit pas être promue uniquement parce qu'elle ressemble à une compétence existante.
+
+\section{Apprentissage}
+Le learner possède un portfolio de candidats génériques. La sélection s'effectue sur TRAIN seulement, puis le candidat sélectionné est réentraîné sur tout TRAIN. Une variante itérative peut enrichir les données internes avec les erreurs des rondes précédentes. HOLDOUT et OOD restent des jeux de mesure, jamais des jeux de tuning.
+
+\section{Réponse généralisée}
+Pour une entrée nouvelle, le runtime peut retourner : décision candidate, confiance, source, skill\_id et \texttt{certified=false}. Une telle sortie est utile pour l'utilisateur mais ne vaut pas preuve exacte. La confiance est un score gradué ; elle n'est pas présentée comme une probabilité garantie.
+
+\section{Auto-observation}
+Le runtime peut observer son propre état, déclencher une transition \texttt{SELF\_OBSERVE}, réserver une ressource pour une action prédite et journaliser une intervention causale. Une configuration désactivée ne doit pas programmer de SELF\_OBSERVE automatique.
+
+\chapter{Pré-requis PC}
+Un PC courant avec Python 3.10+ est suffisant pour le chemin sans installation. Aucun GPU n'est requis. Le mode sans installation est recommandé pour l'essai initial, car il ne dépend pas d'un téléchargement de paquet.
+
+\chapter{Installation PC}
+Depuis la racine du dossier extrait :
+\begin{verbatim}
+cd Dmodel_AAM_O82\_c1
+python --version
+PYTHONPATH=src python -m aam_o82 audit
+PYTHONPATH=src python -m aam_o82 doctor
+\end{verbatim}
+L'installation editable facultative est :
+\begin{verbatim}
+python -m pip install -e .
+\end{verbatim}
+Si l'environnement est hors ligne et ne possède pas les outils de build nécessaires, utiliser directement le chemin \texttt{PYTHONPATH=src}; le modèle n'en dépend pas.
+
+\chapter{Gouvernance des erreurs}
+Avant chaque exécution, consulter le répertoire permanent des checklists fourni par le projet. Les erreurs liées au modèle sont conservées dans \texttt{checklist\_erreurs\_model.json}; les problèmes de ressources, d'archivage ou de banc dans \texttt{checklist\_erreurs\_no\_model.json}. Une entrée \texttt{open} bloque l'exécution contrôlée tant que le correctif n'a pas été préparé et validé.
+
+\chapter{Créer un épisode}
+Un épisode associe un problème, un contrat, un budget, un mode et éventuellement une configuration. Exemple minimal :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 run \\
+  --problem examples/task.json \\
+  --contract examples/echo_contract.json \\
+  --config config/runtime.json \\
+  --workdir runs/runtime \\
+  --max-steps 32
+\end{verbatim}
+Le résultat JSON indique le statut terminal, la décision éventuellement certifiée, la preuve, le budget et l'identifiant d'épisode.
+
+\chapter{Observation}
+Pour ajouter une observation à un épisode existant :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 observe \\
+  --episode ID \\
+  --probe structure \\
+  --config config/runtime.json \\
+  --workdir runs/runtime
+\end{verbatim}
+La reprise réhydrate les observations déjà persistées et ne recrée pas un nouvel \texttt{INIT}.
+
+\chapter{Acquisition et apprentissage}
+Acquisition simple :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 acquire \\
+  --dataset examples/demo_dataset.jsonl \\
+  --contract examples/echo_contract.json \\
+  --config config/acquisition.json \\
+  --mode EXPERIMENT \\
+  --workdir runs/acquire
+\end{verbatim}
+Le protocole produit une capsule candidate ou vérifiée selon les contrats. Les erreurs et corrections sont journalisées. Le learner généralisant peut comparer plusieurs candidats et refitter le meilleur sur TRAIN complet.
+
+\section{Apprentissage itératif}
+Le protocole itératif travaille sur des rondes internes : apprentissage, calcul des erreurs internes, enrichissement, nouveau test, arrêt par stagnation ou limite de rondes. HOLDOUT/OOD sont exclus de la décision d'arrêt du learner.
+
+\chapter{Réutiliser une compétence}
+Vérifier une compétence sur un holdout :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 verify-skill \\
+  --skill skill.json \\
+  --dataset examples/demo_dataset.jsonl \\
+  --split holdout \\
+  --contract examples/echo_contract.json
+\end{verbatim}
+Transfert :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 transfer \\
+  --skill skill.json \\
+  --input input.json \\
+  --contract examples/echo_contract.json
+\end{verbatim}
+Une entrée exacte peut produire une décision certifiable si ses preuves sont valides. Une entrée nouvelle peut produire une \texttt{CANDIDATE} avec confiance et \texttt{certified=false}.
+
+\chapter{Composition, découverte et décomposition}
+Composition :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 compose \\
+  --skills skill_a.json skill_b.json \\
+  --contract examples/echo_contract.json
+\end{verbatim}
+La composition exige des compétences compatibles et vérifiées. La découverte de probe et la décomposition sont soumises au budget, à la vérification et au root-retest.
+
+\chapter{Instruments et auto-observation}
+Les instruments spécialistes sont des observateurs externes avec contrat, provenance, coût, incertitude et capacité de parallélisation. Un désaccord peut déclencher une auto-observation causale.
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 experiment \\
+  --problem examples/task.json \\
+  --contract examples/echo_contract.json \\
+  --config config/runtime.json \\
+  --workdir runs/experiment
+\end{verbatim}
+La configuration \texttt{self\_observation.enabled=false} désactive la programmation automatique de SELF\_OBSERVE.
+
+\chapter{Mémoire, intégrité et recovery}
+Vérification mémoire :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 memory-verify \\
+  --memory runs/runtime/memory
+\end{verbatim}
+Audit :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 audit
+\end{verbatim}
+Replay :
+\begin{verbatim}
+PYTHONPATH=src python -m aam_o82 replay --episode ID --workdir runs/runtime
+\end{verbatim}
+Le replay doit pouvoir reproduire l'ordre des événements et détecter une altération de chaîne.
+
+\chapter{Validation et benchmark}
+\begin{verbatim}
+PYTHONPATH=src python -W error::ResourceWarning -m unittest discover -s tests
+PYTHONPATH=src python scripts/validate_o82.py \
+  --output reports/P11_validation.json
+PYTHONPATH=src python scripts/benchmark_o82.py \
+  --output reports/P12_benchmark.json
+PYTHONPATH=src python scripts/lint_reports.py \
+  --output reports/P10_report_lint.json
+\end{verbatim}
+Les avertissements de ressources sont traités comme erreurs dans le gate final.
+
+\chapter{Commandes complètes O81 conservées}
+La version actuelle conserve aussi les commandes \texttt{experiment}, \texttt{verify-skill}, \texttt{transfer}, \texttt{compose} et \texttt{memory-verify}. Les adaptateurs externes RAG, firewall, black-box/subprocess, power et protocoles sont facultatifs mais gouvernés.
+
+\chapter{Données texte et langues}
+Le modèle accepte un problème dont la valeur peut contenir du texte naturel. Les tests SMS ont démontré l'utilisation d'anglais, français, allemand et de langues OOD multilingues. Les métadonnées de langue ne sont pas fournies comme variable de décision au learner dans les expériences. La sortie de classification est textuelle/symbolique. Ce guide ne revendique pas une génération libre de prose.
+
+\chapter{Dépannage}
+Une sortie \texttt{UNRESOLVED} n'est pas une preuve d'impossibilité. Vérifier d'abord contrat, budget, visibilité des probes, preuves disponibles, skill importé et journal de l'épisode. Une exception Python ou un chemin absent doit être enregistré comme erreur de banc avant toute nouvelle exécution.
+
+\chapter{Reproductibilité}
+Conserver le hash des données, le contrat, la configuration, les paramètres de budget, l'identifiant de skill, les sorties JSON et le journal d'événements. Ne jamais utiliser HOLDOUT/OOD pour choisir un hyperparamètre sans l'indiquer explicitement comme une expérience exploratoire séparée.
+
+\chapter{Statut}
+Cette version est distribuée avec son modèle normatif, ses tests, ses rapports, ses configurations, ses exemples et ses checksums. Les performances annoncées dans les rapports sont attachées aux protocoles et aux jeux de données mesurés ; elles ne doivent pas être transformées en promesse générale.
+\end{document}

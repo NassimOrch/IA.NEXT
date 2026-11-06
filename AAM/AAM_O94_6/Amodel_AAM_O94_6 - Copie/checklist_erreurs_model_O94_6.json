@@ -1,0 +1,261 @@
+{
+  "schema": "aam-o94-6-error-ledger-v1",
+  "title": "O94.6 model errors",
+  "parent_ledger": "checklist_erreurs_model_O94_5.json",
+  "updated_for": "O94_6 P8: RAG entity disambiguation and multi-question regression fixed and retested",
+  "items": [
+    {
+      "incident_id": "O943-M001",
+      "phase": "P1",
+      "category": "missing_passive_live_observation",
+      "severity": "CORE_FUNCTIONALITY_MISSING",
+      "status": "RESOLVED_BOUNDED_ADAPTERS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "L’ancien chemin Observer mélangeait l’import de traces préfabriquées et le sondage actif d’un protocole JSON Lines; il ne créait pas de trace à partir de sources OS vivantes.",
+      "impact": "La fonction nommée Observer ne satisfaisait pas le sens attendu et requérait un fichier/contrat préparé.",
+      "remediation": "Ajouter une session passive filesystem/process/réseau qui écrit elle-même une trace JSONL et un rapport; séparer ce mode de l’import dataset et du sondage actif JSONL.",
+      "evidence": [
+        "aam_o93/observation_live.py",
+        "tests/test_o943_passive_observation.py",
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json"
+      ],
+      "resolution_summary": "P1 fermé sur tests live filesystem, snapshots PID, création automatique JSONL/rapport, chaîne d’empreintes, diagnostics et budgets. Le vrai réseau reste dépendant des outils/droits présents, avec fixtures de backend dans cette livraison."
+    },
+    {
+      "incident_id": "O943-M002",
+      "phase": "P3",
+      "category": "local_model_adapters_visibility",
+      "severity": "LOCAL_MODEL_INTEGRATION_UNCLEAR",
+      "status": "RESOLVED_WITH_EXPLICIT_CONTRACT",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "L’intégration des modèles locaux était difficile à trouver, et le contrat d’adaptateur PyTorch n’était pas livré sous forme de gabarit visible.",
+      "impact": "Un checkpoint .pt/.pth sans architecture n’est pas automatiquement chargeable.",
+      "remediation": "Ajouter un onglet scrollable dédié, un bouton de génération de gabarit Python et les exemples de backends Transformers/Ollama/OpenAI-compatible/workspace AAM.",
+      "evidence": [
+        "aam_o93/ui.py",
+        "aam_o93/model_integration.py",
+        "examples/model_adapters/README_O94_3_FR.md",
+        "examples/model_adapters/pytorch_state_dict_adapter_template.py"
+      ],
+      "resolution_summary": "Gabarit fourni avec contrat load_model/generate/train_model optionnel; il échoue clairement tant que build_model()/generate() ne sont pas adaptés au checkpoint. Pas de fausse promesse d’universalité."
+    },
+    {
+      "incident_id": "O943-M003",
+      "phase": "P4",
+      "category": "missing_composition_compile_and_learned_blocks_surface",
+      "severity": "CORE_UI_PATH_INCOMPLETE",
+      "status": "RESOLVED_BOUNDED_COMPOSITION",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "La compilation et l’apprentissage de briques depuis observation n’étaient pas assez visibles et le catalogue ne montrait pas clairement les blocs issus de traces.",
+      "impact": "Impossible de suivre distinctement une observation, les candidats de briques et la compilation d’une composition.",
+      "remediation": "Ajouter compilation DSL vers artefact JSON, ingestion de traces par LearnedBlockStore, exact lookup train-only et candidats de méthode/règle à revue manuelle; ajouter la brique passive au catalogue.",
+      "evidence": [
+        "aam_o93/block_learning.py",
+        "aam_o93/base_blocks.py",
+        "aam_o93/runtime.py",
+        "tests/test_o943_learned_blocks_and_composition.py",
+        "receipts/O94_3/P4_composition_learning.json",
+        "tests/test_o943_runtime_integration.py",
+        "tests/test_o943_ui_contracts.py"
+      ],
+      "resolution_summary": "Retest P4: observation filesystem live → JSONL créé par AAM → candidats visibles après apprentissage; DSL compile/save/run testé sur support exact et entrée inédite unresolved; aucun code arbitraire exécuté.",
+      "updated_utc": "2026-10-19T15:59:07Z"
+    },
+    {
+      "incident_id": "O943-M004",
+      "phase": "P5",
+      "category": "rag_regression_risk",
+      "severity": "POTENTIAL_FEATURE_LOSS",
+      "status": "RESOLVED_BYTE_PARITY_AND_RUNTIME_TESTS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "Les corrections d’interface et d’observation pourraient accidentellement retirer des fonctions RAG historiques.",
+      "impact": "Risque de perte du moteur sémantique, retrieval et corpus SMS.",
+      "remediation": "Comparer les hashes des six fichiers RAG/moteur/tests historiques entre les archives O94_0, O94_1, O94_2 et laisser les fichiers inchangés dans O94_3.",
+      "evidence": [
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json",
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P5_rag_hash_parity.json"
+      ],
+      "resolution_summary": "P5: 47 RAG/SMS/résolution/adaptive tests pass, and six protected implementation/test files retain the O94_2 SHA-256 values; no RAG file changed.",
+      "updated_utc": "2026-10-19T16:00:24Z"
+    },
+    {
+      "incident_id": "O944-M001",
+      "phase": "P1",
+      "category": "silent_training_window_truncation",
+      "severity": "TRAINING_COVERAGE_HIDDEN_CAP",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T08:35:00+01:00",
+      "summary": "Le chemin LM local limitait silencieusement une époque à 5000 fenêtres train et 1000 fenêtres validation, indépendamment du nombre réellement disponible et sans option CLI correspondante.",
+      "impact": "Une partie des données demeure inutilisée; les métriques de validation reposent sur un sous-échantillon non déclaré.",
+      "remediation": "Aucun plafond par défaut; exposer des plafonds explicites optionnels, les transmettre du CLI au cœur d’entraînement, valider qu’ils sont positifs et inscrire à la trace le nombre disponible/utilisé.",
+      "evidence": [
+        "receipts/O94_4/P0_baseline.json",
+        "receipts/O94_4/P1_coverage_patch.json",
+        "receipts/O94_4/P2_runtime_cli.json",
+        "tests/test_o944_language_window_policy.py"
+      ],
+      "resolution_summary": "Validé sur le cœur, le runtime/CLI/UI et deux entraînements réels : mode par défaut utilise 8707/8707 train et 1708/1708 validation; le mode budgeté utilise exactement 5000/1000.",
+      "updated_utc": "2026-10-20T07:33:12.998211+00:00"
+    },
+    {
+      "incident_id": "O944-M002",
+      "phase": "P2",
+      "category": "rag_weak_context_and_intent_misalignment",
+      "severity": "RETRIEVAL_RELEVANCE_AND_ANSWER_SELECTION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T07:37:58.830045+00:00",
+      "summary": "Un scénario avec deux sources distinctes faisait remonter la source batterie puis une source météo hors contexte à score positif mais faible; la question “How often ...?” sélectionnait la phrase d’identification au lieu de la phrase qui spécifie l’intervalle d’inspection.",
+      "impact": "Du contexte éloigné pouvait entrer dans les sources et la réponse extractive était pertinente par sujet mais insuffisante pour l’intention interrogative.",
+      "remediation": "Introduire un seuil corpus-relatif explicite au classement des chunks, exposer le nombre filtré et le seuil, et ajouter un bonus de classement générique pour les marqueurs d’intervalle dans les questions de fréquence. Ce mécanisme réordonne seulement les phrases observées.",
+      "evidence": [
+        "logs/O94_4/rag_semantic_search_after.json",
+        "logs/O94_4/rag_chat_answer_after.json",
+        "tests/test_o944_rag_answer_intent.py",
+        "receipts/O94_4/P2_runtime_cli.json"
+      ],
+      "resolution_summary": "Le rejeu du scénario retourne uniquement battery_service.md, trace le seuil 5.75286 pour un meilleur score 6.75286, écarte un candidat sur deux et répond “The maintenance procedure inspects separator condition every 200 operating hours.”. Les deux tests de régression RAG passent.",
+      "updated_utc": "2026-10-20T07:39:45.500964+00:00"
+    },
+    {
+      "incident_id": "O944-M003",
+      "phase": "P3",
+      "category": "stale_parent_release_identity_assertions",
+      "severity": "TEST_EXPECTATION_OUTDATED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T07:43:27.103434+00:00",
+      "summary": "La première suite complète après le bump de release avait quatre échecs : quatre tests hérités affirmaient explicitement 0.94.3 ou le titre O94_3 alors que l’API/runtime/UI annonçaient correctement O94.4.",
+      "impact": "La suite O94.4 échouait sur des assertions de version héritées, masquant l’état de la correction fonctionnelle.",
+      "remediation": "Mettre à jour uniquement les attentes d’identité de release dans les tests adaptés et le nom de programme CLI, tout en conservant les preuves historiques O94.3 intactes.",
+      "evidence": [
+        "tests/test_o931_release_identity.py",
+        "tests/test_o940_ui_resolution_details.py",
+        "tests/test_o941_standalone_startup.py",
+        "tests/test_p0_foundation.py",
+        "receipts/O94_4/P3_regression_suite.json",
+        "logs/O94_4/pytest_full_xvfb_final.txt"
+      ],
+      "resolution_summary": "Les quatre assertions héritées ont été ajustées aux identifiants O94.4; test ciblé 15 passed in 7.30s et suite complète finale 374 passed, 0 failed, 5 warnings, 21 sous-tests en 183.52s.",
+      "updated_utc": "2026-10-20T07:48:26.993968+00:00"
+    },
+    {
+      "incident_id": "O946-M005",
+      "phase": "P1/P8",
+      "category": "false_entity_lock_on_french_hyphenation",
+      "severity": "RAG_RETRIEVAL_CORRECTNESS",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T17:30:00Z",
+      "summary": "Une question FR contenant « faut-il » était traitée comme une demande d’identifiant structuré; le filtre entity-first écartait alors la source pertinente, ce qui produisait NO_MATCH ou des faits hors contexte.",
+      "impact": "Défaillance RAG translingue; une forme grammaticale est interprétée à tort comme une clé d’entité.",
+      "remediation": "Restreindre les identifiants atomiques aux préfixes acronymiques structurés ou aux suffixes alphanumériques contenant un chiffre. Conserver les noms composés simples dans les tokens de recherche sans les verrouiller comme entités.",
+      "evidence": [
+        "aam_o93/semantic_rag.py",
+        "aam_o93/resolution_tree.py",
+        "tests/test_o946_entity_id_extraction.py",
+        "tests/test_o946_hyphenated_entity_disambiguation.py",
+        "receipts/O94_6/P8_chat_rag_multique.json"
+      ],
+      "resolution_summary": "Le test indépendant « À quelle température faut-il stocker la batterie Velorin ? » retrouve la source contenant « 18 degrees Celsius »; les identifiants LM-204, GB-42 et Kestrel-17 restent atomiques. Les lots P8_chat_rag_multique (22 pass) et P8_RAG_entity_parent_gate_retest2 (18 pass) passent.",
+      "updated_utc": "2026-10-20T17:49:39.088800+00:00"
+    },
+    {
+      "incident_id": "O946-M006",
+      "phase": "P2/P8",
+      "category": "compound_query_under_serving",
+      "severity": "CHAT_ORCHESTRATION_COVERAGE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T15:25:00Z",
+      "summary": "Une requête contenant trois sous-questions ne produisait qu’une réponse; l’ancien chemin transmettait tout le texte à une seule sélection d’évidence/génération.",
+      "impact": "Réponse partielle ou perte silencieuse de sous-questions dans le chat.",
+      "remediation": "Décomposer la requête composée en sous-questions, exécuter chaque enfant avec le pipeline AAM normal, garder sources/statuts/tâches séparés, puis agréger les réponses dans l’ordre.",
+      "evidence": [
+        "aam_o93/runtime.py",
+        "tests/test_o946_multi_question.py",
+        "real_task_tests/O94_6_replay/evidence/compound_query_gb42.json",
+        "receipts/O94_6/P8_chat_rag_multique.json"
+      ],
+      "resolution_summary": "Les trois questions indépendantes concernant LM-204 et VX-318 sont dirigées vers le pipeline de résolution normal et leurs attributs/sources vérifiés; le lot P8_chat_rag_multique passe 22 tests.",
+      "updated_utc": "2026-10-20T17:49:39.088800+00:00"
+    }
+  ],
+  "o946_items": [
+    {
+      "incident_id": "O946-M001",
+      "phase": "P1",
+      "category": "semantic_rag_entity_grounding",
+      "severity": "FACTUAL_MISRETRIEVAL_PASS_FALSE_POSITIVE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "O94.5 retrieval returned facts belonging to a different station despite PASS_BOUNDED.",
+      "remediation": "Preserve entity IDs as atomic tokens, segment line-oriented entity records, filter candidates by requested entity and requested attribute, and return NO_MATCH for unknown IDs.",
+      "evidence": [
+        "receipts/O94_6/P1_entity_rag_pytest.json",
+        "receipts/O94_6/P1_o945_replay_execution.json",
+        "real_task_tests/O94_6_replay/evidence/o945_regression_replay.json"
+      ],
+      "resolution_summary": "3/3 entity tests pass; 7/7 historical O94.5 prompts are answered with the correct record and source citation. Oracle is evaluation-only and not loaded by runtime.",
+      "updated_utc": "2026-10-20T15:44:14+00:00"
+    },
+    {
+      "incident_id": "O946-M002",
+      "phase": "P2",
+      "category": "intermittent_chat_retrieval_route",
+      "severity": "TRANSIENT_OR_NONDETERMINISTIC_ROUTE_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS_ROOT_CAUSE_CONFIRMED",
+      "summary": "An initial integration test showed language_generation_after_rag_no_evidence for a corpus where semantic retrieval was expected. Raw retrieval and solve diagnostics on a fresh workspace returned the temperature evidence and document_retrieval_semantic; the phase-only integration/UI rerun passed 7/7.",
+      "remediation": "Preserve the failed receipt; maintain raw retrieval diagnostic and route assertions in regression suite. Do not claim a definitive root cause without reproduction.",
+      "evidence": [
+        "receipts/O94_6/P2_unified_chat_pipeline_retest.json",
+        "receipts/O94_6/P2_raw_retrieval_diagnostic.json",
+        "receipts/O94_6/P2_solve_route_diagnostic.json",
+        "receipts/O94_6/P2_unified_chat_pipeline_final_retest.json",
+        "receipts/O94_6/P2_phase_only_final.json"
+      ],
+      "resolution_summary": "Le défaut de route précédemment non reproductible a été reproduit sous une question française avec « faut-il » pris à tort comme ID; voir O946-M004. Le correctif de reconnaissance d’ID est validé par 18/18 tests ciblés et le rejeu RAG bilingue.",
+      "updated_utc": "2026-10-20T17:40:14.106721+00:00"
+    },
+    {
+      "incident_id": "O946-M003",
+      "phase": "P7",
+      "category": "stale_public_release_identity",
+      "severity": "RELEASE_INTEGRITY_DEFECT",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T16:29:17.426064+00:00",
+      "summary": "Lors de la préparation du guide UI, des titres, docstrings, l’identifiant CLI et __version__ annonçaient encore O94.5 dans l’arbre de travail O94.6.",
+      "impact": "Risque de confusion sur la version et les commandes à utiliser; les preuves pourraient être attribuées à la version parente.",
+      "remediation": "Bumper __version__ et les chaînes publiques O94.6, fournir les trois lanceurs O94.6 avec préflight dédié, puis rejouer les tests d’identité, CLI et UI et vérifier un lancement propre.",
+      "evidence": [
+        "aam_o93/__init__.py",
+        "aam_o93/cli.py",
+        "aam_o93/ui.py",
+        "scripts/preflight_o946.py",
+        "run_AAM_O94_6.sh",
+        "tests/test_o946_release_identity.py",
+        "receipts/O94_6/P7_release_identity_retest.json"
+      ],
+      "updated_utc": "2026-10-20T16:56:15.320500+00:00",
+      "resolution_summary": "La version runtime publique est 0.94.6 et le rejeu des tests d’identité, CLI, UI héritée et fondamentaux a passé 17/17 en 14,83 s."
+    },
+    {
+      "incident_id": "O946-M004",
+      "phase": "P8",
+      "category": "false_entity_lock_on_grammatical_hyphenation",
+      "severity": "RAG_RECALL_REGRESSION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T17:34:31.002272+00:00",
+      "summary": "Un scénario de régression historique, avec la question française « À quelle température faut-il stocker la batterie Velorin ? », était rejeté comme NO_MATCH alors que le document observé contient 18 degrees Celsius. Le verrouillage par entité classait le groupe grammatical « faut-il » comme un identifiant, puis éliminait l’évidence pertinente.",
+      "impact": "Le chat pouvait générer une réponse non ancrée ou afficher aucune preuve, malgré une source pertinente présente dans le RAG.",
+      "remediation": "Employer une reconnaissance d’identifiants structurés qui exige soit un préfixe acronymique en majuscules, soit un suffixe alphanumérique contenant un chiffre; garder les ponts lexicaux corpus-gatés; tester régressions FR/EN et identifiants inventés.",
+      "evidence": [
+        "tests/test_o931_chat_pipeline.py",
+        "tests/test_o946_hyphenated_entity_disambiguation.py",
+        "tests/test_o946_entity_rag.py",
+        "tests/test_o945_standalone_preflight.py",
+        "receipts/O94_6/P8_rag_entity_parent_gate_retest2.json",
+        "logs/O94_6/P8_rag_entity_parent_gate_retest2.log"
+      ],
+      "resolution_summary": "Cause confirmée : l’expression régulière héritée classait « faut-il » comme un identifiant atomique. Les regex partagées semantic_rag/resolution_tree reconnaissent maintenant les préfixes acronymiques ou les suffixes porteurs de chiffre; le rejeu ciblé O931 chat + O946 entity-ID + O945 parent/child gate passe 18/18 en 21,91 s. Les faits attendus restent dans le corpus de test indépendant, pas dans le code d’AAM.",
+      "resolved_utc": "2026-10-20T17:40:14.106721+00:00"
+    }
+  ],
+  "updated_utc": "2026-10-20T18:49:46Z"
+}

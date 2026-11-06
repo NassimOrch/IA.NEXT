@@ -1,0 +1,102 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}\usepackage{amsmath,amssymb,booktabs,longtable,geometry,hyperref}
+\geometry{margin=2cm}
+\title{Rapport expérimental complet -- ORDER72 emergent v0}
+\author{Laboratoire ORDER72}
+\date{24 septembre 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Ce rapport décrit de bout en bout la construction et la validation de la première architecture ORDER72 issue de l'analyse causale de ORDER71. L'expérience vise notamment à distinguer le rôle du modèle de contrôle/vérification et celui du World Model (WM), à empêcher toute fuite d'oracle vers le WM, à rendre l'utilisation du WM mesurable et à préserver la propriété de certification indépendante. Les résultats de validation du prototype montrent : indépendance du WM dans le chemin CERTIFY, barrière contre les champs d'oracle, gel des poids, calibration auditable et compatibilité avec le noyau O71.
+\end{abstract}
+\tableofcontents
+\section{Objectifs}
+Les objectifs sont : (1) transformer le diagnostic O71 en architecture explicite ; (2) faire du WM un composant causal de priorisation dans les recherches ouvertes ; (3) conserver une séparation stricte entre prédiction et vérité ; (4) compter le coût de la calibration ; (5) produire des artefacts reproductibles et auditables.
+\section{Sources et provenance}
+Le point de départ est \texttt{model\_order\_71\_v\_1.zip}, complété par \texttt{audit\_order\_71\_v\_1.zip}, les rapports O71, la variante O71 v0 + O70 attention att1, \texttt{RG.jsonl}, les sources O69/O70 sélectionnées et les documents théoriques, notamment \texttt{DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex}. Les documents \texttt{infini\_vs\_fini\_0/1/2.tex} sont conservés comme branche théorique des contraintes et des cadres finis.
+\section{Diagnostic préalable}
+O71 possède deux voies causales. La voie CERTIFY exige un objectif public et une couverture exhaustive. La voie SEARCH utilise \texttt{ActiveGeneralSearch}. Une instrumentation indépendante a confirmé que CERTIFY effectue de l'encodage WM mais zéro prédiction WM avant de décider. Sur la recherche à budget limité, l'attention att1 a produit les mêmes regrets que le WM nul ; O65 n'a apporté qu'un gain faible. Le développement O72 part donc d'un déficit d'utilisation causale du WM, non d'un défaut de vérification.
+\section{Architecture O72}
+\[
+X \rightarrow I_P \rightarrow \mathcal K \rightarrow \mathcal M_{WM} \rightarrow \mathcal A \rightarrow \mathcal E \rightarrow \mathcal V \rightarrow \mathcal T \rightarrow \mathcal R.
+\]
+Ici $I_P$ est l'empreinte à résolution $P$, $\mathcal K$ le système de contraintes, $\mathcal M_{WM}$ le portefeuille de WM, $\mathcal A$ la priorisation, $\mathcal E$ l'expérience/simulation, $\mathcal V$ la vérification, $\mathcal T$ la mémoire temporelle et $\mathcal R$ le raffinement.
+\subsection{Contrat de rôle WM}
+Le contrat logiciel autorise : représentation, prédiction, incertitude, ordonnancement de candidats et priorité d'expérience. Il interdit : source de vérité, vérificateur final et oracle caché.
+\subsection{Routeur}
+Pour un petit pilote $P$, le routeur calcule
+\[
+R_k(P)=\frac1{|P|}\sum_{a\in P}|\hat r_k(a)-r(a)|,
+\]
+avec $r(a)$ extrait d'une conséquence publique. En cas d'absence de retour public exploitable, il ne produit pas de preuve et utilise seulement une règle conservatrice d'incertitude.
+\subsection{Contrôle de vérité}
+Le routeur scanne récursivement les états et conséquences et rejette les champs de type \texttt{target}, \texttt{answer}, \texttt{correct}, \texttt{oracle}, \texttt{solution}, \texttt{ground\_truth}, \texttt{truth}, etc. Le but est d'empêcher qu'un résultat caché ne soit injecté indirectement dans la décision du WM.
+\subsection{Budget}
+Le nombre d'expériences pilotes est retiré du budget total de nœuds. Le temps de calibration est également retiré du temps disponible pour la recherche. Ce choix empêche de déclarer un gain du WM en donnant gratuitement son coût.
+\section{Backend O65}
+Trois checkpoints O65 gelés, 746\,718 paramètres chacun, forment un ensemble de 2\,240\,154 paramètres. L'O65 couvre douze familles de tâches et fournit une prédiction de transition latente, de récompense et d'incertitude.
+\section{Backend attentionnel O70-att1}
+Trois checkpoints attentionnels gelés, 598\,302 paramètres chacun, forment un ensemble de 1\,794\,906 paramètres. Leur entraînement était ciblé sur la récupération associative clé-valeur et ne constitue pas un apprentissage général équivalent à O65.
+\section{Protocole expérimental}
+\begin{enumerate}
+\item Vérifier les hashes des deux portefeuilles.
+\item Tester le chemin CERTIFY avec plusieurs WM et compter les appels \texttt{predict}.
+\item Soumettre au routeur une sortie contenant un champ interdit et exiger un rejet.
+\item Calibrer sur le benchmark associatif documenté O70 avec conséquences publiques seulement.
+\item Exécuter un épisode SEARCH avec pilote borné et vérifier que la totalité du budget est comptabilisée.
+\item Vérifier les hashes après l'épisode.
+\item Mesurer le temps d'une exécution CERTIFY répétée.
+\item Tester le routeur et la recherche sur plusieurs familles indépendantes ; compléter avec le banc O71 de 12 familles et le contrôle WM nul.
+\end{enumerate}
+\section{Commandes exactes}
+Depuis la racine du package :
+\begin{verbatim}
+PYTHONPATH=src python run\_order72.py --mode smoke --nodes 16 --pilot 3
+PYTHONPATH=src python tests/test\_o72.py
+PYTHONPATH=src python tests/o72\_benchmark.py
+\end{verbatim}
+Pour l'audit O71 comparatif :
+\begin{verbatim}
+PYTHONPATH=src python /path/to/compare_wm_o71.py
+PYTHONPATH=src python /path/to/causal_only.py
+\end{verbatim}
+Les scripts et résultats bruts sont archivés dans \texttt{rapport\_ex\_O72\_e\_0.zip} et \texttt{audit\_O72\_e\_0.zip}.
+\section{Résultats}
+\subsection{CERTIFY}
+Les deux WM O65 et att1 obtiennent le même optimum public dans le test contrôlé, avec un seul encodage WM et zéro appel à \texttt{predict}. L'expérience O72 fournit donc une démonstration instrumentée de l'indépendance du choix final vis-à-vis du WM.
+\subsection{Barrière oracle}
+L'injection d'un champ \texttt{correct} dans une conséquence destinée au routeur est rejetée. Le test est PASS.
+\subsection{Calibration associative}
+Sur le problème associatif O70 documenté, le pilote public donne une erreur absolue moyenne de 0,2209 pour O65 et 1,6337 pour att1 sur l'échantillon pilote choisi, ce qui conduit le routeur à sélectionner O65 pour cet épisode. Ce résultat est local à cet échantillon et ne doit pas être transformé en classement général des WM.
+\subsection{Gel des poids}
+Les hashes des deux ensembles WM restent identiques avant et après calibration et exécution. L'audit O72 signale cette invariance comme condition nécessaire de la reproductibilité.
+\subsection{Recherche}
+Le test SEARCH conserve le statut \texttt{UNRESOLVED\_NO\_PUBLIC\_OBJECTIVE} lorsque aucune source publique ne permet de certifier une réponse. C'est volontaire : le WM peut proposer et explorer, mais ne transforme pas une heuristique en vérité.
+\subsection{Performance}
+Trois exécutions CERTIFY du prototype O72 sur le cas contrôlé donnent un temps médian d'environ 0,04394 s sur la machine de l'expérience. La voie CERTIFY n'exécute pas la calibration, donc le surcoût du routeur est nul sur cette voie. Sur SEARCH, le pilote introduit un coût supplémentaire mesuré et soustrait du budget de recherche.
+\section{Comparaison quantitative héritée d'O71}
+Les mesures indépendantes réalisées avant O72 donnent, sur 24 recherches à profondeur 3 :
+\begin{center}\begin{tabular}{lrrr}\toprule WM & regret moyen & score moyen & temps moyen (s)\\\midrule O65 & 4,2198 & 6,2979 & 0,1171\\ att1 & 4,2615 & 6,2563 & 0,0693\\ WM nul & 4,2615 & 6,2563 & 0,0206\\\bottomrule\end{tabular}\end{center}
+La proximité att1/nul montre pourquoi O72 ne doit pas présenter la seule présence d'un WM comme une preuve d'intelligence supplémentaire. L'O65 apporte un signal faible mais mesurable sur ce banc.
+\section{Interprétation}
+Le résultat révèle trois niveaux distincts :
+\begin{enumerate}
+\item La couche de certification est déterministe et indépendante du WM sur les problèmes fermés.
+\item La couche de recherche peut consommer un WM, mais O71 le consomme actuellement de manière trop faible pour que tout changement de WM produise une différence.
+\item Une architecture multi-WM n'a de sens que si le routeur et le moteur de recherche utilisent effectivement la prédiction pour économiser des expériences ou améliorer la couverture.
+\end{enumerate}
+\section{Conséquence sur la taille du WM}
+Le nombre de paramètres n'est pas une mesure suffisante. Une comparaison brute O65/att1 mélange taille, architecture et distribution d'entraînement. L'indicateur à rechercher dans les versions suivantes est un gain décisionnel par coût :
+\[
+\eta=\frac{\Delta\text{regret ou expériences économisées}}{\Delta\text{temps/FLOPs/mémoire}},
+\]
+à protocole de vérification identique.
+\section{Usages réels et pratiques}
+O72 est particulièrement pertinent lorsque l'expérience coûte cher, lorsque l'espace de recherche est trop grand pour être fermé immédiatement, ou lorsque plusieurs familles de tâches exigent des biais prédictifs différents. Le portefeuille WM permet alors de choisir un prédicteur selon son utilité observée, tandis que le vérificateur conserve une séparation de rôle.
+\section{Limites}
+Le prototype n'établit pas une intelligence générale absolue. Les environnements testés restent principalement synthétiques et la vérification s'effectue dans des contrats exécutables connus. Le routeur n'a pas encore démontré un avantage causal stable sur un corpus de tâches externes très large. L'attention att1 reste spécialisée. Une future version doit mesurer des gains sous environnements où le coût de l'expérience, et non celui de la simulation, constitue réellement le goulot d'étranglement.
+\section{Conclusion}
+ORDER72 émerge comme un système d'empreintes et de recherche vérifiable auquel plusieurs WM servent de prédicteurs interchangeables et mesurables. L'audit O71 montre que le WM n'est pas nécessaire à la vérité dans le mode exact et qu'un petit WM peut être suffisant pour certaines fonctions. O72 transforme cette observation en architecture : le WM est utile lorsqu'il réduit le déficit expérimental sous contrainte, mais il reste structurellement exclu de la preuve finale.
+\appendix
+\section{Checklist d'audit}
+Hashes avant/après : PASS. Barrière d'oracle : PASS. CERTIFY sans prédiction WM : PASS. Budget pilote explicite : PASS. Recherche sans objectif public non certifiée : PASS. Scripts reproductibles et résultats bruts archivés : PASS.
+\end{document}

@@ -1,0 +1,1934 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% =========================================================
+% EX9 — Architecture de calcul modulaire à cores de sondes
+% =========================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{geometry}
+\geometry{
+  left=2.3cm,
+  right=2.3cm,
+  top=2.2cm,
+  bottom=2.2cm
+}
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{hyperref}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta,
+  positioning,
+  fit,
+  calc,
+  shapes.geometric,
+  shapes.misc,
+  backgrounds,
+  matrix
+}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  citecolor=blue!50!black,
+  urlcolor=blue!50!black,
+  pdftitle={EX9 -- Architecture de calcul modulaire a cores de sondes},
+  pdfauthor={Projet EX}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist{nosep}
+
+% Diagrammes TikZ : styles communs
+\tikzset{
+  probe/.style={
+    draw=blue!65!black,
+    fill=blue!7,
+    rounded corners=2pt,
+    minimum width=1.65cm,
+    minimum height=0.68cm,
+    align=center,
+    font=\small
+  },
+  core/.style={
+    draw=black!75,
+    fill=gray!8,
+    rounded corners=5pt,
+    thick,
+    inner sep=8pt
+  },
+  control/.style={
+    draw=orange!70!black,
+    fill=orange!10,
+    rounded corners=3pt,
+    minimum width=2.6cm,
+    minimum height=0.8cm,
+    align=center,
+    font=\small
+  },
+  memory/.style={
+    draw=green!50!black,
+    fill=green!8,
+    cylinder,
+    shape border rotate=90,
+    aspect=0.25,
+    minimum width=1.5cm,
+    minimum height=1.0cm,
+    align=center,
+    font=\small
+  },
+  data/.style={
+    draw=purple!65!black,
+    fill=purple!8,
+    rounded corners=3pt,
+    minimum width=1.8cm,
+    minimum height=0.7cm,
+    align=center,
+    font=\small
+  },
+  flow/.style={
+    -{Stealth[length=2mm]},
+    thick
+  },
+  comm/.style={
+    {Stealth[length=2mm]}-{Stealth[length=2mm]},
+    dashed,
+    thick
+  }
+}
+
+\title{
+  \textbf{EX9}\\[0.3cm]
+  \Large Architecture de calcul modulaire\\
+  \Large à cores composés de sondes spécialisées
+}
+\author{Projet EX}
+\date{Document de conception et plan expérimental}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+EX9 propose une architecture de calcul dans laquelle les unités
+fonctionnelles ne sont plus considérées uniquement comme des couches
+numériques monolithiques. Elles sont organisées en cores spécialisés,
+chaque core étant lui-même composé de sondes.
+
+L'architecture distingue trois variantes :
+(i) les cores logiques, organisés dans un graphe logiciel ;
+(ii) les cores physiques, constitués d'unités matérielles dédiées ;
+(iii) les cores neuronaux, construits à partir de sondes adaptatives
+et destinés à remplacer des blocs MLP.
+
+Le calcul est représenté comme un graphe d'opérations spécialisées.
+Des mécanismes de composition, de coordination, de stockage temporaire
+et de communication organisent l'exécution de ce graphe.
+
+L'objectif scientifique est de déterminer si cette organisation peut
+réduire les calculs redondants, améliorer la spécialisation et offrir
+un meilleur compromis entre précision, latence, mémoire et coût
+d'exécution. Ces avantages constituent des hypothèses expérimentales,
+et non des propriétés déjà démontrées.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% =========================================================
+\section{Positionnement et continuité avec EX7}
+% =========================================================
+
+\subsection{Point de départ expérimental}
+
+EX7 V003, désigné \textit{OuterCoord-Lite-7x1}, constitue le point
+de départ architectural disponible.
+
+Cette version comprend :
+\begin{itemize}
+  \item sept sondes indépendantes de type \texttt{AdaptiveRBF} ;
+  \item un coordinateur global unique ;
+  \item une pondération globale apprise, notée $\rho$ ;
+  \item une entrée commune transmise aux sept sondes ;
+  \item une fusion des sorties des sondes.
+\end{itemize}
+
+Chaque sonde possède notamment :
+\begin{itemize}
+  \item un encodeur appris ;
+  \item des centres RBF ;
+  \item des largeurs adaptatives ;
+  \item une couche de lecture produisant les logits.
+\end{itemize}
+
+Dans EX7 V003, les sept sondes sont toutes exécutées à l'inférence.
+La coordination utilise une pondération globale fixe pour le modèle :
+elle ne sélectionne pas dynamiquement les sondes selon chaque entrée.
+
+EX7 démontre donc la faisabilité d'un ensemble de sondes adaptatives
+coordonnées. Il ne démontre pas encore les gains d'une architecture
+à cores spécialisés.
+
+\subsection{Évolution proposée}
+
+EX9 introduit une organisation hiérarchique :
+
+\[
+\boxed{
+\text{Sondes}
+\longrightarrow
+\text{Cores}
+\longrightarrow
+\text{Système de cores}
+}
+\]
+
+Un core est défini comme un ensemble structuré de sondes qui coopèrent
+pour réaliser une fonction identifiable.
+
+La notion de core ne désigne donc pas nécessairement un coeur CPU.
+Elle désigne d'abord une unité fonctionnelle composée de sondes.
+Selon la variante, cette unité peut être logicielle, physique ou
+neuronale.
+
+\subsection{Objectifs}
+
+Les objectifs d'EX9 sont les suivants :
+
+\begin{enumerate}
+  \item Décomposer le calcul en opérations spécialisées.
+  \item Organiser les opérations sous forme de graphes composables.
+  \item Réutiliser les résultats intermédiaires.
+  \item Séparer calcul, composition, coordination et stockage.
+  \item Étudier l'exécution parallèle et conditionnelle.
+  \item Construire des cores neuronaux capables de remplacer des
+        blocs MLP.
+  \item Étudier le passage d'une organisation logicielle à une
+        organisation matérielle.
+\end{enumerate}
+
+% =========================================================
+\section{Définition formelle d'une sonde}
+% =========================================================
+
+\subsection{Sonde comme opérateur}
+
+Soit un espace d'entrée $\mathcal{X}$ et un espace de sortie
+$\mathcal{Y}$.
+
+Une sonde élémentaire est une application paramétrée :
+
+\[
+P_{\theta} :
+\mathcal{X}
+\rightarrow
+\mathcal{Y}.
+\]
+
+Elle transforme une entrée en sortie selon des paramètres
+$\theta$.
+
+Dans le cas d'une sonde spécialisée dans une opération numérique,
+on peut écrire :
+
+\[
+P_{\theta}^{(k)}(x)
+\simeq
+\phi_k(x),
+\]
+
+où $\phi_k$ représente l'opération visée.
+
+Exemples :
+
+\[
+\begin{aligned}
+P^{(\mathrm{PROD})}(a,b) &\simeq ab,\\
+P^{(\mathrm{EXP})}(c) &\simeq e^c,\\
+P^{(\mathrm{DIV})}(u,v) &\simeq \frac{u}{v},\\
+P^{(\mathrm{LOG})}(j) &\simeq \log(j).
+\end{aligned}
+\]
+
+Le symbole $\simeq$ indique une approximation éventuelle lorsque
+la sonde est apprise. Pour une unité arithmétique exacte, on pourra
+au contraire imposer une sémantique déterministe.
+
+\subsection{Sonde adaptative de type RBF}
+
+Une sonde neuronale peut utiliser une représentation latente :
+
+\[
+z = \tanh(Wx+b),
+\]
+
+où :
+\[
+W\in\mathbb{R}^{d\times n},
+\qquad
+b\in\mathbb{R}^{d}.
+\]
+
+Pour $K$ centres $c_k$, les activations radiales sont :
+
+\[
+r_k(z)
+=
+\exp\left(
+-\frac{\|z-c_k\|_2^2}{2\sigma_k^2}
+\right).
+\]
+
+La sortie de la sonde peut être définie par :
+
+\[
+P_{\theta}(x)
+=
+R(x)V+\beta,
+\]
+
+avec :
+
+\[
+R(x)=[r_1(z),\ldots,r_K(z)].
+\]
+
+Les paramètres appris comprennent notamment :
+
+\[
+\theta=(W,b,C,\sigma,V,\beta).
+\]
+
+Cette formulation reprend le principe de la sonde
+\texttt{AdaptiveRBF} utilisée dans EX7.
+
+Elle ne signifie pas que toutes les sondes EX9 devront être des RBF.
+Les sondes pourront être numériques exactes, neuronales adaptatives,
+ou spécialisées dans le routage et la gestion de données.
+
+% =========================================================
+\section{Définition formelle d'un core}
+% =========================================================
+
+\subsection{Définition générale}
+
+Un core $C_i$ est un ensemble structuré de $m_i$ sondes :
+
+\[
+C_i =
+\left(
+P_{i,1},
+P_{i,2},
+\ldots,
+P_{i,m_i},
+\Gamma_i,
+\mathcal{M}_i
+\right),
+\]
+
+où :
+
+\begin{itemize}
+  \item $P_{i,j}$ est une sonde appartenant au core ;
+  \item $\Gamma_i$ décrit l'organisation et les dépendances internes ;
+  \item $\mathcal{M}_i$ décrit les mécanismes de mémoire ou d'état
+        associés au core.
+\end{itemize}
+
+Le core implémente une fonction globale :
+
+\[
+C_i : \mathcal{X}_i \rightarrow \mathcal{Y}_i.
+\]
+
+Cette fonction résulte de la composition des sondes et de leurs
+interactions.
+
+Un core peut être spécialisé dans :
+\begin{itemize}
+  \item le calcul numérique ;
+  \item la composition des opérations ;
+  \item la coordination ;
+  \item le stockage temporaire ;
+  \item la communication ;
+  \item le traitement neuronal adaptatif.
+\end{itemize}
+
+\subsection{Structure interne d'un core}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.45cm]
+  \node[probe] (p1) {Sonde 1};
+  \node[probe,right=of p1] (p2) {Sonde 2};
+  \node[probe,right=of p2] (p3) {Sonde 3};
+  \node[probe,right=of p3] (p4) {Sonde $m$};
+
+  \node[core,fit=(p1)(p2)(p3)(p4),
+        label=above:{\textbf{CORE}}] (c) {};
+
+  \node[data,below=0.8cm of c] (in) {Entrées};
+  \node[data,right=3.0cm of in] (out) {Sorties};
+
+  \draw[flow] (in) -- (p1.south);
+  \draw[flow] (p4.south) -- (out);
+  \draw[comm] (p1) -- (p2);
+  \draw[comm] (p2) -- (p3);
+  \draw[comm] (p3) -- (p4);
+\end{tikzpicture}
+}
+\caption{Un core est composé de sondes qui coopèrent.}
+\end{figure}
+
+Cette représentation est conceptuelle : les sondes ne sont pas
+obligatoirement exécutées en série. Leur organisation peut être
+parallèle, hiérarchique ou conditionnelle.
+
+% =========================================================
+\section{Les trois variantes de cores}
+% =========================================================
+
+\subsection{Core logique}
+
+Un core logique est une unité fonctionnelle logicielle constituée
+de sondes et de mécanismes de composition.
+
+Il n'impose aucune correspondance directe avec un coeur matériel.
+Plusieurs cores logiques peuvent être exécutés sur un même CPU ou GPU.
+
+Formellement :
+
+\[
+C_i^{(L)}
+=
+(\mathcal{P}_i,\Gamma_i,\mathcal{S}_i),
+\]
+
+où :
+\begin{itemize}
+  \item $\mathcal{P}_i$ est l'ensemble des sondes ;
+  \item $\Gamma_i$ est le graphe d'exécution ;
+  \item $\mathcal{S}_i$ est l'état logiciel du core.
+\end{itemize}
+
+Le graphe d'exécution est :
+
+\[
+G_i=(V_i,E_i),
+\]
+
+avec :
+\begin{itemize}
+  \item $V_i$ : sondes et opérations ;
+  \item $E_i$ : dépendances de données et de contrôle.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.88\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[data] (x) {Entrée};
+  \node[probe,right=of x] (p1) {Sonde A};
+  \node[probe,above right=0.55cm and 0.8cm of p1] (p2) {Sonde B};
+  \node[probe,below right=0.55cm and 0.8cm of p1] (p3) {Sonde C};
+  \node[probe,right=1.0cm of p2] (p4) {Sonde D};
+  \node[data,right=1.0cm of p4] (y) {Sortie};
+
+  \draw[flow] (x) -- (p1);
+  \draw[flow] (p1) -- (p2);
+  \draw[flow] (p1) -- (p3);
+  \draw[flow] (p2) -- (p4);
+  \draw[flow] (p3) -- (p4);
+  \draw[flow] (p4) -- (y);
+
+  \begin{scope}[on background layer]
+    \node[core,fit=(p1)(p2)(p3)(p4),
+          label=above:{Core logique}] {};
+  \end{scope}
+\end{tikzpicture}
+}
+\caption{Exemple d'un core logique organisé en graphe logiciel.}
+\end{figure}
+
+\textbf{Propriété :} le core logique définit l'organisation fonctionnelle,
+mais ne garantit pas à lui seul une accélération matérielle.
+
+\subsection{Core physique}
+
+Un core physique correspond à une réalisation matérielle d'un ensemble
+de sondes.
+
+Il peut comprendre :
+\begin{itemize}
+  \item des unités de calcul ;
+  \item des unités de composition ;
+  \item une mémoire locale ;
+  \item des mécanismes de communication ;
+  \item un contrôleur d'exécution.
+\end{itemize}
+
+On définit :
+
+\[
+C_i^{(P)}
+=
+(\mathcal{H}_i,\mathcal{P}_i,\mathcal{M}_i,\mathcal{N}_i),
+\]
+
+où :
+\begin{itemize}
+  \item $\mathcal{H}_i$ désigne les ressources matérielles ;
+  \item $\mathcal{P}_i$ désigne les sondes exécutées ;
+  \item $\mathcal{M}_i$ désigne la mémoire locale ;
+  \item $\mathcal{N}_i$ désigne le réseau de communication.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.5cm]
+  \node[probe] (p1) {Unité sonde 1};
+  \node[probe,right=of p1] (p2) {Unité sonde 2};
+  \node[probe,right=of p2] (p3) {Unité sonde 3};
+
+  \node[control,below=0.9cm of p2] (ctrl) {Contrôleur};
+  \node[memory,below=0.8cm of p1] (mem) {Mémoire locale};
+  \node[data,below=0.8cm of p3] (net) {Interface réseau};
+
+  \node[core,fit=(p1)(p2)(p3)(ctrl)(mem)(net),
+        label=above:{\textbf{CORE PHYSIQUE}}] (c) {};
+
+  \draw[comm] (p1) -- (p2);
+  \draw[comm] (p2) -- (p3);
+  \draw[flow] (ctrl) -- (p2);
+  \draw[comm] (mem) -- (p1);
+  \draw[comm] (net) -- (p3);
+\end{tikzpicture}
+}
+\caption{Organisation conceptuelle d'un core physique.}
+\end{figure}
+
+Le passage à cette variante nécessite une étude de :
+\begin{itemize}
+  \item la surface matérielle ;
+  \item la consommation énergétique ;
+  \item la bande passante mémoire ;
+  \item la latence des communications ;
+  \item le parallélisme réellement exploitable.
+\end{itemize}
+
+Un core physique n'est pas nécessairement plus rapide qu'un CPU ou GPU.
+Le bénéfice doit être mesuré sur une réalisation concrète.
+
+\subsection{Core neuronal}
+
+Un core neuronal est un ensemble de sondes adaptatives qui réalise
+une transformation apprise.
+
+Il est conçu pour remplacer un bloc MLP ou une partie d'un réseau
+neuronal classique.
+
+On définit :
+
+\[
+C_i^{(N)}(x)
+=
+\mathcal{F}_{\Theta_i}
+(P_{i,1},\ldots,P_{i,m_i};x),
+\]
+
+où $\mathcal{F}_{\Theta_i}$ est l'opérateur de composition neuronal.
+
+La fonction du core est apprise à partir de données :
+
+\[
+\Theta_i^\star
+=
+\arg\min_{\Theta_i}
+\mathbb{E}_{(x,y)\sim\mathcal{D}}
+\left[
+\mathcal{L}
+\left(
+C_i^{(N)}(x),y
+\right)
+\right].
+\]
+
+\begin{figure}[H]
+\centering
+\resizebox{0.90\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.55cm]
+  \node[data] (x) {Vecteur $x$};
+
+  \node[probe,right=of x,yshift=0.9cm] (p1) {Sonde adaptative 1};
+  \node[probe,right=of x] (p2) {Sonde adaptative 2};
+  \node[probe,right=of x,yshift=-0.9cm] (p3) {Sonde adaptative 3};
+
+  \node[control,right=1.0cm of p2] (fusion) {Composition\\neurale};
+  \node[data,right=of fusion] (y) {Sortie};
+
+  \draw[flow] (x) -- (p1);
+  \draw[flow] (x) -- (p2);
+  \draw[flow] (x) -- (p3);
+  \draw[flow] (p1) -- (fusion);
+  \draw[flow] (p2) -- (fusion);
+  \draw[flow] (p3) -- (fusion);
+  \draw[flow] (fusion) -- (y);
+
+  \begin{scope}[on background layer]
+    \node[core,fit=(p1)(p2)(p3)(fusion),
+          label=above:{\textbf{CORE NEURONAL}}] {};
+  \end{scope}
+\end{tikzpicture}
+}
+\caption{Core neuronal composé de sondes adaptatives.}
+\end{figure}
+
+\textbf{Distinction importante :} une sonde n'est pas nécessairement
+un neurone scalaire. Une sonde adaptative peut être un petit module
+vectoriel possédant son propre encodeur, ses paramètres et sa fonction
+de sortie.
+
+\subsection{Comparaison des trois variantes}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{2.5cm}XXX}
+\toprule
+ & Core logique & Core physique & Core neuronal \\
+\midrule
+Nature
+& Logicielle
+& Matérielle
+& Apprise \\
+
+Composition
+& Sondes et graphe
+& Sondes et unités matérielles
+& Sondes adaptatives \\
+
+Exécution
+& CPU/GPU
+& Unités physiques dédiées
+& Calcul neuronal \\
+
+Objectif
+& Organiser
+& Accélérer matériellement
+& Remplacer des blocs MLP \\
+
+Validation
+& Coût logiciel
+& Latence, énergie, surface
+& Qualité, paramètres, latence \\
+\bottomrule
+\end{tabularx}
+\caption{Différences entre les variantes de cores EX9.}
+\end{table}
+
+Ces trois variantes sont complémentaires et peuvent être combinées.
+Un core logique peut être le modèle de référence d'un core physique.
+Un core neuronal peut être exécuté dans un core logique ou physique.
+
+% =========================================================
+\section{Calcul sous forme de graphe de sondes}
+% =========================================================
+
+\subsection{Calcul classique}
+
+Considérons :
+
+\[
+f(a,b,c,j)
+=
+ab+\frac{e^c}{a}+\log(j).
+\]
+
+Dans une expression classique, le calcul est décrit par une suite
+d'opérations arithmétiques.
+
+EX9 propose de représenter chaque opération par une sonde ou une
+unité spécialisée.
+
+\subsection{Graphe de calcul}
+
+Définissons un graphe orienté acyclique :
+
+\[
+G=(V,E).
+\]
+
+Chaque sommet $v_i\in V$ représente une opération ou une sonde.
+Chaque arête $(v_i,v_j)\in E$ indique qu'une sortie de $v_i$ est
+utilisée par $v_j$.
+
+Pour l'expression précédente :
+
+\[
+\begin{aligned}
+u_1 &= P_{\mathrm{PROD}}(a,b),\\
+u_2 &= P_{\mathrm{EXP}}(c),\\
+u_3 &= P_{\mathrm{DIV}}(u_2,a),\\
+u_4 &= P_{\mathrm{LOG}}(j),\\
+y &= P_{\mathrm{SUM}}(u_1,u_3,u_4).
+\end{aligned}
+\]
+
+Si les sondes sont exactes, cette composition réalise l'expression
+arithmétique initiale. Si elles sont apprises, une erreur
+d'approximation peut apparaître à chaque étape.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.94\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.85cm and 0.75cm]
+  \node[data] (a) {$a,b$};
+  \node[data,below=0.65cm of a] (c) {$c$};
+  \node[data,below=0.65cm of c] (j) {$j$};
+
+  \node[probe,right=of a] (prod) {PROD};
+  \node[probe,right=of c] (exp) {EXP};
+  \node[probe,right=of j] (log) {LOG};
+
+  \node[probe,right=1.2cm of exp] (div) {DIV};
+  \node[probe,right=1.2cm of div] (sum) {SUM};
+
+  \node[data,right=of sum] (y) {$y$};
+
+  \draw[flow] (a) -- (prod);
+  \draw[flow] (c) -- (exp);
+  \draw[flow] (exp) -- (div);
+  \draw[flow] (a.east) -- ++(0.45,0) |- (div.north);
+  \draw[flow] (j) -- (log);
+  \draw[flow] (prod) -- (sum);
+  \draw[flow] (div) -- (sum);
+  \draw[flow] (log) -- ++(0.45,0) |- (sum.south);
+  \draw[flow] (sum) -- (y);
+\end{tikzpicture}
+}
+\caption{Graphe de calcul composé de sondes spécialisées.}
+\end{figure}
+
+\subsection{Dépendances et parallélisme}
+
+Les opérations PROD, EXP et LOG sont indépendantes au départ.
+Elles peuvent donc être exécutées en parallèle.
+
+L'opération DIV dépend de EXP et de la valeur $a$.
+L'opération SUM dépend des trois branches.
+
+Le graphe exprime donc les dépendances réelles du calcul, plutôt
+qu'une séquence arbitraire.
+
+On note $\operatorname{Pred}(v)$ l'ensemble des prédécesseurs d'un
+sommet $v$. Une opération est exécutable lorsque toutes ses entrées
+sont disponibles :
+
+\[
+\operatorname{Ready}(v,t)
+=
+\bigwedge_{u\in\operatorname{Pred}(v)}
+\operatorname{Available}(u,t).
+\]
+
+Cette règle rend possible une exécution parallèle des opérations
+indépendantes.
+
+% =========================================================
+\section{Composition des sondes}
+% =========================================================
+
+\subsection{Composition fonctionnelle}
+
+Soient deux sondes :
+
+\[
+P_1:\mathcal{X}\rightarrow\mathcal{Z},
+\qquad
+P_2:\mathcal{Z}\rightarrow\mathcal{Y}.
+\]
+
+Leur composition est :
+
+\[
+P_{2\circ1}(x)=P_2(P_1(x)).
+\]
+
+Pour un graphe de calcul général, chaque sonde reçoit les sorties
+de ses prédécesseurs :
+
+\[
+h_i
+=
+P_i
+\left(
+\{h_j:j\in\operatorname{Pred}(i)\}
+\right).
+\]
+
+La sortie globale est produite par un ou plusieurs sommets terminaux.
+
+\subsection{Composition hiérarchique}
+
+Les sondes peuvent être regroupées en cores, puis les cores peuvent
+être composés :
+
+\[
+\mathcal{P}
+\longrightarrow
+\{C_1,\ldots,C_M\}
+\longrightarrow
+F_{\mathrm{EX9}}.
+\]
+
+La fonction globale devient :
+
+\[
+F_{\mathrm{EX9}}(x)
+=
+\mathcal{C}
+\left(
+C_1(x_1),\ldots,C_M(x_M)
+\right),
+\]
+
+où $\mathcal{C}$ est l'opérateur de composition inter-cores.
+
+Les entrées $x_i$ peuvent être identiques, projetées, partitionnées
+ou partagées selon la topologie retenue.
+
+% =========================================================
+\section{Réutilisation et stockage temporaire}
+% =========================================================
+
+\subsection{Problème de redondance}
+
+Un même sous-calcul peut être utilisé plusieurs fois.
+
+Par exemple :
+
+\[
+u=\exp(c)
+\]
+
+peut alimenter plusieurs opérations.
+
+Une architecture sans mécanisme de réutilisation peut recalculer
+plusieurs fois la même valeur.
+
+EX9 propose un stockage temporaire des résultats intermédiaires.
+
+\subsection{Mémoire temporaire}
+
+On définit une mémoire temporaire :
+
+\[
+\mathcal{M}_t
+=
+\{(k,v,\tau,\ell)\},
+\]
+
+où :
+\begin{itemize}
+  \item $k$ est une clé identifiant le calcul ;
+  \item $v$ est le résultat calculé ;
+  \item $\tau$ est l'instant ou la version de calcul ;
+  \item $\ell$ est la durée de validité ou la politique de conservation.
+\end{itemize}
+
+Une opération peut consulter la mémoire avant de lancer un calcul :
+
+\[
+\operatorname{Execute}(k,x)
+=
+\begin{cases}
+\mathcal{M}_t[k],
+& \text{si une valeur valide existe},\\
+P_k(x),
+& \text{sinon}.
+\end{cases}
+\]
+
+Après calcul, le résultat peut être enregistré :
+
+\[
+\mathcal{M}_{t+1}
+=
+\mathcal{M}_t
+\cup
+\{(k,P_k(x),t,\ell)\}.
+\]
+
+Cette stratégie correspond à une forme de mémorisation des
+sous-calculs, souvent appelée \textit{memoization}.
+
+\subsection{Exemple de réutilisation}
+
+\[
+\begin{aligned}
+u &= \operatorname{EXP}(c),\\
+v_1 &= \operatorname{DIV}(u,a),\\
+v_2 &= \operatorname{PROD}(u,b),\\
+v_3 &= \operatorname{SUM}(v_1,v_2).
+\end{aligned}
+\]
+
+La valeur $u$ est calculée une fois et réutilisée deux fois.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.90\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.8cm and 0.8cm]
+  \node[data] (c) {$c$};
+  \node[probe,right=of c] (exp) {EXP};
+  \node[memory,right=of exp] (mem) {Mémoire\\temporaire};
+
+  \node[probe,right=1.5cm of mem,yshift=0.8cm] (div) {DIV};
+  \node[probe,right=1.5cm of mem,yshift=-0.8cm] (prod) {PROD};
+
+  \node[probe,right=1.1cm of div,yshift=-0.8cm] (sum) {SUM};
+
+  \draw[flow] (c) -- (exp);
+  \draw[flow] (exp) -- (mem);
+  \draw[comm] (mem) -- (div);
+  \draw[comm] (mem) -- (prod);
+  \draw[flow] (div) -- (sum);
+  \draw[flow] (prod) -- (sum);
+\end{tikzpicture}
+}
+\caption{Une valeur intermédiaire est calculée une fois puis réutilisée.}
+\end{figure}
+
+\subsection{Conditions de validité}
+
+La réutilisation n'est correcte que si les entrées et le contexte
+du calcul sont compatibles.
+
+La clé de mémoire doit prendre en compte, selon le cas :
+\begin{itemize}
+  \item les valeurs d'entrée ;
+  \item les paramètres de la sonde ;
+  \item la version du modèle ;
+  \item le contexte numérique ;
+  \item les éventuels effets de bord.
+\end{itemize}
+
+Pour des sondes stochastiques ou dépendantes d'un état mutable,
+une réutilisation naïve peut modifier le comportement du système.
+
+La mémoire temporaire doit donc être accompagnée d'une politique
+explicite de validité et d'invalidation.
+
+% =========================================================
+\section{Core de coordination}
+% =========================================================
+
+\subsection{Rôle}
+
+Le core de coordination organise le système de cores.
+
+Il peut :
+\begin{itemize}
+  \item sélectionner les cores nécessaires ;
+  \item déterminer l'ordre d'exécution ;
+  \item identifier les dépendances ;
+  \item allouer les ressources ;
+  \item décider du partage des résultats ;
+  \item contrôler les transferts de données.
+\end{itemize}
+
+On représente la décision de coordination par :
+
+\[
+\pi_{\mathrm{coord}}:
+(s_t,x_t,G)
+\rightarrow
+a_t,
+\]
+
+où :
+\begin{itemize}
+  \item $s_t$ est l'état courant du système ;
+  \item $x_t$ est l'entrée ou la donnée disponible ;
+  \item $G$ est le graphe de calcul ;
+  \item $a_t$ est une action de coordination.
+\end{itemize}
+
+Une action peut être :
+
+\[
+a_t\in
+\{
+\text{ACTIVER},
+\text{ATTENDRE},
+\text{TRANSMETTRE},
+\text{RÉUTILISER},
+\text{STOCKER},
+\text{FUSIONNER}
+\}.
+\]
+
+\subsection{Architecture inter-cores}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.94\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.75cm and 0.9cm]
+  \node[control] (coord) {Core de\\coordination};
+
+  \node[core,below left=1.0cm and 2.1cm of coord] (calc) {
+    \begin{minipage}{3.2cm}
+      \centering
+      \textbf{Core de calcul}\\[2mm]
+      Sonde PROD\\
+      Sonde EXP\\
+      Sonde DIV\\
+      Sonde LOG
+    \end{minipage}
+  };
+
+  \node[core,below=1.0cm of coord] (comp) {
+    \begin{minipage}{3.0cm}
+      \centering
+      \textbf{Core de composition}\\[2mm]
+      Fusion\\
+      Assemblage\\
+      Dépendances
+    \end{minipage}
+  };
+
+  \node[core,below right=1.0cm and 2.1cm of coord] (mem) {
+    \begin{minipage}{3.0cm}
+      \centering
+      \textbf{Core mémoire}\\[2mm]
+      Résultats\\
+      Intermédiaires\\
+      Réutilisation
+    \end{minipage}
+  };
+
+  \node[core,below=1.1cm of comp] (comm) {
+    \begin{minipage}{3.0cm}
+      \centering
+      \textbf{Core communication}\\[2mm]
+      Routage\\
+      Transfert\\
+      Synchronisation
+    \end{minipage}
+  };
+
+  \draw[comm] (coord) -- (calc);
+  \draw[comm] (coord) -- (comp);
+  \draw[comm] (coord) -- (mem);
+  \draw[comm] (calc) -- (comp);
+  \draw[comm] (comp) -- (mem);
+  \draw[comm] (calc) -- (comm);
+  \draw[comm] (mem) -- (comm);
+  \draw[comm] (comp) -- (comm);
+\end{tikzpicture}
+}
+\caption{Organisation fonctionnelle proposée pour EX9.}
+\end{figure}
+
+Les cores présentés sont des rôles fonctionnels. Ils peuvent être
+regroupés, distribués ou fusionnés selon le coût réel de leur
+implémentation.
+
+Il n'est pas nécessaire d'imposer un core physique distinct pour
+chaque fonction.
+
+% =========================================================
+\section{Langage de coordination exécutable}
+% =========================================================
+
+\subsection{Principe}
+
+Le core de coordination peut manipuler un langage d'actions
+décrivant les opérations à effectuer.
+
+On définit un ensemble d'instructions :
+
+\[
+\mathcal{A}
+=
+\{
+\operatorname{APPLY},
+\operatorname{ROUTE},
+\operatorname{STORE},
+\operatorname{LOAD},
+\operatorname{MERGE},
+\operatorname{WAIT}
+\}.
+\]
+
+Une instruction est interprétée par un exécuteur :
+
+\[
+\operatorname{Exec}:
+(\mathcal{A},s_t)
+\rightarrow
+s_{t+1}.
+\]
+
+Une séquence d'actions :
+
+\[
+A=(a_1,a_2,\ldots,a_T)
+\]
+
+produit une évolution :
+
+\[
+s_{t+1}
+=
+\operatorname{Exec}(a_t,s_t).
+\]
+
+Le résultat final est :
+
+\[
+y=H(s_T).
+\]
+
+\subsection{Exemple de programme d'actions}
+
+Pour calculer :
+
+\[
+y=ab+\frac{e^c}{a}+\log(j),
+\]
+
+le coordinateur peut produire une séquence conceptuelle :
+
+\[
+\begin{aligned}
+a_1 &= \operatorname{APPLY}(\mathrm{PROD},a,b),\\
+a_2 &= \operatorname{APPLY}(\mathrm{EXP},c),\\
+a_3 &= \operatorname{STORE}(u),\\
+a_4 &= \operatorname{APPLY}(\mathrm{DIV},u,a),\\
+a_5 &= \operatorname{APPLY}(\mathrm{LOG},j),\\
+a_6 &= \operatorname{MERGE}(u_1,u_2,u_3).
+\end{aligned}
+\]
+
+Cette représentation ne supprime pas le calcul arithmétique.
+Elle décrit comment les opérations sont sélectionnées, ordonnées,
+routées et réutilisées.
+
+\subsection{Condition d'efficacité}
+
+Le langage d'actions n'est utile que si son coût total est inférieur
+au coût de la méthode qu'il remplace.
+
+On définit :
+
+\[
+T_{\mathrm{EX9}}
+=
+T_{\mathrm{selection}}
++
+T_{\mathrm{coordination}}
++
+T_{\mathrm{communication}}
++
+T_{\mathrm{calcul}}
++
+T_{\mathrm{mémoire}}.
+\]
+
+Le système n'est plus rapide que la référence si :
+
+\[
+T_{\mathrm{EX9}} < T_{\mathrm{baseline}}.
+\]
+
+Cette inégalité doit être vérifiée expérimentalement.
+
+% =========================================================
+\section{Architecture neuronale : remplacement des MLP}
+% =========================================================
+
+\subsection{MLP de référence}
+
+Un bloc MLP classique peut être représenté par :
+
+\[
+\operatorname{MLP}(x)
+=
+W_2\sigma(W_1x+b_1)+b_2.
+\]
+
+Il effectue une transformation dense suivie d'une non-linéarité.
+
+Dans EX9, un core neuronal doit apprendre à réaliser une fonction
+comparable :
+
+\[
+C^{(N)}(x)
+\approx
+\operatorname{MLP}(x).
+\]
+
+\subsection{Core neuronal de remplacement}
+
+Le core neuronal est composé de sondes adaptatives :
+
+\[
+C^{(N)}(x)
+=
+\mathcal{F}
+\left(
+P_1(x),P_2(x),\ldots,P_m(x)
+\right).
+\]
+
+La fonction $\mathcal{F}$ peut être :
+\begin{itemize}
+  \item une somme pondérée ;
+  \item une concaténation suivie d'une projection ;
+  \item une composition hiérarchique ;
+  \item un mécanisme de coordination appris ;
+  \item une fusion conditionnelle.
+\end{itemize}
+
+L'objectif est d'obtenir une approximation fonctionnelle du bloc
+MLP, sans supposer que la nouvelle architecture sera plus efficace.
+
+\subsection{Comparaison fonctionnelle}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.94\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.65cm and 0.9cm]
+  \node[data] (x1) {$x$};
+  \node[probe,right=of x1,minimum width=2.5cm] (l1) {Projection dense};
+  \node[probe,right=of l1,minimum width=2.5cm] (act) {Non-linéarité};
+  \node[probe,right=of act,minimum width=2.5cm] (l2) {Projection dense};
+  \node[data,right=of l2] (y1) {$y$};
+
+  \draw[flow] (x1) -- (l1);
+  \draw[flow] (l1) -- (act);
+  \draw[flow] (act) -- (l2);
+  \draw[flow] (l2) -- (y1);
+
+  \node[below=0.35cm of act] {\textbf{MLP de référence}};
+\end{tikzpicture}
+}
+\vspace{0.5cm}
+\resizebox{0.94\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.55cm and 0.65cm]
+  \node[data] (x) {$x$};
+  \node[probe,right=of x,yshift=0.8cm] (p1) {Sonde 1};
+  \node[probe,right=of x] (p2) {Sonde 2};
+  \node[probe,right=of x,yshift=-0.8cm] (p3) {Sonde $m$};
+  \node[control,right=1.1cm of p2] (f) {Composition\\adaptative};
+  \node[data,right=of f] (y) {$y'$};
+
+  \draw[flow] (x) -- (p1);
+  \draw[flow] (x) -- (p2);
+  \draw[flow] (x) -- (p3);
+  \draw[flow] (p1) -- (f);
+  \draw[flow] (p2) -- (f);
+  \draw[flow] (p3) -- (f);
+  \draw[flow] (f) -- (y);
+
+  \node[below=0.35cm of f] {\textbf{Core neuronal EX9}};
+\end{tikzpicture}
+}
+\caption{Remplacement expérimental d'un bloc MLP par un core neuronal.}
+\end{figure}
+
+\subsection{Protocole d'apprentissage}
+
+Deux approches seront comparées.
+
+\textbf{Apprentissage supervisé direct :}
+
+\[
+\Theta^\star
+=
+\arg\min_{\Theta}
+\mathbb{E}_{(x,y)\sim\mathcal{D}}
+\left[
+\mathcal{L}(C_{\Theta}(x),y)
+\right].
+\]
+
+\textbf{Distillation d'un MLP enseignant :}
+
+\[
+\Theta^\star
+=
+\arg\min_{\Theta}
+\mathbb{E}_{x\sim\mathcal{D}}
+\left[
+D\left(
+C_{\Theta}(x),
+\operatorname{MLP}_{\mathrm{teacher}}(x)
+\right)
+\right].
+\]
+
+La distillation permet de comparer plus directement les fonctions
+réalisées, indépendamment des différences d'optimisation.
+
+% =========================================================
+\section{Architecture globale EX9}
+% =========================================================
+
+\subsection{Vue d'ensemble}
+
+L'architecture globale rassemble :
+\begin{itemize}
+  \item un core de coordination ;
+  \item un ou plusieurs cores de calcul ;
+  \item un core de composition ;
+  \item un core de mémoire temporaire ;
+  \item un core de communication ;
+  \item éventuellement des cores neuronaux.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.98\textwidth}{!}{
+\begin{tikzpicture}[node distance=0.65cm and 0.7cm]
+  \node[data] (input) {Entrée};
+
+  \node[control,right=of input] (coord) {Core de\\coordination};
+
+  \node[core,right=1.0cm of coord,yshift=1.6cm] (calc) {
+    \begin{minipage}{2.8cm}
+      \centering
+      \textbf{Core calcul}\\
+      PROD / EXP / DIV / LOG
+    \end{minipage}
+  };
+
+  \node[core,right=1.0cm of coord] (neural) {
+    \begin{minipage}{2.8cm}
+      \centering
+      \textbf{Core neuronal}\\
+      Sondes adaptatives
+    \end{minipage}
+  };
+
+  \node[core,right=1.0cm of coord,yshift=-1.6cm] (comp) {
+    \begin{minipage}{2.8cm}
+      \centering
+      \textbf{Core composition}\\
+      Fusion et assemblage
+    \end{minipage}
+  };
+
+  \node[memory,right=1.0cm of calc] (mem) {Mémoire\\temporaire};
+  \node[data,right=1.0cm of mem] (output) {Sortie};
+
+  \draw[flow] (input) -- (coord);
+  \draw[comm] (coord) -- (calc);
+  \draw[comm] (coord) -- (neural);
+  \draw[comm] (coord) -- (comp);
+  \draw[comm] (calc) -- (mem);
+  \draw[comm] (neural) -- (mem);
+  \draw[comm] (comp) -- (mem);
+  \draw[flow] (mem) -- (output);
+}
+\end{tikzpicture}
+}
+\caption{Architecture globale conceptuelle EX9.}
+\end{figure}
+
+Cette figure représente les fonctions principales. Elle ne prescrit
+pas une topologie matérielle unique.
+
+\subsection{Formalisation globale}
+
+Soit un ensemble de cores :
+
+\[
+\mathcal{C}
+=
+\{C_1,C_2,\ldots,C_M\}.
+\]
+
+Le système EX9 est défini par :
+
+\[
+\operatorname{EX9}
+=
+(\mathcal{C},G,\Pi,\mathcal{M},\mathcal{N}),
+\]
+
+où :
+\begin{itemize}
+  \item $\mathcal{C}$ est l'ensemble des cores ;
+  \item $G$ est le graphe global de dépendances ;
+  \item $\Pi$ est la politique de coordination ;
+  \item $\mathcal{M}$ est l'organisation mémoire ;
+  \item $\mathcal{N}$ est le mécanisme de communication.
+\end{itemize}
+
+Le système calcule :
+
+\[
+y
+=
+\operatorname{Execute}
+\left(
+x;\operatorname{EX9}
+\right).
+\]
+
+La fonction $\operatorname{Execute}$ doit respecter les dépendances
+du graphe, les règles de validité mémoire et les contrats d'entrée
+et de sortie des cores.
+
+% =========================================================
+\section{Modèle de coût et hypothèses d'efficacité}
+% =========================================================
+
+\subsection{Coût total}
+
+Le coût d'EX9 ne peut pas être évalué uniquement par le nombre
+d'opérations arithmétiques.
+
+On définit :
+
+\[
+\begin{aligned}
+T_{\mathrm{total}}
+={}&T_{\mathrm{compute}}
++T_{\mathrm{coord}}
++T_{\mathrm{compose}}\\
+&+T_{\mathrm{memory}}
++T_{\mathrm{communication}}.
+\end{aligned}
+\]
+
+Pour une réalisation matérielle, on ajoute notamment :
+
+\[
+E_{\mathrm{total}}
+=
+E_{\mathrm{compute}}
++E_{\mathrm{memory}}
++E_{\mathrm{communication}}.
+\]
+
+La réduction du calcul arithmétique peut être annulée par le coût
+des transferts, de la coordination ou de la mémoire.
+
+\subsection{Réutilisation}
+
+Soit $N_{\mathrm{naive}}$ le nombre d'exécutions d'opérations dans
+une version sans réutilisation, et $N_{\mathrm{reuse}}$ le nombre
+d'exécutions après partage des résultats.
+
+On définit :
+
+\[
+R_{\mathrm{reuse}}
+=
+1-
+\frac{N_{\mathrm{reuse}}}{N_{\mathrm{naive}}}.
+\]
+
+Cette mesure ne suffit pas à démontrer un gain de latence :
+les opérations n'ont pas toutes le même coût.
+
+Une mesure pondérée est :
+
+\[
+C_{\mathrm{ops}}
+=
+\sum_{i=1}^{N}
+c_i n_i,
+\]
+
+où $c_i$ est le coût estimé de l'opération $i$ et $n_i$ son nombre
+d'exécutions.
+
+\subsection{Hypothèses falsifiables}
+
+\begin{description}
+  \item[H1 -- Réutilisation :]
+  le stockage des intermédiaires réduit le nombre de sous-calculs
+  répétés sur des graphes comportant des dépendances partagées.
+
+  \item[H2 -- Spécialisation :]
+  des sondes spécialisées peuvent réaliser certaines transformations
+  avec un coût inférieur à une unité généraliste de référence.
+
+  \item[H3 -- Composition :]
+  une composition explicite peut améliorer l'organisation et
+  l'ordonnancement des opérations.
+
+  \item[H4 -- Coordination :]
+  une politique de coordination peut éviter certaines exécutions
+  inutiles lorsque les tâches sont conditionnelles.
+
+  \item[H5 -- Core neuronal :]
+  un ensemble de sondes adaptatives peut remplacer certains blocs
+  MLP à qualité comparable.
+
+  \item[H6 -- Matériel :]
+  une correspondance physique entre cores et ressources matérielles
+  peut améliorer le compromis latence-énergie sur des charges adaptées.
+\end{description}
+
+Chaque hypothèse doit être testée séparément.
+
+% =========================================================
+\section{Plan expérimental EX9}
+% =========================================================
+
+\subsection{Étape 1 : graphe de calcul logiciel}
+
+Construire un moteur de graphe où :
+\begin{itemize}
+  \item chaque opération est un noeud ;
+  \item chaque dépendance est une arête ;
+  \item les résultats intermédiaires sont identifiables ;
+  \item les opérations indépendantes peuvent être planifiées en parallèle.
+\end{itemize}
+
+Comparer :
+\begin{enumerate}
+  \item calcul direct ;
+  \item graphe sans réutilisation ;
+  \item graphe avec réutilisation ;
+  \item graphe avec exécution conditionnelle.
+\end{enumerate}
+
+\subsection{Étape 2 : cores logiques}
+
+Créer quatre cores logiques :
+\begin{enumerate}
+  \item core de calcul ;
+  \item core de composition ;
+  \item core de coordination ;
+  \item core de stockage temporaire.
+\end{enumerate}
+
+Le core de communication peut être ajouté comme cinquième module
+si son coût ou sa complexité justifie une séparation.
+
+\subsection{Étape 3 : core neuronal}
+
+Remplacer un bloc MLP par un core neuronal de sondes adaptatives.
+
+Comparer :
+\begin{itemize}
+  \item MLP de référence ;
+  \item core neuronal à sondes RBF ;
+  \item core neuronal avec fusion pondérée ;
+  \item core neuronal avec coordination adaptative.
+\end{itemize}
+
+Les budgets de paramètres, les données, les graines et les conditions
+d'évaluation doivent être contrôlés.
+
+\subsection{Étape 4 : coordination dynamique}
+
+Introduire une politique qui peut sélectionner :
+\begin{itemize}
+  \item les cores à activer ;
+  \item les opérations à exécuter ;
+  \item les résultats à réutiliser ;
+  \item les chemins de communication.
+\end{itemize}
+
+Comparer cette politique à une exécution statique de tous les cores.
+
+\subsection{Étape 5 : simulation physique}
+
+Avant de concevoir une puce, simuler :
+\begin{itemize}
+  \item les unités de calcul ;
+  \item les mémoires locales ;
+  \item les transferts ;
+  \item les délais de communication ;
+  \item les ressources parallèles.
+\end{itemize}
+
+Une simulation de coût matériel doit inclure les transferts et
+la synchronisation, pas uniquement les opérations des sondes.
+
+\subsection{Étape 6 : étude matérielle}
+
+Si les résultats logiciels et simulés sont encourageants, étudier
+une implémentation matérielle.
+
+Les paramètres à mesurer comprennent :
+\begin{itemize}
+  \item surface logique ;
+  \item fréquence ;
+  \item latence ;
+  \item énergie par opération ;
+  \item bande passante mémoire ;
+  \item coût de communication inter-cores.
+\end{itemize}
+
+% =========================================================
+\section{Protocole de comparaison}
+% =========================================================
+
+\subsection{Baselines}
+
+Les comparaisons doivent inclure :
+
+\begin{enumerate}
+  \item MLP classique ;
+  \item EX7 V003 ;
+  \item graphe de calcul conventionnel ;
+  \item graphe avec mémorisation ;
+  \item EX9 à cores logiques ;
+  \item EX9 avec core neuronal ;
+  \item EX9 simulé comme architecture physique.
+\end{enumerate}
+
+\subsection{Mesures}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{3.0cm}X}
+\toprule
+Mesure & Objectif \\
+\midrule
+Accuracy / F1 / log-loss
+& Qualité prédictive selon la tâche \\
+
+Nombre de paramètres
+& Taille des modèles neuronaux \\
+
+Latence p50, p95, p99
+& Coût d'exécution réel \\
+
+Nombre d'opérations
+& Quantité de calcul effectuée \\
+
+Taux de réutilisation
+& Part des résultats intermédiaires réutilisés \\
+
+Mémoire maximale
+& Coût des états et intermédiaires \\
+
+Coût de coordination
+& Temps consommé par les décisions et l'ordonnancement \\
+
+Énergie
+& Coût énergétique par inférence, si mesurable \\
+
+Robustesse
+& Stabilité sur des entrées et distributions variées \\
+\bottomrule
+\end{tabularx}
+\caption{Mesures nécessaires à l'évaluation d'EX9.}
+\end{table}
+
+\subsection{Règles expérimentales}
+
+Pour garantir une comparaison valide :
+\begin{itemize}
+  \item utiliser les mêmes données et partitions ;
+  \item conserver les mêmes conditions matérielles ;
+  \item rapporter plusieurs graines ;
+  \item mesurer l'exécution complète ;
+  \item inclure le coût de coordination ;
+  \item inclure les transferts mémoire ;
+  \item distinguer temps d'entraînement et temps d'inférence ;
+  \item rapporter moyenne et dispersion des mesures.
+\end{itemize}
+
+% =========================================================
+\section{Ablations indispensables}
+% =========================================================
+
+Les ablations permettront d'identifier la contribution réelle de
+chaque mécanisme.
+
+\begin{longtable}{p{3.2cm}p{4.0cm}p{6.0cm}}
+\toprule
+Variante & Modification & Question testée \\
+\midrule
+EX9-A & Sans mémoire temporaire &
+La réutilisation réduit-elle le coût ? \\
+
+EX9-B & Sans coordination dynamique &
+La sélection conditionnelle apporte-t-elle un gain ? \\
+
+EX9-C & Sans composition hiérarchique &
+La composition explicite est-elle utile ? \\
+
+EX9-D & Un seul core généraliste &
+La spécialisation apporte-t-elle un avantage ? \\
+
+EX9-E & Core neuronal remplacé par MLP &
+Le remplacement est-il compétitif ? \\
+
+EX9-F & Communication non optimisée &
+Quel est le coût des transferts ? \\
+
+EX9-G & Exécution statique &
+Le routage dynamique est-il utile ? \\
+\bottomrule
+\end{longtable}
+
+% =========================================================
+\section{Risques et limites}
+% =========================================================
+
+\subsection{Coût de coordination}
+
+Un système modulaire peut être plus lent qu'un bloc dense si la
+coordination, les appels de fonctions ou les transferts dominent
+le coût total.
+
+\subsection{Granularité}
+
+Des sondes trop petites peuvent créer un excès de communication.
+Des sondes trop grandes peuvent perdre l'avantage de spécialisation.
+
+La granularité optimale doit être recherchée expérimentalement.
+
+\subsection{Mémoire temporaire}
+
+La mémorisation peut augmenter l'empreinte mémoire et introduire
+des coûts de recherche, d'invalidation et de synchronisation.
+
+\subsection{Approximation neuronale}
+
+Un core neuronal peut produire une approximation différente du MLP.
+Il faut mesurer la qualité, la stabilité et la généralisation.
+
+\subsection{Difficulté du passage au matériel}
+
+Une architecture logique efficace ne devient pas automatiquement
+une architecture physique efficace. Les contraintes de placement,
+de routage, de mémoire et d'énergie peuvent modifier complètement
+le résultat.
+
+% =========================================================
+\section{Positionnement scientifique}
+% =========================================================
+
+EX9 combine plusieurs idées déjà connues dans l'informatique :
+\begin{itemize}
+  \item graphes de calcul et graphes de dépendances ;
+  \item unités de calcul spécialisées ;
+  \item mémoire locale et réutilisation des résultats ;
+  \item ordonnancement des tâches ;
+  \item architectures parallèles ;
+  \item modèles neuronaux modulaires ;
+  \item approximation de blocs neuronaux.
+\end{itemize}
+
+La nouveauté éventuelle ne peut donc pas être déduite de la seule
+présence de cores ou de sondes.
+
+Elle devra être établie par :
+\begin{enumerate}
+  \item une définition précise de l'organisation des sondes ;
+  \item une règle originale de composition ou de coordination ;
+  \item une comparaison avec les architectures existantes ;
+  \item des résultats reproductibles ;
+  \item des ablations démontrant la contribution de chaque mécanisme.
+\end{enumerate}
+
+La contribution potentielle d'EX9 réside dans l'étude d'une
+architecture unifiée où les sondes constituent les éléments
+fonctionnels internes de cores logiques, physiques ou neuronaux.
+
+% =========================================================
+\section{Feuille de route}
+% =========================================================
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{2.0cm}p{4.0cm}X}
+\toprule
+Phase & Livrable & Critère de validation \\
+\midrule
+EX9.1
+& Moteur de graphe de calcul
+& Exactitude fonctionnelle et dépendances correctes \\
+
+EX9.2
+& Cores logiques
+& Mesure des coûts de composition et coordination \\
+
+EX9.3
+& Mémoire temporaire
+& Réutilisation correcte et gain mesuré \\
+
+EX9.4
+& Core neuronal
+& Comparaison équitable avec MLP \\
+
+EX9.5
+& Coordination adaptative
+& Réduction mesurée du travail exécuté \\
+
+EX9.6
+& Simulation physique
+& Modèle de latence, mémoire et communication \\
+
+EX9.7
+& Étude matérielle
+& Faisabilité et compromis énergie-performance \\
+\bottomrule
+\end{tabularx}
+\caption{Plan de développement proposé pour EX9.}
+\end{table}
+
+% =========================================================
+\section{Conclusion}
+% =========================================================
+
+EX9 propose de considérer le calcul comme un système organisé
+d'opérations spécialisées et composables.
+
+Les sondes constituent les éléments internes des cores.
+Les cores sont spécialisés selon leur fonction :
+calcul, composition, coordination, stockage ou traitement neuronal.
+
+Trois réalisations sont distinguées :
+\begin{itemize}
+  \item le core logique, qui organise les sondes dans un graphe logiciel ;
+  \item le core physique, qui associe les sondes à des ressources matérielles ;
+  \item le core neuronal, qui utilise des sondes adaptatives pour remplacer
+        des blocs MLP.
+\end{itemize}
+
+L'hypothèse centrale est que cette organisation pourrait réduire
+les calculs redondants, favoriser la réutilisation et permettre
+une spécialisation plus fine.
+
+Cependant, la modularité ne garantit ni une accélération ni une
+réduction énergétique. Les coûts de coordination, de mémoire et
+de communication doivent être intégrés à chaque mesure.
+
+EX9 doit donc être développé progressivement : d'abord sous forme
+de graphe logiciel vérifiable, ensuite sous forme de cores logiques,
+puis de cores neuronaux et enfin de simulation et d'étude matérielles.
+
+% =========================================================
+\begin{thebibliography}{99}
+
+\bibitem{ex7}
+Projet EX,
+\textit{Architecture V003 -- OuterCoord-Lite-7x1},
+rapport technique interne, archive
+\texttt{sondes\_ex7\_v003}.
+
+\bibitem{rbf}
+D. S. Broomhead and D. Lowe,
+\textit{Multivariable Functional Interpolation and Adaptive Networks},
+Complex Systems, vol. 2, pp. 321--355, 1988.
+
+\bibitem{moe}
+R. A. Jacobs, M. I. Jordan, S. J. Nowlan, and G. E. Hinton,
+\textit{Adaptive Mixtures of Local Experts},
+Neural Computation, vol. 3, no. 1, pp. 79--87, 1991.
+
+\bibitem{flynn}
+M. J. Flynn,
+\textit{Some Computer Organizations and Their Effectiveness},
+IEEE Transactions on Computers, vol. C-21, no. 9,
+pp. 948--960, 1972.
+
+\bibitem{dataflow}
+J. B. Dennis,
+\textit{First Version of a Data Flow Procedure Language},
+Programming Symposium, Lecture Notes in Computer Science,
+vol. 19, pp. 362--376, 1974.
+
+\bibitem{roofline}
+S. Williams, A. Waterman, and D. Patterson,
+\textit{Roofline: An Insightful Visual Performance Model for
+Multicore Architectures},
+Communications of the ACM, vol. 52, no. 4, pp. 65--76, 2009.
+
+\bibitem{moe_survey}
+C. R. B. et al.,
+\textit{A Review of Sparse Mixture of Experts},
+Référence à compléter par une revue bibliographique vérifiée
+avant toute soumission scientifique.
+
+\end{thebibliography}
+
+\end{document}

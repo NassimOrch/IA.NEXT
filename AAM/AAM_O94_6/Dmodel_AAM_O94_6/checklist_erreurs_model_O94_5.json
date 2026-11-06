@@ -1,0 +1,529 @@
+{
+  "schema": "aam-o94-5-model-error-ledger-v1",
+  "title": "O94.5 — défauts du modèle",
+  "parent_ledger": "checklist_erreurs_model_O94_4.json",
+  "updated_for": "O94.5 P6: audit race, decoder status and raw-byte fingerprint/view generation retested; targeted group passes.",
+  "items": [
+    {
+      "incident_id": "O943-M001",
+      "phase": "P1",
+      "category": "missing_passive_live_observation",
+      "severity": "CORE_FUNCTIONALITY_MISSING",
+      "status": "RESOLVED_BOUNDED_ADAPTERS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "L’ancien chemin Observer mélangeait l’import de traces préfabriquées et le sondage actif d’un protocole JSON Lines; il ne créait pas de trace à partir de sources OS vivantes.",
+      "impact": "La fonction nommée Observer ne satisfaisait pas le sens attendu et requérait un fichier/contrat préparé.",
+      "remediation": "Ajouter une session passive filesystem/process/réseau qui écrit elle-même une trace JSONL et un rapport; séparer ce mode de l’import dataset et du sondage actif JSONL.",
+      "evidence": [
+        "aam_o93/observation_live.py",
+        "tests/test_o943_passive_observation.py",
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json"
+      ],
+      "resolution_summary": "P1 fermé sur tests live filesystem, snapshots PID, création automatique JSONL/rapport, chaîne d’empreintes, diagnostics et budgets. Le vrai réseau reste dépendant des outils/droits présents, avec fixtures de backend dans cette livraison."
+    },
+    {
+      "incident_id": "O943-M002",
+      "phase": "P3",
+      "category": "local_model_adapters_visibility",
+      "severity": "LOCAL_MODEL_INTEGRATION_UNCLEAR",
+      "status": "RESOLVED_WITH_EXPLICIT_CONTRACT",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "L’intégration des modèles locaux était difficile à trouver, et le contrat d’adaptateur PyTorch n’était pas livré sous forme de gabarit visible.",
+      "impact": "Un checkpoint .pt/.pth sans architecture n’est pas automatiquement chargeable.",
+      "remediation": "Ajouter un onglet scrollable dédié, un bouton de génération de gabarit Python et les exemples de backends Transformers/Ollama/OpenAI-compatible/workspace AAM.",
+      "evidence": [
+        "aam_o93/ui.py",
+        "aam_o93/model_integration.py",
+        "examples/model_adapters/README_O94_3_FR.md",
+        "examples/model_adapters/pytorch_state_dict_adapter_template.py"
+      ],
+      "resolution_summary": "Gabarit fourni avec contrat load_model/generate/train_model optionnel; il échoue clairement tant que build_model()/generate() ne sont pas adaptés au checkpoint. Pas de fausse promesse d’universalité."
+    },
+    {
+      "incident_id": "O943-M003",
+      "phase": "P4",
+      "category": "missing_composition_compile_and_learned_blocks_surface",
+      "severity": "CORE_UI_PATH_INCOMPLETE",
+      "status": "RESOLVED_BOUNDED_COMPOSITION",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "La compilation et l’apprentissage de briques depuis observation n’étaient pas assez visibles et le catalogue ne montrait pas clairement les blocs issus de traces.",
+      "impact": "Impossible de suivre distinctement une observation, les candidats de briques et la compilation d’une composition.",
+      "remediation": "Ajouter compilation DSL vers artefact JSON, ingestion de traces par LearnedBlockStore, exact lookup train-only et candidats de méthode/règle à revue manuelle; ajouter la brique passive au catalogue.",
+      "evidence": [
+        "aam_o93/block_learning.py",
+        "aam_o93/base_blocks.py",
+        "aam_o93/runtime.py",
+        "tests/test_o943_learned_blocks_and_composition.py",
+        "receipts/O94_3/P4_composition_learning.json",
+        "tests/test_o943_runtime_integration.py",
+        "tests/test_o943_ui_contracts.py"
+      ],
+      "resolution_summary": "Retest P4: observation filesystem live → JSONL créé par AAM → candidats visibles après apprentissage; DSL compile/save/run testé sur support exact et entrée inédite unresolved; aucun code arbitraire exécuté.",
+      "updated_utc": "2026-10-19T15:59:07Z"
+    },
+    {
+      "incident_id": "O943-M004",
+      "phase": "P5",
+      "category": "rag_regression_risk",
+      "severity": "POTENTIAL_FEATURE_LOSS",
+      "status": "RESOLVED_BYTE_PARITY_AND_RUNTIME_TESTS",
+      "opened_utc": "2026-10-19T15:04:12.468472Z",
+      "summary": "Les corrections d’interface et d’observation pourraient accidentellement retirer des fonctions RAG historiques.",
+      "impact": "Risque de perte du moteur sémantique, retrieval et corpus SMS.",
+      "remediation": "Comparer les hashes des six fichiers RAG/moteur/tests historiques entre les archives O94_0, O94_1, O94_2 et laisser les fichiers inchangés dans O94_3.",
+      "evidence": [
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json",
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P5_rag_hash_parity.json"
+      ],
+      "resolution_summary": "P5: 47 RAG/SMS/résolution/adaptive tests pass, and six protected implementation/test files retain the O94_2 SHA-256 values; no RAG file changed.",
+      "updated_utc": "2026-10-19T16:00:24Z"
+    },
+    {
+      "incident_id": "O944-M001",
+      "phase": "P1",
+      "category": "silent_training_window_truncation",
+      "severity": "TRAINING_COVERAGE_HIDDEN_CAP",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T08:35:00+01:00",
+      "summary": "Le chemin LM local limitait silencieusement une époque à 5000 fenêtres train et 1000 fenêtres validation, indépendamment du nombre réellement disponible et sans option CLI correspondante.",
+      "impact": "Une partie des données demeure inutilisée; les métriques de validation reposent sur un sous-échantillon non déclaré.",
+      "remediation": "Aucun plafond par défaut; exposer des plafonds explicites optionnels, les transmettre du CLI au cœur d’entraînement, valider qu’ils sont positifs et inscrire à la trace le nombre disponible/utilisé.",
+      "evidence": [
+        "receipts/O94_4/P0_baseline.json",
+        "receipts/O94_4/P1_coverage_patch.json",
+        "receipts/O94_4/P2_runtime_cli.json",
+        "tests/test_o944_language_window_policy.py"
+      ],
+      "resolution_summary": "Validé sur le cœur, le runtime/CLI/UI et deux entraînements réels : mode par défaut utilise 8707/8707 train et 1708/1708 validation; le mode budgeté utilise exactement 5000/1000.",
+      "updated_utc": "2026-10-20T07:33:12.998211+00:00"
+    },
+    {
+      "incident_id": "O944-M002",
+      "phase": "P2",
+      "category": "rag_weak_context_and_intent_misalignment",
+      "severity": "RETRIEVAL_RELEVANCE_AND_ANSWER_SELECTION",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T07:37:58.830045+00:00",
+      "summary": "Un scénario avec deux sources distinctes faisait remonter la source batterie puis une source météo hors contexte à score positif mais faible; la question “How often ...?” sélectionnait la phrase d’identification au lieu de la phrase qui spécifie l’intervalle d’inspection.",
+      "impact": "Du contexte éloigné pouvait entrer dans les sources et la réponse extractive était pertinente par sujet mais insuffisante pour l’intention interrogative.",
+      "remediation": "Introduire un seuil corpus-relatif explicite au classement des chunks, exposer le nombre filtré et le seuil, et ajouter un bonus de classement générique pour les marqueurs d’intervalle dans les questions de fréquence. Ce mécanisme réordonne seulement les phrases observées.",
+      "evidence": [
+        "logs/O94_4/rag_semantic_search_after.json",
+        "logs/O94_4/rag_chat_answer_after.json",
+        "tests/test_o944_rag_answer_intent.py",
+        "receipts/O94_4/P2_runtime_cli.json"
+      ],
+      "resolution_summary": "Le rejeu du scénario retourne uniquement battery_service.md, trace le seuil 5.75286 pour un meilleur score 6.75286, écarte un candidat sur deux et répond “The maintenance procedure inspects separator condition every 200 operating hours.”. Les deux tests de régression RAG passent.",
+      "updated_utc": "2026-10-20T07:39:45.500964+00:00"
+    },
+    {
+      "incident_id": "O944-M003",
+      "phase": "P3",
+      "category": "stale_parent_release_identity_assertions",
+      "severity": "TEST_EXPECTATION_OUTDATED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T07:43:27.103434+00:00",
+      "summary": "La première suite complète après le bump de release avait quatre échecs : quatre tests hérités affirmaient explicitement 0.94.3 ou le titre O94_3 alors que l’API/runtime/UI annonçaient correctement O94.4.",
+      "impact": "La suite O94.4 échouait sur des assertions de version héritées, masquant l’état de la correction fonctionnelle.",
+      "remediation": "Mettre à jour uniquement les attentes d’identité de release dans les tests adaptés et le nom de programme CLI, tout en conservant les preuves historiques O94.3 intactes.",
+      "evidence": [
+        "tests/test_o931_release_identity.py",
+        "tests/test_o940_ui_resolution_details.py",
+        "tests/test_o941_standalone_startup.py",
+        "tests/test_p0_foundation.py",
+        "receipts/O94_4/P3_regression_suite.json",
+        "logs/O94_4/pytest_full_xvfb_final.txt"
+      ],
+      "resolution_summary": "Les quatre assertions héritées ont été ajustées aux identifiants O94.4; test ciblé 15 passed in 7.30s et suite complète finale 374 passed, 0 failed, 5 warnings, 21 sous-tests en 183.52s.",
+      "updated_utc": "2026-10-20T07:48:26.993968+00:00"
+    }
+  ],
+  "o945_items": [
+    {
+      "incident_id": "O945-M001",
+      "phase": "P1",
+      "category": "transformers_local_file_path_not_supported",
+      "severity": "BLOCKING_USER_FLOW",
+      "status": "IMPLEMENTED_BOUNDED_REAL_WEIGHTS_UNVERIFIED",
+      "summary": "Le chemin model.safetensors n’est pas traité comme un modèle Transformers prêt à charger; l’interface le dirige vers l’adaptateur générique.",
+      "impact": "SmolLM2 échoue si dossier HF complet non sélectionné et l’adaptateur générique ne peut le charger.",
+      "reproduction": "Inspect model_integration.py register(transformers_local) et UI model path/checkpoint flow.",
+      "created_receipt": "receipts/O94_5/P0_baseline.json",
+      "resolution_summary": "Selected local weight files now resolve to the containing model bundle and their exact filename is retained for first-load SHA-256 verification and strict state_dict loading. Custom .pth/.bin/.safetensors paths, registry listing, incomplete-bundle errors, changed-checkpoint rejection and mocked native generation pass. This environment lacks the actual SmolLM2 weights and Transformers package, so no real SmolLM2 inference/LoRA result is claimed.",
+      "evidence": [
+        "receipts/O94_5/P1_transformers_bundle.json",
+        "tests/test_o945_transformers_bundle.py",
+        "requirements-transformers.txt"
+      ],
+      "updated_utc": "2026-10-20T10:00:54.740992+00:00",
+      "resolution_evidence": "receipts/O94_5/P1_transformers_generation.json",
+      "scope_note": "Native HF directory/file selection and generation dispatch are implemented; real Transformers runtime and SmolLM2 weights were unavailable in this environment. Keep the production SmolLM2 integration validation open."
+    },
+    {
+      "incident_id": "O945-M002",
+      "phase": "P3",
+      "category": "composition_not_native_compilation",
+      "severity": "CORE_FUNCTIONALITY_MISSING",
+      "status": "RESOLVED_RETEST_PASS_BOUNDED",
+      "summary": "Le compilateur de composition émet un graphe JSON; il ne construit ni ne compile un programme exécutable source.",
+      "impact": "Pas d’artefact source réel compilé/testable pour une application composée.",
+      "created_receipt": "receipts/O94_5/P0_baseline.json",
+      "resolution_summary": "The O94.5 P3 receipt proves the reviewed DSL compiles into Python source and CPython bytecode, per-file diagnostics, SHA-256 manifest and a nontrivial project-audit workflow. This resolves the earlier graph-only output deficiency for the reviewed O94.5 DSL, not a claim of a universal compiler for arbitrary languages.",
+      "resolution_evidence": [
+        "receipts/O94_5/P3_phase_gate_receipt.json"
+      ],
+      "updated_utc": "2026-10-20T11:32:00+01:00"
+    },
+    {
+      "incident_id": "O945-M003",
+      "phase": "P2",
+      "category": "multimodal_observation_tools_not_integrated",
+      "severity": "CORE_FUNCTIONALITY_MISSING",
+      "status": "RESOLVED_RETEST_PASS_BOUNDED",
+      "summary": "Le chemin d’observation de fichier n’intègre pas les outils système disponibles pour OCR, PDF, vidéo et audio.",
+      "impact": "Inspection multimodale principalement sous forme d’empreintes; pas de contenu réellement décodé de bout en bout.",
+      "created_receipt": "receipts/O94_5/P0_baseline.json",
+      "resolution_summary": "The public observation path now invokes Tesseract/Poppler and FFmpeg/FFprobe; 7 actual-tool tests cover image OCR, scanned-PDF OCR, acoustic features, video frame sampling/motion hash, text-to-fingerprint and explicit RAG ingestion, final report digest and persisted-text redaction. Local ASR semantics remain unverified because no model directory is installed.",
+      "resolution_evidence": [
+        "receipts/O94_5/P2_observation_toolchain_complete.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00"
+    },
+    {
+      "incident_id": "O945-M004",
+      "phase": "P4",
+      "category": "reward_outcome_not_in_orchestration",
+      "severity": "CORE_FUNCTIONALITY_PARTIAL",
+      "status": "RESOLVED_RETEST_PASS_BOUNDED",
+      "summary": "Le feedback humain influence les préférences mais les résultats d’exécution/verification ne mettent pas à jour un signal distinct de fiabilité opérationnelle.",
+      "impact": "La boucle de récompense n’exploite pas systématiquement les résultats objectivement vérifiés.",
+      "created_receipt": "receipts/O94_5/P0_baseline.json",
+      "resolution_summary": "The final P4 runtime and causal-feedback regression passes 7 tests. Execution, user-preference and independently verified dimensions have explicit separate persisted fields; timeout/unknown outcome and event deduplication are tested.",
+      "resolution_evidence": [
+        "receipts/O94_5/P4_reward_runtime_regression_final.json"
+      ],
+      "updated_utc": "2026-10-20T11:32:00+01:00"
+    },
+    {
+      "incident_id": "O945-M005",
+      "phase": "P3",
+      "category": "generated_compiler_error_handler_syntax",
+      "severity": "COMPILED_PROGRAM_NOT_GENERATED",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le premier test source de composition a trouvé une fermeture de crochet manquante dans le générateur du bloc d’erreur Python.",
+      "remediation": "Corriger le littéral généré puis appliquer compile(), py_compile.compile(), AST parse et exécution subprocess.",
+      "evidence": [
+        "aam_o93/composition_compiler.py",
+        "tests/test_o945_composition_compiler_workbench.py",
+        "receipts/O94_5/P1_transformers_bundle.json"
+      ],
+      "resolution_summary": "Les tests compilent désormais un programme Python, vérifient le .pyc et le manifeste, puis exécutent le programme compilé via subprocess. Retest ciblé global: 16 passed, 0 failed.",
+      "updated_utc": "2026-10-20T10:00:54.740992+00:00",
+      "resolution_evidence": "receipts/O94_5/P2_observation_reward_final.json",
+      "resolution_note": "AAMRuntime public entry passes its O94.5 preflight gate and reaches real OCR/observation; the O94.3 immutable-source gate is no longer invoked ahead of the active descendant gate.",
+      "resolved_utc": "2026-10-20T10:39:00+01:00"
+    },
+    {
+      "incident_id": "O945-M006",
+      "phase": "P2",
+      "category": "observation_persist_text_parameter_signature_mismatch",
+      "severity": "MULTIMODAL_OBSERVATION_API_RUNTIME_BLOCKED",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le patch de privacy report utilisait persist_text dans observe_media mais la signature publique n’exposait pas ce paramètre, causant NameError/TypeError avant le décodage multimodal.",
+      "remediation": "Ajouter persist_text: bool|None, initialiser la valeur par défaut depuis include_text, puis rejouer OCR/PDF/audio/vidéo et intégration runtime/RAG.",
+      "evidence": [
+        "aam_o93/observation_tools.py",
+        "aam_o93/runtime.py",
+        "tests/test_o945_observation_reward.py",
+        "tests/test_o945_observation_multimedia_ffmpeg.py",
+        "receipts/O94_5/P2_observation_persist_text_signature_regression.json",
+        "receipts/O94_5/P2_observation_privacy_fix.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00",
+      "last_observation": "Le fichier de sortie reste absent à un timestamp proche de la fin; l’échantillonnage doit rester strictement à l’intérieur de la durée, pas simplement retrancher une marge réduite.",
+      "resolution_summary": "La signature publique inclut maintenant persist_text; les tests image/PDF et observe_media public passent. L’échec vidéo restant est suivi séparément dans O945-M008.",
+      "resolution_evidence": "receipts/O94_5/P2_ffmpeg_sampling_regression.json"
+    },
+    {
+      "incident_id": "O945-M007",
+      "phase": "P2",
+      "category": "observation_report_privacy_variable",
+      "severity": "RUNTIME_NAME_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "observe_media() référencie persist_text pour la politique de rapport, mais cette variable n’existe pas dans la signature; le premier appel public à l’observateur lève NameError.",
+      "evidence": [
+        "receipts/O94_5/P2_video_output_seek.json",
+        "aam_o93/observation_tools.py"
+      ],
+      "remediation": "Utiliser explicitement include_text, ou ajouter un paramètre distinct documenté avec comportement couvert par tests. Préserver le contrat privacy afin que include_text=False ne persiste pas le texte.",
+      "created_utc": "2026-10-20T10:45:00+01:00",
+      "resolution_evidence": "receipts/O94_5/P2_ffmpeg_sampling_regression.json",
+      "resolution_note": "La régression réexécutée passe le test direct image/PDF, qui atteint le décodage et valide le rapport après correction de include_text.",
+      "resolved_utc": "2026-10-20T10:47:00+01:00",
+      "resolution_summary": "La signature publique inclut maintenant persist_text; les tests image/PDF et observe_media public passent. L’échec vidéo restant est suivi séparément dans O945-M008.",
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00"
+    },
+    {
+      "incident_id": "O945-M008",
+      "phase": "P2",
+      "category": "video_frame_sampling_uses_container_duration_not_last_frame_pts",
+      "severity": "MULTIMODAL_OBSERVATION_MISSES_LATE_SAMPLE",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "La sélection d’images vidéo se basait sur la durée du conteneur et peut viser le timestamp exclusif de la dernière image; FFmpeg peut renvoyer code 0 sans écrire le PNG.",
+      "remediation": "Utiliser nb_frames et le taux moyen/réel du flux vidéo pour sélectionner des timestamps d’image valides; vérifier tout fichier de sortie et retenter avec une autre stratégie de seek quand il manque.",
+      "evidence": [
+        "aam_o93/observation_tools.py",
+        "tests/test_o945_observation_reward.py",
+        "tests/test_o945_observation_multimedia_ffmpeg.py",
+        "receipts/O94_5/P2_ffmpeg_sampling_regression.json"
+      ],
+      "updated_utc": "2026-10-20T10:10:44.854028+00:00",
+      "remediation_summary": "Sampling now uses stream frame count/rate where available and verifies output files; an input-seek retry is attempted only when the output seek produced no frame.",
+      "resolution_evidence": [
+        "receipts/O94_5/P2_observation_toolchain_complete.json"
+      ],
+      "resolution_summary": "Video timestamps derive from stream nb_frames/rate; missing outputs trigger an alternate input-seek attempt; the motion fixture demonstrates distinct sampled frame hashes and the full multimodal suite passes."
+    },
+    {
+      "incident_id": "O945-M009",
+      "phase": "P4",
+      "category": "reward_policy_persisted_signal_schema_incomplete",
+      "severity": "CAUSAL_REWARD_STATE_SCHEMA_INCONSISTENT",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "After an execution-only update, the persistent per-competence preference row could omit the explicit zero-valued user or verified signal counters even though routing_signal returned default zeros. The three feedback dimensions were logically separated but persistent row schema was not invariant.",
+      "remediation": "Normalize all stored preference rows to always materialize user preference, execution reliability, and independent verification signal/value+counter fields before every update; add a multi-update schema regression.",
+      "evidence": [
+        "aam_o93/reward_policy.py",
+        "tests/test_o945_causal_reward_routing.py"
+      ],
+      "updated_utc": "2026-10-20T11:32:00+01:00",
+      "resolution_summary": "The final P4 runtime and causal-feedback regression passes 7 tests. Execution, user-preference and independently verified dimensions have explicit separate persisted fields; timeout/unknown outcome and event deduplication are tested.",
+      "resolution_evidence": [
+        "receipts/O94_5/P4_reward_runtime_regression_final.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M010",
+      "phase": "P4",
+      "category": "punishment_and_verified_outcome_not_independently_regression_tested",
+      "severity": "CAUSAL_FEEDBACK_VALIDATION_GAP",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "P4 tests previously covered positive execution feedback and resolution failure switching but did not directly assert that TIMEOUT punishment, unknown outcomes, and independent verified FAIL are bounded, separated, and idempotent.",
+      "remediation": "Add explicit tests for TIMEOUT, UNRESOLVED, independent verified FAIL, event deduplication, and cross-signal invariance; verify rerouted preferences remain bounded.",
+      "evidence": [
+        "tests/test_o945_causal_reward_routing.py",
+        "aam_o93/reward_policy.py"
+      ],
+      "updated_utc": "2026-10-20T10:35:00Z",
+      "resolution_summary": "The final P4 runtime and causal-feedback regression passes 7 tests. Execution, user-preference and independently verified dimensions have explicit separate persisted fields; timeout/unknown outcome and event deduplication are tested."
+    },
+    {
+      "incident_id": "O945-M011",
+      "phase": "P5",
+      "category": "chat_integration_fixture_required_irrelevant_sentinel",
+      "severity": "TEST_FIXTURE_MISMATCH_AFFECTING_GENERATION_PATH",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T10:40:48.763877+00:00",
+      "summary": "Le test initial du chat utilisait un adaptateur déterministe qui exigeait, en plus de la phrase pertinente, un marqueur sentinelle placé dans une phrase séparée. Le sélecteur de contexte RAG enlève intentionnellement les phrases adjacentes non pertinentes; le fournisseur de test renvoyait alors un texte générique que la validation lexicale rejetait. Le résultat seul ne permettait pas de conclure à un défaut du RAG ou du modèle.",
+      "impact": "Le scénario positif d’intégration chat échoue avant de pouvoir prouver l’association modèle choisi → contexte RAG → compétence → trace causale. Les scénarios erreur fournisseur et ID inconnu, eux, passent.",
+      "remediation": "Rendre la fixture dépendante uniquement des éléments réellement pertinents attendus dans le prompt transmis (hydraulic filter + 200 operating hours), sans exiger un marqueur dans une phrase que le sélecteur doit exclure. Préserver les tests de validation lexicale et afficher le détail du quality gate si le retest échoue encore.",
+      "evidence": [
+        "tests/test_o945_chat_unified_runtime.py",
+        "logs/O94_5/P5_chat_unified_runtime_targeted.log",
+        "aam_o93/runtime.py"
+      ],
+      "updated_utc": "2026-10-20T10:41:33.843984+00:00",
+      "resolution_summary": "The deterministic fixture now checks only query-relevant evidence actually passed in the RAG prompt; it no longer requires a separate sentinel sentence which the query-focused selector correctly excludes. All three public-runtime tests pass; the lexical-anchor gate remains enabled.",
+      "resolution_evidence": [
+        "receipts/O94_5/P5_chat_unified_runtime_retest01.json",
+        "logs/O94_5/P5_chat_unified_runtime_retest01.log"
+      ]
+    },
+    {
+      "incident_id": "O945-M012",
+      "phase": "P5",
+      "category": "integrated_generator_failure_not_applied_to_reward_policy",
+      "severity": "CAUSAL_INTEGRATION_TEST_FAILED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T10:43:01.723876+00:00",
+      "summary": "The first P5 regression run showed an integrated model failure not listed in the execution-policy update. The runtime was amended to record generation competence for successful and failed integrated execution, and to persist a `model.integration_generation_failed` event; direct diagnosis now shows language_generation reliability moving to -0.18, but the guarded test suite must pass before closure.",
+      "impact": "A selected integrated provider failure could be visible to the chat but fail to teach the routing policy which generation competence was unreliable.",
+      "remediation": "Keep language_generation in the executed competence list for successful integrated generation and actual integrated execution failures only; do not count invalid selections as executions. Test success and failure through AAMRuntime.solve(), verify causal audit parent, reliability change, and no silent provider substitution.",
+      "evidence": [
+        "aam_o93/runtime.py",
+        "tests/test_o945_chat_unified_pipeline.py",
+        "receipts/O94_5/P5_chat_unified_targeted.json"
+      ],
+      "updated_utc": "2026-10-20T10:58:19.894579+00:00",
+      "resolution_summary": "Le lot P5 gated contient tests/test_o945_chat_unified_pipeline.py et réussit 27/27; le feedback d’échec du fournisseur intégré, la pénalité de fiabilité, la traçabilité causale et l’absence de substitution silencieuse sont testés via AAMRuntime.solve().",
+      "resolution_evidence": [
+        "receipts/O94_5/P5_chat_rag_batch1.json",
+        "logs/O94_5/P5_chat_rag_batch1.log"
+      ],
+      "additional_resolution_evidence": [
+        "receipts/O94_5/P5_ui_e2e_retest.json",
+        "receipts/O94_5/P5_chat_ui_release_identity_regression.json",
+        "receipts/O94_5/P5_ui_detail_smoke_regression.json",
+        "receipts/O94_5/P5_cli_foundation_composition_dispatch.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M013",
+      "phase": "P6",
+      "category": "ui_cli_actions_missing_from_common_dispatch_registry",
+      "severity": "CORE_ACTION_ORCHESTRATION_BYPASS",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "The full suite detects that UI literal actions observe-media-tools, o945-executable-composition-compile, and o945-executable-composition-execute are not present in _DISPATCHABLE_ACTIONS. These real UI actions cannot satisfy the common dispatch/audit contract.",
+      "impact": "The UI appears to expose observation/composition controls, but the action IDs are not routed through the shared action registry as required for causal audit and unified orchestration.",
+      "remediation": "Register the three exact public action IDs and add tests that dispatch each through the common router with correct source/context/causal audit; do not just exempt these strings from test.",
+      "evidence": [
+        "tests/test_p8_action_router.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py",
+        "logs/O94_5/P6_full_suite_regression.log"
+      ],
+      "updated_utc": "2026-10-20T11:19:08.344969+00:00",
+      "resolution_summary": "Registered the exact action IDs in the common dispatch registry; the targeted action-contract test passes and the three UI/CLI action identifiers now resolve.",
+      "resolution_evidence": [
+        "aam_o93/runtime.py",
+        "tests/test_p8_action_router.py",
+        "receipts/O94_5/P6_targeted_regressions_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M014",
+      "phase": "P6",
+      "category": "incomplete_transformers_bundle_registration_contract",
+      "severity": "MODEL_REGISTRATION_UX_AND_LOADABILITY_CONTRACT",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "Strictly rejecting registration of any incomplete Transformers selection made the UI lose the selected model and its missing-file diagnostics. Simply accepting it as loadable would be unsafe.",
+      "impact": "Users could not preserve a local model selection while preparing config/tokenizer/weight files, or would receive an ambiguous failure.",
+      "remediation": "Register incomplete bundles as explicit non-loadable drafts with missing_requirements; _spec/generate must refuse inference until the bundle is complete and verified, with no remote fallback.",
+      "evidence": [
+        "aam_o93/model_integration.py",
+        "tests/test_o945_transformers_bundle.py"
+      ],
+      "updated_utc": "2026-10-20T11:19:08.344969+00:00",
+      "resolution_summary": "Implemented REGISTERED_INCOMPLETE_BUNDLE/loadable=false and actionable inference blocking; legacy registration compatibility and the new strict non-loadable-draft test pass in the guarded 24-test batch.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_targeted_regressions_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M015",
+      "phase": "P6",
+      "category": "chat_task_attachment_bypassed_modality_specific_observer",
+      "severity": "CORE_OBSERVATION_INTEGRATION_DEFECT",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:11:19.700921+00:00",
+      "summary": "The unified TaskEnvelope path used the raw fingerprint observer for attachments, so video/audio/document attachments could be mislabeled as generic text and did not use the installed decoders.",
+      "impact": "The user-facing chat was not using the real modality-aware observation tools for attachments; malformed media status propagated inconsistently.",
+      "remediation": "Route attachment inputs through observe_media, preserve report/hash/decode status and extracted evidence, use bounded ephemeral context in chat, and require explicit opt-in for RAG persistence.",
+      "evidence": [
+        "aam_o93/runtime.py",
+        "aam_o93/observation_tools.py",
+        "tests/test_o945_chat_unified_pipeline.py",
+        "tests/test_p7_integrated.py"
+      ],
+      "updated_utc": "2026-10-20T11:19:08.344969+00:00",
+      "resolution_summary": "The attachment decode public-contract test and unified-chat attachment test passed in the guarded targeted batch; the new path reports NOT_DECODED rather than claiming unsupported decoding.",
+      "resolution_evidence": [
+        "receipts/O94_5/P6_targeted_regressions_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M016",
+      "phase": "P6",
+      "category": "audit_verify_concurrent_with_autonomy_append",
+      "severity": "FALSE_MEMORY_INTEGRITY_FAILURE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:28:50.908278+00:00",
+      "summary": "The full suite found a CLI startup race where event_memory reported FAIL_INTEGRITY during a status command while the autonomous loop could append to the JSONL audit chain.",
+      "impact": "A valid journal can be reported invalid if verification reads an incomplete append transaction.",
+      "remediation": "Serialize verify_audit/verify_reasoning with the per-instance RLock and cross-process lock used by append; stress-test concurrent writers and readers and rerun CLI status from an isolated workspace.",
+      "evidence": [
+        "aam_o93/memory.py",
+        "tests/test_p0_foundation.py",
+        "tests/test_o945_memory_verify_lock.py",
+        "receipts/O94_5/P6_full_suite_regression_20261020T112306Z_15724.json"
+      ],
+      "updated_utc": "2026-10-20T11:31:16.435361+00:00",
+      "resolution_summary": "The guarded targeted batch passed the external-workspace CLI status test and the concurrent append/verify stress test; audit verification now holds the same RLock and cross-process journal lock as append.",
+      "resolution_evidence": [
+        "aam_o93/memory.py",
+        "tests/test_o945_memory_verify_lock.py",
+        "receipts/O94_5/P6_audit_media_correction_targeted_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M017",
+      "phase": "P6",
+      "category": "multimodal_top_level_status_not_projected_from_decoder",
+      "severity": "VALID_ATTACHMENT_FALSE_NOT_DECODED",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:28:50.908278+00:00",
+      "summary": "Two valid bundled attachments (train_circle_0.png and hold_low.wav) had a per-modality decoder status PASS while the top-level observation report retained its initial PARTIAL status; the TaskEnvelope therefore emitted NOT_DECODED.",
+      "impact": "Valid source content was observed by tools but was incorrectly excluded from ephemeral task evidence.",
+      "remediation": "Project the concrete modality decoder result onto the top-level observation status; only report valid decoding when the actual tool result is PASS, and preserve NOT_DECODED for malformed/unavailable sources.",
+      "evidence": [
+        "aam_o93/observation_tools.py",
+        "aam_o93/runtime.py",
+        "tests/test_p7_integrated.py",
+        "receipts/O94_5/P6_full_suite_regression_20261020T112306Z_15724.json"
+      ],
+      "updated_utc": "2026-10-20T11:31:16.435361+00:00",
+      "resolution_summary": "The top-level multimodal status now reflects the actual tool decode status, so valid PNG/WAV attachments are marked VALID rather than NOT_DECODED. A separate remaining assertion required raw fingerprint views even with empty OCR/ASR text; that is tracked as O945-M018.",
+      "resolution_evidence": [
+        "aam_o93/observation_tools.py",
+        "aam_o93/runtime.py",
+        "receipts/O94_5/P6_audit_media_correction_targeted_retry01.json"
+      ]
+    },
+    {
+      "incident_id": "O945-M018",
+      "phase": "P6",
+      "category": "valid_media_missing_raw_fingerprint_when_semantic_text_empty",
+      "severity": "OBSERVATION_RAW_LEVEL_INCOMPLETE",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T11:31:16.435361+00:00",
+      "summary": "Valid PNG/WAV files were decoded by installed tools but attachment view_count remained 0 when OCR/ASR produced no text, because AAM only created its fingerprint from decoded semantic text.",
+      "impact": "Observation did not expose structural/raw views for valid inputs without semantic text, violating raw-plus-higher-level observation requirement.",
+      "remediation": "Always fingerprint raw file bytes in addition to decoded text; for large inputs use explicit deterministic multi-window sampling, label it sampled, persist the raw-fingerprint receipt/hash, and never claim sampled data equals a full-source observation.",
+      "evidence": [
+        "aam_o93/runtime.py",
+        "aam_o93/observation_tools.py",
+        "receipts/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.json",
+        "logs/O94_5/P6_raw_fingerprint_retest_20261020T113429Z_17266.log"
+      ],
+      "updated_utc": "2026-10-20T11:35:08.809555+00:00",
+      "resolution_summary": "La campagne ciblée P0/P7/mémoire passe 13 tests et 5 sous-tests. PNG et WAV retournent un statut de décodage valide et au moins une vue/empreinte issue des octets bruts même si OCR/ASR ne donnent aucun texte. L’empreinte est liée au SHA-256 source; les fichiers échantillonnés au-delà du budget sont explicitement marqués bornés."
+    },
+    {
+      "incident_id": "O945-M019",
+      "phase": "P7",
+      "category": "latex_laboratory_command_identifier_unescaped",
+      "severity": "DOCUMENTATION_COMPILATION_ERROR",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-20T12:06:32.013324+00:00",
+      "summary": "La première compilation de laboratoire_O94_5.tex s’est arrêtée sur un underscore non échappé dans une commande sous \\texttt, empêchant la production du PDF documentaire.",
+      "impact": "Le critère P7 de compilation du laboratoire n’était pas satisfait; aucune clôture P7 n’est permise avant un retest réussi.",
+      "remediation": "Utiliser un délimiteur de commande verbatim pour la ligne de commande avec identifiants Python; relancer la compilation depuis le dossier de build séparé et vérifier le PDF non vide.",
+      "evidence": [
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120522Z.json",
+        "logs/O94_5/P7_docs_restore_compile_20261020T120522Z.log"
+      ],
+      "updated_utc": "2026-10-20T12:14:32.133210+00:00",
+      "resolution_summary": "Après correction des identifiants non échappés, le reçu final P7 compile formalisme_O94_5.tex et laboratoire_O94_5.tex avec code retour 0, produit les deux PDF non vides, passe l’audit documentaire et les tests de restauration.",
+      "resolution_evidence": [
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120522Z.json",
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120732Z.json",
+        "receipts/O94_5/P7_docs_restore_compile_20261020T120820Z.json",
+        "receipts/O94_5/P7_documentation_restore_final.json"
+      ]
+    }
+  ],
+  "updated_utc": "2026-10-20T12:14:32.133210+00:00"
+}

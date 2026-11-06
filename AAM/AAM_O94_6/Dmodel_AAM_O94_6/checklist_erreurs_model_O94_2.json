@@ -1,0 +1,110 @@
+{
+  "schema": "aam-o94-2-error-ledger-v1",
+  "title": "checklist erreurs model O94 2.json",
+  "parent_ledger": "checklist_erreurs_model.json",
+  "parent_sha256": "71d5a1219a8b3d0193552a4b19d6aa8dc4e776dacff7d5e918ad957741ef5e99",
+  "updated_utc": "2026-10-19T13:54:14.933869Z",
+  "updated_for": "O94_2 incremental repair",
+  "items": [
+    {
+      "incident_id": "O942-M001",
+      "phase": "P1",
+      "category": "blackbox_schema_and_cap",
+      "severity": "INPUT_SCHEMA_REJECTION_AND_FIXED_200_CASE_DEFAULT",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "Les entrées JSON contenant un tableau dans `case`/`cases` et des champs prompt/answer/fold étaient rejetées ou tronquées au cap par défaut 200.",
+      "impact": "Import de traces/datasets empêché, dont un corpus de 1484 enregistrements.",
+      "remediation": "Normaliser plusieurs formes de conteneur et formats CSV/TSV/JSONL; détection de clés et mapping explicites; cap configurable avec plafond dur 20000 et budgets temps/sortie.",
+      "evidence": [
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "logs/O94_2/T09_targeted_regression.json",
+        "logs/O94_2/T10_targeted_regression_xvfb.json"
+      ],
+      "resolution_summary": "Le cas `{case:[...]}` de 1484 lignes est normalisé avec prompt/answer/fold et passe les tests ciblés."
+    },
+    {
+      "incident_id": "O942-M002",
+      "phase": "P2",
+      "category": "missing_active_blackbox_stream",
+      "severity": "OBSERVATION_ONLY_FROM_PRECAPTURED_TRACE",
+      "status": "RESOLVED_WITH_PROTOCOL_SCOPE",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "L’observation boîte noire se limitait surtout à l’ingestion de traces préparées et ne fournissait pas de session interactive persistante dans l’UI.",
+      "impact": "Impossible de sonder une cible vivante depuis AAM en continu.",
+      "remediation": "Ajouter session de processus persistante, canal JSON Lines entrée/réponse, sondes manuelles/automatiques, trace synchronisée après chaque échange et budgets configurables.",
+      "evidence": [
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "tests/test_o942_live_observation.py"
+      ],
+      "resolution_summary": "Une cible autorisée qui expose le contrat JSONL stdin/stdout est sondée pendant qu’elle fonctionne. Cela ne prétend pas capturer arbitrairement une GUI/un capteur sans adaptateur dédié."
+    },
+    {
+      "incident_id": "O942-M003",
+      "phase": "P4",
+      "category": "local_model_integration_visibility",
+      "severity": "LOCAL_MODEL_IMPORT_NOT_EXPOSED_IN_UI",
+      "status": "RESOLVED_ADAPTER_CONTRACT_BOUNDED",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "L’UI n’exposait pas un espace évident pour les modèles locaux et leurs politiques d’intégration/entraînement.",
+      "impact": "Le parcours de chargement des modèles était peu visible et les checkpoints PyTorch ne pouvaient pas être associés à une architecture de manière universelle.",
+      "remediation": "Ajouter onglet Modèles locaux / PyTorch; backend Transformers local, endpoints Ollama/OpenAI-compatible, adaptateur Python local explicite, politique train/holdout et hash.",
+      "evidence": [
+        "logs/O94_2/T02_model_integration.json",
+        "logs/O94_2/T08_ui_combined_retest.json",
+        "tests/test_o941_model_integration.py"
+      ],
+      "resolution_summary": "Le contrat d’intégration et l’UI sont testés avec adaptateur simulé; poids réels et architectures tierces restent à valider avec leurs dépendances."
+    },
+    {
+      "incident_id": "O942-M004",
+      "phase": "P3",
+      "category": "programming_by_composition_not_visible",
+      "severity": "BASE_BLOCK_COMPOSITION_NOT_EXPOSED",
+      "status": "RESOLVED_DSL_BOUNDED",
+      "opened_utc": "2026-10-19T12:38:57.642161Z",
+      "summary": "La programmation par composition des briques compétence/méthode/règle n’était ni visible ni définie dans un espace dédié.",
+      "impact": "Objectif central de composition difficile à découvrir et à vérifier.",
+      "remediation": "Ajouter éditeur DSL versionné et compilateur à graphe de compétences existantes, refus des identifiants arbitraires et règles de composition sûres.",
+      "evidence": [
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "logs/O94_2/T05_base_blocks_retest.json",
+        "tests/test_o942_live_observation.py"
+      ],
+      "resolution_summary": "La composition sûre a des tests d’acceptation bornés; cela n’équivaut pas encore à cloner tout programme arbitraire."
+    },
+    {
+      "incident_id": "O942-M005",
+      "phase": "P6",
+      "category": "mutable_control_hash_deadlock",
+      "severity": "RUNTIME_PREFLIGHT_REENTRANT_BLOCK",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T12:47:49.334966Z",
+      "summary": "Le préflight bloquait le runtime lorsqu’un registre d’incidents append-only ou la checklist changeait entre deux contrôles, y compris pendant la fermeture normale de l’autonomie.",
+      "impact": "Un incident de harnais ou une mise à jour de journal pouvait empêcher une opération suivante ou la sauvegarde d’arrêt.",
+      "remediation": "Maintenir une vérification SHA-256 stricte des documents de formalisation et du code immuable, mais traiter le décalage des registres/checklists opérationnels comme avertissement explicite après validation stricte de leur schéma et de la séquence de phases.",
+      "evidence": [
+        "logs/O94_2/T16_suite_batch04_retest.json",
+        "logs/O94_2/T17_suite_batch04_after_mutable_drift_fix.json"
+      ],
+      "resolution_summary": "Après séparation des hashes statiques et du suivi des dérives append-only, préflight et fermeture autonomie réussissent; le lot 04 repasse 32 tests."
+    },
+    {
+      "incident_id": "O942-M006",
+      "phase": "P8",
+      "category": "blackbox_live_cli_close_result_unbound",
+      "severity": "CLI_EXIT_FAILURE_AFTER_SUCCESSFUL_LIVE_EXCHANGES",
+      "status": "RESOLVED_RETEST_PASS",
+      "opened_utc": "2026-10-19T13:26:48.180154Z",
+      "summary": "Une capture blackbox-live réalisait et journalisait les échanges puis produisait un rapport STOPPED, mais la branche CLI quittait avant l’affectation de out; le traitement commun terminait sur UnboundLocalError et code retour 1.",
+      "impact": "Le mode streaming n’avait pas une fermeture CLI propre, même quand les observations étaient déjà capturées.",
+      "remediation": "Affecter le résultat de stop_blackbox_live à out dans finally et laisser le chemin final commun imprimer le rapport et déterminer le code retour. Ajouter un test E2E CLI avec cible JSONL persistante, deux échanges, :quit, trace et rapport durable.",
+      "evidence": [
+        "logs/O94_2/T63_blackbox_live_cli_e2e.json",
+        "tests/test_o942_live_observation.py",
+        "logs/O94_2/T11_suite_batch_10.json"
+      ],
+      "resolution_summary": "Le retest E2E doit retourner code 0, deux échanges CAPTURED, un résumé STOPPED durable et aucune UnboundLocalError."
+    }
+  ]
+}

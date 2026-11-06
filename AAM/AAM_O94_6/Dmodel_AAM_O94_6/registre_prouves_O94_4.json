@@ -1,0 +1,237 @@
+{
+  "schema": "aam-o94-4-evidence-registry-v1",
+  "version": "O94_4",
+  "created_utc": "2026-10-20T07:50:55.908943+00:00",
+  "parent": "O94_3",
+  "scope": "Audit des scénarios réellement exécutés, correction incrémentale de la couverture d’entraînement et du classement RAG, revue de livraison et limites expérimentales. Extension O94.4 ajoute le backend python_adapter et formalise explicitement le but fonctionnel intégral, tout en séparant résultats mesurés des capacités encore non certifiées.",
+  "feature_evidence": [
+    {
+      "id": "TRAIN-WINDOWS-DEFAULT",
+      "claim": "Le cœur utilise toutes les fenêtres d’entraînement/validation disponibles si les budgets facultatifs sont absents.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o92/language.py",
+        "aam_o92/engine.py",
+        "aam_o93/runtime.py",
+        "aam_o93/cli.py"
+      ],
+      "tests": [
+        "tests/test_o944_language_window_policy.py"
+      ],
+      "receipts": [
+        "receipts/O94_4/P1_coverage_patch.json",
+        "receipts/O94_4/P2_runtime_cli.json"
+      ],
+      "logs": [
+        "logs/O94_4/lm_full_default.json"
+      ],
+      "result": {
+        "train_used": "8707/8707",
+        "validation_used": "1708/1708"
+      }
+    },
+    {
+      "id": "TRAIN-WINDOWS-EXPLICIT-BUDGET",
+      "claim": "Les budgets CLI explicites sont propagés au moteur et rapportés dans la trace.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o93/cli.py",
+        "aam_o93/runtime.py",
+        "aam_o92/language.py"
+      ],
+      "tests": [
+        "tests/test_o944_language_window_policy.py"
+      ],
+      "logs": [
+        "logs/O94_4/lm_budgeted.json"
+      ],
+      "result": {
+        "train_used": "5000/8707",
+        "validation_used": "1000/1708"
+      }
+    },
+    {
+      "id": "RAG-RELEVANCE",
+      "claim": "Le classement sémantique expose et applique un seuil corpus-relatif qui élimine le chunk secondaire de score faible dans le scénario évalué.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o93/semantic_rag.py"
+      ],
+      "tests": [
+        "tests/test_o944_rag_answer_intent.py"
+      ],
+      "logs": [
+        "logs/O94_4/rag_semantic_search.json",
+        "logs/O94_4/rag_semantic_search_after.json"
+      ],
+      "result": {
+        "best_score": 6.75286,
+        "cutoff": 5.75286,
+        "filtered_candidates": 1,
+        "candidate_count": 2
+      }
+    },
+    {
+      "id": "RAG-FREQUENCY-INTENT",
+      "claim": "Une question de fréquence classe en premier une phrase source qui spécifie un intervalle.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o93/resolution_tree.py"
+      ],
+      "tests": [
+        "tests/test_o944_rag_answer_intent.py"
+      ],
+      "logs": [
+        "logs/O94_4/rag_chat_answer.json",
+        "logs/O94_4/rag_chat_answer_after.json"
+      ],
+      "result": {
+        "answer": "The maintenance procedure inspects separator condition every 200 operating hours."
+      }
+    },
+    {
+      "id": "OBSERVATION-LIVE-FILESYSTEM",
+      "claim": "Capture live filesystem avec baseline, ajout/modification et chaîne de hash valide dans un environnement contrôlé.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o93/observation_live.py",
+        "aam_o93/cli.py"
+      ],
+      "logs": [
+        "logs/O94_4/scenarios/live_observation_result.json"
+      ],
+      "tests": [
+        "tests/test_o943_passive_observation.py"
+      ],
+      "limitations": [
+        "Aucune caméra/capteur physique ni NIC réelle testée."
+      ]
+    },
+    {
+      "id": "BLACKBOX-REPLAY",
+      "claim": "Capsule de replay exact pour une entrée observée; entrée inconnue non résolue.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o93/blackbox.py"
+      ],
+      "logs": [
+        "logs/O94_4/scenarios/blackbox_capture.json",
+        "logs/O94_4/scenarios/blackbox_seen.json",
+        "logs/O94_4/scenarios/blackbox_unseen.json",
+        "logs/O94_4/scenarios/blackbox_evaluate.json"
+      ],
+      "limitations": [
+        "Pas de preuve de généralisation; entrée inconnue = UNRESOLVED."
+      ]
+    },
+    {
+      "id": "COMPOSITION-DSL",
+      "claim": "Composition JSON/DSL sauvegardée, validée et exécutée via le runner sûr.",
+      "status": "PASS_BOUNDED",
+      "code": [
+        "aam_o93/program_composer.py",
+        "aam_o93/cli.py"
+      ],
+      "logs": [
+        "logs/O94_4/scenarios/composition_save.json",
+        "logs/O94_4/scenarios/composition_run.json"
+      ],
+      "limitations": [
+        "Graphe JSON déclaratif; pas une compilation native de source arbitraire."
+      ]
+    },
+    {
+      "id": "LOCAL-LANGUAGE-MODEL",
+      "claim": "Le modèle d’attention compact s’entraîne et se sérialise, mais la génération générale reste à évaluer.",
+      "status": "PASS_BOUNDED_WITH_QUALITY_LIMIT",
+      "code": [
+        "aam_o92/language.py",
+        "aam_o93/model_integration.py"
+      ],
+      "logs": [
+        "logs/O94_4/lm_chat_invoke.json",
+        "logs/O94_4/scenarios/lm_train_parent.json"
+      ],
+      "limitations": [
+        "Exemple de génération contient <unk>; le filtre qualité rejette cette génération. Aucun endpoint distant n’a été testé en direct."
+      ]
+    },
+    {
+      "id": "COMPLETE-TEST-SUITE",
+      "claim": "Suite complète de non-régression et tests de livraison ciblés exécutés.",
+      "status": "COMPLETE_EVIDENCED",
+      "tests": [
+        "tests/"
+      ],
+      "receipts": [
+        "receipts/O94_4/P7_full_regression.json"
+      ],
+      "logs": [
+        "logs/O94_4/pytest_full_after_python_adapter.txt",
+        "logs/O94_4/pytest_python_adapter_retest.txt"
+      ],
+      "result": {
+        "suite": "377 passed, 0 failed, 5 warnings, 21 subtests passed",
+        "targeted_adapter": "8 passed",
+        "compileall": "PASS",
+        "latex_sources": "2 source files compile with exit code 0",
+        "preflight": "PASS_BOUNDED"
+      }
+    },
+    {
+      "id": "PORTABLE-ARCHIVES",
+      "claim": "Manifestes, CRC et extraction propre sont testés lors de la finalisation de livraison.",
+      "status": "COMPLETE_EVIDENCED",
+      "code": [
+        "scripts/o94_delivery_common.py",
+        "aam_o93/preflight.py",
+        "aam_o93/o944_phase_gate.py",
+        "scripts/o94_delivery_common.py"
+      ],
+      "receipt": "receipts/O94_4/P8_final_delivery.json",
+      "result": {
+        "crc": "PASS for all three ZIPs",
+        "internal_manifests": "PASS for all three ZIPs",
+        "safe_paths": "PASS",
+        "clean_extraction": "PASS",
+        "extracted_model_preflight": "PASS_BOUNDED",
+        "extracted_custom_adapter_tests": "8 passed",
+        "max_archive_size": "under 220 MiB"
+      }
+    },
+    {
+      "id": "CUSTOM-PYTHON-ADAPTER",
+      "claim": "Un backend python_adapter fournit un contrat extensible pour raccorder un runtime/protocole non natif, avec confirmation explicite de confiance, SHA-256 épinglé, génération et hook d’entraînement facultatif.",
+      "status": "PASS_BOUNDED_TEST_RUNTIME",
+      "code": [
+        "aam_o93/model_integration.py",
+        "aam_o93/ui.py",
+        "examples/model_adapters/python_model_adapter_template.py"
+      ],
+      "tests": [
+        "tests/test_o944_python_adapter.py",
+        "tests/test_o943_model_adapter_contracts.py"
+      ],
+      "receipt": "receipts/O94_4/P5_python_adapter.json",
+      "result": {
+        "targeted_tests": "8 passed",
+        "trust_required": true,
+        "adapter_hash_pinned": true,
+        "custom_protocol_autodiscovery": false,
+        "production_runtime_tested": false
+      },
+      "limitations": [
+        "L’adaptateur réel doit être fourni, inspecté et testé pour chaque runtime/protocole. Le consentement utilisateur n’est pas un bac à sable OS. Le gabarit de base ne prétend ni générer des réponses de modèle ni modifier des poids."
+      ]
+    }
+  ],
+  "not_certified": [
+    "Endpoints distants Ollama/OpenAI-compatible en direct.",
+    "Caméra/capteurs physiques et acquisition réseau NIC réelle.",
+    "Généralisation universelle à partir d’une trace finie.",
+    "Corpus SMS complet; le test à 300 exemples passe mais la campagne complète a dépassé la fenêtre d’exécution.",
+    "Diagnostic individuel des cinq avertissements Pytest, masqués par --disable-warnings."
+  ],
+  "conclusion": "Les résultats sont limités aux configurations et données enregistrées. Les capacités non testées demeurent non certifiées; aucun résultat n’est utilisé pour prédire le succès ou l’échec futur du modèle.",
+  "updated_utc": "2026-10-20T08:23:32.082496+00:00"
+}

@@ -1,0 +1,198 @@
+{
+  "active_run_id": "20261027T153351Z",
+  "authoritative_validation_receipt": "audit/validation_receipt.json",
+  "created_utc": "2026-10-27T15:33:59Z",
+  "evidence": [
+    {
+      "claim": "Suite de régression V1 conservée et exécutée.",
+      "evidence_path": "audit/test_runs/v1_preserved_regression_tests_final.log",
+      "id": "EVID-V1-REGRESSION",
+      "reported_result": "65 tests passés; sources et tests conservés sous legacy_NGeGenBrain_v1/.",
+      "scope": "régression des comportements couverts par les tests existants"
+    },
+    {
+      "claim": "Suite intégrée V2 exécutée et réussie.",
+      "evidence_path": "audit/test_runs/v2_unit_integration_tests_final.log",
+      "id": "EVID-V2-TESTS",
+      "reported_result": "52 tests passés; voir log et reçu de validation.",
+      "scope": "tests du dépôt, pas preuve de complétude scientifique universelle"
+    },
+    {
+      "claim": "Reconstruction fonctionnelle indépendante de parité 4 bits.",
+      "evidence_path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "id": "EVID-SYNTH-RECON",
+      "reported_result": {
+        "full_domain_accuracy": 1.0,
+        "full_domain_size": 16,
+        "holdout_accuracy": 1.0,
+        "holdout_rows": 4,
+        "train_rows": 12
+      },
+      "scope": "finite Boolean behavior in declared XOR class only"
+    },
+    {
+      "claim": "Intervention zero on one synthetic internal module changes output under one input.",
+      "evidence_path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "id": "EVID-CAUSAL-LOCAL",
+      "reported_result": {
+        "baseline": [
+          1.0
+        ],
+        "input": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "intervention": [
+          -1.0
+        ],
+        "output_delta_l2": 2.0,
+        "target": "xor_layers.0.positive"
+      },
+      "scope": "single intervention; not a generalized causal mechanism"
+    },
+    {
+      "claim": "Numeric discovery finds add(x0,x1) in the declared grammar and validates on 3 rows.",
+      "evidence_path": "benchmarks/results/20261027_official/numeric_discovery_result.json",
+      "id": "EVID-NUMERIC-ADD",
+      "reported_result": "CANDIDATE_FOUND; validation accuracy 1.0 on 3 rows",
+      "scope": "small declared expression grammar"
+    },
+    {
+      "claim": "Hash-chain integrity for official records.",
+      "evidence_path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "id": "EVID-REGISTRY-INTEGRITY",
+      "reported_result": "registry_integrity_all_valid = true"
+    },
+    {
+      "claim": "No claim about a real LLM is supported by the current run.",
+      "evidence_path": "rapport_experimentation_NGeGenBrain_v2.md",
+      "id": "EVID-REAL-LLM-NOT-RUN",
+      "reported_result": "transformers package and local model checkpoint unavailable"
+    },
+    {
+      "claim": "Huit architectures synthétiques instrumentables/boîte noire ont été exercées par le protocole seedé.",
+      "evidence_path": "benchmarks/results/20261027_official/synthetic_ladder_results.json",
+      "id": "EVID-SYNTH-LADDER",
+      "reported_result": {
+        "levels": [
+          "linear",
+          "parity",
+          "interaction",
+          "distributed features",
+          "competing pathways",
+          "hierarchical network",
+          "tiny Transformer encoder",
+          "tiny causal LM"
+        ],
+        "levels_executed": 8,
+        "status": "EXECUTED"
+      },
+      "scope": "architecture/instrumentation smoke evidence, not full mechanistic reconstruction"
+    },
+    {
+      "claim": "Balayage causal synthétique sur huit entrées enregistré.",
+      "evidence_path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "id": "EVID-SYNTH-SWEEP",
+      "reported_result": {
+        "comparable_effect_count": 8,
+        "effects": [
+          0.0,
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          2.0,
+          0.0
+        ],
+        "experiment_count": 8,
+        "max_output_delta_l2": 2.0,
+        "mean_output_delta_l2": 0.5,
+        "median_output_delta_l2": 0.0,
+        "min_output_delta_l2": 0.0,
+        "nonzero_effect_count": 2,
+        "population_stddev_output_delta_l2": 0.8660254037844386
+      },
+      "scope": "huit entrées prédefinies; aucune généralisation automatique"
+    },
+    {
+      "claim": "Le détecteur de contre-exemples réfute un candidat volontairement incomplet sur les lignes fournies.",
+      "evidence_path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "id": "EVID-COUNTEREXAMPLE-POSITIVE-CONTROL",
+      "reported_result": {
+        "counterexamples": 4,
+        "evaluated": 8
+      },
+      "scope": "contrôle positif sur données fournies"
+    },
+    {
+      "claim": "Aucun LLM open source externe n'a été chargé dans cette livraison.",
+      "evidence_path": "benchmarks/results/20261027_official/official_experiment_results.json",
+      "id": "EVID-LLM-EXTERNAL-NOT-RUN",
+      "reported_result": "NOT_EXECUTED: transformers et checkpoint local indisponibles; aucune conclusion positive ou négative sur une recomposition LLM réelle."
+    },
+    {
+      "claim": "Le contrat d'adapter Hugging Face est testé avec un faux modèle compatible au protocole.",
+      "evidence_path": "tests/test_huggingface_adapter_mock.py",
+      "id": "EVID-HF-ADAPTER-MOCK-CONTRACT",
+      "reported_result": "5 tests passés: flags local_files_only/trust_remote_code, forward/capture/intervention, génération/gradient, refus d'inspection interne et préservation des token IDs explicites.",
+      "scope": "tests de contrat sur un fake; pas de validation d'un checkpoint pré-entraîné réel"
+    },
+    {
+      "claim": "Le vérificateur de manifeste détecte les fichiers modifiés, non listés et les chemins traversants.",
+      "evidence_path": "tests/test_archive_manifest.py",
+      "id": "EVID-ARCHIVE-MANIFEST-TESTS",
+      "reported_result": "3 tests passés (manifeste valide, altération SHA-256, fichier supplémentaire et path traversal).",
+      "scope": "tests sur fixtures temporaires; vérification de l'archive finale effectuée séparément en clean-room"
+    },
+    {
+      "claim": "Reconstruction comportementale indépendante d'un minuscule Transformer causal synthétique entraîné, avec découverte règle/train-holdout et lookup fini des logits.",
+      "evidence_path": "benchmarks/results/20261027_official/workspace_20261027T153351Z/causal_lm_reconstruction/public_summary.json",
+      "id": "EVID-CAUSAL-LM-RECONSTRUCTION",
+      "reported_result": {
+        "created_utc": "2026-10-27T15:33:57Z",
+        "finite_context_lookup": {
+          "artifact": "composed_lookup_model.json",
+          "composed_mechanism_count": 4,
+          "exact_logit_match_rate": 1.0,
+          "generation_exact_match_rate": 1.0,
+          "queried_context_count": 30,
+          "status": "VALIDATED_ON_QUERIED_FINITE_CONTEXT_DOMAIN_AND_COMPOSED_TRAJECTORIES"
+        },
+        "protocol_separation": {
+          "finite_lookup_scope": "exact only for the explicitly queried contexts",
+          "rule_hypothesis_class_declared": "modular_affine_next_token_v1",
+          "source_calls_during_composed_inference": false,
+          "source_was_query_only": true,
+          "source_weights_copied_to_composed_models": false,
+          "training_truth_passed_to_discovery": false
+        },
+        "rule_reconstruction": {
+          "artifact": "composed_rule_model.json",
+          "candidate_count": 1,
+          "composed_mechanism_count": 4,
+          "generation_exact_match_rate": 1.0,
+          "holdout_accuracy": 1.0,
+          "holdout_context_count": 5,
+          "status": "VALIDATED_GREEDY_BEHAVIOR_ON_HELDOUT_AND_COMPOSED_TRAJECTORIES",
+          "training_context_count": 20
+        },
+        "schema": "NGeGenBrain_v2_synthetic_causal_lm_reconstruction_summary_v1",
+        "scope": "Synthetic trained tiny Transformer only; not a full-size LLM and not internal-circuit equivalence.",
+        "source_model": {
+          "architecture_exposed": "query-only",
+          "capture_capability": false,
+          "family": "pytorch",
+          "inspect_capability": false,
+          "model_hash": "bf3c5e8b6624cacc9d55986051c772c9d47d3db03b66de7ed5d0c7928133cdfa",
+          "model_id": "SYNTH-TRAINED-TINY-CAUSAL-TRANSFORMER-BLACKBOX",
+          "parameters_exposed": null
+        }
+      },
+      "scope": "modèle synthétique et classe de règle déclarée; pas d'équivalence de circuits internes ni d'affirmation sur LLM pré-entraîné externe"
+    }
+  ],
+  "schema": "NGeGenBrain_v2_evidence_registry_v1"
+}

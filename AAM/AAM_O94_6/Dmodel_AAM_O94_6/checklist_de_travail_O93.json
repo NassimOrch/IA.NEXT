@@ -1,0 +1,1694 @@
+{
+  "schema": "aam-o93-work-checklist-v1",
+  "title": "Checklist de phases AAM O93 basée sur formalisme_O93.tex",
+  "created_utc": 1791839290.7809384,
+  "reference_formalism": "formalisme_O93.tex",
+  "reference_laboratory": "laboratoire_O93.tex",
+  "reference_o92_formalism": "Dmodel_AAM_O93/docs/fformalisme_model_emergent_O92.tex",
+  "reference_error_model": "o93_control/checklist_erreurs_model.json",
+  "reference_error_environment": "o93_control/checklist_erreurs_no_model.json",
+  "current_phase": "P10",
+  "global_status": "P10_BLOCKED_ENVIRONMENT_NATIVE_ACCEPTANCE_OPEN",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8",
+    "P9",
+    "P10"
+  ],
+  "rule": "La phase N+1 ne peut démarrer qu’après fermeture documentée et preuve de sortie de la phase N et de ses dépendances; toute modification réouvre les phases dépendantes.",
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Contrats, checkpoint, journal, preflight et noyau commun",
+      "status": "COMPLETE",
+      "gate": [
+        "formalisme et deux registres lisibles",
+        "contrat TaskEnvelope/TaskResult versionné",
+        "journal append-only hash-chain vérifiable",
+        "mémoire de raisonnement séparée et interrupteur persistant",
+        "démarrage CLI isolé et statut sans mutation de sources",
+        "tests P0 exécutés et rapport stocké"
+      ],
+      "depends_on": [],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P0_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 6,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P0_revalidation_security_patch.txt",
+        "log_sha256": "1018658881656351d61306f9f92bba4f553c07f71a4513d26d05deea943d02ed",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842825.7448719
+      }
+    },
+    {
+      "id": "P1",
+      "name": "Observateur universel et interface capteurs",
+      "status": "COMPLETE",
+      "gate": [
+        "fichiers texte/JSON/JSONL/CSV/Python/image/WAV observés",
+        "dossiers inventoriés sans suivre symlink",
+        "statut explicite pour données inconnues et corruptions",
+        "hash et source inchangés",
+        "API caméra/capteur réelle avec permission explicite ou NOT_RUN matérialisé",
+        "tests P1 et rapport stockés"
+      ],
+      "depends_on": [
+        "P0"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P1_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 11,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P1_revalidation_security_patch.txt",
+        "log_sha256": "101e4b0ac4e8c4bd30f975a377acbe68495daf4873aec9b07a2c570b3067c4a8",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842841.271942
+      }
+    },
+    {
+      "id": "P2",
+      "name": "Générateur adaptatif de sondes",
+      "status": "COMPLETE",
+      "gate": [
+        "réutilisation et composition avant miroir et probes primitives",
+        "probes miroir avec référence/contextes déclarés",
+        "collision matrix et gain/cost mesurés",
+        "candidate generation n’incorpore pas les labels/réponses cibles",
+        "budget + checkpoint + reprise testés",
+        "tests P2 et rapport stockés"
+      ],
+      "depends_on": [
+        "P1"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P2_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 9,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P2_revalidation_security_patch.txt",
+        "log_sha256": "86a17857373cff97c8f15814c1f17167b351857680b89ae6fbcd90ec7e9e7951",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842852.008175
+      }
+    },
+    {
+      "id": "P3",
+      "name": "Compétences de base et composition",
+      "status": "COMPLETE",
+      "gate": [
+        "observation, empreinte, création de sondes, orchestration, raisonnement exécutables",
+        "contrats d’entrées/sorties et effets",
+        "compositions simples testées sans ordre secret",
+        "feedback et vérification séparés",
+        "tests P3 et rapport stockés"
+      ],
+      "depends_on": [
+        "P1",
+        "P2"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P3_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 8,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P3_revalidation_security_patch.txt",
+        "log_sha256": "042a3cf26800b2028548b21075be38ac74c2878d3b2aa86bbe38b31e4458b946",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842857.4331703
+      }
+    },
+    {
+      "id": "P4",
+      "name": "Acquisition adaptative source-off",
+      "status": "COMPLETE",
+      "gate": [
+        "tâches séparées avant entraînement",
+        "source/oracle coupés après acquisition",
+        "capsule persistée, hash et rechargement testés",
+        "génération de sondes si collisions restantes",
+        "tests de validation, holdout, transfert et abstention",
+        "tests P4 et rapport stockés"
+      ],
+      "depends_on": [
+        "P2",
+        "P3"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P4_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 6,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P4_revalidation_security_patch.txt",
+        "log_sha256": "196deefb9bb65672605f1069daf16776a7898c53516dfbcb9fd5e9243e27b955",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842866.43333
+      }
+    },
+    {
+      "id": "P5",
+      "name": "RAG observation-first, learning si supervision réelle",
+      "status": "COMPLETE",
+      "gate": [
+        "chargement observe-first et empreintes/chunks conservés",
+        "recherche lexicale n’est qu’un plug-in manuel/auto",
+        "compétences apprises seulement si signal exploitable",
+        "cités et chaque affirmation factuelle liée aux preuves",
+        "documents non fiables séparés des instructions",
+        "tests P5 et rapport stockés"
+      ],
+      "depends_on": [
+        "P1",
+        "P3",
+        "P4"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P5_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 6,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P5_revalidation_security_patch.txt",
+        "log_sha256": "61dcce2acd3cb1156a3b7bf034fedc278f0b82704a2e6b3662044165cd3ee0fe",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842878.5219223
+      }
+    },
+    {
+      "id": "P6",
+      "name": "Autonomie de fond et mémoire continue",
+      "status": "COMPLETE",
+      "gate": [
+        "boucle démarrée à l’ouverture de l’application",
+        "à vide: auto-observation de l’état et agenda falsifiable",
+        "mémoire de raisonnement ON/OFF sans arrêter le moteur",
+        "stop autonomie arrête le runtime et checkpoint conservé",
+        "reward user feedback influe les priorités sans remplacer preuve",
+        "reprise et double lancement testés"
+      ],
+      "depends_on": [
+        "P0",
+        "P3",
+        "P4",
+        "P5"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P6_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 7,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P6_revalidation_security_patch.txt",
+        "log_sha256": "46485fb0567037eb159c17968d3899245633e0ba382d59f28182d9f0a453dd47",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842884.1877024
+      }
+    },
+    {
+      "id": "P7",
+      "name": "Chat, média, génération et interface Observer",
+      "status": "COMPLETE",
+      "gate": [
+        "toutes les demandes passent par TaskEnvelope",
+        "observer permet fichier/dossier et plugin device",
+        "chat choisit les compétences selon contrat et preuves",
+        "image/audio/vidéo: limites et decode states visibles",
+        "feedback utilisateur enregistré",
+        "tests UI de fonctions et de fermeture"
+      ],
+      "depends_on": [
+        "P1",
+        "P3",
+        "P4",
+        "P5",
+        "P6"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P7_revalidated_security.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "passed": 6,
+        "failed": 0,
+        "exit_code": 0,
+        "report": "logs/P7_revalidation_security_patch.txt",
+        "log_sha256": "a2c885b25b80afd64e7b1f1160344122b310a32983fbde368e8afe3ef2e84970",
+        "revalidation_after": "P8 security hardening shared code changes",
+        "timestamp_unix": 1791842888.4872053,
+        "latest_revalidation_log": "Dmodel_AAM_O93/logs/P7_revalidation_security_patch.txt",
+        "ui_workflow_revalidation": "PASS_BOUNDED",
+        "ui_workflow_revalidation_log": "Dmodel_AAM_O93/logs/P7_ui_workflow_security_patch.txt",
+        "ui_workflow_revalidation_report": "Dmodel_AAM_O93/logs/P7_ui_workflow_report_security_patch.json",
+        "ui_workflow_revalidation_log_sha256": "2e4d8fa0d25253b4eaafcbc0af83abc0ca7818c26d2e5414f3515f7711bc1c22",
+        "feedback_task_id": "5ed1c1a9-99f2-4a74-abcd-12f87179f436",
+        "feedback_persisted": true,
+        "feedback_reward": -1.0,
+        "agenda_reprioritized": true,
+        "rating_not_ground_truth": true
+      }
+    },
+    {
+      "id": "P8",
+      "name": "Sécurité, intégrité et résilience",
+      "status": "COMPLETE",
+      "gate": [
+        "tests inputs hostiles/zip traversal/symlink/oversize",
+        "hash-chain détecte altérations",
+        "sandbox des actions à effet",
+        "aucune capture camera automatique",
+        "rollback/checkpoints/restart tests",
+        "tests P8 et rapport"
+      ],
+      "depends_on": [
+        "P0",
+        "P1",
+        "P2",
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P8_complete.json",
+      "evidence": {
+        "result": "PASS_BOUNDED",
+        "focused_tests_passed": 15,
+        "focused_tests_failed": 0,
+        "full_regression_tests_passed": 74,
+        "full_regression_tests_failed": 0,
+        "exit_code": 0,
+        "focused_log": "Dmodel_AAM_O93/logs/P8_security_final.txt",
+        "focused_log_sha256": "b97e0c2d61c1ac506c7ff22c1b887827fd6562bfe0ce3f4f242e7b7a7c67af47",
+        "regression_log": "Dmodel_AAM_O93/logs/P0_P8_full_regression.txt",
+        "regression_log_sha256": "10e1c38c017c4084f312affe59e1dbe2fefc4049b847c39112bd59206b464f4b",
+        "report_json": "Dmodel_AAM_O93/logs/P8_security_report_final.json",
+        "report_json_sha256": "60541a3a3784a7bcf5fdf79ef18fa9d8850141a62e92a4fc45750c2b94d881eb",
+        "resolved_errors": [
+          "O93-E023",
+          "O93-E025",
+          "O93-E026",
+          "O93-ENV011",
+          "O93-ENV012",
+          "O93-ENV015"
+        ],
+        "open_errors": [],
+        "limitations_not_run": [
+          "native Windows 10/11 acceptance",
+          "physical camera capture",
+          "live Internet provider end-to-end",
+          "NTFS/ACL behavior",
+          "power-loss interruption testing"
+        ],
+        "lab_sha256": "1637b563aff972a6b26614648fbd6a973b255fa82b5e8bc76a3a19dd652589c3",
+        "formalism_sha256": "d4bfd17d9352b23b3febc8a9d338df30ec3be2a527b63f5f4df76a37b3c2654c",
+        "visual_review": "P8 closing report now appears after the chronological history; PDF final page rendered and inspected; long artifact paths wrap.",
+        "timestamp_unix": 1791843276.052724
+      },
+      "completed_unix": 1791843271.8803682
+    },
+    {
+      "id": "P9",
+      "name": "Évaluation des capacités et publication du laboratoire",
+      "status": "COMPLETE",
+      "gate": [
+        "protocole preregistré, données et graines hashées",
+        "source-off, OOD, plusieurs seeds pertinents",
+        "fuite/doublons évalués",
+        "métriques/cout/abstention/erreurs conservés",
+        "rapport complet description/architecture/pipeline/commandes/résultats/interprétation/conséquences/conclusion/statut"
+      ],
+      "depends_on": [
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P7",
+        "P8"
+      ],
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P9_start.json",
+      "evidence": {
+        "result": "PASS_BOUNDED_FINAL_VISUAL_REVIEW",
+        "protocol": "Dmodel_AAM_O93/protocols/P9_preregistered_capacity_protocol_v2.json",
+        "protocol_sha256": "fa32324b1ec74fdd2901c45552fdafe19ebc7db7be9d8b1e0f4a387455ef4c01",
+        "protocol_previous_attempt_preserved": "logs/P9_preregistered_protocol_attempt1.json",
+        "runner": "Dmodel_AAM_O93/scripts/p9_capacity_evaluation.py",
+        "runner_sha256": "c4d9476dc05d0bf5417ca37d938269d03484592275d873708e9a7233497d9cc6",
+        "experiment_report": "Dmodel_AAM_O93/runs/P9_capacity/preregistered02_final_report.json",
+        "experiment_report_sha256": "27b8736d66014b187dd1b68c42bbeaadb9874e265cc585139de85913f951a999",
+        "experiment_log": "Dmodel_AAM_O93/logs/P9_capacity_preregistered02_events.jsonl",
+        "experiment_log_sha256": "dfd208bf050451ebeb765b590d54544bb0c5ca2ceacf1a0a7ff0c4e12ee9ea1e",
+        "evidence_tests": {
+          "tests_total": 11,
+          "tests_passed": 11,
+          "tests_failed": 0,
+          "exit_code": 0,
+          "log": "logs/P9_v2_integrity_unittest.txt",
+          "log_sha256": "040c673869d46a7951d88bda78797a746a539395687f90c6080fe9aef717bec0"
+        },
+        "training_seeds": [
+          13,
+          29,
+          47,
+          71,
+          101
+        ],
+        "training_rows": 8,
+        "transfer_examples": 0,
+        "aggregates": {
+          "VALID": {
+            "values": [],
+            "mean": null,
+            "population_std": null,
+            "n_per_seed": null
+          },
+          "HOLDOUT": {
+            "values": [],
+            "mean": null,
+            "population_std": null,
+            "n_per_seed": null
+          },
+          "OOD": {
+            "values": [],
+            "mean": null,
+            "population_std": null,
+            "n_per_seed": null
+          }
+        },
+        "probe_statuses": [
+          "CANDIDATE_FOUND_NOT_GENERALIZATION_PROOF",
+          "CANDIDATE_FOUND_NOT_GENERALIZATION_PROOF",
+          "CANDIDATE_FOUND_NOT_GENERALIZATION_PROOF",
+          "CANDIDATE_FOUND_NOT_GENERALIZATION_PROOF",
+          "CANDIDATE_FOUND_NOT_GENERALIZATION_PROOF"
+        ],
+        "promotion_statuses": [
+          "CANDIDATE_PENDING_INDEPENDENT_ACCEPTANCE",
+          "CANDIDATE_PENDING_INDEPENDENT_ACCEPTANCE",
+          "CANDIDATE_PENDING_INDEPENDENT_ACCEPTANCE",
+          "CANDIDATE_PENDING_INDEPENDENT_ACCEPTANCE",
+          "CANDIDATE_PENDING_INDEPENDENT_ACCEPTANCE"
+        ],
+        "normalized_exact_input_overlap": {
+          "status": "PASS_BOUNDED_NO_CROSS_PARTITION_EXACT_DUPLICATES",
+          "cross_partition_exact_duplicates": [],
+          "near_duplicates": [
+            {
+              "row_a": "row_005",
+              "split_a": "TRAIN",
+              "row_b": "row_009",
+              "split_b": "VALID",
+              "token_jaccard": 0.8,
+              "same_target": true
+            }
+          ]
+        },
+        "source_off": "PASS_BOUNDED; five child workers loaded capsule/runtime bundle without dataset; requests contain id,text,threshold only; labels joined after response.",
+        "open_items": [
+          "P10 : acceptation native Windows, caméra/capteurs physiques, providers Internet réels, NTFS/ACL et power-loss restent NOT_RUN."
+        ],
+        "timestamp_unix": 1791843648.525319,
+        "pre_run_guard_incidents": [
+          {
+            "id": "O93-ENV020",
+            "exit_code": 1,
+            "model_test_started": false,
+            "resolution": "dedicated path-resolving sync script used"
+          }
+        ],
+        "static_script_review": {
+          "status": "PASS_BOUNDED",
+          "runner_compile": "PASS",
+          "source_off_worker_compile": "PASS",
+          "log": "Dmodel_AAM_O93/logs/P9_static_compile_attempt2.txt",
+          "exit_code": 0,
+          "experiment_run": "NOT_RUN",
+          "note": "Le protocole, les graines et les hashes seront figés dans un JSON avant tout entraînement."
+        },
+        "full_regression": {
+          "tests_total": 94,
+          "tests_passed": 94,
+          "tests_failed": 0,
+          "exit_code": 0,
+          "log": "Dmodel_AAM_O93/logs/P0_P9_full_regression_v2.txt",
+          "log_sha256": "06f4290590d247f1b4ad9b216b8b94034e498d00f5758ad29823876aa31b880c",
+          "summary_json": "Dmodel_AAM_O93/logs/P0_P9_full_regression_v2.json"
+        },
+        "transfer_pooled": {
+          "correct": 38,
+          "n": 48,
+          "accuracy": 0.7916666666666666,
+          "coverage_count": 47,
+          "coverage": 0.9791666666666666,
+          "high_confidence_errors_ge_0_9": 9,
+          "per_seed_accuracy": [
+            0.9375,
+            0.875,
+            0.5625
+          ],
+          "mean": 0.7916666666666666,
+          "population_std": 0.1640418307085794
+        },
+        "source_off_all_seeds": "PASS_BOUNDED",
+        "exact_normalized_input_overlap": "no exact normalized duplicates across TRAIN/VALID/HOLDOUT/OOD; one near-duplicate TRAIN/VALID (Jaccard 0.80) remains disclosed",
+        "preregistration_status": "FROZEN_BEFORE_TRAINING",
+        "protocol_path": "Dmodel_AAM_O93/protocols/P9_preregistered_capacity_protocol_v2.json",
+        "protocol_manifest": "Dmodel_AAM_O93/protocols/P9_preregistration_manifest_v2.json",
+        "preregistration_report": "Dmodel_AAM_O93/logs/P9_preregistration_creation_report.json",
+        "dataset_sha256": "d6c75b2b06f566ee9afbbb7a8f902c04e87a2bad09d25a0e13a63ecd92cf36a4",
+        "source_off_worker_sha256": "b6b3753feef78ecea57c7c30b97811499a859dfe2408938a9d1823685bd81354",
+        "seeds": [
+          13,
+          29,
+          47,
+          71,
+          101
+        ],
+        "metrics": {},
+        "training_run": "NOT_RUN_AT_REGISTRATION",
+        "promotion_status": "DO_NOT_PROMOTE_FROM_THIS_EXPERIMENT",
+        "preflight_before_run": {
+          "status": "PASS_BOUNDED",
+          "log": "Dmodel_AAM_O93/logs/preflight_P9_run_ready.json",
+          "exit_code": 0,
+          "training_started": false,
+          "timestamp_unix": 1791843743.9762328
+        },
+        "preregistration_validation": {
+          "status": "PASS_BOUNDED",
+          "checks_passed": 10,
+          "checks_failed": 0,
+          "exit_code": 0,
+          "report": "Dmodel_AAM_O93/logs/P9_preregistration_validation.json",
+          "report_sha256": "edefd9e688a4b2194e770efe5f156ee181124cbb7584d67dfe5290dc2c8b1dc5",
+          "training_started": false,
+          "timestamp_unix": 1791843770.7968118
+        },
+        "laboratory_tex_sha256_current": "42e0f3ffacb0f44f187bdb5bf94ff29a87e796e18b2d595c40ab9f1fe4852e4d",
+        "attempts": [
+          {
+            "protocol": "Dmodel_AAM_O93/protocols/P9_preregistered_capacity_protocol.json",
+            "protocol_sha256": "cad2f416f4718f58b65ac5b1dd927ff65954cfac3a1875ee8b3682dcd22ac193",
+            "status": "FAIL_REVIEW_REQUIRED",
+            "seeds_trained": 5,
+            "seeds_scored": 0,
+            "exit_code": 1,
+            "report": "Dmodel_AAM_O93/logs/P9_attempt01_failure_analysis.json",
+            "output_preserved": "Dmodel_AAM_O93/trained_artifacts/p9_capacity_eval_preregistered01",
+            "reason": "Harness attempted to read an ephemeral source-off worker after TemporaryDirectory exit; final event write also targeted closed stream."
+          },
+          {
+            "attempt": "P9-runner-patch-static-check",
+            "status": "PASS_BOUNDED",
+            "tests_passed": 2,
+            "tests_failed": 0,
+            "exit_code": 0,
+            "log": "Dmodel_AAM_O93/logs/P9_runner_patch_static_check.txt",
+            "training_run": "NOT_RUN"
+          },
+          {
+            "attempt": "P9-postrun-integrity-verifier-attempt01",
+            "status": "FAIL_REVIEW_REQUIRED",
+            "exit_code": 2,
+            "report": "Dmodel_AAM_O93/logs/P9_preregistered02_postrun_integrity.json",
+            "checks_passed": 12,
+            "checks_failed": 1,
+            "reason": "Vérificateur en tri lexical des noms seed_*, attendait l’ordre numérique préinscrit. Les cinq runs sont PASS_BOUNDED dans l’agrégat; aucun réentraînement."
+          },
+          {
+            "attempt": "P9-postrun-integrity-verifier-attempt02",
+            "status": "PASS_BOUNDED",
+            "exit_code": 0,
+            "report": "Dmodel_AAM_O93/logs/P9_preregistered02_postrun_integrity_retry.json",
+            "checks_passed": 14,
+            "checks_failed": 0,
+            "training_run": "NOT_RUN_READ_ONLY_VERIFIER",
+            "numeric_seed_order": [
+              13,
+              29,
+              47,
+              71,
+              101
+            ]
+          },
+          {
+            "id": "P9-V1-three-seed",
+            "status": "HISTORICAL_SUPERSEDED_BY_V2",
+            "seeds": [
+              93,
+              193,
+              293
+            ],
+            "transfer_examples": 16,
+            "transfer_accuracy": [
+              0.9375,
+              0.875,
+              0.5625
+            ],
+            "note": "Preserved exploratory run; not the final source-off protocol."
+          }
+        ],
+        "protocol_v2": {
+          "status": "FROZEN_BEFORE_TRAINING",
+          "protocol_path": "Dmodel_AAM_O93/protocols/P9_preregistered_capacity_protocol_v2.json",
+          "protocol_sha256": "fa32324b1ec74fdd2901c45552fdafe19ebc7db7be9d8b1e0f4a387455ef4c01",
+          "manifest_path": "Dmodel_AAM_O93/protocols/P9_preregistration_manifest_v2.json",
+          "manifest_sha256": "095d4c149085c5fd2c01f6f75cbb59accb5d1e29a91ea94515a258e723282b5d",
+          "runner_sha256": "c4d9476dc05d0bf5417ca37d938269d03484592275d873708e9a7233497d9cc6",
+          "source_off_worker_sha256": "b6b3753feef78ecea57c7c30b97811499a859dfe2408938a9d1823685bd81354",
+          "dataset_sha256": "d6c75b2b06f566ee9afbbb7a8f902c04e87a2bad09d25a0e13a63ecd92cf36a4",
+          "seeds": [
+            13,
+            29,
+            47,
+            71,
+            101
+          ],
+          "predecessor_v1_status": "FAIL_REVIEW_REQUIRED_NO_SOURCE_OFF_METRICS",
+          "predecessor_v1_preserved": true,
+          "training_started": false
+        },
+        "protocol_v2_validation": {
+          "status": "PASS_BOUNDED",
+          "checks_passed": 11,
+          "checks_failed": 0,
+          "exit_code": 0,
+          "report": "Dmodel_AAM_O93/logs/P9_protocol_v2_validation.json",
+          "report_sha256": "02d46838809d6639029588da3ad7da7df854f24ff0458f58e9fe6b410e938c3e",
+          "training_started": false,
+          "timestamp_unix": 1791843985.9816418
+        },
+        "lab_pdf_sha256_candidate": "c01db855c3ea2455ac53f53ab3d3f8a96ffce67302e88d4438408f4d85b0b7e2",
+        "preregistered_v2_final_audit": {
+          "result": "PASS_BOUNDED",
+          "checks_passed": 14,
+          "checks_failed": 0,
+          "report": "Dmodel_AAM_O93/logs/P9_preregistered02_postrun_integrity_retry.json",
+          "report_sha256": "32dc1499a5671cc12e39ebef58304949ffffe5a2501a54f761e5ecbf5e9b8d5f",
+          "aggregate_sha256": "5db994ec950f8cdd7a8adfa3b96d31fc0f3872ecb268043a514f25a4cf7f2042",
+          "final_report_sha256": "27b8736d66014b187dd1b68c42bbeaadb9874e265cc585139de85913f951a999",
+          "seeds": [
+            13,
+            29,
+            47,
+            71,
+            101
+          ],
+          "worker_isolation": "PASS_BOUNDED",
+          "competence_promotion": "DO_NOT_PROMOTE_FROM_THIS_EXPERIMENT"
+        },
+        "v2_evidence_tests": {
+          "tests_total": 11,
+          "tests_passed": 11,
+          "tests_failed": 0,
+          "exit_code": 0,
+          "log": "Dmodel_AAM_O93/logs/P9_v2_integrity_unittest.txt",
+          "log_sha256": "040c673869d46a7951d88bda78797a746a539395687f90c6080fe9aef717bec0"
+        },
+        "full_regression_v2": {
+          "tests_total": 94,
+          "tests_passed": 94,
+          "tests_failed": 0,
+          "exit_code": 0,
+          "log": "Dmodel_AAM_O93/logs/P0_P9_full_regression_v2.txt",
+          "log_sha256": "06f4290590d247f1b4ad9b216b8b94034e498d00f5758ad29823876aa31b880c",
+          "summary_json": "Dmodel_AAM_O93/logs/P0_P9_full_regression_v2.json"
+        },
+        "final_visual_review": {
+          "status": "PASS_BOUNDED",
+          "report": "Dmodel_AAM_O93/logs/P9_pdf_final_review.json",
+          "pages_pdfinfo": 39,
+          "pages_rendered": 39,
+          "pages_manually_inspected": [
+            1,
+            37,
+            38,
+            39
+          ],
+          "note": "All pages rendered; representative pages visually inspected. No all-pages manual inspection claim."
+        },
+        "transfer_pooled_status": "HISTORICAL_V1_EXPLORATORY_ONLY; NOT_PART_OF_V2_FINAL_ACCEPTANCE",
+        "transfer_pooled_note": "Les trois graines 93/193/293 restent documentées dans l’annexe comme exploration V1; elles ne sont pas combinées avec les cinq graines V2, dont le protocole et les métriques sont différents."
+      }
+    },
+    {
+      "id": "P10",
+      "name": "Acceptation Windows native et fonctionnalités globales",
+      "status": "BLOCKED_ENVIRONMENT",
+      "gate": [
+        "Windows 10/11 testée nativement",
+        "CPU-only, chemins unicode, droits, installation/désinstallation",
+        "providers Internet autorisés, vraies citations / dates / licences",
+        "tests ressources et reprise",
+        "les fonctions non exécutées restent explicitement ouvertes"
+      ],
+      "depends_on": [
+        "P0",
+        "P1",
+        "P6",
+        "P7",
+        "P8",
+        "P9"
+      ],
+      "checkpoint": "checkpoints/P10_portable_checkpoint.json",
+      "evidence": {
+        "portable_tests": {
+          "status": "PASS_BOUNDED",
+          "tests_total": 5,
+          "tests_passed": 5,
+          "tests_failed": 0,
+          "exit_code": 0,
+          "log": "logs/P10_portable_acceptance_tests.txt",
+          "verification": "logs/P10_test_log_verification.json"
+        },
+        "laboratory_pdf_review": {
+          "status": "PASS_BOUNDED",
+          "pdf_pages": 41,
+          "rendered_pages": 41,
+          "tex_sha256": "f321a9abb6de361b33b9a9d8489dfc0eeb7421988b4738bd6adb74f1fce549c5",
+          "pdf_sha256": "ac7341afae86835cf673cd57f61a82882f5d6bf9534408ee53f0b60a986ce56a",
+          "report": "logs/P10_laboratory_final_review.json"
+        },
+        "launchers": {
+          "bat": "run_AAM_O93.bat",
+          "powershell": "run_AAM_O93.ps1",
+          "status": "STATIC_CHECK_PASS_NATIVE_NOT_RUN"
+        },
+        "host_probe": "logs/P10_host_capability_probe.json",
+        "blocked_items": [
+          "native Windows 10/11 installation and execution",
+          "Windows Tk/Tcl startup/shutdown, install/uninstall and ACL/NTFS paths",
+          "real camera/audio device capture",
+          "configured Internet provider with citations, dates and licence checks",
+          "power-loss/forced-termination rollback on target OS"
+        ]
+      },
+      "blockers": [
+        "native Windows 10/11 installation and execution",
+        "Windows Tk/Tcl startup/shutdown, install/uninstall and ACL/NTFS paths",
+        "real camera/audio device capture",
+        "configured Internet provider with citations, dates and licence checks",
+        "power-loss/forced-termination rollback on target OS"
+      ],
+      "exit_criteria_not_met": [
+        "Native Windows test unavailable in this Linux host",
+        "No physical camera/audio nodes detected",
+        "No provider credentials configured; Internet provider test not run"
+      ]
+    }
+  ],
+  "last_execution": {
+    "phase": "P10-package-mirror-refresh",
+    "status": "PASS_BOUNDED_MAINTENANCE_ERRORS_RESOLVED",
+    "timestamp": 1791845501.704626,
+    "exit_code": 0,
+    "note": "Canonical README release report copied explicitly into Dmodel/Amodel/suivi; source path and copy-command incidents recorded and resolved."
+  },
+  "history": [
+    {
+      "phase": "P0",
+      "event": "STARTED",
+      "timestamp": 1791839554.4647698,
+      "note": "Préflight O93 effectué avant cette exécution; formalisme, laboratoire et registres d’erreurs consultés."
+    },
+    {
+      "phase": "P0",
+      "event": "COMPLETE",
+      "timestamp": 1791839684.1479032,
+      "note": "6/6 tests réussis, préflight et intégrité vérifiés."
+    },
+    {
+      "phase": "P0",
+      "event": "REOPENED",
+      "timestamp": 1791839709.1970265,
+      "note": "Assertion du test de préflight incorrecte; phase bloquée jusqu’au rejeu réussi."
+    },
+    {
+      "phase": "P0",
+      "event": "COMPLETE",
+      "timestamp": 1791839742.4275556,
+      "note": "6/6 tests réussis après correction de l’assertion de préflight; O93-E006 résolue."
+    },
+    {
+      "phase": "P1",
+      "event": "STARTED",
+      "timestamp": 1791839742.4275556,
+      "note": "P0 fermé avec preuve; démarrage de la gate observateur."
+    },
+    {
+      "phase": "P1",
+      "event": "EXECUTION_FAILED",
+      "timestamp": 1791839810.0513527,
+      "note": "SyntaxError dans observer.py; phase reste RUNNING."
+    },
+    {
+      "phase": "P1",
+      "event": "COMPLETE",
+      "timestamp": 1791839884.657157,
+      "note": "11/11 tests passés; caméra physique NOT_RUN explicitement; erreur de syntaxe résolue."
+    },
+    {
+      "phase": "P2",
+      "event": "STARTED",
+      "timestamp": 1791839884.657157,
+      "note": "P1 fermé avec preuves; début du générateur adaptatif de sondes."
+    },
+    {
+      "phase": "P2",
+      "event": "COMPLETE",
+      "timestamp": 1791840086.5483253,
+      "note": "8/8 tests; moteur de sondes adaptatif mesuré. Essai réel sur TRAIN resté UNRESOLVED_BUDGET; aucune compétence promue."
+    },
+    {
+      "phase": "P3",
+      "event": "STARTED",
+      "timestamp": 1791840086.5483253,
+      "note": "P2 fermé; phase des compétences primitives."
+    },
+    {
+      "phase": "P3",
+      "event": "EXECUTION_FAILED",
+      "timestamp": 1791840168.0844069,
+      "note": "create_probes renvoie des objets ProbeCandidate non sérialisés; phase reste RUNNING."
+    },
+    {
+      "phase": "P3",
+      "event": "COMPLETE",
+      "timestamp": 1791840198.4312084,
+      "note": "Tests compétences/composition 8/8; regression P0-P3 33/33; E008 résolue."
+    },
+    {
+      "phase": "P4",
+      "event": "STARTED",
+      "timestamp": 1791840198.4312084,
+      "note": "P3 fermé; P4 acquisition source-off commence."
+    },
+    {
+      "phase": "P2",
+      "event": "REOPENED_FOR_REGRESSION",
+      "timestamp": 1791840842.269273,
+      "note": "Réouverture après audit du score de sondes : comparaison par hash exact confondait variance textuelle et fausse séparation; changer la métrique nécessite de rejouer P2 puis toutes les gates dépendantes."
+    },
+    {
+      "phase": "P2",
+      "event": "COMPLETE",
+      "timestamp": 1791840998.9321575,
+      "note": "P2 reclosed only after typed-similarity code, 9 tests, TRAIN-only metrics experiment and dependent P0-P4 regression 40/40."
+    },
+    {
+      "phase": "P3",
+      "event": "COMPLETE",
+      "timestamp": 1791840998.9321575,
+      "note": "P3 reclosed after all dependent regressions passed following P2 metric change."
+    },
+    {
+      "phase": "P4",
+      "event": "COMPLETE",
+      "timestamp": 1791840998.9321575,
+      "note": "P4 reclosed after typed-metric acquisition run, capsule reload/source-off replay, validation/holdout/OOD and abstention; sample sizes remain tiny and competence is not promoted."
+    },
+    {
+      "phase": "P2",
+      "event": "REOPENED_FOR_ASSERTION_REGRESSION",
+      "timestamp": 1791841082.0773904,
+      "note": "Une assertion de test gardait la casse du message d’avertissement précédent. Test corrigé pour vérifier l’engagement sémantique sans dépendre de la casse; la gate est rejouée avant toute progression."
+    },
+    {
+      "phase": "P4",
+      "event": "REOPENED_FOR_REGRESSION",
+      "timestamp": 1791841112.596736,
+      "note": "O93 P5 preparation changed acquisition data parsing and deterministic input-group partitioning; dependent P4 source-off gate must be rerun before P5 can start."
+    },
+    {
+      "phase": "P2",
+      "event": "COMPLETE",
+      "timestamp": 1791841159.3191974,
+      "note": "P2: metric audit resolved; nine unit tests and TRAIN-only experiment pass; all dependent gates rerun."
+    },
+    {
+      "phase": "P3",
+      "event": "COMPLETE",
+      "timestamp": 1791841159.3191974,
+      "note": "P3 revalidated after probe metric change; contracts, composition and feedback tests all pass."
+    },
+    {
+      "phase": "P4",
+      "event": "COMPLETE",
+      "timestamp": 1791841159.3191974,
+      "note": "P4 revalidated after dataset reader/splitter change; source-off, validation/holdout/OOD and abstention recorded; the model remains a candidate pending independent acceptance."
+    },
+    {
+      "phase": "P2",
+      "event": "COMPLETE",
+      "timestamp": 1791841173.7266555,
+      "note": "ProbeFactory scoring changed from exact signature/fixed binary split to typed similarity and pairwise inter-vs-intra target ranking. P2 suite 9/9; TRAIN-only experiment finds text.word_frequency candidate (rank 0.994, separation 1.00, between dissimilarity 0.977 vs within 0.601); this is a probe candidate, not competence proof."
+    },
+    {
+      "phase": "P3",
+      "event": "COMPLETE",
+      "timestamp": 1791841173.7266562,
+      "note": "P3 revalidated after the shared probe-evaluation change; complete ordered regression P0-P4 passes 40/40."
+    },
+    {
+      "phase": "P4",
+      "event": "RUNNING",
+      "timestamp": 1791841173.7266567,
+      "note": "P4 will be rerun with the new pairwise-scored probe portfolio and fresh capsule; do not reuse prior P4 metrics as current evidence."
+    },
+    {
+      "phase": "P4",
+      "event": "COMPLETE",
+      "timestamp": 1791841284.3149667,
+      "note": "Official P4 experiment and source-off capsule revalidated; P0-P4 compile and regression passed 40/40 after dataset reader/split and runtime review. Tiny splits, candidate only, no generalized competence claim."
+    },
+    {
+      "phase": "P5",
+      "event": "RUNNING",
+      "timestamp": 1791841284.3149667,
+      "note": "Starting observation-first knowledge ingestion, optional lexical retrieval, and supervised acquisition from explicit labels. No presumed semantic retrieval."
+    },
+    {
+      "phase": "P5",
+      "event": "TEST_GATE_FAILED",
+      "timestamp": 1791841402.7861898,
+      "note": "Initial P5 suite exposed detector-coverage gap, single-class TRAIN fixture (engine correctly unresolved), and test cleanup order error. Phase remains RUNNING; no phase advancement."
+    },
+    {
+      "phase": "P5",
+      "event": "TEST_GATE_FAILED",
+      "timestamp": 1791841432.5771556,
+      "note": "Retest 2: 5/6 passed; only an exact-message assertion mismatched the valid runtime wording. Training fixture and injection flags now behave as intended; phase remains P5 RUNNING."
+    },
+    {
+      "phase": "P5",
+      "event": "UNIT_GATE_PASS",
+      "timestamp": 1791841465.4128528,
+      "note": "P5 unit tests pass 6/6 after documented fixes. P5 remains RUNNING until full P0-P5 dependency regression and documentation integrity checks pass."
+    },
+    {
+      "phase": "P5",
+      "event": "DEPENDENCY_REGRESSION_EXIT_UNCONFIRMED",
+      "timestamp": 1791841538.6020944,
+      "note": "The complete P0-P5 suite reports 46/46 assertions passing, but the outer command timed out after test completion text. P5 remains RUNNING until the harness exit code is confirmed."
+    },
+    {
+      "phase": "P5",
+      "event": "EXIT_DIAGNOSTIC_PASS",
+      "timestamp": 1791841604.0310605,
+      "note": "Runner reports 46/46, exit code 0 and only MainThread alive. Discovered and corrected drift between root and embedded docs; phase remains P5 RUNNING until full re-run reads synchronized documents."
+    },
+    {
+      "phase": "P5",
+      "event": "COMPLETE",
+      "timestamp": 1791841673.9432614,
+      "note": "P5 unit tests 6/6 and post-doc-sync P0-P5 regression 46/46 with confirmed exit code 0. RAG remains lexical BM25-like; supervised training only on explicit labels; candidate skill not generally certified."
+    },
+    {
+      "phase": "P6",
+      "event": "RUNNING",
+      "timestamp": 1791841673.9432614,
+      "note": "Implementing/validating background autonomy priority feedback, reasoning-memory ON/OFF, graceful checkpoint shutdown and duplicate-runtime exclusion."
+    },
+    {
+      "phase": "P6",
+      "event": "GUI_HANG_DIAGNOSED_AND_FIX_IN_PROGRESS",
+      "timestamp": 1791842125.2542078,
+      "note": "P6 autonomy unit suite passed 7/7. Xvfb minimal Tk passed, but application UI constructor blocked because _build_autonomy scheduled status work before __init__ also called _refresh_status, leading to a modal busy dialog. UI code now avoids duplicate initial status request; autonomy also executes a bounded local agenda action per pulse. P6 remains RUNNING pending revalidation."
+    },
+    {
+      "phase": "P6",
+      "event": "AUTONOMY_UNIT_GATE_PASS",
+      "timestamp": 1791842166.1799908,
+      "note": "Post-fix autonomy loop and action executor pass 7/7 tests with exit code 0. Tests cover empty agenda, safe local inventory, reasoning-memory ON/OFF, feedback priority, corrupt lock fail-closed, duplicate runtime ownership, checkpoint stop/restart, and idempotent start. GUI/Xvfb app smoke remains required; P6 stays RUNNING."
+    },
+    {
+      "phase": "P6",
+      "event": "UI_AUTOSTART_STOP_CHECKPOINT_PASS",
+      "timestamp": 1791842195.4645233,
+      "note": "Real O93Desktop Xvfb smoke code 0: 5 tabs, autonomy RUNNING, one pulse and local action, UI stop -> STOPPED, checkpoint present, lock absent, audit/reasoning integrity PASS. Root cause O93-E020 fixed; phase remains RUNNING pending complete P0-P6 regression."
+    },
+    {
+      "phase": "P6",
+      "event": "COMPLETE",
+      "timestamp": 1791842253.9921014,
+      "note": "7/7 P6 unit tests, real O93Desktop Xvfb UI smoke exit 0 (5 tabs, pulse/action, checkpoint, lock release, audit/reasoning integrity PASS), and P0-P6 regression 53/53 with exit 0. O93-E020 resolved. Windows-native acceptance remains P10, not implied by Xvfb."
+    },
+    {
+      "phase": "P7",
+      "event": "RUNNING",
+      "timestamp": 1791842253.9921014,
+      "note": "Begin integrated chat/media/generation/Observer UI gate after P6 closure; review formalism, lab, checklist and both error ledgers before tests."
+    },
+    {
+      "phase": "P7",
+      "event": "FIRST_INTEGRATED_TEST_FAIL_TEST_ASSERTION",
+      "timestamp": 1791842350.48639,
+      "note": "P7 integrated suite: 5/6 pass. Text generation from packaged LM, image/audio attachments, explicit NOT_DECODED video, safe no-fallback media-generation routing and invalid task contract work. One test failed on an exact wording mismatch in the expected non-semantic-RAG phrase; runtime output correctly says no semantic-neural ranking is claimed. O93-E021 opened; P7 stays RUNNING."
+    },
+    {
+      "phase": "P7",
+      "event": "TESTS_PASS_UI_GATE_OPEN",
+      "timestamp": 1791842421.7823985,
+      "note": "P7 integrated tests 6/6, exit code 0. E021 résolue; la phase reste RUNNING en attente du workflow UI de bout en bout et des vérifications de clôture."
+    },
+    {
+      "phase": "P7",
+      "event": "UI_WORKFLOW_PASS_BOUNDED",
+      "timestamp": 1791842470.001286,
+      "note": "Smoke test de bout en bout sous Tk/Xvfb terminé code 0; chat + image, onglet Observer, 2 pulses autonomie, stop/checkpoint/locks/journaux vérifiés."
+    },
+    {
+      "phase": "P7",
+      "event": "UI_FEEDBACK_GAP_OPENED",
+      "timestamp": 1791842515.4997485,
+      "note": "A real interface gap was found by source audit: runtime has rate_task and autonomy uses feedback, but chat UI offered no rating control. O93-E022 opened; P7 cannot close until GUI feedback persistence/agenda-priority is verified."
+    },
+    {
+      "phase": "P7",
+      "event": "UI_WORKFLOW_AND_FEEDBACK_PASS_BOUNDED",
+      "timestamp": 1791842548.4557242,
+      "note": "L’interface Tk/Xvfb expose maintenant le contrôle de feedback lié au task_id. Le feedback insatisfait est persisté, donne reward=-1 et repriorise le diagnostic sans remplacer les preuves. O93-E022 résolue; régression dépendante P0-P7 à exécuter avant fermeture."
+    },
+    {
+      "phase": "P7",
+      "event": "COMPLETE",
+      "timestamp": 1791842603.9033895,
+      "note": "6/6 tests intégrés; UI Tk/Xvfb chat-image + Observer + feedback négatif persisté + agenda diagnostique + stop/checkpoint/intégrité passés; régression P0-P7 59/59 avec exit code 0. Limites Windows natif, caméra réelle et génération médias laissées NOT_RUN."
+    },
+    {
+      "phase": "P8",
+      "event": "BLOCKED_PREFLIGHT_NO_MODEL_RUN",
+      "timestamp": 1791842645.7586486,
+      "note": "Aucune commande ni test P8 n’a été exécuté: le préflight a correctement bloqué une corruption de copie des checklists; restauration depuis la source canonique, incident O93-ENV009 enregistré et résolu."
+    },
+    {
+      "phase": "P8",
+      "event": "STARTED",
+      "timestamp": 1791842695.6897585,
+      "note": "P7 checkpoint and complete status verified; preflight PASS_BOUNDED. Security/resilience tests begin. No P8 result claimed yet."
+    },
+    {
+      "phase": "P7",
+      "event": "COMPLETE_RECONCILED",
+      "timestamp": 1791842721.3880556,
+      "note": "Reconciled P7 checklist and O93 error ledger after the actual Tk/Xvfb feedback workflow. E021 and E022 resolved with evidence; historical failed logs preserved. P0-P7 regression 59/59 exit 0."
+    },
+    {
+      "phase": "P8",
+      "event": "TEST_FAIL_QUALITY_GATE",
+      "timestamp": 1791842766.052285,
+      "note": "10/11 tests sécurité réussis. Le chargeur de datasets suivait un lien symbolique car il vérifiait is_symlink après resolve. E023 ouvert; correction avant rejeu."
+    },
+    {
+      "phase": "P8",
+      "event": "PATCH_SCRIPT_FAILED_NO_TEST_RUN",
+      "timestamp": 1791842801.15392,
+      "note": "Patch partiel: data.py modifié, test_p8_security.py inchangé; script s’est arrêté sur target text not found. Enregistrement ENV011; P8 demeure RUNNING et aucun résultat de test n’est attribué au correctif."
+    },
+    {
+      "phase": "P8",
+      "event": "BLOCKED_SECURITY_FINDINGS",
+      "timestamp": 1791842803.5632691,
+      "note": "Initial P8 7/9 exposed missing secret redaction and missing JSON backup. Patch implemented; reopened P0-P7 because core persistence code changed. P8 is not accepted until rerun."
+    },
+    {
+      "phase": "P0",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842825.7448719,
+      "passed": 6,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P0_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P1",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842841.271942,
+      "passed": 11,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P1_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P2",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842852.008175,
+      "passed": 9,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P2_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P3",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842857.4331703,
+      "passed": 8,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P3_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P4",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842866.43333,
+      "passed": 6,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P4_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P5",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842878.5219223,
+      "passed": 6,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P5_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P6",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842884.1877024,
+      "passed": 7,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P6_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P7",
+      "event": "REVALIDATION_COMPLETE",
+      "timestamp": 1791842888.4872053,
+      "passed": 6,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/P7_revalidation_security_patch.txt",
+      "reason": "Shared persistence/security code changed; dependent phase replay required."
+    },
+    {
+      "phase": "P0-P7",
+      "event": "DEPENDENCY_REGRESSION_PASS_AFTER_P8_HARDENING",
+      "timestamp": 1791842941.3692927,
+      "tests_passed": 59,
+      "tests_failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P0_P7_full_revalidation_security_patch.txt",
+      "ui_e2e_log": "Dmodel_AAM_O93/logs/P7_ui_workflow_security_patch.txt",
+      "note": "Revalidation complete; P8 security tests can now be rerun."
+    },
+    {
+      "phase": "P8",
+      "event": "TEST_HARNESS_INVOCATION_ERROR",
+      "timestamp": 1791842942.870892,
+      "passed": 0,
+      "failed": 1,
+      "exit_code": 1,
+      "log": "Dmodel_AAM_O93/logs/P8_symlink_regression_attempt2.txt",
+      "reason": "Mauvais nom de classe unittest; aucun résultat sur le code testé."
+    },
+    {
+      "phase": "P8",
+      "event": "MIRROR_SYNC_RECOVERY",
+      "timestamp": 1791842968.8165777,
+      "passed": 0,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/mirror_sync_recovery.json",
+      "reason": "Fixed same-file copy handling; no model test was executed."
+    },
+    {
+      "phase": "P8",
+      "event": "SYMLINK_REGRESSION_PASS",
+      "timestamp": 1791842992.243451,
+      "passed": 1,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_symlink_regression_attempt3.txt",
+      "reason": "Validation ciblée du correctif DatasetLoader; gate P8 encore en cours."
+    },
+    {
+      "phase": "P8",
+      "event": "FOCUSED_SECURITY_TESTS_PASS",
+      "timestamp": 1791843009.331075,
+      "tests_passed": 15,
+      "tests_failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_security_retest1.txt",
+      "note": "Resolved the historic dataset symlink issue (E023), and renumbered new security findings E025/E026 to avoid reusing E023. P8 still awaits full regression/report."
+    },
+    {
+      "phase": "P8",
+      "event": "SECURITY_SUITE_PASS_DEPENDENT_REVALIDATION_PENDING",
+      "timestamp": 1791843019.5669193,
+      "passed": 15,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_security_attempt2.txt",
+      "reason": "Les contrôles directs passent; les phases antérieures touchées doivent être rejouées avant clôture P8."
+    },
+    {
+      "phase": "P8",
+      "event": "FOCUSED_SECURITY_FINAL_PASS",
+      "timestamp": 1791843021.5783138,
+      "tests_passed": 15,
+      "tests_failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_security_final.txt",
+      "sha256": "b97e0c2d61c1ac506c7ff22c1b887827fd6562bfe0ce3f4f242e7b7a7c67af47",
+      "note": "Final repeat after ledger normalization; all adversarial/security tests passed."
+    },
+    {
+      "phase": "P8",
+      "event": "REPORT_RECONCILIATION",
+      "timestamp": 1791843046.544581,
+      "passed": 0,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_security_attempt2.txt",
+      "reason": "Correction du parser de noms; résultat de test inchangé."
+    },
+    {
+      "phase": "P8",
+      "event": "DEPENDENT_REGRESSION_PREFLIGHT_IMPORT_ERROR",
+      "timestamp": 1791843067.1076574,
+      "passed": 0,
+      "failed": 0,
+      "exit_code": 1,
+      "log": "Dmodel_AAM_O93/logs/preflight_P0_P7_regression_after_P8.json",
+      "reason": "Erreur de namespace dans la commande; aucun test n’a commencé."
+    },
+    {
+      "phase": "P8",
+      "event": "DEPENDENT_P0_P7_REGRESSION_PASS",
+      "timestamp": 1791843111.017733,
+      "passed": 59,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P0_P7_regression_after_P8_attempt1.txt",
+      "reason": "Revalidation des phases affectées après correction du DatasetLoader et de la sauvegarde .bak."
+    },
+    {
+      "phase": "P8",
+      "event": "GATE_EXIT_CRITERIA_MET_AWAITING_CLOSURE_RECORD",
+      "timestamp": 1791843152.2457945,
+      "passed": 75,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_gate_exit_report.json",
+      "reason": "Les résultats P8 sont positifs dans le périmètre exécuté; fermeture formelle à écrire après vérification des statuts des registres."
+    },
+    {
+      "phase": "P8",
+      "event": "EVIDENCE_CONSOLIDATED_CLOSURE_REVIEW_READY",
+      "timestamp": 1791843228.9532251,
+      "passed": 74,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_gate_exit_report.json",
+      "reason": "Raw test logs and UI report verified; unrelated architecture/platform open items were separated explicitly."
+    },
+    {
+      "phase": "P8",
+      "event": "FINAL_GATE_PREPARED",
+      "timestamp": 1791843251.0234776,
+      "passed": 74,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P8_gate_exit_report.json",
+      "reason": "P8-tested-scope exit criteria met; open architecture/scale/Windows items remain in named separate gates."
+    },
+    {
+      "phase": "P8",
+      "event": "COMPLETE_PASS_BOUNDED",
+      "timestamp": 1791843271.8803682,
+      "passed": 74,
+      "failed": 0,
+      "exit_code": 0,
+      "checkpoint": "Dmodel_AAM_O93/checkpoints/P8_complete.json",
+      "reason": "15 tests P8 + 59 tests dépendants P0-P7 + UI E2E indépendant; erreurs P8 spécifiques résolues."
+    },
+    {
+      "phase": "P8",
+      "event": "GATE_CLOSED_PASS_BOUNDED",
+      "timestamp_unix": 1791843276.0527313,
+      "focused_tests_passed": 15,
+      "regression_tests_passed": 74,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P0_P8_full_regression.txt",
+      "note": "P8 closed only after focused adversarial tests, full P0-P8 regression, final report reconciliation and visual review."
+    },
+    {
+      "phase": "P9",
+      "event": "PHASE_OPENED_AFTER_P8_EXIT",
+      "timestamp_unix": 1791843276.052733,
+      "result": "RUNNING",
+      "formalism_sha256": "d4bfd17d9352b23b3febc8a9d338df30ec3be2a527b63f5f4df76a37b3c2654c",
+      "laboratory_sha256": "1637b563aff972a6b26614648fbd6a973b255fa82b5e8bc76a3a19dd652589c3",
+      "note": "P9 capability evaluation begins with pre-registration before any P9 model-selection experiment."
+    },
+    {
+      "phase": "P9",
+      "event": "PREREGISTRATION_PREFLIGHT_PASS",
+      "timestamp": 1791843393.6487536,
+      "passed": 0,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/preflight_P9_preregistration.json",
+      "reason": "P8 complete et registres consultés; préparation de la préinscription avant les mesures."
+    },
+    {
+      "phase": "P9",
+      "event": "MIRROR_SYNC_COMMAND_FAILED_BEFORE_EXPERIMENT",
+      "timestamp_unix": 1791843409.7875433,
+      "exit_code": 1,
+      "error_id": "O93-ENV017",
+      "note": "Wrong cwd used package-prefixed relative paths; no model/test execution occurred. Resolved from release root."
+    },
+    {
+      "phase": "P9",
+      "event": "PREFLIGHT_WRAPPER_FAILED_AFTER_PREFLIGHT_RETURN",
+      "timestamp_unix": 1791843426.2832499,
+      "error_id": "O93-ENV018",
+      "exit_code": 1,
+      "log": "Dmodel_AAM_O93/logs/P9_preflight_wrapper_attempt2.txt",
+      "note": "json display import missing; no experiment started. Corrected wrapper before P9 run."
+    },
+    {
+      "phase": "P9",
+      "event": "MIRROR_SYNC_SAMEFILE_ERROR",
+      "timestamp_unix": 1791843445.3672042,
+      "error_id": "O93-ENV019",
+      "exit_code": 1,
+      "note": "Sync stopped before model training. Recovery uses idempotent copy, no-op for identical path."
+    },
+    {
+      "phase": "P9",
+      "event": "PREREGISTERED_EXPERIMENT_COMPLETE_EVIDENCE_TESTS_PASS",
+      "timestamp_unix": 1791843532.0424101,
+      "experiment_report": "Dmodel_AAM_O93/logs/P9_capacity_experiment.json",
+      "report_sha256": "c3dd3f730aaf8baf51d3cf49e4a19adc7d2bc1dd183f094206e22196167c285b",
+      "evidence_tests_passed": 9,
+      "evidence_tests_failed": 0,
+      "transfer_seed_accuracy": [
+        0.9375,
+        0.875,
+        0.5625
+      ],
+      "note": "Three frozen seeds run; transfer labels evaluated only after inference; no competence promoted."
+    },
+    {
+      "phase": "P9",
+      "event": "MIRROR_SYNC_SELF_COPY_REPEATED",
+      "timestamp_unix": 1791843550.1488047,
+      "error_id": "O93-ENV020",
+      "exit_code": 1,
+      "note": "Maintenance sync wrapper failed on a source=destination path; no model test started. Corrected with a dedicated idempotent sync script."
+    },
+    {
+      "phase": "P9",
+      "event": "STATIC_REVIEW_PASS",
+      "timestamp": 1791843638.808512,
+      "note": "Les scripts p9_capacity_evaluation.py et p9_source_off_predict.py se compilent. Source-off renforcé pour éviter que le worker voie le dossier dataset. Aucun entraînement de capacité exécuté dans cette étape."
+    },
+    {
+      "phase": "P9",
+      "event": "FULL_REGRESSION_P0_P9_PASS",
+      "timestamp_unix": 1791843648.525449,
+      "tests_total": 83,
+      "tests_passed": 83,
+      "tests_failed": 0,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P0_P9_full_regression.txt",
+      "log_sha256": "f5b9bb8bba3c13b7e28ba45b1eb64b4dd04fe0d679214f8e5f918f26d0509983",
+      "experiment_report_sha256": "c3dd3f730aaf8baf51d3cf49e4a19adc7d2bc1dd183f094206e22196167c285b",
+      "note": "Replayed all phases P0-P9 in order; 74 existing tests plus nine P9 artifact/evidence checks. No test failures."
+    },
+    {
+      "phase": "P9",
+      "event": "PREREGISTERED",
+      "timestamp": 1791843720.7180543,
+      "note": "P9-PROTOCOL-01 gelé avant training; 5 seeds [13,29,47,71,101], dataset hash d6c75..., source-off worker isolé sans dataset, aucun fit lancé pendant l’inscription."
+    },
+    {
+      "phase": "P9",
+      "event": "RUN_READY_PREFLIGHT_PASS",
+      "timestamp": 1791843743.9762328,
+      "note": "Le préflight final a confirmé P8 COMPLETE/P9 RUNNING et consulté toutes les sources requises. Aucune expérience d’apprentissage lancée à ce stade."
+    },
+    {
+      "phase": "P9",
+      "event": "PREREGISTRATION_VALIDATED",
+      "timestamp": 1791843770.7968118,
+      "note": "10/10 contrôles pré-entraînement réussis. Les hashes correspondent au protocole gelé; la sortie et l’agrégat étaient absents; aucun fit n’a commencé."
+    },
+    {
+      "phase": "P9",
+      "event": "DOCUMENT_MIRROR_SYNC_BLOCKED_PDF_MISSING",
+      "timestamp": 1791843865.9529216,
+      "error_id": "O93-ENV025",
+      "exit_code": 1,
+      "note": "La synchronisation s’est arrêtée avant copie parce que laboratoire_O93.pdf n’existait pas après l’échec de compilation. Aucun test modèle n’a démarré; corriger le TeX, compiler/rendre puis synchroniser."
+    },
+    {
+      "phase": "P9",
+      "event": "CAPACITY_ATTEMPT_FAILED_HARNESS",
+      "timestamp": 1791843883.141775,
+      "note": "Tentative P9 V1 : 5 capsules entraînées, mais toutes les graines enregistrées ERROR par défaut de durée de vie du bundle/report et le flux événement final fermé. Pas de métrique utilisable; aucune promotion. Préparer une révision protocolaire sans réutiliser le répertoire de sortie."
+    },
+    {
+      "phase": "P9",
+      "event": "MANUAL_MIRROR_COPY_SAMEFILE",
+      "timestamp": 1791843883.930161,
+      "error_id": "O93-ENV026",
+      "exit_code": 1,
+      "note": "Copie de maintenance interrompue sur destination identique; aucun test ou entraînement modèle exécuté; copies idempotentes requises."
+    },
+    {
+      "phase": "P9",
+      "event": "LAB_TEX_INVALID_CONTROL_REPAIR",
+      "timestamp": 1791843883.930161,
+      "error_id": "O93-ENV027",
+      "exit_code": 1,
+      "note": "L’ancienne queue de protocole P9 avec caractère DEL a été supprimée et remplacée par une notice historique NOT_EXECUTED; compile/rendu en attente."
+    },
+    {
+      "phase": "P9",
+      "event": "MIRROR_WRAPPER_REDUNDANT_COPY_TYPEERROR",
+      "timestamp": 1791843896.5420642,
+      "error_id": "O93-ENV028",
+      "exit_code": 1,
+      "note": "Wrapper a échoué sur une copie redondante après les copies principales; aucune exécution modèle. La routine idempotente principale a terminé."
+    },
+    {
+      "phase": "P9",
+      "event": "HARNESS_PATCH_STATIC_CHECK_PASS",
+      "timestamp": 1791843931.0902634,
+      "note": "Correction du défaut de durée de vie du worker et du journal final; deux scripts compilent, code statique 0. Les sorties V1 restent préservées, le protocole V1 n’est plus utilisé."
+    },
+    {
+      "phase": "P9",
+      "event": "PREREGISTERED_V2_SUPERSEDING_V1",
+      "timestamp": 1791843962.6466866,
+      "note": "Version 2 du protocole gelée avant run, avec hash du runner corrigé et chemins neufs. V1 conservé comme tentative échouée sans métriques. Seeds/dataset/metrics inchangés."
+    },
+    {
+      "phase": "P9",
+      "event": "PROTOCOL_V2_VALIDATED",
+      "timestamp": 1791843985.9816418,
+      "note": "11/11 contrôles pré-entraînement réussis. La version V1 reste conservée comme échec de harnais sans scores; les 5 graines sont inchangées."
+    },
+    {
+      "phase": "P9",
+      "event": "LAB_TEX_BUILD_FAILED_OLD_TAIL_SECTION",
+      "timestamp": 1791844041.0314188,
+      "error_id": "O93-ENV029",
+      "exit_code": 12,
+      "note": "Compilation stoppée avant génération de PDF; une ancienne section cinq graines était après le chapitre consolidé. Sections restructurées; compilation/rendu à reprendre."
+    },
+    {
+      "phase": "P9",
+      "event": "LAB_TEX_COMPILED_33PAGES_LAYOUT_REVIEW_PENDING",
+      "timestamp": 1791844074.3423312,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P9_laboratoire_compile_final_attempt2.txt",
+      "note": "LaTeX compilé en 33 pages; contrôle visuel/retouches layout en cours. Quelques overfull hbox historiques identifiés, aucune erreur fatale."
+    },
+    {
+      "phase": "P9",
+      "event": "LAB_SECTION_ORDER_RECONCILED_AND_LAYOUT_REFINED",
+      "timestamp": 1791844109.0576742,
+      "exit_code": 0,
+      "note": "Le rapport conserve une tentative stricte à cinq graines avec évaluation en échec sans métriques, puis le run mesuré à trois graines avec inférence API input-only explicitement non isolée. Les sections obsolètes après le chapitre de clôture ont été retirées; les identifiants longs/commandes ont été séparés pour la mise en page."
+    },
+    {
+      "phase": "P9",
+      "event": "LAB_COMPILE_PASS_33PAGES_VISUAL_REVIEW_PENDING",
+      "timestamp": 1791844133.373085,
+      "exit_code": 0,
+      "log": "Dmodel_AAM_O93/logs/P9_laboratoire_compile_final_attempt3.txt",
+      "log_sha256": "e6b48bf12c049614e065874dd32445bd4eb58e4e24fdb5e9bfa249958befd21c",
+      "pdf_sha256": "12aacf197c81adcd000819b7ab78836007f18935cbd37ee0efad1a61e439f924",
+      "note": "Le PDF se compile en 33 pages. Plusieurs overfull hbox restent à examiner par rendu; aucune clôture P9 avant inspection visuelle."
+    },
+    {
+      "phase": "P9",
+      "event": "POSTRUN_INTEGRITY_VALIDATOR_FALSE_NEGATIVE",
+      "timestamp": 1791844152.5153718,
+      "error_id": "O93-ENV030",
+      "exit_code": 2,
+      "note": "12/13 checks passed; only order comparison failed (paths sort lexical); all five seed records individually PASS_BOUNDED. Next run read-only validator with numeric ordering."
+    },
+    {
+      "phase": "P9",
+      "event": "POSTRUN_INTEGRITY_VERIFIER_PASS",
+      "timestamp": 1791844237.007033,
+      "error_id": "O93-ENV030",
+      "exit_code": 0,
+      "tests_passed": 14,
+      "tests_failed": 0,
+      "note": "Numeric seed ordering fixed; five runs, worker isolation, metrics, event closure, zero error stream, leakage warning and no-promotion policy all verified."
+    },
+    {
+      "phase": "P9",
+      "event": "V2_READ_ONLY_REGRESSION_TESTS_ADDED_BEFORE_EXECUTION",
+      "timestamp": 1791844259.5680337,
+      "note": "Ajout de tests versionnés couvrant préflight, hashes du protocole, 5 graines numériques, isolation source-off, capsules, métriques, abstention, sondes non promues, fuite, événements et rapport final. Aucun test lancé dans cette modification."
+    },
+    {
+      "phase": "P9",
+      "event": "V2_POSTRUN_EVIDENCE_TESTS_PASS",
+      "timestamp": 1791844287.1905992,
+      "error_id": "O93-ENV030",
+      "exit_code": 0,
+      "tests_passed": 11,
+      "tests_failed": 0,
+      "note": "Protocol/hash, numeric seed order, source-off, capsule, metrics, abstention, probe warning, leakage, event closure, and no-promotion checks pass."
+    },
+    {
+      "phase": "P0-P9",
+      "event": "FULL_REGRESSION_V2_PASS",
+      "timestamp": 1791844330.6204002,
+      "exit_code": 0,
+      "tests_passed": 94,
+      "tests_failed": 0,
+      "log": "Dmodel_AAM_O93/logs/P0_P9_full_regression_v2.txt",
+      "note": "Regression includes legacy P9 evidence plus new read-only tests for current preregistered V2; the final report is revalidated through data-level checks."
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_LAB_COMPILE_FAILED_RAW_MATH_ARROW",
+      "timestamp": 1791844350.8318796,
+      "error_id": "O93-ENV031",
+      "exit_code": 12,
+      "log": "Dmodel_AAM_O93/logs/P9_laboratoire_compile_v2.txt",
+      "note": "Documentation build failed; no current PDF produced. Model artifacts/results unchanged."
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_LAB_RAW_ARROW_CORRECTION_PREPARED",
+      "timestamp": 1791844369.8036883,
+      "error_id": "O93-ENV031",
+      "note": "Source-only fix; compile has not yet been rerun."
+    },
+    {
+      "phase": "P9",
+      "event": "DOCUMENT_SYNC_BLOCKED_BEFORE_PDF",
+      "timestamp": 1791844390.6081476,
+      "error_id": "O93-ENV032",
+      "exit_code": 1,
+      "note": "No model or training artifacts changed; sync order corrected to build/review PDF before sync."
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_LAB_COMPILE_ATTEMPT03_FAILED",
+      "timestamp": 1791844416.1861012,
+      "error_id": "O93-ENV031",
+      "exit_code": 12,
+      "log": "Dmodel_AAM_O93/logs/P9_laboratoire_compile_v3.txt",
+      "note": "Second LaTeX build failure from one raw arrow in Pipeline exact line; preserve log and rerun after direct replacement."
+    },
+    {
+      "phase": "P9",
+      "event": "P9_V2_RESULTS_MADE_CANONICAL_IN_CHECKLIST",
+      "timestamp": 1791844455.3279572,
+      "tests_passed": 94,
+      "tests_failed": 0,
+      "note": "V2 five-seed source-off protocol is the primary P9 result; 3-seed transfer run is retained as historical exploratory attempt."
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_DOCUMENT_PREFLIGHT_PASS",
+      "timestamp": 1791844472.3093748,
+      "status": "PASS_BOUNDED",
+      "log": "Dmodel_AAM_O93/logs/P9_final_pdf_preflight.json",
+      "note": "Préflight relit formalisme O93, laboratoire, checklist et registres d’erreurs O92/O93 avant recompilation et inspection du PDF."
+    },
+    {
+      "phase": "P9",
+      "event": "LABORATORY_TEX_COMPILE_PASS_RENDER_PENDING",
+      "timestamp": 1791844499.3408723,
+      "status": "COMPILE_PASS_LAYOUT_REVIEW_OPEN",
+      "exit_code": 0,
+      "pages": 39,
+      "log": "Dmodel_AAM_O93/logs/P9_laboratoire_compile_final_attempt4.txt",
+      "error_id": "O93-ENV033"
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_PDF_LAYOUT_ISSUE_DETECTED_AND_FIX_PREPARED",
+      "timestamp": 1791844515.229312,
+      "error_id": "O93-ENV033",
+      "note": "The final report compiles but the inline combined-regression command visually overflows; converting to multi-line listing. The prior PDF is not accepted as final."
+    },
+    {
+      "phase": "P9",
+      "event": "MAINTENANCE_COPY_SAME_PATH_CAUGHT_RESOLVED",
+      "timestamp": 1791844516.4529822,
+      "error_id": "O93-ENV034",
+      "status": "RESOLVED_AFTER_RETRY",
+      "note": "Une copie same-path a été arrêtée; les documents canoniques restent intacts."
+    },
+    {
+      "phase": "P9",
+      "event": "PDF_RENDER_ATTEMPT1_FAILED",
+      "timestamp": 1791844539.8462179,
+      "error_id": "O93-ENV035",
+      "status": "OPEN_RETRY_REQUIRED",
+      "note": "Retry with hash-verified copy and independent PDF checks."
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_REPORT_LAYOUT_CORRECTION_PREPARED",
+      "timestamp": 1791844596.615438,
+      "error_id": "O93-ENV033",
+      "note": "Long command strings replaced with breakable listings; compile and render needed before resolve."
+    },
+    {
+      "phase": "P9",
+      "event": "FINAL_COMMAND_LISTING_FIX_PREPARED",
+      "timestamp": 1791844655.1891778,
+      "error_id": "O93-ENV033",
+      "note": "Shell command continuation characters corrected for copy/paste; PDF recompile pending."
+    },
+    {
+      "phase": "P9",
+      "event": "P9_CLOSED_PASS_BOUNDED_AFTER_FINAL_PDF_REVIEW",
+      "timestamp": 1791844767.4259017,
+      "status": "COMPLETE",
+      "evidence": [
+        "logs/P9_pdf_final_review.json",
+        "logs/P0_P9_full_regression_v2.txt",
+        "logs/P9_preregistered02_postrun_integrity_retry.json",
+        "logs/P9_v2_integrity_unittest.txt"
+      ],
+      "note": "Final lab source compiled successfully; 39-page PDF and all 39 page images verified; pages 1,37,38,39 inspected; V2 remains miniature-task evidence and skill is not promoted."
+    },
+    {
+      "phase": "P10",
+      "event": "P10_STARTED_AFTER_P9_GATE",
+      "timestamp": 1791844786.8523943,
+      "status": "RUNNING",
+      "evidence": [
+        "logs/P10_environment_probe_preflight.json",
+        "checkpoints/P9_complete.json"
+      ],
+      "note": "P9 complete and final PDF render reviewed; beginning environment-dependent acceptance."
+    },
+    {
+      "phase": "P10",
+      "event": "PORTABLE_ACCEPTANCE_TESTS_PASS",
+      "timestamp": 1791844941.4836047,
+      "status": "PASS_BOUNDED_PORTABLE_SUBSET",
+      "tests_passed": 5,
+      "tests_failed": 0,
+      "evidence": [
+        "logs/P10_host_capability_probe.json",
+        "logs/P10_portable_acceptance_tests.txt",
+        "logs/P10_test_log_verification.json"
+      ],
+      "note": "Does not satisfy native Windows or physical hardware gates."
+    },
+    {
+      "phase": "P10",
+      "event": "LAB_TEX_BUILD_FAILED_THEN_SOURCE_TYPO_FIXED",
+      "timestamp_unix": 1791845046.6675997,
+      "status": "OPEN_UNTIL_REBUILD_REVIEW",
+      "evidence": "Dmodel_AAM_O93/logs/P10_laboratory_compile.txt; O93-E029; O93-ENV037"
+    },
+    {
+      "phase": "P10",
+      "event": "SECOND_LATEX_LINEBREAK_FIX",
+      "timestamp": 1791845072.5456812,
+      "status": "REBUILD_PENDING",
+      "evidence": "O93-ENV038; logs/P10_laboratory_compile_retry.txt"
+    },
+    {
+      "phase": "P10",
+      "event": "PDF_REVIEW_FALSE_NEGATIVE_AND_ARTIFACT_LAYOUT_FIX",
+      "timestamp": 1791845152.2481813,
+      "status": "REBUILD_AND_REVIEW_PENDING",
+      "evidence": "O93-ENV039; logs/P10_laboratory_final_review.json"
+    },
+    {
+      "phase": "P10",
+      "event": "PORTABLE_SUBSET_AND_DOCUMENT_REVIEW_COMPLETED_NATIVE_ACCEPTANCE_BLOCKED",
+      "timestamp": 1791845242.2536395,
+      "status": "BLOCKED_ENVIRONMENT",
+      "evidence": [
+        "logs/P10_host_capability_probe.json",
+        "logs/P10_portable_acceptance_tests.txt",
+        "logs/P10_test_log_verification.json",
+        "logs/P10_laboratory_final_review.json"
+      ],
+      "note": "P0-P9 remain COMPLETE. P10 portable subset passed 5/5 and laboratory PDF 41/41 pages compiled/rendered; native Windows, physical device and configured provider gates remain open. No next phase was opened."
+    },
+    {
+      "phase": "P10",
+      "event": "EXACT_ARCHIVE_VALIDATOR_FAILED_TO_PERSIST_UI_DIAGNOSTIC",
+      "timestamp": 1791845414.5340593,
+      "status": "OPEN_DIAGNOSTIC_RETRY",
+      "evidence": "O93-ENV040; /mnt/data/O93_workspace/release/archive_validation_stdout.txt"
+    },
+    {
+      "phase": "P10",
+      "event": "EXACT_ARCHIVE_UI_SCRIPT_INVOCATION_DIAGNOSED",
+      "timestamp": 1791845438.7117343,
+      "status": "TEST_HARNESS_RETRY_AS_MODULE",
+      "evidence": "/mnt/data/O93_workspace/release/exact_archive_ui_smoke.txt; O93-ENV040"
+    },
+    {
+      "phase": "P10",
+      "event": "EXACT_ARCHIVE_UI_SMOKE_PASSED_AFTER_MODULE_INVOCATION_FIX",
+      "timestamp": 1791845467.4547207,
+      "status": "PASS_BOUNDED",
+      "evidence": [
+        "logs/P10_exact_archive_ui_attempt1.txt",
+        "logs/P10_exact_archive_ui_module_retry.txt",
+        "logs/P10_exact_archive_ui_module_retry.exit"
+      ]
+    },
+    {
+      "phase": "P10",
+      "event": "RELEASE_README_COPY_SOURCE_PATH_CORRECTED",
+      "timestamp": 1791845501.704626,
+      "status": "RESOLVED",
+      "evidence": "O93-ENV041; O93-ENV042; README_O93_RELEASE_FR.md"
+    }
+  ],
+  "reference_laboratory_sha256_current": "f321a9abb6de361b33b9a9d8489dfc0eeb7421988b4738bd6adb74f1fce549c5",
+  "reference_formalism_sha256_current": "d4bfd17d9352b23b3febc8a9d338df30ec3be2a527b63f5f4df76a37b3c2654c"
+}

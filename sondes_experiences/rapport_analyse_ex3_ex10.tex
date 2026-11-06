@@ -1,0 +1,658 @@
+% Rapport d'analyse critique EX3--EX10
+% Produit à partir de l'archive last_sources_3.zip et de ses archives imbriquées.
+% Les conclusions distinguent les résultats directement vérifiables, les rapports
+% récapitulatifs, les spécifications non exécutées et les éléments manquants.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.15cm,headheight=15pt]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs,tabularx,longtable,array,multirow}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{ragged2e}
+\usepackage{url}
+\usepackage{pifont}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  urlcolor=blue!45!black,
+  citecolor=blue!45!black,
+  pdftitle={Analyse critique des expériences EX3 à EX10},
+  pdfauthor={Analyse documentaire et expérimentale},
+  pdfsubject={Formalismes, protocoles, résultats et limites des sondes adaptatives}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{3em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=2pt,topsep=3pt}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Analyse EX3--EX10}
+\rhead{Dossier des sondes adaptatives}
+\cfoot{\thepage}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Loss}{\mathcal{L}}
+\newcommand{\MAE}{\operatorname{MAE}}
+\newcommand{\RMSE}{\operatorname{RMSE}}
+\newcommand{\LL}{\operatorname{LL}}
+\newcommand{\Ptot}{P_{\mathrm{total}}}
+\newcommand{\Ptrain}{P_{\mathrm{train}}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\fichier}[1]{\path{#1}}
+\newcommand{\important}[1]{\textbf{#1}}
+
+\title{\vspace{-1.3cm}\textbf{Rapport d'analyse critique des expériences EX3 à EX10}\\[4pt]
+\large Fondements théoriques, formalismes, protocoles, résultats et pistes de recherche}
+\author{Analyse technique et scientifique du dossier fourni}
+\date{3 novembre 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\begin{center}
+\fbox{\parbox{0.94\textwidth}{\textbf{Périmètre et prudence.} Le présent rapport analyse les documents, les tableaux de résultats, les audits et les archives imbriquées présents dans \fichier{last_sources_3.zip}. Il ne prétend pas avoir réexécuté les entraînements. Les conclusions sont donc une analyse documentaire et une vérification de cohérence des éléments livrés. L'absence d'un artefact est traitée comme une absence de preuve, jamais comme une preuve de performance nulle.}}
+\end{center}
+
+\begin{abstract}
+Le programme EX3--EX10 explore des sondes adaptatives à base de représentations latentes et de fonctions radiales (RBF), puis des ensembles de sondes, des correcteurs OOF, des coordinateurs et des assemblages d'opérateurs numériques. Le fil directeur est cohérent : obtenir une capacité numérique fortement comprimée, au moins quatre fois moins de paramètres totaux qu'un MLP comparateur, sans sacrifier simultanément la qualité prédictive et les coûts réels d'exécution.
+
+L'analyse conduit à un résultat nuancé mais assez stable. La contrainte de compacité paramétrique a souvent été satisfaite et documentée de façon de plus en plus rigoureuse. En revanche, cette compacité ne s'est pas transformée en gain de latence ou de coût de pipeline : les calculs RBF, les passages multiples, le cross-fitting OOF et les coordinations sérielles ont pénalisé les temps d'entraînement et surtout l'inférence CPU. La qualité est dépendante du domaine : quelques résultats favorables apparaissent sur Wisconsin ou sur certaines fonctions synthétiques, mais les gains ne se transfèrent pas uniformément. La réplication EX9 sur deux domaines synthétiques pénalise fortement les variantes B10/B11/A0 par rapport aux MLP ; les résultats CNG d'EX10 sont intéressants en interpolation sur certaines fonctions, mais leur comportement en frontière et en extrapolation reste fragile. Pour CNC, le fine-tuning conjoint corrige une partie des erreurs de composition, sans démontrer la réutilisabilité zéro-shot des spécialistes gelés.
+
+EX3 demeure un cas particulier : le prompt est présent et précis, mais le workspace, les données brutes, scripts et checkpoints EX3 annoncés ne sont pas livrés dans l'archive. Il est donc impossible de reconstruire de façon autonome les résultats originaux de cette campagne. Les documents EX7-Matrix, Matrix-Vector et Hybrid sont des formalismes et des hypothèses de conception, non des validations expérimentales dans EX7. Enfin, les propositions EX11 et REPLICA-U sont des pistes futures et ne doivent pas être interprétées comme des résultats acquis.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Verdict exécutif}
+
+\subsection{Ce que le dossier établit avec le plus de confiance}
+
+\begin{enumerate}
+  \item \important{La compression paramétrique est réelle.} À partir d'EX4, plusieurs campagnes ont comparé les candidates à des MLP dont le nombre de paramètres persistants est au moins quatre fois supérieur. Les décomptes incluent progressivement les buffers, les centres, les coefficients fixes, le scaler et les composants nécessaires à l'inférence. La règle centrale est bien \(P_{\mathrm{MLP,total}}/P_{\mathrm{sonde,total}}\geq 4\), donc au plus 25\,\% des paramètres totaux du comparateur MLP.
+  \item \important{La compression ne prouve pas l'efficacité.} Dans EX4--EX7 et EX9, la latence batch 1 des sondes et architectures assemblées est généralement supérieure à celle des MLP, parfois d'un ordre de grandeur ou davantage. Les pipelines OOF amplifient le coût d'entraînement.
+  \item \important{La qualité dépend du domaine et de la métrique.} Il existe des points favorables, par exemple B10 sur Wisconsin et certains CNG G3/M4--M7 sur les fonctions \(x_1x_2\) et \(x_1^2+x_2\). Ces gains ne constituent pas une supériorité générale : la réplication synthétique d'EX9 est négative pour les familles B10/B11/A0, et EX10 montre une extrapolation CNG souvent défavorable.
+  \item \important{La spécialisation locale ne garantit pas la composition.} Les spécialistes CNC peuvent approximer des opérations dans leur domaine d'entraînement, mais l'assemblage gelé C1 est très mauvais sur les trois graphes. Le fine-tuning conjoint C2 réduit nettement l'erreur, tout en restant derrière le MLP direct C3 sur les trois tests.
+  \item \important{La qualité des audits s'est améliorée.} Les livrables EX5--EX10 comprennent des inventaires, recalculs de métriques, contrôles de ratios, hashes, locks et audits. Ces contrôles renforcent la confiance dans la cohérence des artefacts ; ils ne suffisent pas à prouver la généralisation externe ni l'absence absolue de toute fuite au niveau du processus.
+\end{enumerate}
+
+\subsection{Ce qui n'est pas démontré}
+
+Le dossier ne démontre pas encore une architecture de sondes qui remplisse simultanément les quatre conditions suivantes : (i) au moins quatre fois moins de paramètres totaux qu'un MLP ; (ii) non-infériorité prédictive sur les métriques primaires, avec marges préenregistrées ; (iii) coût d'apprentissage et d'inférence égal ou inférieur de bout en bout ; (iv) répétition du résultat sur des domaines réels vierges indépendants. Il n'y a pas de validation réelle externe vierge complète dans les expériences livrées. Les mesures énergétiques, la mémoire maximale comparable et les compteurs FLOPs/MAC matériels restent pour l'essentiel non mesurés.
+
+\subsection{Réponse synthétique à la question scientifique}
+
+L'hypothèse « plusieurs petites sondes adaptatives peuvent offrir une alternative compacte à un MLP beaucoup plus grand » est crédible au sens de la représentation et de la paramétrisation, mais elle n'est pas validée comme proposition de meilleure efficacité globale. Les résultats suggèrent plutôt un compromis : la structure sonde peut être paramétriquement parcimonieuse et parfois très précise sur une tâche circonscrite, mais sa mise en œuvre RBF et son orchestration ont, dans les versions testées, un coût temporel supérieur et une généralisation hétérogène. La prochaine avancée décisive ne consiste donc pas seulement à ajouter des niveaux ou des coordinateurs ; elle exige de simplifier le graphe de calcul, de mieux contrôler l'extrapolation, et de conduire des validations indépendantes véritablement confirmatoires.
+
+\section{Méthode d'analyse et hiérarchie des preuves}
+
+\subsection{Corpus exploité}
+
+L'archive contient des documents de conception, des prompts JSON, des rapports Markdown, des fichiers LaTeX, des résultats CSV/JSON, des checkpoints et plusieurs archives ZIP imbriquées. Les éléments centraux examinés sont :
+
+\begin{itemize}
+  \item \fichier{prompt_ex3.json} et \fichier{debrit_0.txt} ;
+  \item les rapports, données et versions des workspaces EX4 et EX5 ;
+  \item le rapport final et les audits EX6 v003 ;
+  \item le formalisme EX7, les synthèses narratives et les rapports V002/V003 ;
+  \item EX8 v010, ses résultats appariés et ses analyses statistiques ;
+  \item EX9 v011, notamment le rapport final, les contrôles multi-domaines et l'exception de verrou documentaire ;
+  \item EX10 v011, ses 550 modèles, 1\,695 évaluations holdout, les résumés CNG/CNC et l'audit final ;
+  \item \fichier{th_sondes_core_test_0.tex}, \fichier{th_sondes_core_test_1.tex} et \fichier{Replica_U_0.tex}.
+\end{itemize}
+
+\subsection{Niveaux de preuve employés}
+
+Le rapport distingue quatre niveaux :
+\begin{enumerate}
+  \item \textbf{Résultat expérimental livré :} métrique, comparaison ou mesure figurant dans un tableau de résultats et rattachée à un run ou à une campagne identifiée.
+  \item \textbf{Résultat récapitulatif :} conclusion d'un rapport de campagne, lorsque les données brutes ou tous les checkpoints ne sont pas directement examinés dans le présent travail.
+  \item \textbf{Formalisation/protocole :} équation, architecture, hypothèse ou procédure proposée, mais sans exécution démontrée.
+  \item \textbf{Vision spéculative :} extrapolation vers une architecture linguistique générale, la cognition, le remplacement de l'attention ou l'interprétabilité.
+\end{enumerate}
+
+Un audit d'intégrité PASS ou PASS\_WITH\_LIMITATIONS signifie que les artefacts couverts par l'audit sont cohérents selon ses contrôles. Il ne transforme pas une campagne de développement en validation externe. De même, cinq graines ne sont pas cinq domaines : elles mesurent avant tout la variabilité d'initialisation sur des observations souvent identiques.
+
+\subsection{Limitation documentaire fondamentale d'EX3}
+
+Le fichier \fichier{prompt_ex3.json} définit une campagne EX3 complète et ambitieuse. Il renvoie à \fichier{sondes_research_workspace_ex3/} et à une référence de code v009. Pourtant, l'audit EX4 signale explicitement que le workspace/code/checkpoints EX3 et les jeux bruts cités dans les débris sont absents de l'archive livrée. Le prompt est donc une preuve de l'intention expérimentale et des critères, non une preuve d'exécution ni de résultats. Les mentions résiduelles de résultats ou de nombres de paramètres dans \fichier{debrit_0.txt} ne remplacent pas les artefacts réplicables. Toute conclusion quantitative attribuée directement à EX3 serait non fondée.
+
+\section{Fondements théoriques et formalismes}
+
+\subsection{La sonde adaptative RBF}
+
+La sonde décrite dans le formalisme de base reçoit une entrée \(x\in\R^n\). Pour une sonde \(i\), les paramètres sont
+\[
+\theta_i=(W_i,b_i,C_i,\ell_i,V_i,\beta_i),
+\]
+avec \(W_i\in\R^{d\times n}\), \(b_i\in\R^d\), \(C_i\in\R^{K\times d}\), \(\ell_i\in\R^K\), \(V_i\in\R^{K\times q}\) et \(\beta_i\in\R^q\). L'encodeur latent est
+\[
+z_i(x)=\tanh(W_i x+b_i).
+\]
+La largeur du centre \(k\) est paramétrée positivement par
+\[
+\sigma_{i,k}=\exp(\ell_{i,k}),
+\]
+avec des bornes opérationnelles annoncées dans le formalisme, \(0{,}05\leq\sigma_{i,k}\leq12\). L'activation radiale est
+\[
+r_{i,k}(x)=\exp\!\left(-\frac{\|z_i(x)-c_{i,k}\|_2^2}{2\sigma_{i,k}^2}\right),
+\]
+et la lecture
+\[
+P_i(x;\theta_i)=r_i(x)^\top V_i+\beta_i.
+\]
+Les centres sont initialisés par K-means sur les seules représentations latentes du jeu d'entraînement. Les données de validation et de test ne doivent pas intervenir dans le calcul des centres.
+
+\paragraph{Comptage paramétrique.} Pour une sortie de dimension \(q\), le nombre de coefficients d'une sonde, avant buffers de prétraitement et autres éléments propres à une architecture, est
+\[
+P_{\mathrm{sonde}}=dn+d+Kd+K+Kq+q.
+\]
+Cette formule est importante : le coût ne dépend pas seulement du nombre de paramètres de projection \(W\). Les centres, largeurs, poids de lecture et biais font partie du modèle persistant. Quand le protocole compare les tailles, il faut distinguer \(P_{\mathrm{train}}\) et \(P_{\mathrm{total}}\), et inclure les éléments fixes qui restent indispensables à l'inférence.
+
+\paragraph{Interprétation mathématique.} La sonde est une composition de deux transformations : une projection non linéaire de l'entrée vers un espace latent borné, puis une base de fonctions gaussiennes centrées sur des points appris ou initialisés. La sortie est une combinaison linéaire des réponses radiales. Ce mécanisme fournit une famille d'approximants flexibles sur un domaine couvert par les centres. Il ne garantit cependant pas une extrapolation correcte. Quand \(z(x)\) est loin des centres, toutes les activations RBF peuvent devenir très faibles ; le terme de biais domine alors et la sortie peut devenir presque constante. La saturation de \(\tanh\) peut également compresser des entrées éloignées dans des zones latentes proches des bords.
+
+Les arguments généraux d'approximation par bases RBF concernent des hypothèses de domaine, de densité de centres et de choix des largeurs. Ils ne prouvent pas que la procédure finie K-means + Adam utilisée ici couvre efficacement chaque fonction, ni que le modèle extrapole. Les résultats EX10 confirment précisément la distinction entre interpolation et extrapolation.
+
+\subsection{RETRO : coordination globale et mise à jour locale}
+
+Le prompt EX3 définit RETRO par une intensité globale \(\alpha\) croissante et un facteur local \(\beta\) décroissant, avec
+\[
+\beta=1-\alpha.
+\]
+La logique visée est de faire évoluer l'apprentissage depuis une adaptation locale des experts vers une influence accrue d'un signal global. Cette formule exprime une opposition de poids, mais elle ne suffit pas, à elle seule, à définir un algorithme reproductible : il faut préciser quelles gradients ou mises à jour sont multipliés, comment la normalisation est faite, à quelle fréquence les contrôleurs évoluent, ce qu'il advient des états d'optimiseur et quel critère déclenche la transition.
+
+Une difficulté centrale observée dans EX4, EX5 et EX8 est le décalage entre le déclenchement du mécanisme et le checkpoint sélectionné. Plusieurs variantes RETRO/maturation atteignent leur déclencheur, mais le meilleur checkpoint de validation précède l'activation effective : les métriques finales publiées décrivent alors le régime local antérieur. D'autres variantes déclenchent après le meilleur checkpoint et les snapshots post-activation sont moins bons. Il est donc plus précis de dire que RETRO a parfois été exécuté, mais que son bénéfice n'est pas démontré au checkpoint sélectionné. Dans EX8, B9 ne déclenche pas dans les cinq graines ; A3 ne déclenche que deux fois et A4 aucune fois.
+
+\subsection{MIXA : mélange adaptatif et banque fixe}
+
+MIXA est défini comme une branche adaptative associée à une banque de sondes RBF fixes, puis à un mécanisme de mélange appris. Formellement, une représentation possible est
+\[
+h_{\mathrm{mix}}(x)=g(x)\,h_{\mathrm{adapt}}(x)
+              +(1-g(x))\,h_{\mathrm{fixe}}(x),
+\]
+où \(g(x)\) peut être scalaire, vectoriel ou obtenu par une fonction de contrôle. Cette écriture illustre le principe ; les variantes livrées ont des structures et coûts différents.
+
+L'intérêt théorique est de combiner plasticité et ancrage : la branche adaptative peut ajuster des structures spécifiques, tandis que la branche fixe peut servir de base de référence. Mais ce mélange n'assure ni que les deux branches soient complémentaires ni que le gate apprenne une décision utile. Si les représentations sont fortement corrélées, le mélange peut ajouter des paramètres et du calcul sans nouvelle information. Les ablations EX4/EX5 le montrent : la branche fixe seule est faible, le mélange peut parfois gagner en exactitude, mais la log-loss et la calibration restent souvent inférieures au MLP ; le meilleur checkpoint peut aussi être pré-activation du contrôleur.
+
+\subsection{CNG : coopération de sondes}
+
+Le cœur neuronal général (CNG) comprend \(M\) sondes recevant la même entrée. Leurs sorties sont concaténées :
+\[
+h(x)=\begin{bmatrix}P_1(x)\\P_2(x)\\\vdots\\P_M(x)\end{bmatrix}.
+\]
+Le composeur linéaire appris est
+\[
+C_\phi(h)=W_c h+b_c,
+\qquad
+\widehat y(x)=C_\phi(h(x)).
+\]
+Le plan EX10 compare trois régimes : G1 sonde unique, G2 moyenne fixe des sorties de plusieurs sondes (\(M=2,4,7\)), G3 composition linéaire apprise (\(M=1,2,4,7\)). Les MLP appariés servent à contrôler la capacité paramétrique.
+
+Un point théorique mérite d'être souligné : la présence de plusieurs sondes et d'un composeur ne constitue pas à elle seule une coopération fonctionnelle. Sans contraintes ou diagnostics, les sondes peuvent apprendre des fonctions redondantes ; une permutation des branches peut laisser la fonction globale inchangée ; le composeur peut s'appuyer presque entièrement sur une seule branche. Il faut donc évaluer la diversité des erreurs, la sensibilité de la sortie au retrait d'une sonde, les contributions conditionnelles et la stabilité des poids du composeur. Une ablation leave-one-probe-out montre une dépendance fonctionnelle dans le modèle évalué, mais ne démontre pas automatiquement que la sonde a appris un rôle sémantique stable.
+
+Le protocole de conception prévoit une ablation avec réapprentissage du composeur afin de mesurer la contribution conditionnelle de chaque branche. Les fichiers EX10 comprennent des diagnostics de retrait de sonde ; leur interprétation doit rester liée à la méthode d'ablation effectivement appliquée et au fait que seuls cinq seeds sont disponibles.
+
+\subsection{CNC : sondes d'opérations et graphes composés}
+
+Le cœur neuronal de calcul (CNC) associe une sonde à chaque opération élémentaire : ADD, SUB, MUL, DIV, EXP et LOG. Chaque spécialiste apprend séparément une fonction sur un domaine déclaré. Les domaines de sécurité du protocole incluent notamment \(|b|\geq0{,}25\) pour la division et un argument strictement positif pour le logarithme.
+
+Trois régimes sont comparés :
+\begin{itemize}
+  \item C1 : spécialistes pré-entraînés puis gelés, assemblés dans un graphe explicite ;
+  \item C2 : mêmes spécialistes utilisés comme initialisation, puis ajustés conjointement sur le graphe ;
+  \item C3 : MLP direct et sonde RBF directe entraînés à approximer la fonction globale.
+\end{itemize}
+
+La distinction C1/C2 est scientifiquement centrale. Une réussite C1 fournirait une preuve de réutilisabilité des opérations apprises séparément. C2 teste plutôt si une initialisation modulaire peut être calibrée par une perte globale. Il ne faut pas présenter C2 comme une composition zéro-shot.
+
+Au premier ordre, pour un graphe \(y=f(u_1,\ldots,u_m)\), l'erreur propagée peut s'écrire approximativement
+\[
+\widehat y-y\simeq\sum_{j=1}^{m}
+\frac{\partial f}{\partial u_j}\,\varepsilon_j,
+\]
+où \(\varepsilon_j\) est l'erreur sur le nœud \(j\). Les termes d'ordre supérieur deviennent importants lorsque les erreurs sont grandes ou que les dérivées varient rapidement. Les opérations exponentielle et division peuvent amplifier des erreurs locales ; la proximité d'une singularité est particulièrement problématique. Il est donc indispensable de sauvegarder et d'auditer les erreurs intermédiaires, ce qu'EX10 a effectivement fait.
+
+\subsection{Formalismes EX7 : RBF, Matrix, Matrix-Vector et Hybrid}
+
+Le formalisme EX7 distingue quatre familles :
+\begin{enumerate}
+  \item \textbf{EX7-RBF :} plusieurs probes adaptatives RBF, chacune dotée d'une représentation et d'une base radiale, avec coordination globale par des poids \(\rho=\operatorname{softmax}(a)\). Une sortie agrégée peut s'écrire \(\widehat y=\sum_i\rho_i P_i(x)\).
+  \item \textbf{EX7-Matrix :} chaque branche est une transformation matricielle non linéaire \(h_i=\sigma(W_i x+b_i)\), suivie d'une projection/coordination. Cette variante cherche à remplacer les calculs de distance RBF locaux par des opérations de matrice plus favorables aux bibliothèques numériques.
+  \item \textbf{EX7-Matrix-Vector :} même fonction mathématique générale que Matrix, mais calculs regroupés en tenseurs/vectorisés. C'est une hypothèse d'implémentation et non une nouvelle preuve théorique de capacité.
+  \item \textbf{EX7-Hybrid :} transformations matricielles locales, concaténation et projection vers un espace partagé, puis banque RBF globale. L'hypothèse est de déplacer le coût radial vers un seul étage global.
+\end{enumerate}
+
+Le formalisme compte explicitement les paramètres et distingue les variantes. Il souligne également une difficulté réelle : distribuer strictement les dimensions d'entrée entre les sondes peut détruire les interactions inter-features, telles que \(x_1x_2\). Une solution exige une communication, une projection commune ou des dimensions partagées ; ces corrections ont un coût et peuvent annuler les économies attendues.
+
+\important{Point de preuve :} les documents EX7-Matrix, Matrix-Vector et Hybrid sont des architectures proposées et formalisées. Les résultats EX7 V002 concernent l'orchestration RBF/OOF récursive ; EX7 V003 teste une variante OuterCoord-Lite à sept probes RBF et un coordinateur externe. Ils ne valident pas Matrix, Matrix-Vector ou Hybrid. Cette distinction doit rester explicite.
+
+\subsection{Limites générales du formalisme}
+
+Les formalismes sont cohérents comme objets de recherche, mais quelques points nécessitent une attention renforcée :
+\begin{itemize}
+  \item \textbf{Bornes et saturation :} les largeurs positives paramétrées par exponentielle sont mathématiquement bien posées, mais le clipping éventuel et sa différentiabilité doivent être consignés dans le code réel ; les bornes seules ne garantissent pas une couverture uniforme.
+  \item \textbf{Échelle latente :} K-means minimise une inertie euclidienne locale ; cela ne garantit pas la répartition optimale des centres pour la fonction cible ni la calibration des sorties.
+  \item \textbf{Dépendance au support :} les bases RBF sont naturellement locales. Les faibles activations hors couverture et la saturation de l'encodeur expliquent pourquoi les métriques d'extrapolation doivent être isolées.
+  \item \textbf{Coordination :} un softmax donne des poids normalisés, pas une spécialisation interprétable. Des poids presque uniformes indiquent une agrégation dense, pas un routage parcimonieux.
+  \item \textbf{Coût structurel :} un nombre de paramètres réduit peut s'accompagner de nombreuses opérations d'exponentielle, de normes, de softmax, de petits kernels et de synchronisations. Le nombre de coefficients n'est donc pas un proxy fiable de latence.
+  \item \textbf{Identifiabilité :} les labels de branches et les rôles des sondes peuvent permuter sans modifier la fonction globale. Une interprétation sémantique requiert des critères de stabilité entre graines et interventions causales.
+\end{itemize}
+
+\section{Analyse chronologique des expériences}
+
+\subsection{EX3 -- contrat expérimental et lacune de traçabilité}
+
+\textbf{But déclaré.} EX3 vise à optimiser des sondes adaptatives compactes et à les comparer à des MLP ayant au moins quatre fois plus de paramètres totaux. Le ratio 4\(\times\) est un seuil minimal, non une cible exacte. Le succès est défini conjointement sur accuracy et log-loss ; les dimensions de ressources annoncées comprennent durée, FLOPs/MACs, latence, débit, RAM/VRAM, taille mémoire et énergie lorsque réellement mesurable.
+
+\textbf{Variantes prévues.} RETRO devait introduire un poids global \(\alpha\) croissant et un facteur local \(\beta=1-\alpha\). MIXA devait combiner une branche adaptative avec une banque RBF fixe et un mélange appris. Le prompt demande des ablations, des contrôles matched-capacity, des comparateurs MLP-ge4x, des données confirmatoires non exposées et une séparation des livrables EX2/EX3.
+
+\textbf{Constat documentaire.} Le prompt pointe vers un workspace EX3 et une candidate v009, mais l'archive reçue ne contient pas ce workspace ni les données, scripts et checkpoints EX3. EX4 le signale explicitement dans son README. Les résultats v009 ou références historiques mentionnés ailleurs ne sont donc pas attribuables à une exécution EX3 autonome et reproductible sur la seule base de cette archive.
+
+\textbf{Réflexion.} EX3 fournit le contrat scientifique le plus net du projet : compacité totale, qualité conjointe, coût réel, généralisation et honnêteté documentaire. Mais sa fonction de point de départ empirique est fragilisée par l'absence des artefacts. La suite EX4 doit être considérée comme une reconstruction documentée de la piste, non comme une validation rétroactive des résultats EX3.
+
+\subsection{EX4 -- compacité obtenue, efficacité globale non obtenue}
+
+EX4 reconstruit une campagne Wisconsin sur cinq initialisations. Les décomptes corrigés incluent les 60 coefficients numériques du scaler commun. La candidate d8/k4 est la meilleure piste de qualité des variantes principales présentées : 356 paramètres totaux contre 1\,448 pour le MLP-ge4x, soit 4,067\(\times\). L'accuracy moyenne est égale à 97,65\,\% des deux côtés, mais la log-loss est moins bonne pour la sonde (0,05952 contre 0,05394). Fit et latence restent également plus lents.
+
+\begin{table}[H]
+\centering\small
+\caption{Quelques résultats EX4 v006 (moyennes sur cinq initialisations).}
+\begin{tabularx}{\textwidth}{lrrrrr}
+\toprule
+Candidate & \(P_s\) & \(P_{MLP}\) & Ratio & Acc. sonde/MLP & LL sonde/MLP\\
+\midrule
+d2/k4 croissance & 146 & 590 & 4,041 & 97,88/97,88\% & 0,07868/0,05552\\
+d4/k8 croissance & 463,6 & 1\,863,8 & 4,018 & 97,65/98,12\% & 0,07791/0,05296\\
+d8/k4 croissance & 356 & 1\,448 & 4,067 & 97,65/97,65\% & 0,05952/0,05394\\
+d4/k16 croissance & 443,4 & 1\,791,2 & 4,046 & 97,65/97,88\% & 0,06593/0,05341\\
+d4/k8 maturation & 793 & 3\,197 & 4,032 & 96,71/98,59\% & 0,08199/0,05057\\
+MIXA d4/k8 & 1\,037 & 4\,154 & 4,006 & 97,41/98,12\% & 0,09153/0,05175\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Aucune des 12 familles annoncées n'a satisfait conjointement les critères de paramètres, accuracy, log-loss, fit et latence : 0/12. La micro-MIXA a fourni des résultats intéressants en comparaison de ses variantes adaptative/fixe : le gating peut aider l'accuracy, mais n'atteint pas la log-loss du MLP. La branche fixe seule est la moins performante.
+
+Le transfert Iris (150 observations, dont 30 dans le test descriptif) n'a pas confirmé la non-infériorité : les MIXA obtiennent environ 0,9600--0,9667 d'accuracy face à 0,9667 pour les MLP-ge4x, mais des log-loss de 0,12062--0,17272 contre 0,09331--0,09633. La latence batch 1 reste environ 5,5 à 6,4 fois plus élevée. Banknote et MAGIC n'ont pas pu être obtenus à cause de l'indisponibilité DNS ; aucun résultat n'est revendiqué sur ces jeux.
+
+\textbf{Point critique RETRO/MIXA.} Les traces indiquent des déclenchements, mais le meilleur checkpoint de validation est antérieur à l'activation effective pour plusieurs variantes (\(\alpha=0\) au checkpoint retenu). Les métriques ne prouvent donc pas un bénéfice post-maturation. Le cas \code{retro_linear} est défavorable (log-loss moyenne rapportée autour de 0,09493 et temps de fit supérieur au MLP).
+
+\textbf{Verdict EX4 :} compression paramétrique démontrée ; efficacité globale et non-infériorité non démontrées ; pas de validation externe vierge.
+
+\subsection{EX5 -- contrôle fin de RETRO, MIXA, OOF et alternance}
+
+EX5 étend l'étude par sept versions : sémantique Adam/AdamW et gel, proportions fixes/adaptatives, correcteur résiduel OOF, alternance A\(\leftrightarrow\)B, hiérarchie question/réponse, partage de centres/encodeurs, PCA question-only, transfert Wine/Digits et profilage CPU. Les 437 comparaisons MLP-ge4x auditées respectent le ratio, avec un minimum de 4,000735\(\times\).
+
+\paragraph{RETRO et optimisation.} Les variantes maturation/inverse déclenchent sur cinq graines sur cinq, mais les meilleurs checkpoints sont pré-activation ; les meilleurs snapshots post-activation présentent une log-loss plus mauvaise. Les contrôles d'optimiseur sont importants : un « gel » par learning rate nul ou gradient nul ne conserve pas nécessairement l'état Adam, car les moments et compteurs d'étape peuvent évoluer si \texttt{step()} est appelé. Un gel strict exige de ne pas exécuter l'étape de l'optimiseur sur les paramètres gelés, ou de gérer explicitement son état.
+
+\paragraph{Correcteur OOF.} Le correcteur adaptatif a 1\,160 paramètres, accuracy 97,65\,\% et log-loss 0,05218, contre 4\,649 paramètres, accuracy 98,59\,\% et log-loss 0,05037 pour le MLP-ge4x. Le pipeline sonde+OOF prend 2,138 s contre 0,268 s ; la latence p50 batch 1 est 0,341 ms contre 0,0166 ms. La procédure OOF est méthodologiquement saine pour empêcher qu'un correcteur apprenne sur des prédictions in-sample trop optimistes, mais elle est coûteuse et ne compense pas ici l'écart avec le MLP.
+
+\paragraph{Hiérarchie et alternance.} L'alternance stricte A/B est implémentée et contrôlée, mais ne gagne pas le MLP. Dans la hiérarchie question/réponse, certains régimes donnent une accuracy élevée ; cependant, la log-loss et la vitesse restent défavorables. Le transfert Wine et Digits ne démontre pas la non-infériorité conjointe. Sur Digits, les log-loss sont nettement inférieures pour les MLP (par exemple environ 0,18 contre 0,44--0,54 pour certaines variantes MIXA).
+
+\paragraph{PCA-Q et compilation.} Les variantes PCA-Q peuvent réduire les MAC analytiques, mais aucune n'améliore simultanément les deux métriques et la latence batch 1 : 30/30 candidats ont moins de MACs forward, 0/30 une latence p50/p95 batch 1 plus faible, et une seule sur 30 un temps de pipeline au plus égal. TorchScript trace exact ne signifie pas rapide : une variante compilée est rapportée environ 7,75 fois plus lente en batch 1.
+
+\textbf{Verdict EX5 :} excellente montée en rigueur de l'audit et du contrôle d'optimiseur ; des variantes OOF et hiérarchiques intéressantes à étudier ; pas de succès global de qualité-ressources.
+
+\subsection{EX6 -- orchestration Emplica, Orchestra et Replica}
+
+EX6 v003 est explicitement classé \textbf{INCOMPLET}. Il complète plusieurs axes : Emplica homogène, spécialistes par couche, Orchestra avec gate externe, ablation sans messages inter-couches, correcteurs OOF et quelques essais Replica. Les ratios paramétriques sont tous supérieurs ou égaux à quatre, mais la qualité et les ressources sont mesurées sur un unique split Wisconsin historiquement exposé.
+
+\begin{table}[H]
+\centering\small
+\caption{EX6 v003 : résultats moyens sur cinq initialisations, validation de 85 exemples.}
+\begin{tabularx}{\textwidth}{Xrrrr}
+\toprule
+Architecture & Params sonde/MLP & Acc. sonde/MLP & LL sonde/MLP & Fit sonde/MLP\\
+\midrule
+Emplica homogène & 6\,705/26\,825 & 98,12/98,82\% & 0,05968/0,04566 & 2,428/0,212 s\\
+Emplica spécialiste & 7\,340/29\,366 & 97,88/98,82\% & 0,04944/0,04891 & 2,239/0,226 s\\
+Orchestra gate X & 7\,227/28\,937 & 97,65/98,82\% & 0,06299/0,04691 & 2,379/0,231 s\\
+Orchestra sans messages & 6\,967/27\,881 & 97,88/98,82\% & 0,05995/0,04563 & 2,180/0,241 s\\
+Emplica + OOF & 8\,295/33\,194 & 98,59/98,82\% & 0,03637/0,04675 & 11,818/0,263 s\\
+Orchestra + OOF & 8\,512/34\,052 & 98,12/98,82\% & 0,03982/0,04733 & 10,677/0,260 s\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Les correcteurs OOF ont des points estimés favorables en log-loss, mais leurs intervalles bootstrap appariés contiennent zéro (Emplica OOF différence moyenne candidate--MLP de \(-0,01038\), IC 95\,\% \([-0,05569;0,01905]\) ; Orchestra OOF \(-0,00751\), IC \([-0,06105;0,03035]\)). Ils ne prouvent donc pas une supériorité ou une non-infériorité. Le coût de pipeline OOF est de l'ordre de 41--46 fois celui du MLP ; la latence batch 1 est de l'ordre de 60--70 fois plus élevée.
+
+Les essais de partition du calcul RBF/Replica ont une parité numérique de l'ordre de \(4,77\times10^{-7}\), mais la variante parallèle CPU est plus lente que la série. Les résultats ne justifient pas une affirmation d'accélération. EX6 n'a pas terminé l'ensemble des architectures, mesures matérielles et validations externes prévues ; le rapport et les audits le déclarent ouvertement.
+
+\textbf{Verdict EX6 :} ratio de paramètres atteint ; latence et entraînement défavorables ; un signal OOF de log-loss à confirmer ; programme scientifique incomplet.
+
+\subsection{EX7 -- architectures récursives, coordination et simplification}
+
+\paragraph{EX7 V002 : Orchestra Org et coûts de l'OOF.} La version V002 approfondit les correcteurs, la distillation, les variantes structurelles et l'architecture récursive Orchestra Org. Les tâches prévues autour de la composition et de la structure sont largement exécutées, mais le constat global reste négatif sur l'efficacité. Les correcteurs OOF peuvent obtenir des log-loss intéressantes, par exemple une variante RBF réduite \code{rbf_d1_k4} autour de 0,03884 contre 0,04675 pour son MLP-ge4x, mais l'accuracy reste plus faible (98,35\,\% contre 98,82\,\%) et le pipeline environ 44,4 fois plus lent. La variante récursive RBF-Lite est autour de 0,05535 de log-loss, avec un pipeline OOF reconstruit d'environ 21,99 s contre 0,40 s pour le MLP-ge4x.
+
+Le parallélisme des folds OOF est essayé, mais la campagne parallèle prend environ 27,34 s contre 16,11 s en séquentiel. Cela illustre que le parallélisme CPU n'est pas gratuit : contention, lancement de processus, allocation mémoire et synchronisation peuvent dominer les calculs des petites branches. Le trace TorchScript exact est seulement plus rapide que le mode eager correspondant, pas que le MLP.
+
+\paragraph{EX7 V003 : OuterCoord-Lite-7x1.} Cette variante retire la cascade 7\(\times\)5 et les gates internes, gardant sept sondes RBF adaptatives et un coordinateur global softmax. Elle réduit le nombre de paramètres persistants à 1\,341, contre 6\,712 pour Orchestra 7\(\times\)5. L'accuracy moyenne est 97,88\,\%, la log-loss 0,06806 ; le MLP apparié fait 98,12\,\% et 0,05136, le MLP-ge4x 98,59\,\% et 0,05222. La latence E2E p50 batch 1 est 0,290 ms, contre 0,0251 ms pour le MLP apparié, soit environ 11,6 fois plus lente.
+
+Les poids du coordinateur restent presque uniformes : entropie proche de 99,81\,\% de son maximum, nombre effectif de branches environ 6,975/7. Toutes les sondes sont exécutées ; il n'y a donc pas de calcul parcimonieux. La simplification réduit bien le nombre de paramètres et la latence par rapport à Orchestra, sans battre le MLP. Le partitionnement des exemples entre branches n'implique pas une spécialisation sémantique.
+
+\paragraph{Distinction formalismes/résultats.} Le document EX7 formalise Matrix, Matrix-Vector et Hybrid, et le texte de synthèse les qualifie comme propositions. La V003 exécutée reste une architecture RBF OuterCoord-Lite. L'idée de remplacer les branches RBF par des couches matricielles peut être intéressante sur CPU/GPU, mais aucune comparaison chiffrée livrée ne permet de conclure qu'elle est plus rapide ou meilleure.
+
+\textbf{Verdict EX7 :} réduction de la complexité d'architecture utile ; meilleure vitesse relative à Orchestra ; aucune preuve de vitesse supérieure au MLP ou de généralisation externe.
+
+\subsection{EX8 v010 -- A0, B10/B11 et langage d'actions}
+
+EX8 v010 comprend une campagne Wisconsin de 18 bras et 90 runs de candidates, 160 comparateurs MLP uniques, des variantes récursives et la piste B10/B11. La comparaison B10/B11 est particulièrement informative car le backbone est apparié : cinq AdaptiveRBF parallèles, dimension latente 4, quatre centres par branche, une couche, 20 évaluations de centres par observation.
+
+B10 remplace le gate standard par un mécanisme de langage d'actions : marge et désaccord sont transformés en états flous, puis une table de neuf états par cinq poids renvoie une combinaison softmax continue. B11 garde un gate appris standard. Sur Wisconsin, B10 obtient log-loss moyenne 0,04139, B11 0,04443 ; les deux battent leurs MLP appariés et GE4X sur 5/5 graines selon les résumés. Mais il y a cinq graines sur un même split, et le test exact bilatéral sur B10 contre B11 donne \(p=0,0625\), plus petit p possible avec cinq différences signées ; les intervalles de confiance et le contrôle BH ne valident pas un effet statistiquement solide. B10 est environ 2,85 fois plus lente que B11 en batch 1 (0,332 ms contre 0,116 ms) et ajoute 49 paramètres. Les diagnostics montrent une table presque uniforme dans trois graines sur cinq.
+
+A0 PCA2 corrigée a une log-loss moyenne de 0,04307, mais ne gagne que 3/5 graines face au MLP apparié et ses intervalles appariés incluent zéro. La réduction A1, de 56 à 16 évaluations RBF par exemple, améliore la latence d'environ 16,5\,\%, au prix d'une dégradation de log-loss à 0,0676.
+
+Le domaine secondaire SMS donne un signal négatif : B10 0,10020 et B11 0,10349, contre environ 0,07413 pour le MLP apparié ; les deux perdent 0/5 graines. SMS étant déjà historiquement exposé, il constitue une réplication négative utile mais pas un holdout externe vierge.
+
+\textbf{Verdict EX8 :} résultat local B10/B11 favorable sur Wisconsin, non confirmé statistiquement et accompagné d'un coût de latence ; A0 reste exploratoire ; aucun argument de supériorité inter-domaines.
+
+\subsection{EX9 v011 -- réplication multi-domaines et pilotes CNG/CNC}
+
+EX9 constitue un point de contrôle important, car il prend les variantes A0/B10/B11 historiques et les soumet à des domaines synthétiques séparés.
+
+\paragraph{XOR8 : métriques de validation uniquement.} B10, B11 et A0 donnent respectivement des log-loss de validation 0,54998, 0,55409 et 0,45006 ; les MLP appariés/ge4x se situent autour de 0,30. Les candidates perdent 0/5 face aux comparateurs. L'évaluateur du holdout XOR8 échoue au chargement d'un checkpoint avant la première prédiction ; le test XOR8 est donc déclaré compromis/non scoré. Il serait incorrect de publier une métrique de test XOR8.
+
+\paragraph{Concentric2 et rotated-moons2.} Deux jeux synthétiques ont chacun 600 observations d'entraînement, 240 de validation et 1\,200 de test, avec cinq graines de modèles. En validation, B10/B11/A0 sont nettement derrière les MLP appariés et GE4X. Sur holdout, les log-loss restent fortement défavorables :
+\begin{table}[H]
+\centering\small
+\caption{EX9 : log-loss test sur les deux domaines synthétiques, moyennes des graines.}
+\begin{tabularx}{\textwidth}{lrrr}
+\toprule
+Domaine & Candidate & MLP apparié & MLP-ge4x\\
+\midrule
+Concentric2 & B10 0,25583 & 0,06319 & 0,05946\\
+Concentric2 & B11 0,25502 & 0,06485 & 0,05860\\
+Concentric2 & A0 0,20091 & 0,05922 & 0,06071\\
+Rotated-moons2 & B10 0,25611 & 0,12225 & 0,12129\\
+Rotated-moons2 & B11 0,25532 & 0,12234 & 0,12138\\
+Rotated-moons2 & A0 0,23261 & 0,12162 & 0,12102\\
+\bottomrule
+\end{tabularx}
+\end{table}
+Les six candidates perdent face aux deux comparateurs dans les cinq graines. Les intervalles bootstrap imbriqués rapportés restent du côté défavorable pour les douze comparaisons candidates/comparateurs. Les performances CPU batch 1 des candidates sont environ 12--22 fois plus lentes. Cela invalide la généralisation du résultat Wisconsin B10/B11 aux deux domaines synthétiques étudiés.
+
+\paragraph{Pilotes CNG/CNC.} Les neuf pilotes EX9 (trois CNG, six spécialistes CNC) sont utiles au débogage des protocoles, mais ne constituent pas la campagne complète. Aucun graphe CNC composé C1/C2 n'est alors terminé ; il n'y a ni grille CNG M=1/2/4/7 sur les quatre fonctions ni comparateur MLP complet. Le programme détaillé est poursuivi en EX10.
+
+\paragraph{Intégrité du verrou.} L'audit post-test de la cohorte multi-domaines rapporte 294/295 fichiers identiques. L'unique écart est le fichier documentaire \fichier{reports/PROMPT_EX9_AUDIT.md}, mis à jour après gel pour consigner l'état de reprise ; les données, modèles, configurations, scripts expérimentaux et prédictions couverts par le verrou restent identiques selon l'exception documentée. La formulation correcte est 294/295 avec une exception documentaire expliquée, et non 295/295.
+
+\textbf{Verdict EX9 :} le gain Wisconsin de B10/B11 ne se généralise pas aux deux domaines synthétiques testés ; la compacité demeure, mais la qualité et la vitesse ne suivent pas. XOR8 n'a pas de résultat test exploitable.
+
+\subsection{EX10 v011 -- CNG/CNC complets et scoring gelé}
+
+EX10 livre la campagne la plus complète du noyau CNG/CNC : 460 runs CNG, 90 runs CNC, 550 modèles gelés avant ouverture des 195 fichiers holdout opaques, et 1\,695 évaluations one-shot. Les métriques et prédictions sont recalculées exactement par l'audit post-test (1\,695/1\,695, delta nul), les diagnostics de nœuds sont présents (90/90) et les 3\,037 empreintes du verrou sont vérifiées.
+
+\paragraph{Réplication classification.} Sur Wisconsin, B10 a log-loss 0,041390 et B11 0,044425 ; les deux gagnent 5/5 contre les MLP appariés et GE4X, tandis qu'A0 obtient 0,043068 et 3/5. Sur SMS, déjà exposé historiquement, B10 0,100201, B11 0,103492 et A0 0,106820 perdent 0/5 face aux deux comparateurs. Ce résultat confirme l'hétérogénéité par domaine, non une supériorité globale.
+
+\paragraph{CNG : synthèse quantitative.} Les tâches sont \(\sin(x)\), \(x_1x_2\), \(x_1^2+x_2\) et \(\sin(x_1x_2)+x_3\). Les candidats G1/G2/G3 sont appariés à des MLP en paramètres. Les données sont séparées 630/135/135 par tâche ; K-means n'utilise que l'entraînement ; cinq graines sont utilisées.
+
+\begin{table}[H]
+\centering\small
+\caption{EX10 CNG : exemples de résultats test favorables aux sondes. MAE moyenne sur cinq graines.}
+\begin{tabularx}{\textwidth}{lrrrl}
+\toprule
+Fonction & Candidate & MAE sonde & MAE MLP apparié & Victoires\\
+\midrule
+\(\sin(x)\) & G3 M=4 & 0,00352 & 0,00468 & 4/5\\
+\(\sin(x)\) & G3 M=7 & 0,00257 & 0,00407 & 5/5\\
+\(x_1x_2\) & G2 M=7 & 0,01346 & 0,02310 & 5/5\\
+\(x_1x_2\) & G3 M=4 & 0,01069 & 0,02215 & 5/5\\
+\(x_1x_2\) & G3 M=7 & 0,00714 & 0,02139 & 5/5\\
+\(x_1^2+x_2\) & G3 M=4 & 0,01438 & 0,02593 & 5/5\\
+\(x_1^2+x_2\) & G3 M=7 & 0,01249 & 0,02115 & 4/5\\
+\(\sin(x_1x_2)+x_3\) & G3 M=7 & 0,08580 & 0,10524 & 3/5\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Ces résultats montrent qu'un ensemble de sondes combiné par un composeur appris peut être efficace en interpolation sur certaines fonctions synthétiques lisses ou structurées. Ils ne sont pas uniformes : sur la tâche mêlant sinus, produit et troisième variable, l'avantage est plus faible et moins stable. Surtout, les splits boundary et extrapolation présentent souvent des écarts en faveur du MLP. Par exemple, sur \(x_1x_2\), G3 M=7 atteint une MAE test de 0,00714 contre 0,02139, mais sa MAE extrapolation est 0,47468 contre 0,43178 pour le MLP (0/5 victoires) ; sur \(x_1^2+x_2\), G3 M=7 fait 0,01249 contre 0,02115 en test, mais 0,97701 contre 0,73299 en extrapolation (0/5). Une amélioration sur le test interpolatif n'est donc pas synonyme de robustesse hors distribution.
+
+Les ablations de retrait de sondes ont des effets variables selon la fonction. Par exemple, sur \(x_1^2+x_2\), retirer une branche peut augmenter fortement l'erreur (retrait P3 : MAE 0,26386), alors que sur \(\sin(x)\) certaines suppressions restent relativement proches du modèle complet. C'est une preuve de dépendance fonctionnelle différente selon le problème, pas encore une preuve de rôles sémantiques stables ou d'une spécialisation généralisable.
+
+\paragraph{CNC : spécialistes élémentaires.} Les spécialistes apprennent mieux certaines opérations dans leur domaine de test : ADD 0,01678 MAE, SUB 0,02003, EXP 0,02133, LOG 0,00652. MUL est beaucoup plus difficile (0,37490) et DIV atteint 0,26259. Les erreurs augmentent hors domaine : EXP passe à 3,67244 MAE en extrapolation opérationnelle ; MUL à 1,99160 ; LOG à 0,70029. La performance opérationnelle doit donc être rapportée en tenant compte des échelles et des domaines admissibles ; une MAE brute n'est pas directement comparable entre opérations de différentes amplitudes.
+
+\paragraph{CNC : graphes composés.} Les trois graphes évalués sont \(ab+e^c\), \(ab/(c+1)\) et \(\log(a^2+b^2+1)+e^c\). Les résultats test illustrent fortement l'écart entre réutilisation gelée et ajustement global :
+\begin{table}[H]
+\centering\small
+\caption{EX10 CNC : MAE test moyenne sur cinq graines.}
+\begin{tabularx}{\textwidth}{lrrrr}
+\toprule
+Graphe & C1 figé & C2 conjoint & MLP direct & RBF direct\\
+\midrule
+\(ab+e^c\) & 0,53605 & 0,08217 & 0,01611 & 0,13237\\
+\(ab/(c+1)\) & 0,49343 & 0,08621 & 0,02469 & 0,07269\\
+\(\log(a^2+b^2+1)+e^c\) & 0,51552 & 0,02021 & 0,00963 & 0,07400\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+C2 améliore nettement C1 : la mise au point conjointe corrige les décalages d'échelle et les erreurs cumulées. Néanmoins, C2 reste moins précis que le MLP direct dans les trois cas sur le split test. En changement de domaine du graphe, C2 se dégrade encore. C1 ne valide donc pas la réutilisabilité des opérateurs gelés ; C2 valide plutôt la possibilité de les utiliser comme initialisation d'un modèle spécialisé pour le graphe. Le fait que l'oracle arithmétique natif ait une erreur presque nulle est un contrôle de génération des données, non un modèle appris comparable.
+
+\paragraph{Ressources et intégrité.} Le profilage d'inférence est séquentiel sur CPU mono-thread, avec cinq warmups et vingt répétitions. Les durées de fit ne sont pas comparables pour 180/550 runs marqués \code{CONTENDED_OR_UNVERIFIED}; les 370 autres sans chevauchement détecté restent descriptives. Aucune énergie ni aucun compteur FLOPs/MAC matériels fiables n'ont été obtenus. La bonne intégrité des métriques ne doit pas être confondue avec la preuve d'une performance supérieure.
+
+\textbf{Verdict EX10 :} CNG offre des résultats positifs circonscrits en interpolation ; les extrapolations appellent à la prudence ; CNC montre que les spécialistes gelés se composent mal et que l'ajustement conjoint améliore sans dépasser le MLP direct. EX10 est fort en intégrité d'exécution, mais reste synthétique pour CNG/CNC et ne résout pas l'absence de validation réelle externe vierge.
+
+\section{Comparaison transversale des campagnes}
+
+\subsection{Évolution du programme}
+
+\begin{longtable}{p{1.05cm}p{3.2cm}p{4.6cm}p{4.2cm}}
+\caption{Synthèse des questions et conclusions expérimentales par campagne.}\\
+\toprule
+Exp. & Axe principal & Résultat le plus solide & Limite décisive\\
+\midrule
+\endfirsthead
+\toprule
+Exp. & Axe principal & Résultat le plus solide & Limite décisive\\
+\midrule
+\endhead
+EX3 & Sonde compacte, RETRO, MIXA & Prompt et critères détaillés. & Workspace, données et checkpoints EX3 absents.\\
+EX4 & Reconstruction du benchmark et ratio 4\(\times\) & d8/k4 : 356 vs 1\,448 paramètres, ratio 4,067. & Log-loss, fit et latence derrière MLP ; aucun succès conjoint 0/12.\\
+EX5 & RETRO, OOF, MIXA, hiérarchie, transfert & Protocole OOF et contrôle du gel Adam mieux définis ; ratios audités. & Non-infériorité non montrée ; coût pipeline et latence élevés ; Wine/Digits non concluants.\\
+EX6 & Emplica/Orchestra/Replica & Ratio 4\(\times\) et plusieurs correcteurs OOF à bonne log-loss ponctuelle. & Incomplet ; 55--70\(\times\) plus lent en inférence pour plusieurs bras.\\
+EX7 & Récursion, coordination et simplification & OuterCoord-Lite réduit la complexité face à Orchestra Org. & Toujours environ 11,6\(\times\) plus lent que MLP apparié ; pas de validation externe.\\
+EX8 & A0, B10/B11, langage d'actions & B10/B11 performants sur Wisconsin. & Gain B10/B11 non significatif à cinq graines, B10 plus lent ; SMS négatif.\\
+EX9 & Réplication multi-domaines & Deux nouveaux holdouts synthétiques scorés après gel. & A0/B10/B11 perdent 5/5 sur concentric2 et rotated-moons2 ; XOR8 non scoré.\\
+EX10 & CNG/CNC complets & CNG gagne sur certaines fonctions en interpolation ; audits one-shot solides. & Extrapolation fragile ; C1 faible ; C2 derrière MLP ; pas de données réelles vierges.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Les critères ne sont pas interchangeables}
+
+Les rapports du projet utilisent plusieurs dimensions parfois résumées ensemble. Il faut les séparer :
+\begin{itemize}
+  \item \textbf{Capacité :} le nombre de paramètres totaux est une mesure de stockage de coefficients, pas une mesure de calcul ni de mémoire d'activation.
+  \item \textbf{Qualité de classification :} l'accuracy mesure les décisions finales ; la log-loss pénalise également la mauvaise calibration et les prédictions excessivement confiantes. Une égalité d'accuracy ne compense pas une log-loss fortement dégradée.
+  \item \textbf{Qualité de régression :} MAE et RMSE ont des sensibilités différentes aux erreurs extrêmes. Les comparaisons doivent être appariées sur les mêmes observations, et les métriques brutes dépendent de l'échelle de la fonction.
+  \item \textbf{Coût d'inférence :} latence batch 1, débit en batch, coût de prétraitement et nombre de passages sont des grandeurs distinctes. Une architecture plus compacte peut être plus lente en raison des opérations RBF, des petits kernels et des appels sériels.
+  \item \textbf{Coût d'apprentissage :} un modèle final rapide peut provenir d'un apprentissage très coûteux ; inversement, le temps de recherche et le coût du pipeline OOF doivent être rapportés séparément du fit final.
+  \item \textbf{Mémoire et énergie :} taille du fichier modèle, RAM/RSS, VRAM, mémoire d'activation et énergie ne sont pas interchangeables. Dans ces expériences, les mesures comparables manquent souvent.
+\end{itemize}
+
+\subsection{Lecture du ratio 4\(\times\)}
+
+Le ratio paramétrique est un critère structurel utile : il force à comparer une candidate à un modèle de capacité nettement supérieure et empêche de présenter comme petite une sonde dont les buffers et le prétraitement seraient exclus. Mais le seuil 4\(\times\) ne suffit pas pour conclure à l'efficacité. Une sonde de 1000 paramètres qui exécute plusieurs centaines d'exponentielles et des passages sériels peut être moins efficace qu'un MLP de 4000 paramètres composé de GEMM bien optimisées. EX5--EX7 et les profils EX8/EX9 illustrent cette situation.
+
+\section{Analyse critique de la méthode statistique et des audits}
+
+\subsection{Cinq graines : utile, mais insuffisant pour la généralisation}
+
+Cinq graines permettent de tester une partie de la sensibilité à l'initialisation et de calculer des comparaisons appariées sur un même split. Elles ne fournissent pas cinq réplications indépendantes du domaine. En classification Wisconsin, les mêmes observations sont souvent réutilisées pour chaque seed ; en EX10, les cinq seeds utilisent les mêmes splits synthétiques par fonction. Les unités statistiques sont donc imbriquées : observations, initialisations, jeux et domaines. Une analyse qui traite chaque seed comme un jeu de données indépendant surestime la quantité d'information.
+
+Le test exact des signes bilatéral avec cinq différences de graines ne peut pas fournir une valeur-p inférieure à 0,0625. Cela explique pourquoi le résultat B10 vs B11 reste non concluant même avec cinq signes favorables. L'absence de significativité n'implique pas l'équivalence ; elle indique surtout que l'étude est peu puissante pour trancher un petit effet.
+
+\subsection{Non-infériorité : nécessité de marges et d'intervalles}
+
+Une comparaison de moyennes n'est pas un test de non-infériorité. Il faut préenregistrer une marge \(\delta\), définir la direction des différences, calculer des intervalles de confiance appariés et démontrer que la borne défavorable reste dans la marge. Ce processus doit être appliqué séparément à accuracy et log-loss (ou à des métriques adaptées à la régression), sans compenser la perte d'une métrique par le gain d'une autre.
+
+Les analyses EX6 et EX8 indiquent souvent que les intervalles incluent zéro. EX9 fournit au contraire des intervalles bootstrap du côté défavorable pour les douze comparaisons candidates/comparateurs sur les domaines synthétiques testés. Dans les deux cas, l'interprétation doit tenir compte du nombre de domaines, de la sélection sur validation et de la multiplicité des variantes examinées.
+
+\subsection{Sélection de checkpoints et chronologie de la coordination}
+
+Plusieurs campagnes montrent que les contrôleurs RETRO ou maturation déclenchent après l'époque du meilleur checkpoint. Si le modèle retenu est sélectionné sur la log-loss de validation avant l'activation de la coordination, on ne peut pas attribuer la qualité de ce checkpoint au régime post-activation. Les traces d'alpha/beta et le checkpoint choisi doivent être présentés ensemble. Une comparaison correcte devrait publier au moins : (i) le meilleur checkpoint selon une règle commune ; (ii) le meilleur checkpoint post-activation, s'il existe ; (iii) la performance de référence sans activation ; (iv) le coût supplémentaire de la phase de coordination.
+
+\subsection{OOF et isolation des données}
+
+Le cross-fitting OOF est un choix méthodologique pertinent pour entraîner un second étage sans lui fournir les prédictions in-sample d'un modèle ayant appris sur les mêmes exemples. Le protocole doit toutefois séparer les rôles : les données OOF produisent les caractéristiques du correcteur, la validation arrête/sélectionne selon une règle fixée, et le test reste opaque jusqu'au gel final. Les coûts du OOF doivent être inclus dans le coût d'entraînement du système complet, et les prédictions OOF doivent être mises en cache pour éviter de les recalculer inutilement lorsque le design le permet.
+
+Plusieurs rapports signalent que les chargeurs de données (notamment sklearn) matérialisent l'objet complet en mémoire avant de construire les partitions, même lorsque les lignes test ne sont pas fournies au modèle, au fit ou au sélecteur. Il est donc correct de dire que le test n'a pas été utilisé dans l'apprentissage selon le protocole applicatif documenté, mais pas de revendiquer une isolation mémoire/procédure absolue. La génération et l'ouverture des holdouts EX10, le verrou préalable et le scoring unique renforcent fortement la traçabilité des mesures synthétiques ; ils ne compensent pas l'absence d'un domaine réel vierge.
+
+\subsection{Intégrité et exceptions}
+
+Les audits EX5, EX6, EX8, EX9 et EX10 recalculent de nombreuses métriques, contrôlent les hashes et vérifient les ratios. EX10 est particulièrement solide sur l'intégrité post-test (1\,695/1\,695 métriques recalculées sans écart, 90/90 diagnostics de nœuds, 3\,037 empreintes). EX9 documente correctement une exception de rapport post-gel (294/295), et ne doit pas être présenté comme 295/295. Les audits doivent être lus avec leur périmètre : ils certifient les éléments inclus, non les éléments absents ou non mesurés.
+
+\section{Réflexion scientifique intégrée}
+
+\subsection{Ce qui semble réellement fonctionner}
+
+\begin{enumerate}
+  \item \textbf{L'encodeur latent compact + base RBF est une famille d'approximants crédible.} Plusieurs tâches de régression synthétiques en interpolation donnent des erreurs faibles, et des modèles classifieurs compacts peuvent obtenir des log-loss compétitives sur certains splits.
+  \item \textbf{La combinaison apprise de plusieurs sondes est utile dans certains régimes.} En EX10, G3/M4--M7 dépasse le MLP apparié sur le test de quelques fonctions. L'effet apparaît surtout lorsque la tâche profite de capacités complémentaires ou d'une meilleure représentation du produit.
+  \item \textbf{Les diagnostics au niveau des nœuds sont essentiels.} EX10 montre concrètement que l'erreur des spécialistes ne s'additionne pas de manière triviale et que les erreurs locales peuvent amplifier la sortie globale.
+  \item \textbf{Les contrôles de gel et d'optimiseur comptent.} Les conclusions EX5 sur Adam évitent une erreur fréquente : lr nul n'est pas synonyme d'état d'optimiseur strictement gelé.
+  \item \textbf{La complexité fonctionnelle est réductible.} OuterCoord-Lite démontre qu'en retirant la cascade et les gates internes, on peut réduire la taille du modèle et la latence comparée à Orchestra Org, même si on reste en retrait du MLP.
+\end{enumerate}
+
+\subsection{Ce qui semble échouer, ou reste trop fragile}
+
+\begin{enumerate}
+  \item \textbf{La spécialisation émergente par simple multiplicité de branches.} Sept branches ne deviennent pas automatiquement sept spécialistes. Des gates presque uniformes et des performances de retrait variables suggèrent une redondance ou une spécialisation dépendante de la tâche.
+  \item \textbf{La coordination sophistiquée sans réduction de calcul.} B10 améliore un point estimate sur Wisconsin, mais ajoute une latence importante par rapport à B11 ; une table d'actions n'économise pas les calculs du backbone.
+  \item \textbf{L'assemblage gelé de spécialistes opératoires.} C1 est très mauvais ; la modularité locale ne produit pas automatiquement des modules composables.
+  \item \textbf{L'extrapolation des bases RBF.} Les résultats test positifs de certaines fonctions CNG se renversent dans des régions hors support. Il faut contrôler les activations, la distance au support, et les erreurs sous changement de domaine.
+  \item \textbf{L'optimisation de paramètres comme proxy de vitesse.} Réduire la taille du modèle n'a pas réduit la latence batch 1 dans les systèmes livrés. Le calcul réel est dominé par la structure et l'implémentation.
+\end{enumerate}
+
+\subsection{Interprétabilité et spécialisation : ce qui manque encore}
+
+Une sonde RBF peut sembler plus inspectable qu'un grand MLP parce qu'elle possède des centres, des largeurs, des activations et des projections explicitement nommés. Cela ne suffit pas à rendre ses fonctions intelligibles. Il faudrait démontrer, pour chaque branche, une stabilité des rôles à travers les seeds, une sélectivité reproductible à certains motifs, une contribution causale lorsqu'on l'ajoute ou la retire, et une faible sensibilité à la permutation des branches. Des cartes d'activation ou des poids de gate ne sont pas, à eux seuls, une interprétation.
+
+La notion de « sonde » ne correspond pas à un neurone biologique ou à une unité cognitive par simple analogie. Une branche peut implémenter plusieurs fonctions, être redondante, ou changer de rôle selon la tâche. Toute analogie avec le cerveau, la compréhension sémantique ou le raisonnement doit donc être traitée comme une hypothèse de recherche, pas comme une conséquence des résultats numériques.
+
+\subsection{Matrix/Hybrid : piste d'ingénierie prometteuse, preuve manquante}
+
+La proposition Matrix/Hybrid mérite une vraie campagne, car elle s'attaque à une source plausible de coût : les petits calculs RBF répétés. Des opérations matricielles plus denses peuvent mieux exploiter les bibliothèques CPU/GPU. L'architecture Hybrid peut également réduire le nombre de calculs radiaux locaux en les déplaçant vers un étage global. Toutefois, une telle conception peut augmenter la dimension du vecteur partagé, concentrer le coût au coordinateur, introduire une communication entre branches ou perdre les interactions croisées si les entrées sont partitionnées trop strictement.
+
+La comparaison décisive doit mesurer la latence end-to-end, en incluant normalisation, transformations, coordination et transfert des tenseurs ; une comparaison du seul noyau local ne suffit pas. Il faut aussi égaliser le budget paramétrique et le nombre de calculs, et vérifier que la qualité n'est pas perdue par compression.
+
+\section{Priorités expérimentales recommandées}
+
+Les propositions ci-dessous sont un plan de recherche, pas des résultats. Elles visent à transformer les observations précédentes en conclusions confirmatoires, en évitant de multiplier la complexité avant d'avoir isolé les facteurs qui limitent la performance.
+
+\subsection{Priorité 1 -- restaurer une filiation EX3 vérifiable}
+
+Avant toute nouvelle comparaison avec EX3, reconstruire à partir d'une source externe conservée ou d'une archive historique le workspace original, les données, scripts, configurations, checkpoints, registres et hashes. Si ces éléments sont irrécupérables, déclarer EX3 comme non reproductible à partir du présent dossier et démarrer une nouvelle branche versionnée, sans attribuer rétroactivement des mesures à EX3.
+
+\subsection{Priorité 2 -- définir un test confirmatoire multi-domaines vierge}
+
+Choisir plusieurs tâches réelles externes indépendantes et au moins deux familles de problèmes (classification et régression, si le programme prétend à une architecture générale). Les jeux ne doivent pas avoir été exposés dans EX2--EX10. Préenregistrer les seeds, les partitions, les marges de non-infériorité, les métriques primaires, les budgets et la règle de sélection. Geler tous les checkpoints avant l'ouverture du test. Pour la classification, analyser séparément accuracy et log-loss ; pour la régression, publier MAE/RMSE avec normalisation documentée et mesures en unités naturelles.
+
+L'unité d'analyse doit être hiérarchique : observations imbriquées dans seed, seed dans dataset et dataset dans domaine. Ne pas traiter cinq seeds sur une même partition comme cinq domaines indépendants. Privilégier des intervalles appariés par observation, puis agréger au niveau des datasets/domaines. Ajuster les comparaisons multiples lorsque de nombreuses architectures sont testées.
+
+\subsection{Priorité 3 -- un banc de coût end-to-end reproductible}
+
+Mesurer séparément : (i) temps de recherche et de fit complet ; (ii) coût OOF/cross-fitting ; (iii) taille et paramètres persistants ; (iv) latence batch 1 ; (v) débit sur plusieurs batches ; (vi) RAM peak/RSS isolé et VRAM ; (vii) énergie si instrumentée. Contrôler le nombre de threads, l'affinité, les warmups, la fréquence CPU et la contention. Publier médiane, quantiles, dispersion et répétitions brutes. Les coûts OOF doivent être facturés au pipeline, mais il est pertinent de publier aussi un coût amorti lorsque les artefacts OOF sont réutilisés dans un déploiement multi-tâches.
+
+Les expériences EX5--EX10 indiquent une priorité d'optimisation : éviter les kernels minuscules et les évaluations RBF non fusionnées, vectoriser sur le batch, précalculer ce qui peut l'être sans fuite, réduire les passages sériels et vérifier que le gain théorique survit à l'exécution réelle. Les benchmarks CPU et GPU doivent être séparés ; le parallélisme ne doit être conservé que s'il réduit la latence mesurée.
+
+\subsection{Priorité 4 -- confirmer la coopération CNG}
+
+Pour chaque tâche, comparer G1, G2 et G3 avec le même budget paramétrique total, le même budget d'optimisation et plusieurs seeds/datasets. Répéter l'ablation leave-one-probe-out avec deux conditions : (a) retrait brut sans réapprentissage du composeur, qui mesure la robustesse du réseau entraîné ; (b) retrait puis réapprentissage du composeur, qui mesure la valeur conditionnelle d'une branche. Ajouter des mesures de corrélation des erreurs, de redondance des représentations, d'entropie/poids de gate et de stabilité des rôles inter-seeds. Ajouter un contrôle où les sorties des sondes sont permutées ou remplacées par des branches redondantes pour vérifier que l'effet vient bien de la complémentarité.
+
+Pour l'extrapolation, tester des régions de plus en plus éloignées avec suivi des activations RBF (norme, max, somme, entropie effective), distances aux centres et erreurs. Une détection d'entrée hors support ou un mécanisme de rejet est plus défendable qu'une extrapolation silencieuse.
+
+\subsection{Priorité 5 -- traiter CNC comme un problème de transfert de modules}
+
+C1 doit rester la mesure la plus exigeante de la réutilisabilité. C2 peut être conservé comme approche de fine-tuning, mais son coût et le degré de modification de chaque spécialiste doivent être publiés. Ajouter :
+\begin{itemize}
+  \item une calibration par opérateur avant assemblage ;
+  \item une mesure du décalage de distribution des entrées intermédiaires entre apprentissage isolé et graphe composé ;
+  \item une propagation d'intervalles d'incertitude aux nœuds ;
+  \item un contrôle d'erreur analytique fondé sur les dérivées des opérations ;
+  \item des graphes nouveaux composés à partir d'opérations connues mais de topologies jamais vues ;
+  \item un comparateur symbolique exact comme borne théorique, distinct des modèles appris.
+\end{itemize}
+
+Une amélioration de C2 doit être analysée comme spécialisation au graphe, non comme transfert zéro-shot. Pour soutenir une véritable composition, il faut démontrer une performance sur des graphes non utilisés pour le fine-tuning.
+
+\subsection{Priorité 6 -- tester Matrix/Hybrid avant REPLICA-U}
+
+Une progression rationnelle est : Matrix local simple ; Matrix-Vector équivalent en fonction ; Hybrid avec banque RBF globale ; comparaison iso-paramètres/iso-budget ; puis coordination apprise. L'objectif premier est la vitesse de calcul, mesurée au niveau end-to-end, sans sacrifier la qualité. Les spécifications doivent exposer le coût de communication, les dimensions de messages et les opérations de projection.
+
+\code{Replica_U_0.tex} décrit une architecture proposée pour EX11 : spécialistes, teacher conjoint, puis student distillé, avec un student de production unique. Cette idée pourrait résoudre un problème observé dans les pipelines multi-branches : la somme des coûts des experts à l'inférence. Mais elle n'est pas validée. Elle introduit de nouveaux risques (teacher trop coûteux, fuite dans la distillation, prédictions OOF, distribution teacher/student, calibration, perte de capacité par compression). La proposition EX11 de \fichier{th_sondes_core_test_1.tex} doit donc rester un protocole prospectif avec critères de réussite et ablations préenregistrées.
+
+\section{Conclusion générale}
+
+Le projet a construit une progression scientifique reconnaissable : une sonde adaptative RBF, des variantes RETRO et MIXA, des empilements OOF, des architectures Emplica/Orchestra, une coordination externe, des expériences de classification et de régression, puis des cœurs généralistes CNG et calculatoires CNC. Les formalismes sont suffisamment explicites pour permettre une discussion mathématique et plusieurs campagnes sont bien documentées. Les audits et les contrôles de protocole ont aussi gagné en maturité.
+
+La conclusion empirique doit néanmoins rester sobre. Les expériences valident surtout la compacité paramétrique et la possibilité de résultats locaux de bonne qualité. Elles ne valident pas la supériorité générale des sondes, leur meilleure efficacité de bout en bout, ni la capacité de spécialistes autonomes à se recomposer sans ajustement. Les résultats Wisconsin de B10/B11 sont intéressants mais non confirmatoires ; EX9 montre leur échec sur deux domaines synthétiques nouveaux. EX10 montre des gains CNG dans des zones interpolatives bien définies et des limites nettes en extrapolation ; il montre également que le fine-tuning CNC aide les graphes mais reste moins performant que le MLP direct.
+
+La recherche la plus prometteuse est maintenant ciblée : (1) comprendre et réduire le coût réel des calculs RBF ; (2) caractériser le support et l'extrapolation ; (3) mesurer la complémentarité des sondes plutôt que supposer leur spécialisation ; (4) évaluer la composabilité des opérateurs sur des graphes réellement nouveaux ; (5) confirmer sur des domaines réels indépendants. Une architecture plus ambitieuse ne doit être promue que si elle améliore ces critères mesurables. Le dossier actuel ne justifie ni l'abandon des sondes ni leur promotion comme remplacement des MLP : il justifie une recherche plus ciblée, plus efficace et davantage confirmatoire.
+
+\appendix
+\section{Inventaire documentaire abrégé}
+
+Le tableau suivant donne les principaux fichiers sources permettant de retrouver les éléments discutés. Les chemins sont relatifs au contenu extrait de l'archive principale.
+
+\begin{longtable}{p{5.4cm}p{8.0cm}}
+\caption{Sources principales du rapport.}\\
+\toprule
+Fichier / dossier & Rôle dans l'analyse\\
+\midrule
+\endfirsthead
+\toprule
+Fichier / dossier & Rôle dans l'analyse\\
+\midrule
+\endhead
+\fichier{last_sources_3/prompt_ex3.json} & Contrat EX3 : ratio total 4\(\times\), RETRO, MIXA, métriques de ressources, exigences confirmatoires.\\
+\fichier{last_sources_3/debrit_0.txt} & Traces historiques ; utiles comme contexte, mais insuffisantes pour reconstruire la campagne EX3.\\
+\fichier{last_sources_3/th_sondes_core_test_0.tex} & Formalisme CNG/CNC, paramètres de sonde, protocoles, critères statistiques et limites.\\
+\fichier{last_sources_3/th_sondes_core_test_1.tex} & Proposition EX11 de validation confirmatoire ; pas un résultat EX3--EX10.\\
+\fichier{last_sources_3/EX7_formalisme_hybride_arch_0.tex} & Définitions EX7-RBF, Matrix, Matrix-Vector, Hybrid et comptage de paramètres.\\
+\fichier{last_sources_3/EX7_chat_sentheses_0.tex} & Synthèse conceptuelle EX7 ; sépare établi, proposé et vision à long terme.\\
+\fichier{last_sources_3/Replica_U_0.tex} & Spécification REPLICA-U proposée pour EX11, explicitement non validée.\\
+\fichier{.../sondes_ex4_workspace.../deliverables/rapport_executif_ex4.md} & Résultats EX4, d8/k4, micro-MIXA, transfert Iris et limites.\\
+\fichier{.../sondes_ex5_workspace.../deliverables/rapport_executif_ex5.md} & Résumé EX5, OOF, RETRO, hiérarchie, transfert et ressources.\\
+\fichier{.../sondes_ex6_v003.../reports_v3/FINAL_REPORT_EX6_V003.md} & Résultats Emplica/Orchestra/OOF/Replica, statistiques et statut INCOMPLET.\\
+\fichier{.../sondes_ex7.../reports/FINAL_REPORT_EX7_V002.md} & Orchestra Org, correcteurs et coûts OOF.\\
+\fichier{.../sondes_ex7_v003.../README_EX7_V003.md} & OuterCoord-Lite-7x1, paramètres, qualité et latence.\\
+\fichier{EX8_v010/RAPPORT_FINAL_V010.md} & A0, B10/B11, SMS, récursion, audits et limites.\\
+\fichier{EX8_v010/STATISTICAL_ANALYSIS_V010.md} & Analyse statistique appariée, tests de signes et intervalles.\\
+\fichier{EX9_v011_DELIVERABLES/EX9_v011/reports/REPORT_EX9_FINAL.md} & XOR8, concentric2, rotated-moons2, pilotes CNG/CNC, limites.\\
+\fichier{EX9_v011_DELIVERABLES/EX9_v011/reports/PROMPT_EX9_AUDIT_LOCK_EXCEPTION.md} & Exception documentaire 294/295 au verrou multi-domaines.\\
+\fichier{EX10_v011_COMPLETE/EX10_v011/reports/EX10_FINAL_RESULTS.md} & Résultats CNG/CNC, comparaisons classification, holdouts et limites.\\
+\fichier{EX10_v011_COMPLETE/EX10_v011/README_EX10.md} & Inventaire, séquence de verrouillage, volumes et conformité EX10.\\
+\fichier{EX10_v011_COMPLETE/EX10_v011/results/processed/CNG_CANDIDATE_VS_MLP_SUMMARY.csv} & MAE/RMSE appariées par fonction, split et variante CNG.\\
+\fichier{EX10_v011_COMPLETE/EX10_v011/results/processed/CNG_LEAVE_ONE_PROBE_OUT_SUMMARY.csv} & Ablations de sondes CNG par fonction et split.\\
+\fichier{EX10_v011_COMPLETE/EX10_v011/results/processed/CNC_GRAPH_HOLDOUT_SUMMARY.csv} & MAE/RMSE des graphes CNC C1/C2/C3 sur test, frontière et décalage.\\
+\fichier{EX10_v011_COMPLETE/EX10_v011/results/processed/CNC_OPERATION_HOLDOUT_SUMMARY.csv} & Résultats des six spécialistes élémentaires sur les différents domaines.\\
+\bottomrule
+\end{longtable}
+
+\section{Éléments explicitement absents ou non validés}
+
+\begin{itemize}
+  \item Workspace, scripts, checkpoints et jeux bruts EX3 autonomes ;
+  \item résultats d'un test XOR8 (évaluateur échoué avant toute prédiction) ;
+  \item validation réelle externe vierge sur laquelle les modèles EX3--EX10 auraient été confirmés ;
+  \item validation expérimentale des architectures EX7-Matrix, Matrix-Vector et Hybrid ;
+  \item preuve de réutilisation zéro-shot des spécialistes CNC gelés ;
+  \item mesures complètes et comparables de FLOPs/MAC matériels, énergie, RAM/RSS peak et VRAM ;
+  \item validation de REPLICA-U et des propositions EX11.
+\end{itemize}
+
+\end{document}

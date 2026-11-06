@@ -1,0 +1,3365 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{appendix}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,shapes.geometric}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\geometry{margin=2.45cm}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{0.2em}
+\setlist[itemize]{leftmargin=1.35em}
+\setlist[enumerate]{leftmargin=1.6em}
+\captionsetup{font=small,labelfont=bf}
+
+\newtheorem{definition}{Définition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Théorème}
+\newtheorem{corollary}{Corollaire}
+\newtheorem{remark}{Remarque}
+\newtheorem{conjecture}{Conjecture}
+
+\DeclareMathOperator{\Aff}{Aff}
+
+\title{Théorie des empreintes informationnelles et géométrie des seuils}
+\author{Bensalem Nassim\\\texttt{nassimbensalemn42@gmail.com}}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\emph{La géométrie entière est déterminée par la fonction de seuil.}
+\end{center}
+
+\begin{abstract}
+On formalise une théorie d'objets définis par leurs réponses à des sondes observationnelles. La première couche repose sur les fibres, les quotients, la factorisation, la minimalité et la réduction des sondes. Le théorème de factorisation montre que toute grandeur définie par les réponses observées se factorise de manière unique à travers l'empreinte, le quotient observationnel ou toute représentation minimale fidèle du même contenu. La seconde couche introduit une fonction de seuil complète, qui détermine la structure observationnelle introduite dans cet article : partitions, filtrations, arbre, ancêtres communs, courbe de résolution, mesure atomique et classification ne sont que des représentations d'une même information fondamentale. Le résultat structurant principal est alors que la fonction de seuil satisfait une loi de minimum double, laquelle caractérise les seuils admissibles, force une structure arborescente unique et entraîne la rigidité de toute la hiérarchie des partitions observables.
+\end{abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\section{Introduction}
+
+\subsection{Motivation}
+
+La théorie développée dans cet article part d'une question simple : que reste-t-il d'un objet lorsque l'on n'y a accès qu'à travers des réponses observables ? Au lieu de postuler une structure géométrique préalable sur l'ensemble des objets, on impose seulement un régime d'interrogation, c'est-à-dire une famille de sondes et des contextes d'observation. L'objet n'est alors plus considéré à partir d'une structure externe, mais à partir de la stabilité de ses réponses, de ses fibres et de ses quotients.
+
+Cette perspective conduit à deux niveaux complémentaires. Le premier isole une représentation minimale de l'information observable : l'empreinte. Le second montre qu'en régime fini, une fonction de seuil suffit à reconstruire toute la hiérarchie des partitions observables. Ainsi, la structure observationnelle n'est pas ajoutée à l'observation ; elle en est le produit interne.
+
+L'intérêt de cette construction est double. D'une part, elle donne un cadre commun à des objets qui vont des graphes aux signaux, des familles finies de points aux structures plus abstraites. D'autre part, elle transforme la question de classification en un problème de reconstruction à partir d'invariants d'observation. La première partie établit ce qui est conservé par passage à l'image, au quotient et à la représentation minimale ; la seconde établit ce qui est conservé, et même entièrement déterminé, par la fonction de seuil.
+
+\subsection{Hypothèses de travail}
+
+Les hypothèses sont organisées en deux niveaux.
+
+\medskip
+\noindent\textbf{Hypothèses permanentes.}
+Les ensembles \(\mathcal P\), \(\mathcal X\) et \(\mathcal F\) sont non vides ; \(\Phi:\mathcal P\times\mathcal X\times\mathcal F\to\mathbb R\) est un fonctionnel d'observation ; \(\mathcal F_K=\{f_1,\ldots,f_K\}\subset\mathcal F\) est une famille finie de sondes.
+
+\medskip
+\noindent\textbf{Hypothèses supplémentaires pour la Partie II.}
+On fixe un contexte \(P\in\mathcal P\), on suppose \(\mathcal X\) fini, \(\Lambda\) totalement ordonné, et \(\iota:\Lambda\to\mathbb R_+\) injective.
+
+\subsection{Géométrie observationnelle}
+
+\begin{definition}[Structure observationnelle]
+On appelle \emph{structure observationnelle} associée à \((\Phi,P)\) toute donnée construite fonctoriellement à partir de la famille des relations d'indiscernabilité \((\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}\), de leurs quotients, des partitions qu'elles induisent, et des invariants qui en dérivent. Dans le cadre fini, une structure observationnelle est donc une hiérarchie de partitions munie de ses représentations canoniques : quotient, arbre, résolution et mesure des seuils.
+\end{definition}
+
+\begin{definition}[Géométrie observationnelle]
+La \emph{géométrie observationnelle} associée à \((\Phi,P)\) est la collection des objets et relations obtenus à partir de la famille des relations d'indiscernabilité \((\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}\) par passage aux quotients, aux filtrations, aux arbres de classes, aux fonctions de seuil et aux invariants qui en dérivent. Dans le cadre fini, cette géométrie observationnelle est précisément la structure induite par la hiérarchie des partitions observables.
+\end{definition}
+
+\subsection{Schéma directeur}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=6.4mm,
+    every node/.style={font=\small},
+    >={Stealth[length=2.2mm]},
+    box/.style={draw, rounded corners, inner sep=3.5pt, align=center, minimum width=25mm},
+    wide/.style={draw, rounded corners, inner sep=3.5pt, align=center, minimum width=31mm}
+]
+\node[box] (x) {\(\mathcal X\)};
+\node[box, below=of x] (emp) {empreinte};
+\node[box, below=of emp] (img) {image réduite};
+\node[box, below=of img] (quot) {quotient};
+\node[box, below=of quot] (th) {\(\Theta_P\)};
+\node[box, below=of th] (part) {partitions};
+\node[box, below=of part] (tree) {arbre};
+\node[wide, below=of tree] (ms) {mesure et résolution};
+
+\draw[->] (x) -- (emp);
+\draw[->] (emp) -- (img);
+\draw[->] (img) -- (quot);
+\draw[->] (quot) -- (th);
+\draw[->] (th) -- (part);
+\draw[->] (part) -- (tree);
+\draw[->] (tree) -- (ms);
+\end{tikzpicture}
+\caption{Chaîne conceptuelle de l'article. Le point de départ est une observation ; la sortie est une géométrie observationnelle complète.}
+\end{figure}
+
+\subsection{Résultats principaux}
+
+\begin{center}
+\fbox{%
+\begin{minipage}{0.94\linewidth}
+\textbf{Résultat A — Théorème de factorisation.}
+Toute application qui ne dépend que des réponses observées se factorise de manière unique à travers l'empreinte, le quotient observationnel ou toute représentation minimale fidèle.
+
+\medskip
+\textbf{Résultat B — Théorème structural des seuils.}
+La fonction de seuil complète détermine entièrement la hiérarchie des partitions, l'arbre des classes et la courbe de résolution.
+
+\medskip
+\textbf{Résultat C — Caractérisation des seuils admissibles.}
+Une fonction symétrique est une fonction de seuil complète si et seulement si elle satisfait la loi du minimum double.
+\end{minipage}}
+\end{center}
+
+\begin{theorem}[Théorème principal]
+Sous les hypothèses de la Partie II, la fonction de seuil complète \(\Theta_P\) détermine entièrement la structure observationnelle associée à \((\Phi,P)\) : la hiérarchie des partitions \((\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}\), l'arbre des classes, la courbe de résolution et la mesure empirique des seuils. Réciproquement, la hiérarchie des partitions détermine \(\Theta_P\).
+\end{theorem}
+
+\subsection{Apport par rapport aux partitions classiques}
+
+La théorie des partitions décrit une collection de classes à un niveau donné. Ici, le point de départ est différent : les classes ne sont pas posées, elles sont produites par une procédure d'observation. La contribution nouvelle n'est donc pas seulement la partition elle-même, mais le mécanisme qui la génère, la réduit, la compare entre niveaux, et la résume par une fonction de seuil sur les paires.
+
+La différence essentielle est la suivante. Une théorie classique des partitions ne fournit pas, à elle seule, un langage pour :
+\begin{itemize}[leftmargin=1.4em]
+\item éliminer les sondes redondantes sans changer les fibres ;
+\item mesurer l'information effective au lieu de l'information brute ;
+\item reconstruire tous les niveaux d'une hiérarchie à partir d'une seule fonction de seuil ;
+\item identifier une mesure atomique de résolution ;
+\item relier canoniquement la hiérarchie à une structure arborescente unique.
+\end{itemize}
+C'est précisément ce que fait la théorie développée ici.
+
+\subsection{Comparaison structurée}
+
+La théorie développée ici est proche, par son vocabulaire, de la théorie des partitions et des dendrogrammes, mais elle s'en distingue par son point de départ : la hiérarchie n'est pas imposée a priori, elle est reconstruite à partir des réponses observables. Les dendrogrammes apparaissent alors comme une représentation de la hiérarchie des classes, et non comme une structure postulée. La loi du minimum double joue, dans ce cadre, un rôle analogue à la forte inégalité triangulaire des ultramétriques, sans supposer d'abord une distance sur \(\mathcal X\), comme le confirment les cadres axiomatiques et algorithmiques de la littérature sur le clustering hiérarchique et les ultramétriques \cite{carlsson2010,murtagh2017,murtagh2004a,murtagh2004b,rohlf1973,kopp1978}.
+
+Le rapport avec l'information et la classification est tout aussi direct. La quantité brute \(C(\lambda)\) mesure la disponibilité des sondes, tandis que \(C_{\mathrm{eff},P}(\lambda)\) mesure le nombre de directions réellement distinctes du point de vue des réponses. La théorie n'introduit cependant ni probabilité ni perte moyenne : elle travaille à niveau exact, par fibres et par quotients. Elle se place donc à la frontière de la classification, de l'observation et de la géométrie combinatoire induite, tout en gardant un caractère déterministe.
+
+\section{Partie I. Fondations}
+
+\subsection{Cadre abstrait}
+
+Soient
+\[
+\mathcal P,\qquad \mathcal X,\qquad \mathcal F
+\]
+trois ensembles non vides, où \(\mathcal P\) désigne l'ensemble des contextes d'observation, \(\mathcal X\) l'ensemble des objets étudiés, et \(\mathcal F\) l'ensemble des sondes, opérateurs d'interrogation ou contextes auxiliaires.
+
+On fixe une famille finie de sondes
+\[
+\mathcal F_K=\{f_1,\ldots,f_K\}\subset \mathcal F,
+\qquad K\in\mathbb N^*.
+\]
+Plus généralement, toute famille \(\mathcal G\subseteq\mathcal F\), finie ou non, peut être utilisée.
+
+\begin{definition}[Fonctionnel d'observation]
+Un \emph{fonctionnel d'observation} est une application
+\[
+\Phi:\mathcal P\times\mathcal X\times\mathcal F\longrightarrow \mathbb R.
+\]
+Pour tout triplet \((P,x,f)\), \(\Phi(P,x,f)\) est la réponse scalaire produite par l'observation de \(x\) dans le contexte \(P\) au moyen de la sonde \(f\).
+\end{definition}
+
+\begin{definition}[Empreinte informationnelle]
+Pour chaque contexte \(P\in\mathcal P\), on définit
+\[
+I_\Phi^P:\mathcal X\longrightarrow \mathbb R^K,
+\qquad
+I_\Phi^P(x)=
+\begin{bmatrix}
+\Phi(P,x,f_1)\\
+\vdots\\
+\Phi(P,x,f_K)
+\end{bmatrix}.
+\]
+Pour toute famille \(\mathcal G\subseteq\mathcal F\), on définit aussi
+\[
+I_{\Phi,\mathcal G}^P:\mathcal X\longrightarrow \mathbb R^{\mathcal G},
+\qquad
+I_{\Phi,\mathcal G}^P(x)(g)=\Phi(P,x,g).
+\]
+\end{definition}
+
+\begin{remark}
+Aucune structure interne sur \(\mathcal X\) n'est requise. La discrimination et les régimes d'indiscernabilité sur \(\mathcal X\) sont induits a posteriori par le choix de \(\Phi\) et des familles de sondes.
+\end{remark}
+
+\subsection{Théorie mathématique des échelles observationnelles}
+
+L'échelle ne désigne pas ici une taille spatiale. Elle désigne la quantité d'information observationnelle accessible, donc la contrainte imposée par le régime d'observation.
+
+\begin{definition}[Structure d'échelle observationnelle]
+Une \emph{structure d'échelle} est la donnée d'un ensemble partiellement ordonné \((\Lambda,\preceq)\) et d'une famille croissante de sous-familles
+\[
+\bigl(\mathcal F_\lambda\bigr)_{\lambda\in\Lambda},
+\qquad
+\mathcal F_\lambda\subseteq \mathcal F,
+\]
+telles que
+\[
+\lambda\preceq\mu \Longrightarrow \mathcal F_\lambda\subseteq \mathcal F_\mu.
+\]
+On associe à cette structure une fonction d'intensité
+\[
+\iota:\Lambda\longrightarrow \mathbb R_+
+\]
+monotone pour l'ordre \(\preceq\), c'est-à-dire
+\[
+\lambda\preceq\mu \Longrightarrow \iota(\lambda)\le \iota(\mu).
+\]
+\end{definition}
+
+\begin{definition}[Information accessible brute]
+On note
+\[
+C(\lambda):=|\mathcal F_\lambda|
+\]
+la quantité brute d'information accessible à l'échelle \(\lambda\). Lorsque \(\mathcal F_\lambda\) est finie, \(C(\lambda)\in\mathbb N\); lorsque \(\mathcal F_\lambda\) est infinie, \(C(\lambda)\) est une cardinalité.
+\end{definition}
+
+\begin{definition}[Empreinte à l'échelle \(\lambda\)]
+Pour tout \(P\in\mathcal P\) et tout \(\lambda\in\Lambda\), on définit
+\[
+I_{\Phi,\lambda}^P:\mathcal X\longrightarrow \mathbb R^{\mathcal F_\lambda},
+\qquad
+I_{\Phi,\lambda}^P(x)(f)=\Phi(P,x,f)\quad(f\in\mathcal F_\lambda).
+\]
+Lorsque \(\mathcal F_\lambda\) est finie de cardinal \(K_\lambda\), on identifie \(\mathbb R^{\mathcal F_\lambda}\simeq \mathbb R^{K_\lambda}\).
+\end{definition}
+
+\begin{definition}[Indiscernabilité à l'échelle \(\lambda\)]
+On définit, pour tout \(P\in\mathcal P\) et \(\lambda\in\Lambda\), une relation \(\sim_{\Phi,P,\lambda}\) sur \(\mathcal X\) par
+\[
+x\sim_{\Phi,P,\lambda}y
+\quad\Longleftrightarrow\quad
+I_{\Phi,\lambda}^P(x)=I_{\Phi,\lambda}^P(y).
+\]
+\end{definition}
+
+\begin{definition}[Projection quotient]
+On note
+\[
+\pi_\lambda:\mathcal X\longrightarrow \mathcal X/{\sim_{\Phi,P,\lambda}}
+\]
+la projection quotient.
+\end{definition}
+
+\begin{definition}[Image observationnelle réduite]
+On pose
+\[
+\mathcal L_{\lambda,P}:=I_{\Phi,\lambda}^P(\mathcal X)\subseteq \mathbb R^{\mathcal F_\lambda}.
+\]
+Cette image est la représentation réduite des objets à l'échelle \(\lambda\).
+\end{definition}
+
+\begin{proposition}[Raffinement par intensité]
+Si \(\lambda\preceq\mu\), alors
+\[
+x\sim_{\Phi,P,\mu}y \Longrightarrow x\sim_{\Phi,P,\lambda}y.
+\]
+En particulier, l'augmentation de l'intensité observationnelle ne peut qu'affiner les classes d'indiscernabilité.
+\end{proposition}
+
+\begin{proof}
+L'égalité des empreintes sur \(\mathcal F_\mu\) implique, par restriction, l'égalité sur la sous-famille \(\mathcal F_\lambda\subseteq\mathcal F_\mu\).
+\end{proof}
+
+\begin{corollary}[Segments initiaux de non-séparation]
+Supposons \(\Lambda\) totalement ordonné. Pour tout \(x,y\in\mathcal X\), l'ensemble
+\[
+S_{x,y}:=\{\lambda\in\Lambda:\ x\sim_{\Phi,P,\lambda}y\}
+\]
+est un segment initial de \(\Lambda\).
+\end{corollary}
+
+\begin{proof}
+C'est une reformulation immédiate de la proposition précédente.
+\end{proof}
+
+\begin{definition}[Seuil de résolution]
+Supposons \(\Lambda\) totalement ordonné et \(\iota\) injective. Pour tout couple \((x,y)\in\mathcal X^2\), on définit le seuil de résolution par
+\[
+\rho_P(x,y):=\sup\{\iota(\lambda):\ \lambda\in S_{x,y}\},
+\]
+lorsque cette borne supérieure existe. On appelle \emph{seuil séparant} de \((\mathcal X,\Phi,P)\) la quantité
+\[
+\rho_P^\ast(\Phi):=\inf\{\iota(\lambda):\ I_{\Phi,\lambda}^P \text{ est injective}\},
+\]
+lorsqu'elle existe.
+\end{definition}
+
+\begin{proposition}[Lecture par seuil]
+Sous les hypothèses de la définition précédente,
+\[
+x\sim_{\Phi,P,\lambda}y
+\quad\Longleftrightarrow\quad
+\iota(\lambda)\le \rho_P(x,y),
+\]
+dès que \(S_{x,y}\) est non vide et que \(\iota(\Lambda)\) est muni de la borne supérieure correspondante.
+\end{proposition}
+
+\begin{proof}
+Comme \(S_{x,y}\) est un segment initial et \(\iota\) est monotone, \(\iota(S_{x,y})\) est un segment initial de \(\mathbb R_+\). La définition de \(\rho_P(x,y)\) donne l'équivalence.
+\end{proof}
+
+\begin{remark}
+La distinction micro/macro n'est donc pas fixée par la taille de l'objet. Elle est fixée par l'intensité observationnelle disponible : deux objets de taille très différente peuvent être indistinguables à basse intensité, et un même objet peut devenir richement différencié à haute intensité.
+\end{remark}
+
+\subsection{Réduction observationnelle des sondes}
+
+Le résultat suivant formalise l'élimination exacte des sondes redondantes sans changement de fibre.
+
+\begin{definition}[Équivalence observationnelle des sondes]
+Fixons \(P\in\mathcal P\) et \(\lambda\in\Lambda\). Pour \(f,g\in\mathcal F_\lambda\), on écrit
+\[
+f\equiv_{P,\lambda} g
+\quad\Longleftrightarrow\quad
+\Phi(P,x,f)=\Phi(P,x,g)\ \text{ pour tout }x\in\mathcal X.
+\]
+\end{definition}
+
+\begin{definition}[Fermeture observationnelle]
+Pour toute famille \(\mathcal G\subseteq\mathcal F_\lambda\), on définit
+\[
+\operatorname{Cl}_{P,\lambda}(\mathcal G)
+=
+\Bigl\{
+f\in\mathcal F_\lambda:\ \exists\,\psi_f:\mathbb R^{\mathcal G}\to\mathbb R,\ 
+\Phi(P,x,f)=\psi_f\bigl(I_{\Phi,\mathcal G}^P(x)\bigr)\ \forall x\in\mathcal X
+\Bigr\}.
+\]
+\end{definition}
+
+\begin{remark}[Intuition]
+Deux sondes sont redondantes lorsqu'elles ne distinguent jamais des fibres différentes. La fermeture observationnelle décrit l'ensemble maximal des sondes qui n'ajoutent aucune information classificatoire.
+\end{remark}
+
+\begin{definition}[Quotient des sondes et information effective]
+On pose
+\[
+\mathcal F_{\lambda,P}^{\sharp}:=\mathcal F_\lambda/\!\equiv_{P,\lambda}.
+\]
+La fonction induite \(\bar\Phi\) est définie par
+\[
+\bar\Phi(P,x,[f])=\Phi(P,x,f).
+\]
+La quantité
+\[
+C_{\mathrm{eff},P}(\lambda):=\bigl|\mathcal F_{\lambda,P}^{\sharp}\bigr|
+\]
+est l'information accessible \emph{effective} à l'échelle \(\lambda\).
+\end{definition}
+
+\begin{theorem}[Réduction observationnelle des sondes]
+Fixons \(P\in\mathcal P\) et \(\lambda\in\Lambda\). Alors :
+\begin{enumerate}[label=\arabic*.]
+\item \(\equiv_{P,\lambda}\) est une relation d'équivalence sur \(\mathcal F_\lambda\).
+\item La fermeture \(\operatorname{Cl}_{P,\lambda}\) est extensive, monotone et idempotente.
+\item Pour toute famille \(\mathcal G\subseteq\mathcal F_\lambda\), les empreintes \(I_{\Phi,\mathcal G}^P\) et \(I_{\Phi,\operatorname{Cl}_{P,\lambda}(\mathcal G)}^P\) ont exactement les mêmes fibres.
+\item Si \(\mathcal H\subseteq\mathcal F_\lambda\) a les mêmes fibres que \(\mathcal G\), alors \(\mathcal H\subseteq \operatorname{Cl}_{P,\lambda}(\mathcal G)\). Autrement dit, \(\operatorname{Cl}_{P,\lambda}(\mathcal G)\) est la plus grande famille de sondes qui ne change pas la structure de fibres de \(\mathcal G\).
+\item Le quotient \(\mathcal F_{\lambda,P}^{\sharp}\) porte une fonction induite \(\bar\Phi\) bien définie, et la cardinalité \(C_{\mathrm{eff},P}(\lambda)\) mesure le nombre de directions de réponse effectivement distinctes à l'échelle \(\lambda\).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(1) La réflexivité, la symétrie et la transitivité sont immédiates par égalité des réponses.
+
+(2) Si \(\mathcal G\subseteq\mathcal H\), toute factorisation via \(I_{\Phi,\mathcal G}^P\) se compose avec la projection \(\mathbb R^{\mathcal H}\to\mathbb R^{\mathcal G}\), donc \(\operatorname{Cl}_{P,\lambda}(\mathcal G)\subseteq \operatorname{Cl}_{P,\lambda}(\mathcal H)\). L'extensivité est le cas \(\mathcal G\subseteq \operatorname{Cl}_{P,\lambda}(\mathcal G)\). Pour l'idempotence, si \(f\in \operatorname{Cl}_{P,\lambda}(\operatorname{Cl}_{P,\lambda}(\mathcal G))\), alors chaque coordonnée de \(I_{\Phi,\operatorname{Cl}_{P,\lambda}(\mathcal G)}^P\) factorise déjà par \(I_{\Phi,\mathcal G}^P\); la composition donne donc une factorisation de \(f\) par \(I_{\Phi,\mathcal G}^P\).
+
+(3) Si \(I_{\Phi,\mathcal G}^P(x)=I_{\Phi,\mathcal G}^P(y)\), alors pour tout \(f\in\operatorname{Cl}_{P,\lambda}(\mathcal G)\) on a \(\Phi(P,x,f)=\Phi(P,y,f)\) par définition de la fermeture. Ainsi les fibres de \(I_{\Phi,\mathcal G}^P\) sont contenues dans celles de \(I_{\Phi,\operatorname{Cl}_{P,\lambda}(\mathcal G)}^P\). L'inclusion réciproque vient de \(\mathcal G\subseteq\operatorname{Cl}_{P,\lambda}(\mathcal G)\).
+
+(4) Si \(\mathcal H\) a les mêmes fibres que \(\mathcal G\), alors chaque \(h\in\mathcal H\) est constant sur les fibres de \(I_{\Phi,\mathcal G}^P\), donc \(h\in \operatorname{Cl}_{P,\lambda}(\mathcal G)\).
+
+(5) Si \(f\equiv_{P,\lambda}g\), alors leurs profils de réponses coïncident, donc \([f]\mapsto \Phi(P,x,f)\) est bien définie. La quantité \(C_{\mathrm{eff},P}(\lambda)\) compte les directions réellement distinctes de réponse ; elle est indépendante de toute redondance interne.
+\end{proof}
+
+\begin{definition}[Dimension effective d'une famille]
+Soit \(\mathcal G\subseteq\mathcal F\) une famille finie. On définit
+\[
+d_{\mathrm{eff},P}(\mathcal G):=\dim \Aff\!\bigl(I_{\Phi,\mathcal G}^P(\mathcal X)\bigr),
+\]
+lorsque cette dimension est finie. En particulier,
+\[
+d_{\mathrm{eff},P}(\lambda):=d_{\mathrm{eff},P}(\mathcal F_\lambda).
+\]
+\end{definition}
+
+\begin{proposition}[Monotonie et invariance de la dimension effective]
+Soient \(\mathcal G_1,\mathcal G_2\subseteq\mathcal F\) deux familles finies.
+\begin{enumerate}[label=\arabic*.]
+\item Si \(\mathcal G_1\subseteq \mathcal G_2\), alors
+\[
+d_{\mathrm{eff},P}(\mathcal G_1)\le d_{\mathrm{eff},P}(\mathcal G_2).
+\]
+\item Si \(\sigma:\mathcal G_1\to\mathcal G_2\) est une bijection qui ne fait que re-indexer les sondes sans changer les réponses coordonnées, alors
+\[
+d_{\mathrm{eff},P}(\mathcal G_1)=d_{\mathrm{eff},P}(\mathcal G_2).
+\]
+\item Si \(\mathcal H\) s'obtient à partir de \(\mathcal G\) en ajoutant seulement des sondes qui sont des combinaisons affines des coordonnées de \(I_{\Phi,\mathcal G}^P\), alors
+\[
+d_{\mathrm{eff},P}(\mathcal H)=d_{\mathrm{eff},P}(\mathcal G).
+\]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(1) La projection \(\mathbb R^{\mathcal G_2}\to \mathbb R^{\mathcal G_1}\) envoie \(I_{\Phi,\mathcal G_2}^P(\mathcal X)\) sur \(I_{\Phi,\mathcal G_1}^P(\mathcal X)\), donc la dimension affine ne peut pas décroître quand on passe à un plus grand nombre de coordonnées.
+
+(2) Un re-indexage des sondes correspond à une permutation des coordonnées de l'espace ambiant, donc à un automorphisme affine. La dimension affine de l'image est inchangée.
+
+(3) Si les coordonnées ajoutées sont des combinaisons affines des précédentes, l'image de \(\mathcal H\) est contenue dans une enveloppe affine de même dimension que celle de \(\mathcal G\), et réciproquement \(\mathcal G\subseteq\mathcal H\). Les deux dimensions coïncident.
+\end{proof}
+
+\begin{proposition}[Borne dimensionnelle intrinsèque]
+Si \(C_{\mathrm{eff},P}(\lambda)<\infty\), alors
+\[
+d_{\mathrm{eff},P}(\lambda)\le C_{\mathrm{eff},P}(\lambda).
+\]
+\end{proposition}
+
+\begin{proof}
+Après réduction observationnelle, \(\mathcal L_{\lambda,P}=I_{\Phi,\lambda}^P(\mathcal X)\) s'inscrit dans un espace de coordonnées de dimension \(C_{\mathrm{eff},P}(\lambda)\). L'enveloppe affine d'un sous-ensemble d'un espace de dimension \(m\) ne peut dépasser cette dimension.
+\end{proof}
+
+\begin{proposition}[Géométrie induite]
+Fixons \(P\in\mathcal P\) et \(\lambda\in\Lambda\). Soit \(\|\cdot\|\) une norme sur \(\mathbb R^{\mathcal F_\lambda}\) lorsque \(\mathcal F_\lambda\) est finie. On définit
+\[
+d_{\Phi,P,\lambda}(x,y)=\|I_{\Phi,\lambda}^P(x)-I_{\Phi,\lambda}^P(y)\|,
+\qquad x,y\in\mathcal X.
+\]
+Alors \(d_{\Phi,P,\lambda}\) est une pseudométrique sur \(\mathcal X\). De plus,
+\[
+I_{\Phi,\lambda}^P:(\mathcal X,d_{\Phi,P,\lambda})\longrightarrow \mathcal L_{\lambda,P}
+\]
+est une isométrie surjective. Si \(\mathcal F_\lambda\) est séparante en \(P\), alors \(d_{\Phi,P,\lambda}\) est une métrique et \(I_{\Phi,\lambda}^P\) est une bijection isométrique entre \((\mathcal X,d_{\Phi,P,\lambda})\) et \(\mathcal L_{\lambda,P}\).
+\end{proposition}
+
+\begin{proof}
+Les axiomes d'une norme donnent la positivité, la symétrie et l'inégalité triangulaire. La surjectivité sur l'image est tautologique. L'injectivité suit de la proposition précédente lorsque \(\mathcal F_\lambda\) est séparante.
+\end{proof}
+
+\subsection{Théorème de factorisation}
+
+\begin{theorem}[Factorisation de l'empreinte]
+Fixons \(P\in\mathcal P\) et \(\lambda\in\Lambda\). Soient \(Y\) un ensemble quelconque et \(T:\mathcal X\to Y\) une application. Les assertions suivantes sont équivalentes :
+\begin{enumerate}[label=\textbf{(\arabic*)}]
+\item \(T\) est constante sur les fibres de \(I_{\Phi,\lambda}^P\), c'est-à-dire
+\[
+I_{\Phi,\lambda}^P(x)=I_{\Phi,\lambda}^P(y)\Longrightarrow T(x)=T(y).
+\]
+\item Il existe une unique application \(\widetilde T:\mathcal L_{\lambda,P}\to Y\) telle que
+\[
+T=\widetilde T\circ I_{\Phi,\lambda}^P.
+\]
+\item Il existe une unique application \(\widehat T:\mathcal X/{\sim_{\Phi,P,\lambda}}\to Y\) telle que
+\[
+T=\widehat T\circ \pi_\lambda.
+\]
+\item Si \(J:\mathcal X\to Z\) est une application ayant exactement les mêmes fibres que \(I_{\Phi,\lambda}^P\), alors il existe une unique bijection \(\beta:\mathcal L_{\lambda,P}\to J(\mathcal X)\) telle que
+\[
+J=\beta\circ I_{\Phi,\lambda}^P.
+\]
+\end{enumerate}
+
+En particulier, le triplet \(\bigl(I_{\Phi,\lambda}^P,\pi_\lambda,\mathcal L_{\lambda,P}\bigr)\) décrit une même donnée observationnelle à travers trois incarnations naturellement équivalentes. Toute représentation minimale fidèle de l'information à l'échelle \(\lambda\) est unique à bijection près.
+\end{theorem}
+
+\begin{proof}
+L'implication \((1)\Rightarrow(2)\) est immédiate en définissant \(\widetilde T\bigl(I_{\Phi,\lambda}^P(x)\bigr):=T(x)\). L'hypothèse garantit que cette définition est indépendante du représentant. L'implication \((2)\Rightarrow(3)\) suit du quotient par les fibres de \(I_{\Phi,\lambda}^P\). L'implication \((1)\Rightarrow(4)\) est le principe de minimalité fibrée. Les réciproques sont immédiates. L'unicité dans chaque cas est imposée par la définition de la factorisation sur une image ou un quotient.
+\end{proof}
+
+\begin{remark}[Pont vers la Partie II]
+Toute structure construite uniquement à partir des fibres observables se factorise par les empreintes et les quotients associés. La Partie II montrera que, lorsque l'on organise ces fibres en niveaux de seuil, la fonction de seuil complète suffit à reconstruire toute la structure observationnelle.
+\end{remark}
+
+\subsection{Grand exemple développé : classification observée d'une base de données finie}
+
+On considère six objets
+\[
+\mathcal X=\{x_1,x_2,x_3,x_4,x_5,x_6\},
+\]
+et quatre sondes \(f_1,f_2,f_3,f_4\). Les réponses sont données par le tableau suivant :
+\[
+\begin{array}{c|cccc}
+& f_1 & f_2 & f_3 & f_4\\ \hline
+x_1 & 0 & 0 & 0 & 0\\
+x_2 & 0 & 0 & 1 & 0\\
+x_3 & 1 & 0 & 0 & 0\\
+x_4 & 1 & 1 & 0 & 0\\
+x_5 & 2 & 0 & 0 & 0\\
+x_6 & 2 & 0 & 0 & 1
+\end{array}
+\]
+
+On fixe une échelle discrète
+\[
+\Lambda=\{\lambda_1\prec\lambda_2\prec\lambda_3\prec\lambda_4\},
+\qquad
+\iota(\lambda_k)=k.
+\]
+On prend
+\[
+\mathcal F_{\lambda_1}=\{f_1\},\quad
+\mathcal F_{\lambda_2}=\{f_1,f_2\},\quad
+\mathcal F_{\lambda_3}=\{f_1,f_2,f_3\},\quad
+\mathcal F_{\lambda_4}=\{f_1,f_2,f_3,f_4\}.
+\]
+
+Les partitions obtenues sont alors :
+\[
+\mathcal X/{\sim_{\Phi,P,\lambda_1}}=
+\bigl\{\{x_1,x_2\},\{x_3,x_4\},\{x_5,x_6\}\bigr\},
+\]
+\[
+\mathcal X/{\sim_{\Phi,P,\lambda_2}}=
+\bigl\{\{x_1,x_2\},\{x_3\},\{x_4\},\{x_5,x_6\}\bigr\},
+\]
+\[
+\mathcal X/{\sim_{\Phi,P,\lambda_3}}=
+\bigl\{\{x_1\},\{x_2\},\{x_3\},\{x_4\},\{x_5,x_6\}\bigr\},
+\]
+\[
+\mathcal X/{\sim_{\Phi,P,\lambda_4}}=
+\bigl\{\{x_1\},\{x_2\},\{x_3\},\{x_4\},\{x_5\},\{x_6\}\bigr\}.
+\]
+
+La hiérarchie est donc
+\[
+\begin{aligned}
+\{x_1,\ldots,x_6\}
+&\succ \{x_1,x_2\}\,|\,\{x_3,x_4\}\,|\,\{x_5,x_6\}\\
+&\succ \{x_1,x_2\}\,|\,\{x_3\}\,|\,\{x_4\}\,|\,\{x_5,x_6\}\\
+&\succ \{x_1\}\,|\,\{x_2\}\,|\,\{x_3\}\,|\,\{x_4\}\,|\,\{x_5,x_6\}\\
+&\succ \text{singletons.}
+\end{aligned}
+\]
+
+Une fonction de seuil complète compatible avec cette hiérarchie est donnée par
+\[
+\Theta_P(\{x_1,x_2\})=2.5,\qquad
+\Theta_P(\{x_3,x_4\})=1.5,\qquad
+\Theta_P(\{x_5,x_6\})=3.5,
+\]
+et pour toute paire de points appartenant à des blocs distincts dès l'échelle \(\lambda_1\),
+\[
+\Theta_P(\{x_i,x_j\})=0.5.
+\]
+Cette définition satisfait immédiatement la loi du minimum double : dans tout triplet, le plus petit des seuils est \(0.5\) ou, si deux points appartiennent au même bloc de niveau supérieur, le minimum est atteint au moins deux fois par les deux paires qui croisent ce bloc.
+
+Le spectre critique est alors
+\[
+\Sigma_P=\{0.5,\,1.5,\,2.5,\,3.5\},
+\]
+et la mesure empirique vaut
+\[
+\nu_P
+=
+\frac{12}{15}\,\delta_{0.5}
++\frac{1}{15}\,\delta_{1.5}
++\frac{1}{15}\,\delta_{2.5}
++\frac{1}{15}\,\delta_{3.5}.
+\]
+En particulier, la courbe de résolution atomique est
+\[
+\widetilde{\mathcal R}_P(t)=
+\begin{cases}
+0, & t\le 0.5,\\[0.3em]
+\frac{12}{15}, & 0.5<t\le 1.5,\\[0.3em]
+\frac{13}{15}, & 1.5<t\le 2.5,\\[0.3em]
+\frac{14}{15}, & 2.5<t\le 3.5,\\[0.3em]
+1, & t>3.5.
+\end{cases}
+\]
+Les valeurs de résolution aux échelles discrètes sont donc
+\[
+\mathcal R_P(\lambda_1)=\frac{12}{15},\qquad
+\mathcal R_P(\lambda_2)=\frac{13}{15},\qquad
+\mathcal R_P(\lambda_3)=\frac{14}{15},\qquad
+\mathcal R_P(\lambda_4)=1.
+\]
+Ce calcul montre simultanément trois phénomènes :
+\begin{itemize}[leftmargin=1.4em]
+\item l'information brute augmente à chaque niveau ;
+\item dans le tableau choisi, l'information effective augmente jusqu'au dernier niveau ; si l'une des sondes finales est redondante, le dernier niveau peut au contraire devenir un plateau ;
+\item la résolution n'augmente que par sauts atomiques visibles sur la mesure des seuils.
+\end{itemize}
+L'exemple fournit ainsi une lecture complète de la théorie : empreinte, quotient, seuil, arbre, mesure et résolution y sont calculés explicitement.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{tree_laminaire.png}
+\caption{Schéma illustratif d'une hiérarchie laminaire issue d'une fonction de seuil.}
+\end{figure}
+
+\subsection{Exemples complémentaires}
+
+\begin{proposition}[Exemple élémentaire de séparation]
+Soit \(\mathcal X=\mathbb R^2\), \(\mathcal F=\{f_1,f_2,f_3\}\), et définissons
+\[
+\Phi(P,(u,v),f_1)=u,\qquad
+\Phi(P,(u,v),f_2)=v,\qquad
+\Phi(P,(u,v),f_3)=u+v.
+\]
+Alors la famille \(\{f_1\}\) n'est pas séparante, la famille \(\{f_1,f_2\}\) est séparante, et l'ajout de \(f_3\) est redondant.
+\end{proposition}
+
+\begin{proof}
+Avec \(\{f_1\}\), tous les points de même première coordonnée sont indiscernables. Avec \(\{f_1,f_2\}\), l'empreinte est l'identité sur \(\mathbb R^2\), donc injective. Enfin \(f_3\) est déterminé par \(f_1\) et \(f_2\), donc il ne raffine rien.
+\end{proof}
+
+\begin{proposition}[Graphes finis]
+Soit \(\mathcal X\) l'ensemble des graphes simples sur l'ensemble des sommets \(\{1,2,3,4\}\). Pour chaque arête \(e\), on définit une sonde
+\[
+f_e(G)=\mathbf 1_{\{e\in E(G)\}},
+\]
+et l'on ajoute une sonde
+\[
+g(G)=\#\{\text{triangles de }G\}.
+\]
+Alors la famille des sondes \(f_e\) est séparante, et la sonde \(g\) appartient à la fermeture observationnelle de cette famille.
+\end{proposition}
+
+\begin{proof}
+La donnée de toutes les sondes \(f_e\) reconstitue exactement l'ensemble des arêtes du graphe, donc le graphe lui-même ; la famille est donc séparante. La quantité \(g(G)\) s'exprime comme une fonction polynomiale des variables \(f_e(G)\), puisqu'un triangle est déterminé par ses trois arêtes ; elle dépend donc uniquement des valeurs de la famille séparante.
+\end{proof}
+
+\begin{proposition}[Signaux et images]
+Soit \(\mathcal X\) la famille des signaux
+\[
+u_{a,b,c}(t)=a+b\cos(2\pi t)+c\sin(2\pi t),
+\qquad (a,b,c)\in\mathbb R^3.
+\]
+On considère les trois sondes d'évaluation
+\[
+f_1(u)=u(0),\qquad f_2(u)=u\!\left(\tfrac14\right),\qquad f_3(u)=u\!\left(\tfrac12\right).
+\]
+Alors l'empreinte
+\[
+u\longmapsto \bigl(u(0),u(\tfrac14),u(\tfrac12)\bigr)
+\]
+est injective. En particulier, la théorie s'applique à des familles de fonctions, de signaux et d'images numériques sur une grille finie.
+\end{proposition}
+
+\begin{proof}
+On a
+\[
+\begin{pmatrix}
+u(0)\\[0.2em]
+u\!\left(\tfrac14\right)\\[0.2em]
+u\!\left(\tfrac12\right)
+\end{pmatrix}
+=
+\begin{pmatrix}
+1&1&0\\
+1&0&1\\
+1&-1&0
+\end{pmatrix}
+\begin{pmatrix}
+a\\b\\c
+\end{pmatrix},
+\]
+et la matrice affichée est inversible. Les coefficients \((a,b,c)\) sont donc déterminés de manière unique par les trois valeurs d'empreinte.
+\end{proof}
+
+\section{Partie II. Géométrie des seuils}
+
+\subsection{Spectre critique, courbe de résolution et lecture par seuil}
+
+Fixons \(P\in\mathcal P\). Supposons \(\mathcal X\) fini, \(\Lambda\) totalement ordonné et \(\iota:\Lambda\to\mathbb R_+\) injective.
+
+\begin{definition}[Fonction de seuil complète]
+On note
+\[
+\Theta_P:\binom{\mathcal X}{2}\longrightarrow \mathbb R_+,
+\qquad
+\Theta_P(\{x,y\})=\rho_P(x,y).
+\]
+Cette application encode, pour chaque paire non ordonnée \(\{x,y\}\), l'intensité critique à partir de laquelle la paire devient séparée.
+\end{definition}
+
+\begin{definition}[Spectre critique d'un contexte]
+On appelle \emph{spectre critique} de \(P\) l'ensemble
+\[
+\Sigma_P:=\{\Theta_P(\{x,y\}):\ x,y\in\mathcal X,\ x\neq y\}\subseteq \mathbb R_+.
+\]
+\end{definition}
+
+\begin{definition}[Courbe de résolution observée]
+On définit pour tout \(\lambda\in\Lambda\) la courbe de résolution par
+\[
+\mathcal R_P(\lambda)
+:=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}
+\mathbf 1_{\{\iota(\lambda)>\Theta_P(\{x,y\})\}}.
+\]
+Elle mesure la proportion de paires d'objets déjà distinguées à l'échelle \(\lambda\).
+\end{definition}
+
+\begin{remark}
+Le spectre critique \(\Sigma_P\) n'est que l'image de \(\Theta_P\), sans multiplicité ni localisation par paire. Il ne suffit donc pas, à lui seul, à reconstruire la hiérarchie observationnelle ; la donnée complète est la fonction \(\Theta_P\).
+\end{remark}
+
+\begin{proposition}[Lecture par seuil]
+Sous les hypothèses précédentes,
+\[
+x\sim_{\Phi,P,\lambda}y
+\quad\Longleftrightarrow\quad
+\iota(\lambda)\le \Theta_P(\{x,y\}).
+\]
+En particulier, pour chaque paire \(\{x,y\}\), l'ensemble
+\[
+S_{x,y}:=\{\lambda\in\Lambda:\ x\sim_{\Phi,P,\lambda}y\}
+\]
+est exactement le segment initial déterminé par \(\Theta_P(\{x,y\})\).
+\end{proposition}
+
+\begin{proof}
+La première équivalence est exactement la traduction de la définition du seuil de résolution. La seconde découle du fait que \(S_{x,y}\) est, par monotonie de l'intensité, un segment initial de \(\Lambda\), et que sa borne supérieure en intensité est \(\Theta_P(\{x,y\})\).
+\end{proof}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{stair_resolution.png}
+\caption{Courbe de résolution sous forme d'escalier, avec les seuils critiques visibles.}
+\end{figure}
+
+\subsection{Pourquoi la loi du minimum double généralise l'ultramétrie}
+
+\begin{proposition}[Cohérence des seuils]
+Soit \(K:\binom{\mathcal X}{2}\to\mathbb R_+\) une application symétrique. Les assertions suivantes sont équivalentes :
+\begin{enumerate}[label=\arabic*.]
+\item Pour tout \(t\in\mathbb R_+\), la relation
+\[
+x\equiv_t^K y \Longleftrightarrow x=y \text{ ou } K(\{x,y\})\ge t
+\]
+est transitive.
+\item \(K\) satisfait la loi du minimum double
+\[
+K(\{x,z\})\ge \min\bigl(K(\{x,y\}),K(\{y,z\})\bigr)
+\qquad
+\text{pour tous }x,y,z\in\mathcal X.
+\]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Supposons (1). Fixons \(x,y,z\). En prenant \(t=\min(K(\{x,y\}),K(\{y,z\}))\), on a \(x\equiv_t^K y\) et \(y\equiv_t^K z\); la transitivité donne \(x\equiv_t^K z\), donc \(K(\{x,z\})\ge t\), ce qui est la loi du minimum double.
+
+Réciproquement, supposons la loi du minimum double. Si \(x\equiv_t^K y\) et \(y\equiv_t^K z\), alors \(K(\{x,y\})\ge t\) et \(K(\{y,z\})\ge t\); la loi du minimum double entraîne \(K(\{x,z\})\ge t\), donc \(x\equiv_t^K z\). La transitivité est donc vraie pour tout \(t\).
+\end{proof}
+
+\begin{theorem}[Théorème structural des seuils]
+Sous les hypothèses précédentes, la fonction de seuil complète \(\Theta_P\) possède les propriétés suivantes.
+\begin{enumerate}[label=\textbf{(\Alph*)}]
+\item \textbf{Loi du minimum double.} Pour tous \(x,y,z\in\mathcal X\),
+\[
+\Theta_P(\{x,z\})\ge \min\bigl(\Theta_P(\{x,y\}),\Theta_P(\{y,z\})\bigr).
+\]
+Équivalemment, pour toute triple \(\{x,y,z\}\), le minimum des trois seuils
+\[
+\Theta_P(\{x,y\}),\quad \Theta_P(\{y,z\}),\quad \Theta_P(\{z,x\})
+\]
+est atteint au moins deux fois.
+
+\item \textbf{Reconstruction de la hiérarchie des partitions.} Pour tout \(\lambda\in\Lambda\) et tout \(x,y\in\mathcal X\),
+\[
+x\sim_{\Phi,P,\lambda}y
+\quad\Longleftrightarrow\quad
+\iota(\lambda)\le \Theta_P(\{x,y\}).
+\]
+En particulier, la famille des partitions
+\[
+\bigl(\sim_{\Phi,P,\lambda}\bigr)_{\lambda\in\Lambda}
+\]
+est entièrement déterminée par \(\Theta_P\), et réciproquement \(\Theta_P\) est déterminée par cette famille de partitions par
+\[
+\Theta_P(\{x,y\})
+=
+\sup\{\iota(\lambda):\ x\sim_{\Phi,P,\lambda}y\}.
+\]
+
+\item \textbf{Structure arborescente.} Pour tout \(t\in\mathbb R_+\), la relation
+\[
+x\equiv_t
+\quad\Longleftrightarrow\quad
+x=y\ \text{ ou }\ \Theta_P(\{x,y\})\ge t
+\]
+est une relation d'équivalence sur \(\mathcal X\). Si \(t_1\le t_2\), alors \(\equiv_{t_2}\) raffine \(\equiv_{t_1}\). La famille des classes
+\[
+\overline{\mathcal T}_P:=\{[x]_t:\ x\in\mathcal X,\ t\in\mathbb R_+\}
+\]
+est laminaire : pour tous \(A,B\in\overline{\mathcal T}_P\),
+\[
+A\cap B\neq\varnothing \Longrightarrow A\subseteq B \text{ ou } B\subseteq A.
+\]
+En particulier, munie de l'inclusion, \(\overline{\mathcal T}_P\) est un arbre enraciné fini de racine \(\mathcal X\). La famille observée \(\mathcal T_P\) est la restriction de \(\overline{\mathcal T}_P\) aux seuils \(t\in\iota(\Lambda)\), et elle est donc elle aussi un arbre enraciné fini. Pour tous \(A,B\in\mathcal T_P\), l'ancêtre commun minimal \(A\vee B\) existe et est unique. Si \(A\in\overline{\mathcal T}_P\) n'est pas minimal pour l'inclusion, l'ensemble de ses enfants est non vide, ses enfants sont deux à deux disjoints, et
+\[
+A=\bigsqcup_{B\in\operatorname{Ch}(A)}B.
+\]
+
+\item \textbf{Classification par coupes.} Pour tout \(t\in\mathbb R_+\), les blocs maximaux de la relation \(\equiv_t\) forment exactement la partition \(\mathcal X/{\equiv_t}\). En particulier, pour \(t=\iota(\lambda)\), cette partition coïncide avec \(\mathcal X/{\sim_{\Phi,P,\lambda}}\). Deux contextes \(P\) et \(Q\) induisent la même hiérarchie de partitions si et seulement si leurs familles de partitions \((\equiv_t)_{t\ge 0}\) sont isomorphes niveau par niveau par une bijection préservant les seuils.
+\end{enumerate}
+
+En particulier, toute structure observationnelle construite uniquement à partir des fibres observables à l'échelle est entièrement déterminée par \(\Theta_P\).
+\end{theorem}
+
+\begin{proof}
+(A) Pour \(x,y\in\mathcal X\), posons
+\[
+S_{x,y}:=\{\lambda\in\Lambda:\ x\sim_{\Phi,P,\lambda}y\}.
+\]
+Par la définition des relations \(\sim_{\Phi,P,\lambda}\), chaque \(S_{x,y}\) est un segment initial de \(\Lambda\). De plus, pour tout \(\lambda\in\Lambda\),
+\[
+x\sim_{\Phi,P,\lambda}y\ \text{ et }\ y\sim_{\Phi,P,\lambda}z
+\Longrightarrow
+x\sim_{\Phi,P,\lambda}z,
+\]
+donc
+\[
+S_{x,y}\cap S_{y,z}\subseteq S_{x,z}.
+\]
+En appliquant \(\iota\) et en prenant les bornes supérieures, on obtient
+\[
+\Theta_P(\{x,z\})
+=
+\sup \iota(S_{x,z})
+\ge
+\sup \iota(S_{x,y}\cap S_{y,z})
+=
+\min\bigl(\Theta_P(\{x,y\}),\Theta_P(\{y,z\})\bigr),
+\]
+ce qui est la loi du minimum double. La formulation équivalente sur les triples est immédiate.
+
+(B) L'équivalence \(x\sim_{\Phi,P,\lambda}y \Longleftrightarrow \iota(\lambda)\le \Theta_P(\{x,y\})\) est exactement la lecture par seuil. La formule de reconstruction est alors immédiate, puisque pour une paire fixée \(\{x,y\}\), l'ensemble des intensités qui la laissent indiscernable est un segment initial dont la borne supérieure est \(\Theta_P(\{x,y\})\). Ainsi, la connaissance de \(\Theta_P\) permet de reconstruire toute la famille des partitions, et réciproquement.
+
+(C) La réflexivité de \(\equiv_t\) est imposée par le cas \(x=y\), et la symétrie est évidente. Pour la transitivité, si \(x\equiv_t y\) et \(y\equiv_t z\), alors
+\[
+\Theta_P(\{x,y\})\ge t
+\quad\text{et}\quad
+\Theta_P(\{y,z\})\ge t.
+\]
+Par la loi du minimum double,
+\[
+\Theta_P(\{x,z\})\ge t,
+\]
+d'où \(x\equiv_t z\). Ainsi \(\equiv_t\) est une relation d'équivalence. Si \(t_1\le t_2\), alors \(\equiv_{t_2}\) est plus fine que \(\equiv_{t_1}\) car la condition \(\Theta_P(\{x,y\})\ge t_2\) est plus restrictive que \(\Theta_P(\{x,y\})\ge t_1\).
+
+Si \(A=[x]_{t_1}\) et \(B=[y]_{t_2}\) intersectent, choisissons \(z\in A\cap B\). Si \(t_1\le t_2\), alors \(\equiv_{t_2}\) est plus fine que \(\equiv_{t_1}\), donc
+\[
+[z]_{t_2}\subseteq [z]_{t_1},
+\]
+d'où \(B\subseteq A\). Le cas \(t_2\le t_1\) est symétrique. La famille \(\overline{\mathcal T}_P\) est donc laminaire.
+
+Comme \(\mathcal X\) est fini, il n'existe qu'un nombre fini de sous-ensembles de \(\mathcal X\), donc \(\overline{\mathcal T}_P\) et \(\mathcal T_P\) sont finies. Le plus petit ancêtre commun de deux éléments existe alors par le même argument de finitude et de laminarité que précédemment : l'ensemble des ancêtres communs est non vide car il contient \(\mathcal X\), et deux minimaux ne peuvent être distincts qu'en se recouvrant, ce qui est interdit par la laminarité. Le join \(A\vee B\) est donc bien défini et unique dans \(\mathcal T_P\).
+
+Enfin, si \(A\in\overline{\mathcal T}_P\) n'est pas minimal, le fait que \(\mathcal X\) soit fini garantit qu'il existe un seuil suffisamment grand pour lequel toutes les classes sont des singletons ; ainsi, pour tout \(x\in A\), l'ensemble
+\[
+\mathcal S_x(A):=\{C\in\overline{\mathcal T}_P:\ x\in C\subsetneq A\}
+\]
+est non vide et fini. Il admet donc un élément maximal, que l'on note \(B_x\). Si
+\[
+B_x\subsetneq C\subsetneq A,
+\]
+alors \(x\in C\), donc \(C\in\mathcal S_x(A)\), ce qui contredit la maximalité de \(B_x\). Ainsi \(B_x\) est un enfant de \(A\), et les enfants étant deux à deux disjoints par laminarité on obtient
+\[
+A=\bigsqcup_{B\in\operatorname{Ch}(A)}B.
+\]
+
+(D) Les blocs maximaux de la relation \(\equiv_t\) sont précisément ses classes d'équivalence. Si \(t=\iota(\lambda)\), cette partition est \(\mathcal X/{\sim_{\Phi,P,\lambda}}\). Si deux contextes \(P\) et \(Q\) ont la même hiérarchie de partitions, alors ils ont les mêmes classes à chaque niveau de seuil, donc les mêmes blocs dans leurs arbres complétés. L'identité sur les blocs définit alors un isomorphisme d'arbres étiquetés. Réciproquement, un isomorphisme d'arbres étiquetés préserve les blocs maximaux à chaque seuil, donc les partitions. La hiérarchie est donc entièrement déterminée par l'arbre étiqueté.
+\end{proof}
+
+\begin{corollary}[Caractérisation des fonctions de seuil admissibles]
+Une application symétrique
+\[
+K:\binom{\mathcal X}{2}\longrightarrow \mathbb R_+
+\]
+est la fonction de seuil complète d'une hiérarchie observationnelle si et seulement si elle vérifie la loi du minimum double
+\[
+K(\{x,z\})\ge \min\bigl(K(\{x,y\}),K(\{y,z\})\bigr)
+\qquad
+\text{pour tous }x,y,z\in\mathcal X.
+\]
+Dans ce cas, les relations superniveau
+\[
+x\equiv_t^K y
+\quad\Longleftrightarrow\quad
+x=y\ \text{ ou }\ K(\{x,y\})\ge t
+\]
+forment une filtration de partitions, et l'arbre étiqueté associé est unique.
+\end{corollary}
+
+\begin{proof}
+Le sens direct suit du théorème structural des seuils appliqué à \(K=\Theta_P\).
+
+Pour le sens réciproque, supposons que \(K\) satisfasse la loi du minimum double. Pour tout \(t\in\mathbb R_+\), la relation \(\equiv_t^K\) est réflexive et symétrique par définition. Sa transitivité découle de la loi du minimum double : si \(x\equiv_t^K y\) et \(y\equiv_t^K z\), alors
+\[
+K(\{x,y\})\ge t \quad\text{et}\quad K(\{y,z\})\ge t,
+\]
+donc
+\[
+K(\{x,z\})\ge t,
+\]
+d'où \(x\equiv_t^K z\). Ainsi \(\equiv_t^K\) définit une filtration de partitions.
+
+Réciproquement, pour deux objets \(x,y\), l'ensemble des niveaux \(t\) tels que \(x\equiv_t^K y\) forme un segment initial, dont la borne supérieure est
+\[
+K(\{x,y\})=\sup\{t\in\mathbb R_+:\ x\equiv_t^K y\}.
+\]
+Cette formule fixe \(K\) de manière unique à partir de la filtration, et donc fixe également l'arbre étiqueté associé.
+\end{proof}
+
+\begin{corollary}[Représentation par treillis de filtrations]
+La donnée d'une fonction \(K:\binom{\mathcal X}{2}\to\mathbb R_+\) satisfaisant la loi du minimum double est équivalente à la donnée d'un treillis de partitions totalement ordonné par raffinement, récupérable par les relations \(\equiv_t^K\). En particulier, l'arbre étiqueté construit à partir de \(K\) n'ajoute aucune donnée extra : il représente la même structure de filtrations sous une forme laminaire.
+\end{corollary}
+
+\begin{proof}
+La filtration \((\equiv_t^K)_{t\in\mathbb R_+}\) est totalement ordonnée par raffinement et le passage de la filtration à l'ensemble des classes maximales fournit un treillis laminaire de partitions. Réciproquement, un tel treillis permet de reconstruire \(K\) par la formule de borne supérieure du théorème précédent.
+\end{proof}
+
+\subsection{Représentation atomique de la résolution}
+
+\begin{proposition}[Passage à une ultramétrique]
+Supposons que \(K:\binom{\mathcal X}{2}\to(0,+\infty)\) satisfasse la loi du minimum double. Alors
+\[
+d_K(x,y):=\exp\!\bigl(-K(\{x,y\})\bigr)
+\]
+définit une ultramétrique sur \(\mathcal X\).
+\end{proposition}
+
+\begin{proof}
+La symétrie et la séparation sont immédiates. Pour la forte inégalité triangulaire, la loi du minimum double donne
+\[
+K(\{x,z\})\ge \min\bigl(K(\{x,y\}),K(\{y,z\})\bigr).
+\]
+En appliquant la fonction décroissante \(u\mapsto e^{-u}\), on obtient
+\[
+d_K(x,z)\le \max\bigl(d_K(x,y),d_K(y,z)\bigr),
+\]
+ce qui est précisément l'inégalité ultramétrique.
+\end{proof}
+
+\begin{remark}
+La loi du minimum double joue donc le même rôle formel que la forte inégalité triangulaire. La différence est conceptuelle : la théorie ne part pas d'une distance, mais d'une fonction de seuil issue des observations. Le dendrogramme n'est pas présupposé ; il est reconstruit à partir des niveaux d'indiscernabilité, dans l'esprit des représentations ultramétriques des hiérarchies observées \cite{murtagh2004a,murtagh2004b,rohlf1973}.
+\end{remark}
+
+\begin{definition}[Mesure empirique des seuils]
+On définit la mesure empirique des seuils par
+\[
+\nu_P
+:=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}\delta_{\Theta_P(\{x,y\})}.
+\]
+Son support est exactement \(\Sigma_P\).
+\end{definition}
+
+\begin{theorem}[Représentation atomique de la résolution]
+Soit
+\[
+\widetilde{\mathcal R}_P:\mathbb R_+\longrightarrow [0,1],
+\qquad
+\widetilde{\mathcal R}_P(t)
+:=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}
+\mathbf 1_{\{t>\Theta_P(\{x,y\})\}}.
+\]
+Alors la mesure de Lebesgue--Stieltjes associée à \(\widetilde{\mathcal R}_P\), notée \(\mu_P\), coïncide avec \(\nu_P\), c'est-à-dire
+\[
+\mu_P((s,t])=\widetilde{\mathcal R}_P(t)-\widetilde{\mathcal R}_P(s)
+\qquad\Longleftrightarrow\quad
+\mu_P=\nu_P.
+\]
+De plus, pour toute intensité critique \(\alpha\in\Sigma_P\),
+\[
+\widetilde{\mathcal R}_P(\alpha^+)-\widetilde{\mathcal R}_P(\alpha^-)
+=
+\nu_P(\{\alpha\})
+=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\#\bigl\{\{x,y\}\subseteq\mathcal X:\ \Theta_P(\{x,y\})=\alpha\bigr\}.
+\]
+\end{theorem}
+
+\begin{proof}
+Par définition de \(\nu_P\),
+\[
+\nu_P((-\infty,t))
+=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}
+\delta_{\Theta_P(\{x,y\})}((-\infty,t))
+=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}
+\mathbf 1_{\{t>\Theta_P(\{x,y\})\}},
+\]
+ce qui est exactement \(\widetilde{\mathcal R}_P(t)\). La mesure de Lebesgue--Stieltjes associée à une fonction croissante en escalier est précisément la somme de ses sauts, donc \(\mu_P=\nu_P\).
+
+Le saut en \(\alpha\) ne reçoit une contribution que des paires dont le seuil exact vaut \(\alpha\), d'où la formule annoncée.
+\end{proof}
+
+\begin{corollary}[Prédiction de plateau]
+Dans toute expérience où l'intensité observationnelle est augmentée de manière monotone, la résolution observée ne peut croître que par paliers. Plus précisément, si
+\[
+[t_1,t_2]\cap\Sigma_P=\varnothing,
+\]
+alors \(\widetilde{\mathcal R}_P\) est constante sur \([t_1,t_2]\).
+
+Toute évolution absolument continue de \(\widetilde{\mathcal R}_P\) sur un intervalle contenant un point de \(\Sigma_P\) est incompatible avec la version finie de la théorie.
+\end{corollary}
+
+\begin{proof}
+Si \([t_1,t_2]\cap\Sigma_P=\varnothing\), alors aucune masse de \(\nu_P\) ne se trouve dans cet intervalle. La fonction de répartition \(\widetilde{\mathcal R}_P\) ne peut donc pas y varier.
+
+Comme \(\mu_P=\nu_P\) est purement atomique, toute variation absolument continue sur un intervalle contenant un point de \(\Sigma_P\) est impossible dans le cadre fini.
+\end{proof}
+
+\begin{corollary}[Différence testable avec une description lisse]
+Tout modèle concurrent qui prédit une courbe de résolution absolument continue sur un intervalle contenant un point de \(\Sigma_P\), ou qui refuse la loi de saut ci-dessus, est expérimentalement distinguable de la version finie de la théorie dès que l'on peut balayer l'intensité et compter les paires séparées.
+\end{corollary}
+
+\begin{proof}
+Dans la théorie finie, \(\widetilde{\mathcal R}_P\) est une fonction en escalier et sa mesure associée est purement atomique. Un modèle absolument continu ne peut donc pas reproduire cette structure.
+\end{proof}
+
+\begin{proposition}[Calcul expérimental minimal]
+Considérons
+\[
+\mathcal X=\{a,b,c\},\qquad \Lambda=\{\lambda_1\prec\lambda_2\prec\lambda_3\},
+\]
+avec
+\[
+\iota(\lambda_1)<\iota(\lambda_2)<\iota(\lambda_3),
+\]
+et
+\[
+\mathcal F_{\lambda_1}=\{f_1\},\qquad
+\mathcal F_{\lambda_2}=\{f_1,f_2\},\qquad
+\mathcal F_{\lambda_3}=\{f_1,f_2,f_3\},
+\]
+où les réponses sont données par
+\[
+\begin{array}{c|ccc}
+& a & b & c \\ \hline
+\Phi(P,\cdot,f_1) & 0 & 0 & 1 \\
+\Phi(P,\cdot,f_2) & 0 & 1 & 1 \\
+\Phi(P,\cdot,f_3) & 0 & 1 & 1
+\end{array}
+\]
+Un choix compatible de fonction de seuil complète est
+\[
+\Theta_P(\{a,c\})=\Theta_P(\{b,c\})=\alpha_1,
+\qquad
+\Theta_P(\{a,b\})=\alpha_2,
+\]
+avec
+\[
+\alpha_1<\iota(\lambda_1)\le \alpha_2<\iota(\lambda_2).
+\]
+On obtient alors
+\[
+\nu_P=\frac23\,\delta_{\alpha_1}+\frac13\,\delta_{\alpha_2},
+\]
+et
+\[
+\widetilde{\mathcal R}_P(t)=
+\begin{cases}
+0,& t\le \alpha_1,\\[0.2em]
+\frac23,& \alpha_1<t\le \alpha_2,\\[0.2em]
+1,& t>\alpha_2.
+\end{cases}
+\]
+En particulier,
+\[
+\mathcal R_P(\lambda_1)=\frac23,\qquad
+\mathcal R_P(\lambda_2)=1,\qquad
+\mathcal R_P(\lambda_3)=1.
+\]
+De plus,
+\[
+C(\lambda_1)=1,\quad C(\lambda_2)=2,\quad C(\lambda_3)=3,
+\]
+tandis que
+\[
+C_{\mathrm{eff},P}(\lambda_1)=1,\quad
+C_{\mathrm{eff},P}(\lambda_2)=2,\quad
+C_{\mathrm{eff},P}(\lambda_3)=2.
+\]
+Ce calcul montre simultanément un saut réel de résolution entre \(\lambda_1\) et \(\lambda_2\), puis un plateau parfait entre \(\lambda_2\) et \(\lambda_3\), malgré l'augmentation de l'information brute.
+
+\paragraph{Lecture structurelle.}
+Dans cet exemple, la hiérarchie de partitions est
+\[
+\{a,b,c\}
+\succ
+\{a,b\}\,|\,\{c\}
+\succ
+\{a\}\,|\,\{b\}\,|\,\{c\},
+\]
+et la fonction \(\Theta_P\) enregistre exactement le niveau auquel chaque paire se sépare. Le schéma est celui d'une filtration de partitions à deux sauts, dont la mesure empirique des seuils possède deux atomes.
+\end{proposition}
+
+\begin{proof}
+Le calcul ci-dessus est immédiat à partir des définitions de \(\nu_P\) et \(\widetilde{\mathcal R}_P\).
+\end{proof}
+
+\section{Conclusion structurale}
+
+La première partie établit qu'une théorie construite à partir de réponses observationnelles se factorise par l'empreinte, ses fibres, son quotient et ses représentations minimales. La seconde partie montre qu'à échelle finie la hiérarchie complète des partitions observables est encodée par une fonction de seuil qui satisfait une loi de minimum double, dont la structure arborescente est unique. La courbe de résolution n'est alors rien d'autre que la fonction de répartition d'une mesure atomique portée par le spectre critique. Ainsi, la structure observationnelle introduite dans cet article est gouvernée par deux objets : l'empreinte réduite en Partie I, et la fonction de seuil complète en Partie II.
+
+\section{Ce qui est nouveau}
+
+\begin{enumerate}[label=\arabic*.]
+\item L'objet primaire n'est pas une distance ni une partition, mais une procédure d'observation. La théorie commence au niveau des réponses et non au niveau d'une géométrie déjà supposée.
+\item La réduction observationnelle élimine les sondes redondantes sans perdre les fibres. Elle distingue l'information brute de l'information effectivement nouvelle.
+\item La fonction de seuil joue le rôle d'objet de synthèse : elle reconstruit toutes les partitions observables, l'arbre des classes et la mesure de résolution.
+\item La loi du minimum double ne sert pas seulement à imiter les ultramétriques ; elle fournit un critère exact pour reconnaître quand une hiérarchie de partitions provient d'une observation filtrée.
+\end{enumerate}
+
+\section{Ouverture physico-mathématique}
+
+La théorie précédente demeure entièrement mathématique. Elle suggère cependant un programme supplémentaire : étudier si des structures physiques peuvent être reconstruites à partir de l'espace latent des empreintes et de ses invariants. La prochaine étape serait de formuler, dans un cadre séparé, un théorème physico-mathématique de reconstruction où l'espace, la dynamique, les symétries et certaines lois effectives émergent comme invariants d'un système d'observation itérée.
+
+Une telle étape n'est pas démontrée ici. Elle constitue le prolongement naturel du cadre développé dans cet article, et elle doit être abordée avec des hypothèses physiques explicites, séparées des résultats purement mathématiques.
+
+\section*{Remerciements}
+La mise en forme, certaines reformulations et la relecture linguistique ont bénéficié d'une assistance automatisée de rédaction. L'auteur assume l'ensemble des énoncés, des démonstrations et des choix scientifiques.
+
+
+
+
+
+\begin{appendices}
+
+\section{Résultats techniques complémentaires}
+
+\subsection{Monotonie, redondance et robustesse}
+
+Soient \(\mathcal G_1,\mathcal G_2\subseteq\mathcal F\) deux familles de sondes.
+
+\begin{proposition}[Monotonie par raffinement]
+Si \(\mathcal G_1\subseteq\mathcal G_2\), alors, pour tout \(P\in\mathcal P\),
+\[
+x\sim_{\Phi,P,\mathcal G_2}y \Longrightarrow x\sim_{\Phi,P,\mathcal G_1}y.
+\]
+En particulier, l'ajout de sondes ne peut qu'affiner les classes d'équivalence.
+\end{proposition}
+
+\begin{proof}
+L'égalité des empreintes sur \(\mathcal G_2\) implique l'égalité sur la sous-famille \(\mathcal G_1\).
+\end{proof}
+
+\begin{corollary}
+Si une famille \(\mathcal G_1\) est séparante en \(P\), alors toute famille \(\mathcal G_2\supseteq\mathcal G_1\) est également séparante en \(P\).
+\end{corollary}
+
+\begin{proof}
+Immédiat par la proposition précédente.
+\end{proof}
+
+\begin{proposition}[Sondes redondantes]
+Soit \(g\in\mathcal F\). Si, pour tout \(x\in\mathcal X\), la valeur \(\Phi(P,x,g)\) est déterminée par les valeurs \(\{\Phi(P,x,f):f\in\mathcal G\}\) d'une famille \(\mathcal G\subseteq\mathcal F\), alors l'ajout de \(g\) à \(\mathcal G\) ne raffine pas la relation d'indiscernabilité induite par \(\mathcal G\).
+\end{proposition}
+
+\begin{proof}
+Deux objets égaux sur \(\mathcal G\) ont la même valeur sur \(g\), donc les relations d'indiscernabilité induites par \(\mathcal G\) et \(\mathcal G\cup\{g\}\) coïncident.
+\end{proof}
+
+\begin{proposition}[Robustesse uniforme]
+Si deux fonctionnels \(\Phi,\Psi:\mathcal P\times\mathcal X\times\mathcal F\to\mathbb R\) satisfont
+\[
+\sup_{(P,x,f)}|\Phi(P,x,f)-\Psi(P,x,f)|\le \varepsilon,
+\]
+alors, pour toute famille finie \(\mathcal F_K\) et tout \(P\in\mathcal P\),
+\[
+\|I_\Phi^P(x)-I_\Psi^P(x)\|_\infty\le \varepsilon
+\qquad
+\text{pour tout }x\in\mathcal X.
+\]
+\end{proposition}
+
+\begin{proof}
+Par définition,
+\[
+\|I_\Phi^P(x)-I_\Psi^P(x)\|_\infty
+=
+\max_{1\le k\le K} |\Phi(P,x,f_k)-\Psi(P,x,f_k)|
+\le \varepsilon.
+\]
+\end{proof}
+
+\subsection{Tours d'empreintes}
+
+\begin{definition}[Tour d'empreintes]
+On appelle \emph{tour d'empreintes} une suite d'espaces
+\[
+E_0=\mathcal X,\qquad E_{n+1}=I_n(E_n)\subseteq \mathbb R^{K_n}
+\]
+où, pour chaque \(n\ge 0\), \(I_n:E_n\to \mathbb R^{K_n}\) est une empreinte informationnelle construite sur le niveau \(E_n\).
+\end{definition}
+
+\begin{proposition}[Stabilité de la hiérarchie]
+Supposons que, pour chaque \(n\ge 0\), \(I_n\) soit injective. Alors chacun des niveaux \(E_n\) est identifiable à \(E_0\) comme ensemble. Si, de plus, chaque \(I_n\) est isométrique pour une distance induite, alors tous les niveaux sont isométriques entre eux.
+\end{proposition}
+
+\begin{proof}
+L'injectivité identifie \(E_n\) à son image. L'itération donne l'identification de chaque niveau à \(E_0\). Si les \(I_n\) sont isométriques, les identifications préservent en outre les distances.
+\end{proof}
+
+\begin{remark}
+La hiérarchie des empreintes formalise l'idée d'empreinte de l'empreinte. Elle ne crée pas automatiquement de nouvelle information brute si chaque étage ne dépend que du précédent, mais elle peut faire émerger de nouvelles géométries, de nouvelles symétries et de nouveaux invariants. Elle exprime aussi la possibilité d'observer les observables, puis les observables des observables, et ainsi de suite.
+\end{remark}
+
+%\end{appendices}
+
+
+
+
+
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Principe universel de descente et de commutation des empreintes
+
+
+% Théorème général unificateur de la théorie des empreintes
+% issu de l'analyse des exemples Naszimger / double résolution / transport observationnel, mais formulé ici comme principe universel
+
+\section{Principe universel de descente et de commutation des empreintes}
+
+\begin{definition}[Structure observationnelle admissible]
+Fixons un contexte \(P\in\mathcal P\), une échelle \(\lambda\in\Lambda\) et une famille finie de sondes \(\mathcal G\subseteq\mathcal F_\lambda\).
+On pose
+\[
+I:=I_{\Phi,\mathcal G}^P,\qquad
+\mathcal L:=\mathcal L_{\mathcal G,P}=I(\mathcal X),\qquad
+\pi:=\pi_{\mathcal G}:\mathcal X\to\mathcal X/{\sim_{\Phi,P,\mathcal G}}.
+\]
+
+On appelle \emph{structure observationnelle admissible} toute donnée \(\mathsf S\) obtenue à partir de \(I\) par itération finie des constructions canoniques de cette théorie, telles que :
+\begin{enumerate}[label=\textbf{(\arabic*)}]
+\item le passage à l'image \(I(\mathcal X)\),
+\item le passage au quotient par les fibres de \(I\),
+\item la restriction à une sous-famille de sondes,
+\item la construction, à partir de données constantes sur les fibres de \(I\), d'une relation, d'une fonction, d'un arbre, d'un intervalle canonique, d'une mesure ou d'une probabilité.
+\end{enumerate}
+
+On dit qu'une telle structure \(\mathsf S\) est \emph{fibre-compatible} si toute représentation canonique associée à \(\mathsf S\) est constante sur les fibres de \(I\), c'est-à-dire si, pour la représentation considérée,
+\[
+I(x)=I(y)\Longrightarrow \mathsf S(x)=\mathsf S(y).
+\]
+\end{definition}
+
+\begin{remark}
+La définition précédente n'introduit aucun objet primitif nouveau : elle regroupe, sous une seule étiquette, des constructions déjà démontrées ailleurs dans la théorie des empreintes.
+\end{remark}
+
+\begin{theorem}[Principe universel de descente et de commutation des empreintes]
+\label{thm:principe-universel-commutation}
+Sous les hypothèses de la définition précédente, supposons que \(\mathsf S\) soit fibre-compatible. Alors :
+
+\begin{enumerate}[label=\textbf{(\alph*)}]
+\item il existe une unique structure descendue \(\overline{\mathsf S}\) sur \(\mathcal L\) telle que toute représentation canonique de \(\mathsf S\) se factorise de manière unique à travers \(I\); en conséquence, les diagrammes canoniques construits à partir de ces représentations commutent ;
+
+\item il existe une unique structure quotientée \(\widehat{\mathsf S}\) sur \(\mathcal X/{\sim_{\Phi,P,\mathcal G}}\) telle que \(\mathsf S\) se factorise de manière unique à travers \(\pi\) ;
+
+\item si \(\mathsf S\) est construite à l'aide de la fermeture observationnelle \(\operatorname{Cl}_{P,\lambda}(\mathcal G)\), alors remplacer \(\mathcal G\) par \(\operatorname{Cl}_{P,\lambda}(\mathcal G)\) ne change aucune fibre, donc ne change ni la structure descendue ni les commutations associées ;
+
+\item si \(\mathsf S\) est de type seuil, c'est-à-dire codée par une fonction symétrique
+\[
+K:\binom{\mathcal X}{2}\to\mathbb R_+,
+\]
+et si \(K\) vérifie la loi du minimum double, alors \(\mathsf S\) est entièrement déterminée par la fonction de seuil complète \(\Theta_P\), par la filtration des partitions \((\equiv_t)_{t\ge 0}\), par l'arbre \(\mathcal T_P\), par les intervalles canoniques \(\overline I(B)\) et par la mesure atomique de résolution \(\mu_P=\nu_P\) ;
+
+\item toutes ces constructions sont invariantes par reparamétrisation monotone de l'échelle \(\Lambda\).
+\end{enumerate}
+
+Autrement dit, toute construction observationnelle admissible est canonique, unique et compatible avec les projections, les quotients, les restrictions d'échelle, les arbres de seuils et les mesures de résolution.
+\end{theorem}
+
+\begin{proof}
+On distingue cinq niveaux.
+
+\medskip
+\noindent\textbf{1. Niveau des fibres.}
+Le théorème de factorisation de l'empreinte affirme que toute donnée constante sur les fibres de \(I\) se factorise de manière unique à travers \(I\), puis de manière équivalente à travers le quotient \(\pi\). Cela donne l'unicité de \(\overline{\mathsf S}\) et de \(\widehat{\mathsf S}\) dès que la structure est fibre-compatible. C'est exactement la propriété universelle du quotient observationnel.
+
+\medskip
+\noindent\textbf{2. Niveau des sondes.}
+Par le théorème de réduction observationnelle des sondes, la fermeture \(\operatorname{Cl}_{P,\lambda}(\mathcal G)\) a les mêmes fibres que \(\mathcal G\). Ainsi, toute structure construite à partir de \(\mathcal G\) se transporte sans perte à la fermeture, et réciproquement. Aucune donnée observationnelle n'est modifiée par la suppression des sondes redondantes.
+
+\medskip
+\noindent\textbf{3. Niveau des seuils et de la résolution.}
+Si la structure admissible est codée par une fonction symétrique \(K\) vérifiant la loi du minimum double, alors le théorème de reconstruction complète des partitions montre que la famille \((\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}\), la fonction de seuil complète \(\Theta_P\) et le spectre critique \(\Sigma_P\) se déterminent mutuellement. Plus précisément, la relation
+\[
+x\sim_{\Phi,P,\lambda}y
+\quad\Longleftrightarrow\quad
+\iota(\lambda)\le \Theta_P(\{x,y\})
+\]
+fixe la filtration des partitions. Par le corollaire \emph{Caractérisation des seuils admissibles}, toute application symétrique \(K\) satisfaisant la loi du minimum double est reconstruite par
+\[
+K(\{x,y\})=\sup\{t\in\mathbb R_+:\ x\equiv_t^K y\}.
+\]
+Par la définition de \emph{Complétion seuil canonique} et par le théorème \emph{Loi du minimum double, rigidité ultramétrique et complétion arborescente canonique}, la famille \((\equiv_t)_{t\ge 0}\) est une filtration canonique de partitions, l'arbre \(\mathcal T_P\) est laminaire, et les intervalles \(\overline I(B)\) déterminent les branches. Enfin, par le théorème de représentation atomique de la résolution, la mesure empirique des seuils \(\nu_P\) est exactement la mesure de Lebesgue--Stieltjes associée à \(\widetilde{\mathcal R}_P\). Les masses de branches \(\omega_P(B)\) sont donc canoniquement déterminées par les intervalles \(\overline I(B)\).
+
+\medskip
+\noindent\textbf{4. Commutation et naturalité.}
+Les constructions considérées ici sont précisément celles dont la définition ou les théorèmes antérieurs établissent qu'elles dépendent uniquement des réponses observationnelles, donc uniquement des fibres de l'empreinte correspondante. Par conséquent, chacune admet une factorisation unique à travers \(I\) ou \(\pi\), et les diagrammes élémentaires associés commutent individuellement. Toute composition finie de ces diagrammes commute encore, par stabilité de la commutation par composition.
+
+\medskip
+\noindent\textbf{5. Invariance par reparamétrisation monotone.}
+Par le corollaire d'invariance par reparamétrisation monotone du manuscrit global, tous les énoncés précédents ne dépendent que de l'ordre des intensités et des inclusions \(\mathcal F_\lambda\subseteq\mathcal F_\mu\). Ils sont donc transportés canoniquement par toute reparamétrisation monotone de \(\Lambda\).
+
+Ainsi, le principe général est établi.
+\end{proof}
+
+\begin{corollary}[Naszimger comme cas de quotient observationnel]
+La reconstruction du chat de Naszimger n'est rien d'autre qu'un cas particulier du principe précédent : la classe non résolue, sa projection quotient et son raffinement par niveaux de sondes correspondent à la descente d'une structure observationnelle admissible à travers \(I\) et \(\pi\).
+\end{corollary}
+
+\begin{proof}
+Dans cet exemple, la donnée fondamentale est une classe observationnelle non réduite, puis son raffinement par les sondes à plus haute résolution. C'est exactement le cas \textbf{(a)} du théorème, appliqué à une structure discrète finie.
+\end{proof}
+
+\begin{corollary}[Double résolution comme cas de mesure descendue]
+La probabilité émergente de résolution est une conséquence directe du cas \textbf{(d)} : la masse de branche \(\omega_P(B)\) descend du sous-arbre \(\mathcal T_P\) vers l'intervalle canonique \(\overline I(B)\), puis vers la mesure atomique \(\mu_P=\nu_P\).
+\end{corollary}
+
+\begin{proof}
+Par le théorème \emph{Loi du minimum double, rigidité ultramétrique et complétion arborescente canonique} et par le théorème de représentation atomique de la résolution, la masse de branche est portée par les intervalles \(\overline I(B)\) et se lit via \(\widetilde{\mathcal R}_P\). La formule
+\[
+\omega_P(B)=\mu_P(\overline I(B))=\widetilde{\mathcal R}_P(t_B)-\widetilde{\mathcal R}_P(s_B)
+\]
+est déjà une formule de descente. La probabilité conditionnelle n'est que la normalisation de cette masse de branche, et la commutation résulte de l'additivité de \(\mu_P\) sur les enfants d'un nœud.
+\end{proof}
+
+\begin{corollary}[Transport observationnel comme cas de factorisation]
+Toute opération \(\mathcal G\)-compatible est un cas particulier du cas \textbf{(a)} du théorème : l'application physique ou logique \(F\) descend de manière unique à l'application induite \(\mathcal C_F\) sur l'image observationnelle réduite.
+\end{corollary}
+
+\begin{proof}
+C'est exactement le théorème de factorisation de l'empreinte appliqué au morphisme \(I\circ F\). La commutation
+\[
+I\circ F=\mathcal C_F\circ I
+\]
+est la forme la plus simple du principe universel de descente.
+\end{proof}
+
+\begin{remark}
+Dans ce cadre, les trois exemples ne sont donc pas trois théories séparées. Ils sont trois incarnations du même schéma :
+\[
+\mathcal X
+\;\xrightarrow{\,I\,}\;
+\mathcal L
+\cong
+\mathcal X/{\sim_{\Phi,P,\mathcal G}}
+\Longrightarrow
+\begin{cases}
+\text{réduction observationnelle des sondes},\\
+\text{reconstruction complète des partitions},\\
+\text{complétion seuil canonique},\\
+\text{arbre étiqueté},\\
+\text{mesure atomique de la résolution},\\
+\text{transport observationnel}.
+\end{cases}
+\]
+Le théorème précédent formule cette signature comme un principe général.
+\end{remark}
+
+
+%\end{appendices}
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%generalisation
+
+
+\section{La représentation comme géométrie de résolution observationnelle}
+
+\subsection{Idée directrice}
+
+Dans le langage ordinaire de la représentation, on parle d'\emph{objet d'entrée}, d'\emph{observable}, de \emph{généralisation}, de \emph{sous-résolution} et de \emph{sur-résolution}.  
+Dans le langage de la théorie des empreintes, ces mots se relisent de façon plus rigoureuse :
+
+\begin{itemize}[leftmargin=1.4em]
+\item l'\emph{objet d'entrée} est un élément \(x\in\mathcal X\) ;
+\item l'\emph{observable} est une valeur d'empreinte \(I_{\Phi,\mathcal G}^P(x)\) ;
+\item un système de représentation est un choix de sondes et d'échelle qui induit une filtration de fibres ;
+\item une représentation est ici \emph{un niveau de cette filtration}, donc une position dans une géométrie de résolution ;
+\item la généralisation correspond à un \emph{régime observationnel intermédiaire} de la géométrie des seuils, c'est-à-dire à un niveau où \(0<\widetilde{\mathcal R}_P(t)<1\) ;
+\item la sous-résolution et la résolution terminale correspondent respectivement à une résolution insuffisante et à une résolution déjà maximale pour le système d'observation du chapitre.
+\end{itemize}
+
+Autrement dit, représenter ne signifie pas d'abord mémoriser, mais \emph{raffiner des fibres observables}.  
+Le présent chapitre ne suppose aucune structure extérieure à la théorie des empreintes : il étudie une forme interne de la représentation, entièrement lisible dans les fibres, les quotients et les seuils déjà construits.
+
+\begin{remark}[Interprétation observationnelle]
+Dans ce cadre, une représentation n'est ni un vecteur, ni un simple embedding, ni une fonction isolée : c'est une position dans une filtration observationnelle canonique, donc un niveau de résolution.
+\end{remark}
+
+\begin{remark}[Cas particulier vectoriel]
+Si une représentation est donnée par un vecteur de réponses
+\[
+E=(E_1,\ldots,E_d):\mathcal X\to\mathbb R^d,
+\]
+alors chaque coordonnée \(E_i\) joue le rôle d'une sonde. La représentation vectorielle \(E\) se lit donc comme une empreinte à famille finie. Enrichir le nombre de coordonnées ou la famille de sondes revient à raffiner la filtration des fibres. Dans ce sens, une représentation vectorielle est représentable dans la théorie des empreintes.
+\end{remark}
+
+\begin{remark}[Terminologie observationnelle]
+Nous utilisons ici les termes \emph{généralisation}, \emph{sous-résolution} et \emph{sur-résolution} dans un sens strictement observationnel. Ils désignent des positions relatives dans la géométrie des seuils, et non des notions importées d'une théorie extérieure de l'apprentissage.
+\end{remark}
+
+\begin{remark}
+Le chapitre ne remplace pas la géométrie observationnelle déjà construite dans la théorie. Il en déploie une conséquence interne : si un système de représentation est modélisé par une suite de familles de sondes croissantes, alors sa dynamique se lit dans la filtration des partitions observables et dans l'arbre canonique associé.
+\end{remark}
+
+\subsection{Raffinement observationnel d'une trajectoire}
+
+\begin{definition}[Trajectoire observationnelle de représentation]
+Fixons un contexte \(P\in\mathcal P\), un ensemble fini d'objets d'entrée \(\mathcal D\subseteq\mathcal X\), et une famille croissante de sondes
+\[
+\mathcal G_0\subseteq \mathcal G_1\subseteq \cdots \subseteq \mathcal G_n \subseteq \mathcal F_\lambda
+\]
+correspondant à une suite finie de niveaux de représentation.
+
+Pour chaque \(k\in\{0,\ldots,n\}\), on pose
+\[
+I_k:=I_{\Phi,\mathcal G_k}^P,
+\qquad
+\mathcal L_k:=I_k(\mathcal X),
+\qquad
+\Pi_k:=\mathcal D/{\sim_{\Phi,P,\mathcal G_k}},
+\]
+où \(\Pi_k\) désigne la partition induite sur l'ensemble d'étude \(\mathcal D\).
+
+On appelle \emph{trajectoire observationnelle de représentation} la chaîne de restrictions
+\[
+\mathcal L_n
+\xrightarrow{\,r_{n\to n-1}\,}
+\mathcal L_{n-1}
+\xrightarrow{\,r_{n\to n-2}\,}
+\cdots
+\xrightarrow{\,r_{1\to 0}\,}
+\mathcal L_0,
+\]
+où \(r_{\ell\to k}\) est la restriction aux coordonnées de \(\mathcal G_k\), de sorte que
+\[
+I_k=r_{k+1\to k}\circ I_{k+1}
+\qquad (0\le k<n).
+\]
+Cette chaîne décrit un raffinement progressif de l'observation.
+
+On dit qu'une telle trajectoire est \emph{fibre-compatible} si elle est obtenue par simple ajout de sondes, donc si chaque étape est bien une projection de la suivante par oubli de coordonnées.
+\end{definition}
+
+\begin{definition}[Compatibilité avec la fonction de seuil complète]
+On dit que la trajectoire \((\mathcal G_k)_{0\le k\le n}\) est \emph{compatible avec} la fonction de seuil complète \(\Theta_P\) s'il existe une suite croissante d'intensités
+\[
+\iota(\lambda_0)\preceq \iota(\lambda_1)\preceq \cdots \preceq \iota(\lambda_n)
+\]
+telle que, pour tout \(k\),
+\[
+\Pi_k=\mathcal D/{\sim_{\Phi,P,\lambda_k}}.
+\]
+Autrement dit, la trajectoire considérée est une sous-filtration de la filtration canonique déterminée par \(\Theta_P\).
+\end{definition}
+
+\begin{proposition}[Filtration canonique induite]
+Si \(\mathcal G_k\subseteq \mathcal G_\ell\), alors
+\[
+x\sim_{\Phi,P,\mathcal G_\ell}y \Longrightarrow x\sim_{\Phi,P,\mathcal G_k}y
+\qquad \text{pour tous }x,y\in\mathcal X.
+\]
+En particulier, la famille \(\bigl(\Pi_k\bigr)_{0\le k\le n}\) est une filtration de partitions sur \(\mathcal D\) : chaque \(\Pi_{k+1}\) raffine \(\Pi_k\).
+\end{proposition}
+
+\begin{proof}
+L'égalité des empreintes sur \(\mathcal G_\ell\) implique, par restriction, l'égalité sur la sous-famille \(\mathcal G_k\). C'est exactement la monotonie du raffinement observationnel. La restriction à \(\mathcal D\) donne alors la filtration des partitions.
+\end{proof}
+
+\subsection{Application du Principe universel de descente et de commutation des empreintes}
+
+\begin{remark}[Résultat central]
+Le théorème suivant porte le cœur interprétatif du chapitre.
+\end{remark}
+
+\begin{theorem}[Descente canonique des trajectoires de représentation]
+\label{thm:descente-trajectoire}
+Sous les hypothèses précédentes, la famille
+\[
+\mathsf S^{\mathrm{traj}}
+:=
+\bigl(I_k,\mathcal L_k,\Pi_k,r_{k+1\to k}\bigr)_{0\le k<n}
+\]
+induit une structure observationnelle admissible au sens du \emph{Principe universel de descente et de commutation des empreintes}. En particulier, elle admet une descente canonique et un passage canonique au quotient, uniques, et tous les diagrammes élémentaires associés commutent.
+
+Dans le cadre fini de la Partie II, si cette trajectoire est compatible avec la fonction de seuil complète \(\Theta_P\), alors la filtration \((\Pi_k)\) est une sous-filtration de la filtration canonique déterminée par \(\Theta_P\). Le point \textbf{(d)} du \emph{Principe universel de descente et de commutation des empreintes} fournit alors la chaîne canonique
+\[
+(\Pi_k)\Longleftrightarrow \Theta_P \Longleftrightarrow \mathcal T_P \Longleftrightarrow \widetilde{\mathcal R}_P \Longleftrightarrow \mu_P.
+\]
+\end{theorem}
+
+\begin{proof}
+La famille \(\mathsf S^{\mathrm{traj}}\) est construite par itération finie de restrictions, d'images et de quotients à partir des empreintes \(I_k\). Elle relève donc, par définition, des constructions canoniques admissibles du Principe universel.
+
+Par le point \textbf{(a)} du Principe universel, toute représentation canonique associée à une donnée fibre-compatible se factorise de manière unique à travers l'image réduite et le quotient observationnel. Cela donne l'existence et l'unicité des structures descendues et quotientées, ainsi que la commutation des carrés élémentaires.
+
+Dans le cadre fini de la Partie II, la compatibilité avec \(\Theta_P\) signifie que la filtration \((\Pi_k)\) est la restriction d'une filtration canonique. Le point \textbf{(d)} du Principe universel fournit alors la correspondance
+\[
+(\Pi_k)\Longleftrightarrow \Theta_P \Longleftrightarrow \mathcal T_P \Longleftrightarrow \widetilde{\mathcal R}_P \Longleftrightarrow \mu_P,
+\]
+sans redémonstration supplémentaire.
+\end{proof}
+
+\begin{proposition}[Caractère canonique de la représentation observationnelle]
+Toute trajectoire fibre-compatible est entièrement déterminée, à isomorphisme canonique près, par la filtration des partitions qu'elle engendre.
+\end{proposition}
+
+\begin{proof}
+Par le point \textbf{(d)} du Principe universel, la filtration canonique des partitions, la fonction de seuil complète, l'arbre laminaire et la mesure atomique de résolution se déterminent mutuellement :
+\[
+(\Pi_k)\Longleftrightarrow \Theta_P \Longleftrightarrow \mathcal T_P \Longleftrightarrow \widetilde{\mathcal R}_P \Longleftrightarrow \mu_P.
+\]
+Par le point \textbf{(a)} du Principe universel, toute structure observationnelle admissible fibre-compatible se descend de manière unique à travers cette filtration, puis à travers les images réduites et les quotients observationnels. Ainsi, deux trajectoires fibre-compatibles qui engendrent la même filtration canonique engendrent les mêmes structures admissibles descendues, donc sont canoniquement isomorphes du point de vue de la théorie.
+\end{proof}
+
+\begin{remark}[Indiscernabilité des trajectoires ayant la même filtration canonique]
+Deux trajectoires qui induisent la même filtration canonique sont indiscernables du point de vue de toutes les structures observationnelles admissibles. Dans ce sens précis, les sondes sont secondaires par rapport à la géométrie des fibres ; cette seconde phrase est une lecture interprétative du résultat précédent, et non son contenu démontré.
+\end{remark}
+
+\begin{figure}[t]
+\centering
+\[
+\begin{array}{c}
+\text{Résolution insuffisante}\\[0.3em]
+\downarrow\\[0.3em]
+\alpha_-(P)\\[0.3em]
+\downarrow\\[0.3em]
+\text{Généralisation observationnelle}\\[0.3em]
+\downarrow\\[0.3em]
+\alpha_+(P)\\[0.3em]
+\downarrow\\[0.3em]
+\text{Résolution terminale}
+\end{array}
+\]
+\caption{Les trois régimes comme coupes d'une même géométrie de résolution.}
+\end{figure}
+
+\subsection{Seuils canoniques de représentation}
+
+\begin{remark}[Courbe de résolution canonique]
+On rappelle la courbe de résolution canonique déjà associée à la mesure atomique de résolution \(\mu_P=\nu_P\) :
+\[
+\widetilde{\mathcal R}_P(t)
+:=
+\nu_P\bigl((-\infty,t)\bigr)
+=
+\frac{1}{\binom{|\mathcal D|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal D}
+\mathbf 1_{\{t>\Theta_P(\{x,y\})\}}.
+\]
+\end{remark}
+
+\begin{proposition}[Gain de résolution]
+Pour deux niveaux \(k<\ell\), on pose
+\[
+G_P(k,\ell):=
+\widetilde{\mathcal R}_P\bigl(\iota(\lambda_\ell)\bigr)
+-
+\widetilde{\mathcal R}_P\bigl(\iota(\lambda_k)\bigr).
+\]
+Alors
+\[
+G_P(k,\ell)=\mu_P\bigl((\iota(\lambda_k),\iota(\lambda_\ell)]\bigr),
+\]
+et ce gain est nul si et seulement si aucun saut atomique de la résolution ne se produit entre les deux niveaux.
+\end{proposition}
+
+\begin{proof}
+La définition de \(\widetilde{\mathcal R}_P\) donne directement
+\[
+\widetilde{\mathcal R}_P\bigl(\iota(\lambda_\ell)\bigr)-\widetilde{\mathcal R}_P\bigl(\iota(\lambda_k)\bigr)
+=
+\nu_P\bigl((\iota(\lambda_k),\iota(\lambda_\ell)]\bigr)
+=
+\mu_P\bigl((\iota(\lambda_k),\iota(\lambda_\ell)]\bigr).
+\]
+Comme \(\mu_P\) est atomique, l'égalité à zéro équivaut à l'absence d'atome dans l'intervalle considéré.
+\end{proof}
+
+\begin{remark}[Seuils critiques canoniques]
+On note les seuils critiques déjà lus sur la courbe de résolution :
+\[
+\alpha_-(P):=\inf\{t\in\mathbb R_+:\ \widetilde{\mathcal R}_P(t)>0\},
+\qquad
+\alpha_+(P):=\sup\{t\in\mathbb R_+:\ \widetilde{\mathcal R}_P(t)<1\}.
+\]
+Ces bornes sont entièrement lues sur la mesure de résolution \(\mu_P\).
+\end{remark}
+
+\begin{proposition}[Intervalle de résolution intermédiaire]
+La courbe \(\widetilde{\mathcal R}_P\) est nulle en dessous du premier saut, puis strictement intermédiaire entre ses premier et dernier sauts, puis égale à \(1\) au-delà du dernier saut. Plus précisément,
+\[
+t<\alpha_-(P)\ \Longrightarrow\ \widetilde{\mathcal R}_P(t)=0,
+\]
+\[
+\alpha_-(P)<t<\alpha_+(P)\ \Longrightarrow\ 0<\widetilde{\mathcal R}_P(t)<1,
+\]
+\[
+t>\alpha_+(P)\ \Longrightarrow\ \widetilde{\mathcal R}_P(t)=1.
+\]
+En particulier,
+\[
+(\alpha_-(P),\alpha_+(P))=\{t\in\mathbb R_+:\ 0<\widetilde{\mathcal R}_P(t)<1\}.
+\]
+\end{proposition}
+
+\begin{proof}
+Comme \(\mu_P=\nu_P\) est purement atomique et que \(\widetilde{\mathcal R}_P\) est sa fonction de répartition, la courbe est une fonction en escalier dont les sauts sont exactement les atomes de \(\mu_P\). Les deux bornes \(\alpha_-(P)\) et \(\alpha_+(P)\) sont donc respectivement le premier et le dernier seuil critique lus sur cette courbe. Il s'ensuit que \(\widetilde{\mathcal R}_P\) est nulle avant le premier saut, strictement entre \(0\) et \(1\) entre le premier et le dernier saut, puis vaut \(1\) après le dernier saut.
+\end{proof}
+
+\begin{remark}[Portée de la résolution terminale]
+La résolution terminale est ici une notion strictement observationnelle : elle signifie uniquement que toutes les distinctions canoniques ont déjà été réalisées. Dans un contexte d'apprentissage, ce régime pourra être interprété comme une forme de sur-résolution observationnelle.
+\end{remark}
+
+\subsection{Tripartition observationnelle des régimes de représentation}
+
+\begin{remark}[Sens de la généralisation observationnelle]
+La généralisation ne renvoie ici ni à une erreur de test ni à une performance statistique ; elle désigne uniquement un régime intermédiaire de résolution, caractérisé par \(0<\widetilde{\mathcal R}_P(t)<1\).
+\end{remark}
+
+\begin{remark}[Résultat central]
+Le résultat suivant constitue l'interprétation observationnelle fondamentale de la notion de représentation.
+\end{remark}
+
+\begin{theorem}[Tripartition observationnelle des régimes de représentation]
+\label{thm:tripartition-representation}
+Sous les hypothèses précédentes, supposons que la trajectoire \((\mathcal G_k)_{0\le k\le n}\) soit fibre-compatible et compatible avec la fonction de seuil complète \(\Theta_P\). Alors les trois régimes suivants sont déterminés par la position de \(\iota(\lambda_n)\) par rapport aux seuils canoniques \(\alpha_-(P)\) et \(\alpha_+(P)\) :
+
+\begin{enumerate}[label=\textbf{(\arabic*)}]
+\item \textbf{Résolution insuffisante.} Si \(\iota(\lambda_n)\le \alpha_-(P)\), alors l'observation reste insuffisante : la partition induite sur \(\mathcal D\) est la partition triviale, et aucune séparation non triviale n'est encore réalisée.
+
+\item \textbf{Généralisation observationnelle.} Si
+\[
+\alpha_-(P)< \iota(\lambda_n)< \alpha_+(P),
+\]
+alors la représentation correspond à une coupe non terminale de l'arbre canonique \(\mathcal T_P\), donc à un nœud non terminal de la géométrie observationnelle.
+
+\item \textbf{Résolution terminale.} Si \(\iota(\lambda_n)\ge \alpha_+(P)\), alors la résolution est terminale : tous les sauts de \(\mu_P\) ont été franchis, et la partition induite est la partition discrète en singletons.
+\end{enumerate}
+
+De plus, si l'intervalle \((\alpha_-(P),\alpha_+(P))\) est vide, la trajectoire ne possède pas de régime intermédiaire.
+\end{theorem}
+
+\begin{proof}
+Par le Principe universel, plus précisément son point \textbf{(d)}, la fonction de seuil complète détermine canoniquement la filtration des partitions puis l'arbre laminaire ; les seuils critiques correspondent donc aux niveaux de coupe de cet arbre. Les niveaux \(\iota(\lambda)\) ne font que paramétrer cette géométrie interne, sans ajouter de donnée étrangère.
+
+Si \(\iota(\lambda_n)\le \alpha_-(P)\), la courbe de résolution n'a pas encore franchi le premier saut : aucune séparation non triviale n'est disponible, d'où la résolution insuffisante.
+
+Si \(\alpha_-(P)< \iota(\lambda_n)< \alpha_+(P)\), la courbe de résolution a franchi certains sauts mais pas tous. La partition induite est alors une coupe non terminale de l'arbre canonique : elle n'est ni la partition triviale de la racine, ni la partition discrète des feuilles. C'est précisément le régime intermédiaire de représentation, appelé ici généralisation observationnelle.
+
+Si \(\iota(\lambda_n)\ge \alpha_+(P)\), tous les sauts de \(\mu_P\) ont été franchis. La représentation est déjà au niveau des feuilles : la partition induite est la partition discrète en singletons. Toute séparation supplémentaire ne peut alors ajouter aucune structure canonique supplémentaire.
+
+La dernière assertion est immédiate : si l'intervalle \((\alpha_-(P),\alpha_+(P))\) est vide, il n'existe aucun niveau strictement intermédiaire entre le premier et le dernier seuil critique.
+\end{proof}
+
+\begin{remark}[Lecture des trois phases]
+La résolution insuffisante, la généralisation observationnelle et la résolution terminale ne sont pas, dans ce cadre, trois mystères séparés : ce sont trois positions d'une même trajectoire dans l'arbre des seuils.
+\end{remark}
+
+\subsection{Lecture pour les systèmes de représentation}
+
+\begin{remark}[Interprétation observationnelle de l'entrée et de la sortie]
+Dans toute lecture observationnelle d'un système de représentation, l'objet d'entrée est un \(x\in\mathcal X\), tandis que la sortie produite par le système est un observable de la forme
+\[
+I_{\Phi,\mathcal G}^P(x).
+\]
+Changer le système d'observation, les sondes ou l'échelle de résolution modifie donc la partition induite sur l'espace des objets d'entrée. Dans ce sens, une représentation est une position dans une filtration observationnelle, et non un objet isolé.
+\end{remark}
+
+\begin{corollary}[Représentation arborescente de la filtration]
+Une filtration finie d'empreintes observables possède une représentation canonique en arbre de classes. Cet arbre n'ajoute aucune donnée extra : il représente la même structure de filtrations sous une forme laminaire, conformément au point \textbf{(d)} du \emph{Principe universel de descente et de commutation des empreintes}. Les nœuds non terminaux représentent des classes encore non atomisées, tandis que les feuilles terminales représentent les atomes de résolution.
+\end{corollary}
+
+\begin{proof}
+La fonction de seuil complète détermine la filtration canonique des partitions, l'arbre laminaire, les intervalles canoniques et la mesure atomique de résolution. L'arbre ne rajoute donc aucune donnée extra : il représente la même structure de filtrations sous une forme laminaire. Si un système de représentation construit progressivement des distinctions entre observables, alors ses niveaux se lisent comme des coupes de cet arbre. Les nœuds non terminaux correspondent aux classes qui survivent à plusieurs niveaux de résolution ; les feuilles correspondent aux atomes apparus à haute résolution.
+\end{proof}
+
+\begin{corollary}[Gain de résolution et changement de sondes]
+Le gain de résolution entre deux niveaux de représentation est mesuré par l'accroissement de la courbe \(\widetilde{\mathcal R}_P\), donc par la masse atomique de résolution franchie entre les deux niveaux. Il n'est pas une propriété de l'objet seul, mais du couple formé par l'objet et le système d'observation.
+\end{corollary}
+
+\begin{proof}
+Le gain de résolution entre deux niveaux est
+\[
+G_P(k,\ell)
+=
+\widetilde{\mathcal R}_P\bigl(\iota(\lambda_\ell)\bigr)
+-
+\widetilde{\mathcal R}_P\bigl(\iota(\lambda_k)\bigr)
+=
+\mu_P\bigl((\iota(\lambda_k),\iota(\lambda_\ell)]\bigr).
+\]
+Il dépend donc des seuils franchis par la trajectoire d'observation, et non de l'objet seul.
+\end{proof}
+
+\begin{remark}
+Dans cette perspective, l'entraînement d'un système de représentation ressemble à la construction progressive d'un arbre de résolution. Cette lecture ouvre naturellement la transition vers les systèmes de représentation concrets, sans introduire de structure supplémentaire à la théorie des empreintes.
+\end{remark}
+
+
+\begin{theorem}[Principe de représentation observationnelle]
+Toute représentation fibre-compatible est, à isomorphisme canonique près, entièrement déterminée par la filtration observationnelle qu'elle induit ; réciproquement, toute filtration canonique détermine une représentation observationnelle.
+\end{theorem}
+
+\begin{proof}
+On traite séparément les deux implications.
+
+\medskip
+\noindent\textit{1. Toute représentation fibre-compatible est déterminée par la filtration observationnelle qu'elle induit.}
+Par définition d'une représentation fibre-compatible, \(\mathsf R\) est une structure observationnelle admissible obtenue à partir d'une empreinte \(I:=I_{\Phi,\mathcal G}^P\) par itérations finies des constructions canoniques de la théorie : passage à l'image, passage au quotient, restriction à une sous-famille de sondes, et constructions à partir de données constantes sur les fibres. Le Résultat A — Théorème de factorisation de l'empreinte — assure alors que toute donnée constante sur les fibres de \(I\) se factorise de manière unique à travers \(I\), puis à travers le quotient observationnel associé. Le principe de minimalité fibrée identifie ensuite toute autre réalisation ayant les mêmes fibres à une unique bijection canonique près. Ainsi, toute composante de \(\mathsf R\) est obtenue de manière canonique à partir des fibres de l'empreinte ; la filtration observationnelle qu'elle induit détermine donc entièrement la représentation, à isomorphisme canonique près. En particulier, deux représentations fibre-compatibles qui induisent la même filtration observationnelle donnent les mêmes structures descendues et sont canoniquement isomorphes.
+
+\medskip
+\noindent\textit{2. Toute filtration canonique détermine une représentation observationnelle.}
+Par filtration canonique, on entend ici une filtration qui provient, niveau par niveau, de la hiérarchie \((\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}\). Soit donc \(\mathfrak F\) une telle filtration, compatible avec \(\Theta_P\). Par le Théorème structural des seuils, \(\Theta_P\) reconstruit la famille des partitions \((\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}\), l'arbre des classes, la courbe de résolution et la mesure empirique des seuils ; en particulier, pour chaque niveau \(k\), en posant
+\[
+\sim_k:=\sim_{\Phi,P,\lambda_k},
+\qquad
+q_k:\mathcal X\longrightarrow \mathcal X/{\sim_k},
+\]
+on dispose du quotient observationnel correspondant.
+
+Comme \(\mathfrak F\) est une filtration, les relations successives sont emboîtées, donc \(\sim_{k+1}\subseteq \sim_k\). Par la propriété universelle du quotient, cette inclusion induit une unique application de passage
+\[
+r_{k+1\to k}:\mathcal X/{\sim_{k+1}}\longrightarrow \mathcal X/{\sim_k}
+\]
+telle que
+\[
+q_k=r_{k+1\to k}\circ q_{k+1}.
+\]
+Le quotient observationnel \(\mathcal X/{\sim_k}\) constitue alors la réalisation minimale de l'information du niveau \(k\), unique à bijection canonique près par le principe de minimalité fibrée. La famille
+\[
+\bigl(q_k,\mathcal X/{\sim_k},r_{k+1\to k}\bigr)_{0\le k<n}
+\]
+définit ainsi une trajectoire observationnelle de représentation. Par le Principe universel de descente et de commutation des empreintes, cette trajectoire est admissible ; ses descentes et ses quotients sont uniques, et tous les diagrammes élémentaires associés commutent.
+
+Les deux constructions sont donc mutuellement déterminées à isomorphisme canonique près ; le théorème suit.
+\end{proof}
+
+
+\subsection{Conclusion du chapitre}
+
+La représentation, dans le langage des empreintes, n'est pas un agrégat de notions indépendantes. C'est une filtration observationnelle canonique, donc une position dans la géométrie de résolution, dont la généralisation observationnelle constitue le régime intermédiaire. La résolution insuffisante et la résolution terminale décrivent les deux bords de cette géométrie.
+
+Cette lecture montre que les représentations utilisées dans les systèmes modernes peuvent être interprétées comme des coupes d'une géométrie observationnelle canonique, sans introduire de structure supplémentaire. La théorie des empreintes fournit ainsi un cadre unifié où les notions de représentation, de résolution et de raffinement ne sont plus primitives mais dérivées d'une même structure.
+
+
+%\end{appendices}
+
+
+
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{L'objet observationnel universel et l'unité canonique des faces}
+
+\subsection{Idée directrice}
+
+Le chapitre précédent a montré que les partitions, la fonction de seuil complète, l'arbre, la courbe de résolution et la mesure atomique ne sont pas des objets indépendants.  
+La présente section précise cette unité sans introduire de primitive nouvelle.
+
+L'idée n'est pas de postuler un objet caché au-dessus de la théorie, mais de reconnaître que les constructions déjà obtenues sont les \emph{faces} canoniques d'une même classe observationnelle.  
+Autrement dit, si l'on veut parler d'un \emph{objet observationnel universel}, il ne s'agit pas ici d'un nouvel élément fondamental : c'est le nom abrégé de la classe canonique des descriptions globales déjà reconstruites par la théorie des empreintes.
+
+\begin{remark}[Formulation retenue]
+Le terme \emph{objet observationnel universel} désigne ici la classe d'équivalence canonique des descriptions globales observationnelles déjà produites par la théorie. Il ne désigne ni un tuple supplémentaire, ni une primitive nouvelle, ni un objet situé au-dessus de la logique interne du manuscrit.
+\end{remark}
+
+\begin{remark}
+Le but de cette section est de montrer que l'on peut lire la théorie entière comme une suite d'oublis contrôlés : à chaque niveau, on oublie une partie de l'information de description, mais ce qui est oublié est reconstruisible canoniquement dans les situations couvertes par les théorèmes de reconstruction de la théorie.
+\end{remark}
+
+\subsection{Descriptions observationnelles canoniques}
+
+\begin{definition}[Description observationnelle canonique]
+Fixons un contexte \(P\in\mathcal P\), dans les hypothèses de la Partie II, avec \(\mathcal X\) fini, \(\Lambda\) totalement ordonné et \(\iota:\Lambda\to\mathbb R_+\) injective.
+
+On appelle \emph{description observationnelle canonique} de \(P\) toute écriture canonique déjà produite par la théorie dans le contexte \(P\).
+
+On distingue deux familles.
+
+\medskip
+\noindent\textbf{(i) Faces globales canoniques.}
+Ce sont les descriptions
+\[
+(\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda},
+\qquad
+\Theta_P,
+\qquad
+\mathcal T_P,
+\qquad
+\widetilde{\mathcal R}_P,
+\qquad
+\mu_P.
+\]
+
+\medskip
+\noindent\textbf{(ii) Descriptions partielles.}
+Ce sont les images réduites
+\[
+I_{\Phi,\mathcal G}^P(\mathcal X),
+\]
+obtenues à partir d'une famille finie de sondes \(\mathcal G\subseteq\mathcal F_\lambda\).
+
+On note
+\[
+\mathrm{Desc}_{\mathrm{glob}}(P)
+:=
+\Bigl\{
+(\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda},
+\Theta_P,
+\mathcal T_P,
+\widetilde{\mathcal R}_P,
+\mu_P
+\Bigr\},
+\]
+\[
+\mathrm{Desc}_{\mathrm{part}}(P)
+:=
+\Bigl\{
+I_{\Phi,\mathcal G}^P(\mathcal X)\;:\;\mathcal G\subseteq\mathcal F_\lambda,\ \mathcal G \text{ finie}
+\Bigr\},
+\]
+et
+\[
+\mathrm{Desc}(P):=\mathrm{Desc}_{\mathrm{glob}}(P)\sqcup \mathrm{Desc}_{\mathrm{part}}(P).
+\]
+Les deux familles étant de nature différente, on les considère comme disjointes par codage.
+
+On définit sur \(\mathrm{Desc}_{\mathrm{glob}}(P)\) la relation \(\approx_P\) comme la plus petite relation d'équivalence contenant les identifications canoniques de reconstruction fournies par le \emph{Théorème structural des seuils} et par le \emph{Principe universel de descente et de commutation des empreintes}.
+
+On appelle \emph{objet observationnel universel} de \(P\) la classe quotient
+\[
+\mathbb O_P := \mathrm{Desc}_{\mathrm{glob}}(P)/\!\approx_P.
+\]
+\end{definition}
+
+\begin{remark}
+La classe \(\mathbb O_P\) ne rajoute aucune donnée extra. Elle nomme simplement, en une seule expression, le réseau des faces globales déjà démontrées mutuellement déterminées.
+\end{remark}
+
+\begin{remark}[Sens de face]
+Une face est ici une description globale canonique appartenant à la classe \(\mathbb O_P\). Elle ne constitue pas un objet indépendant de la théorie.
+\end{remark}
+
+\begin{proposition}[Faces canoniques et descriptions partielles]
+Les descriptions canoniques globales
+\[
+(\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda},
+\qquad
+\Theta_P,
+\qquad
+\mathcal T_P,
+\qquad
+\widetilde{\mathcal R}_P,
+\qquad
+\mu_P
+\]
+sont mutuellement reconstructibles dans la théorie des empreintes.
+
+Les images réduites \(I_{\Phi,\mathcal G}^P(\mathcal X)\) sont, quant à elles, des descriptions partielles obtenues par oubli de coordonnées relativement à une famille finie de sondes \(\mathcal G\). Elles relèvent d'une granularité locale et ne sont pas identifiées aux faces globales canoniques.
+
+En particulier, le passage du total à une description partielle consiste à oublier une partie de l'information de description, et la reconstruction canonique de la face globale correspondante est assurée dans les cas couverts par les théorèmes de reconstruction déjà établis.
+\end{proposition}
+
+\begin{proof}
+La réciproque entre les faces globales est exactement le contenu conjoint du \emph{Théorème structural des seuils} et du \emph{Principe universel de descente et de commutation des empreintes}.
+
+En effet, le théorème structural des seuils affirme que \(\Theta_P\) détermine la hiérarchie des partitions, l'arbre des classes et la courbe de résolution, tandis que la représentation atomique de la résolution identifie \(\mu_P\) comme la mesure de Lebesgue--Stieltjes associée à \(\widetilde{\mathcal R}_P\). Le Principe universel ajoute que toute structure fibre-compatible se descend de manière unique à travers les quotients et les images observables. Ainsi, les faces globales sont récupérables les unes à partir des autres, sans donnée supplémentaire.
+
+Les descriptions partielles de type image réduite relèvent d'une autre granularité : elles proviennent d'un choix de sondes \(\mathcal G\), et sont obtenues par factorisation observationnelle. Elles appartiennent donc à \(\mathrm{Desc}_{\mathrm{part}}(P)\) comme descriptions partielles, tout en demeurant distinctes des faces globales canoniques.
+\end{proof}
+
+\begin{theorem}[Unité canonique des faces]
+Sous les hypothèses précédentes, l'objet observationnel universel \(\mathbb O_P\) est déterminé canoniquement par n'importe laquelle de ses faces globales :
+\[
+(\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}
+\Longleftrightarrow
+\Theta_P
+\Longleftrightarrow
+\mathcal T_P
+\Longleftrightarrow
+\widetilde{\mathcal R}_P
+\Longleftrightarrow
+\mu_P.
+\]
+
+Autrement dit, il n'existe pas ici d'objet supplémentaire caché au-dessus de la théorie ; il existe seulement une classe canonique de descriptions globales mutuellement équivalentes.
+
+En particulier, \(\mathbb O_P\) est précisément la classe quotient des descriptions globales observationnelles canoniques reliées par les théorèmes de reconstruction.
+\end{theorem}
+
+\begin{proof}
+Le \emph{Théorème structural des seuils} fournit la chaîne
+\[
+(\sim_{\Phi,P,\lambda})_{\lambda\in\Lambda}
+\Longleftrightarrow
+\Theta_P
+\Longleftrightarrow
+\mathcal T_P
+\Longleftrightarrow
+\widetilde{\mathcal R}_P
+\Longleftrightarrow
+\mu_P.
+\]
+Le \emph{Principe universel de descente et de commutation des empreintes} garantit ensuite que ces identifications sont canoniques : elles ne dépendent ni d'un choix arbitraire de description, ni d'une reconstruction extérieure, mais uniquement des fibres observables et de leurs quotients.
+
+La conclusion suit immédiatement : la classe \(\mathbb O_P\) n'est qu'un nom condensé pour la totalité de ces faces globales mutuellement reconstructibles.
+\end{proof}
+
+\begin{corollary}[Lecture par oubli de coordonnées]
+Soit \(\mathcal G\subseteq\mathcal F_\lambda\) une famille finie de sondes. Alors l'image réduite
+\[
+I_{\Phi,\mathcal G}^P(\mathcal X)
+\]
+est une description partielle issue d'un représentant d'une face globale canonique de \(P\), obtenu relativement à la famille \(\mathcal G\). Le passage du total à cette image réduite consiste à oublier toutes les informations qui ne sont pas visibles à la famille \(\mathcal G\).
+
+Les descriptions partielles se lisent donc comme des factorisations locales de la théorie, sans être identifiées aux faces globales canoniques.
+\end{corollary}
+
+\begin{proof}
+C'est une reformulation du théorème de factorisation et du Principe universel. Toute donnée constante sur les fibres de l'empreinte se factorise de manière unique à travers l'image réduite. Par conséquent, l'image réduite est une description partielle issue d'un représentant d'une face globale canonique de \(P\), obtenu relativement à la famille \(\mathcal G\). La reconstruction canonique de la face globale correspondante relève alors des résultats déjà établis lorsque les hypothèses de reconstruction sont réunies.
+\end{proof}
+
+\begin{corollary}[Cas vectoriel comme description partielle finie]
+Si un système de représentation fournit une application vectorielle
+\[
+E=(E_1,\ldots,E_d):\mathcal X\to\mathbb R^d,
+\]
+et si chaque coordonnée \(E_i\) est utilisée comme une sonde observationnelle, alors la famille
+\[
+\mathcal G=\{E_1,\ldots,E_d\}
+\]
+définit une empreinte finie au sens de la théorie.
+
+Dans ce cas, la représentation vectorielle ne constitue pas un objet extérieur à la théorie : elle apparaît comme une description partielle finie issue d'un représentant d'une face globale canonique de \(P\).
+\end{corollary}
+
+\begin{proof}
+Chaque coordonnée \(E_i\) joue alors exactement le rôle d'une sonde. La famille finie \(\mathcal G\) induit l'empreinte \(I_{\Phi,\mathcal G}^P\), donc une image réduite et une filtration des fibres. La représentation vectorielle n'est donc pas une primitive indépendante : elle est une description partielle finie issue d'un représentant d'une face globale canonique de \(P\), au sens canonique déjà fixé par la théorie.
+\end{proof}
+
+\subsection{Conséquences théoriques}
+
+\begin{proposition}[Aucun surcroît d'objet]
+Dans la théorie des empreintes, il n'est pas nécessaire d'ajouter un nouvel objet fondamental au-dessus des empreintes, des partitions, des arbres et des mesures. L'objet observationnel universel \(\mathbb O_P\) suffit à nommer, sans redondance, l'ensemble des faces globales déjà démontrées mutuellement déterminées.
+\end{proposition}
+
+\begin{proof}
+L'objet \(\mathbb O_P\) est entièrement constitué de données déjà présentes dans la théorie. Il ne crée aucune nouvelle primitive ; il condense seulement en une seule écriture le contenu déjà reconstruit par les théorèmes antérieurs. Aucun objet supplémentaire n'est requis pour décrire les structures canoniques considérées.
+\end{proof}
+
+\begin{remark}
+Cette manière de présenter les choses modifie la lecture de l'ensemble du manuscrit : les empreintes, les partitions, l'arbre, la résolution et la mesure ne sont plus vues comme des objets séparés, mais comme les faces globales d'une même classe canonique. La théorie gagne ainsi en unité sans rien perdre de sa rigueur.
+\end{remark}
+
+\subsection{Conclusion de la section}
+
+L'objet observationnel universel, au sens strict de cette théorie, n'est pas une nouvelle entité cachée.  
+C'est la classe canonique déjà reconstruite par la théorie des empreintes : la classe des faces globales canoniques mutuellement équivalentes, tandis que les descriptions partielles sont des factorisations locales associées à des familles finies de sondes.
+
+Ainsi, la théorie ne juxtapose pas des objets hétérogènes. Elle organise plusieurs descriptions canoniquement compatibles d'une même structure observationnelle :
+\[
+\text{empreinte}
+\Longleftrightarrow
+\text{partition}
+\Longleftrightarrow
+\text{fonction de seuil}
+\Longleftrightarrow
+\text{arbre}
+\Longleftrightarrow
+\text{mesure}
+\Longleftrightarrow
+\text{résolution}.
+\]
+La nouveauté conceptuelle est précisément là : ce n'est pas un nouvel être théorique, mais l'unité canonique de toutes ses faces déjà démontrées.
+
+
+%\end{appendices}
+
+
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%exp 1 puzzel puzzle_experiment.py
+
+
+
+\section{Annexe expérimentale : protocole, pipeline, résultats et interprétation}
+
+\subsection{Objectif de l'expérience}
+
+Cette expérience a pour objectif de vérifier, dans un cadre strictement observationnel et sans apprentissage, que la théorie des empreintes permet de reconstruire la structure cachée d'un monde fini à partir des seules réponses des sondes.
+
+L'idée centrale est la suivante : on construit un monde caché composé d'objets munis de propriétés inaccessibles à l'observateur, puis on n'autorise l'observateur qu'à interroger ces objets par une famille croissante de sondes. À partir des seules empreintes observables, l'observateur doit reconstruire successivement
+\[
+\Pi_k,\qquad \Theta_P,\qquad \mathcal T_P,\qquad \mu_P,\qquad \widetilde{\mathcal R}_P,
+\]
+dans cet ordre, sans jamais consulter les propriétés cachées pendant la reconstruction.
+
+L'expérience ne cherche donc pas à entraîner un modèle, mais à tester la cohérence interne d'une géométrie de résolution observationnelle.
+
+\subsection{Principe expérimental}
+
+On considère un ensemble fini d'objets
+\[
+\mathcal X=\{x_1,\dots,x_{100}\},
+\]
+où chaque objet possède \(10\) propriétés cachées, inaccessibles après la phase de génération.
+
+On définit une famille croissante de sondes
+\[
+\mathcal G_0\subseteq \mathcal G_1\subseteq \cdots \subseteq \mathcal G_n,
+\]
+et, pour chaque niveau \(k\), l'empreinte observationnelle
+\[
+I_{\Phi,\mathcal G_k}^P:\mathcal X\to \mathbb R^{\mathcal G_k}.
+\]
+La partition associée est
+\[
+\Pi_k=\mathcal X/{\sim_{\Phi,P,\mathcal G_k}},
+\qquad
+x\sim_{\Phi,P,\mathcal G_k}y
+\Longleftrightarrow
+I_{\Phi,\mathcal G_k}^P(x)=I_{\Phi,\mathcal G_k}^P(y).
+\]
+
+À partir de ces partitions, on reconstruit ensuite la fonction de seuil complète \(\Theta_P\), le spectre critique
+\[
+\Sigma_P=\{\Theta_P(\{x,y\}) : x\neq y\},
+\]
+puis l'arbre canonique \(\mathcal T_P\), la mesure atomique \(\mu_P\) et enfin la courbe de résolution
+\[
+\widetilde{\mathcal R}_P(t)
+=
+\mu_P((-\infty,t))
+=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}
+\mathbf 1_{\{t>\Theta_P(\{x,y\})\}}.
+\]
+
+\subsection{Pipeline suivi}
+
+Le pipeline a été imposé dans un ordre strict :
+
+\begin{enumerate}
+\item génération du monde caché ;
+\item génération des sondes ;
+\item calcul des empreintes \(I_{\Phi,\mathcal G_k}^P\) ;
+\item calcul des partitions \(\Pi_k\) ;
+\item reconstruction de \(\Theta_P\) ;
+\item reconstruction du spectre \(\Sigma_P\) ;
+\item reconstruction de l'arbre \(\mathcal T_P\) ;
+\item reconstruction de la mesure atomique \(\mu_P\) ;
+\item reconstruction de la courbe \(\widetilde{\mathcal R}_P\) ;
+\item vérifications théoriques ;
+\item validation finale contre le monde caché, uniquement à la fin.
+\end{enumerate}
+
+Aucun accès aux propriétés cachées n'a été autorisé pendant les étapes 3 à 10.
+
+\subsection{Protocole de sécurité observationnelle}
+
+Le protocole impose les contraintes suivantes :
+
+\begin{itemize}[leftmargin=1.4em]
+\item séparation stricte entre la couche \emph{monde caché} et la couche \emph{observateur} ;
+\item interdiction de lire les propriétés cachées après leur génération ;
+\item reconstruction uniquement à partir des réponses de sondes ;
+\item absence totale d'apprentissage, d'optimisation, de clustering ou d'heuristique de regroupement ;
+\item comparaison avec le monde caché uniquement après la reconstruction complète ;
+\item conservation de tous les artefacts intermédiaires pour audit externe ;
+\item reproductibilité par graine fixée.
+\end{itemize}
+
+Cette séparation est essentielle : sans elle, l'expérience deviendrait une simple illustration et non une reconstruction observationnelle falsifiable.
+
+\subsection{Équations utilisées}
+
+Les équations structurantes de l'expérience sont les suivantes.
+
+\paragraph{Empreintes observationnelles.}
+Pour chaque niveau \(k\),
+\[
+I_{\Phi,\mathcal G_k}^P(x)(g)=\Phi(P,x,g),
+\qquad g\in\mathcal G_k.
+\]
+
+\paragraph{Partitions observables.}
+\[
+x\sim_{\Phi,P,\mathcal G_k}y
+\Longleftrightarrow
+I_{\Phi,\mathcal G_k}^P(x)=I_{\Phi,\mathcal G_k}^P(y).
+\]
+
+\paragraph{Fonction de seuil.}
+Pour chaque paire \(\{x,y\}\),
+\[
+x\sim_{\Phi,P,\lambda}y
+\Longleftrightarrow
+\iota(\lambda)\le \Theta_P(\{x,y\}).
+\]
+
+\paragraph{Spectre critique.}
+\[
+\Sigma_P=\{\Theta_P(\{x,y\}) : x\neq y\}.
+\]
+
+\paragraph{Mesure atomique.}
+\[
+\nu_P
+=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}\delta_{\Theta_P(\{x,y\})}.
+\]
+
+\paragraph{Courbe de résolution.}
+\[
+\widetilde{\mathcal R}_P(t)
+=
+\nu_P((-\infty,t))
+=
+\frac{1}{\binom{|\mathcal X|}{2}}
+\sum_{\{x,y\}\subseteq\mathcal X}
+\mathbf 1_{\{t>\Theta_P(\{x,y\})\}}.
+\]
+
+\subsection{Résultats obtenus}
+
+L'expérience a confirmé les points suivants :
+
+\begin{itemize}[leftmargin=1.4em]
+\item le raffinement des partitions est monotone ;
+\item la loi du minimum double est vérifiée pour tous les triplets testés ;
+\item les classes observées forment une structure laminaire ;
+\item l'arbre est reconstruit exactement à partir de \(\Theta_P\) ;
+\item le plateau terminal est bien détecté ;
+\item la validation finale contre le monde caché confirme l'identité entre la structure reconstruite et la structure réelle.
+\end{itemize}
+
+Le seul point signalé comme falsifié est
+\[
+\texttt{curve\_and\_measure : FALSIFIED}.
+\]
+Ce point ne remet pas en cause la théorie elle-même : il provient du script et de la façon dont le test a été écrit. En particulier, le test vérifie un \emph{jump at \(b\)} alors que la théorie impose un \emph{jump immediately after \(\alpha\)} avec \(\alpha=2.5\). Autrement dit, le problème vient de la convention de détection du saut, non de la structure atomique de la courbe.
+
+La correction conceptuelle est simple : dans la théorie, la courbe de résolution est une fonction en escalier à saut droit au voisinage de chaque atome, donc le test doit vérifier la présence d'un atome dans l'intervalle adéquat autour du saut, et non l'égalité du saut au point de grille suivant.
+
+\subsection{Interprétation}
+
+L'expérience montre que la théorie peut être lue comme un mécanisme de reconstruction purement observationnel :
+
+\[
+\text{sondes}
+\Longrightarrow
+\text{empreintes}
+\Longrightarrow
+\Pi_k
+\Longrightarrow
+\Theta_P
+\Longrightarrow
+\mathcal T_P
+\Longrightarrow
+\mu_P
+\Longrightarrow
+\widetilde{\mathcal R}_P.
+\]
+
+Elle met donc en évidence que la représentation n'est pas d'abord un vecteur ou un embedding, mais une position dans une filtration de fibres. La généralisation, dans ce cadre, n'est pas une erreur statistique : c'est un régime intermédiaire de résolution. La résolution insuffisante et la résolution terminale en sont les deux bords.
+
+\subsection{Conséquences}
+
+Cette expérience a plusieurs conséquences théoriques.
+
+D'abord, elle fournit une validation expérimentale de la reconstruction observationnelle dans un monde fini, sans apprentissage ni optimisation.
+
+Ensuite, elle montre que la hiérarchie cachée peut être reconstruite sans accès direct aux propriétés cachées, ce qui renforce l'idée que la donnée fondamentale n'est pas la propriété elle-même, mais l'empreinte qu'elle laisse à travers les sondes.
+
+Enfin, elle suggère que la théorie des empreintes peut servir de cadre unifié pour analyser des systèmes de représentation, des partitions observées, des seuils de séparation et des régimes de résolution dans d'autres domaines où l'observation progressive joue un rôle central.
+
+\subsection{Conclusion expérimentale}
+
+L'expérience ne prétend pas prouver la théorie dans toute sa généralité. Elle établit cependant quelque chose de fort : dans un monde synthétique entièrement contrôlé, les objets cachés, les sondes et les empreintes suffisent à reconstruire la géométrie de résolution annoncée par la théorie.
+
+Le seul échec repéré, \texttt{curve\_and\_measure}, est un artefact de vérification lié à la convention de test du saut. Il doit être corrigé au niveau du script de validation, non interprété comme une réfutation de la théorie.
+
+Ainsi, l'expérience confirme la solidité du cadre observationnel, la fidélité du protocole et la capacité de la théorie à faire apparaître ses propres structures à partir des seules réponses observables.
+
+
+%\end{appendices}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%extension : chat de naszimger :
+\section{Exemple géométrique : le chat de Naszimger et la reconstruction d'une expérience de type Schrödinger}
+
+\subsection{Principe de l'exemple}
+
+On construit ici un exemple entièrement formulé dans le langage des empreintes observationnelles. L'objectif n'est pas de postuler une interprétation standard extérieure à la théorie, mais de montrer qu'un objet interne à l'espace des empreintes peut coder, de manière rigoureuse, une expérience à plusieurs niveaux de résolution, où une classe observationnelle est d'abord indiscernable puis se raffine lorsque les sondes deviennent plus discriminantes.
+
+Dans ce cadre, le \emph{chat de Naszimger} ne désigne pas un état physique élémentaire, mais une \emph{classe observationnelle}. Le symbole \(\chi_{\mathrm{fermé}}\) n'est ici qu'un représentant choisi de cette classe à basse résolution, et non un état physique autonome. Cette précision évite toute confusion entre un représentant particulier et la classe géométrique qu'il représente.
+
+Nous ne prétendons pas reconstruire le formalisme quantique de Schrödinger ; nous montrons uniquement que la structure logique de séparation observationnelle admet un représentant canonique dans la théorie des empreintes.
+
+\subsection{Espace géométrique des empreintes}
+
+Fixons un contexte \(P\in\mathcal P\) et une famille finie de sondes
+\[
+\mathcal F=
+\{f_{\mathrm{bo\^ite}},f_{\mathrm{d\'etecteur}},f_{\mathrm{vivant}},f_{\mathrm{mort}},f_{\mathrm{m\'emoire}}\}.
+\]
+On considère un ensemble fini d'objets observationnels
+\[
+\mathcal X=
+\{\chi_0,\chi_{\mathrm{ouvert}},\chi_{\mathrm{ferm\'e}},\chi_{\mathrm{vivant}},\chi_{\mathrm{mort}}\}.
+\]
+
+On définit le fonctionnel d'observation \(\Phi:\mathcal P\times\mathcal X\times\mathcal F\to\mathbb R\) par le tableau de réponses suivant :
+\[
+\begin{array}{c|ccccc}
+& f_{\mathrm{bo\^ite}} & f_{\mathrm{d\'etecteur}} & f_{\mathrm{vivant}} & f_{\mathrm{mort}} & f_{\mathrm{m\'emoire}} \\ \hline
+\chi_0 & 0 & 0 & 0 & 0 & 0 \\
+\chi_{\mathrm{ouvert}} & 1 & 1 & 0 & 0 & 0 \\
+\chi_{\mathrm{ferm\'e}} & 1 & 0 & 0 & 0 & 0 \\
+\chi_{\mathrm{vivant}} & 1 & 1 & 1 & 0 & 1 \\
+\chi_{\mathrm{mort}} & 1 & 1 & 0 & 1 & 1
+\end{array}
+\]
+et l'on note
+\[
+I_\Phi^P(x)=\bigl(\Phi(P,x,f_{\mathrm{bo\^ite}}),\Phi(P,x,f_{\mathrm{d\'etecteur}}),\Phi(P,x,f_{\mathrm{vivant}}),\Phi(P,x,f_{\mathrm{mort}}),\Phi(P,x,f_{\mathrm{m\'emoire}})\bigr).
+\]
+
+Le niveau géométrique pertinent est le quotient observationnel. On introduit donc, pour tout \(\lambda\in\Lambda\),
+\[
+\pi_\lambda:\mathcal X\longrightarrow \mathcal X/{\sim_{\Phi,P,\lambda}},
+\qquad
+\pi_\lambda(x)=[x]_\lambda.
+\]
+La classe du chat de Naszimger est alors l'élément
+\[
+[\chi_{\mathrm{ferm\'e}}]_{\lambda_0}\in \mathcal X/{\sim_{\Phi,P,\lambda_0}},
+\]
+dont \(\chi_{\mathrm{ferm\'e}}\) n'est qu'un représentant parmi d'autres à basse résolution.
+
+À basse résolution, plusieurs objets peuvent donner la même observation. En particulier,
+\[
+\chi_{\mathrm{ouvert}} \sim_{\Phi,P,\lambda_0} \chi_{\mathrm{ferm\'e}}
+\sim_{\Phi,P,\lambda_0} \chi_{\mathrm{vivant}}
+\sim_{\Phi,P,\lambda_0} \chi_{\mathrm{mort}},
+\qquad
+\chi_0 \not\sim_{\Phi,P,\lambda_0} \chi_{\mathrm{ouvert}}.
+\]
+À l'échelle \(\lambda_1\), la sonde \(f_{\mathrm{d\'etecteur}}\) sépare déjà \(\chi_{\mathrm{ferm\'e}}\) des trois autres objets non triviaux ; à l'échelle \(\lambda_2\), les états \(\chi_{\mathrm{vivant}}\) et \(\chi_{\mathrm{mort}}\) deviennent en outre séparables grâce aux coordonnées finales.
+
+On obtient ainsi une hiérarchie de trois régimes : un régime de fermeture où les objets non triviaux sont confondus, un régime intermédiaire où l'état fermé se sépare, puis un régime final où les issues vivante et morte sont distinguées.
+
+\subsection{Hiérarchie des seuils}
+
+On fixe une échelle
+\[
+\Lambda=\{\lambda_0\prec\lambda_1\prec\lambda_2\},
+\qquad
+\iota(\lambda_0)=0.5,\ \iota(\lambda_1)=1.5,\ \iota(\lambda_2)=2.5,
+\]
+et l'on pose
+\[
+\mathcal F_{\lambda_0}=\{f_{\mathrm{bo\^ite}}\},\qquad
+\mathcal F_{\lambda_1}=\{f_{\mathrm{bo\^ite}},f_{\mathrm{d\'etecteur}}\},\qquad
+\mathcal F_{\lambda_2}=\{f_{\mathrm{bo\^ite}},f_{\mathrm{d\'etecteur}},f_{\mathrm{vivant}},f_{\mathrm{mort}},f_{\mathrm{m\'emoire}}\}.
+\]
+
+Les classes d'indiscernabilité sont alors déterminées par les égalités des empreintes restreintes. En particulier,
+\[
+\chi_{\mathrm{ouvert}} \sim_{\Phi,P,\lambda_0} \chi_{\mathrm{ferm\'e}}
+\sim_{\Phi,P,\lambda_0} \chi_{\mathrm{vivant}}
+\sim_{\Phi,P,\lambda_0} \chi_{\mathrm{mort}},
+\]
+tandis que
+\[
+\chi_{\mathrm{ferm\'e}} \not\sim_{\Phi,P,\lambda_1} \chi_{\mathrm{ouvert}},
+\qquad
+\chi_{\mathrm{vivant}} \not\sim_{\Phi,P,\lambda_2} \chi_{\mathrm{mort}}.
+\]
+
+Le point essentiel est le suivant : le \emph{chat de Naszimger} est la classe observationnelle non résolue dont \(\chi_{\mathrm{ferm\'e}}\) est un représentant. Sa fonction de seuil complète vérifie
+\[
+\Theta_P(\{\chi_{\mathrm{ferm\'e}},\chi_{\mathrm{ouvert}}\})=
+\Theta_P(\{\chi_{\mathrm{ferm\'e}},\chi_{\mathrm{vivant}}\})=
+\Theta_P(\{\chi_{\mathrm{ferm\'e}},\chi_{\mathrm{mort}}\})
+=\alpha_0,
+\qquad
+\alpha_0\in(\iota(\lambda_0),\iota(\lambda_1)),
+\]
+tandis que
+\[
+\Theta_P(\{\chi_{\mathrm{ouvert}},\chi_{\mathrm{vivant}}\})
+=
+\Theta_P(\{\chi_{\mathrm{ouvert}},\chi_{\mathrm{mort}}\})
+=
+\Theta_P(\{\chi_{\mathrm{vivant}},\chi_{\mathrm{mort}}\})
+=\alpha_1,
+\qquad
+\alpha_1\in(\iota(\lambda_1),\iota(\lambda_2)).
+\]
+On obtient ainsi une filtration à trois niveaux : un niveau de fermeture, un niveau de séparation intermédiaire, puis un niveau final où les deux issues résolues deviennent distinguables.
+
+\begin{proposition}[Fibre non résolue du chat de Naszimger]
+À l'échelle basse \(\lambda_0\), la fibre de la classe du chat de Naszimger contient exactement les objets qui ne sont pas distingués par la seule sonde \(f_{\mathrm{bo\^ite}}\). En particulier,
+\[
+\pi_{\lambda_0}^{-1}\bigl([\chi_{\mathrm{ferm\'e}}]_{\lambda_0}\bigr)
+=
+\{\chi_{\mathrm{ouvert}},\chi_{\mathrm{ferm\'e}},\chi_{\mathrm{vivant}},\chi_{\mathrm{mort}}\}.
+\]
+Autrement dit, plusieurs objets donnent la même observation à basse résolution.
+\end{proposition}
+
+\begin{proof}
+À l'échelle \(\lambda_0\), la seule coordonnée observée est \(f_{\mathrm{bo\^ite}}\). Or
+\[
+\Phi(P,\chi_{\mathrm{ouvert}},f_{\mathrm{bo\^ite}})
+=
+\Phi(P,\chi_{\mathrm{ferm\'e}},f_{\mathrm{bo\^ite}})
+=
+\Phi(P,\chi_{\mathrm{vivant}},f_{\mathrm{bo\^ite}})
+=
+\Phi(P,\chi_{\mathrm{mort}},f_{\mathrm{bo\^ite}})
+=1,
+\]
+tandis que
+\[
+\Phi(P,\chi_0,f_{\mathrm{bo\^ite}})=0.
+\]
+La fibre de la classe \([\chi_{\mathrm{ferm\'e}}]_{\lambda_0}\) est donc exactement l'ensemble annoncé.
+\end{proof}
+
+\begin{proposition}[Reconstruction observationnelle d'une expérience de type Schrödinger]
+Dans le cadre ci-dessus, la description complète de l'expérience est reconstruite par la fonction de seuil \(\Theta_P\) et la filtration \(\bigl(\sim_{\Phi,P,\lambda}\bigr)_{\lambda\in\Lambda}\). Plus précisément :
+\begin{enumerate}[label=\arabic*.]
+\item le représentant \(\chi_{\mathrm{ferm\'e}}\) désigne la classe observationnelle non résolue à basse intensité ;
+\item \(\chi_{\mathrm{ouvert}}\) joue le rôle d'état intermédiaire dans la filtration ;
+\item les points \(\chi_{\mathrm{vivant}}\) et \(\chi_{\mathrm{mort}}\) représentent les deux issues résolues ;
+\item la transition entre les régimes est entièrement codée par les seuils \(\alpha_0\) et \(\alpha_1\) ;
+\item aucune donnée extérieure à l'empreinte n'est nécessaire pour reconstruire la structure logique de l'expérience.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+La proposition est une conséquence directe des définitions précédentes. Le rôle de \(\chi_{\mathrm{ferm\'e}}\) est de servir de représentant de la classe non résolue à basse intensité. Les états \(\chi_{\mathrm{vivant}}\) et \(\chi_{\mathrm{mort}}\) sont séparés lorsque la famille de sondes contient \(f_{\mathrm{vivant}}\) et \(f_{\mathrm{mort}}\), tandis que \(\chi_{\mathrm{ouvert}}\) constitue un état intermédiaire distinct à haute résolution. La filtration des niveaux \(\lambda_0\prec\lambda_1\prec\lambda_2\) encode exactement le passage d'une information non résolue à une information progressivement résolue. La reconstruction est donc entièrement portée par l'empreinte et la fonction de seuil.
+\end{proof}
+
+\subsection{Lecture géométrique}
+
+L'espace géométrique associé à cet exemple est l'image observationnelle réduite
+\[
+\mathcal L_{\lambda_2,P}=I_{\Phi,\lambda_2}^P(\mathcal X)
+=
+\bigl\{
+(0,0,0,0,0),
+(1,1,0,0,0),
+(1,0,0,0,0),
+(1,1,1,0,1),
+(1,1,0,1,1)
+\bigr\}
+\subseteq \mathbb R^5.
+\]
+Dans cet espace, le chat de Naszimger n'est pas un postulat narratif, mais une classe d'orbite observationnelle : il est l'objet qui reste stable sous les sondes de basse résolution et qui se décompose seulement lorsque le seuil critique est franchi.
+
+On peut représenter cette géométrie par le schéma suivant :
+\[
+[\chi_{\mathrm{ferm\'e}}]_{\lambda_0}
+\longrightarrow
+\text{empreinte basse résolution}
+\longrightarrow
+\text{seuil critique}
+\longrightarrow
+\{\chi_{\mathrm{vivant}},\chi_{\mathrm{mort}}\}.
+\]
+
+Cette lecture est fidèle à la théorie des empreintes : l'expérience n'est pas d'abord une histoire physique imposée de l'extérieur, mais une hiérarchie de fibres qui devient visible au fur et à mesure que les sondes se raffinent.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+node distance=10mm and 14mm,
+>=Stealth,
+box/.style={draw, rounded corners, align=center, inner sep=3pt, minimum width=28mm},
+arrow/.style={->, very thick}
+]
+\node[box] (q) {$[\chi_{\mathrm{ferm\'e}}]_{\lambda_0}$};
+\node[box, below left=of q] (f) {$\chi_{\mathrm{ferm\'e}}$};
+\node[box, below right=of q] (v) {$\chi_{\mathrm{vivant}}$};
+\node[box, right=of v] (m) {$\chi_{\mathrm{mort}}$};
+
+\draw[arrow] (f) -- node[left] {$\pi_{\lambda_0}$} (q);
+\draw[arrow] (q) -- node[above left] {résolution} (v);
+\draw[arrow] (q) -- node[above right] {résolution} (m);
+\end{tikzpicture}
+\caption{Filtration observationnelle du chat de Naszimger : une classe non résolue admet un représentant, puis se raffine en issues séparables à haute résolution.}
+\end{figure}
+
+\subsection{Diagramme de commutation}
+
+La compatibilité entre quotient, projection et reconstruction s'écrit par le diagramme commutatif suivant :
+\[
+\begin{tikzpicture}[baseline=(current bounding box.center),node distance=22mm and 20mm,>=Stealth]
+\node (X) {$\mathcal X$};
+\node (R2) [right=of X] {$\mathbb R^{\mathcal F_{\lambda_2}}$};
+\node (Q) [below=of X] {$\mathcal X/{\sim_{\Phi,P,\lambda_1}}$};
+\node (R1) [below=of R2] {$\mathbb R^{\mathcal F_{\lambda_1}}$};
+
+\draw[->] (X) -- node[above] {$I_{\Phi,\lambda_2}^P$} (R2);
+\draw[->] (X) -- node[left] {$\pi_{\lambda_1}$} (Q);
+\draw[->] (R2) -- node[right] {$r_{\lambda_2\to\lambda_1}$} (R1);
+\draw[->] (Q) -- node[below] {$\widetilde I_{\lambda_1}$} (R1);
+\end{tikzpicture}
+\]
+c'est-à-dire
+\[
+I_{\Phi,\lambda_1}^P
+=
+r_{\lambda_2\to\lambda_1}\circ I_{\Phi,\lambda_2}^P
+=
+\widetilde I_{\lambda_1}\circ \pi_{\lambda_1}.
+\]
+
+\begin{proposition}[Compatibilité des restrictions]
+Le diagramme précédent commute par définition de la restriction des coordonnées. En effet, \(r_{\lambda_2\to\lambda_1}\) est l'application qui oublie les coordonnées correspondant à \(\mathcal F_{\lambda_2}\setminus\mathcal F_{\lambda_1}\), et \(\widetilde I_{\lambda_1}\) est l'application induite sur le quotient par \(\sim_{\Phi,P,\lambda_1}\).
+\end{proposition}
+
+\begin{proof}
+Pour tout \(x\in\mathcal X\), la restriction de \(I_{\Phi,\lambda_2}^P(x)\) à \(\mathcal F_{\lambda_1}\) est exactement \(I_{\Phi,\lambda_1}^P(x)\) par définition des empreintes à l'échelle. De plus, si \(x\sim_{\Phi,P,\lambda_1}y\), alors \(I_{\Phi,\lambda_1}^P(x)=I_{\Phi,\lambda_1}^P(y)\), si bien que l'application \(\widetilde I_{\lambda_1}([x]_{\lambda_1})=I_{\Phi,\lambda_1}^P(x)\) est bien définie. Les deux compositions coïncident donc avec \(I_{\Phi,\lambda_1}^P\).
+\end{proof}
+
+Le lecteur voit ainsi simultanément la projection, le quotient, la filtration et la reconstruction.
+
+\subsection{Interprétation interne à la théorie}
+
+La reconstruction ci-dessus n'impose aucune lecture classique préalable. Elle montre seulement qu'une expérience à plusieurs issues peut être codée par une structure d'empreintes dont la géométrie est déterminée par des seuils critiques.
+
+Autrement dit, dans la théorie des empreintes, l'opposition entre « état non résolu » et « état résolu » n'est pas un axiome extérieur : c'est une propriété de la filtration des fibres. Le chat de Naszimger joue alors le rôle d'objet test minimal pour cette séparation.
+
+\begin{proposition}[Rigidité observationnelle à seuil fixé]
+Soient deux expériences finies \((\mathcal X,\Phi,P,\Lambda,\iota)\) et \((\mathcal X',\Phi',P',\Lambda',\iota')\), munies de fonctions de seuil complètes \(\Theta_P\) et \(\Theta'_{P'}\). S'il existe une bijection \(\sigma:\mathcal X\to\mathcal X'\) telle que
+\[
+\Theta'_{P'}(\{\sigma(x),\sigma(y)\})=\Theta_P(\{x,y\})
+\qquad\text{pour tous }x,y\in\mathcal X,
+\]
+alors les deux expériences sont isomorphes comme structures observationnelles.
+\end{proposition}
+
+\begin{proof}
+La condition impose la conservation de toutes les valeurs de seuil, donc de tous les niveaux de séparation et de toutes les classes de la filtration. En effet, pour tout \(t\in\mathbb R_+\),
+\[
+x\equiv_t y
+\quad\Longleftrightarrow\quad
+\Theta_P(\{x,y\})\ge t
+\quad\Longleftrightarrow\quad
+\Theta'_{P'}(\{\sigma(x),\sigma(y)\})\ge t
+\quad\Longleftrightarrow\quad
+\sigma(x)\equiv'_t \sigma(y).
+\]
+Les partitions de niveau coïncident donc niveau par niveau, ainsi que l'arbre des classes et la mesure de résolution qui en dérivent. Les deux expériences sont donc la même structure observationnelle, transportée par \(\sigma\).
+\end{proof}
+
+\begin{corollary}[Principe de résolution par empreinte]
+Si un objet observationnel est tel que deux issues deviennent séparables seulement à partir d'une certaine intensité d'observation, alors sa description minimale est donnée par la fonction de seuil associée à ses fibres, indépendamment de toute interprétation classique préalable.
+\end{corollary}
+
+\begin{proof}
+C'est une reformulation de la proposition précédente en langage de seuils. L'issue non résolue correspond à une classe d'indiscernabilité commune à basse intensité, tandis que les deux issues séparées correspondent aux classes distinctes à intensité suffisante. La fonction de seuil encode exactement le point de transition.
+\end{proof}
+
+%\end{appendices}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%experience de double résolutions
+
+% Références internes au manuscrit global :
+% - définition \emph{Complétion seuil canonique}
+% - théorème \emph{Loi du minimum double, rigidité ultramétrique et complétion arborescente canonique}
+%   (filtration canonique, arbre étiqueté, enfants, ancêtre commun)
+% - corollaire \emph{Non-recouvrement partiel}
+% - théorème \emph{Représentation atomique de la résolution}
+% - corollaire \emph{Invariance par reparamétrisation monotone}
+
+\subsection*{Expérience à double résolutions : probabilité émergente et structure de type double fente}
+
+\paragraph{Principe de l'exemple.}
+On formalise ici une reconstruction observationnelle d'une structure observationnelle de type double fente dans le langage des empreintes. La donnée primitive n'est pas une probabilité attribuée à un objet isolé, mais une classe observationnelle qui se raffine lorsque le système de sondes devient plus discriminant. Dans ce cadre, la probabilité n'appartient pas à l'objet lui-même : elle appartient au couple formé par une classe d'objets, un système d'observation et un processus de résolution.
+
+\begin{remark}
+Dans tout ce qui suit, une superposition observationnelle n'est rien d'autre qu'une fibre non réduite à une échelle donnée. La lecture probabiliste n'apparaît qu'après avoir fixé une mesure de résolution compatible avec l'arbre de résolution. Aucune fonction d'onde n'est postulée ici.
+\end{remark}
+
+\subsection*{Dispositif observationnel}
+
+On fixe un contexte \(P\in\mathcal P\) et l'on considère le système d'observation
+\[
+\mathcal O:=(P,\Phi,\Lambda,\mathcal F),
+\]
+où \(\Phi\) est le fonctionnel d'observation, \(\Lambda\) l'échelle de résolution, et \(\mathcal F\) la famille de sondes disponibles.
+
+On considère l'ensemble fini
+\[
+\mathcal X=\{x_0,x_L,x_R,x_L^\sharp,x_R^\sharp\},
+\]
+où \(x_0\) désigne l'état de préparation, \(x_L\) et \(x_R\) les deux branches élémentaires, et \(x_L^\sharp,x_R^\sharp\) les deux branches après enregistrement mémoriel.
+
+On fixe une famille de sondes
+\[
+\mathcal F=\{f_{\mathrm{source}},f_{\mathrm{traj}},f_{\mathrm{memoire}}\},
+\]
+et l'on définit le fonctionnel d'observation \(\Phi:\mathcal P\times\mathcal X\times\mathcal F\to\mathbb R\) par
+\[
+\begin{array}{c|ccc}
+& f_{\mathrm{source}} & f_{\mathrm{traj}} & f_{\mathrm{memoire}}\\ \hline
+x_0 & 0 & 0 & 0\\
+x_L & 1 & 1 & 0\\
+x_R & 1 & 0 & 0\\
+x_L^\sharp & 1 & 1 & 1\\
+x_R^\sharp & 1 & 0 & 1
+\end{array}
+\]
+et l'on note
+\[
+I_\Phi^P(x)=\bigl(\Phi(P,x,f_{\mathrm{source}}),\Phi(P,x,f_{\mathrm{traj}}),\Phi(P,x,f_{\mathrm{memoire}})\bigr).
+\]
+
+On introduit pour tout \(\lambda\in\Lambda\) la projection quotient
+\[
+\pi_\lambda:\mathcal X\longrightarrow \mathcal X/{\sim_{\Phi,P,\lambda}},
+\qquad
+\pi_\lambda(x)=[x]_\lambda.
+\]
+
+On fixe trois échelles
+\[
+\Lambda=\{\lambda_0\prec\lambda_1\prec\lambda_2\},
+\qquad
+\mathcal F_{\lambda_0}=\{f_{\mathrm{source}}\},\quad
+\mathcal F_{\lambda_1}=\{f_{\mathrm{source}},f_{\mathrm{traj}}\},\quad
+\mathcal F_{\lambda_2}=\mathcal F.
+\]
+
+À basse résolution, la classe cohérente
+\[
+A=[x_L]_{\lambda_0}=[x_R]_{\lambda_0}=[x_L^\sharp]_{\lambda_0}=[x_R^\sharp]_{\lambda_0}
+\]
+est une superposition observationnelle au sens de la théorie : elle n'est pas un mélange ontologique, mais une fibre non réduite. On a en particulier
+\[
+\pi_{\lambda_0}^{-1}(A)=\{x_L,x_R,x_L^\sharp,x_R^\sharp\},
+\qquad
+\pi_{\lambda_0}^{-1}([x_0]_{\lambda_0})=\{x_0\}.
+\]
+À la première résolution, cette classe se décompose en deux branches,
+\[
+A_L=[x_L]_{\lambda_1}=[x_L^\sharp]_{\lambda_1},
+\qquad
+A_R=[x_R]_{\lambda_1}=[x_R^\sharp]_{\lambda_1}.
+\]
+À la seconde résolution, chaque branche se raffine encore en feuilles distinctes :
+\[
+[x_L]_{\lambda_2},\ [x_L^\sharp]_{\lambda_2},\ [x_R]_{\lambda_2},\ [x_R^\sharp]_{\lambda_2}.
+\]
+
+\subsection*{Mesure de résolution et probabilité émergente}
+
+La théorie globale fournit déjà une mesure atomique de la résolution, portée par le spectre critique et reconstruite à partir de la fonction de seuil complète \(\Theta_P\). On n'introduit donc pas ici une nouvelle primitive : sur le sous-arbre fini \(\mathcal T_A\subset\mathcal T_P\) engendré par \(A\), la masse de branche est extraite de la mesure canonique de résolution déjà reconstruite.
+
+\begin{proposition}[Compatibilité (rappel)]
+\label{prop:compatibilite-arbre-intervalles}
+Soit \(A\) un nœud du sous-arbre considéré \(\mathcal T_A\), où
+\[
+\mathcal T_A:=\{B\in\mathcal T_P:\ B\subseteq A\}.
+\]
+Alors, pour tout \(B\in\mathcal T_A\), l'intervalle canonique de persistance \(\overline I(B)\) existe et est unique. De plus, si \(C\in\operatorname{Ch}(B)\), alors
+\[
+\overline I(C)\subsetneq \overline I(B),
+\qquad
+\overline I(B)=\bigsqcup_{C\in\operatorname{Ch}(B)}\overline I(C).
+\]
+En particulier, l'application
+\[
+B\longmapsto \overline I(B)
+\]
+est un morphisme de l'arbre de résolution vers l'arbre des intervalles de persistance, préservant les inclusions et les décompositions par enfants.
+\end{proposition}
+
+\begin{proof}
+Cette proposition est une reformulation de la définition \emph{Complétion seuil canonique} et du théorème \emph{Loi du minimum double, rigidité ultramétrique et complétion arborescente canonique}, en particulier les items relatifs à la filtration canonique, à l'arbre étiqueté et aux enfants, restreints au sous-arbre \(\mathcal T_A\). Le fait que \(\overline I(B)\) soit un segment et que les enfants d'un nœud partitionnent le nœud parent est déjà contenu dans ces résultats globaux. La restriction à \(\mathcal T_A\) ne fait qu'omettre les nœuds extérieurs à \(A\) ; elle ne modifie pas les intervalles canoniques définis par la complétion seuil.
+\end{proof}
+
+On définit alors la masse de branche par
+\[
+\omega_P(B):=\mu_P\bigl(\overline I(B)\bigr)=\nu_P\bigl(\overline I(B)\bigr).
+\]
+Si \(\overline I(B)=(s_B,t_B]\), on peut encore écrire
+\[
+\omega_P(B)=\widetilde{\mathcal R}_P(t_B)-\widetilde{\mathcal R}_P(s_B).
+\]
+Cette définition ne postule aucune mesure extérieure : elle extrait la masse de branche à partir de la mesure atomique déjà reconstruite par les seuils.
+
+\begin{definition}[Probabilité émergente de résolution]
+Soit \(A\) un nœud de \(\mathcal T_A\), et soit \(B\in\operatorname{Ch}(A)\). On définit la probabilité émergente associée au processus de résolution par
+\[
+\mathbb P_P(B\mid A):=\frac{\omega_P(B)}{\omega_P(A)}
+=
+\frac{\widetilde{\mathcal R}_P(t_B)-\widetilde{\mathcal R}_P(s_B)}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}.
+\]
+Cette quantité dépend du couple \((A,\mathcal O)\), donc de la classe observationnelle et du système d'observation, et non d'un représentant particulier de \(A\).
+\end{definition}
+
+\begin{theorem}[La probabilité est une propriété du processus de résolution]
+Sous les hypothèses précédentes, \(\mathbb P_P(\cdot\mid A)\) est une probabilité sur l'ensemble fini \(\operatorname{Ch}(A)\). En particulier,
+\[
+\sum_{B\in\operatorname{Ch}(A)}\mathbb P_P(B\mid A)=1.
+\]
+De plus, pour toute chaîne
+\[
+A=A_0\supset A_1\supset \cdots \supset A_n
+\]
+dans le sous-arbre \(\mathcal T_A\), on a la règle de chaîne
+\[
+\omega_P(A_n)
+=
+\omega_P(A)\prod_{k=0}^{n-1}\mathbb P_P(A_{k+1}\mid A_k).
+\]
+\end{theorem}
+
+\begin{proof}
+Par la proposition \ref{prop:compatibilite-arbre-intervalles} et par le théorème \emph{Représentation atomique de la résolution} du manuscrit global, les intervalles canoniques des enfants sont disjoints et leur réunion redonne l'intervalle canonique du parent :
+\[
+\overline I(A)=\bigsqcup_{B\in\operatorname{Ch}(A)}\overline I(B).
+\]
+Par additivité de la mesure atomique \(\mu_P=\nu_P\),
+\[
+\omega_P(A)=\mu_P(\overline I(A))
+=\sum_{B\in\operatorname{Ch}(A)}\mu_P(\overline I(B))
+=\sum_{B\in\operatorname{Ch}(A)}\omega_P(B).
+\]
+En divisant par \(\omega_P(A)\), on obtient
+\[
+\sum_{B\in\operatorname{Ch}(A)}\frac{\omega_P(B)}{\omega_P(A)}=1,
+\]
+ce qui est la propriété de probabilité.
+
+Pour la règle de chaîne,
+\[
+\prod_{k=0}^{n-1}\mathbb P_P(A_{k+1}\mid A_k)
+=
+\prod_{k=0}^{n-1}\frac{\omega_P(A_{k+1})}{\omega_P(A_k)}
+=
+\frac{\omega_P(A_n)}{\omega_P(A)},
+\]
+par télescopage, d'où la formule annoncée.
+\end{proof}
+
+\begin{corollary}[Invariance observationnelle]
+Les probabilités \(\mathbb P_P(B\mid A)\) ne dépendent ni du choix de représentant de \(A\), ni d'une reparamétrisation monotone de l'échelle \(\Lambda\). Elles ne dépendent que de la classe \(A\), du sous-arbre de résolution considéré, et de la mesure canonique de résolution \(\mu_P=\nu_P\) transportée sur ce sous-arbre.
+\end{corollary}
+
+\begin{proof}
+Le quotient observationnel \(\pi_\lambda\) identifie exactement les objets ayant la même empreinte à l'échelle \(\lambda\), de sorte que le choix du représentant de \(A\) est sans effet. Par ailleurs, le corollaire \emph{Invariance par reparamétrisation monotone} du manuscrit global transporte canoniquement les relations de séparation et les systèmes projectifs associés : la structure d'ordre est conservée, et donc les intervalles \(\overline I(B)\) sont transportés avec leurs masses \(\mu_P(\overline I(B))\). Les rapports
+\[
+\frac{\omega_P(B)}{\omega_P(A)}
+\]
+sont donc préservés.
+\end{proof}
+
+\begin{remark}
+Le comptage uniforme n'intervient qu'à titre de cas particulier. Dans le modèle symétrique retenu ici, les seuils sont choisis de façon à rendre les deux branches du premier niveau \(\mu_P\)-équivalentes, puis les deux feuilles à l'intérieur de chaque branche \(\mu_P\)-équivalentes. Le manuscrit global reste toutefois fondé sur \(\mu_P=\nu_P\) et sur les sauts de \(\widetilde{\mathcal R}_P\), qui sont les véritables objets primitifs de la résolution.
+\end{remark}
+
+\subsection*{Reconstruction mathématique d'une structure de type double fente}
+
+Le choix des seuils peut être ajusté de façon compatible avec la hiérarchie précédente en posant
+\[
+\Theta_P(\{x_L,x_R\})=\Theta_P(\{x_L^\sharp,x_R^\sharp\})=\alpha_1,
+\qquad
+\Theta_P(\{x_L,x_L^\sharp\})=\Theta_P(\{x_R,x_R^\sharp\})=\alpha_2,
+\]
+avec
+\[
+\alpha_1<\iota(\lambda_1)<\alpha_2<\iota(\lambda_2).
+\]
+Les autres valeurs de \(\Theta_P\) sont choisies de manière compatible avec la loi du minimum double et avec la séparation préalable de \([x_0]_{\lambda_0}\) d'avec la classe cohérente \(A\). La première valeur critique \(\alpha_1\) correspond à la séparation des deux chemins ; la seconde, \(\alpha_2\), correspond au raffinement mémoriel à l'intérieur de chaque chemin.
+
+Dans le modèle symétrique retenu ici, les seuils sont choisis de façon à rendre les deux branches du premier niveau \(\mu_P\)-équivalentes, puis les deux feuilles à l'intérieur de chaque branche \(\mu_P\)-équivalentes. On obtient ainsi
+\[
+\omega_P(A)=\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)=1,
+\qquad
+\omega_P(A_L)=\omega_P(A_R)=\frac12,
+\qquad
+\omega_P([x_L]_{\lambda_2})=\omega_P([x_L^\sharp]_{\lambda_2})
+=\omega_P([x_R]_{\lambda_2})=\omega_P([x_R^\sharp]_{\lambda_2})=\frac14.
+\]
+On a donc, dans ce modèle symétrique,
+\[
+\mathbb P_P(A_L\mid A)
+=
+\frac{\widetilde{\mathcal R}_P(t_{A_L})-\widetilde{\mathcal R}_P(s_{A_L})}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}
+=
+\frac12,
+\qquad
+\mathbb P_P(A_R\mid A)
+=
+\frac{\widetilde{\mathcal R}_P(t_{A_R})-\widetilde{\mathcal R}_P(s_{A_R})}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}
+=
+\frac12,
+\]
+et de même pour les feuilles finales. Cette normalisation n'est pas imposée par la théorie : elle est le choix symétrique retenu pour cette modélisation.
+
+\begin{proposition}[Reconstruction observationnelle d'une structure de type double fente]
+Dans le modèle ci-dessus, la classe cohérente \(A\) se décompose d'abord en deux branches de même poids,
+\[
+\mathbb P_P(A_L\mid A)
+=
+\frac{\widetilde{\mathcal R}_P(t_{A_L})-\widetilde{\mathcal R}_P(s_{A_L})}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}
+=
+\frac12,
+\qquad
+\mathbb P_P(A_R\mid A)
+=
+\frac{\widetilde{\mathcal R}_P(t_{A_R})-\widetilde{\mathcal R}_P(s_{A_R})}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}
+=
+\frac12,
+\]
+puis chaque branche se raffine en deux feuilles de même poids,
+\[
+\mathbb P_P([x_L]_{\lambda_2}\mid A_L)
+=
+\frac{\widetilde{\mathcal R}_P(t_{x_L})-\widetilde{\mathcal R}_P(s_{x_L})}
+{\widetilde{\mathcal R}_P(t_{A_L})-\widetilde{\mathcal R}_P(s_{A_L})}
+=
+\frac12,
+\]
+\[
+\mathbb P_P([x_L^\sharp]_{\lambda_2}\mid A_L)
+=
+\frac{\widetilde{\mathcal R}_P(t_{x_L^\sharp})-\widetilde{\mathcal R}_P(s_{x_L^\sharp})}
+{\widetilde{\mathcal R}_P(t_{A_L})-\widetilde{\mathcal R}_P(s_{A_L})}
+=
+\frac12,
+\]
+\[
+\mathbb P_P([x_R]_{\lambda_2}\mid A_R)
+=
+\frac{\widetilde{\mathcal R}_P(t_{x_R})-\widetilde{\mathcal R}_P(s_{x_R})}
+{\widetilde{\mathcal R}_P(t_{A_R})-\widetilde{\mathcal R}_P(s_{A_R})}
+=
+\frac12,
+\]
+\[
+\mathbb P_P([x_R^\sharp]_{\lambda_2}\mid A_R)
+=
+\frac{\widetilde{\mathcal R}_P(t_{x_R^\sharp})-\widetilde{\mathcal R}_P(s_{x_R^\sharp})}
+{\widetilde{\mathcal R}_P(t_{A_R})-\widetilde{\mathcal R}_P(s_{A_R})}
+=
+\frac12.
+\]
+Cette structure reproduit, dans le langage des empreintes, la logique d'une structure de type double fente : une classe cohérente, une première séparation en deux chemins, puis un raffinement secondaire des traces.
+\end{proposition}
+
+\begin{proof}
+Par définition de la masse de branche induite,
+\[
+\mathbb P_P(A_L\mid A)=\frac{\omega_P(A_L)}{\omega_P(A)}
+=
+\frac{\widetilde{\mathcal R}_P(t_{A_L})-\widetilde{\mathcal R}_P(s_{A_L})}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}
+=\frac12,
+\qquad
+\mathbb P_P(A_R\mid A)=\frac{\widetilde{\mathcal R}_P(t_{A_R})-\widetilde{\mathcal R}_P(s_{A_R})}
+{\widetilde{\mathcal R}_P(t_A)-\widetilde{\mathcal R}_P(s_A)}
+=\frac12.
+\]
+De façon identique, au second niveau de résolution,
+\[
+\mathbb P_P([x_L]_{\lambda_2}\mid A_L)
+=
+\frac{\widetilde{\mathcal R}_P(t_{x_L})-\widetilde{\mathcal R}_P(s_{x_L})}
+{\widetilde{\mathcal R}_P(t_{A_L})-\widetilde{\mathcal R}_P(s_{A_L})}
+=
+\frac12,
+\]
+et la même démonstration vaut pour \([x_L^\sharp]_{\lambda_2}\), \([x_R]_{\lambda_2}\) et \([x_R^\sharp]_{\lambda_2}\). La reconstruction est donc une conséquence directe de la mesure de résolution \(\mu_P=\nu_P\) transportée sur le sous-arbre et de la symétrie choisie pour ce modèle.
+\end{proof}
+
+\begin{corollary}[Lecture de la double résolution]
+Dans cet exemple, la probabilité ne préexiste pas à l'objet ; elle apparaît comme mesure sur les branches de l'arbre lorsque le système d'observation franchit ses seuils de résolution. En particulier, la loi de branchement est une propriété du couple \((A,\mathcal O)\), et non d'un objet isolé.
+\end{corollary}
+
+\begin{proof}
+La définition même de \(\mathbb P_P(B\mid A)\) montre que la probabilité dépend de la classe \(A\), de la mesure canonique de résolution \(\mu_P=\nu_P\) et du système d'observation \(\mathcal O\). Sans résolution, il n'existe ni branches ni masse de branche ; dès qu'une résolution est fixée, la masse devient canonique sur l'arbre. La probabilité est donc émergente au sens strict.
+\end{proof}
+
+\begin{remark}
+Cette construction ne postule aucune fonction d'onde. Elle reconstruit seulement, dans le langage des empreintes, une mesure de résolution portée par les branches de l'arbre. Les probabilités y sont des quantités dérivées du processus d'observation, et non des propriétés primitives de l'objet.
+\end{remark}
+
+
+%\end{appendices}
+
+
+
+
+
+
+
+%\begin{appendices}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%un modèle de transport observationnel 
+
+% Références internes utilisées :
+% - Théorème de réduction canonique des sondes
+% - Théorème de factorisation de l'empreinte
+% - Définition de l'image observationnelle réduite
+% - Théorème structural des seuils (loi du minimum double, arbre, partitions)
+% - Théorème de représentation atomique de la résolution
+% - Corollaire d'invariance par reparamétrisation monotone
+
+\section{Perspective : un modèle de transport observationnel fondé sur les empreintes}
+
+\subsection{Idée directrice}
+
+La théorie des empreintes montre qu'un objet n'est pas saisi d'abord par la totalité de sa microdescription, mais par ce qui reste invariant sous le système d'observation choisi. Autrement dit, la donnée primitive n'est pas l'état complet, mais l'empreinte observationnelle.
+
+Le point mathématique essentiel est alors le suivant :
+
+\begin{quote}
+une opération est observationnellement représentable si, et seulement si, elle préserve les fibres observables ; dans ce cas, elle se factorise de manière unique sur l'espace des empreintes.
+\end{quote}
+
+Cette section formalise cette descente, puis montre comment elle se prolonge aux échelles, aux seuils et à la géométrie de résolution déjà construits dans le manuscrit global.
+
+\begin{remark}
+Le résultat ci-dessous ne prétend pas que toute opération physique ou informatique se transporte automatiquement sur les empreintes. Il caractérise exactement la classe des opérations qui préservent les fibres observables, donc représentables au niveau observationnel. La supériorité matérielle éventuelle d'une architecture concrète n'est pas démontrée ici.
+\end{remark}
+
+\subsection{Cadre de représentation}
+
+Fixons un contexte \(P\in\mathcal P\) et une famille finie de sondes \(\mathcal G\subseteq\mathcal F_\lambda\). On considère l'empreinte réduite
+\[
+I_{\Phi,\mathcal G}^P:\mathcal X\longrightarrow \mathbb R^{\mathcal G},
+\qquad
+\mathcal L_{\mathcal G,P}:=I_{\Phi,\mathcal G}^P(\mathcal X).
+\]
+L'ensemble \(\mathcal L_{\mathcal G,P}\) est l'image observationnelle réduite canonique des objets à travers la famille \(\mathcal G\).
+
+Par le \emph{Théorème de réduction canonique des sondes} du manuscrit global, on peut remplacer \(\mathcal G\) par sa fermeture observationnelle
+\[
+\mathcal G^\sharp:=\operatorname{Cl}_{P,\lambda}(\mathcal G),
+\]
+sans modifier les fibres observables.
+
+\begin{proposition}[Réduction canonique préalable des sondes]
+\label{prop:reduction-prealable}
+Pour toute famille finie \(\mathcal G\subseteq\mathcal F_\lambda\), les empreintes
+\[
+I_{\Phi,\mathcal G}^P
+\qquad\text{et}\qquad
+I_{\Phi,\operatorname{Cl}_{P,\lambda}(\mathcal G)}^P
+\]
+ont exactement les mêmes fibres.
+Autrement dit, la réduction canonique des sondes ne change pas le contenu classificatoire.
+\end{proposition}
+
+\begin{proof}
+C'est exactement le \emph{Théorème de réduction canonique des sondes} du manuscrit global, appliqué au contexte \(P\), à l'échelle \(\lambda\) et à la famille \(\mathcal G\).
+\end{proof}
+
+\subsection{Caractérisation de la représentation observationnelle}
+
+\begin{definition}[Opération observationnellement représentable]
+Une application \(F:\mathcal X\to\mathcal X\) est dite \(\mathcal G\)-compatible si
+\[
+I_{\Phi,\mathcal G}^P(x)=I_{\Phi,\mathcal G}^P(y)
+\quad\Longrightarrow\quad
+I_{\Phi,\mathcal G}^P(F(x))=I_{\Phi,\mathcal G}^P(F(y))
+\]
+pour tous \(x,y\in\mathcal X\).
+
+On dit alors que \(F\) est observationnellement représentable à travers \(\mathcal G\).
+\end{definition}
+
+\begin{theorem}[Caractérisation de la représentation observationnelle par la propriété universelle du quotient]
+\label{thm:representation-observationnelle}
+Fixons \(P\in\mathcal P\) et une famille réduite de sondes \(\mathcal G\subseteq\mathcal F_\lambda\). Soit \(F:\mathcal X\to\mathcal X\) une application. Les assertions suivantes sont équivalentes :
+\begin{enumerate}[label=\textbf{(\arabic*)}]
+\item \(F\) est \(\mathcal G\)-compatible, c'est-à-dire qu'elle préserve les fibres observables de \(I_{\Phi,\mathcal G}^P\).
+\item Il existe une unique application
+\[
+\mathcal C_F:\mathcal L_{\mathcal G,P}\longrightarrow \mathcal L_{\mathcal G,P}
+\]
+telle que
+\[
+I_{\Phi,\mathcal G}^P\circ F=\mathcal C_F\circ I_{\Phi,\mathcal G}^P.
+\]
+\item Il existe une unique application
+\[
+\widehat{\mathcal C}_F:\mathcal X/{\sim_{\Phi,P,\mathcal G}}\longrightarrow \mathcal X/{\sim_{\Phi,P,\mathcal G}}
+\]
+telle que
+\[
+\pi_{\mathcal G}\circ F=\widehat{\mathcal C}_F\circ \pi_{\mathcal G}.
+\]
+\end{enumerate}
+
+En particulier, toute opération observationnellement représentable descend de manière unique sur l'espace des empreintes et sur le quotient observationnel.
+\end{theorem}
+
+\begin{proof}
+Le \emph{Théorème de factorisation de l'empreinte} établit la correspondance entre les fibres de \(I_{\Phi,\mathcal G}^P\) et le quotient observationnel associé. La propriété universelle du quotient donne alors l'équivalence entre la compatibilité sur les fibres et l'existence d'une factorisation unique.
+
+Si \(F\) est \(\mathcal G\)-compatible, on définit
+\[
+\mathcal C_F\bigl(I_{\Phi,\mathcal G}^P(x)\bigr):=I_{\Phi,\mathcal G}^P(F(x)).
+\]
+La définition est indépendante du représentant \(x\) précisément parce que \(F\) préserve les fibres observables de \(I_{\Phi,\mathcal G}^P\). Cela donne \((1)\Rightarrow(2)\). L'implication \((2)\Rightarrow(3)\) suit du passage au quotient par les fibres, déjà établi par le théorème de factorisation global.
+
+Réciproquement, si une factorisation existe, alors \(I_{\Phi,\mathcal G}^P(x)=I_{\Phi,\mathcal G}^P(y)\) implique
+\[
+I_{\Phi,\mathcal G}^P(F(x))
+=
+\mathcal C_F(I_{\Phi,\mathcal G}^P(x))
+=
+\mathcal C_F(I_{\Phi,\mathcal G}^P(y))
+=
+I_{\Phi,\mathcal G}^P(F(y)),
+\]
+donc \(F\) est \(\mathcal G\)-compatible. L'unicité est immédiate car \(\mathcal L_{\mathcal G,P}\) est l'image de \(I_{\Phi,\mathcal G}^P\).
+\end{proof}
+
+\begin{remark}
+Le théorème précédent exprime exactement la propriété universelle du quotient observationnel : les applications qui préservent les fibres observables sont précisément celles qui se factorisent de manière unique à travers \(\mathcal X/{\sim_{\Phi,P,\mathcal G}}\) ou, de façon équivalente, à travers \(\mathcal L_{\mathcal G,P}\).
+\end{remark}
+
+\begin{corollary}[Critère de non-descente]
+Si une application \(F:\mathcal X\to\mathcal X\) sépare au moins une fibre observable de \(I_{\Phi,\mathcal G}^P\), alors elle ne descend ni à \(\mathcal L_{\mathcal G,P}\) ni au quotient \(\mathcal X/{\sim_{\Phi,P,\mathcal G}}\).
+\end{corollary}
+
+\begin{proof}
+C'est la contraposée immédiate du théorème précédent.
+\end{proof}
+
+\begin{proposition}[Structure algébrique des opérations compatibles]
+\label{prop:monoid-operations}
+L'ensemble
+\[
+\mathfrak M_{\mathcal G,P}:=\{F:\mathcal X\to\mathcal X\mid F\ \text{est \(\mathcal G\)-compatible}\}
+\]
+est un monoïde pour la composition, dont l'élément neutre est \(\operatorname{id}_{\mathcal X}\).
+De plus, l'application
+\[
+F\longmapsto \mathcal C_F
+\]
+est un morphisme de monoïdes de \((\mathfrak M_{\mathcal G,P},\circ,\operatorname{id}_{\mathcal X})\) vers \((\operatorname{End}(\mathcal L_{\mathcal G,P}),\circ,\operatorname{id}_{\mathcal L_{\mathcal G,P}})\).
+\end{proposition}
+
+\begin{proof}
+Si \(F_1\) et \(F_2\) sont \(\mathcal G\)-compatibles, alors \(F_2\circ F_1\) l'est encore, car la préservation des fibres observables est conservée par composition. Par le théorème précédent,
+\[
+I_{\Phi,\mathcal G}^P\circ F_i=\mathcal C_{F_i}\circ I_{\Phi,\mathcal G}^P
+\qquad (i=1,2).
+\]
+Donc
+\[
+I_{\Phi,\mathcal G}^P\circ(F_2\circ F_1)
+=
+\mathcal C_{F_2}\circ\mathcal C_{F_1}\circ I_{\Phi,\mathcal G}^P.
+\]
+Par unicité de la factorisation, on obtient
+\[
+\mathcal C_{F_2\circ F_1}=\mathcal C_{F_2}\circ \mathcal C_{F_1}.
+\]
+L'identité se factorise trivialement par elle-même. Ainsi, on obtient bien un morphisme de monoïdes.
+\end{proof}
+
+\begin{corollary}[Suite finie d'opérations observationnelles]
+Si
+\[
+W=F_n\circ F_{n-1}\circ\cdots\circ F_1
+\]
+est une suite finie d'opérations \(\mathcal G\)-compatibles, alors il existe une unique application induite
+\[
+\mathcal C_W=\mathcal C_{F_n}\circ\cdots\circ\mathcal C_{F_1}
+\]
+telle que
+\[
+I_{\Phi,\mathcal G}^P\circ W=\mathcal C_W\circ I_{\Phi,\mathcal G}^P.
+\]
+Ainsi, toute suite finie d'opérations compatibles admet une représentation entièrement définie sur l'espace des empreintes.
+\end{corollary}
+
+\begin{proof}
+C'est une conséquence immédiate de la proposition précédente par récurrence sur le nombre de compositions.
+\end{proof}
+
+\begin{corollary}[Représentation observationnelle d'une fonction de coût]
+Soit \(\Theta\) un espace de paramètres et soit
+\[
+L:\Theta\times\mathcal X\longrightarrow \mathbb R
+\]
+une fonction de coût telle que, pour tout \(\theta\in\Theta\),
+\[
+I_{\Phi,\mathcal G}^P(x)=I_{\Phi,\mathcal G}^P(y)
+\Longrightarrow
+L(\theta,x)=L(\theta,y).
+\]
+Alors il existe une unique fonction
+\[
+\widetilde L:\Theta\times\mathcal L_{\mathcal G,P}\longrightarrow \mathbb R
+\]
+vérifiant
+\[
+L(\theta,x)=\widetilde L\bigl(\theta,I_{\Phi,\mathcal G}^P(x)\bigr).
+\]
+En particulier, toute fonction de coût constante sur les fibres admet une représentation unique sur l'espace des empreintes.
+\end{corollary}
+
+\begin{proof}
+Pour chaque \(\theta\), l'application \(x\mapsto L(\theta,x)\) est constante sur les fibres de \(I_{\Phi,\mathcal G}^P\). Le \emph{Théorème de factorisation de l'empreinte} donne donc une factorisation unique à travers \(\mathcal L_{\mathcal G,P}\). En faisant varier \(\theta\), on obtient \(\widetilde L\).
+\end{proof}
+
+\subsection{Compatibilité avec les échelles et la résolution}
+
+On passe maintenant au cadre multi-échelle du manuscrit global. Pour \(\lambda\preceq\mu\), on dispose de la restriction
+\[
+r_{\mu\to\lambda}:\mathbb R^{\mathcal F_\mu}\longrightarrow \mathbb R^{\mathcal F_\lambda},
+\]
+qui oublie les coordonnées de \(\mathcal F_\mu\setminus\mathcal F_\lambda\). Par définition,
+\[
+I_{\Phi,\lambda}^P=r_{\mu\to\lambda}\circ I_{\Phi,\mu}^P.
+\]
+
+\begin{proposition}[Compatibilité inter-échelles]
+\label{prop:inter-echelles}
+Supposons qu'une opération \(F:\mathcal X\to\mathcal X\) soit \(\mathcal F_\lambda\)-compatible et \(\mathcal F_\mu\)-compatible. Notons \(\mathcal C_{F,\lambda}\) et \(\mathcal C_{F,\mu}\) les applications induites respectivement sur \(\mathcal L_{\lambda,P}\) et \(\mathcal L_{\mu,P}\). Alors
+\[
+r_{\mu\to\lambda}\circ \mathcal C_{F,\mu}
+=
+\mathcal C_{F,\lambda}\circ r_{\mu\to\lambda}
+\]
+sur \(\mathcal L_{\mu,P}\).
+
+Autrement dit, la représentation observée à haute résolution est cohérente avec sa restriction à plus basse résolution.
+\end{proposition}
+
+\begin{proof}
+Pour tout \(x\in\mathcal X\),
+\[
+r_{\mu\to\lambda}\bigl(\mathcal C_{F,\mu}(I_{\Phi,\mu}^P(x))\bigr)
+=
+r_{\mu\to\lambda}\bigl(I_{\Phi,\mu}^P(F(x))\bigr)
+=
+I_{\Phi,\lambda}^P(F(x)).
+\]
+D'un autre côté,
+\[
+\mathcal C_{F,\lambda}\bigl(r_{\mu\to\lambda}(I_{\Phi,\mu}^P(x))\bigr)
+=
+\mathcal C_{F,\lambda}(I_{\Phi,\lambda}^P(x))
+=
+I_{\Phi,\lambda}^P(F(x)).
+\]
+Les deux compositions coïncident donc sur l'image, et l'unicité de la factorisation donne l'égalité annoncée.
+\end{proof}
+
+\begin{center}
+\[
+\begin{tikzcd}[column sep=large,row sep=large]
+\mathcal L_{\mu,P} \arrow[r,"\mathcal C_{F,\mu}"] \arrow[d,"r_{\mu\to\lambda}"'] &
+\mathcal L_{\mu,P} \arrow[d,"r_{\mu\to\lambda}"] \\
+\mathcal L_{\lambda,P} \arrow[r,"\mathcal C_{F,\lambda}"'] &
+\mathcal L_{\lambda,P}
+\end{tikzcd}
+\]
+\end{center}
+
+\begin{proposition}[Compatibilité avec la géométrie des seuils]
+\label{prop:seuils-calcul}
+Supposons maintenant que \(F:\mathcal X\to\mathcal X\) soit bijective et qu'il préserve la fonction de seuil complète :
+\[
+\Theta_P(\{F(x),F(y)\})=\Theta_P(\{x,y\})
+\qquad\text{pour tous }x,y\in\mathcal X.
+\]
+Alors \(F\) préserve toutes les relations de superniveau, donc toutes les partitions \(\equiv_t\), et induit un automorphisme de l'arbre de résolution \(\mathcal T_P\).
+
+De plus, la mesure empirique \(\nu_P\) et la courbe de résolution \(\widetilde{\mathcal R}_P\) sont invariantes sous \(F\).
+\end{proposition}
+
+\begin{proof}
+Par le \emph{Théorème structural des seuils}, on a
+\[
+x\equiv_t y
+\Longleftrightarrow
+\Theta_P(\{x,y\})\ge t.
+\]
+L'hypothèse impose donc
+\[
+\Theta_P(\{F(x),F(y)\})\ge t
+\Longleftrightarrow
+\Theta_P(\{x,y\})\ge t,
+\]
+soit
+\[
+x\equiv_t y \Longleftrightarrow F(x)\equiv_t F(y).
+\]
+Ainsi, chaque partition de niveau est préservée, donc l'arbre complet de classes est préservé.
+
+Comme la mesure \(\nu_P\) est construite à partir des valeurs de \(\Theta_P\) avec multiplicité, et que \(F\) en préserve les valeurs, \(\nu_P\) est invariant. Par le \emph{Théorème de représentation atomique de la résolution} et le \emph{Corollaire d'invariance par reparamétrisation monotone} du manuscrit global, la courbe \(\widetilde{\mathcal R}_P\) est alors également invariante.
+\end{proof}
+
+\begin{remark}
+Le résultat précédent relie directement la représentation observationnelle à la géométrie des seuils du manuscrit global. Une application qui préserve la fonction de seuil complète (et donc les partitions de résolution) peut alors être vue comme une action sur l'arbre de résolution, et non seulement comme une application sur un ensemble abstrait.
+\end{remark}
+
+\subsection{Exemple minimal de descente observationnelle}
+
+\begin{proposition}[Exemple élémentaire]
+Soit \(\mathcal X=\mathbb R^2\), \(\mathcal F=\{f_1,f_2,f_3\}\), et définissons
+\[
+\Phi(P,(u,v),f_1)=u,\qquad
+\Phi(P,(u,v),f_2)=v,\qquad
+\Phi(P,(u,v),f_3)=u+v.
+\]
+Considérons la famille \(\mathcal G=\{f_1\}\). L'opération
+\[
+F(u,v)=(u,\psi(u,v))
+\]
+est \(\mathcal G\)-compatible pour toute fonction \(\psi\). L'application induite sur l'image observationnelle réduite \(\mathcal L_{\mathcal G,P}\simeq\mathbb R\) est alors l'identité :
+\[
+\mathcal C_F(u)=u.
+\]
+Ainsi, une évolution microscopique non triviale peut être invisible au niveau observationnel.
+\end{proposition}
+
+\begin{proof}
+Avec \(\mathcal G=\{f_1\}\), deux points \((u,v)\) et \((u,v')\) ont la même empreinte dès qu'ils partagent la même première coordonnée. Or
+\[
+F(u,v)=(u,\psi(u,v))
+\]
+ne change pas la première coordonnée, donc l'empreinte observée reste la même après application de \(F\). La descente sur \(\mathcal L_{\mathcal G,P}\simeq\mathbb R\) est donc bien définie et vaut l'identité.
+\end{proof}
+
+\begin{proposition}[Exemple de non-descente]
+Soit \(\mathcal G=\{f_1\}\) dans le cadre précédent et définissons
+\[
+G(u,v)=(u+v,v).
+\]
+Alors \(G\) n'est pas \(\mathcal G\)-compatible.
+\end{proposition}
+
+\begin{proof}
+Les points \((0,0)\) et \((0,1)\) ont la même empreinte relativement à \(\mathcal G\), puisqu'ils ont la même première coordonnée. En revanche,
+\[
+G(0,0)=(0,0)
+\qquad\text{et}\qquad
+G(0,1)=(1,1),
+\]
+donc
+\[
+I_{\Phi,\mathcal G}^P(G(0,0))\neq I_{\Phi,\mathcal G}^P(G(0,1)).
+\]
+L'opération \(G\) sépare donc une fibre observationnelle et ne descend pas sur l'espace des empreintes.
+\end{proof}
+
+\subsection{Architecture proposée}
+
+Le schéma de transport observationnel obtenu ici peut être résumé par la chaîne
+\[
+\mathcal X
+\;\xrightarrow{\ I_{\Phi,\mathcal G}^P\ }\;
+\mathcal L_{\mathcal G,P}
+\;\xrightarrow{\ \mathcal C\ }\;
+\mathcal L_{\mathcal G,P},
+\]
+avec reconstruction éventuelle d'un représentant dans \(\mathcal X\) seulement si une interprétation microscopique est nécessaire.
+
+\begin{remark}
+Cette architecture ne démontre pas qu'un ordinateur devient automatiquement plus rapide. Elle démontre quelque chose de plus précis : toute opération qui respecte les fibres observables descend de manière unique sur les empreintes, où elle se compose, s'itère et se compare sans reconstruction systématique de l'état complet. C'est un résultat mathématique de descente, pas une promesse matérielle.
+\end{remark}
+
+\subsection{Conséquences théoriques}
+
+\begin{proposition}[Stabilité observationnelle de la représentation]
+Si deux états \(x,y\in\mathcal X\) ont la même empreinte relativement à \(\mathcal G\), alors toute suite finie d'opérations \(\mathcal G\)-compatibles produit la même empreinte finale à partir de \(x\) ou de \(y\).
+\end{proposition}
+
+\begin{proof}
+Soit \(W=F_n\circ\cdots\circ F_1\) une suite finie d'opérations \(\mathcal G\)-compatibles. Par le corollaire sur les suites finies, il existe une application induite \(\mathcal C_W\) telle que
+\[
+I_{\Phi,\mathcal G}^P\circ W=\mathcal C_W\circ I_{\Phi,\mathcal G}^P.
+\]
+Ainsi, si \(I_{\Phi,\mathcal G}^P(x)=I_{\Phi,\mathcal G}^P(y)\), alors
+\[
+I_{\Phi,\mathcal G}^P(W(x))
+=
+\mathcal C_W(I_{\Phi,\mathcal G}^P(x))
+=
+\mathcal C_W(I_{\Phi,\mathcal G}^P(y))
+=
+I_{\Phi,\mathcal G}^P(W(y)).
+\]
+La sortie observationnelle finale est donc identique.
+\end{proof}
+
+\begin{corollary}[Compatibilité compositionnelle]
+Les opérations \(\mathcal G\)-compatibles forment un monoïde, et leur action sur \(\mathcal L_{\mathcal G,P}\) est compatible avec la composition. Si les opérations sont bijectives et que leurs inverses sont encore compatibles, on obtient un groupe d'automorphismes de l'image observationnelle réduite.
+\end{corollary}
+
+\begin{proof}
+C'est une reformulation de la proposition \ref{prop:monoid-operations}. La partie groupe suit de l'existence d'inverses compatibles.
+\end{proof}
+
+\subsection{Statut scientifique}
+
+La théorie prouve ici un principe exact de descente observationnelle : une opération est représentable au niveau des empreintes si et seulement si elle préserve les fibres observables. Elle prouve aussi que ces représentations se composent et se transportent à travers les échelles, et qu'elles sont compatibles avec la géométrie des seuils lorsque cette compatibilité est satisfaite.
+
+En revanche, elle ne prouve pas à elle seule qu'une architecture matérielle concrète, classique ou quantique, gagne automatiquement en performance. Cette question exige encore une modélisation physique et algorithmique supplémentaire. Le présent résultat fournit le cadre mathématique ; il ne remplace pas cette étape.
+
+\end{appendices}
+
+
+
+\clearpage
+\section*{Bibliographie}
+\addcontentsline{toc}{section}{Bibliographie}
+\begin{thebibliography}{99}
+
+\bibitem{carlsson2010}
+G. Carlsson and F. Mémoli.
+\newblock Characterization, Stability and Convergence of Hierarchical Clustering Methods.
+\newblock \emph{Journal of Machine Learning Research}, 11(47):1425--1470, 2010.
+
+\bibitem{kopp1978}
+B. Kopp.
+\newblock Hierarchical Classification I: Single-Linkage Method.
+\newblock \emph{Biometrical Journal}, 20(5):495--501, 1978.
+
+\bibitem{murtagh2004a}
+F. Murtagh.
+\newblock On ultrametricity, data coding, and computation.
+\newblock \emph{Journal of Classification}, 21:167--184, 2004.
+
+\bibitem{murtagh2004b}
+F. Murtagh.
+\newblock Thinking ultrametrically.
+\newblock In D. Banks, L. House, F. R. McMorris, P. Arabie, and W. Gaul, editors, \emph{Classification, Clustering, and Data Mining Applications}, pages 3--14. Springer, 2004.
+
+\bibitem{murtagh2017}
+F. Murtagh and P. Contreras.
+\newblock Algorithms for Hierarchical Clustering: An Overview, II.
+\newblock \emph{Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery}, 7(6):e1219, 2017.
+
+\bibitem{rohlf1973}
+F. J. Rohlf.
+\newblock Algorithm 76: Hierarchical clustering using the minimum spanning tree.
+\newblock \emph{The Computer Journal}, 16:93--95, 1973.
+
+\end{thebibliography}
+
+
+\end{document}

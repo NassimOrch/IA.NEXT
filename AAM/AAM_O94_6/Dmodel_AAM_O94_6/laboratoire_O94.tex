@@ -1,0 +1,248 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry,hyperref,longtable,booktabs,array,xcolor}
+\geometry{margin=2.1cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Laboratoire O94 -- Plan d'essais, observabilité et vérification par phases}
+\author{Dossier d'audit AAM}
+\date{Version 0.94.0 -- 18 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Description}
+Le laboratoire décrit l'audit du code livré en O93_1 puis les corrections O94 mises en œuvre dans une copie de travail distincte. Les deux archives sources sont immuables ; leurs hashes et résultats de test sont conservés dans le dossier de suivi. Le laboratoire n'infère ni la réussite ni l'échec futur d'AAM : il spécifie les mesures à effectuer et rapporte uniquement ce qui est exécuté.
+
+\section{Architecture du laboratoire}
+Le laboratoire s'appuie sur (i) le runtime O94 ; (ii) des tests unitaires et de non-régression ; (iii) des fixtures synthétiques étiquetées comme telles ; (iv) le registre \texttt{registre\textunderscore prouves\textunderscore O94.json} ; (v) les journaux d'erreurs modèle et environnement ; (vi) le snapshot \texttt{sav\textunderscore AAM\textunderscore O94} et (vii) les manifests SHA-256. Les tests de matériel ou services externes ne sont pas remplacés par des mocks pour affirmer une validation en conditions réelles.
+
+\section{Pipeline complet}
+\begin{enumerate}
+\item vérifier hashes d'entrée et inventorier le modèle, les formalisms, la théorie source et les checklists historiques ;
+\item enregistrer les écarts O93 connus, notamment le corpus SMS complet encore non validé ;
+\item formaliser compétences de base, méthodes et règles transversales ;
+\item implémenter les réparations atomiques, traces blackbox, budgets RAG et résolution continue ;
+\item connecter les réglages LLM et l'interface d'inspection ;
+\item exécuter les tests ciblés dans l'ordre des phases, puis la suite de non-régression ;
+\item compiler les sources TeX si un moteur LaTeX est disponible, sans inspecter les PDF ;
+\item actualiser le registre, les checklists, les manifestes et la sauvegarde ;
+\item créer les archives de livraison et les revalider par extraction/test CRC et SHA-256.
+\end{enumerate}
+
+\section{Plan de phase et critères de sortie}
+\begin{longtable}{p{0.07\linewidth}p{0.24\linewidth}p{0.37\linewidth}p{0.20\linewidth}}
+\toprule
+Phase & But & Critère de sortie objectif & Statut \\
+\midrule
+P0 & Inventaire et intégrité initiale & Archives d'entrée lisibles, CRC correct, hashes enregistrés, écarts historiques recensés & COMPLETE_EVIDENCED \\
+P1 & Briques et formalisation de base & Catalogue typé ; toutes les références de composition/dépendance résolues ; tests ciblés verts & COMPLETE_EVIDENCED \\
+P2 & Persistance et concurrence & Reprise sur erreur simulée de partage Windows ; erreur permanente propagée sans perte de cible ; anciennes données préservées & COMPLETE_EVIDENCED \\
+P3 & Observation, RAG et résolution continue & Trace bornée étiquetée non causale ; espace adaptatif avec override explicite ; résolution non vérifiée si aucun vérificateur & COMPLETE_EVIDENCED \\
+P4 & Backend de langue, interface et graphe causal & Parseurs protocolaires testés ; aucun secret persisté ; graphe causale explicite et défilable ; UI compilable & COMPLETE_EVIDENCED \\
+P5 & Régressions et sécurité & Tests ciblés + tests de régression ; échecs classés et non masqués ; tests externes signalés comme non exécutés & COMPLETE_EVIDENCED \\
+P6 & Documentation, audit et sauvegarde & Formalisme, laboratoire, reçus, registre et snapshot cohérents & COMPLETE_EVIDENCED \\
+P7 & Livraison reproductible & Archives extraites/testées, manifests vérifiés, tailles en deçà du seuil ou parties accompagnées d'un script de jonction & COMPLETE_EVIDENCED \\
+\bottomrule
+\end{longtable}
+
+\section{Essais abstraits / tests de conception}
+\subsection{Briques fondamentales}
+Test : construire le catalogue, valider toutes les dépendances, puis confirmer que chaque sous-système listé utilise uniquement des IDs connus. Interprétation : valide les liens du catalogue, pas une preuve que tous les chemins internes du moteur soient réécrits sur ce graphe.
+\subsection{Verrou temporaire Windows}
+Test : simuler deux erreurs \texttt{winerror=32}, puis réussite du remplacement ; vérifier trois tentatives. Test négatif : provoquer un code non transitoire et vérifier que l'erreur est immédiatement remontée et que le fichier cible existant reste inchangé. Le test simulé contrôle la politique de reprise ; il ne remplace pas un essai sur un véritable système Windows avec locks concurrents.
+\subsection{RAG adaptatif}
+Test : construire un corpus synthétique avec variation du nombre de sources, chunks et tokens ; vérifier la politique choisie, les bornes et le comportement d'un nombre de vues explicitement demandé. Évaluation de qualité séparée : des requêtes et sources pertinentes, préparées indépendamment, sont nécessaires pour mesurer rappel, bruit et généralisation ; les compteurs seuls ne démontrent pas la qualité sémantique.
+\subsection{Trace blackbox}
+Test : fournir une séquence JSON répétant certaines structures ; le rapport doit garder le hash et les observations de chaque événement, marquer l'adjacence comme non-preuve de causalité et la signature répétée comme non-preuve de reproduction.
+\subsection{Résolution continue}
+Test : appeler sans vérificateur sur un solveur substitué déterministe et vérifier que le statut demeure non vérifié ; appeler avec critère explicite et vérifier que le critère exact est appliqué. Un critère structurel étroit n'est pas assimilé à une validation sémantique générale.
+\subsection{Préférences récompense / punition}
+Test : une note correctement liée à la dernière tâche affecte la préférence des compétences réellement utilisées et produit un événement causal ; une note sans lien n'actualise aucune route. Le test d'idempotence confirme qu'un même hash de feedback n'est pas appliqué deux fois.
+\subsection{Backend LLM}
+Test : mock HTTP local pour les réponses compatibles OpenAI et Ollama, contrôle du chemin HTTP, extraction du contenu et traitement d'une réponse vide. Les tests ne prouvent pas la qualité du modèle serveur. Le secret ne doit jamais apparaître dans les réglages ou les journaux.
+\subsection{Graphe causal}
+Test : les flèches sont créées uniquement depuis les parents métier explicites ; \texttt{prev\textunderscore hash} seul ne crée aucun arc. La profondeur ne doit pas être compressée par plafonnement visuel ; la région de défilement doit couvrir la vue.
+
+\section{Commandes d'exécution}
+À partir de la racine du projet :
+\begin{verbatim}
+python -m aam_o93 status
+python -m pytest tests/test_o94_base_blocks.py -q
+python -m pytest tests/test_o94_atomic_replace_retry.py -q
+python -m pytest tests/test_o94_rag_adaptive.py -q
+python -m pytest tests/test_o94_trace_resolution_reward.py -q
+python -m pytest tests/test_o94_local_llm_adapter.py -q
+python -m pytest tests/test_p6_memory_causal_graph_view.py -q
+python -m pytest tests -q
+python -m compileall -q aam_atomic_io.py aam_o92 aam_o93
+\end{verbatim}
+Le reçu d'exécution est enregistré dans \texttt{suivi\textunderscore model\textunderscore AAM\textunderscore O94.zip}. Pour chaque commande, le reçu doit contenir heure UTC, commande, code de sortie, durée, sortie complète ou chemin de journal et hash du reçu.
+
+\section{Résultats et interprétations}
+Les résultats définitifs doivent être synchronisés avec \texttt{logs/O94\textunderscore test\textunderscore results.json}, \texttt{registre\textunderscore prouves\textunderscore O94.json}, \texttt{checklist\textunderscore de\textunderscore travail\textunderscore O94.json} et les journaux de non-régression. Les tests simulés et tests unitaires peuvent documenter les contrats locaux ; ils n'établissent pas l'acquisition universelle de compétence, une reproduction parfaite d'un processus arbitraire, l'efficacité sur l'intégralité d'un corpus métier, ou la disponibilité d'un périphérique.
+
+\section{Conséquences}
+\textbf{Théoriques :} les rapports relient les observations et empreintes au formalisme des familles de sondes et équivalences d'observation ; les poids RAG sont interprétés comme des estimations spécifiques au corpus.\\
+\textbf{Conceptuelles :} les compétences, méthodes et règles sont distinguées afin que les compositions deviennent inspectables et que les préférences récompense/punition restent séparées de la vérité.\\
+\textbf{Opérationnelles :} les opérations persistantes sont bornées et traçables ; l'utilisation de modèles externes, réseaux et capteurs exige un choix explicite ; les statuts non concluants sont des résultats valides du protocole, pas des prédictions d'impossibilité.
+
+\section{Conclusion et statut du modèle}
+O94 représente une version de travail enrichie de mécanismes précis, dont le statut dépend des reçus de tests réellement produits et des limites de l'environnement. Le corpus SMS historique complet, les scénarios Windows réels de partage de fichiers, la caméra/capteurs, les serveurs LLM configurés et les conditions Internet ne sont marqués validés que si les preuves exécutées correspondantes existent. Toute entrée non testée doit rester \texttt{NOT\textunderscore VALIDATED} ou \texttt{BLOCKED\textunderscore ENVIRONMENT}.
+
+\section{P5 — rapport de non-régression au 18 octobre 2026}
+\subsection{Description}
+La phase P5 confronte O94 à l’ensemble des modules de test livrés, y compris les contrats O94 nouveaux et les modules historiques conservés. Les premiers échecs sont gardés dans les reçus et registres; seuls les retests réussis servent à fermer l’incident correspondant.
+\subsection{Architecture}
+Le runner \texttt{scripts/o94\_phase\_runner.py} enregistre la commande, le code de sortie, la durée, stdout/stderr, les hashes et les prérequis consultés. La collecte est résumée dans \texttt{logs/O94\_test\_results.json}; les tests Tk ont été exécutés sous Xvfb lorsque nécessaire.
+\subsection{Pipeline complet}
+Préflight et lecture des checklists; collecte de 274 cas répartis sur 47 modules; exécution en lots courts; séparation des tests dépendant d’un affichage; compilation Python; liaison de chaque module à un reçu de sortie zéro; classification des échecs et timeouts initiaux.
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python -m pytest --collect-only -q tests
+xvfb-run -a python -m pytest -q tests/test_o94_atomic_replace_retry.py tests/test_o94_base_blocks.py tests/test_o94_cli_contract.py tests/test_o94_continuous_resolution_ui.py tests/test_o94_local_llm_adapter.py tests/test_o94_rag_adaptive.py tests/test_o94_trace_resolution_reward.py tests/test_o930_preflight_dependency_closure.py tests/test_o931_release_identity.py tests/test_o931_sparse_proximity_optimization.py tests/test_o931_record_preserving_rag.py tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p1_o930_observer_upgrade.py tests/test_p1_observer.py
+python -m compileall -q aam_atomic_io.py aam_o92 aam_o93 scripts/o94_phase_runner.py tests
+python scripts/o94_aggregate_test_receipts.py
+\end{verbatim}
+Les autres modules ont été lancés par lots courts; les commandes exactes et sorties complètes sont dans \texttt{logs/O94\_P5\_*.json}. Le lancement monolithique et un lot agrégé P7/P8 ont dépassé le plafond du superviseur; ils ne sont pas comptés comme réussites.
+\subsection{Résultats}
+\textbf{Résultat local borné : PASS.} Les 274 cas collectés dans les 47 modules possèdent tous un reçu de retest réussi (47/47 modules couverts); 21 sous-tests additionnels sont également rapportés comme passés par pytest. \texttt{compileall} a terminé avec le code 0. Le rapport d’agrégation est \texttt{logs/O94\_test\_results.json}. Les échecs initiaux ont été conservés et reliés aux reçus de retest.
+\subsection{Interprétation des résultats}
+Cette preuve signifie que les cas de test présents dans le dépôt sont passés en exécutions segmentées dans l’environnement courant. Elle ne prouve pas l’absence de défauts non couverts, l’acquisition universelle d’une compétence, ou une reproduction parfaite de tout processus observé. Une invocation monolithique interrompue n’est pas requalifiée comme un passage.
+\subsection{Conséquences théoriques}
+Les contrats de base, d’observation/trace, de RAG adaptatif, de résolution continue, de graphes causaux, de persistance et de feedback disposent d’une base de régression locale explicite. Les mesures restent conditionnées par les tests et les entrées utilisés.
+\subsection{Conséquences conceptuelles}
+Le score utilisateur reste une préférence causale et non une vérité; une trace d’événement n’est pas assimilée à une preuve de causalité; et l’état « non vérifié » n’est pas converti en réussite implicite.
+\subsection{Conséquences opérationnelles}
+Les tests graphiques ont besoin d’un serveur d’affichage (Xvfb ici). Les retests segmentés sont reproductibles et leurs reçus sont inclus au dossier; les timeouts initiaux sont gardés dans le registre environnemental.
+\subsection{Conclusion}
+La phase P5 est close au niveau local borné, sur la base de la couverture mesurée de 274 cas/47 modules. Cette clôture ne valide pas les scénarios externes listés ci-dessous.
+\subsection{Statut du modèle et limites}
+Le test bout-en-bout du corpus SMS complet de 5\,574 lignes reste \texttt{NOT\_VALIDATED}; le résultat historique borné à 120 lignes ne le remplace pas. L’acceptation native Windows/NTFS/ACL, les capteurs/caméras physiques, les fournisseurs Internet et LLM en direct et le scénario de panne électrique sur système cible restent \texttt{NOT\_RUN}. Aucune conclusion sur le potentiel futur du modèle n’est déduite.
+
+\section{Phase P6 : registre de preuves et synchronisation documentaire}
+\subsection{Description}
+La phase P6 construit un registre de traçabilité propre à O94 sans écraser les registres historiques O93. Le registre couvre les dix anomalies A0--A9 ainsi que l’autonomie/mémoire et les limites sécurité/multimodal, soit treize entrées d’audit. Les erreurs d’outillage initiales du constructeur sont conservées dans les reçus et reclassées après correction et retest.
+\subsection{Architecture}
+\texttt{registre\_prouves\_O94.json} relie exigence, fichiers de code, points d’interface, modules de tests, reçus et limites. Le runner de phase et le préflight vérifient le protocole avant chaque exécution. \texttt{checklist\_erreurs\_model.json} et \texttt{checklist\_erreurs\_no\_model.json} conservent les erreurs initiales et leur résolution.
+\subsection{Pipeline complet}
+Lecture des chemins/checklists/formalisme/journal d’erreurs; contrôle P5 clos/P6 ouvert; génération du registre; extraction et vérification de chaque chemin de code et module de tests; reconciliation des deux erreurs du générateur; mise à jour des rapports LaTeX; validation JSON; synchronisation du point de sauvegarde.
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python scripts/o94_phase_runner.py P6 -- python scripts/o94_update_p6_report.py
+python scripts/o94_phase_runner.py P6 -- python scripts/o94_build_proof_registry.py
+python scripts/o94_phase_runner.py P6 -- python scripts/o94_validate_json.py
+python scripts/o94_snapshot.py
+\end{verbatim}
+Les reçus de phase individuels dans \texttt{logs/O94\_P6\_*.json} sont la référence pour les codes de retour réels; un statut décrit dans ce rapport ne remplace pas les reçus.
+\subsection{Résultats}
+Le registre est généré avec treize entrées; la validation du registre retourne \texttt{PASS\_BOUNDED}, sans fichier de code ou module de test introuvable. Les détails des essais sont fournis dans \texttt{logs/O94\_test\_results.json}: 274 cas collectés, 47 modules collectés et 47 modules dotés d’un reçu de retest réussi. La synchronisation finale du snapshot est une condition de clôture P6 et sera référencée par son manifeste.
+\subsection{Interprétation des résultats}
+La couverture établit la traçabilité des exigences référencées et le succès des cas locaux effectivement présents; elle n’établit ni la complétude universelle du système ni la réussite des essais non exécutés. Un chemin de code existant n’implique pas à lui seul que chaque fonction correspondante satisfait tous les scénarios réels.
+\subsection{Conséquences théoriques}
+Les objets fondamentaux, la mémoire causale, la recherche sémantique pondérée, l’observation, la résolution continue et le feedback sont maintenant référencés dans un index d’audit avec un périmètre de preuve explicite.
+\subsection{Conséquences conceptuelles}
+La traçabilité est séparée de la validation de performance : les états partiels/non testés restent visibles. Les journaux de chaîne d’intégrité ne sont pas interprétés comme une preuve de causalité réelle et une trace d’observation ne suffit pas à démontrer la reproduction parfaite d’une compétence.
+\subsection{Conséquences opérationnelles}
+Les reçus initiaux ne sont pas supprimés. Les deux erreurs de générateur sont classées comme erreurs d’outillage après correction et retest PASS. La sauvegarde est versionnée par manifeste SHA-256.
+\subsection{Conclusion}
+P6 peut être clôturée lorsque les deux documents LaTeX, le registre, les checklists JSON et le snapshot référencé sont tous vérifiés ensemble. La clôture ne doit pas modifier les statuts d’essais SMS/Windows/fournisseurs externes non exécutés.
+\subsection{Statut du modèle et limites}
+Le statut global demeure \texttt{PASS\_BOUNDED}, et non « entièrement prouvé ». Le corpus SMS complet de 5 574 lignes, le système réel Windows/NTFS/ACL, les capteurs physiques et les appels aux services externes restent non validés. Aucun verdict n’est posé sur le potentiel futur du modèle.
+
+
+
+\section{P7 — incident de packaging et reprise segmentée}
+\subsection{Description}
+La première invocation monolithique du packaging a dépassé le délai du superviseur (300 s) sans reçu agrégé. L'archive partielle n'a pas été tenue pour vérifiée par sa seule existence. L'incident a été inscrit dans le registre d'erreurs d'outillage et la procédure a été découpée en étapes reprenables.
+\subsection{Architecture}
+Le constructeur de livraison réutilisé est \texttt{scripts/o94\_package\_delivery.py}, avec ses fonctions partagées dans \texttt{scripts/o94\_delivery\_common.py}. Il est exécuté une seule étape à la fois : \texttt{model}, \texttt{followup}, \texttt{audit}, puis \texttt{finalize}. Le vérificateur portable \texttt{verify\_o94\_delivery.py} contrôle les trois ZIP lorsqu'ils sont réunis dans un même répertoire. Chaque archive doit passer le CRC, les contrôles de chemin, l'extraction indépendante et le contrôle SHA-256/tailles; le snapshot est vérifié séparément.
+\subsection{Pipeline complet}
+Journaliser le timeout; écarter toute archive partielle; consulter les deux checklists d'erreurs et la checklist de phase; rafraîchir les manifestes; construire le modèle; contrôler son démarrage CLI isolé; construire le snapshot/suivi; construire l'audit; agréger les trois reçus et émettre le sidecar externe. Toute étape doit avoir un reçu propre avant de lancer la suivante.
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python -m py_compile scripts/o94_delivery_common.py scripts/o94_package_delivery.py verify_manifest.py scripts/refresh_o94_manifests.py scripts/o94_snapshot.py
+python -m pytest -q tests/test_o94_snapshot_portability.py
+python -m aam_o93 --help
+python -m compileall -q aam_o92 aam_o93 scripts
+python scripts/refresh_o94_manifests.py
+python scripts/o94_snapshot.py
+python scripts/o94_package_delivery.py --step model
+python scripts/o94_package_delivery.py --step followup
+python scripts/o94_package_delivery.py --step audit
+python scripts/o94_package_delivery.py --step finalize
+python /chemin/vers/suivi_extrait/verify_o94_delivery.py /chemin/vers/le/repertoire/des-trois-ZIP
+\end{verbatim}
+Les reçus historiques des essais interrompus sont conservés dans les journaux. Les rapports de finalisation distinguent la vérification de packaging des fonctionnalités ou essais AAM qui restent non validés.
+\subsection{Résultats}
+Les reçus candidats précédents ont confirmé le CRC, l'extraction indépendante et les manifestes des trois ZIP candidats; ils ne constituent pas les preuves finales, car le contenu documentaire a encore changé après leur création. Les archives définitives sont reconstruites à partir du contenu gelé par les quatre étapes séquentielles ci-dessus et leurs reçus sont inscrits dans \texttt{O94\_livraison\_manifest.json}. Le constructeur et le vérificateur de livraison ont été corrigés puis testés séparément; la clôture attend encore la réussite sur les trois archives définitives après synchronisation du point de sauvegarde.
+\subsection{Interprétation des résultats}
+Les résultats des archives candidates valident les outils et la méthode de reprise, mais ne se substituent pas à une vérification des octets livrés finaux. Le timeout initial, l'incident UTF-8 de la première méthode système et l'incompatibilité de nom de champ du vérificateur sont conservés dans l'historique comme incidents d'outillage corrigés.
+\subsection{Conséquences théoriques, conceptuelles et opérationnelles}
+Théoriquement, une interruption du constructeur est distinguée d'une anomalie fonctionnelle du modèle. Conceptuellement, l'état d'un livrable dépend d'un reçu de vérification indépendant de sa création. Opérationnellement, le build est séquentiel et reprenable; P7 ne peut être fermé avant l'intégrité et les manifestes des trois archives finales.
+\subsection{Conclusion}
+La méthode de livraison segmentée est définie et testée sur des candidats; la clôture de P7 demeure conditionnée par la dernière vérification des archives finales et l'émission du manifeste externe.
+\subsection{Statut du modèle}
+\texttt{Dmodel candidate: PASS\_BOUNDED}. \texttt{P7 global: IN\_PROGRESS} jusqu'à la preuve indépendante sur les trois archives définitives. L'implémentation complète au sens universel n'est pas revendiquée.
+
+\section{Phase P7 -- Validation de la livraison}
+
+\subsection{Description}
+P7 clôt la préparation des trois livrables O94 après synchronisation du point de sauvegarde. Le travail s'appuie sur le snapshot courant et sur les archives candidates validées ; les archives finales sont reconstruites après la mise à jour des documents et de la checklist, puis font l'objet d'une nouvelle vérification indépendante. Les essais portent sur l'intégrité des artefacts livrés, pas sur une prétention à la complétude universelle des compétences.
+
+\subsection{Architecture}
+\begin{itemize}
+\item \texttt{Dmodel\_AAM\_O94.zip} : runtime O94, interface, tests, configurations, documents, reçus et manifeste de fichiers.
+\item \texttt{Amodel\_AAM\_O94.zip} : audit source O93\_0 conservé, archive \texttt{sources\_AAM\_17.zip}, formalismes/laboratoire O94, checklists, registre de preuves et reçus de validation.
+\item \texttt{suivi\_model\_AAM\_O94.zip} : sauvegarde \texttt{sav\_AAM\_O94/current}, manifeste du snapshot, chemins, provenance, et outils de vérification.
+\end{itemize}
+
+\subsection{Pipeline complet}
+1. Lire le formalisme, le laboratoire, \texttt{chemins\_O94.json}, la checklist et les deux registres d'erreurs.
+2. Vérifier que P0--P6 sont fermées et que les hashes initiaux des deux archives fournies correspondent aux reçus.
+3. Exécuter les tests ciblés des chemins portables et la compilation Python.
+4. Construire des manifestes SHA-256 couvrant chaque fichier livré à l'exception des manifestes eux-mêmes, sans caches Python ni temporaires.
+5. Construire chaque ZIP, contrôler CRC, noms sûrs, extraction indépendante, manifeste interne et point de sauvegarde.
+6. Vérifier que chaque ZIP reste sous 220\,000\,000 octets et que les noms UTF-8 sont conservés.
+7. Inscrire les hashes finaux dans \texttt{O94\_livraison\_manifest.json} externe, puis synchroniser le snapshot et reconstruire les archives finales.
+
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python -m py_compile verify_manifest.py scripts/refresh_o94_manifests.py scripts/o94_snapshot.py
+python -m pytest -q tests/test_o94_snapshot_portability.py
+python -m aam_o93 --help
+python -m compileall -q aam_o92 aam_o93 scripts
+python scripts/refresh_o94_manifests.py
+python verify_manifest.py .
+python /chemin/vers/suivi_extrait/verify_o94_delivery.py /chemin/vers/le/repertoire/des-trois-ZIP
+python scripts/o94_package_delivery.py --step model
+python scripts/o94_package_delivery.py --step followup
+python scripts/o94_package_delivery.py --step audit
+python scripts/o94_package_delivery.py --step finalize
+\end{verbatim}
+Le dernier vérificateur est inclus dans l'archive de suivi. Il effectue le CRC, vérifie les chemins, extrait temporairement les archives, contrôle les manifestes de fichiers et vérifie indépendamment le snapshot.
+
+\subsection{Résultats}
+Les tests de livraison ciblés ont retourné : \texttt{py\_compile PASS}, \texttt{test\_o94\_snapshot\_portability PASS (2 tests)}, \texttt{aam\_o93 --help PASS}, et \texttt{compileall PASS}. Le manifeste modèle a vérifié 5\,444 fichiers de la première construction sans fichier manquant, changé ou en excès. Les constructions candidates de l'audit et du suivi ont également passé le CRC, la sécurité des chemins et les vérifications SHA-256 après extraction ; le snapshot a passé ses 5\,446 entrées de manifeste. Les trois archives candidates étaient toutes sous la limite de 220\,000\,000 octets. Les hashes et tailles des archives finales post-clôture sont récapitulés dans \texttt{O94\_livraison\_manifest.json}; les archives finales sont re-testées après la mise à jour de la checklist et des documents.
+
+Un incident de construction par commande système a produit des noms Unicode illisibles dans un ZIP candidat. Le ZIP défectueux a été rejeté et remplacé par une construction Python conservant UTF-8. Le timeout de la première construction combinée est également conservé comme incident d'outillage ; il n'est pas interprété comme un résultat du modèle.
+
+\subsection{Interprétation des résultats}
+Un CRC positif vérifie la structure de l'archive ; un manifeste positif vérifie l'égalité de tailles et de hashes des fichiers connus ; le contrôle des extras repère également un fichier non recensé. La relecture du nom Unicode après extraction apporte un contrôle supplémentaire d'absence de corruption des chemins. Ces résultats n'établissent pas l'intégrité d'un système de fichiers après panne électrique ni la restauration sur chaque OS cible.
+
+\subsection{Conséquences théoriques}
+La preuve d'intégrité est une proposition sur des octets et leurs chemins exacts : elle ne constitue pas une mesure des performances cognitives ou de l'acquisition de compétence.
+
+\subsection{Conséquences conceptuelles}
+Les trois archives ont des responsabilités séparées : exécution, audit, suivi/sauvegarde. Les hashes relient les versions sans fusionner les preuves et les limites de validation.
+
+\subsection{Conséquences opérationnelles}
+Les trois livrables sont sous la limite de taille prévue ; aucun découpage ou script de jonction n'est requis pour cette livraison. Le script portable de vérification permet une vérification après téléchargement. Les chemins absolus du poste de build sont étiquetés séparément des chemins relatifs de livraison.
+
+\subsection{Conclusion}
+La construction candidate a mis au jour et résolu un défaut réel d'encodage de chemins dans l'outil de compression utilisé en première tentative. La construction de remplacement et la vérification indépendante n'ont pas retrouvé cette altération. Les reçus d'échec et de retest sont conservés dans les registres. La clôture P7 est conditionnée à la dernière revalidation des archives reconstruites après synchronisation finale.
+
+\subsection{Statut du modèle}
+La présente livraison est bornée par les essais consignés. Le RAG SMS complet (5\,574 lignes) reste \texttt{NOT\_VALIDATED}; Windows natif/NTFS/ACL, capteurs physiques, fournisseurs LLM/Internet en direct et scénarios de coupure d'alimentation sur le système cible restent \texttt{NOT\_RUN}. La clôture de P7 n'implique aucune conclusion positive ou négative sur le potentiel futur d'AAM.
+
+\end{document}

@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "project_id": "NGeGenBrain_v0",
+  "run_id": "cli_smoke_20261027_release",
+  "timestamp": "2026-10-27T11:19:32+01:00",
+  "environment": {
+    "os": "linux",
+    "python": "3.13.5"
+  },
+  "status": "PASS",
+  "commands_run": 6,
+  "failed_commands": 0,
+  "database_path": "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+  "commands": [
+    {
+      "name": "initialize",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v0_work_1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+        "init"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "ae15ef9726c21e06d2bee36e4820051902cf087022042e6397acac3d424a2782",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "keys=action,at,ok,result,status"
+    },
+    {
+      "name": "status",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v0_work_1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+        "status"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "a4c2391d891f77b2e64d2c034d0640e72b876c6843e3cbcb82274b2e7d1c8195",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "keys=health,stats"
+    },
+    {
+      "name": "actions",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v0_work_1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+        "actions"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "05b05e3a9cc4d76507e14e3d5aae9b28bbbbd147374cf19c26ac0544ac4268a3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "action_count=51"
+    },
+    {
+      "name": "run_example_ast",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v0_work_1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+        "run",
+        "--program",
+        "/mnt/data/NGeGenBrain_v0_work_1/examples/add.json",
+        "--input",
+        "null",
+        "--capabilities",
+        "[]",
+        "--budget",
+        "1000"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "988f29ed8b70013ebfb0df24a1290a4bdd59e48ae9a586781dba5870e0748745",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "result_status=Success"
+    },
+    {
+      "name": "verify_database",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v0_work_1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+        "verify"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "04dfbbd7b1c814307b84558dff1b2dba4a8581eeef3551d59d03398c2e4d2461",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "database_valid=True"
+    },
+    {
+      "name": "action_registry",
+      "command": [
+        "/opt/pyvenv/bin/python3",
+        "/mnt/data/NGeGenBrain_v0_work_1/ngbrain.py",
+        "--db",
+        "/mnt/data/NGeGenBrain_v0_work_1/build/cli_smoke_final.sqlite3",
+        "action",
+        "system.actions",
+        "--data",
+        "{}"
+      ],
+      "exit_code": 0,
+      "passed": true,
+      "stdout_sha256": "91851d1944afea601947e6d60f53cd84281f000d02a2b744f92e9dcf8155bf81",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": "ok=True; result_type=list"
+    }
+  ],
+  "scope": "Black-box CLI smoke only; web protocol and action parity are covered by the runtime regression suite."
+}

@@ -1,0 +1,453 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2.15cm}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xurl}
+\usepackage{listings}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,frame=single}
+\setlength{\emergencystretch}{3em}
+\newcommand{\AAM}{\mathrm{AAM}}
+\newcommand{\FPN}{\mathrm{FPN}}
+\newcommand{\FP}{\Phi}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\argmin}{\mathop{\mathrm{arg\,min}}}
+\newcommand{\status}[1]{\textbf{[#1]}}
+\title{Formalisme du modèle émergent AAM O92\\[0.6em]\large O92-HFPN : neurones à poids sur empreintes hiérarchiques\\[1.2em]\normalfont\normalsize\begin{minipage}{0.82\textwidth}\textbf{Statut du document.} Formalisme complet proposé à partir des sources et des laboratoires bornés. Ce document spécifie une architecture à construire et à tester; il ne prétend pas qu'une implémentation O92 existe déjà. Il ne prédit ni réussite ni échec ultime. Les résultats empiriques disponibles ne deviennent pas des preuves universelles au seul motif qu'ils inspirent le design.\end{minipage}}
+\author{Dossier de conception à partir du corpus AAM}
+\date{12 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\chapter{Objectif et règles de conception}
+
+\section{But central}
+AAM est conçu comme un système d'intelligence artificielle autonome, local-first et extensible vers des ressources distantes configurées, dont le substrat de représentation, d'observation et d'apprentissage est fidèle à la théorie des empreintes. Il doit apprendre des compétences depuis des exemples ou des mécanismes observables en boîte noire ou blanche, les reproduire sans dépendance à l'oracle ou à l'adaptateur de départ, les conserver et les réutiliser selon leur domaine de validité. Il doit raisonner, décomposer les tâches, planifier des expériences, observer son propre état et le processus d'observation, mémoriser, apprendre et réviser les compétences, et travailler avec texte, JSON, images, audio et vidéo.
+
+« Autonomie obligatoire » signifie ici que l'architecture contient dès sa conception une boucle persistante de buts, de planification, d'exécution d'actions autorisées, d'observation des résultats, d'apprentissage, de vérification, de reprise après interruption et de production de rapports. Ce terme ne signifie pas l'autorisation d'agir sans borne de permission sur la machine ou sur Internet. Les actions à impact externe traversent un contrôle d'autorisation explicite; la boucle autonome continue de rechercher des tâches permises, des sous-objectifs, des observations et des améliorations dans son périmètre déclaré.
+
+\section{Règles rouges rendues vérifiables}
+\begin{enumerate}[leftmargin=1.6em]
+\item Aucun verdict global pré-enregistré de succès ou d'échec du potentiel AAM. On publie des résultats et des incertitudes attachés à un protocole, domaine et environnement.
+\item Une capacité est candidate tant qu'un test comportemental indépendant, avec la source coupée, ne l'a pas vérifiée.
+\item Un budget consommé, une dépendance manquante ou une expérience non exécutée produit un statut de ressource/environnement ou \texttt{NOT\_RUN}, jamais le mot « impossible ».
+\item Aucune amélioration de score n'est recevable sans contrôler la validité des données, les fuites, la séparation train/validation/test, le coût, la reproductibilité et l'effet de la correction.
+\item La mémoire d'exemples, la recherche RAG, les poids entraînés, les règles explicites, l'oracle de test, le vérificateur et le planificateur ont des identités et contrats séparés.
+\item Les données invalides, échecs, sorties inattendues, métriques défavorables et tests non exécutés sont conservés dans un journal append-only, corrigés via événements explicites et jamais effacés rétroactivement.
+\item Les capacités peuvent s'étendre par nouveaux modules, sondes et compétences; aucun plafond arbitraire de famille ou de profondeur ne doit être introduit comme conclusion sur le potentiel. Les budgets effectifs sont transparents, configurables et reportés comme coûts opérationnels.
+\end{enumerate}
+
+\section{Sources structurantes}
+La conception part de la théorie \path{DDD_Base_theorie_des_empreintes_complete_order_5.tex}, du formalisme de sondes composées et miroir dans \path{formalismes/th_emp_suite_formalisme_order_69.tex}, du formalisme empirique AST, des artefacts et rapports historiques O65--O91, et des essais réalisés pour ce dossier. Le carnet \path{carnet_note_O92.json} conserve l'inventaire par chemin/hash. Le registre \path{erreurs_a_evite_O92.json} doit être consulté avant toute implémentation et évolue avec chaque version. Les résultats sont dans \path{laboratoire_O92.json} et analysés dans \path{laboratoire_O92.tex}.
+
+\chapter{Fondements mathématiques des empreintes}
+\section{Domaine et famille de sondes}
+Soit un domaine déclaré $\mathcal{X}$, comprenant un objet ou événement $x$ et un contexte d'observation $c$. Une sonde typée $p_i$ est une fonction partielle :
+\[
+ p_i: \mathcal{X}\times\mathcal{C}\times\mathcal{R}_i \rightharpoonup \mathcal{Y}_i,
+\]
+où $\mathcal{R}_i$ contient les paramètres et la référence éventuelle. Une réponse doit être accompagnée d'un état : \texttt{VALID}, \texttt{MISSING}, \texttt{OUT\_OF\_DOMAIN}, \texttt{ERROR}, \texttt{TIMEOUT} ou \texttt{REDACTED}; une valeur absente n'est jamais transformée silencieusement en zéro. Le schéma de la sonde comprend identifiant versionné, domaine applicable, unité/type, paramètre, transformation d'entrée, référence, coût attendu, contrat d'erreur, provenance de l'implémentation et validateur.
+
+Pour un portefeuille ordonné $P=(p_1,\ldots,p_k)$, on définit une empreinte :
+\[
+ \FP_P(x;c)=\big((s_i,v_i,m_i)\big)_{i=1}^{k},
+\]
+où $s_i$ est l'état, $v_i$ la valeur quand elle est valide et $m_i$ les métadonnées nécessaires (référence, unité, version, confiance, provenance). La projection de valeurs valides sans états peut être utilisée pour un modèle, mais l'empreinte auditée garde la structure complète.
+
+\section{Équivalence et raffinements de partitions}
+Sur un sous-domaine $D\subseteq\mathcal{X}$, la famille $P$ induit une relation d'équivalence si l'égalité des signatures est définie de manière stable :
+\[
+ x\sim_{P,D}y\iff \FP_P(x)=\FP_P(y),\quad x,y\in D.
+\]
+On ajoute une sonde $q$ pour obtenir $P' = P\oplus q$. Alors $\sim_{P'}$ raffine $\sim_P$; le nombre de classes ne baisse pas si la nouvelle coordonnée est correctement intégrée. Mais le gain est nul lorsque $q(x)=q(y)$ pour toutes les paires qui entraient en collision. Le moteur doit donc enregistrer, pour chaque sonde candidate, les paires auparavant confondues qu'elle sépare, celles qu'elle ne sépare pas, les invariants modifiés, le coût, le bruit et la validité sur le domaine.
+
+Le taux de classes, la collision résiduelle, la stabilité entre répétitions, la sensibilité au bruit et le coût ne donnent pas seuls le « sens ». Ils sont des diagnostics de représentation. La complétude d'une famille de sondes exige un argument explicite sur un domaine défini et relativement à la distinction visée; une signature finie n'est pas l'équivalent de la sémantique complète pour tous les objets possibles.
+
+\section{Composition et sondes miroir}
+La composition parallèle est :
+\[
+ (p\otimes q)(x)=(p(x),q(x)).
+\]
+Une composition séquentielle $q\circ p$ n'est admise que si la sortie de $p$ correspond au type d'entrée de $q$ et que le domaine composé est déclaré. Les sonde relationnelles ont la forme
+\[
+ r_i(x,z;c)=\rho_i\big(p_a(x;c),p_b(z;c),\operatorname{rel}(x,z;c)\big),
+\]
+où $z$ est une référence enregistrée et versionnée. Un « miroir » est un schéma de relation, pas une propriété mystique qui s'appliquerait sans référent ou transformation définis.
+
+\paragraph{Ordre de recherche prescrit.} (1) réutilisation et normalisation de sondes existantes; (2) composition parallèle ou séquentielle valide; (3) sondes miroir/relatives sur des références choisies explicitement; (4) diagnostic de collisions persistantes; (5) création ou apprentissage d'une primitive seulement si les étapes précédentes n'expliquent pas les observations et si une expérience montre un gain par rapport à son coût. Toute suggestion de sonde conserve ses hypothèses et sa contre-épreuve.
+
+\section{Méga-observation et méta-observation}
+L'observation d'un observateur est elle-même un objet $o=(p,\theta,\mathcal{D},\hat{y},y,\ell,t)$ décrivant par exemple sonde, paramètres, données, prédiction, résultat, perte et temps. Observer $o$ au niveau suivant peut révéler des relations sur le processus, mais n'augmente pas automatiquement le pouvoir discriminant de la fonction d'observation originale. Une itération méta n'est considérée utile que si elle prédit un résultat mesurable différent d'un contrôle de base, et que l'expérience confirme ce résultat hors des données ayant servi à inventer l'hypothèse.
+
+Le méta-circuit doit ainsi matérialiser : état interne observé $\rightarrow$ hypothèse falsifiable $\rightarrow$ sonde proposée $\rightarrow$ prédiction pré-enregistrée $\rightarrow$ exécution sous budget $\rightarrow$ comparaison au résultat $\rightarrow$ mise à jour ou rejet $\rightarrow$ test indépendant. Une note élevée de curiosité ou de récompense ne constitue jamais par elle-même une certification.
+
+\chapter{Architecture générale O92-HFPN}
+\section{Vue d'ensemble}
+Le modèle retenu pour la formalisation est nommé \textbf{O92-HFPN} : \emph{Hierarchical Fingerprint Neuron Architecture}. Il s'agit d'une combinaison hiérarchique de poids appris sur empreintes typées, de sondes relationnelles, de têtes par canal, de fusion à fiabilité mesurée, de capsules de compétences source-off, de mémoire distincte, de raisonneur et d'une boucle autonome persistante.
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Entrée multimodale et normalisation de transport} : texte, JSON, fichiers, images, audio, vidéo, données tabulaires, événements et sorties d'outils.
+\item \textbf{Gestionnaire de contrats} : types, schémas, domaine, unités, politique de permissions, provenance et erreurs.
+\item \textbf{Observateurs / sondes} : sondes primitives, encoders de modalités, signatures globales/locales, transformations contrôlées et tests de référence.
+\item \textbf{Moteur de composition} : réutilisation, séquences typées, composition parallèle, miroirs et relations avec références explicites.
+\item \textbf{Graphe d'empreintes} : nœuds et arêtes d'observations, équivalences relatives au domaine, collisions, provenance, incertitude et invariants testés.
+\item \textbf{Substrat neurone-empreinte à poids} : projections apprenables sur coordonnées d'empreinte, poids partagés lorsque la transformation l'autorise, têtes spécialisées et couches relationnelles.
+\item \textbf{Fusion hiérarchique} : pondération conditionnelle des branches, calibration, surveillance de désaccord, gestion des vues absentes et abstention justifiée.
+\item \textbf{Apprentissage de compétences} : inférence de mécanisme candidat, entraînement/distillation, export de capsule, tests source-off et promotion/révocation.
+\item \textbf{Mémoire et recherche} : mémoire épisodique, registre des expériences, RAG local, datasets et mémoire de compétences séparée des poids.
+\item \textbf{Raisonneur et planificateur} : décomposition de tâches, sélection d'outils, planification, calcul de coût, contrôle de préconditions et vérification.
+\item \textbf{Gestionnaire d'autonomie et de curiosité} : cycle persistant de buts, sous-buts, sondes, essais, suivi de progrès et reprise.
+\item \textbf{Superviseur de confiance/sécurité} : sandbox, permissions, provenance, contraintes et évaluation indépendante.
+\item \textbf{Journal d'audit / état/checkpoint} : logs append-only, répétabilité, restauration, rollback de compétence et reprise d'interruption.
+\item \textbf{Interface desktop Windows-first} : Chat, sources/RAG, datasets, compétences, laboratoire, historique et paramètres.
+\end{enumerate}
+
+\section{Contrats entre couches}
+Chaque message inter-couche contient identifiant de tâche, signature/type, payload ou référence d'artefact, version du schéma, budget et timeout, contexte de provenance, résultat/erreur typé et certificat si disponible. Aucune couche ne peut remplacer un état \texttt{UNKNOWN} par une réponse positive ou négative implicite. Toute voie de secours enregistre la raison du fallback et l'effet possible sur le résultat. Toute sortie utilisateur distingue faits sources, prédictions, hypothèses, actions exécutées et éléments non vérifiés.
+
+\section{Modèle de données de l'empreinte}
+Un schéma conceptuel de coordinateur de signature est :
+\begin{lstlisting}
+FingerprintRecord {
+  object_id, observation_id, modality, domain_id,
+  probe_id, probe_version, input_transform_id,
+  reference_id?, value_type, value, validity_state,
+  unit, timestamp, confidence?, noise_estimate?,
+  source_hash, code_hash, parameters_hash,
+  cost_ms, resource_usage, provenance, privacy_label
+}
+\end{lstlisting}
+Le schéma exact est versionné et migré par transformateur déclaré. L'identité d'un coordinateur ne peut dépendre de l'ordre d'itération accidentel d'un dictionnaire; les signatures canoniques incluent l'ordre/schéma déclaré, et la quantification ou canonicalisation indique précision, tolérance et domaine de validité. Les valeurs incertaines conservent leur distribution ou intervalle plutôt qu'un seul chiffre présenté comme exact.
+
+\chapter{Neurones à poids soumis à la logique des empreintes}
+\section{Définition du neurone-empreinte (FPN)}
+Soit une entrée $x$ et le contexte $c$. Les observateurs produisent des branches typées $\phi^{(v)}(x;c)$, où $v$ indique une vue (globale, région, transformation, relation, modalité ou probe family). La couche d'entrée garde des masques de validité $m^{(v)}$, mesures de fiabilité $r^{(v)}$ et identifiants de schéma $s^{(v)}$ :
+\[
+ z^{(0)}=\operatorname{TypedPack}\!\left(\{\phi^{(v)},m^{(v)},r^{(v)},s^{(v)}\}_{v\in V}\right).
+\]
+Chaque FPN est un module à poids entraînables :
+\[
+ h_{\ell}^{(v)}=\sigma\!\left(W_{\ell}^{(v)}\tilde h_{\ell-1}^{(v)}+B_{\ell}^{(v)}u_{\ell}^{(v)}+b_{\ell}^{(v)}\right),
+\]
+où $\tilde h$ est la projection de coordonnées de signature explicitement typées, $u$ est le contexte relationnel ou le résumé des autres vues, $W$ porte les poids de compétence et $B$ les interactions déclarées. La fonction d'activation $\sigma$ dépend du type de tâche. Les poids peuvent être denses, clairsemés, factorisés, convolutifs ou à attention; cette liberté de réalisation n'autorise pas à perdre la provenance de la coordonnée qui alimente le poids.
+
+Les « neurones » de niveau supérieur ne sont pas censés être des noms sémantiques imposés à la main. Ils apprennent des combinaisons stables de réponses et de relations, en mesurant la répétabilité, la contribution au comportement, la robustesse et la qualité de transfert. L'architecture permet des poids comme un LLM, mais l'interface des poids est ancrée dans les familles d'empreintes observées. Pour le langage, le substrat peut apprendre des poids d'attention sur représentations de tokens, n-grammes, dépendances et empreintes de séquence; il n'est pas limité à un classificateur de petits vecteurs.
+
+\section{Fusion avec portes de fiabilité}
+La concaténation de toutes les vues en une seule chaîne de caractéristiques n'est pas une règle obligatoire. Pour chaque branche $v$, définir un score de fiabilité :
+\[
+ a_v=\operatorname{Gate}_{\theta}\left(h^{(v)},r^{(v)},u^{(v)},m^{(v)},\delta^{(v)}\right),
+ \qquad a_v\geq0,
+\]
+où $u^{(v)}$ représente l'incertitude et $\delta^{(v)}$ le désaccord avec les autres vues ou un modèle de référence. Pour les branches admissibles, la fusion normalisée est
+\[
+ h_{\mathrm{fuse}}=\sum_{v\in V} \bar a_v\,T_v(h^{(v)}),\qquad
+ \bar a_v=\frac{a_v}{\sum_{j\in V}a_j+\epsilon}.
+\]
+Une fusion par attention ou par réseau expert peut remplacer la moyenne, mais doit exposer des scores de contribution, de fiabilité et d'ablation. Lorsque toutes les vues utiles sont absentes, le modèle n'émet pas une valeur par défaut non justifiée. Lorsque deux branches se contredisent au-delà d'une tolérance calibrée, il peut demander une nouvelle sonde, interroger une source ou rapporter explicitement l'incertitude.
+
+Le partage de poids est appliqué lorsque la transformation représente une symétrie ou une invariance justifiée dans le contrat de la tâche; il ne doit pas être imposé à l'audio inversé dans le temps ou à la vidéo inversée comme si ces opérations conservaient toujours le sens. Dans ces modalités, la transformation est d'abord une sonde comparative diagnostique, puis peut être reconnue invariante seulement après preuve sur le domaine considéré.
+
+\section{Coordonnées de poids et classes de transformation}
+La famille de coordonnées est construite à partir de :
+\begin{itemize}[leftmargin=1.5em]
+\item valeurs brutes typées, résumés et mesures de confiance;
+\item seuils, dérivées, moments, variations, ratios et signatures d'événements adaptés au type;
+\item réponses de compositions de sondes, relations à une référence et comparaisons temporelles;
+\item représentations latentes apprises à partir de contenu brut, reliées par provenance aux entrées et versions de l'encodeur;
+\item indicateurs de validité, d'écart au domaine d'apprentissage, de coût, de bruit et de désaccord.
+\end{itemize}
+Une coordonnée dérivée garde la définition exacte de sa construction. Le système mesure son utilité marginale sur des partitions et des tâches gelées; il n'inclut pas un nouveau probe parce qu'il augmente seulement la taille du vecteur.
+
+\section{Mémoire distincte des poids}
+Le modèle maintient des systèmes complémentaires :
+\begin{description}[leftmargin=1.5em,style=nextline]
+\item[Mémoire de travail] État des buts, hypothèses, résultats temporaires, budgets et dépendances nécessaires à la tâche courante.
+\item[Mémoire épisodique] Événements chronologiques : requêtes, décisions, actions, observations et conséquences; récupérable pour audit/reprise.
+\item[Mémoire sémantique/RAG] Documents, fragments et graphes indexés avec citations, provenance, version, permissions et capacité de réindexation.
+\item[Mémoire des compétences] Capsules validées, tests, domaine de validité, contrats, versions, poids et preuves sources-off.
+\item[Poids neuraux FPN] Paramètres entraînés qui transforment des signatures et relations; ils ne remplacent pas les originaux ni la provenance, et ne sont pas assimilés à la recherche textuelle.
+\item[Mémoire d'échec/correction] Événements de tests échoués, erreurs évitées, tentatives remplacées, causes et correctifs; append-only et consultable par le planificateur.
+\end{description}
+Cette séparation conserve l'ancrage RAG tout en permettant l'apprentissage de compétences indépendantes de l'exemple original.
+
+\chapter{Fonction objectif, entraînement et optimisation}
+\section{Objectif multicritère}
+Le but d'optimisation est un vecteur de résultats, non un score magique. Une fonction de travail possible est :
+\[
+\begin{split}
+\mathcal{L}= {}&\lambda_{\mathrm{task}}\mathcal{L}_{\mathrm{task}}
++\lambda_{\mathrm{pred}}\mathcal{L}_{\mathrm{next\text{-}observation}}
++\lambda_{\mathrm{rel}}\mathcal{L}_{\mathrm{relation}}\\
+&+\lambda_{\mathrm{view}}\mathcal{L}_{\mathrm{invariance}}
++\lambda_{\mathrm{contrast}}\mathcal{L}_{\mathrm{contrastive}}
++\lambda_{\mathrm{cal}}\mathcal{L}_{\mathrm{calibration}}\\
+&+\lambda_{\mathrm{sparse}}\mathcal{L}_{\mathrm{sparsity}}
++\lambda_{\mathrm{cost}}\mathcal{L}_{\mathrm{resource}}
++\lambda_{\mathrm{constraint}}\mathcal{L}_{\mathrm{constraint}}.
+\end{split}
+\]
+Cette expression est un inventaire modulaire des objectifs, pas une loi universelle ni un ensemble de termes tous activés sur chaque tâche. Les poids $\lambda$ sont déclarés/versionnés; leurs valeurs et la présence des termes sont choisies avec validation seulement. La sécurité et les contrats critiques ne deviennent pas de simples pénalités compensables par un meilleur score de tâche : les contraintes bloquantes ont une voie de contrôle séparée.
+
+\paragraph{Perte tâche.} Erreur prédictive ou de sortie de la tâche, adaptée au type (token, séquence, action, régression, classement, code, média).
+\paragraph{Perte de prochaine observation.} Prédit les résultats des sondes futures ou états observables, puis les compare aux observations exécutées, permettant de tester si le modèle de son environnement et de lui-même est causalement utile.
+\paragraph{Perte relationnelle.} Préserve les relations validées entre signatures, références, invariants et compositions de probes.
+\paragraph{Perte d'invariance.} Réduit les écarts entre vues uniquement pour une transformation déclarée sémantiquement admissible dans le domaine testé; les transformations susceptibles de changer le contenu peuvent au contraire exiger de prévoir leur différence.
+\paragraph{Perte contrastive.} Rapproche des vues/objets qui satisfont le contrat de même classe relationnelle et sépare des collisions vérifiées; les paires positives ne sont pas fabriquées par simple supposition.
+\paragraph{Calibration.} Compare la confiance à la fréquence empirique d'erreur, par modalité, domaine et catégorie de décision.
+\paragraph{Ressources.} Mesure temps, mémoire, stockage, latence d'outil et coût de calcul; le compromis coût-performance est publié sans transformer un budget en limite théorique.
+
+\section{Pipeline d'entraînement}
+\begin{enumerate}[leftmargin=1.6em]
+\item Valider format, contrat, provenance, politique de données et identité des sources.
+\item Dédupliquer par contenu lorsque pertinent tout en gardant les chemins et relations d'origine; détecter les données quasi-dupliquées entre splits.
+\item Choisir un découpage adapté à la question : temporel, groupé par source, par objet, par auteur, ou domaines OOD explicitement définis.
+\item Fixer train, validation, holdout et stress/OOD avant l'ajustement; sceller les manifestes et graines.
+\item Construire les probes et transformations uniquement sur train ou sur les invariants fixés a priori; chaque transformateur apprend ses statistiques sur train seulement.
+\item Entraîner des baselines et FPN à poids, têtes par vue, architecture hybride et mémoire prototype séparées.
+\item Sélectionner par règle enregistrée sur validation; limiter recherche d'hyperparamètres et noter le nombre de variantes essayées.
+\item Geler modèle/configuration; exécuter test indépendant puis tests source-off et adversariaux définis avant l'ouverture des résultats.
+\item Enregistrer paramètres, état des poids, schémas des empreintes, hashes, métriques et erreurs; promouvoir seulement si les seuils de capacité sont atteints.
+\item Surveiller dérive et incident après déploiement; révoquer ou faire rollback si le domaine ou le comportement sort du certificat.
+\end{enumerate}
+
+\section{Optimisations sans appauvrissement arbitraire}
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{Calcul différentiel/cache des probes :} recalculer seulement les sondes dont les entrées ou références ont changé; le cache porte les hashes dépendants.
+\item \textbf{Index de collision :} rechercher quelles classes/objets restent confondus, afin que la sonde supplémentaire réponde à un déficit mesuré plutôt qu'à une expansion non ciblée.
+\item \textbf{Sparsité/factorisation :} activer des blocs/relations pertinents avec ablation vérifiable; les features éliminées sont conservées dans l'historique de modèle.
+\item \textbf{Poids partagés :} réduire la redondance sur les symétries justifiées; conserver une branche de contrôle si la symétrie peut casser le sens.
+\item \textbf{Pruning et quantification :} ne valider qu'après comparaison de la qualité, calibration, robustesse et dérive, pas sur la seule économie de taille.
+\item \textbf{Traitement progressif :} réponses en streaming ou budget progressif sont possibles; le statut indique si la recherche est complète, partielle ou interrompue.
+\item \textbf{Parallélisation :} essais indépendants/encodages de vues en parallèle avec mêmes IDs, seeds et contraintes; ordre d'arrivée ne doit pas modifier la signature canonique.
+\item \textbf{Checkpoints transactionnels :} persister le dernier état cohérent, reprendre un job sans réécrire un résultat partiel comme final.
+\item \textbf{Auto-réglage des budgets :} choisir la prochaine action par réduction attendue de déficit/coût; les plafonds sont des budgets configurables et l'arrêt est rapporté comme arrêt de calcul, non négatif théorique.
+\end{itemize}
+
+\chapter{Acquisition indépendante d'une compétence}
+\section{Cycle de vie candidat vers compétence}
+L'acquisition doit faire disparaître la dépendance d'exécution vers le mécanisme-source observé. L'enseignant, adaptateur ou outil est utilisé pendant la phase d'observation, jamais discrètement requis à l'inférence dans la capsule qui prétend l'avoir acquis.
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Contrat de cible :} définir entrées, sorties, effets, préconditions, erreurs attendues, domaines et critères de réussite.
+\item \textbf{Observation :} recueillir paires entrée/sortie, états intermédiaires légalement observables, cas limites et répétitions; distinguer observations et suppositions.
+\item \textbf{Génération de candidats :} règle, modèle polynomial, arbre, FPN neuronal, petit réseau, adaptateur distillé, graphe de processus ou modèle multimodal, avec baseline mémoire et contrôle.
+\item \textbf{Inférence de mécanisme :} sélectionner familles de modèle candidates en fonction des relations visibles; prévoir des tests discriminants si plusieurs hypothèses expliquent les mêmes exemples.
+\item \textbf{Entraînement et validation :} s'ajuster sur train, sélectionner sur validation, mesurer les erreurs et ajouter des observations lorsque celles-ci séparent réellement les hypothèses.
+\item \textbf{Capsule autonome :} sérialiser poids/code compilé sûr, schéma de probes, métadonnées, préconditions, domaine observé, dépendances explicites, version et hashes. Ne pas inclure un pointeur d'inférence caché vers l'oracle.
+\item \textbf{Test source-off :} couper ou bloquer le mécanisme source et ses identifiants réseau; redémarrer un processus isolé et exécuter les cas gelés.
+\item \textbf{Certification :} un vérificateur indépendant contrôle exactement, par tolérance ou propriété, les cas holdout, limites, sorties invalides, sécurité et OOD.
+\item \textbf{Promotion :} enregistrer certificat borné à un domaine/test/protocole; la compétence reste réversible et monitorée.
+\item \textbf{Rejet ou amélioration :} conserver les erreurs, identifier la sonde ou observation qui manque, collecter des observations nouvelles et refaire une version; ne jamais réécrire un échec en succès sans nouveau test.
+\end{enumerate}
+
+\section{Structure de capsule}
+\begin{lstlisting}
+SkillCapsule {
+  skill_id, revision, declared_contract, input_output_schema,
+  fingerprint_schema_versions, probe_dependencies,
+  learned_weights_or_compiled_mechanism,
+  supported_domain, observed_domain, known_failure_domains,
+  validation_report_hash, frozen_test_report_hash,
+  source_off_test_report_hash, verifier_id_and_version,
+  provenance, licenses, permissions, resource_profile,
+  activation_conditions, rollback_target, revocation_state
+}
+\end{lstlisting}
+La capsule ne peut se déclarer « universelle » parce qu'elle a réussi une famille limitée de tests. Elle peut s'étendre par des observations supplémentaires et des révisions certificatives. Les données confidentielles et secrets ne sont pas intégrés aux poids sans règle de gouvernance explicite.
+
+\section{Acquisition d'adaptateurs, programmes et mécanismes}
+Pour un adaptateur appris, instrumentation de la version, de l'entrée/sortie, des couches/états accessibles et des droits d'accès. Pour une boîte noire, l'observation passe par une interface avec schéma de requête/réponse et budget. Pour un programme, ajouter AST, contrôle des effets et sandbox, mais un AST similaire ne garantit pas un comportement similaire. Pour un mécanisme interactif, les essais doivent couvrir état, événement, action et transition; un programme qui compile ou un agent qui décrit une stratégie n'est pas encore une compétence exécutée.
+
+Les exemples contradictoires sont précieux : les conserver, rechercher si la boîte noire est stochastique, séparer hasard et erreur, caractériser les conditions, puis soit apprendre une distribution, soit borner le contrat. Quand l'observation disponible ne distingue pas deux mécanismes, le planificateur choisit une expérience où leurs prédictions divergent, plutôt que de choisir une interprétation arbitraire.
+
+\chapter{Raisonnement, décomposition, récompense et autonomie}
+\section{Boucle de raisonnement}
+Une tâche utilisateur devient un contrat de tâche. Le raisonneur construit une représentation de l'état, génère plusieurs plans, estime les coûts et préconditions, décompose les sous-problèmes, exécute une étape, compare son résultat au plan, puis poursuit, répare ou demande une observation. Chaque sous-problème possède entrée, résultat attendu, tests, dépendances et état. Les résultats des outils reviennent comme observations avec provenance, et non comme vérité non vérifiée.
+
+La sélection du prochain objectif peut estimer un gain d'information ou de déficit :
+\[
+ \operatorname{priority}(a)=\frac{\EE[\Delta D(a)]+\lambda\EE[\Delta I(a)]-\eta\,\operatorname{risk}(a)}{\epsilon+\operatorname{cost}(a)},
+\]
+où $D$ est un déficit déclaré (observation, capacité, résolution, recherche, transfert ou conformité) et $I$ une mesure d'information définie pour l'expérience. Ce score est un heuristique de priorité, pas un théorème. Il est calibré empiriquement et ne se substitue pas à des contraintes bloquantes de sécurité.
+
+\section{Récompense et pénalité}
+Une récompense peut augmenter la priorité de tâches qui apportent des preuves, découvrent une sonde utile, réduisent une erreur de compétence ou terminent un but déclaré. Une pénalité peut signaler une violation de contrat, coût inutile, répétition d'une erreur ou détérioration d'une métrique. Les récompenses sont attachées à des événements observés et au vérificateur indépendant, non à une auto-évaluation libre. Les signaux peuvent être contradictoires; une amélioration d'un score n'efface pas une violation de sécurité ou une régression non autorisée.
+
+Pour éviter un comportement d'optimisation de la mesure, conserver un ensemble de métriques, audits adversariaux et tâches cachées gelées, avec rotation contrôlée des tests sans fuite. Toute mise à jour de la fonction de récompense est versionnée; l'ancien comportement de référence est gardé pour comparer si le changement a créé un biais.
+
+\section{Autonomie persistante et reprise}
+L'agent autonome s'exécute sur un ordonnanceur persistant : charger état signé, examiner objectifs actifs et échéances, choisir but/sous-but autorisé, former un plan, sélectionner sonde/outils, vérifier permissions, exécuter dans une enveloppe de ressources, consigner observations/résultat, mettre à jour mémoire/compétences, contrôler les seuils, mettre en veille ou choisir l'action suivante. Après crash/redémarrage, il reprend depuis un checkpoint cohérent et ne répète pas une action à effet externe sans idempotence ou confirmation d'état.
+
+L'autonomie comprend la recherche de documentation locale, la construction de tests, l'auto-évaluation, l'extension du portefeuille de probes, l'entraînement de candidats, l'organisation des données et la production d'un rapport. Elle ne doit pas dépendre d'un opérateur pour chaque sous-tâche interne; elle doit toutefois utiliser des permissions explicites pour réseau, installation, suppression, publication, achat, modification de sécurité ou toute action irréversible. Une dépendance manquante est signalée et contournée seulement avec une alternative documentée autorisée.
+
+\section{Auto-observation des neurones et de l'observation}
+Le modèle peut inspecter les poids, contributions, activations, échelles, gradients, portes de vues, mémoire, historiques de probes, taux d'erreur et stratégies de recherche. Cette inspection devient un objet à son tour : « quelle observation a produit cette feature, selon quelle transformation et quelle hypothèse ? » Le niveau méta prévoit quelle intervention va modifier quelle mesure. Les mécanismes utiles sont retenus après ablation : désactiver la méta-observation, comparer à une baseline, exécuter les mêmes tâches gelées et rapporter l'effet.
+
+Pas de boucle de récursion non bornée : un budget de calcul, une condition de suffisance et une règle d'arrêt sont explicites. La limite de budget donne l'état \texttt{INTERRUPTED\_BUDGET}; l'absence de signal neuf peut donner \texttt{NO\_MEASURED\_GAIN\_IN\_THIS\_TRIAL}; aucune de ces valeurs ne signifie que la capacité ou l'idée est impossible de façon générale.
+
+\chapter{Multimodalité et protocole d'empreintes par modalité}
+\section{Texte et JSON}
+L'ingestion conserve octets/source hash, encoding, frontières, schema, langue estimée, segments, tokenisation versionnée et statut de parse. Le texte peut produire des empreintes globales de séquence et locales (paragraphes, phrases, tokens, blocs syntaxiques), des relations de structure, des signatures de programme (AST/call graph) et des représentations latentes apprises. Un JSON conserve la hiérarchie et les types; une liste n'est pas convertie en suite de caractères, une valeur booléenne n'est pas confondue avec un entier, et les schémas invalides sont signalés.
+
+Les sondes sémantiques ou latentes ne remplacent pas le texte/structure source. Pour la recherche locale, chaque chunk RAG conserve le document, offset, titre, hash, version de l'index, droits et scores de récupération. Les réponses peuvent citer précisément les documents ou expliquer qu'aucune preuve n'a été trouvée.
+
+\section{Images : vues globales, régions et inversions}
+Pour une image $I$, former explicitement les canaux suivants (selon budget et tâche) :
+\[
+ V_I=\{I, Q_1(I),Q_2(I),Q_3(I),Q_4(I),\operatorname{flip}(I),\operatorname{polarityNorm}(I)\},
+\]
+où $Q_i$ sont des quadrants ou régions et $\operatorname{polarityNorm}$ une normalisation testée du contraste/polarité. L'empreinte se calcule globalement et pour chaque région; les signatures régionales peuvent aussi être regroupées avec les signatures miroir dans un objet relationnel qui conserve la provenance de chaque canal. Les propositions d'inversion/polarité et de flip sont expérimentales : on ne présume pas que toute rotation, réflexion ou inversion de couleur préserve toujours le contenu sémantique.
+
+Étapes : détecter format/alpha/couleur; conserver une vue brute; générer chaque transformation traçable; construire des signatures globales/locales; extraire des caractéristiques géométriques, structurelles, OCR et latentes; apprendre des têtes par vue; mesurer invariance et désaccord; fusionner selon fiabilité; déclencher une observation supplémentaire si ambigu. Les régions doivent éviter les artefacts de quadrants : variations de cadrage et découpes multi-échelle sont évaluées.
+
+L'essai synthétique O92 montre que 336 caractéristiques géométriques séparent parfaitement cercles et carrés dans le domaine conçu tandis que le concaténat brut à 2\,208 caractéristiques casse sur la palette inversée. Il motive une fusion structurée; il ne justifie ni une unique représentation géométrique pour toutes les images ni une affirmation de VLM générale.
+
+\section{Audio : temps, spectre et miroir contrôlé}
+Pour une onde $a(t)$, conserver fréquence d'échantillonnage, canaux, durée, segmentation, source et conditions d'enregistrement. Produire les empreintes globales du signal et par fenêtres, ainsi que des représentations temporelles/spectrales (énergie, changements, enveloppe, spectrogramme, embeddings d'un encodeur versionné), des signatures de transcription si un ASR est disponible et des relations fenêtre-à-contexte. On peut comparer signal original et transformations contrôlées, mais la lecture inverse dans le temps n'est pas une invariance universelle de la parole : elle sert d'abord de sonde différentielle. En audio conversationnel, aligner mots/segments avec temps et confiance, et conserver séparément détection vocale, transcription, identification de locuteur et interprétation sémantique.
+
+Le rapport O91 donne WER moyenne 1.0388 sur dix exemples anglais synthétiques pour la voie PocketSphinx testée; Whisper.cpp n'a pas été exécuté. C'est une alerte de qualité pour cette configuration, pas une évaluation de tous les ASR. La couche UI doit afficher moteur/modèle/langue, poids configurés, confiance et état NOT\_RUN ou qualité échouée.
+
+\section{Vidéo : empreintes spatiales et temporelles}
+Décoder sans perdre timestamps, fréquence d'images, résolution et audio synchronisé. Construire signatures de la vidéo entière, segments temporels, images-clés, régions par image, relations de mouvement et transitions, pistes audio et alignement parole/événement. Les transformations temporelles (inversion, changement de cadence, sous-échantillonnage) sont des expériences de robustesse; elles ne doivent pas être déclarées invariantes a priori. Les sondes de frames manquantes, dérive d'horloge ou flou rapportent un état d'observation dégradée. La fusion audio/vidéo conserve l'alignement et les conflits : une parole incohérente avec la scène déclenche une explication ou une observation additionnelle, pas une moyenne aveugle.
+
+\section{Tabulaire, code et outils}
+Les valeurs tabulaires ont nom/type/unité/manquants/date, distributions et provenance; la séparation temporelle ou par entité est choisie selon la fuite possible. Le code peut utiliser AST, appels, effets, tests, invariants et exécutions sandboxées; une signature d'AST ne prouve pas équivalence comportementale. Les outils sont des sondes/actionneurs avec préconditions, droits et contrats de retour. Les erreurs stdout/stderr vides ne sont ni automatiquement une réussite ni automatiquement une panne : le contrat décide si un payload est requis.
+
+\chapter{RAG, données, apprentissage global et ressources externes}
+\section{RAG local}
+Le chargeur identifie type, taille, hash, encodage, format, permissions et provenance; parse sans perte; valide schema et anomalies; conserve les octets d'origine; met en quarantaine les lignes invalides avec position et raison; segmente/indexe; cite les passages retournés; permet la reconstruction déterministe d'index et la suppression/export selon politique. Le RAG peut soutenir le raisonneur mais le récupérateur ne doit pas prétendre avoir appris un mécanisme juste parce qu'il a retrouvé une réponse similaire.
+
+\section{Accès global et Internet}
+Les connecteurs globaux sont des fournisseurs de contenu et d'outils, non des autorités implicites. Chaque réponse externe inclut URI/source, date d'observation, heure, version lorsque pertinente, politique de cache et fiabilité. Le contenu distant est séparé des instructions système et traité comme données non fiables; il ne peut pas modifier les permissions ou les objectifs autonomes. La désactivation réseau doit laisser les fonctions locales déclarées fonctionner et afficher les dépendances qui nécessitent réellement le réseau.
+
+\section{Entraînement général et spécialisation locale}
+L'architecture distingue pré-entraînement ou modèles de fondation éventuellement externes, adaptation locale, apprentissage de probes, distillation de compétences, fine-tuning contrôlé et indexation RAG. Un poids obtenu par apprentissage local doit toujours garder sa provenance et son domaine; les bases de fondation sont intégrées selon licence, empreinte de modèle, tokenizer et contrat d'inférence. La stratégie peut utiliser des modèles existants pour certaines tâches sans faire dépendre toutes les capacités d'un seul backend.
+
+Le fonctionnement sur PC n'exige pas que chaque opération soit exécutée par un grand modèle dense. Les sondes légères, index locaux, règles exactes, petits modèles spécialisés et calculs plus lourds optionnels composent un système extensible. Des limites de mémoire et de temps existent concrètement sur une machine; elles sont configurées, mesurées et contournées par cache, reprise, offload ou sélection de méthode — jamais converties en un jugement préalable du potentiel.
+
+\chapter{Interface d'utilisation Windows-first}
+\section{Principes}
+La version utilisateur est une application desktop Windows 10/11, avec PySide6 comme solution primaire et une couche d'interface alternative éventuelle si l'installation l'exige. Le cœur AAM fonctionne comme un service local versionné; UI et moteur échangent des requêtes typées. Mode hors-ligne utilisable, stockage local et absence de chemins codés en dur sont exigences de premier ordre. Internet ou les modèles distants sont des plugins activés explicitement.
+
+\section{Écrans}
+\begin{description}[leftmargin=1.5em,style=nextline]
+\item[Chat] Historique, entrée texte, pièces jointes fichier/image/audio/vidéo, état d'inférence, sources citées, étapes de raisonnement exposables sous forme d'audit, boutons annuler/rejouer, affichage des erreurs et incertitudes.
+\item[Sources / RAG] Ajouter dossiers ou fichiers, filtrer, prévisualiser, gérer index/chunks, vérifier provenance, retirer une source, reconstruire l'index et inspecter les citations.
+\item[Datasets] Table/aperçu, schema, stats manquants, formats, split train/val/test, version/hash, détection de doublons et quarantaine des entrées invalides sans altérer l'original.
+\item[Compétences] Liste des capsules, versions, domaines, preuves, coûts, tests source-off, préconditions, état candidate/validée/révoquée, export/import et rollback.
+\item[Laboratoire] Construire une expérience, choisir seeds, paramètres, modèle, budget et splits; affichage live; progression; logs; tableaux de métriques; comparer runs sans modifier le holdout.
+\item[Historique et audit] Journal append-only des requêtes, actions/outils, erreurs, modèles/poids, hash des sources et décisions de promotion; filtrage/export/suppression selon droits.
+\item[Paramètres et ressources] Modèle local, CPU/GPU, RAM, espace, chemins Unicode, ports locaux, réseau, plugins, secrets, sauvegardes, politique d'actions, horaires d'autonomie et quotas.
+\end{description}
+
+\section{Commandes et acceptation Windows}
+Les commandes install/run PowerShell, mises à jour, retour arrière et désinstallation doivent être documentées et testées sur un compte propre. L'acceptation ne doit pas dépendre des dossiers \path{/mnt/data} ou \path{/home/oai}. Tester hors ligne, avec CPU seul, GPU optionnel, dataset mal formé, espace disque limité, répertoire avec accents/espaces, reprise après interruption, droits sans administrateur et désinstallation complète. L'acceptation native Windows n'a pas été exécutée pendant l'audit présent; elle reste un gate non passé, non un jugement sur la possibilité d'une implémentation Windows.
+
+\chapter{Sécurité, fiabilité et contraintes d'exécution}
+\section{Frontières de confiance}
+Tous les fichiers importés, documents RAG, sorties d'outils, contenu internet et résultats d'oracle sont des données non fiables jusqu'à validation. Les programmes générés/extraits s'exécutent en sandbox avec permissions de fichiers, réseau, processus, temps et mémoire. Pas d'évaluation arbitraire de code dans le processus principal; pas de chargement automatique de pickle/checkpoint inconnu; pas de secret dans les logs ou RAG. Les connexions aux comptes et actions externes demandent scopes minimaux et confirmation selon impact.
+
+\section{Contrôle d'action}
+Chaque action dispose d'un type, effet attendu, niveau d'impact, permissions, idempotence, stratégie de compensation, budget, précondition, timeout et vérificateur. Les actions interdites par politique sont bloquées par une voie séparée des poids de récompense, afin qu'un score de tâche ne compense pas une interdiction. L'autonomie choisit librement des actions permises et peut proposer de nouvelles procédures; elle ne contourne pas la vérification des permissions.
+
+\section{Incidents et sûreté de la mémoire}
+Les mises à jour de poids, migrations de schéma, changements d'objectifs, modifications de récompense et promotions sont atomiques et journalisées. Le système garde un checkpoint de référence, sait arrêter un module, révoquer une compétence, réindexer une mémoire et revenir à une version validée. Les fichiers invalides sont mis en quarantaine avec hash/offset/raison; les entrées vides sont classées par contrat et ne sont pas toutes traitées comme erreurs.
+
+\chapter{Vérification, tests et mesures de capacité}
+\section{États de résultat}
+Chaque opération retourne un statut typé, par exemple : \path{PASS_BOUNDED}, \path{FAIL_QUALITY_GATE}, \path{NOT_RUN}, \path{ENVIRONMENT_ERROR}, \path{INVALID_INPUT}, \path{INCONCLUSIVE}, \path{INTERRUPTED_BUDGET}, \path{UNRESOLVED} ou \path{REVOKED}. Chaque statut a définition, cause, journal, prochain test et effet sur la promotion. Un statut n'est jamais deviné à partir d'un mot dans le log seul.
+
+\section{Plan d'évaluation à chaque compétence}
+\begin{enumerate}[leftmargin=1.6em]
+\item Tests fonctionnels exacts et contrat d'I/O.
+\item Validation indépendante et tests avec variations contrôlées.
+\item Test source-off après serialization/restart.
+\item Tests d'intégration et de non-régression.
+\item Holdout gelé représentatif du domaine déclaratif.
+\item OOD/adversarial qui testent explicitement les invariants attendus et les cas qui doivent conduire à l'abstention.
+\item Calibration/incertitude, latence, mémoire, coût et fiabilité des outils.
+\item Analyse des erreurs, des effets secondaires, du recours à RAG et des dépendances cachées.
+\item Réplication sur plusieurs graines/datasets/objets lorsque cela est pertinent, en évitant les duplicatas comme faux réplicats.
+\item Vérification plateforme Windows et déploiement après acceptation.
+\end{enumerate}
+
+\section{Mesures d'empreinte et de transfert}
+Le tableau de bord par expérience inclut nombre de classes/collisions, collision résiduelle, coût de la sonde, stabilité, erreur de tâche, calibration, transfert, résultats OOD, désaccord des vues, mémoire requise, latence et erreurs de protocole. La recherche de nouvelles sondes mesure le gain marginal et garde les sondes qui apportent une différence reproductible. La généralisation est évaluée par augmentation des domaines et tâches, plutôt que déduite d'un score unique.
+
+\section{Résultats utiles déjà observés et leur portée}
+\begin{itemize}[leftmargin=1.5em]
+\item Audits historiques : O91 178/178, O90 168/168, O82.2 125/125 après configuration, ORDER 8.0.2.0 et 8.0.2.2 11/11 chacun. Résultats bornés à leurs suites et environnements.
+\item CAS O91 : 9/9; OCR contrôlé 6/6; aucun ne certifie la sémantique générale.
+\item ASR PocketSphinx testé : WER moyenne 1.0388, gate à 0.20 échoué; Whisper.cpp et VLM à vrais poids non exécutés.
+\item Images synthétiques : invariant géométrique parfait sur ce benchmark; concaténation brute échoue sous inversion palette, répliqué à trois graines.
+\item Météo : variantes pondérées sur empreintes dépassent la base majoritaire; le modèle choisi sur validation n'est pas celui au meilleur F1 test, et la cible doit être auditée contre fuite.
+\item Boîte noire numérique : les polynômes apprennent les mécanismes polynomiaux correspondants et prédisent sans oracle; le MLP de charnière baisse en OOD, ce qui motive le test de domaine et plusieurs candidats.
+\end{itemize}
+Ces résultats ont déterminé l'architecture proposée sans autoriser une conclusion sur la réalisation générale d'AAM. Le fichier de laboratoire contient les nombres complets, métriques secondaires et limites.
+
+\chapter{Documentation et processus de développement}
+Chaque changement de conception demande une RFC courte : hypothèse, source théorique, déficit mesuré, signatures touchées, coût, risques, tests à ajouter, expérience de falsification et plan rollback. Chaque version de modèle publie : description; architecture; pipeline bout-en-bout; commandes d'exécution; résultats; interprétation; conséquences théoriques, conceptuelles et opérationnelles; conclusion; statut du modèle. Les scripts restent découpés par tâche, écrivent les checkpoints et produisent du JSON strict avec schéma versionné. La collecte historique globale n'est pas utilisée comme suite unique si les snapshots ont des noms de modules qui se chevauchent.
+
+\section{Registre des erreurs}
+Le registre \path{erreurs_a_evite_O92.json} suit ID stable, version, type, sévérité, observation, conséquences, correctif, état, sources et preuves. Une erreur qui a été corrigée garde le fait historique et le correctif; une piste non testée reste ouverte. Toute nouvelle régression ou nouveau type de failure ajoute une entrée, sans renuméroter ni effacer les anciennes. Le carnet fichier-par-fichier est reconstruit par contenu hashé avec occurrences de chemins conservées.
+
+\chapter{Plan de construction O92 et gates d'acceptation}
+\section{Ordre de construction proposé}
+\begin{enumerate}[leftmargin=1.6em]
+\item Infrastructure Windows-first, contrats d'entrée, journaux append-only, gestion d'état et installation hors ligne.
+\item Ingestion typée et intégrité de datasets; parseurs CSV/JSON/JSONL/image/audio/vidéo, puis Parquet validé et quarantaines.
+\item Portefeuille de probes de base, signature canonique, versioning, partitionnement, composition et sondes miroir/relation.
+\item Baselines simples et bancs de tests de collisions/canonicalisation.
+\item FPN à poids avec canaux typés, partage contrôlé, têtes séparées et instrumentation des contributions.
+\item Fusion à fiabilité, désaccord et abstention calibrée; essais d'ablation.
+\item Capsules source-off, vérification indépendante et gestion de versions.
+\item Mémoire RAG et compétences distinctes, citations et recherche locale.
+\item Raisonneur/décomposeur, contrôleur de coût, boucle autonome persistante, checkpoints et permissions.
+\item Multi-modalité enrichie, connecteurs Internet consentis, entraînement/évaluation plus global, optimisations et déploiement.
+\end{enumerate}
+Cet ordre est une stratégie de réduction des risques d'intégration, pas une limite permanente de capacité. Le plan permet de tester chaque couche tôt et de maintenir une voie de fonctionnement local à chaque étape.
+
+\section{Gates avant promotion}
+\begin{longtable}{p{0.21\linewidth}p{0.49\linewidth}p{0.20\linewidth}}
+\toprule
+\textbf{Gate} & \textbf{Preuve exigée} & \textbf{État au dossier O92}\\
+\midrule
+Intégrité corpus & Inventaire, hash, paths, anomalies préservées & Pass avec items explicitement ouverts\\
+Suite historique & Commandes, environnement, nombre de tests, logs & Pass bornés sur snapshots testés\\
+Neurone-empreinte & Ablation vs brut/mémoire et preuves par coordinateur & Micro-labs oui; modèle O92 end-to-end non implémenté\\
+Acquisition & Test source-off, serialization/restart, domaine et holdout & 4 fonctions synthétiques seulement\\
+Image VLM naturelle & Vrais poids/modèle, jeux gelés et erreurs sémantiques & NOT\_RUN\\
+Audio ASR & Seuil WER sur corpus représentatif par langue/domaine & Échec du setup PocketSphinx; autre backend NOT\_RUN\\
+Parquet & Schéma, records, types, valeurs manquantes décodés & NOT\_RUN\\
+Autonomie persistante & Reprise, planification, progression, rollback, sécurité & Formalisée; acceptation d'implémentation NOT\_RUN\\
+Windows desktop & Installation propre, offline, chat, RAG, datasets, PowerShell & NOT\_RUN\\
+Compétence déployée & Certificat indépendant, source-off, régression, monitoring & Procédure formalisée; à appliquer lors de la construction\\
+\bottomrule
+\end{longtable}
+
+\chapter{Décision finale et conclusion}
+\section{Architecture retenue}
+O92-HFPN est retenu comme la variante conceptuelle la plus cohérente avec (i) les invariants de la théorie, (ii) la demande de poids appris plutôt qu'une mémoire ordinaire, (iii) l'acquisition de compétences autonomes, (iv) les résultats des essais de composition et de multi-vues, (v) les leçons des erreurs historiques et (vi) la demande de multimodalité et d'autonomie Windows-first. La conception évite l'erreur de prendre une représentation plus large pour une représentation nécessairement meilleure. Elle choisit le meilleur principe d'architecture sur la preuve disponible, tout en gardant les autres candidats comme ablations et solutions spécialisées.
+
+\section{Pipeline synthétique de bout en bout}
+Entrée et provenance $\rightarrow$ validation du contrat $\rightarrow$ probes de modalité et vues $\rightarrow$ empreinte typée $\rightarrow$ recherche de probes réutilisées/composées/miroir $\rightarrow$ graphe d'empreintes $\rightarrow$ têtes FPN à poids $\rightarrow$ fusion calibrée $\rightarrow$ raisonnement et choix d'action $\rightarrow$ action/outils autorisés $\rightarrow$ résultat observé $\rightarrow$ vérification indépendante $\rightarrow$ réponse avec preuves/états $\rightarrow$ journal de l'expérience $\rightarrow$ apprentissage/révision d'une compétence candidate $\rightarrow$ tests source-off $\rightarrow$ promotion ou rollback $\rightarrow$ introspection contrôlée pour choisir le prochain test.
+
+\section{Statut final}
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{Analyse des sources :} inventaire hashé et analyse fichier/par fichier construits; checkpoints binaires et contenu Parquet explicitement non décodés sémantiquement.
+\item \textbf{Laboratoires :} composition de probes, ablation image v2 et réplication trois graines, comparaison météo et acquisition numérique source-off exécutées; limites et contre-exemples consignés.
+\item \textbf{Architecture :} O92-HFPN définie; neurones, données, pertes, fusion, acquisition, autonomie, sécurité, RAG, interface et tests détaillés.
+\item \textbf{Implémentation :} non incluse dans cette exécution, conformément à la demande.
+\item \textbf{Capacités encore ouvertes :} modèles réels à poids sémantiques vision/audio/vidéo, décodage Parquet, acceptation native Windows, entraînement global et protocole opérationnel du « sens fort ».
+\item \textbf{Position sur le potentiel :} aucun jugement anticipé de réussite ou d'échec global. Le modèle est spécifié pour pouvoir être construit, éprouvé, corrigé et étendu à partir d'éléments testables; les résultats futures devront être mesurés et rapportés au lieu d'être supposés.
+\end{itemize}
+
+\end{document}

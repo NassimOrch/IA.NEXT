@@ -1,0 +1,67 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,hyperref,microtype}
+\title{Correction ORDER 59 -- Release corrective 59.0.2}
+\author{Journal technique d'intégrité ORDER 59}
+\date{20 septembre 2026}
+\begin{document}
+\maketitle
+
+\section{Objet}
+Ce document enregistre exclusivement les anomalies détectées puis corrigées pendant l'audit dur du modèle ORDER 59. Une correction de code n'est pas transformée en preuve de capacité. Les résultats expérimentaux restent ceux effectivement observés dans le rapport hard.
+
+\section{Artefact d'entrée}
+L'archive survivante utilisée comme base de correction est 
+\texttt{model\_order\_59.zip}, SHA-256 :
+\begin{center}\texttt{16531f4e e47158b2 a2bf7517 f9e81637}\par\texttt{89f9e7e9 af237f07 a2d8db0e 572fd6a3}\end{center}
+
+\section{Corrections de causalité et d'intégrité}
+\begin{enumerate}
+\item \textbf{Historique par occurrence.} Le calcul du futur associé à une observation utilise maintenant l'occurrence de transition elle-même et non un simple hash d'observation ; les observations répétées ne sont plus confondues artificiellement.
+\item \textbf{Sélection active.} Les probes déjà représentées sont exclues des candidats de raffinement, et la trace conserve le gain de la probe effectivement choisie.
+\item \textbf{Fermeture et géométrie.} La fermeture observationnelle est exécutée sur la représentation courante et le contrôle de loi du minimum double est effectué lorsque les hypothèses nécessaires sont réunies.
+\item \textbf{Contraintes induites.} Une incompatibilité observée entre action et interaction peut modifier le score de l'action future ; la contrainte n'est plus seulement un objet de journalisation.
+\item \textbf{Vérification.} Une couche indépendante contrôle la proposition d'action et l'état de représentation avant exécution.
+\item \textbf{Budget.} Le temps mur est global à l'épisode et les évaluations de nœuds sont cumulatives. Une re-création de l'horloge à chaque pas n'est plus possible.
+\item \textbf{Prédiction.} Le modèle associe désormais état d'observation et action, et les prédictions multi-pas se poursuivent depuis l'état latent prédit.
+\item \textbf{Imagination.} La simulation produit un effet dépendant de l'action simulée ; une hypothèse exécutée peut donc départager deux actions.
+\item \textbf{Synthèse.} Un programme à score non positif ou non démontré reste rejeté. L'acceptation exige un signal non constant évalué sur des transitions tenues à l'écart.
+\item \textbf{Fuite de récompense.} Le programme synthétisé ne reçoit pas directement la récompense-cible dans son contexte d'exécution.
+\item \textbf{Réseau neural.} Le score d'action est explicitement conditionné par l'observation et l'action, y compris quand leurs statistiques superficielles sont identiques.
+\item \textbf{Déficit de transfert.} La simple présence d'un programme en mémoire ne crée plus un déficit de transfert ; il faut une comparaison réelle avec la représentation cible.
+\item \textbf{Séparation architecture/évaluation.} Les environnements et le CLI de démonstration résident dans \texttt{evaluation\_adapters/}, hors du noyau installable.
+\item \textbf{Anti-triche statique.} L'auditeur vérifie désormais aussi les imports de sockets, réseau, processus et ctypes interdits dans le noyau.
+\item \textbf{Packaging.} Les versions sont alignées sur 59.0.2 et setuptools découvre explicitement le package sous \texttt{src}.
+\item \textbf{Chess.} Conversion UCI/plateau, promotion, roque, prise en passant et droits de roque ont été corrigés et testés. Ces changements restent confinés à l'adaptateur.
+\item \textbf{Documentation.} Les anciens hash erronés, nombres de tests et constructions LaTeX non compilables sont remplacés par des valeurs et compilations issues de la release actuelle.
+\item \textbf{Alphabet d’actions SequenceEnv.} L’ancien adaptateur construisait les candidats à partir de la continuation cachée. La release corrective utilise maintenant un domaine numérique dérivé uniquement du préfixe observé ; la future valeur n’est pas consultée pour fabriquer l’alphabet.
+\item \textbf{Transition adversariale chess.} La réponse interne noire réutilise désormais la transition complète de l’environnement, y compris roque, promotion, prise en passant et mise à jour des droits, au lieu d’une simple copie de cases.
+\item \textbf{Release du paquet.} Le README, les tests de package et l’archive modèle sont alignés sur 59.0.2. L’archive a été reconstruite depuis zéro pour empêcher qu’un ancien contenu soit ajouté par erreur au nouveau ZIP.
+\end{enumerate}
+
+\section{Vérification après correction}
+La suite finale est :
+\begin{verbatim}
+PYTHONPATH=src:. pytest -q
+24 passed
+python -m compileall -q src evaluation_adapters
+PASS
+\end{verbatim}
+La couverture instrumentée du noyau est de 87\% des lignes. L'absence de test sur une ligne non exécutée n'est pas assimilée à une absence de bug.
+
+\section{Anomalies chess du harnais historique}
+Deux anomalies du protocole précédent ont été traitées séparément : l'environnement adversarial recevait auparavant un argument de construction non supporté ; un FEN de régression plaçait également la configuration différemment de ce que le test supposait. Les corrections de harnais ne sont pas comptées comme succès du modèle. Les résultats chess du rapport sont issus du harnais corrigé.
+
+Le SHA-256 de l'archive corrective finale est :
+\begin{center}\texttt{5bb38372 255aabca 232c9e26 e920f24a}\par\texttt{f5de2820 debec70e 8f4dd9ce d2641c96}\end{center}
+
+\section{Statut scientifique après correction}
+La version 59.0.2 améliore la causalité logicielle et l'intégrité expérimentale. Elle ne prouve pas une intelligence générale. Les résultats partiels, les ressources épuisées et les cas non vérifiés restent visibles dans l'audit.
+
+\section{Traçabilité}
+Le manifeste de la release corrigée, le hash final de l'archive, les hashes par fichier, les sorties de tests, les résultats bruts, les commandes et les logs de compilation sont fournis dans l'archive d'audit associée.
+
+\end{document}

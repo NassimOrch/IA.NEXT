@@ -1,0 +1,651 @@
+{
+  "experiment_id": "NG-V3_1-EXP-02-PRESERVE-LM-MULTIVIEW-ROUTER",
+  "status": "TRAINED_AND_EVALUATED",
+  "timestamp_utc": "2026-10-28T09:55:09.596819+00:00",
+  "protocol_version": "ngbrain-v2-hierarchical-multiview-v1.2",
+  "seed": 20261030,
+  "steps_requested": 1800,
+  "steps_completed": 1800,
+  "batch_size": 8,
+  "sequence_length": 64,
+  "learning_rate": 0.001,
+  "torch_threads": 2,
+  "device": "cpu",
+  "architecture": "ng_multiview_gru_lm_v3_1",
+  "router_input_mode": "legacy_output_plus_view_sidecar",
+  "parameters": 55568,
+  "legacy_language_model_parameters": 54536,
+  "view_router_parameters": 1032,
+  "view_facets": [
+    "behavioral_generation",
+    "next_token_statistics",
+    "hidden_representations",
+    "attention_patterns",
+    "ablation_response",
+    "scaling_response",
+    "cross_language_behavior",
+    "limitations_hypotheses"
+  ],
+  "retained_legacy_output_facets": [
+    "contrastive",
+    "definition",
+    "dialogue",
+    "explanation",
+    "narrative",
+    "procedure",
+    "question_answer",
+    "scientific_reasoning"
+  ],
+  "best_validation_step": 1700,
+  "best_validation_view_loss": 1.8482625409960747,
+  "checkpoint_selection": "minimum observation-view classification loss on validation windows; test never used for selection",
+  "dataset_manifest_sha256": "b3fbd0b883161b46cc1492b7a7a5f6538c0533f1b8308fc65c18ecf93e999310",
+  "train_dataset_sha256": "1fc192b7a71294e489cf97b94bf94e7d77aacd4351385cf2d35debce59d62931",
+  "validation_dataset_sha256": "a1946ea95397198e02ac8f539c24dce74f6249827458332538be76a4d791e191",
+  "test_dataset_sha256": "bdc9de06d592a7cbdefbf7a6d65947c4c2787cb72968e7b3da2e546235bcefd2",
+  "source_study_sha256": "dba0f02d8b68f349b24c828545de8254f9e9c9fa3048e565cde8b05b1d33c707",
+  "base_model_archive_sha256": "ec1c76cac52d108875a27b1d3bb7c3f8493d7f45e9fd1d48b8c483eaec2691ef",
+  "source_model_training_policy": "Only direct source-model metadata, hidden/attention summaries and controlled intervention observations in the English training partition supervise the view router; no teacher weights/logits are present in the student.",
+  "warm_start": {
+    "source_student_archive_sha256": "ec1c76cac52d108875a27b1d3bb7c3f8493d7f45e9fd1d48b8c483eaec2691ef",
+    "all_original_state_keys_preserved": true,
+    "shared_keys_loaded": [
+      "emb.weight",
+      "facet_A",
+      "facet_B",
+      "facet_bias",
+      "head.bias",
+      "head.weight",
+      "norm.bias",
+      "norm.weight",
+      "rnn.bias_hh_l0",
+      "rnn.bias_ih_l0",
+      "rnn.weight_hh_l0",
+      "rnn.weight_ih_l0",
+      "router.bias",
+      "router.weight"
+    ],
+    "base_language_path_frozen": true
+  },
+  "history": [
+    {
+      "step": 1,
+      "train_view_loss": 2.1002464294433594,
+      "validation": {
+        "facet_loss": 2.1195471584796906,
+        "facet_accuracy": 0.1328125,
+        "correct": 17,
+        "total": 128,
+        "selection_score": 2.1195471584796906
+      },
+      "grad_norm_preclip": 1.433319330215454
+    },
+    {
+      "step": 100,
+      "train_view_loss": 2.058380126953125,
+      "validation": {
+        "facet_loss": 2.0605435520410538,
+        "facet_accuracy": 0.109375,
+        "correct": 14,
+        "total": 128,
+        "selection_score": 2.0605435520410538
+      },
+      "grad_norm_preclip": 1.9489922523498535
+    },
+    {
+      "step": 200,
+      "train_view_loss": 2.026726245880127,
+      "validation": {
+        "facet_loss": 2.057174250483513,
+        "facet_accuracy": 0.140625,
+        "correct": 18,
+        "total": 128,
+        "selection_score": 2.057174250483513
+      },
+      "grad_norm_preclip": 1.3961492776870728
+    },
+    {
+      "step": 300,
+      "train_view_loss": 2.069378137588501,
+      "validation": {
+        "facet_loss": 2.0526348277926445,
+        "facet_accuracy": 0.078125,
+        "correct": 10,
+        "total": 128,
+        "selection_score": 2.0526348277926445
+      },
+      "grad_norm_preclip": 2.2647321224212646
+    },
+    {
+      "step": 400,
+      "train_view_loss": 1.9639332294464111,
+      "validation": {
+        "facet_loss": 2.0185881182551384,
+        "facet_accuracy": 0.140625,
+        "correct": 18,
+        "total": 128,
+        "selection_score": 2.0185881182551384
+      },
+      "grad_norm_preclip": 1.3969342708587646
+    },
+    {
+      "step": 500,
+      "train_view_loss": 1.9413048028945923,
+      "validation": {
+        "facet_loss": 1.9890569299459457,
+        "facet_accuracy": 0.1484375,
+        "correct": 19,
+        "total": 128,
+        "selection_score": 1.9890569299459457
+      },
+      "grad_norm_preclip": 2.1375834941864014
+    },
+    {
+      "step": 600,
+      "train_view_loss": 1.7726377248764038,
+      "validation": {
+        "facet_loss": 1.9702325761318207,
+        "facet_accuracy": 0.2265625,
+        "correct": 29,
+        "total": 128,
+        "selection_score": 1.9702325761318207
+      },
+      "grad_norm_preclip": 1.6090701818466187
+    },
+    {
+      "step": 700,
+      "train_view_loss": 1.7215099334716797,
+      "validation": {
+        "facet_loss": 1.9493288323283195,
+        "facet_accuracy": 0.2265625,
+        "correct": 29,
+        "total": 128,
+        "selection_score": 1.9493288323283195
+      },
+      "grad_norm_preclip": 1.9044766426086426
+    },
+    {
+      "step": 800,
+      "train_view_loss": 1.6701252460479736,
+      "validation": {
+        "facet_loss": 1.9297537580132484,
+        "facet_accuracy": 0.3125,
+        "correct": 40,
+        "total": 128,
+        "selection_score": 1.9297537580132484
+      },
+      "grad_norm_preclip": 1.5634417533874512
+    },
+    {
+      "step": 900,
+      "train_view_loss": 1.5773872137069702,
+      "validation": {
+        "facet_loss": 1.912090577185154,
+        "facet_accuracy": 0.28125,
+        "correct": 36,
+        "total": 128,
+        "selection_score": 1.912090577185154
+      },
+      "grad_norm_preclip": 2.14884090423584
+    },
+    {
+      "step": 1000,
+      "train_view_loss": 1.6220550537109375,
+      "validation": {
+        "facet_loss": 1.9206718131899834,
+        "facet_accuracy": 0.2109375,
+        "correct": 27,
+        "total": 128,
+        "selection_score": 1.9206718131899834
+      },
+      "grad_norm_preclip": 1.1891804933547974
+    },
+    {
+      "step": 1100,
+      "train_view_loss": 1.5256458520889282,
+      "validation": {
+        "facet_loss": 1.8894455879926682,
+        "facet_accuracy": 0.25,
+        "correct": 32,
+        "total": 128,
+        "selection_score": 1.8894455879926682
+      },
+      "grad_norm_preclip": 1.804972529411316
+    },
+    {
+      "step": 1200,
+      "train_view_loss": 1.666322112083435,
+      "validation": {
+        "facet_loss": 1.9226954355835915,
+        "facet_accuracy": 0.3125,
+        "correct": 40,
+        "total": 128,
+        "selection_score": 1.9226954355835915
+      },
+      "grad_norm_preclip": 0.9103902578353882
+    },
+    {
+      "step": 1300,
+      "train_view_loss": 1.7653368711471558,
+      "validation": {
+        "facet_loss": 1.8907384350895882,
+        "facet_accuracy": 0.28125,
+        "correct": 36,
+        "total": 128,
+        "selection_score": 1.8907384350895882
+      },
+      "grad_norm_preclip": 1.94208562374115
+    },
+    {
+      "step": 1400,
+      "train_view_loss": 1.499800443649292,
+      "validation": {
+        "facet_loss": 1.865020178258419,
+        "facet_accuracy": 0.3359375,
+        "correct": 43,
+        "total": 128,
+        "selection_score": 1.865020178258419
+      },
+      "grad_norm_preclip": 1.3520267009735107
+    },
+    {
+      "step": 1500,
+      "train_view_loss": 1.8762457370758057,
+      "validation": {
+        "facet_loss": 1.887465551495552,
+        "facet_accuracy": 0.2578125,
+        "correct": 33,
+        "total": 128,
+        "selection_score": 1.887465551495552
+      },
+      "grad_norm_preclip": 1.5221272706985474
+    },
+    {
+      "step": 1600,
+      "train_view_loss": 1.4779754877090454,
+      "validation": {
+        "facet_loss": 1.8728164434432983,
+        "facet_accuracy": 0.3671875,
+        "correct": 47,
+        "total": 128,
+        "selection_score": 1.8728164434432983
+      },
+      "grad_norm_preclip": 1.5053150653839111
+    },
+    {
+      "step": 1700,
+      "train_view_loss": 1.415932297706604,
+      "validation": {
+        "facet_loss": 1.8482625409960747,
+        "facet_accuracy": 0.28125,
+        "correct": 36,
+        "total": 128,
+        "selection_score": 1.8482625409960747
+      },
+      "grad_norm_preclip": 1.4605997800827026
+    },
+    {
+      "step": 1800,
+      "train_view_loss": 1.6569788455963135,
+      "validation": {
+        "facet_loss": 1.855936884880066,
+        "facet_accuracy": 0.2265625,
+        "correct": 29,
+        "total": 128,
+        "selection_score": 1.855936884880066
+      },
+      "grad_norm_preclip": 1.3859556913375854
+    }
+  ],
+  "train_language_model_evaluation": {
+    "token_loss_nats_per_byte": 2.9623860873955428,
+    "perplexity_per_byte": 19.344073382050148,
+    "bytes_scored": 18287,
+    "by_facet": {
+      "behavioral_generation": {
+        "loss_sum": 7111.630227088928,
+        "bytes": 2729,
+        "loss": 2.6059473166320735,
+        "perplexity": 13.544049730967286
+      },
+      "next_token_statistics": {
+        "loss_sum": 6493.056381225586,
+        "bytes": 2129,
+        "loss": 3.049815115653164,
+        "perplexity": 21.11144088674129
+      },
+      "hidden_representations": {
+        "loss_sum": 9826.182312011719,
+        "bytes": 2535,
+        "loss": 3.876206040241309,
+        "perplexity": 48.24084361992809
+      },
+      "attention_patterns": {
+        "loss_sum": 6210.275749206543,
+        "bytes": 2228,
+        "loss": 2.787376907184265,
+        "perplexity": 16.238369138492992
+      },
+      "ablation_response": {
+        "loss_sum": 6147.3479907512665,
+        "bytes": 2057,
+        "loss": 2.988501697010825,
+        "perplexity": 19.855910023704336
+      },
+      "scaling_response": {
+        "loss_sum": 5884.461270332336,
+        "bytes": 1995,
+        "loss": 2.949604646783126,
+        "perplexity": 19.09840162093707
+      },
+      "cross_language_behavior": {
+        "loss_sum": 6344.849213242531,
+        "bytes": 2358,
+        "loss": 2.690775747770369,
+        "perplexity": 14.743108418985956
+      },
+      "limitations_hypotheses": {
+        "loss_sum": 6155.351236343384,
+        "bytes": 2256,
+        "loss": 2.728435831712493,
+        "perplexity": 15.308922551391566
+      }
+    }
+  },
+  "validation_language_model_evaluation": {
+    "token_loss_nats_per_byte": 2.025238082990614,
+    "perplexity_per_byte": 7.57791490252509,
+    "bytes_scored": 1746,
+    "by_facet": {
+      "behavioral_generation": {
+        "loss_sum": 438.8335723876953,
+        "bytes": 217,
+        "loss": 2.0222745271322364,
+        "perplexity": 7.555490572710532
+      },
+      "next_token_statistics": {
+        "loss_sum": 517.8169860839844,
+        "bytes": 213,
+        "loss": 2.431065662366124,
+        "perplexity": 11.370993265226348
+      },
+      "hidden_representations": {
+        "loss_sum": 355.9757385253906,
+        "bytes": 219,
+        "loss": 1.6254599932666238,
+        "perplexity": 5.080755613105675
+      },
+      "attention_patterns": {
+        "loss_sum": 457.6665382385254,
+        "bytes": 233,
+        "loss": 1.964234069693242,
+        "perplexity": 7.129449836680854
+      },
+      "ablation_response": {
+        "loss_sum": 391.6856994628906,
+        "bytes": 224,
+        "loss": 1.7485968726021903,
+        "perplexity": 5.746533897413467
+      },
+      "scaling_response": {
+        "loss_sum": 405.6069030761719,
+        "bytes": 203,
+        "loss": 1.9980635619515856,
+        "perplexity": 7.374761494333743
+      },
+      "cross_language_behavior": {
+        "loss_sum": 491.14747619628906,
+        "bytes": 216,
+        "loss": 2.273830908316153,
+        "perplexity": 9.716552828691269
+      },
+      "limitations_hypotheses": {
+        "loss_sum": 477.33277893066406,
+        "bytes": 221,
+        "loss": 2.1598768277405616,
+        "perplexity": 8.670069680620133
+      }
+    }
+  },
+  "test_language_model_evaluation": {
+    "token_loss_nats_per_byte": 2.0358417609926605,
+    "perplexity_per_byte": 7.6586962046306,
+    "bytes_scored": 1735,
+    "by_facet": {
+      "behavioral_generation": {
+        "loss_sum": 485.7973937988281,
+        "bytes": 219,
+        "loss": 2.2182529397206765,
+        "perplexity": 9.191259147066528
+      },
+      "next_token_statistics": {
+        "loss_sum": 430.1753387451172,
+        "bytes": 228,
+        "loss": 1.886733941864549,
+        "perplexity": 6.597784704558401
+      },
+      "hidden_representations": {
+        "loss_sum": 558.2098388671875,
+        "bytes": 239,
+        "loss": 2.3356060203648012,
+        "perplexity": 10.335721689629606
+      },
+      "attention_patterns": {
+        "loss_sum": 489.72633361816406,
+        "bytes": 218,
+        "loss": 2.246451071642954,
+        "perplexity": 9.454124219492709
+      },
+      "ablation_response": {
+        "loss_sum": 328.5745086669922,
+        "bytes": 205,
+        "loss": 1.6028024813024009,
+        "perplexity": 4.96693267365139
+      },
+      "scaling_response": {
+        "loss_sum": 391.1255798339844,
+        "bytes": 196,
+        "loss": 1.9955386726223692,
+        "perplexity": 7.356164525255315
+      },
+      "cross_language_behavior": {
+        "loss_sum": 433.36595153808594,
+        "bytes": 207,
+        "loss": 2.0935553214400286,
+        "perplexity": 8.11371079505909
+      },
+      "limitations_hypotheses": {
+        "loss_sum": 415.21051025390625,
+        "bytes": 223,
+        "loss": 1.861930539255185,
+        "perplexity": 6.436150025713363
+      }
+    }
+  },
+  "validation_view_classification": {
+    "correct": 5,
+    "total": 16,
+    "accuracy": 0.3125,
+    "confusion": {
+      "behavioral_generation": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 1,
+        "ablation_response": 1,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 0
+      },
+      "next_token_statistics": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 1,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 1
+      },
+      "hidden_representations": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 1,
+        "attention_patterns": 1,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 0
+      },
+      "attention_patterns": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 1,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 1
+      },
+      "ablation_response": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 2,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 0
+      },
+      "scaling_response": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 1,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 1
+      },
+      "cross_language_behavior": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 1,
+        "limitations_hypotheses": 1
+      },
+      "limitations_hypotheses": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 1,
+        "scaling_response": 0,
+        "cross_language_behavior": 1,
+        "limitations_hypotheses": 0
+      }
+    }
+  },
+  "test_view_classification": {
+    "correct": 4,
+    "total": 16,
+    "accuracy": 0.25,
+    "confusion": {
+      "behavioral_generation": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 2
+      },
+      "next_token_statistics": {
+        "behavioral_generation": 1,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 1
+      },
+      "hidden_representations": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 1,
+        "attention_patterns": 0,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 1
+      },
+      "attention_patterns": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 1,
+        "ablation_response": 1,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 0
+      },
+      "ablation_response": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 1,
+        "hidden_representations": 0,
+        "attention_patterns": 1,
+        "ablation_response": 0,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 0
+      },
+      "scaling_response": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 1,
+        "scaling_response": 0,
+        "cross_language_behavior": 1,
+        "limitations_hypotheses": 0
+      },
+      "cross_language_behavior": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 1,
+        "scaling_response": 0,
+        "cross_language_behavior": 1,
+        "limitations_hypotheses": 0
+      },
+      "limitations_hypotheses": {
+        "behavioral_generation": 0,
+        "next_token_statistics": 0,
+        "hidden_representations": 0,
+        "attention_patterns": 0,
+        "ablation_response": 1,
+        "scaling_response": 0,
+        "cross_language_behavior": 0,
+        "limitations_hypotheses": 1
+      }
+    }
+  },
+  "generation_path_identity": {
+    "exact_logit_tensor_equal": true,
+    "max_absolute_logit_delta": 0.0,
+    "prompt": "A scientific report distinguishes observation from inference."
+  },
+  "model_sha256": "ac6de5e4eba4c1cf992da93593b6a53c753d81537d9772710face92a9876752d",
+  "known_scope_limits": [
+    "Only 16 held-out documents, two per view, are available; view classification accuracy has wide uncertainty.",
+    "The sidecar is an observation-view classifier over an existing independent tiny LM, not a full mechanistic reconstruction of either source LLM.",
+    "The default generation path intentionally retains v3_0 behavior to avoid observed held-out regression from joint fine-tuning. The separate joint-finetuned candidate and its regression are retained in the audit."
+  ],
+  "elapsed_seconds": 17.132867097854614
+}

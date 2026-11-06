@@ -1,0 +1,184 @@
+{
+  "schema": "aam-o94-3-work-checklist-v1",
+  "title": "O94.3 — checklist séquentielle incrémentale",
+  "created_utc": "2026-10-19T15:04:12.468472Z",
+  "updated_utc": "2026-10-19T16:41:00Z",
+  "rule": "Ne jamais activer une phase avant la preuve de fin de ses prédécesseurs. Une commande interrompue n’est pas un succès.",
+  "version": "0.94.3",
+  "reference_formalism": "formalisme_O94_3.tex",
+  "reference_laboratory": "laboratoire_O94_3.tex",
+  "reference_error_model": "checklist_erreurs_model_O94_3.json",
+  "reference_error_environment": "checklist_erreurs_no_model_O94_3.json",
+  "reference_formalism_sha256_current": "c35effae9500ab03951faa4f5bc6a375838c1494021f32428355325742281903",
+  "reference_laboratory_sha256_current": "1dcc8afdc65ff4a497ac4d3be9394d7805867b698e45434c21c8972e74b0bac5",
+  "reference_error_model_sha256_current": "4a3096a8ea1d7a67adecdca3dd2c05f2403bb9301cec4a2d98ea368b3772113e",
+  "reference_error_environment_sha256_current": "6163aa9434de873be6e3013c5968dee0157bae6033aace315afec135f1fe7c50",
+  "current_phase": "COMPLETE",
+  "global_status": "COMPLETE_EVIDENCED",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Auditer la provenance et protéger le RAG historique",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [],
+      "criteria": [
+        "Intégrité CRC des trois archives parentes vérifiée",
+        "SHA-256 moteur RAG, retrieval O92 et tests historiques comparés",
+        "Aucun fichier RAG protégé modifié"
+      ],
+      "evidence": [
+        "receipts/O94_3/P0_rag_parity.json"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Implémenter l’observation passive live et la trace créée par AAM",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "Démarrage sans JSONL préfabriqué",
+        "Collecte en direct d’événements filesystem et PID; niveau réseau via TShark",
+        "JSONL auto-produit, chaîne hash continue, rapport durable, budgets et arrêt",
+        "Erreurs de permissions/dépendance affichées sans prétendre capter ce qui est inaccessible"
+      ],
+      "evidence": [
+        "receipts/O94_3/P1_observation_live.json"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Rendre les onglets scrollables et piloter les sources/budgets",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1"
+      ],
+      "criteria": [
+        "Barre verticale et molette dans onglets denses",
+        "Sélecteur PID/interface, sortie automatique de trace, budgets visibles",
+        "Smoke test UI sous affichage virtuel"
+      ],
+      "evidence": [
+        "receipts/O94_3/P2_scrollable_ui.json"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Exposer les adaptateurs locaux et leurs politiques",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P2"
+      ],
+      "criteria": [
+        "Backends Transformers local, PyTorch adapter, Ollama, OpenAI-compatible et workspace AAM documentés et visibles",
+        "Gabarit PyTorch local copiable et contrat vérifiable",
+        "Fixtures ou endpoint de test; secrets absents des fichiers persistés"
+      ],
+      "evidence": [
+        "receipts/O94_3/P3_model_integration.json"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Apprendre des briques candidates et compiler la composition",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P3"
+      ],
+      "criteria": [
+        "Trace passive produit candidats méthode/règle; aucun code arbitraire injecté",
+        "Lookup exact de paires train non ambiguës; holdout exclu; unseen unresolved",
+        "Compilation DSL produit un artefact versionné",
+        "Catalogue affiche les briques de base et candidates apprises"
+      ],
+      "evidence": [
+        "receipts/O94_3/P4_composition_learning.json"
+      ]
+    },
+    {
+      "id": "P5",
+      "name": "Répéter les tests de non-régression RAG/SMS et préserver les modules",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P4"
+      ],
+      "criteria": [
+        "Tests semantic RAG, résolution, retrieval SMS et RAG adaptatif passent",
+        "Hashes des fichiers protégés O94_3 identiques à O94_2",
+        "Aucune erreur de régression du RAG masquée"
+      ],
+      "evidence": [
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P5_rag_hash_parity.json"
+      ]
+    },
+    {
+      "id": "P6",
+      "name": "Valider intégration, lancement et sécurité sur les lots de tests",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P5"
+      ],
+      "criteria": [
+        "compileall et suites ciblées passent",
+        "Tests UI, modèles, composition, préflight et CLI live exécutés",
+        "Tests interrompus non comptés comme succès; incidents historisés"
+      ],
+      "evidence": [
+        "receipts/O94_3/P6_matrix_reconciliation.json",
+        "receipts/O94_3/P6_compileall.json"
+      ]
+    },
+    {
+      "id": "P7",
+      "name": "Finaliser la formalisation, l’audit et la sauvegarde restaurable",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P6"
+      ],
+      "criteria": [
+        "Laboratoire/formalisme compilables",
+        "Chemins, checklists, reçus et savepoint actualisés",
+        "Registre de preuves relie chaque fonctionnalité à code/test/document"
+      ],
+      "evidence": [
+        "receipts/O94_3/P7_document_compile.json",
+        "receipts/O94_3/P7_documentation_audit.json",
+        "receipts/O94_3/P7_gate_preclose.json"
+      ]
+    },
+    {
+      "id": "P8",
+      "name": "Construire et vérifier les livrables finaux après extraction propre",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P7"
+      ],
+      "criteria": [
+        "Trois ZIP sous 220 MB ou fractionnement + script",
+        "CRC, paths, manifestes et hashes vérifiés",
+        "Extraction fraîche du modèle, préflight et tests essentiels depuis le ZIP final"
+      ],
+      "evidence": [
+        "receipts/O94_3/P8_pre_candidate_gate.json",
+        "receipts/O94_3/P8_post_incident_resolution_gate.json",
+        "receipts/O94_3/P8_candidate_verification.json",
+        "receipts/O94_3/P8_network_stop_retest.json",
+        "receipts/O94_3/P8_release_state.json"
+      ]
+    }
+  ],
+  "savepoint_directory": "sav_AAM_O94_3"
+}

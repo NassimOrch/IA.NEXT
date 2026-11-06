@@ -1,0 +1,43 @@
+\section{Contrat fonctionnel cible du système AAM intégré}
+\label{sec:objectif-integral-aam}
+Cette section réunit le but fonctionnel de long terme demandé pour AAM. Elle définit des contrats observables et ne transforme pas une ambition en preuve acquise. Les capacités exécutées, les capacités prises en charge par architecture mais non vérifiées en direct, et les capacités encore à valider sont séparées dans le laboratoire et le registre de preuves.
+
+\subsection{Normalisation des briques de base}
+On distingue trois catégories primitives, sans imposer a priori que la liste soit exhaustive :
+\begin{description}
+  \item[Compétence] opérateur versionné $c=(I,O,P,E,T)$ avec type d'entrée $I$, type de sortie $O$, préconditions $P$, effets déclarés $E$ et tests reproductibles $T$. Une compétence composée doit référencer ses enfants et les transitions de contrôle/données.
+  \item[Méthode] procédure ordonnée ou conditionnelle qui orchestre une ou plusieurs compétences : $m=(G,\pi,\kappa)$, où $G$ est le graphe d'exécution, $\pi$ la politique de sélection et $\kappa$ la politique d'arrêt/reprise.
+  \item[Règle] contrainte ou relation déclarative qui n'exécute pas seule une tâche : $r=(\varphi,\alpha,\rho)$, où $\varphi$ est la condition, $\alpha$ l'action/contrainte et $\rho$ la provenance et la politique de révision.
+\end{description}
+Les briques transversales candidates sont l'observation, la création/composition de sondes, la création et comparaison d'empreintes, la lecture d'espaces sémantiques, le raisonnement explicite, la mémoire et la provenance, l'orchestration, la résolution itérative, l'intégration de modèle et l'évaluation. Elles n'acquièrent le statut de « base » que si elles sont réutilisables dans plusieurs domaines et disposent d'un contrat/test; l'étiquette seule ne suffit pas.
+
+\subsection{Intégration de modèles et protocoles}
+Le pipeline cible est : découverte/import explicite $\to$ validation d'identité et de provenance $\to$ adaptateur de chargement/génération $\to$ politique d'entraînement déclarée $\to$ test d'intégration $\to$ routage vers chat, RAG, mémoire et compositions $\to$ évaluation indépendante. Le registre O94.4 offre plusieurs backends natifs et un adaptateur Python personnalisé dont le contrat est \texttt{load\_model(context)}, \texttt{generate(model,prompt,options)} et, facultativement, \texttt{train\_model(context,model,train\_rows,output\_dir,policy)}.
+
+Un adaptateur personnalisé permet de raccorder un runtime ou protocole non natif seulement si une implémentation locale compatible existe. Il ne constitue pas une détection universelle automatique des formats ou architectures. Son exécution requiert un consentement explicite, son SHA-256 est épinglé, et ses résultats demeurent non vérifiés jusqu'à évaluation indépendante. Les secrets réseau ne sont pas enregistrés dans le registre; le réseau est désactivé par défaut et l'accès distant nécessite une politique d'hôtes autorisés.
+
+\subsection{Observation, sondes et empreintes}
+Une session d'observation doit conserver la source, l'horodatage, les paramètres et la provenance de chaque sonde, ainsi qu'une chaîne d'intégrité. Les vues peuvent opérer sur les données brutes et sur des représentations dérivées, sans effacer la source de référence. Un espace sémantique versionné distingue tokens invariants et variants, enregistre une mesure de proximité et des poids, et expose la politique de fusion des espaces intermédiaires. Le nombre de sondes/espaces peut être adapté à la taille, à la diversité et à la stabilité mesurée; les budgets ne doivent pas devenir des plafonds silencieux.
+
+L'observation d'une boîte noire sépare strictement : (i) les entrées effectivement observées, (ii) la capsule ou compétence extraite, (iii) les entrées d'entraînement éventuelles, (iv) un lot de généralisation tenu à l'écart. Le rejeu d'une entrée déjà vue n'est pas une preuve de généralisation. Une entrée inconnue insuffisamment couverte doit rester explicitement non résolue plutôt que de recevoir une réponse inventée. Une reproduction ne peut pas prétendre être indépendante d'un outil sous-jacent si le code reproduit se contente de rappeler cet outil.
+
+\subsection{RAG, mémoire et résolution continue}
+Le pipeline de traitement vise : ingestion sans altération des originaux $\to$ observations multi-sondes $\to$ espaces intermédiaires $\to$ espace final versionné $\to$ recherche pondérée par pertinence/provenance $\to$ construction du contexte de la demande $\to$ sélection d'une compétence/méthode $\to$ réponse ou exécution traçable. Les variantes de recherche lexicale classique et de recherche sémantique restent distinguées comme deux compétences différentes.
+
+La mémoire est reliée à l'arbre de résolution par des nœuds typés (objectif, hypothèse, observation, action, résultat, réfutation, décision) et des relations causales directionnelles, chacune avec provenance et poids/état. Une boucle de résolution répétée doit exposer son critère d'arrêt, les essais, les signaux de récompense/punition et la raison de chaque changement d'orchestration. « Continuer jusqu'à résoudre » signifie poursuivre selon un budget et une politique d'arrêt explicites et configurables, avec arrêt opérateur et traces persistantes; cela ne signifie pas une exécution sans contrôle ni une réussite postulée.
+
+\subsection{Réseau, multimodalité et usage d'entreprise}
+Le contrat d'exploitation locale privilégie les données et les poids locaux, les accès réseau désactivés par défaut, l'autorisation visible pour les connecteurs distants, les secrets hors registre, l'absence d'exécution automatique des instructions provenant de sources distantes, et la traçabilité des écritures. Les parseurs, OCR, vision, audio, vidéo, capteurs et systèmes de base de données sont des adaptateurs de modalité distincts. La présence d'une interface d'import d'un type de fichier ne prouve pas que son décodage ou la reproduction d'une compétence multimodale soit validé sur des données réelles.
+
+\subsection{Contrats d'acceptation des cas d'usage}
+Chaque compétence de sortie doit déclarer le domaine, les entrées, les sorties, les préconditions, les dépendances, les effets de bord, la politique de sécurité, la métrique, le jeu d'essai et le jeu de généralisation séparé. Les cas suivants sont retenus comme bancs de qualification :
+\begin{enumerate}
+ \item \textbf{Documents PDF :} observer un modèle de page de référence, extraire sa structure/style, produire plusieurs documents à partir de textes différents, puis contrôler structure, rendu, pagination et fidélité du texte indépendamment.
+ \item \textbf{Migration de base de données :} observer un schéma et un flux représentatifs sans exposition non autorisée, produire une migration vers un dialecte cible, tester les contraintes, données, transactions et résultats sur une instance isolée, puis comparer avec des cas de test non observés.
+ \item \textbf{Modernisation de logiciel interne :} observer des entrées/sorties et traces autorisées, spécifier un comportement cible, construire des tests différentiels, puis modifier et relancer le programme sans effacer l'historique de provenance.
+ \item \textbf{Reproduction d'une capacité OCR :} comparer un corpus de documents et d'images non utilisés pour construire l'empreinte; mesurer si la compétence apprise fonctionne sans rappeler l'OCR d'origine. Si elle l'appelle encore, la dépendance doit être déclarée.
+ \item \textbf{Recherche autonome :} consigner hypothèses, sources, expériences, critères de réfutation, progrès, budgets et interruptions; une longue exécution seule n'est pas une preuve de recherche scientifique réussie.
+\end{enumerate}
+
+\subsection{Invariants contre les fausses preuves}
+Aucune trace ne doit présenter un mock, un gabarit, un checkpoint non chargé, un replay d'entrée déjà vue, un fichier importé sans décodage, un résultat calculé par un outil externe ou une réponse synthétique comme preuve d'une compétence autonome de généralisation. Les états admis sont au minimum \texttt{PASS\_BOUNDED}, \texttt{PARTIAL}, \texttt{UNVERIFIED}, \texttt{UNRESOLVED} ou \texttt{FAIL}; le périmètre et la configuration doivent accompagner le résultat. Les échecs de tests et les anomalies de protocole sont conservés comme événements historiques même après correction.

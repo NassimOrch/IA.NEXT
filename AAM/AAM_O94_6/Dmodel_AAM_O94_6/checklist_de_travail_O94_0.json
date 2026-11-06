@@ -1,0 +1,2233 @@
+{
+  "schema": "aam-o94-0-phase-checklist-v1",
+  "title": "Checklist de travail O94_0 — correctifs R1/R2/R3",
+  "created_utc": "2026-10-18T13:14:09.524127+00:00",
+  "rule": "Aucune phase suivante ne commence avant le respect de tous les critères de sortie de la phase courante. Un statut d’exécution partiel ne vaut pas validation.",
+  "current_phase": "P7",
+  "global_status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Inventaire et intégrité de la base O94",
+      "status": "COMPLETE_EVIDENCED",
+      "requirements": [
+        "Consulter chemins_O94.json et checklists O94",
+        "Vérifier les archives et les hashes de référence",
+        "Lire théorie des empreintes et audit O94",
+        "Figer une copie de travail O94_0"
+      ],
+      "exit_criteria": [
+        "Entrées identifiées et hashes consignés",
+        "CRC des entrées contrôlés",
+        "Références théoriques et défauts R1-R3 tracés"
+      ],
+      "completed_utc": "2026-10-18T13:17:15.581096+00:00",
+      "evidence": [
+        "logs/O94_0/P0_input_archive_integrity.json",
+        "source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex",
+        "chemins_O94_0.json",
+        "checklist_erreurs_no_model.json",
+        "checklist_erreurs_model.json"
+      ],
+      "result_summary": "CRC PASS pour 6 archives (archives O94, bases O93 et sources_AAM_17 imbriquée) ; les hashes de toutes les entrées consignés. Les erreurs ouvertes héritées sont conservées, non effacées."
+    },
+    {
+      "id": "P1",
+      "name": "Formalisation des critères R1-R3 à partir de la théorie des empreintes",
+      "status": "COMPLETE_EVIDENCED",
+      "requirements": [
+        "R1 réponse unique, utile, sources dans les détails",
+        "R2 le chemin chat standard est question→RAG→générateur, avec réponses de secours lisibles",
+        "R2 sélection contrôlée d’un backend AAM compatible",
+        "R3 arbre hiérarchique master→micro-RAG→feuilles et raffinement contextuel"
+      ],
+      "exit_criteria": [
+        "Contrats et invariants documentés",
+        "Critères testables sans injecter la réponse attendue au runtime"
+      ],
+      "completed_utc": "2026-10-18T13:17:57.472847+00:00",
+      "evidence": [
+        "docs/O94_0/P1_formalisation_initiale.md",
+        "docs/O94_0/P1_test_contracts.json",
+        "source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex"
+      ],
+      "result_summary": "Les contrats R1-R3 et 10 cas testables sont formalisés. L’arbre est interprété comme un raffinement monotone; la hiérarchie n’affirme aucune sémantique universelle."
+    },
+    {
+      "id": "P2",
+      "name": "Segmentation atomique des sources et construction de l’arbre micro-RAG",
+      "status": "COMPLETE_EVIDENCED",
+      "requirements": [
+        "JSONL et flux de lignes structurés ne sont jamais coupés au milieu d’un enregistrement",
+        "Construire master/micro-RAG depuis empreintes de contenu observé",
+        "Routage hiérarchique avant accès aux enregistrements feuilles",
+        "Provenance et offsets conservés"
+      ],
+      "exit_criteria": [
+        "Tests source intacte et records exactement une fois",
+        "Tests de routage hiérarchique mesurent les éléments consultés",
+        "Aucun contenu source perdu dans les formes prises en charge"
+      ],
+      "completed_utc": "2026-10-18T14:51:00.557495+00:00",
+      "evidence": [
+        "logs/O94_0/P2_P3_P4_targeted_tests_003.json",
+        "aam_o93/resolution_tree.py",
+        "aam_o93/runtime.py",
+        "aam_o93/semantic_rag.py",
+        "tests/test_o940_rag_resolution.py",
+        "logs/O94_0/P2_sms_tsv_retest_004.json",
+        "logs/O94_0/P2_sms_tsv_preflight_004.json",
+        "tests/test_o940_real_sms_corpus_sample.py",
+        "aam_o93/observer.py"
+      ],
+      "result_summary": "Revalidation SMS TSV réelle réussie : 16 tests et 5 sous-tests. L’échantillon officiel de 300 lignes donne des chunks et un espace sémantique prêt; la question sur la finale de la FA Cup retrouve le corps du SMS cible seul. Le SHA-256 du membre original et celui de l’échantillon sont revérifiés.",
+      "history": [
+        {
+          "status": "COMPLETE_EVIDENCED",
+          "recorded_utc": "2026-10-18T14:46:18.039581+00:00",
+          "reason": "Reouverture apres preuve de corpus reel: l’observateur strict CSV refusait certains guillemets du flux TSV SMS et l’ingestion resultant n’avait produit aucun chunk. Correctif TSV preserve physical lines, a revalider sous gate P2."
+        },
+        {
+          "status": "IN_PROGRESS_REOPENED",
+          "recorded_utc": "2026-10-18T14:48:19.729576+00:00",
+          "reason": "Normalisation du statut réouvert pour permettre au runner phase-gated de lancer les tests P2; le motif TSV et la réouverture historique sont conservés."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:50:36.533037+00:00",
+          "reason": "Réouverture P2 close après correction du parse TSV tolérant aux guillemets du corps et ingestion vérifiée d’un échantillon réel de 300/5574 messages; chaque enregistrement physique est préservé exactement une fois, RAG construit, hash inchangé."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED",
+          "recorded_utc": "2026-10-18T14:51:00.557495+00:00",
+          "reason": "P2 fermé après le retest réel SMS TSV: l’archive officielle est lue sans altération; 300 lignes échantillonnées sont ingérées, segmentées sans coupure et la cible FA Cup est retrouvée/extraitée. Référence logs/O94_0/P2_sms_tsv_retest_004.json."
+        }
+      ],
+      "reopened_utc": "2026-10-18T14:46:18.039581+00:00",
+      "reopen_reason": "Le vrai SMS Spam Collection a montré que le parseur strict CSV pouvait rejeter un flux TSV texte avec guillemets non échappés; l’ingestion produisait 0 chunk. Le parsing TSV vient d’être rendu tolérant et doit être vérifié avec tests et corpus réels avant de re-clore P2.",
+      "execution_receipts": [
+        {
+          "path": "logs/O94_0/P2_tsv_quote_fix_001_test_o931_record_preserving_rag.json",
+          "sha256": "86101f11cd9f4e566ba6d3bbcf2000a7326f269e342350635be3d8dd95a98c06",
+          "exit_code": 0,
+          "result": "3 passed in 0.80s",
+          "timestamp_utc": "2026-10-18T14:47:39.933828+00:00"
+        },
+        {
+          "path": "logs/O94_0/P2_real_sms_300_ingest_002_test_o931_record_preserving_rag.json",
+          "sha256": "9f0d47331fc9cba1266ea9429e466cab9a26ce709e1c6b7a0a1b4b7427b1dc37",
+          "exit_code": 1,
+          "result": "FAILED tests/test_o931_record_preserving_rag.py::test_real_sms_collection_300_rows_survives_tsv_ingestion_exactly_once - KeyError: 'structure_status'",
+          "timestamp_utc": "2026-10-18T14:48:09.964462+00:00"
+        },
+        {
+          "path": "logs/O94_0/P2_sms_tsv_retest_002.json",
+          "sha256": "525d538be540f540424e48ebe0770ff1ef15bfe0e5d2662fd81fbaf8cefcf05f",
+          "exit_code": 1,
+          "result": "1 failed, 3 passed in 14.27s",
+          "timestamp_utc": "2026-10-18T14:48:38.922756+00:00"
+        },
+        {
+          "path": "logs/O94_0/P2_real_sms_300_ingest_003_test_o931_record_preserving_rag.json",
+          "sha256": "b2b330aff85cf7c9df60bce9df48240ffb12e76d07cb7816db0d4df1c5ac2a97",
+          "exit_code": 0,
+          "result": "4 passed in 19.52s",
+          "timestamp_utc": "2026-10-18T14:48:46.067788+00:00"
+        },
+        {
+          "path": "logs/O94_0/P2_sms_tsv_retest_003.json",
+          "sha256": "18f3713d02b913a19dbd5bc906b8a85a1b4994e83b64eb00a739bdfaed9e5c44",
+          "exit_code": 1,
+          "result": "1 failed, 14 passed, 4 subtests passed in 20.24s",
+          "timestamp_utc": "2026-10-18T14:49:20.852362+00:00"
+        },
+        {
+          "path": "logs/O94_0/P2_sms_tsv_retest_004.json",
+          "sha256": "85415559fdfccd31c16db9e71b819ccd60f1b028f56e8b3b9eb43acccaacf289",
+          "exit_code": 0,
+          "result": "16 passed, 5 subtests passed in 28.86s",
+          "timestamp_utc": "2026-10-18T14:50:06.906227+00:00"
+        }
+      ],
+      "closure_receipts": [
+        {
+          "path": "logs/O94_0/P2_P3_P4_targeted_tests_003.json",
+          "sha256": "0df7f4e17700a319b7ea3acb853b7ecd4aec7cc021c67622afed141ddbf70645",
+          "exit_code": 0,
+          "result": "34 passed in 4.41s"
+        },
+        {
+          "path": "logs/O94_0/P2_real_sms_300_ingest_003_test_o931_record_preserving_rag.json",
+          "sha256": "b2b330aff85cf7c9df60bce9df48240ffb12e76d07cb7816db0d4df1c5ac2a97",
+          "exit_code": 0,
+          "result": "4 passed in 19.52s"
+        }
+      ],
+      "scope_limits": [
+        "Échantillon d’ingestion de 300 lignes sur les 5574 lignes du jeu; le corpus complet n’est pas déclaré certifié.",
+        "La préservation source et la construction de l’espace sémantique sont évaluées séparément de la pertinence factuelle de la réponse."
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Réponse unique et génération ancrée par le RAG ou un AAM délégué",
+      "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "requirements": [
+        "Extraire le champ réponse d’un enregistrement pertinent de manière générique",
+        "Refuser le déversement de plusieurs réponses dans le chat principal",
+        "Modèle de langage reçoit les passages RAG sélectionnés en contexte",
+        "Backend AAM compatible isolé, avec anti-récursion et traçabilité"
+      ],
+      "exit_criteria": [
+        "Tests positifs et négatifs sur records distracteurs",
+        "Mode local et backend AAM couvrent erreurs et absence de modèle",
+        "Aucune déclaration de vérité sur la base du seul ancrage lexical",
+        "With empty corpus and retrieval policy enabled, execute a real RAG search attempt, record NO_INDEX/NO_MATCH separately from generation, and test generator invocation strictly after retrieval.",
+        "Le générateur reçoit un contexte source borné/dédupliqué, sans mélanger les enregistrements JSONL distincts; le rendu de chat reste une réponse unique et propre."
+      ],
+      "started_utc": "2026-10-18T13:38:25.211600+00:00",
+      "evidence": [
+        "logs/O94_0/P3_real_jsonl_chat_retest_001.json",
+        "logs/O94_0/P3_peer_fallback_regression_002.json",
+        "logs/O94_0/P3_actual_peer_postfix_smoke_001.json",
+        "logs/O94_0/P3_peer_delegation_end_to_end_005.json",
+        "logs/O94_0/P3_peer_delegation_retest_003.json",
+        "tests/test_o940_rag_resolution.py",
+        "aam_o93/runtime.py",
+        "scripts/o940_run_tests.py",
+        "logs/O94_0/P3_long_structured_answer_retest_003.json",
+        "logs/O94_0/P3_real_sms_rag_chat_003_test_o940_real_sms_retrieval.json",
+        "logs/O94_0/P3_trained_generator_context_retest_001.json",
+        "logs/O94_0/corpus_eval/P3_bounded_corpus_eval_002.json"
+      ],
+      "result_summary": "P3 révalidée après réouverture : les contrats RAG vide→générateur, chat/R1/R2, atomicité des enregistrements, espace sémantique, adaptateur local, RAG adaptatif et route intégrée passent. Le module de réponses structurées longues passe 20/20; le générateur local entraîné passe 9/9 et exclut le marqueur hors sujet; le test de récupération SMS réel passe 1/1; l’évaluation post-hoc du corpus scénario a 10/10 correspondances exactes, 10/10 réponses non vides et 10/10 traces. Trois routes sont testées : génération locale, délégation contrôlée à une instance AAM et réponse RAG directe explicite. L’évaluation ne certifie ni vérité universelle ni serveur LLM externe vivant.",
+      "completed_utc": "2026-10-18T14:56:55.999257+00:00",
+      "reopened_utc": "2026-10-18T14:44:05.882782+00:00",
+      "reopen_reason": "Revalidation après échec du contrat de contexte: le classement de phrases avait tronqué le contexte remis au générateur et supprimé une preuve liée du même passage.",
+      "history": [
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:19:45.506243+00:00",
+          "reason": "P5 code review found chat requests with no indexed source skip retrieval entirely; R2 requires an actual RAG attempt before generation."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:28:20.223842+00:00",
+          "reason": "P3 reopened gap revalidated: an enabled RAG policy invokes the semantic reader even with no index, records NO_INDEX/NO_MATCH separately, and invokes the generator afterward. Cross-language selected evidence is relevant and distractor text is excluded; generation, citations and answer truth remain distinct."
+        },
+        {
+          "status": "PAUSED_DEPENDENCY_REOPENED",
+          "recorded_utc": "2026-10-18T14:46:18.039581+00:00",
+          "reason": "P2 rouvert pour corriger et retester l’ingestion TSV sur un corpus source; la fermeture dépend de P2."
+        },
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:50:36.533037+00:00",
+          "reason": "P2 fermé après retest source; P3 doit maintenant confirmer la récupération de réponse depuis le SMS corpus réel et les contrats R1/R2."
+        },
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:51:00.557495+00:00",
+          "reason": "P2 TSV closure allows P3 to resume; new long-structured-answer defect from the bounded corpus evaluation requires a focused R1 retest before P3 closure."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:56:55.999257+00:00",
+          "reason": "P3 reopened gap revalidated: an enabled RAG policy invokes the semantic reader even with no index, records NO_INDEX/NO_MATCH separately, and invokes the generator afterward. Cross-language selected evidence is relevant and distractor text is excluded; generation, citations and answer truth remain distinct."
+        }
+      ],
+      "runner_status_normalization": {
+        "prior_status": "IN_PROGRESS_REOPENED",
+        "note": "The runner accepts IN_PROGRESS/ACTIVE; reopen reason/history remains preserved."
+      },
+      "execution_receipts": [
+        {
+          "path": "logs/O94_0/P3_empty_index_rag_first_retest_001.json",
+          "sha256": "352a3609a6d32a14fdca0f2cbd1b56ca9149b1bbe682f1bda4b770e2c072e1cf",
+          "exit_code": 1,
+          "result": "1 failed, 18 passed in 2.23s",
+          "timestamp_utc": "2026-10-18T14:20:36.659307+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_empty_index_reopen_probe.json",
+          "sha256": "a06a69d5741a1b81ccfb8ae3bc7b833da63f1469938a5b89dfd4207e03699ae9",
+          "exit_code": 0,
+          "result": "18 passed in 1.80s",
+          "timestamp_utc": "2026-10-18T14:22:57.300917+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_cross_language_rag_retest.json",
+          "sha256": "64cce2fe92cfc1156f1bb08312737f6471c0af6c7bd823f691305666b934c275",
+          "exit_code": 1,
+          "result": "1 failed, 6 passed in 2.39s",
+          "timestamp_utc": "2026-10-18T14:23:12.718772+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_cross_language_context_contract_002.json",
+          "sha256": "b6736e56fe35737fdb7d81b67046f8cc403f1a5f9302ef3119805dc00e59f00c",
+          "exit_code": 1,
+          "result": "1 failed, 6 passed in 2.33s",
+          "timestamp_utc": "2026-10-18T14:24:31.450948+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_cross_language_context_contract_003.json",
+          "sha256": "c26db3879ea9d39275ffb86248582fca200e75d6376b49726fe2b69e1220b7b1",
+          "exit_code": 1,
+          "result": "1 failed, 7 passed in 2.51s",
+          "timestamp_utc": "2026-10-18T14:24:50.611256+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_cross_language_rag_pipeline_004.json",
+          "sha256": "a78e7450f2fff2100d5efc99054937f26d3d5111b6b96d451318ed85863caf0c",
+          "exit_code": 0,
+          "result": "9 passed in 2.45s",
+          "timestamp_utc": "2026-10-18T14:25:18.851092+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_empty_index_and_resolution.json",
+          "sha256": "51b8c9963196b17d979251bfbf6e0649cd766a69ba7f0ab916e602393a8f5206",
+          "exit_code": 0,
+          "result": "18 passed in 1.81s",
+          "timestamp_utc": "2026-10-18T14:25:44.084292+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_record_preservation.json",
+          "sha256": "9fb4fdc9f489db8ad7f7542c5c71bd2d96d160f679e72af8adee94b18025abba",
+          "exit_code": 0,
+          "result": "2 passed in 0.52s",
+          "timestamp_utc": "2026-10-18T14:25:47.157908+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_semantic_rag_core.json",
+          "sha256": "7f588beb0ee47b2a44876c76367572bcedd1cf8febbc3b6967b65b4e5d2b1971",
+          "exit_code": 0,
+          "result": "12 passed in 1.73s",
+          "timestamp_utc": "2026-10-18T14:25:51.470597+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_local_llm_adapter.json",
+          "sha256": "978d9d0661c3741c8adaa7d84345e9e25cc947ae84661f103f26cb4777e0ef57",
+          "exit_code": 0,
+          "result": "2 passed in 0.22s",
+          "timestamp_utc": "2026-10-18T14:25:54.363074+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_rag_adaptive.json",
+          "sha256": "c7c157e6bcf65c8c74abb8b0dd789f771e315885518a8a5dc3c9c303a6ac2f3a",
+          "exit_code": 0,
+          "result": "2 passed in 0.53s",
+          "timestamp_utc": "2026-10-18T14:25:57.352816+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_integrated_p3_route.json",
+          "sha256": "ed573fabb0a809bc2a4a9b82f3aa127a1524b37e1cf861f36644a618332e002f",
+          "exit_code": 0,
+          "result": "6 passed, 5 subtests passed in 1.83s",
+          "timestamp_utc": "2026-10-18T14:26:01.738265+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_rag_empty_index.json",
+          "sha256": "62db9dace83ce3d13c3134379fe0b9ddaa60ac2260da0ae891d5002c37fd132b",
+          "exit_code": 0,
+          "result": "18 passed in 1.79s",
+          "timestamp_utc": "2026-10-18T14:26:36.666423+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_chat_answer_contract.json",
+          "sha256": "d0f619f73b5b9911af2b38ed4ceed8dc2442bc20637861c9d9e09ec6eb7280e0",
+          "exit_code": 0,
+          "result": "9 passed in 2.37s",
+          "timestamp_utc": "2026-10-18T14:26:41.613382+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_record_atomicity.json",
+          "sha256": "fd6f3288a68c1a5ecbf642c4624bf74486f77bb5116b196bd490ef3f7d65d4ea",
+          "exit_code": 0,
+          "result": "2 passed in 0.55s",
+          "timestamp_utc": "2026-10-18T14:26:44.795354+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_semantic_space.json",
+          "sha256": "cde9c4b0c6b5a04eda13bb815e17b1e098b781d088a8cc095408d508a1e1a31c",
+          "exit_code": 0,
+          "result": "12 passed in 1.65s",
+          "timestamp_utc": "2026-10-18T14:26:49.102277+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_local_llm_adapter.json",
+          "sha256": "04450e3bfda600de529f6df391a55dd9128d6493687366feb486d0a210f5e078",
+          "exit_code": 0,
+          "result": "2 passed in 0.22s",
+          "timestamp_utc": "2026-10-18T14:26:51.892261+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_rag_adaptive.json",
+          "sha256": "f9ab7d36833b6447abc14597ce9a9dbcd83a940f9392141bc3c1a60631f9fb5b",
+          "exit_code": 0,
+          "result": "2 passed in 0.47s",
+          "timestamp_utc": "2026-10-18T14:26:54.869714+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_integrated_route.json",
+          "sha256": "894a2de1f767808c31d9b636132ef2a9c3f1bec94abbaff61d8f822c9b04fac2",
+          "exit_code": 0,
+          "result": "6 passed, 5 subtests passed in 1.73s",
+          "timestamp_utc": "2026-10-18T14:26:59.177781+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_context_expansion_and_empty_rag_contract_002.json",
+          "sha256": "9db89b3f4c5b6b8a173bb1aff23fd303d686baf79d000417d3cea4b7d5baca8c",
+          "exit_code": 1,
+          "result": "1 failed, 18 passed in 2.08s",
+          "timestamp_utc": "2026-10-18T14:44:11.053723+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_context_expansion_filtered_passages_003.json",
+          "sha256": "5f725ea0c217255e670202e8506003903a1dd38c149f1bd15923eb11b1d4b7a5",
+          "exit_code": 0,
+          "result": "33 passed, 5 subtests passed in 5.71s",
+          "timestamp_utc": "2026-10-18T14:45:37.959441+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_long_structured_answer_retest_001.json",
+          "sha256": "9f0c5575b558abca2e88860bbb6d5234d0ea47fcc74712383c65d084b7f21534",
+          "exit_code": 1,
+          "result": "1 failed, 7 passed in 0.61s",
+          "timestamp_utc": "2026-10-18T14:51:05.558669+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_real_sms_rag_chat_001_test_o940_real_sms_retrieval.json",
+          "sha256": "15f3764c9cda923cee1ddcb52eb0ac8a81866325f6f808007e717fdb52f7159b",
+          "exit_code": 2,
+          "result": "____________ ERROR collecting tests/test_o940_real_sms_retrieval.py ____________",
+          "timestamp_utc": "2026-10-18T14:51:25.638305+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_real_sms_rag_chat_002_test_o940_real_sms_retrieval.json",
+          "sha256": "61faeeb49981b07b7a61c81cd6a8fa33239aed112130173940f0a9a83a19b197",
+          "exit_code": 1,
+          "result": "FAILED tests/test_o940_real_sms_retrieval.py::test_real_sms_corpus_rag_chat_returns_one_matching_message_only - AssertionError: assert 'compact_local_lm' == 'extractive_fallback'",
+          "timestamp_utc": "2026-10-18T14:51:35.492528+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_long_structured_answer_retest_002.json",
+          "sha256": "62b105037c21aa5682e58d498792ded5d22a1a55e29e6b32be1c1068a3952add",
+          "exit_code": 1,
+          "result": "1 failed, 7 passed in 0.65s",
+          "timestamp_utc": "2026-10-18T14:52:31.188624+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_real_sms_rag_chat_003_test_o940_real_sms_retrieval.json",
+          "sha256": "b6c25d3d8fbc019977284c47d78225cc1bd58baeb03db9a0afea61f36148e01b",
+          "exit_code": 0,
+          "result": "1 passed in 14.88s",
+          "timestamp_utc": "2026-10-18T14:52:14.703803+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_post_tsv_rag_resolution_001_test_o940_rag_resolution.json",
+          "sha256": "01a7a1be0319cccf38cbb0bb504f657076dc00e675c154c9bd57a536cffe7b48",
+          "exit_code": 1,
+          "result": "FAILED tests/test_o940_rag_resolution.py::test_aam_backend_delegation_uses_selected_workspace_without_silent_llm_substitution - UnboundLocalError: cannot access local variable 'AAMRuntime' where it is not associated with a value",
+          "timestamp_utc": "2026-10-18T14:52:45.479927+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_long_structured_answer_retest_003.json",
+          "sha256": "37f21bfabc947a5d77ab1ed8d5748d79bdc61289ee438cfa7e314aa918b21d18",
+          "exit_code": 0,
+          "result": "20 passed in 1.76s",
+          "timestamp_utc": "2026-10-18T14:53:10.428378+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_post_tsv_rag_resolution_002_test_o940_rag_resolution.json",
+          "sha256": "216fb4d845adcce3e1338fbf679868e9b5bd6dfdad96db2c6d8ec905d068a7c4",
+          "exit_code": 0,
+          "result": "20 passed in 1.71s",
+          "timestamp_utc": "2026-10-18T14:55:00.873141+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_post_tsv_chat_pipeline_001_test_o931_chat_pipeline.json",
+          "sha256": "fb638ceddb83803099bca8d2436dc2a1252d2ad73360e8575b40ba0ca8ecc186",
+          "exit_code": 0,
+          "result": "9 passed in 2.51s",
+          "timestamp_utc": "2026-10-18T14:55:09.765328+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_real_sms_retrieval_retest_001_test_o940_real_sms_retrieval.json",
+          "sha256": "97f22296570371244721fbe52cfac06da085ed5c50c013ba1a13f451d0c4357c",
+          "exit_code": 0,
+          "result": "1 passed in 13.86s",
+          "timestamp_utc": "2026-10-18T14:55:15.028167+00:00"
+        },
+        {
+          "path": "logs/O94_0/P3_trained_generator_context_retest_001.json",
+          "sha256": "5d57f6920b91ce566f06dd003657e7fc5ae0354f64d56cc9225a28e82d1e244b",
+          "exit_code": 0,
+          "result": "9 passed in 2.46s",
+          "timestamp_utc": "2026-10-18T14:56:16.145245+00:00"
+        }
+      ],
+      "closure_receipts": [
+        {
+          "path": "logs/O94_0/P3_gate_rag_empty_index.json",
+          "sha256": "62db9dace83ce3d13c3134379fe0b9ddaa60ac2260da0ae891d5002c37fd132b",
+          "exit_code": 0,
+          "result": "18 passed in 1.79s"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_chat_answer_contract.json",
+          "sha256": "d0f619f73b5b9911af2b38ed4ceed8dc2442bc20637861c9d9e09ec6eb7280e0",
+          "exit_code": 0,
+          "result": "9 passed in 2.37s"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_record_atomicity.json",
+          "sha256": "fd6f3288a68c1a5ecbf642c4624bf74486f77bb5116b196bd490ef3f7d65d4ea",
+          "exit_code": 0,
+          "result": "2 passed in 0.55s"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_semantic_space.json",
+          "sha256": "cde9c4b0c6b5a04eda13bb815e17b1e098b781d088a8cc095408d508a1e1a31c",
+          "exit_code": 0,
+          "result": "12 passed in 1.65s"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_local_llm_adapter.json",
+          "sha256": "04450e3bfda600de529f6df391a55dd9128d6493687366feb486d0a210f5e078",
+          "exit_code": 0,
+          "result": "2 passed in 0.22s"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_rag_adaptive.json",
+          "sha256": "f9ab7d36833b6447abc14597ce9a9dbcd83a940f9392141bc3c1a60631f9fb5b",
+          "exit_code": 0,
+          "result": "2 passed in 0.47s"
+        },
+        {
+          "path": "logs/O94_0/P3_gate_integrated_route.json",
+          "sha256": "894a2de1f767808c31d9b636132ef2a9c3f1bec94abbaff61d8f822c9b04fac2",
+          "exit_code": 0,
+          "result": "6 passed, 5 subtests passed in 1.73s"
+        },
+        {
+          "path": "logs/O94_0/P3_cross_language_rag_pipeline_004.json",
+          "sha256": "a78e7450f2fff2100d5efc99054937f26d3d5111b6b96d451318ed85863caf0c",
+          "exit_code": 0,
+          "result": "9 passed in 2.45s"
+        },
+        {
+          "path": "logs/O94_0/P3_long_structured_answer_retest_003.json",
+          "sha256": "37f21bfabc947a5d77ab1ed8d5748d79bdc61289ee438cfa7e314aa918b21d18",
+          "exit_code": 0,
+          "result": "20 passed in 1.76s"
+        },
+        {
+          "path": "logs/O94_0/P3_real_sms_rag_chat_003_test_o940_real_sms_retrieval.json",
+          "sha256": "b6c25d3d8fbc019977284c47d78225cc1bd58baeb03db9a0afea61f36148e01b",
+          "exit_code": 0,
+          "result": "1 passed in 14.88s"
+        },
+        {
+          "path": "logs/O94_0/P3_trained_generator_context_retest_001.json",
+          "sha256": "5d57f6920b91ce566f06dd003657e7fc5ae0354f64d56cc9225a28e82d1e244b",
+          "exit_code": 0,
+          "result": "9 passed in 2.46s"
+        },
+        {
+          "path": "logs/O94_0/corpus_eval/P3_bounded_corpus_eval_002.json",
+          "sha256": "031dbd66b073914f7e4b4993fc862106ec8347b3c991ab96b7998ff04c9f015a",
+          "exit_code": 0,
+          "result": "10/10 exact post-hoc matches; 10/10 nonempty answers; 10/10 evidence traces; real source/sample hashes verified"
+        }
+      ],
+      "scope_limits": [
+        "Pas de serveur LLM externe vivant vérifié dans cette phase.",
+        "Une preuve de provenance ne constitue pas à elle seule une validation de vérité.",
+        "Le test de corpus scénario est borné à 32 enregistrements et 10 requêtes; le test SMS de récupération utilise 300/5574 lignes. Le corpus complet n’a pas été évalué en récupération."
+      ],
+      "empty_index_gap_resolution": {
+        "status": "RESOLVED_BY_RETEST",
+        "receipt": "logs/O94_0/P3_gate_rag_empty_index.json",
+        "test": "tests/test_o940_rag_resolution.py::test_chat_attempts_rag_before_generation_when_index_is_empty",
+        "expected_order": [
+          "rag",
+          "generator"
+        ],
+        "status_contract": [
+          "NO_INDEX",
+          "NO_MATCH",
+          "EMPTY",
+          "NOT_FOUND"
+        ]
+      },
+      "closed_utc": "2026-10-18T14:46:10.743201+00:00",
+      "closure_evidence": [
+        "logs/O94_0/P3_context_expansion_filtered_passages_003.json",
+        "logs/O94_0/P3_empty_index_rag_first_retest_001.json",
+        "logs/O94_0/P3_gate_integrated_route.json"
+      ],
+      "closure_summary": "R1/R2 retest passed: 33 tests and 5 subtests. Empty-index question path attempts RAG before generator; the generator receives query-filtered, deduplicated bounded context; JSONL records remain atomic; user-facing formatter displays answer only. Failures from earlier attempts remain archived with their test-bench/model issue classifications.",
+      "resume_reason": "P2 validated TSV line-preservation; revalidate generation/retrieval order and single-answer output after observer parser change.",
+      "issues_to_revalidate": [
+        {
+          "issue_id": "O940-P3-STRUCTURED-LONG-RESPONSE-TRUNCATION-001",
+          "reason": "Un enregistrement JSON de réponse longue dépasse le budget de contexte; la troncature faisait échouer le parsing et pouvait renvoyer un fragment du prompt. Réponse complète conservée séparément du contexte borné.",
+          "required_receipt": "logs/O94_0/P3_long_structured_answer_retest_001.json"
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Mémoire hiérarchique, raffinement contextuel et interface détails",
+      "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "requirements": [
+        "Lecture mémoire progressive et limitée",
+        "Plus de contexte peut approfondir le niveau de résolution",
+        "Chat visible = texte réponse seulement",
+        "Bouton Détails donne sources, preuves, score, modèle, statut et journaux",
+        "La mémoire événementielle fournit une résolution progressive indexée master→micro→événements, avec charges utiles lues seulement après sélection",
+        "La profondeur de mémoire augmente le contexte et le budget de lecture de façon mesurable sans modifier le journal de preuve"
+      ],
+      "exit_criteria": [
+        "Tests de profondeur et de budget de lecture",
+        "Tests UI formatter et panneau Détails",
+        "Pas de fuite des données techniques dans la réponse visible"
+      ],
+      "evidence": [
+        "docs/O94_0/P4_memory_resolution.md",
+        "aam_o93/memory_resolution.py",
+        "aam_o93/memory.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py",
+        "tests/test_o940_memory_resolution.py",
+        "tests/test_o940_ui_resolution_details.py",
+        "logs/O94_0/P4_memory_resolution_005.json",
+        "logs/O94_0/P4_memory_resolution_ui_003.json",
+        "logs/O94_0/P4_rag_chat_nonregression_001.json",
+        "logs/O94_0/P4_causal_reward_memory_nonregression_001.json",
+        "logs/O94_0/P4_continuous_ui_nonregression_001.json",
+        "logs/O94_0/P4_savepoint_verify_002.json",
+        "logs/O94_0/P4_memory_resolution_retest_001.json",
+        "logs/O94_0/P4_details_depth_ui_retest_001.json",
+        "logs/O94_0/P4_memory_event_inspection_retest_001.json",
+        "logs/O94_0/P4_causal_graph_view_retest_001.json",
+        "logs/O94_0/P4_chat_response_details_nonregression_001.json",
+        "logs/O94_0/P4_causal_reward_memory_retest_001.json",
+        "logs/O94_0/P4_continuous_resolution_ui_retest_001.json"
+      ],
+      "started_utc": "2026-10-18T13:48:30.049212+00:00",
+      "completed_utc": "2026-10-18T14:59:07.825970+00:00",
+      "result_summary": "P4 revalidation après reprise P3 : mémoire hiérarchique/profondeur 11 tests, panneau Détails 2 tests sous Xvfb, inspection d’événements 7 tests, graphe causal 4 tests, chat/réponse/détails 30 tests, récompense causale 3 tests et résolution continue UI 1 test — tous passés. Le journal source reste canonique; l’index de résolution est dérivé, vérifiable, et les charges utiles ne sont lues qu’après routage maître→micro. Les essais restent locaux et bornés; ils ne certifient pas la vérité universelle ni un matériel réel.",
+      "reopened_utc": "2026-10-18T13:51:36.652427+00:00",
+      "reopen_reason": "Revue de complétude R3: l’arbre micro-RAG existe, mais la mémoire événementielle O93 est encore un journal append-only avec consultation récente; il manque une API de résolution hiérarchique qui affine les événements selon la profondeur sans lire toutes les charges utiles. Le panneau Détails/profondeur déjà validé reste historique; P4 rouvre pour traiter la mémoire puis revalider UI.",
+      "exit_criteria_results": {
+        "tests_depth_and_read_budget": "PASS — logs/O94_0/P4_memory_resolution_005.json",
+        "ui_formatter_and_details": "PASS — logs/O94_0/P4_memory_resolution_ui_003.json",
+        "no_technical_data_in_answer_transcript": "PASS — logs/O94_0/P4_memory_resolution_ui_003.json; historique P4 UI details aussi conservé",
+        "memory_master_micro_event_hierarchy": "PASS — test_master_tree_routes_query_to_relevant_micro_group_only in test_o940_memory_resolution.py",
+        "context_refinement_and_causal_temporal_expansion": "PASS — tests test_additional_context_refines_between_overlapping_memory_answers, test_depth_three... and test_depth_four..."
+      },
+      "history": [
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:19:45.506243+00:00",
+          "reason": "Phase P3 reopened on R2 pipeline gap; later phases paused until P3 revalidation and sequential review."
+        },
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:28:20.223842+00:00",
+          "reason": "Reprise autorisée après revalidation et clôture P3; les preuves antérieures P4 restent conservées, une non-régression ciblée est exigée avant sa clôture."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:29:56.443454+00:00",
+          "reason": "P4 revalidation after P3 reopening passed: hierarchical memory budgets, selected payload reads, UI Details separation, memory event inspection and causal graph tests all have current receipts."
+        },
+        {
+          "status": "PAUSED_DEPENDENCY_REOPENED",
+          "recorded_utc": "2026-10-18T14:46:18.039581+00:00",
+          "reason": "P2 rouvert pour corriger et retester l’ingestion TSV sur un corpus source; la fermeture dépend de P2."
+        },
+        {
+          "status": "PAUSED_DEPENDENCY_REOPENED",
+          "recorded_utc": "2026-10-18T14:51:00.557495+00:00",
+          "reason": "Suspendu pendant la revalidation séquentielle de P3."
+        },
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:56:55.999257+00:00",
+          "reason": "Reprise autorisée après revalidation et clôture P3; les preuves antérieures P4 restent conservées, une non-régression ciblée est exigée avant sa clôture."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T14:59:07.825970+00:00",
+          "reason": "P4 revalidation after P3 reopening passed: hierarchical memory budgets, selected payload reads, UI Details separation, memory event inspection and causal graph tests all have current receipts."
+        }
+      ],
+      "resumed_utc": "2026-10-18T14:56:55.999257+00:00",
+      "resume_reason": "P3 exit criteria now met by the new empty-index and cross-language retrieval receipts; revalidate hierarchy/UI before advancing.",
+      "execution_receipts": [
+        {
+          "path": "logs/O94_0/P4_memory_resolution.json",
+          "sha256": "d6254bb7a7547a1d86ab20a03a8dd719cd657fb4224001a497cf764b97e30e25",
+          "exit_code": 0,
+          "result": "11 passed in 0.32s",
+          "timestamp_utc": "2026-10-18T14:28:46.243192+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_ui_details.json",
+          "sha256": "a322f2ca263235a29834641907e9b67f27a98eff46d3454cb41e519a2a07e2b6",
+          "exit_code": 0,
+          "result": "2 passed in 0.90s",
+          "timestamp_utc": "2026-10-18T14:28:49.906382+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_memory_event_inspection.json",
+          "sha256": "a0db7b0ec7596537974b0814ad50afd8e522904278b55352214594858d080e14",
+          "exit_code": 0,
+          "result": "7 passed in 0.25s",
+          "timestamp_utc": "2026-10-18T14:28:52.706071+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_causal_graph_view.json",
+          "sha256": "286868da1e419ecb1233eee7091b201967e3036f6557dc90cb973960e9cde977",
+          "exit_code": 0,
+          "result": "4 passed in 0.05s",
+          "timestamp_utc": "2026-10-18T14:28:55.180053+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_memory_tree_ui_and_chat_details_005.json",
+          "sha256": "39fab4caa08c09dc04e9821e4dccb7da3fd3a603599668c41c4cea787406339c",
+          "exit_code": 4,
+          "result": "no tests ran in 0.00s",
+          "timestamp_utc": "2026-10-18T14:46:13.302576+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_memory_resolution_retest_001.json",
+          "sha256": "d1f4e7a5bddc39c5a4bdee8d5746facffce3b1332fa3cd33fa2b953bea233d7a",
+          "exit_code": 0,
+          "result": "11 passed in 0.36s",
+          "timestamp_utc": "2026-10-18T14:57:24.349432+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_details_depth_ui_retest_001.json",
+          "sha256": "86d1d514435235db9bff29581d851883729ce3aa1b016e387317faa6500525b1",
+          "exit_code": 0,
+          "result": "2 passed in 0.96s",
+          "timestamp_utc": "2026-10-18T14:57:36.493128+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_memory_event_inspection_retest_001.json",
+          "sha256": "089236fff3a3b71151e29c3a55a676b95258894dcd120648c846f44c444b5527",
+          "exit_code": 0,
+          "result": "7 passed in 0.26s",
+          "timestamp_utc": "2026-10-18T14:57:43.636830+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_causal_graph_view_retest_001.json",
+          "sha256": "52c3b143018e70c3cdd22f533807ccd21922623aff2bae97c142718572ddb0c7",
+          "exit_code": 0,
+          "result": "4 passed in 0.05s",
+          "timestamp_utc": "2026-10-18T14:57:50.731217+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_chat_response_details_nonregression_001.json",
+          "sha256": "fb4481d264f51007b29497268d9814b17eb13f8b07ee3fe8df21bdb25323720d",
+          "exit_code": 0,
+          "result": "30 passed in 4.31s",
+          "timestamp_utc": "2026-10-18T14:58:02.153804+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_causal_reward_memory_retest_001.json",
+          "sha256": "83c568d43cf9c87aab6e6a16f4a25606e6e106ad7d200c219eb80949c108fc0f",
+          "exit_code": 0,
+          "result": "3 passed in 0.52s",
+          "timestamp_utc": "2026-10-18T14:58:12.442149+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_continuous_resolution_ui_retest_001.json",
+          "sha256": "95eaeab3199f7174609a26cab91db20b0e5a5a1dbf7e20ccfab2046b7008bf7b",
+          "exit_code": 0,
+          "result": "1 passed in 0.03s",
+          "timestamp_utc": "2026-10-18T14:58:19.254034+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_gate_memory_resolution_002_test_o940_memory_resolution.json",
+          "sha256": "cf035d32a12675368f4ad50005ce3ae05ff27af197d71598a9eb71a5c152c519",
+          "exit_code": 0,
+          "result": "11 passed in 0.32s",
+          "timestamp_utc": "2026-10-18T14:58:45.988583+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_gate_details_ui_002_test_o940_ui_resolution_details.json",
+          "sha256": "8692f708d3857dc73267d8c9140f64241d52fcc9d8e4c0c455aabd49ad307849",
+          "exit_code": 0,
+          "result": "2 passed in 0.94s",
+          "timestamp_utc": "2026-10-18T14:58:48.858511+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_gate_memory_event_inspection_002_test_p6_memory_event_inspection.json",
+          "sha256": "1883be1bf32f9c1af37d3469fefc129d13b9d1e852d569fc47a4b46ddd837ff2",
+          "exit_code": 0,
+          "result": "7 passed in 0.22s",
+          "timestamp_utc": "2026-10-18T14:58:52.579030+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_gate_causal_graph_002_test_p6_memory_causal_graph_view.json",
+          "sha256": "f8a3b530ba276954df284a63d279074c05b715dad6674410ec75397d3cc2d53d",
+          "exit_code": 0,
+          "result": "4 passed in 0.08s",
+          "timestamp_utc": "2026-10-18T14:58:55.410105+00:00"
+        },
+        {
+          "path": "logs/O94_0/P4_gate_chat_answer_contract_002_test_o931_chat_pipeline.json",
+          "sha256": "5890f74f5dda33177c2de0c8d9d3fb5418c5f6683d9466e8755fd5b59a1aa75d",
+          "exit_code": 0,
+          "result": "9 passed in 2.81s",
+          "timestamp_utc": "2026-10-18T14:58:58.378232+00:00"
+        }
+      ],
+      "closure_receipts": [
+        {
+          "path": "logs/O94_0/P4_memory_resolution_retest_001.json",
+          "sha256": "d1f4e7a5bddc39c5a4bdee8d5746facffce3b1332fa3cd33fa2b953bea233d7a",
+          "exit_code": 0,
+          "result": "11 passed in 0.36s"
+        },
+        {
+          "path": "logs/O94_0/P4_details_depth_ui_retest_001.json",
+          "sha256": "86d1d514435235db9bff29581d851883729ce3aa1b016e387317faa6500525b1",
+          "exit_code": 0,
+          "result": "2 passed in 0.96s"
+        },
+        {
+          "path": "logs/O94_0/P4_memory_event_inspection_retest_001.json",
+          "sha256": "089236fff3a3b71151e29c3a55a676b95258894dcd120648c846f44c444b5527",
+          "exit_code": 0,
+          "result": "7 passed in 0.26s"
+        },
+        {
+          "path": "logs/O94_0/P4_causal_graph_view_retest_001.json",
+          "sha256": "52c3b143018e70c3cdd22f533807ccd21922623aff2bae97c142718572ddb0c7",
+          "exit_code": 0,
+          "result": "4 passed in 0.05s"
+        },
+        {
+          "path": "logs/O94_0/P4_chat_response_details_nonregression_001.json",
+          "sha256": "fb4481d264f51007b29497268d9814b17eb13f8b07ee3fe8df21bdb25323720d",
+          "exit_code": 0,
+          "result": "30 passed in 4.31s"
+        },
+        {
+          "path": "logs/O94_0/P4_causal_reward_memory_retest_001.json",
+          "sha256": "83c568d43cf9c87aab6e6a16f4a25606e6e106ad7d200c219eb80949c108fc0f",
+          "exit_code": 0,
+          "result": "3 passed in 0.52s"
+        },
+        {
+          "path": "logs/O94_0/P4_continuous_resolution_ui_retest_001.json",
+          "sha256": "95eaeab3199f7174609a26cab91db20b0e5a5a1dbf7e20ccfab2046b7008bf7b",
+          "exit_code": 0,
+          "result": "1 passed in 0.03s"
+        }
+      ],
+      "scope_limits": [
+        "La couverture est fondée sur des tests contrôlés ciblés; aucune charge matérielle caméra/capteur réelle n’est auditée ici.",
+        "La profondeur mesure un budget de résolution, pas une garantie de vérité universelle."
+      ],
+      "paused_reason": "P3 rouverte : le contrat RAG→générateur et contexte source doit être revalidé avant toute transition.",
+      "activated_utc": "2026-10-18T14:46:10.743201+00:00"
+    },
+    {
+      "id": "P5",
+      "name": "Tests ciblés, non-régression et essai de corpus",
+      "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "requirements": [
+        "Tests nouveaux R1-R3",
+        "Non-régression RAG, chat, UI, entrainement et autonomie",
+        "Essai contrôlé sur dataset de démonstration et données imbriquées"
+      ],
+      "exit_criteria": [
+        "Tous les tests pertinents reçoivent un résultat",
+        "Les échecs/écarts restent dans les checklists",
+        "Corpus entier non marqué validé s’il n’a pas réellement été testé"
+      ],
+      "started_utc": "2026-10-18T14:05:20.618023+00:00",
+      "execution_plan": [
+        "RAG/mémoire/contextualisation",
+        "chat et délégation AAM",
+        "UI sous Xvfb",
+        "entraînement/acquisition/datasets",
+        "autonomie/graphe causal/sécurité",
+        "tests restants par module isolé et corpus borné"
+      ],
+      "execution_receipts": [
+        {
+          "path": "logs/O94_0/P5_isolate_test_o94_rag_adaptive.json",
+          "sha256": "f6b5950b9d055c2c9b582e87c3337c7e805a2989d44683da7eb377d8b8e61fc6",
+          "exit_code": 0,
+          "result": "2 passed in 0.55s",
+          "timestamp_utc": "2026-10-18T14:10:09.342993+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_o94_snapshot_portability.json",
+          "sha256": "16f61f3ba2be862f5236354825f0b83072195fb73c6d68b0d918250ad30d8da8",
+          "exit_code": 0,
+          "result": "3 passed in 0.04s",
+          "timestamp_utc": "2026-10-18T14:10:11.972767+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_p3_semantic_rag.json",
+          "sha256": "98ae3ccff9f5f7a60ebc3fd8d64f9e3a95d777a2e8638a50fb9c0fafe7156948",
+          "exit_code": 0,
+          "result": "12 passed in 1.69s",
+          "timestamp_utc": "2026-10-18T14:10:16.214800+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_p7_dataset_service.json",
+          "sha256": "2d7cf01d26d0431e0a8ab42e7bcd80137596ed5dfea9f1a69f6720188b3f4dc8",
+          "exit_code": 0,
+          "result": "18 passed, 4 subtests passed in 6.18s",
+          "timestamp_utc": "2026-10-18T14:10:34.127113+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_p7_integrated.json",
+          "sha256": "4fc06285a71e2461ad9fce0fbfe54ffe6d2d8e2a00796dc9ccb2d886cc343356",
+          "exit_code": 1,
+          "result": "1 failed, 3 passed, 5 subtests passed in 1.42s",
+          "timestamp_utc": "2026-10-18T14:10:38.125391+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_p7_training_control.json",
+          "sha256": "d99792d12b4ce575ff7ccd49c0a7c969beb80642ded8707fc848de97c42710ee",
+          "exit_code": 1,
+          "result": "1 failed, 1 passed in 2.46s",
+          "timestamp_utc": "2026-10-18T14:10:43.238705+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_p4_acquisition.json",
+          "sha256": "6618a42dd045de89c2e2dfa04b8eaca2aee8c11fbce6ea52683d67af2c0039ae",
+          "exit_code": 0,
+          "result": "7 passed in 8.21s",
+          "timestamp_utc": "2026-10-18T14:10:53.933141+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_isolate_test_p5_knowledge.json",
+          "sha256": "8367bd5fe98f3e57537155e3960675b872d50f55f69fc005ffa84a420cf50c65",
+          "exit_code": 1,
+          "result": "1 failed, 5 passed in 2.85s",
+          "timestamp_utc": "2026-10-18T14:10:59.345959+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_rag_sentence_rerun_001.json",
+          "sha256": "bef9752c5dd3787a4d1121b93b0834069f2e3357833bcd918307efaeec9164a2",
+          "exit_code": 0,
+          "result": "17 passed in 1.65s",
+          "timestamp_utc": "2026-10-18T14:14:10.649424+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_integrated_answer_contract_rerun_001.json",
+          "sha256": "1f9835bacb6b12e89e20aa2175a355054f083d3a605bdb60888c543579862882",
+          "exit_code": 0,
+          "result": "6 passed, 5 subtests passed in 1.99s",
+          "timestamp_utc": "2026-10-18T14:14:15.511400+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_knowledge_answer_contract_rerun_001.json",
+          "sha256": "cbe0dabd70bff181fe98e546306a06b6bd4ae970a4aa7d12db60e746aaa055fb",
+          "exit_code": 0,
+          "result": "6 passed in 3.26s",
+          "timestamp_utc": "2026-10-18T14:14:21.388851+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_training_control_race_rerun_001.json",
+          "sha256": "e8695dd95810dab8d10cd39fc5447f05d09b58ccf0148187ef3a7ea53e80c39e",
+          "exit_code": 0,
+          "result": "3 passed in 10.90s",
+          "timestamp_utc": "2026-10-18T14:14:41.438317+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_language_training_full_xvfb_rerun_001.json",
+          "sha256": "30cb3575c2b79a5052f317bbd416e61e718ddf3c96a718afa0e3e25ed8bb2dca",
+          "exit_code": 0,
+          "result": "5 passed in 2.46s",
+          "timestamp_utc": "2026-10-18T14:15:34.169183+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_foundations_portable_001.json",
+          "sha256": "5229cb18103d04c0b3232ab207caffb464f10d3dae2c93417f0db99333916ab9",
+          "exit_code": 0,
+          "result": "17 passed in 3.11s",
+          "timestamp_utc": "2026-10-18T14:16:00.771160+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_observation_probes_001.json",
+          "sha256": "89039c79113dd26c8ec47751d768cf054c50faa60661e1142b992e95726f2a8b",
+          "exit_code": 0,
+          "result": "33 passed, 7 subtests passed in 0.75s",
+          "timestamp_utc": "2026-10-18T14:16:10.238697+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_competency_composition_001.json",
+          "sha256": "9910fa12bd6f5ebf82c11a6246fa8271e35d3d3dd42ce31d6ba5ca12eb83627b",
+          "exit_code": 0,
+          "result": "27 passed in 6.99s",
+          "timestamp_utc": "2026-10-18T14:16:24.620170+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_ui_workflow_regression_001.json",
+          "sha256": "0abd1ea5810cc6c22bb1fe2505fbef3920921307772c166886e38c8ae28f5d6f",
+          "exit_code": 0,
+          "result": "9 passed in 2.80s",
+          "timestamp_utc": "2026-10-18T14:16:37.096331+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_autonomy_memory_profiles_001.json",
+          "sha256": "4f73759101c02df9b35ad90872cb0449f4f3cb172573ef6a2454b2adc916ad8e",
+          "exit_code": 0,
+          "result": "24 passed in 4.92s",
+          "timestamp_utc": "2026-10-18T14:16:49.827044+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_probe_and_source_tools_001.json",
+          "sha256": "34ac93b3ecf51d4af4e03433cd08853dfc44998a6f164ce0b6b96333fd9f0dbf",
+          "exit_code": 0,
+          "result": "15 passed in 1.34s",
+          "timestamp_utc": "2026-10-18T14:16:58.309784+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_action_router_security_001.json",
+          "sha256": "220a1aa80070067652777ca3c4a51c0851898952f6dfeda8784029bf3a6db764",
+          "exit_code": 0,
+          "result": "34 passed, 5 subtests passed in 5.15s",
+          "timestamp_utc": "2026-10-18T14:17:22.645936+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_capacity_preregistration_001.json",
+          "sha256": "057d6495353a94fafde452c60ba10434491a4331383f431df44ee0968ebf85e4",
+          "exit_code": 0,
+          "result": "21 passed in 0.14s",
+          "timestamp_utc": "2026-10-18T14:17:34.366422+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_20261018_test_o930_preflight_dependency_closure.json",
+          "sha256": "6b58f71f69d505d45f4840a5aa247ec8ee7f624a014fe4a192d2708f6fc1b2bf",
+          "exit_code": 0,
+          "result": "2 passed in 0.06s",
+          "timestamp_utc": "2026-10-18T14:31:44.526796+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_20261018_test_o931_autonomy_boot_lifecycle.json",
+          "sha256": "627ee72697f01d1b1d8555d4966bc33645926edc8f63f93cf3f021787b82bfce",
+          "exit_code": 0,
+          "result": "1 passed in 1.17s",
+          "timestamp_utc": "2026-10-18T14:31:47.512923+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_20261018_test_o931_chat_pipeline.json",
+          "sha256": "75e38642f065efd31f2651a00f24ab55d30927918db5163f0b739d472ca72467",
+          "exit_code": 0,
+          "result": "9 passed in 2.54s",
+          "timestamp_utc": "2026-10-18T14:31:51.932263+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_20261018_test_o931_language_model_training_surface.json",
+          "sha256": "c8bbce46373c13e1504a0b3f3192453861052ad919c9ae96419019a59b3da961",
+          "exit_code": 1,
+          "result": "NO_SUMMARY_EXIT_1",
+          "timestamp_utc": "2026-10-18T14:31:54.962801+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_20261018_test_o931_record_preserving_rag.json",
+          "sha256": "0c8b280643876877fe21f8e266b49a91c4c25112aa7c7503ffa955acce44959d",
+          "exit_code": 0,
+          "result": "2 passed in 0.54s",
+          "timestamp_utc": "2026-10-18T14:31:57.426160+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_20261018_test_o931_release_identity.json",
+          "sha256": "c14ace94a153ffbb82e1b2bf6c9330ce715b0fbee1b402ac2b8f9a68683f6ac5",
+          "exit_code": 0,
+          "result": "1 passed in 0.29s",
+          "timestamp_utc": "2026-10-18T14:31:59.580919+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5a_ui_retest_20261018_test_o931_language_model_training_surface.json",
+          "sha256": "d8291a8c1ccf25fb64d3626394ba860252a55c95309bed8db1b7b0cb2c455151",
+          "exit_code": 0,
+          "result": "5 passed in 2.45s",
+          "timestamp_utc": "2026-10-18T14:32:24.493936+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_knowledge_test_p5_knowledge.json",
+          "sha256": "7507a2071990fab88a41786b7a7ee263896bd57939808f3475190756cb5f948e",
+          "exit_code": 0,
+          "result": "6 passed in 3.06s",
+          "timestamp_utc": "2026-10-18T14:32:45.096999+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_integrated_route_test_p7_integrated.json",
+          "sha256": "03488b96b492e40985eb729dc07a21fa246308d095653daedc0649221cbcdac2",
+          "exit_code": 0,
+          "result": "6 passed, 5 subtests passed in 1.83s",
+          "timestamp_utc": "2026-10-18T14:32:49.404760+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_o940_rag_resolution_test_o940_rag_resolution.json",
+          "sha256": "1b5314fd8859b365cc4e20e2063131f2a313448d703f964c609b8d81c9f470cd",
+          "exit_code": 0,
+          "result": "18 passed in 1.71s",
+          "timestamp_utc": "2026-10-18T14:32:53.741328+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_memory_resolution_test_o940_memory_resolution.json",
+          "sha256": "2cd673905fdc49c80ac8846c22d3050c0b81207b64d247356a76cc89b9d1f69a",
+          "exit_code": 0,
+          "result": "11 passed in 0.33s",
+          "timestamp_utc": "2026-10-18T14:32:56.386444+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_details_ui_test_o940_ui_resolution_details.json",
+          "sha256": "c85fe6797064d27797c829f7a51fee71b47817aa69a9126736d2631b51dd74ee",
+          "exit_code": 0,
+          "result": "2 passed in 0.92s",
+          "timestamp_utc": "2026-10-18T14:32:59.865934+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_continuous_resolution_ui_test_o94_continuous_resolution_ui.json",
+          "sha256": "c2ec3e4f5ea807095a89fcd05ce789c8226bcd67836b1ef438858d0daee77733",
+          "exit_code": 0,
+          "result": "1 passed in 0.03s",
+          "timestamp_utc": "2026-10-18T14:33:02.461389+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_reward_tracing_test_o94_trace_resolution_reward.json",
+          "sha256": "f9165744e72be6f3dadcf56946fcf4faba82bee2f2cc558bb6de7a41654a2ba0",
+          "exit_code": 0,
+          "result": "3 passed in 0.52s",
+          "timestamp_utc": "2026-10-18T14:33:05.586320+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o931_sparse_proximity_optimization.json",
+          "sha256": "50d5be13defc1715391f4224f67e16dd01c166661b0c71ee542533db1faa422a",
+          "exit_code": 0,
+          "result": "5 passed in 0.21s",
+          "timestamp_utc": "2026-10-18T14:33:31.337516+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o931_ui_busy_catalog_refresh.json",
+          "sha256": "b448ecbb3f726cfb78d85a3f07d9a672f2b27c581b7a21d0e51195c2d73d107d",
+          "exit_code": 0,
+          "result": "1 passed in 1.08s",
+          "timestamp_utc": "2026-10-18T14:33:35.514485+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o931_ui_smoke.json",
+          "sha256": "2b565366b6e65d67d88d4fb649d0a8c787a062a7b1e01a0f7d2023f8f3764e41",
+          "exit_code": 0,
+          "result": "2 passed in 1.28s",
+          "timestamp_utc": "2026-10-18T14:33:39.849217+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o94_atomic_replace_retry.json",
+          "sha256": "31296126d18921b49f4b33b44be9efab73b34726e4aba9ec4124003814f0bc28",
+          "exit_code": 0,
+          "result": "3 passed in 0.05s",
+          "timestamp_utc": "2026-10-18T14:33:42.936284+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o94_base_blocks.json",
+          "sha256": "c94a2995c060b68d57655c19ea4ba810b5330c8a8fe46553ecf3d4aa9b2c2971",
+          "exit_code": 0,
+          "result": "2 passed in 0.22s",
+          "timestamp_utc": "2026-10-18T14:33:45.772695+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o94_cli_contract.json",
+          "sha256": "ef0d4261b843b4225351a3eed28bb74ec9dab9c2866ea06fd809efb2368a418d",
+          "exit_code": 0,
+          "result": "2 passed in 2.38s",
+          "timestamp_utc": "2026-10-18T14:33:50.952550+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o94_delivery_common_manifest.json",
+          "sha256": "3a1568e145c88f7fe3b17c3bc144780e40c4310a22be6daa8f8c728f560ad09e",
+          "exit_code": 0,
+          "result": "5 passed in 0.06s",
+          "timestamp_utc": "2026-10-18T14:33:53.985190+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o94_local_llm_adapter.json",
+          "sha256": "ced287bfd1e087db307c81776e0624dd03a5fb66b7733de9d47eb6e74eeaae0d",
+          "exit_code": 0,
+          "result": "2 passed in 0.21s",
+          "timestamp_utc": "2026-10-18T14:33:56.704755+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5c_20261018_test_o94_rag_adaptive.json",
+          "sha256": "719e3cad9e4864decc1d6edbb5d7d92eaa5964407ed71bfdc0b1969cc4e968f4",
+          "exit_code": 0,
+          "result": "2 passed in 0.50s",
+          "timestamp_utc": "2026-10-18T14:33:59.761181+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_o94_snapshot_portability.json",
+          "sha256": "2c241c7c69ed91ba2c077797fe58fa5606774e79e00cc67d1355c7af905c70cd",
+          "exit_code": 0,
+          "result": "3 passed in 0.04s",
+          "timestamp_utc": "2026-10-18T14:34:14.579356+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p0_foundation.json",
+          "sha256": "d3f67b53cbc9482be3c253112d63b4d72199b40b2c3aaa536c48967a268a5f06",
+          "exit_code": 0,
+          "result": "6 passed in 1.51s",
+          "timestamp_utc": "2026-10-18T14:34:18.684509+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p0_o930_artifacts.json",
+          "sha256": "1ef26fa5ca898d66ff6895a74bca96bc9e081cf18ff3116c1f1e1961399d8a37",
+          "exit_code": 0,
+          "result": "6 passed in 0.09s",
+          "timestamp_utc": "2026-10-18T14:34:21.316557+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p10_portable_acceptance.json",
+          "sha256": "e5a03cce04c932f6ad804cb594c6813f4221ba2a42159870dc38f8c297e657ff",
+          "exit_code": 0,
+          "result": "5 passed in 1.80s",
+          "timestamp_utc": "2026-10-18T14:34:25.732041+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p1_o930_observer_upgrade.json",
+          "sha256": "b79c118c6ad745666402574f9afca524275969aea8a330351b8d416217024b58",
+          "exit_code": 0,
+          "result": "7 passed, 2 subtests passed in 0.20s",
+          "timestamp_utc": "2026-10-18T14:34:28.717653+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p1_observer.json",
+          "sha256": "16e77dfb71c60efba8e599374dc676716c290551b872b5dedafb5df4c65bf1c3",
+          "exit_code": 0,
+          "result": "11 passed, 5 subtests passed in 0.26s",
+          "timestamp_utc": "2026-10-18T14:34:31.605485+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p2_probes.json",
+          "sha256": "8619ef2d0e81e8c244db08a9187a0cb843fe1487d4cfe2308ba1ad4b29b60a47",
+          "exit_code": 0,
+          "result": "15 passed in 0.39s",
+          "timestamp_utc": "2026-10-18T14:34:34.508292+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p3_competencies.json",
+          "sha256": "13d4c6cb3a15cb523514f50008109d9f206fd17466e9edfedee8b32ab2e37463",
+          "exit_code": 0,
+          "result": "8 passed in 1.25s",
+          "timestamp_utc": "2026-10-18T14:34:38.412508+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5d_20261018_test_p3_semantic_rag.json",
+          "sha256": "3d8c1ac93389970979d0766cfbd8e9ec736ff84d56083e1482b7e1305536ae2e",
+          "exit_code": 0,
+          "result": "12 passed in 1.88s",
+          "timestamp_utc": "2026-10-18T14:34:43.128349+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5e_20261018_test_p4_acquisition.json",
+          "sha256": "286f5982e049fb82e74e305f1cfd4db978566c1f02906f7a9e7b5e22da815d6e",
+          "exit_code": 0,
+          "result": "7 passed in 8.10s",
+          "timestamp_utc": "2026-10-18T14:35:06.185579+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5e_20261018_test_p4_competence_graph.json",
+          "sha256": "4267a2a3da191726b5820b81406399259c0bf92df694a2d959e51f5fe3a77a00",
+          "exit_code": 0,
+          "result": "10 passed in 2.02s",
+          "timestamp_utc": "2026-10-18T14:35:11.024982+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5e_20261018_test_p4_ui_integration.json",
+          "sha256": "9336bf88363643d598560541195f88e69a310a755865af6a6b8865fd63d67c47",
+          "exit_code": 0,
+          "result": "2 passed in 1.06s",
+          "timestamp_utc": "2026-10-18T14:35:14.892919+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5e_20261018_test_p5_autonomy_o930.json",
+          "sha256": "b1da54916fc9b6a329b31bacaa32db4a7aa3385b6f08455d3e8cd1af0b757392",
+          "exit_code": 0,
+          "result": "9 passed in 4.23s",
+          "timestamp_utc": "2026-10-18T14:35:22.021738+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5e_20261018_test_p6_autonomy.json",
+          "sha256": "bc28f7de947034fdba7aff6195e366e3ff8765c98305c6aec6958e09f23981d9",
+          "exit_code": 0,
+          "result": "7 passed in 3.41s",
+          "timestamp_utc": "2026-10-18T14:35:28.179584+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5e_competence_profiles_retest_20261018_test_p6_competence_profiles.json",
+          "sha256": "2c9dc140782eeea73221adcb4dda9b0394664ab29b5724dcc1109c8f5f4c62fc",
+          "exit_code": 0,
+          "result": "6 passed in 1.21s",
+          "timestamp_utc": "2026-10-18T14:36:17.176101+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_memory_causal_graph_view.json",
+          "sha256": "241bb00bb03014ad26fad0429dc55a262ea2f4c1eeb32423fd10939a69a05d40",
+          "exit_code": 0,
+          "result": "4 passed in 0.05s",
+          "timestamp_utc": "2026-10-18T14:36:35.602605+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_memory_event_inspection.json",
+          "sha256": "ef00a76aeaf6b001f8a91f054c62dd58b52ca6c8a952bcb1d24997138b23ad1f",
+          "exit_code": 0,
+          "result": "7 passed in 0.22s",
+          "timestamp_utc": "2026-10-18T14:36:38.304485+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_probe_management.json",
+          "sha256": "29ebb9f8a2bedb3891ee8757ea19f215a6471cc93278735f52f6acc7fc442cc2",
+          "exit_code": 0,
+          "result": "8 passed in 0.33s",
+          "timestamp_utc": "2026-10-18T14:36:41.183515+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_probe_ui_contracts.json",
+          "sha256": "48ec956d1a5b2d0654ae59b7af6b7219aa5a98164c8a109950b06f3ac961d351",
+          "exit_code": 0,
+          "result": "2 passed in 0.03s",
+          "timestamp_utc": "2026-10-18T14:36:43.979961+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_source_inspector.json",
+          "sha256": "6ec42f8902a20fbc832ca000f3ab1581a1c2b48f8e42633cf2c58a1f7fd1dd8a",
+          "exit_code": 0,
+          "result": "5 passed in 1.01s",
+          "timestamp_utc": "2026-10-18T14:36:47.618890+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_ui_initial_catalog_sequence.json",
+          "sha256": "3eb7e2f70e88970bf0e05cd6fd9cc7354d4798c7ffb97711b3f0f439f367e06f",
+          "exit_code": 0,
+          "result": "2 passed in 0.05s",
+          "timestamp_utc": "2026-10-18T14:36:50.186662+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5f_20261018_test_p6_ui_integration.json",
+          "sha256": "db77abd5c7d2a80ad871d0d41c9f4e3bc40fe100ded1dbde9ab5d30a49619a8d",
+          "exit_code": 0,
+          "result": "5 passed in 0.73s",
+          "timestamp_utc": "2026-10-18T14:36:53.531897+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5g_20261018_test_p7_dataset_service.json",
+          "sha256": "7acdb1d3c07c38c3094848edb20cbb530131efac7720c50d8a06df25c6342fb3",
+          "exit_code": 0,
+          "result": "18 passed, 4 subtests passed in 6.15s",
+          "timestamp_utc": "2026-10-18T14:37:11.062073+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5g_20261018_test_p7_training_control.json",
+          "sha256": "4104579c1f1e7825be7e831ef3f7bf48404b88d38fc36e1194f87bc47dc36b92",
+          "exit_code": 0,
+          "result": "3 passed in 9.93s",
+          "timestamp_utc": "2026-10-18T14:37:24.026028+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5g_20261018_test_p8_action_router.json",
+          "sha256": "0327faeaae0abf1f9ff389cdd7ac2d7a5c53f0274548b13d06ee76621ba7ed72",
+          "exit_code": 0,
+          "result": "10 passed, 5 subtests passed in 1.69s",
+          "timestamp_utc": "2026-10-18T14:37:28.432054+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5g_20261018_test_p8_integration.json",
+          "sha256": "f721786b630286b464ae307eba7bfee79989542e83ea7173c4744a8de71872fa",
+          "exit_code": 0,
+          "result": "4 passed in 3.49s",
+          "timestamp_utc": "2026-10-18T14:37:34.430720+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5h_security_isolated_20261018_test_p8_security.json",
+          "sha256": "4906ede69bc6eebc758fbb035894d5e37de4bd6996c5c1f8e3c2dc8603cfad63",
+          "exit_code": 0,
+          "result": "20 passed in 0.51s",
+          "timestamp_utc": "2026-10-18T14:38:08.480002+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5i_20261018_test_p9_capacity_evidence.json",
+          "sha256": "bc2e7d2f9fae328c05cd389f99092da15493e1b2b847a000bf665a435db452d0",
+          "exit_code": 0,
+          "result": "9 passed in 0.08s",
+          "timestamp_utc": "2026-10-18T14:38:25.554648+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5i_20261018_test_p9_preflight_status_vocabulary.json",
+          "sha256": "2a652494dc6ba6662908b4f2830703e5335ed11ce538ada74c5e8b3b43176b66",
+          "exit_code": 0,
+          "result": "1 passed in 0.05s",
+          "timestamp_utc": "2026-10-18T14:38:28.064278+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5i_20261018_test_p9_preregistered_v2_integrity.json",
+          "sha256": "6ecd2dc728cb47b98b9c98ce5a04f22d650cd34aa7d512ac7a3560e778b4b44e",
+          "exit_code": 0,
+          "result": "11 passed in 0.07s",
+          "timestamp_utc": "2026-10-18T14:38:30.579129+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_001_test_o930_preflight_dependency_closure.json",
+          "sha256": "51283ffd17b869900f1577b3845497fa29f33f23c038ed04f6f3a0df2fe6e625",
+          "exit_code": 0,
+          "result": "2 passed in 0.09s",
+          "timestamp_utc": "2026-10-18T15:00:12.982702+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_001_test_o931_autonomy_boot_lifecycle.json",
+          "sha256": "a8f1192dc1074609c06806a1f62172c8e2c78c0730c14028a60b46344360baff",
+          "exit_code": 0,
+          "result": "1 passed in 1.36s",
+          "timestamp_utc": "2026-10-18T15:00:16.748455+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_001_test_o931_chat_pipeline.json",
+          "sha256": "3748a947ebf8c4a1827edeca1ad4d10da99db535f6b7a12001e950cd11867a70",
+          "exit_code": 0,
+          "result": "9 passed in 2.98s",
+          "timestamp_utc": "2026-10-18T15:00:22.011579+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_001_test_o931_language_model_training_surface.json",
+          "sha256": "84eacd40aa775643a8dfe75775080f285c91fcd88ee1cd643db4f04466330f5b",
+          "exit_code": 0,
+          "result": "5 passed in 3.07s",
+          "timestamp_utc": "2026-10-18T15:00:27.654107+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5final_a_20261018_test_o930_preflight_dependency_closure.json",
+          "sha256": "cd3dbb5eb0deb05548b9617acc90f4aff6d248efbc698dd9a07986d62199fdf0",
+          "exit_code": 0,
+          "result": "2 passed in 0.07s",
+          "timestamp_utc": "2026-10-18T15:00:40.836384+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5final_a_20261018_test_o931_autonomy_boot_lifecycle.json",
+          "sha256": "c0ca0188e92983970a8e64e6bed5445e1b060dc33ce08809b1402a02afe92fcb",
+          "exit_code": 0,
+          "result": "1 passed in 1.32s",
+          "timestamp_utc": "2026-10-18T15:00:44.096031+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5final_a_20261018_test_o931_chat_pipeline.json",
+          "sha256": "c1ddee34bf2fed1d2d0a1b45179cabf4fa751aeb0034fbd4f749b863239821c0",
+          "exit_code": 0,
+          "result": "9 passed in 2.83s",
+          "timestamp_utc": "2026-10-18T15:00:49.395473+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5final_a_20261018_test_o931_language_model_training_surface.json",
+          "sha256": "c439c58818c3bae6cc03f3714605030f9395d7ce750ea0aef471a13631c92301",
+          "exit_code": 0,
+          "result": "5 passed in 2.30s",
+          "timestamp_utc": "2026-10-18T15:00:53.706977+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_record_preserving_rag_latest_retest_001.json",
+          "sha256": "c5b8018f676d03db544b98a93ae0a5f3007ed563634c07b84cd3e866cdf9d2f6",
+          "exit_code": 0,
+          "result": "4 passed in 23.07s",
+          "timestamp_utc": "2026-10-18T15:02:06.259949+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_record_preserving_sms_retest_001_test_o931_record_preserving_rag.json",
+          "sha256": "03d17756d3fc2ffc7dc7aec41e720301d8c165d2a832744e63dcb64db6d62059",
+          "exit_code": 0,
+          "result": "4 passed in 22.60s",
+          "timestamp_utc": "2026-10-18T15:01:49.470659+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_002_test_o931_release_identity.json",
+          "sha256": "f048cb96ace268173ee9b5c0817bf63602e660af30de7673f38686502043b539",
+          "exit_code": 0,
+          "result": "1 passed in 0.30s",
+          "timestamp_utc": "2026-10-18T15:02:28.529932+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_002_test_o931_sparse_proximity_optimization.json",
+          "sha256": "151ea272df49bc5bcd9731e903b9fffa1c615077a302f0781f563c52cb5e0808",
+          "exit_code": 0,
+          "result": "5 passed in 0.18s",
+          "timestamp_utc": "2026-10-18T15:02:30.833337+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_002_test_o931_ui_busy_catalog_refresh.json",
+          "sha256": "69ebcd7389ebae2c8f200ee9d8451200ee544d80959f0ba53b2bc73271d4fb41",
+          "exit_code": 0,
+          "result": "1 passed in 1.00s",
+          "timestamp_utc": "2026-10-18T15:02:33.895649+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_002_test_o931_ui_smoke.json",
+          "sha256": "42a093dcc73201719b47f88a36949477a02fe717b85ad6357aed2604842e0b9a",
+          "exit_code": 0,
+          "result": "2 passed in 1.24s",
+          "timestamp_utc": "2026-10-18T15:02:37.133149+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_002_test_o940_memory_resolution.json",
+          "sha256": "a93fd7103271ffc48a1a3a3dcff980cd786a5e364691a26d67e54f0581191b36",
+          "exit_code": 0,
+          "result": "11 passed in 0.34s",
+          "timestamp_utc": "2026-10-18T15:02:39.333170+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_corpus_sample_eval_retest_001_test_o940_real_sms_corpus_sample.json",
+          "sha256": "b05d3c845c1fd7b11356ee53ad9fd4c1504daefaf870ce880e75f06f4b5d62d7",
+          "exit_code": 0,
+          "result": "1 passed in 9.89s",
+          "timestamp_utc": "2026-10-18T15:02:30.941037+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_003_test_o940_rag_resolution.json",
+          "sha256": "c03fb5d3ca625daaf035390371e7d2da89b03d1908946bf258831377b2d6c966",
+          "exit_code": 0,
+          "result": "20 passed in 1.92s",
+          "timestamp_utc": "2026-10-18T15:02:49.790950+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_full_sms_chat_regression_002_test_o940_real_sms_retrieval.json",
+          "sha256": "2fc3362a5752def81da77b6b17e581240e04e64db0076c8c810324a222451395",
+          "exit_code": 0,
+          "result": "1 passed in 14.73s",
+          "timestamp_utc": "2026-10-18T15:02:43.762112+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_003_test_o940_real_sms_corpus_sample.json",
+          "sha256": "b72cab87c69673b199bea3ec2c79878b619e4b6006b1920d845f0f300de1ab5c",
+          "exit_code": 0,
+          "result": "1 passed in 10.21s",
+          "timestamp_utc": "2026-10-18T15:03:02.229613+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_003_test_o940_real_sms_retrieval.json",
+          "sha256": "7e6a753eee104adef24411dc36b7a868997bcafa30fe5dd6d2783b8de1451227",
+          "exit_code": 0,
+          "result": "1 passed in 13.97s",
+          "timestamp_utc": "2026-10-18T15:03:18.085265+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_details_depth_ui_fullmatrix_retest_001.json",
+          "sha256": "b0777935c9660c963d9d0ecbd3e91977df076021cb6592edb70eeda5d6616034",
+          "exit_code": 0,
+          "result": "2 passed in 0.96s",
+          "timestamp_utc": "2026-10-18T15:03:44.984503+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_004_test_o94_atomic_replace_retry.json",
+          "sha256": "828fab1dd02f0ddfaf72ae76273aae3afd954fae250ff70780dbfbdf2bdb63a0",
+          "exit_code": 0,
+          "result": "3 passed in 0.04s",
+          "timestamp_utc": "2026-10-18T15:04:53.229915+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_004_test_o94_base_blocks.json",
+          "sha256": "461d18e69d1e26bf1dbd2016d3ba24c23ed29105e4b1a3077ff5cac3c1abc1c1",
+          "exit_code": 0,
+          "result": "2 passed in 0.20s",
+          "timestamp_utc": "2026-10-18T15:04:55.380178+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_004_test_o94_cli_contract.json",
+          "sha256": "30c4d28057567f674c08439231072f9278a892e23d749d0b39907bc6e9c0e92d",
+          "exit_code": 0,
+          "result": "2 passed in 2.07s",
+          "timestamp_utc": "2026-10-18T15:04:59.341342+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_004_test_o94_delivery_common_manifest.json",
+          "sha256": "4773e94d25e6b4bcd64cb675b6c4d2484fdc70cb1c30054b1f0cb6b660a2da90",
+          "exit_code": 0,
+          "result": "5 passed in 0.04s",
+          "timestamp_utc": "2026-10-18T15:05:01.486517+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_004_test_o94_local_llm_adapter.json",
+          "sha256": "3d15e0f50072ab357543779969c4c40563b8c066f33c96ad193ca8cf20100d15",
+          "exit_code": 0,
+          "result": "2 passed in 0.23s",
+          "timestamp_utc": "2026-10-18T15:05:03.784361+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_005_test_o94_rag_adaptive.json",
+          "sha256": "2388edfe4ee9a6127eb51fcb06049dc54ca0602166973534d2b833802e418f5f",
+          "exit_code": 0,
+          "result": "2 passed in 0.55s",
+          "timestamp_utc": "2026-10-18T15:05:11.784285+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_005_test_o94_snapshot_portability.json",
+          "sha256": "2a339531d06cbff9a8f99428c1520d0e959864e2e1de8c5bf18583ef8b7bda7d",
+          "exit_code": 0,
+          "result": "3 passed in 0.04s",
+          "timestamp_utc": "2026-10-18T15:05:13.829898+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_005_test_p0_foundation.json",
+          "sha256": "a7a0f06ab183d33310e5e35f376b05eeb9cab9660626493aac6df0790fa5c282",
+          "exit_code": 0,
+          "result": "6 passed in 1.40s",
+          "timestamp_utc": "2026-10-18T15:05:17.139826+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_005_test_p0_o930_artifacts.json",
+          "sha256": "8ae2ac84cc3609bbbf36b45c366352fff1532f3edf0a00969c79b2829f9ee35a",
+          "exit_code": 0,
+          "result": "6 passed in 0.10s",
+          "timestamp_utc": "2026-10-18T15:05:19.287944+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_005_test_p10_portable_acceptance.json",
+          "sha256": "9bcd5c926a38a9a0a157cfd8df084ed2d9d2753bd79910c2651adde1fe0d5071",
+          "exit_code": 0,
+          "result": "5 passed in 1.99s",
+          "timestamp_utc": "2026-10-18T15:05:23.350035+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_006_test_p1_o930_observer_upgrade.json",
+          "sha256": "2b3e20f0d2ff4e0d0fc89c3b5fb081ad1846ae4e756f472a44ec06db1c481281",
+          "exit_code": 0,
+          "result": "7 passed, 2 subtests passed in 0.19s",
+          "timestamp_utc": "2026-10-18T15:05:31.330955+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_006_test_p1_observer.json",
+          "sha256": "eb3517be77957ae4511edb01637cba46934e24a6764fe504dcbf6e6eaa6c9778",
+          "exit_code": 0,
+          "result": "11 passed, 5 subtests passed in 0.27s",
+          "timestamp_utc": "2026-10-18T15:05:33.538527+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_006_test_p2_probes.json",
+          "sha256": "5401c6e5350b4232a259e649875a1f99ad2be5c3c4d5746f4eabdb41120db4f6",
+          "exit_code": 0,
+          "result": "15 passed in 0.38s",
+          "timestamp_utc": "2026-10-18T15:05:35.633024+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_006_test_p3_competencies.json",
+          "sha256": "57c60a2619993ade25b6a0eb8fe270f322bc06c459e45261996cb630b385c99e",
+          "exit_code": 0,
+          "result": "8 passed in 1.12s",
+          "timestamp_utc": "2026-10-18T15:05:38.633559+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_006_test_p3_semantic_rag.json",
+          "sha256": "c4757bebf060071c56cf634659b9246699db3dcf0887fb82f2a8f286689fb78b",
+          "exit_code": 0,
+          "result": "12 passed in 1.72s",
+          "timestamp_utc": "2026-10-18T15:05:42.490516+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_007_test_p4_acquisition.json",
+          "sha256": "c65e0cc7c37f3dde1561b672ea50bf3fcce193ea24ab4ff75b6818400ed3dac1",
+          "exit_code": 0,
+          "result": "7 passed in 8.32s",
+          "timestamp_utc": "2026-10-18T15:06:00.057459+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_007_test_p4_competence_graph.json",
+          "sha256": "e0a79305fed33b0e28817946720e6c9de3ac3a32d8842821a1e0758e7928e717",
+          "exit_code": 0,
+          "result": "10 passed in 2.18s",
+          "timestamp_utc": "2026-10-18T15:06:04.332532+00:00"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_007_test_p5_autonomy_o930.json",
+          "sha256": "f66511fd8c0b50889f3e4133344cafb44e1675bcab928f697fe51997205bbb65",
+          "exit_code": 0,
+          "result": "9 passed in 4.05s",
+          "timestamp_utc": "2026-10-18T15:06:10.500568+00:00"
+        }
+      ],
+      "history": [
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:19:45.506243+00:00",
+          "reason": "Phase P3 reopened on R2 pipeline gap; later phases paused until P3 revalidation and sequential review."
+        },
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:29:56.443454+00:00",
+          "reason": "P4 revalidation completed; P5 may now resume for extended regression and controlled corpus evaluation."
+        },
+        {
+          "status": "PAUSED_DEPENDENCY_REOPENED",
+          "recorded_utc": "2026-10-18T14:46:18.039581+00:00",
+          "reason": "P2 rouvert pour corriger et retester l’ingestion TSV sur un corpus source; la fermeture dépend de P2."
+        },
+        {
+          "status": "PAUSED_DEPENDENCY_REOPENED",
+          "recorded_utc": "2026-10-18T14:51:00.557495+00:00",
+          "reason": "Suspendu pendant la revalidation séquentielle de P3."
+        },
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T14:59:07.825970+00:00",
+          "reason": "P4 revalidation completed; P5 may now resume for extended regression and controlled corpus evaluation."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T15:06:10.760510+00:00",
+          "reason": "La matrice mise à jour couvre tous les modules de test présents; les changements d’ingestion TSV ont une preuve actuelle et le RAG a été testé sur un échantillon du SMS réel et sur un échantillon Screenplay avec évaluation post-hoc."
+        }
+      ],
+      "resumed_utc": "2026-10-18T14:59:07.825970+00:00",
+      "resume_reason": "P4 current tests passed after the P3 fix; proceed with broad non-regression and bounded corpus evaluation.",
+      "paused_reason": "P3 clôturée après retest; P4 doit repasser avant reprise P5.",
+      "completed_utc": "2026-10-18T15:06:10.760510+00:00",
+      "closure_receipts": [
+        {
+          "path": "logs/O94_0/P5_matrix_consolidated_001.json",
+          "sha256": "87a73d0c1d422e0ab090bfba9310640ad4553d66b8e274cc7bc9d063096e9a7f",
+          "status": "PASS",
+          "result": "54/54 modules PASS; 316 tests et 21 sous-tests"
+        },
+        {
+          "path": "logs/O94_0/P5_record_preserving_sms_retest_001_test_o931_record_preserving_rag.json",
+          "sha256": "03d17756d3fc2ffc7dc7aec41e720301d8c165d2a832744e63dcb64db6d62059",
+          "status": "PASS",
+          "result": "4 passed in 22.60s"
+        },
+        {
+          "path": "logs/O94_0/P5_corpus_sample_eval_retest_001_test_o940_real_sms_corpus_sample.json",
+          "sha256": "b05d3c845c1fd7b11356ee53ad9fd4c1504daefaf870ce880e75f06f4b5d62d7",
+          "status": "PASS",
+          "result": "1 passed in 9.89s"
+        },
+        {
+          "path": "logs/O94_0/P5_full_sms_chat_regression_002_test_o940_real_sms_retrieval.json",
+          "sha256": "2fc3362a5752def81da77b6b17e581240e04e64db0076c8c810324a222451395",
+          "status": "PASS",
+          "result": "1 passed in 14.73s"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_003_test_o940_rag_resolution.json",
+          "sha256": "c03fb5d3ca625daaf035390371e7d2da89b03d1908946bf258831377b2d6c966",
+          "status": "PASS",
+          "result": "20 passed in 1.92s"
+        },
+        {
+          "path": "logs/O94_0/P5_matrix_p5b_001_test_o931_chat_pipeline.json",
+          "sha256": "3748a947ebf8c4a1827edeca1ad4d10da99db535f6b7a12001e950cd11867a70",
+          "status": "PASS",
+          "result": "9 passed in 2.98s"
+        },
+        {
+          "path": "logs/O94_0/corpus_eval/P3_bounded_corpus_eval_002.json",
+          "sha256": "031dbd66b073914f7e4b4993fc862106ec8347b3c991ab96b7998ff04c9f015a",
+          "status": "PASS_BOUNDED",
+          "result": "10/10 correspondances exactes post-hoc, réponses non vides et traces de preuve sur 32 enregistrements Screenplay."
+        }
+      ],
+      "result_summary": "Matrice locale: 54/54 modules en PASS, 316 tests et 21 sous-tests; tous les hashes de fichiers de tests correspondent aux reçus sélectionnés. Ingestion TSV: test ciblé sur 300 messages SMS réels, chaque ligne conservée exactement une fois. Recherche/chat SMS: 1 parcours bout-en-bout; le corpus intégral contient 5574 lignes et son ZIP passe CRC. Evaluation Screenplay: 10/10 correspondances exactes post-hoc sur un échantillon de 32 enregistrements; les références ont servi seulement à l’évaluation, pas au runtime.",
+      "scope_limits": [
+        "Le test RAG SMS utilise un échantillon de 300 lignes pour la requête et l’intégration; les 5574 lignes ont été vérifiées comme présentes dans l’archive, mais toutes n’ont pas été interrogées individuellement.",
+        "Screenplay: 32 enregistrements observés et 10 requêtes évaluées; les correspondances exactes sont un résultat borné post-hoc, pas une garantie de vérité universelle.",
+        "Les essais ne valident pas un serveur LLM externe vivant, un OS Windows natif, un appareil caméra/micro/capteur réel ni toutes les extensions multimodales."
+      ],
+      "evidence": [
+        "logs/O94_0/P5_matrix_consolidated_001.json",
+        "logs/O94_0/P5_record_preserving_sms_retest_001_test_o931_record_preserving_rag.json",
+        "logs/O94_0/P5_corpus_sample_eval_retest_001_test_o940_real_sms_corpus_sample.json",
+        "logs/O94_0/P5_full_sms_chat_regression_002_test_o940_real_sms_retrieval.json",
+        "logs/O94_0/P5_matrix_p5b_003_test_o940_rag_resolution.json",
+        "logs/O94_0/P5_matrix_p5b_001_test_o931_chat_pipeline.json",
+        "logs/O94_0/corpus_eval/P3_bounded_corpus_eval_002.json"
+      ]
+    },
+    {
+      "id": "P6",
+      "name": "Formalismes, rapport de laboratoire et registre des preuves O94_0",
+      "status": "COMPLETE_EVIDENCED",
+      "requirements": [
+        "laboratoire_O94_0.tex",
+        "formalisme_O94_0.tex",
+        "registre_preuves_O94_0.json",
+        "rapport incidents et limites",
+        "snapshot sav_AAM_O94_0 synchronisé"
+      ],
+      "exit_criteria": [
+        "JSON valide, LaTeX structurellement sain",
+        "Chaque exigence R1-R3 reliée aux fichiers et tests",
+        "Savepoint possède un manifeste d’intégrité"
+      ],
+      "history": [
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T15:06:10.760510+00:00",
+          "reason": "P5 est fermé sur matrice actuelle et essais de corpus bornés; P6 peut produire les formalismes, laboratoire et registre de preuves finalisés."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T15:16:07.105387+00:00",
+          "reason": "Les deux sources LaTeX passent le contrôle structurel, le registre comprend 16 sous-exigences R1-R3 reliées au code/tests/reçus, et le validateur P6 a passé tous ses contrôles."
+        },
+        {
+          "status": "REOPENED_VALIDATION_DRIFT",
+          "recorded_utc": "2026-10-18T15:18:13.392844+00:00",
+          "reason": "Après fermeture P6, les chemins CRC, les liens P6 du registre, les scripts de savepoint et le laboratoire ont été mis à jour. La clôture et le reçu 001 précèdent ces changements; ils sont préservés comme historiques, P6 est rouverte pour revérification."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED",
+          "recorded_utc": "2026-10-18T15:20:35.472832+00:00",
+          "reason": "P6 fermée uniquement après validation des sources LaTeX/JSON/références et vérification indépendante du manifeste du savepoint."
+        }
+      ],
+      "resumed_utc": "2026-10-18T15:06:10.760510+00:00",
+      "resume_reason": "P5 exit criteria passed with current module receipts and verified sample corpora.",
+      "evidence": [
+        "formalisme_O94_0.tex",
+        "laboratoire_O94_0.tex",
+        "registre_prouves_O94_0.json",
+        "registre_preuves_O94_0.json",
+        "scripts/o940_validate_p6_documents.py",
+        "logs/O94_0/P6_document_authoring_preflight_001.json",
+        "logs/O94_0/P6_document_registry_validation_failed_001.json",
+        "logs/O94_0/P6_document_registry_validation_001.json",
+        "logs/O94_0/P6_artifact_validation_001.json",
+        "rapport_incidents_limites_O94_0.md",
+        "scripts/o940_verify_savepoint.py",
+        "scripts/o940_close_p6.py",
+        "logs/O94_0/P6_reopen_002.json",
+        "logs/O94_0/P6_document_registry_validation_legacy_001.json",
+        "logs/O94_0/P6_closure_legacy_001.json",
+        "logs/O94_0/P6_document_registry_validation_002.json",
+        "docs/O94_0/P6_rapport_incidents_limites.md",
+        "../suivi_model_AAM_O94_0/reports/P6_savepoint_manifest_verify_001.json"
+      ],
+      "result_summary": "Formalisme et laboratoire compilés par pdflatex; registre de 20 entrées, références locales résolues; 137 références de la validation documentaire; point de sauvegarde vérifié par SHA-256 pour tous les fichiers listés, sans fichier manquant/extra.",
+      "closure_receipts": [
+        {
+          "path": "logs/O94_0/P6_artifact_validation_001.json",
+          "sha256": "5f47162288ad880c8f6464091d615f32aa849ab3c31b2214600cb93e0d6024e8",
+          "status": "PASS",
+          "result": "LaTeX équilibré; registre R1-R3 complet (16 exigences); références SHA cohérentes; snapshot existant avec pointeur vérifié."
+        }
+      ],
+      "scope_limits": [
+        "La validation LaTeX est structurelle; aucun PDF n’a été compilé conformément à la priorité du travail.",
+        "La validation des preuves est bornée aux chemins et reçus listés; elle ne garantit pas la vérité universelle des réponses.",
+        "Les essais externes LLM, Windows natif et matériel physique restent hors du périmètre validé."
+      ],
+      "reopened_utc": "2026-10-18T15:18:13.392844+00:00",
+      "reopen_reason": "Le reçu de validation 001 et la fermeture 001 sont antérieurs aux modifications post-clôture du registre, de chemins_O94_0.json et de laboratoire_O94_0.tex; P6 doit couvrir les octets actuels.",
+      "completed_utc": "2026-10-18T15:20:35.472832+00:00"
+    },
+    {
+      "id": "P7",
+      "name": "Empaquetage portable, manifestes et contrôle CRC des livrables",
+      "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "requirements": [
+        "Dmodel_AAM_O94_0.zip",
+        "Amodel_AAM_O94_0.zip",
+        "suivi_model_AAM_O94_0.zip",
+        "chemins_O94_0.json et script restauration/jonction si découpage nécessaire"
+      ],
+      "exit_criteria": [
+        "Chaque ZIP sous 220 MB ou découpé",
+        "testzip et ré-extraction réussissent",
+        "Sommes SHA-256 externes concordantes après gel final"
+      ],
+      "history": [
+        {
+          "status": "IN_PROGRESS",
+          "recorded_utc": "2026-10-18T15:16:07.105387+00:00",
+          "reason": "P6 est terminée sur preuve documentaire et registre validé; le packaging et son contrôle indépendant commencent."
+        },
+        {
+          "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+          "recorded_utc": "2026-10-18T15:33:41.318994+00:00",
+          "reason": "P7 candidate-triplet CRC/extraction/manifest/hash checks and savepoint verification passed; final freeze build will be revalidated independently."
+        }
+      ],
+      "start_reason": "P6 exit criteria passed with verified documents and proof registry.",
+      "started_utc": "2026-10-18T15:20:35.472832+00:00",
+      "result_summary": "Les trois candidats passent CRC, chemins sûrs, extraction indépendante et manifeste interne; tailles <220 000 000 octets; 7 archives/sources d’entrée conformes aux hachages figés; snapshot vérifié sans MagicMock. Une vérification supplémentaire sera émise pour le gel final.",
+      "execution_receipts": [
+        {
+          "path": "logs/O94_0/P7_portable_smoke_001.json",
+          "sha256": "d14602f39b5da8efd0e3fd39493bc417f8cf6b1e9d7776bdcfa525eb2e562f17",
+          "exit_code": 0,
+          "result": "PASS_BOUNDED",
+          "timestamp_utc": "2026-10-18T15:25:47.047605+00:00"
+        },
+        {
+          "path": "logs/O94_0/P7_portable_smoke_002.json",
+          "sha256": "1480a0fb385e682104941357f92db7ed6ee8d79665711be2d15348bff6b0b5d7",
+          "exit_code": 0,
+          "result": "PASS_BOUNDED",
+          "timestamp_utc": "2026-10-18T15:26:15.377911+00:00"
+        },
+        {
+          "path": "logs/O94_0/P7_candidate_triplet_verification_001.json",
+          "sha256": "0ea46afdd7fe0c7ad1e8fba74ed84cdea3be7b1fe33a4ed2a14defb05da144ae",
+          "exit_code": 0,
+          "result": "PASS_BOUNDED",
+          "timestamp_utc": "2026-10-18T15:33:41.318994+00:00"
+        }
+      ],
+      "closure_receipt": "logs/O94_0/P7_closure_001.json",
+      "closed_utc": "2026-10-18T15:33:41.318994+00:00"
+    }
+  ],
+  "history": [
+    {
+      "phase": "P0",
+      "event": "closed",
+      "timestamp_utc": "2026-10-18T13:17:15.581096+00:00",
+      "evidence": "logs/O94_0/P0_input_archive_integrity.json",
+      "status": "COMPLETE_EVIDENCED"
+    },
+    {
+      "phase": "P1",
+      "event": "closed",
+      "timestamp_utc": "2026-10-18T13:17:57.472847+00:00",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": "docs/O94_0/P1_test_contracts.json"
+    },
+    {
+      "at_utc": "2026-10-18T13:38:25.211600+00:00",
+      "event": "P2_CLOSED_P3_OPENED",
+      "receipt": "logs/O94_0/P2_P3_P4_targeted_tests_003.json",
+      "summary": "P2 critères de sortie atteints sur tests ciblés; phase P3 ouverte. Les tests de profondeur/UI présents dans la suite seront relancés avec les preuves P4."
+    },
+    {
+      "at_utc": "2026-10-18T13:38:49.863693+00:00",
+      "event": "PY_COMPILE_PASS",
+      "receipt": "logs/O94_0/P2_py_compile_001.json",
+      "summary": "Modules modifiés et test O94_0 compilés avec succès."
+    },
+    {
+      "at_utc": "2026-10-18T13:39:45.542243+00:00",
+      "event": "P3_TEST_COLLECTION_BLOCKED_IMPORT_PATH",
+      "receipt": "logs/O94_0/P3_import_path_failure_001.json",
+      "summary": "Runner did not resolve the local package during collection; classified as test-runner environment until retest."
+    },
+    {
+      "at_utc": "2026-10-18T13:40:28.161367+00:00",
+      "event": "P3_CHAT_JSONL_RETEST_PASS",
+      "receipt": "logs/O94_0/P3_real_jsonl_chat_retest_001.json",
+      "summary": "End-to-end JSONL retrieval produces one matched response and does not display adjacent rows. External live backends remain separately scoped."
+    },
+    {
+      "at_utc": "2026-10-18T13:41:16.297566+00:00",
+      "event": "P3_PEER_SMOKE_FIXTURE_INVALID",
+      "receipt": "logs/O94_0/P3_peer_smoke_training_input_failure_001.json",
+      "summary": "The test trainer fixture was one segment; fix the fixture and rerun. No inference about AAM delegation."
+    },
+    {
+      "at_utc": "2026-10-18T13:41:49.889244+00:00",
+      "event": "P3_PEER_SMOKE_DUPLICATE_FIXTURE",
+      "receipt": "logs/O94_0/P3_peer_smoke_duplicate_fixture_failure_002.json",
+      "summary": "Identical paragraphs were deduplicated. The smoke fixture will use distinct paragraphs, preserving model trainer criteria."
+    },
+    {
+      "at_utc": "2026-10-18T13:42:46.363639+00:00",
+      "event": "P3_AAM_PEER_FALLBACK_GAP_FOUND",
+      "receipt": "logs/O94_0/P3_aam_peer_empty_answer_001.json",
+      "summary": "Real second workspace executed but did not generate usable text; the parent must surface selected RAG fallback and detailed peer status rather than a bare diagnostic."
+    },
+    {
+      "at_utc": "2026-10-18T13:43:52.159578+00:00",
+      "event": "P3_AAM_PEER_RAG_FALLBACK_ADDED_AND_TESTED",
+      "receipt": "logs/O94_0/P3_peer_fallback_regression_002.json",
+      "summary": "AAM peer no-answer no longer yields only a dead-end notice when selected RAG evidence exists: the answer is a clean extractive fallback, and Details preserves that the delegated model did not answer."
+    },
+    {
+      "at_utc": "2026-10-18T13:44:51.963475+00:00",
+      "event": "P3_CLOSED_P4_OPENED",
+      "receipt": "logs/O94_0/P3_actual_peer_postfix_smoke_001.json",
+      "summary": "P3 clôturée avec portée bornée : chemin RAG→générateur, sélection sans substitution silencieuse, fallback propre, délégation vers workspace AAM réel et transparence du cas peer sans réponse. La génération libre du peer reste non démontrée."
+    },
+    {
+      "at_utc": "2026-10-18T13:45:58.426584+00:00",
+      "event": "P4_UI_BUSY_TIMEOUT_FOUND",
+      "receipt": "logs/O94_0/P4_ui_busy_startup_failure_001.json",
+      "summary": "UI startup progress remains an open issue; inspect callbacks and worker slot before re-run."
+    },
+    {
+      "at_utc": "2026-10-18T13:47:05.633038+00:00",
+      "event": "P4_UI_STARTUP_DIAGNOSTIC_CLEAR",
+      "receipt": "logs/O94_0/P4_ui_startup_diagnostic_001.json",
+      "summary": "The busy timeout from the preceding batch is not reproducible in isolated UI startup; test reruns are required."
+    },
+    {
+      "at_utc": "2026-10-18T13:47:11.967289+00:00",
+      "event": "P3_REOPENED_AFTER_CODE_REVIEW",
+      "previous_status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "status": "IN_PROGRESS",
+      "reason": "Retest requis après correction du routage RAG→générateur AAM; la clôture précédente est conservée dans l’historique.",
+      "code_changes": [
+        "aam_o93/runtime.py",
+        "tests/test_o940_rag_resolution.py"
+      ]
+    },
+    {
+      "at_utc": "2026-10-18T13:47:37.658981+00:00",
+      "event": "P4_UI_BUSY_ISOLATED_RETEST_PASS",
+      "receipt": "logs/O94_0/P4_ui_busy_isolated_retest_001.json",
+      "summary": "The named test passes in isolation; retain the batch discrepancy until the batch is rerun."
+    },
+    {
+      "at_utc": "2026-10-18T13:48:30.049212+00:00",
+      "event": "P4_DETAILS_DEPTH_UI_PASS",
+      "receipt": "logs/O94_0/P4_details_depth_ui_001.json",
+      "summary": "The actual Tk details window exposes provenance and generation diagnostics while transcript remains plain answer; depth selector and AAM workspace selector persist."
+    },
+    {
+      "at_utc": "2026-10-18T13:49:07.698504+00:00",
+      "event": "P4_CLOSED_P5_OPENED",
+      "receipt": "logs/O94_0/P4_ui_regression_002.json",
+      "summary": "P4 closed from hierarchical-search budget tests plus concrete Tk Details/depth/AAM selector tests and a successful UI regression batch."
+    },
+    {
+      "at_utc": "2026-10-18T13:50:34.647668+00:00",
+      "event": "P5_EXTENDED_BATCH_A_TIMEOUT",
+      "receipt": "logs/O94_0/P5_extended_batch_A_timeout_001.json",
+      "summary": "No aggregate result accepted. Split modules and preserve per-module receipts."
+    },
+    {
+      "at_utc": "2026-10-18T13:51:36.652427+00:00",
+      "event": "P3_RETESTED_AFTER_REOPEN_AND_CLOSED",
+      "receipt": "logs/O94_0/P3_peer_delegation_end_to_end_005.json",
+      "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "summary": "24 tests réussis; le chemin RAG→peer AAM traite question et preuves séparément, recursion désactivée, trace minimisée. Le serveur LLM externe live reste non testé."
+    },
+    {
+      "at_utc": "2026-10-18T13:51:36.652427+00:00",
+      "event": "P4_REOPENED_FOR_HIERARCHICAL_MEMORY_GAP",
+      "previous_status": "COMPLETE_EVIDENCED",
+      "status": "IN_PROGRESS",
+      "reason": "La fermeture précédente prouvait le micro-RAG et le panneau Details mais pas le raffinement hiérarchique de la mémoire événementielle, explicitement demandé dans R3.",
+      "scope": [
+        "aam_o93/memory.py",
+        "aam_o93/ui.py",
+        "tests for query-scoped memory resolution"
+      ]
+    },
+    {
+      "at_utc": "2026-10-18T13:58:52.659439+00:00",
+      "event": "P4_MEMORY_RESOLUTION_INITIAL_TEST_STOP",
+      "receipt": "logs/O94_0/P4_memory_resolution_initial_001.json",
+      "summary": "8 tests passed before --maxfail stopped on a privacy assertion that searched the entire audit log rather than the query-audit event; fix test scope and rerun P4."
+    },
+    {
+      "at_utc": "2026-10-18T13:59:37.810122+00:00",
+      "event": "P4_MEMORY_RESOLUTION_RETEST_PASS",
+      "receipt": "logs/O94_0/P4_memory_resolution_retest_002.json",
+      "summary": "36 memory-resolution, causal-memory and RAG tests passed; query privacy assertion now inspects the resolution-access event, preserving the earlier over-broad assertion failure as history."
+    },
+    {
+      "at_utc": "2026-10-18T14:00:53.217261+00:00",
+      "event": "P4_UI_MEMORY_BATCH_TIMEOUT",
+      "receipt": "logs/O94_0/P4_ui_memory_batch_timeout_001.json",
+      "summary": "UI/memory combined batch timed out after two progress dots without final pytest summary; isolate modules and preserve as unresolved tooling/test execution incident."
+    },
+    {
+      "at_utc": "2026-10-18T14:01:51.222775+00:00",
+      "event": "P4_MODULE_PASS",
+      "module": "tests/test_o940_ui_resolution_details.py",
+      "receipt": "logs/O94_0/P4_modules/test_o940_ui_resolution_details.receipt.json",
+      "summary": "PASS in isolated P4 module; duration=3.338s; no inference beyond its own receipt."
+    },
+    {
+      "at_utc": "2026-10-18T14:02:00.773580+00:00",
+      "event": "P4_MODULE_PASS",
+      "module": "tests/test_o931_ui_smoke.py",
+      "receipt": "logs/O94_0/P4_modules/test_o931_ui_smoke.receipt.json",
+      "summary": "PASS in isolated P4 module; duration=3.307s; no inference beyond its own receipt."
+    },
+    {
+      "at_utc": "2026-10-18T14:02:09.768804+00:00",
+      "event": "P4_MODULE_PASS",
+      "module": "tests/test_o931_ui_busy_catalog_refresh.py",
+      "receipt": "logs/O94_0/P4_modules/test_o931_ui_busy_catalog_refresh.receipt.json",
+      "summary": "PASS in isolated P4 module; duration=2.969s; no inference beyond its own receipt."
+    },
+    {
+      "at_utc": "2026-10-18T14:02:18.268509+00:00",
+      "event": "P4_MODULE_PASS",
+      "module": "tests/test_p6_memory_event_inspection.py",
+      "receipt": "logs/O94_0/P4_modules/test_p6_memory_event_inspection.receipt.json",
+      "summary": "PASS in isolated P4 module; duration=2.171s; no inference beyond its own receipt."
+    },
+    {
+      "at_utc": "2026-10-18T14:02:26.150545+00:00",
+      "event": "P4_MODULE_PASS",
+      "module": "tests/test_p6_memory_causal_graph_view.py",
+      "receipt": "logs/O94_0/P4_modules/test_p6_memory_causal_graph_view.receipt.json",
+      "summary": "PASS in isolated P4 module; duration=1.877s; no inference beyond its own receipt."
+    },
+    {
+      "timestamp_utc": "2026-10-18T14:44:05.882782+00:00",
+      "event": "REOPEN_PHASE",
+      "phase": "P3",
+      "previous_status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "new_status": "IN_PROGRESS",
+      "reason": "Contexte source RAG tronqué lors du transfert au générateur; appliquer séparation classement-réponse vs contexte-generation."
+    },
+    {
+      "timestamp_utc": "2026-10-18T14:46:10.743201+00:00",
+      "event": "PHASE_CLOSED",
+      "phase": "P3",
+      "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+      "basis": "33 tests, 5 sous-tests réussis; RAG attempted before generation even for empty index; context filtering retested"
+    },
+    {
+      "event": "phase_reopened",
+      "phase": "P2",
+      "timestamp_utc": "2026-10-18T14:46:18.039581+00:00",
+      "reason": "Le vrai SMS Spam Collection a montré que le parseur strict CSV pouvait rejeter un flux TSV texte avec guillemets non échappés; l’ingestion produisait 0 chunk. Le parsing TSV vient d’être rendu tolérant et doit être vérifié avec tests et corpus réels avant de re-clore P2.",
+      "previous_current_phase": "P4"
+    },
+    {
+      "timestamp_utc": "2026-10-18T14:48:19.729576+00:00",
+      "event": "phase_reopen_runner_status_normalized",
+      "phase": "P2",
+      "reason": "TSV SMS ingestion retest required before dependent phases resume."
+    },
+    {
+      "event": "phase_closed",
+      "phase": "P2",
+      "timestamp_utc": "2026-10-18T14:50:36.533037+00:00",
+      "next_phase": "P3",
+      "reason": "Required ingestion/whole-record receipts PASS."
+    },
+    {
+      "timestamp_utc": "2026-10-18T14:51:00.557495+00:00",
+      "event": "P2_closed_P3_resumed",
+      "phase": "P3",
+      "reason": "P2 source-corpus gate passed; long structured answer defect must be tested before later phases resume."
+    }
+  ],
+  "last_execution": {
+    "phase": "P7",
+    "name": "candidate-triplet-integrity-and-phase-closure",
+    "receipt": "logs/O94_0/P7_closure_001.json",
+    "receipt_sha256": "5c86e059c6ff5e22bc8a7f77e7afbcabf5c4b46fd9e6352794ca062507b26e90",
+    "exit_code": 0,
+    "classification": "PASS_BOUNDED",
+    "timestamp_utc": "2026-10-18T15:33:41.318994+00:00"
+  },
+  "last_closure": {
+    "phase": "P7",
+    "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+    "timestamp_utc": "2026-10-18T15:33:41.318994+00:00",
+    "receipts": [
+      {
+        "path": "logs/O94_0/P7_closure_001.json",
+        "sha256": "5c86e059c6ff5e22bc8a7f77e7afbcabf5c4b46fd9e6352794ca062507b26e90",
+        "status": "PASS_BOUNDED"
+      },
+      {
+        "path": "logs/O94_0/P7_candidate_triplet_verification_001.json",
+        "sha256": "0ea46afdd7fe0c7ad1e8fba74ed84cdea3be7b1fe33a4ed2a14defb05da144ae",
+        "status": "PASS_BOUNDED"
+      }
+    ]
+  },
+  "baseline_hashes": {
+    "Dmodel_AAM_O94.zip": {
+      "path": "/mnt/data/Dmodel_AAM_O94.zip",
+      "size_bytes": 168235491,
+      "sha256": "0d857f60fd87e8600608a86b0aab9d3573ab772c1a976d1d6fa9530cc5b8630b",
+      "zip_crc": "NOT_RUN"
+    },
+    "Amodel_AAM_O94.zip": {
+      "path": "/mnt/data/Amodel_AAM_O94.zip",
+      "size_bytes": 147620367,
+      "sha256": "3531ea1a1623b386cc9bae02f7dc91f105f548cb593d9610a8abcbec713b2d00",
+      "zip_crc": "NOT_RUN"
+    },
+    "suivi_model_AAM_O94.zip": {
+      "path": "/mnt/data/suivi_model_AAM_O94.zip",
+      "size_bytes": 169134229,
+      "sha256": "d09c91c47b692bd3fb702b1fcbabc95172ddae7a704efdd14cafd77a4243a040",
+      "zip_crc": "NOT_RUN"
+    },
+    "Dmodel_AAM_O93_1.zip": {
+      "path": "/mnt/data/Dmodel_AAM_O93_1.zip",
+      "size_bytes": 156625150,
+      "sha256": "1316374f1adffefa8ddd2bb389b5e91521297d2a627316e6911d8b742f80ef0a",
+      "zip_crc": "NOT_RUN"
+    },
+    "Amodel_AAM_O93_0_modifier.zip": {
+      "path": "/mnt/data/Amodel_AAM_O93_0_modifier.zip",
+      "size_bytes": 136677036,
+      "sha256": "c70d63388fd5be0f584609a4454cb6279df81d29f5d76625012ca36c3d6454d5",
+      "zip_crc": "NOT_RUN"
+    },
+    "embedded_sources_AAM_17.zip": {
+      "path": "source_material/source_archive/sources_AAM_17.zip",
+      "size_bytes": 39758574,
+      "sha256": "add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38",
+      "verification": "PRESENT"
+    },
+    "DDD_Base_theorie_des_empreintes_complete_order_5.tex": {
+      "path": "source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex",
+      "size_bytes": 217783,
+      "sha256": "7256823991944d2da57a8460517dac97259ae375a3ccb0a2d7f05477af006e2a",
+      "verification": "PRESENT"
+    }
+  },
+  "updated_utc": "2026-10-18T15:33:41.318994+00:00",
+  "last_update_utc": "2026-10-18T15:33:41.318994+00:00",
+  "phase_transition_history": [
+    {
+      "event": "P4_CLOSED_P5_READY_NOT_STARTED",
+      "timestamp_utc": "2026-10-18T14:03:08.259084+00:00",
+      "from": "P4",
+      "to": "P5",
+      "condition": "Tous les critères P4 ont des reçus de retest réussis; P5 reste PENDING jusqu’au lancement explicite."
+    },
+    {
+      "event": "P5_STARTED_AFTER_P4_EVIDENCED_CLOSE",
+      "timestamp_utc": "2026-10-18T14:05:20.618023+00:00",
+      "from": "P4",
+      "to": "P5",
+      "condition": "P4 clôturée avec tests, rapport et snapshot vérifié."
+    }
+  ],
+  "last_phase_closure": {
+    "phase": "P7",
+    "status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+    "timestamp_utc": "2026-10-18T15:33:41.318994+00:00",
+    "receipts": [
+      {
+        "path": "logs/O94_0/P7_closure_001.json",
+        "sha256": "5c86e059c6ff5e22bc8a7f77e7afbcabf5c4b46fd9e6352794ca062507b26e90",
+        "status": "PASS_BOUNDED"
+      },
+      {
+        "path": "logs/O94_0/P7_candidate_triplet_verification_001.json",
+        "sha256": "0ea46afdd7fe0c7ad1e8fba74ed84cdea3be7b1fe33a4ed2a14defb05da144ae",
+        "status": "PASS_BOUNDED"
+      }
+    ]
+  }
+}

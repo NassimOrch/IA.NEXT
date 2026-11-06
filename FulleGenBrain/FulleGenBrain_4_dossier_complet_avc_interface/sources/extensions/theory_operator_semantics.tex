@@ -1,0 +1,26 @@
+\subsection{Sémantique contractuelle des opérateurs de recherche et de mémoire}
+Les constructeurs transversaux sont des opérations du langage, pas des effets implicites du runtime. La table ci-dessous fixe leur résultat contractuel minimal et les contrôles de sûreté. Une implémentation peut raffiner ces contrats, mais ne peut ni supprimer la provenance, ni transformer un résultat incertain en succès certifié.
+\begin{longtable}{p{0.19\textwidth}p{0.37\textwidth}p{0.34\textwidth}}
+\toprule Opérateur & Sémantique / résultat & Conditions et invariants minimaux \\
+\midrule
+\endfirsthead
+\toprule Opérateur & Sémantique / résultat & Conditions et invariants minimaux \\
+\midrule
+\endhead
+\(\mathsf{Choose}(p_1,\ldots,p_n)\) & Expose l'ensemble des alternatives admissibles; ne choisit pas silencieusement une gagnante. & Alternatives bien typées; stratégie de résolution explicite si une seule voie doit être exécutée. \\
+\(\mathsf{Select}(\pi,p_1,\ldots,p_n)\) & Applique la politique versionnée \(\pi\) aux seules alternatives admissibles et journalise le choix. & Score heuristique distinct d'une preuve; contraintes dures et portes de sûreté non contournables. \\
+\(\mathsf{Synthesize}(G,D)\) & Produit un front ou un flux reprenable de \(\mathsf{PROGRAM\mbox{-}CANDIDATE}\) qui répond à l'objectif \(G\) sur les données \(D\). & Grammaire, budgets et données versionnés; contre-exemples conservés; aucun candidat auto-certifié. \\
+\(\mathsf{Hibernate}(c)\) & Décharge la représentation active en gardant le payload exact récupérable, le hash et les dépendances. & Refus si épinglé, loué, en transaction ou requis par une révocation; checkpoint persistant avant déchargement. \\
+\(\mathsf{Wake}(c,q)\) & Restaure \(c\) à la demande de contexte \(q\), puis produit \(\mathsf{ACTIVE}\), \(\mathsf{STALE}\) ou un refus explicite. & Vérification d'intégrité, de version, de contexte, de droits et revalidation des dépendances; le chargement seul ne valide rien. \\
+\(\mathsf{Compress}(m,k)\) & Encode \(m\) dans un format \(k\) avec reconstruction canonique sans perte. & Round-trip et hash contrôlés; ratio mesuré; provenance/version conservées. \\
+\(\mathsf{Summarize}(m,k,\epsilon)\) & Produit une vue dérivée avec perte contrôlée dans un domaine de questions défini. & Source exacte conservée; \(\epsilon\) et métrique qualifiés par domaine; la vue ne remplace jamais une preuve source. \\
+\(\mathsf{Restore}(k)\) & Réhydrate un checkpoint ou objet stocké en vérifiant sa cohérence. & Schéma et versions compatibles; intégrité, dépendances et effets externes réconciliés ou déclarés ambigus. \\
+\(\mathsf{EmitWave}(w)\) & Persiste un événement typé dirigé vers des abonnés admissibles. & Identifiant idempotent, provenance source/version, priorité, TTL/fan-out et backpressure. \\
+\(\mathsf{ReceiveWave}(w)\) & Valide, déduplique et route une vague vers un handler déclaré. & Schéma/version/source contrôlés; handler idempotent ou sémantique de replay explicite; révocations prioritaires. \\
+\(\mathsf{ResumeSearch}(k)\) & Restaure un front de recherche après budget ou interruption. & AST/grammaire, signature, versions, graines, statistiques et budget cohérents; migration ou rejet si schéma incompatible. \\
+\(\mathsf{Checkpoint}(p,k)\) & Capture un état cohérent du programme, du front et des effets observables. & Point de cohérence explicite; les effets externes non idempotents exigent réconciliation/compensation, pas un simple rollback mémoire. \\
+\(\mathsf{Revoke}(d)\) & Révoque une preuve, version ou dépendance et marque ses descendants à réévaluer. & Propagation transitive traçable; aucun descendant dépendant ne reste certifié sans nouvelle justification. \\
+\(\mathsf{Txn}(p,\kappa)\) & Exécute une transaction selon la politique \(\kappa\) et rend le résultat final ou partiel explicite. & Atomicité limitée au domaine garanti; les effets distribués nécessitent saga, idempotence ou réconciliation. \\
+\bottomrule
+\end{longtable}
+\paragraph{Portée.} Ces contrats spécifient une sémantique cible et ses conditions d'admissibilité. Ils ne déclarent pas que tous les constructeurs sont déjà implantés dans un runtime unique. L'état de couverture entre théorie, architecture, code et tests est conservé dans la matrice FulleGenBrain\_3 et dans le registre de preuves.

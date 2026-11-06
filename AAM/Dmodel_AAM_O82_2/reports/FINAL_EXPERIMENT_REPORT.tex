@@ -1,0 +1,126 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry,hyperref,booktabs,longtable,array,tabularx,enumitem,amsmath,amssymb}
+\geometry{margin=2.35cm}
+\setlist{nosep}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,hypertexnames=false}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\title{Rapport expérimental comparatif AAM O82\_2 / O82\_c1}
+\author{ROCA-D / AAM}
+\date{6 octobre 2026}
+\begin{document}
+\sloppy
+\setlength{\emergencystretch}{2em}
+\maketitle
+\tableofcontents
+
+\chapter{Description}
+Cette campagne mesure le comportement de quatre générations AAM sur des problèmes textuels réels issus de \emph{SMSSpamCollection} : O82 primaire, O82\_0, O82\_1 et O82\_c0, puis vérifie les corrections introduites dans O82\_2 et O82\_c1. L'objectif n'est pas d'obtenir un score cosmétique mais d'évaluer apprentissage, généralisation, couverture, abstention, consommation de ressources, mémoire, vitesse, observation dégradée, auto-observation, confiance et utilisation de langues naturelles.
+
+Le corpus original contient 5 574 lignes. Le fichier enrichi contient 5 572 lignes. La comparaison de provenance a conduit à retenir 5 031 couples pour lesquels l'identifiant de ligne, le label et le texte source sont cohérents après normalisation documentaire. Aucune information HOLDOUT ou OOD n'est utilisée pour choisir le learner dans les protocoles de production.
+
+\chapter{Architecture}
+Les versions corrigées conservent la hiérarchie normative suivante : mémoire exacte d'abord, candidate généralisée ensuite, certification indépendante en dernier. Le runtime reste non-LLM et ne contient ni table de réponses SMS ni règle métier cachée.
+
+Le portfolio contient plusieurs candidats génériques. Les candidats sont comparés sur une partition interne de TRAIN selon précision, couverture, transfert, stabilité, coût, complexité et ressources. Le meilleur candidat est refitté sur la totalité de TRAIN. Le candidat \texttt{o81\_exact\_tree} conserve une implémentation générique compatible avec le learner O81 0.3 ; \texttt{rich\_generic\_tree} ajoute une représentation générique structurée.
+
+La mémoire guide également l'acquisition : après chaque observation, le retrieval est réévalué et peut fournir un ensemble minimal de probes nécessaires. L'auto-observation est une transition contrôlée et peut réserver une ressource pour l'action ou la probe suivante.
+
+\chapter{Pipeline complet}
+\begin{enumerate}
+\item Provenance et séparation TRAIN/HOLDOUT/OOD.
+\item Construction d'une empreinte partielle à partir des probes disponibles.
+\item Retrieval mémoire obligatoire avant une nouvelle acquisition.
+\item Calcul de suffisance relative au contrat.
+\item Génération d'une décision exacte ou candidate généralisée.
+\item Vérification indépendante avec preuves cas-locales.
+\item Memorization et fermeture si la preuve satisfait le contrat.
+\item En apprentissage : sélection train-only, correction itérative éventuelle, refit final sur tout TRAIN.
+\item En contrôle : observation dégradée, auto-observation causale et réservation de ressources.
+\item Replay, recovery et audit de l'épisode.
+\end{enumerate}
+
+\chapter{Commandes d'exécution}
+Les commandes normatives du package sont exécutées depuis sa racine :
+\begin{verbatim}
+PYTHONPATH=src python -W error::ResourceWarning \\
+  -m unittest discover -s tests
+PYTHONPATH=src python scripts/validate_o82.py \\
+  --output reports/P11_validation.json
+PYTHONPATH=src python scripts/benchmark_o82.py \\
+  --output reports/P12_benchmark.json
+PYTHONPATH=src python -m aam_o82 audit
+PYTHONPATH=src python -m aam_o82 run \\
+  --problem examples/task.json \\
+  --contract examples/echo_contract.json \\
+  --config config/runtime.json \\
+  --workdir runs/runtime \\
+  --max-steps 32
+\end{verbatim}
+Le chemin sans installation par \texttt{PYTHONPATH=src} a été utilisé dans les contrôles PC propres.
+
+\chapter{Résultats}
+\section{Comparaison des versions}
+\begin{description}
+\item[O82 primaire.] HOLDOUT : 8.765\% de couverture et 8.765\% d'accuracy. OOD anglais : 10.436\% et 10.436\%. Acquisition : 4.33 s; RSS : 110200 KB.
+\item[O82\_0.] HOLDOUT : 8.765\% de couverture et 8.765\% d'accuracy. OOD anglais : 10.436\% et 10.436\%. Acquisition : 2.76 s; RSS : 114556 KB.
+\item[O82\_1.] HOLDOUT : 81.806\% de couverture et 81.673\% d'accuracy. OOD anglais : 79.789\% et 79.392\%. Acquisition : 15.99 s; RSS : 117344 KB.
+\item[O82\_c0.] HOLDOUT : 81.806\% de couverture et 81.673\% d'accuracy. OOD anglais : 79.789\% et 79.392\%. Acquisition : 16.25 s; RSS : 113144 KB.
+\end{description}
+
+La précision sélective des branches corrigées est de 99.838\% sur HOLDOUT et 99.503\% sur OOD anglais. Les gains de couverture sont donc principalement obtenus sans transformer la voie généralisée en table de réponses.
+
+\section{Pourquoi O81 0.3 généralisait}
+Le contrôle O81 0.3 reproduit son protocole sur L1 : \texttt{tree\_classifier} avec représentation générique puis refit sur les 800 exemples TRAIN. Il obtient 94.5\% HOLDOUT et 79.75\% OOD. Le même backend porté dans O82\_2/c1 reproduit exactement ces résultats. Le \texttt{rich\_generic\_tree} O82 donne 95.5\% HOLDOUT et 85.25\% OOD.
+
+L'explication est donc expérimentale : O81 disposait d'un learner générique inductif plus riche que le premier O82 corrigé, et son protocole séparait sélection interne et refit final. La répétition des erreurs n'est pas la cause unique de la généralisation, même si elle améliore la couverture lorsqu'elle est ajoutée proprement.
+
+\section{Apprentissage par lots et correction}
+Sur L1, le one-pass char-ngram donne 81.5\% de couverture HOLDOUT et 26\% OOD. Après deux rondes de correction interne, la couverture atteint 88\% HOLDOUT et 33.75\% OOD, avec 87\% et 28.5\% d'accuracy globale. La conclusion est de conserver cette boucle comme mécanisme train-only de recherche et de correction, avec arrêt sur critères internes, puis refit complet.
+
+\section{Réponse généralisée et confiance}
+Un SMS HOLDOUT transformé par suppression de ponctuation produit une candidate \texttt{ham} de confiance 0.912579, source \texttt{generalized\_skill}, \texttt{certified=false}. Le statut terminal est une abstention avec candidate visible; la représentation interne est \texttt{certified=false}. La confiance mesurée sur le rich-tree a ECE 0.0359 et Brier 0.0419 sur HOLDOUT, mais ECE 0.1331 et Brier 0.1404 sur OOD. Il est donc rigoureux de parler de \emph{score de confiance} et non de probabilité universelle.
+
+\section{Observation dégradée}
+Sur huit SMS réels, la stratégie mémoire-guidée utilise deux probes, \texttt{structure} et \texttt{text}, et obtient 8/8 décisions \texttt{DONE} correctes. Le contrôle exhaustif utilise cinq probes. Les coûts déclarés passent de 1.35 à 0.35, soit une réduction de 74.07\%. Le temps mur d'un bundle exhaustif peut cependant être inférieur grâce au parallélisme ; il ne doit pas être confondu avec le coût agrégé.
+
+\section{Auto-observation}
+Avec le même SMS réel et le même désaccord instrumenté, le mode auto-observation activé produit une planification \texttt{SelfObservationScheduled}=1, sept événements \texttt{SelfObserved} et une réservation \texttt{ProbePredictionReserved}=1. Lorsque l'auto-observation est désactivée, les trois compteurs sont nuls. Ceci démontre une intégration conditionnelle et causale, sans démontrer que l'auto-observation est toujours bénéfique.
+
+\section{Langage et multilingue}
+Les tests utilisent des entrées SMS réelles en anglais, ainsi que des traductions et OOD en français, allemand et d'autres langues. Dans le protocole réduit, O82\_2/c1 atteignent 86.67\% HOLDOUT et 91.67\% OOD sur 36 cas multilingues ; un contrôle de 42 cas atteint 92.86\%. La métadonnée de langue n'est pas fournie au learner. Les sorties sont des décisions textuelles/symboliques et des candidates avec confiance. Ce runtime ne revendique pas de génération libre de prose de type LLM.
+
+\section{Robustesse}
+Sur 600 transformations de casse, ponctuation et espaces, les parents résolvent 3.5\% des cas, alors que les branches corrigées couvrent 87.33\% avec 99.62\% d'accuracy sélective. Cette expérience sépare bien la simple correspondance d'empreinte d'une représentation textuelle généralisable.
+
+\section{Ressources}
+Les branches O82\_2/c1 ont une acquisition complète d'environ 16 s sur le protocole large et une RSS d'environ 111--117 MB. Le rich-tree L1 demande environ 0.81 s pour son entraînement candidat, contre 16.06 s pour le contrôle O81 exact-tree. Le portfolio ajoute un coût de sélection, mais il permet le choix train-only d'un learner générique et la conservation du backend O81-compatible.
+
+\chapter{Interprétations des résultats}
+La suggestion d'apprentissage par répétition est objectivement pertinente, mais la bonne formulation est une boucle de correction train-only, non une optimisation « jusqu'au résultat souhaité » observé sur le test. Utiliser HOLDOUT/OOD comme signal d'arrêt serait une fuite de protocole.
+
+La suggestion d'une réponse généralisée accompagnée d'un pourcentage est également pertinente dans sa version contrôlée. Il est préférable de ne pas supprimer l'information utile ; il faut néanmoins séparer explicitement \texttt{candidate}, confiance et certification. Une confiance seule ne peut pas prouver une décision exacte.
+
+Les expériences montrent également que la mémoire peut être utilisée comme une structure de planification d'effort et pas uniquement comme un stockage. La preuve 2 probes contre 5 sur des cas réels rend l'idée d'observation dégradée opérationnelle. L'auto-observation est maintenant une véritable voie de contrôle, mais son utilité dépend du déclencheur et du budget.
+
+\chapter{Conséquence : théorique}
+La distinction entre empreinte exacte, prédiction généralisée et preuve certifiée devient une séparation fondamentale. Une observation partielle peut suffire pour une classe de questions et être insuffisante pour une autre. Le système peut donc apprendre une hiérarchie de représentations et de coûts plutôt qu'une seule représentation universelle.
+
+\chapter{Conséquence : conceptuelle}
+AAM évolue vers une architecture où mémorisation, induction, correction, observation adaptative et auto-observation se renforcent. O82\_2/c1 récupèrent le potentiel général d'O81 tout en conservant les contrats de vérification et de non-triche. Le rich-tree dépasse le contrôle O81 sur L1, mais le portfolio conserve aussi le backend exact O81.
+
+\chapter{Conséquence : opérationnelle}
+Le principal prix des nouvelles capacités est le coût d'apprentissage et de stockage. En échange, la couverture hors empreinte augmente fortement. L'utilisateur dispose d'une réponse candidate même lorsqu'une preuve exacte manque, avec une confiance et un statut explicitement visibles. Les ressources d'observation sont réduites lorsque la mémoire connaît déjà le sous-ensemble pertinent.
+
+\chapter{Conclusions}
+O82\_2 et O82\_c1 sont des corrections objectivement justifiées par les expériences. Elles ne reposent pas sur une table de réponses SMS et ne contournent pas la vérification. La comparaison O81 démontre que la généralisation requiert un learner générique adapté et un protocole de sélection/refit correct ; la répétition vient en complément. Les tests d'auto-observation et d'observation dégradée montrent que ces mécanismes existent réellement dans le pipeline et ne sont pas uniquement documentaires.
+
+\chapter{Statut du model}
+\textbf{O82\_2 : VALIDÉ POUR LES PROTOCOLES EXPÉRIMENTAUX MESURÉS.}
+
+\textbf{O82\_c1 : VALIDÉ POUR LES PROTOCOLES EXPÉRIMENTAUX MESURÉS.}
+
+Ce statut ne constitue pas une garantie universelle de performance. Les jeux de données, budgets, contrats et configurations doivent être conservés avec les résultats. Toute future amélioration devra reproduire les contrôles de généralisation, observation, auto-observation, certification et non-régression avant d'être promue.
+\end{document}

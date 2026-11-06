@@ -1,0 +1,356 @@
+\documentclass[11pt,a4paper,oneside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=2.25cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs}
+\usepackage{booktabs,longtable,tabularx,array,enumitem}
+\usepackage{hyperref,bookmark,fancyhdr}
+\usepackage{xurl}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black,pdftitle={Rapport 1 — théorie des empreintes et formalisme de l'observation},pdfauthor={Etude de corpus source ng adapt 0}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}\setlength{\emergencystretch}{2em}\sloppy
+\setlist{itemsep=2pt,topsep=3pt}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Empreintes et observation — version 1}\fancyhead[R]{\thepage}\renewcommand{\headrulewidth}{0.4pt}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{theorem}{Théorème}[chapter]
+\newtheorem{lemma}{Lemme}[chapter]
+\newtheorem{corollary}{Corollaire}[chapter]
+\newtheorem{remark}{Remarque}[chapter]
+\newcommand{\R}{\mathbb R}
+\newcommand{\X}{\mathcal X}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Fcal}{\mathcal F}
+\newcommand{\Gcal}{\mathcal G}
+\newcommand{\Lcal}{\mathcal L}
+\newcommand{\I}{\mathsf I}
+\newcommand{\cl}{\operatorname{cl}}
+\begin{document}
+\hypersetup{pageanchor=false}
+\pagenumbering{roman}
+\begin{titlepage}
+\centering
+{\Large Version incrémentale 1 — audit scientifique}\par\vspace{1.1cm}
+{\Huge\bfseries Théorie des empreintes et formalisme de l'observation}\par\vspace{0.6cm}
+{\LARGE Comparaison formelle, alignement des notions, dépendances et limites de preuve}\par\vspace{1.5cm}
+\begin{tabularx}{\textwidth}{rX}
+\textbf{Archive source :} & \path{sources_ng_adapt_0.zip}\\
+\textbf{Théorie primaire présente :} & \path{DDD_Base_theorie_des_empreintes_complete_order_5.tex}\\
+\textbf{Formalisme observationnel :} & \path{NGeGenBrain_observation_formalisme_full_0.tex}\\
+\textbf{Version du rapport :} & \path{rapport_th_emp_vs_obs_1.tex}\\
+\textbf{Date de l'étude :} & 29 octobre 2026\\
+\textbf{Statut :} & rapport d'analyse des sources, avec preuves locales explicites
+\end{tabularx}
+\vfill
+\textit{Règle de lecture : une correspondance définitoire, une preuve mathématique, un résultat empirique et une interprétation sont des statuts différents. Aucun d'eux ne se substitue aux autres.}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\chapter*{Résumé exécutif}
+\addcontentsline{toc}{chapter}{Résumé exécutif}
+Les deux corpus partagent un noyau mathématique très net : un protocole applique des sondes à un objet dans un contexte; les réponses forment une signature appelée empreinte; l'égalité des signatures induit une relation d'indiscernabilité, ses fibres et un quotient canonique; les propriétés constantes sur ces fibres factorisent par l'empreinte. Cette correspondance peut être démontrée exactement en restreignant le formalisme observationnel au cas déterministe scalaire, à contexte fixé et à des sondes admissibles.
+
+Ils ne sont toutefois pas la même théorie dans leur portée complète. La théorie des empreintes développe notamment la géométrie des seuils, les filtrations de partitions, la hiérarchie, l'ultramétrique dérivée, les transports compatibles, l'identité interne et des extensions sur l'apprentissage et la recherche. Le formalisme de l'observation consolide et opérationnalise le noyau, et insiste davantage sur le typage des observations, les préconditions d'acquisition, les données manquantes, le bruit, la provenance, les dossiers d'évidence, les interventions, l'identifiabilité et le problème inverse. Ces développements se chevauchent mais ne sont pas tous réductibles l'un à l'autre.
+
+Le verdict adéquat est donc : **noyau commun formellement aligné; formalismes complets distincts et partiellement complémentaires; extension conservatrice démontrable seulement sur la restriction commune déclarée**. Dire que le texte observationnel est « la suite » historique de la théorie ne découle pas de son seul contenu mathématique. On peut dire qu'il prolonge et précise le cadre sur certains axes opérationnels, sans affirmer une chronologie intellectuelle non prouvée.
+
+Une correction conceptuelle centrale est impérative : une empreinte est une représentation construite à partir d'observations; elle n'est ni l'enregistrement complet, ni un dossier de provenance, ni un mécanisme causal identifié. La constance sur les fibres est vraie par définition, mais l'invariance sous une transformation d'objet ou un changement de contexte exige une autre égalité et des quantificateurs explicites.
+
+\chapter{Description, périmètre et hiérarchie des sources}
+\section{Inventaire effectivement présent}
+L'archive fournie est disponible sous \path{/mnt/data/sources_ng_adapt_0.zip}. Après extraction, les chemins primaires identifiés sont :
+\begin{itemize}
+\item Théorie des empreintes : \path{th_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex} (217\,783 octets).
+\item Formalisme observationnel principal : \path{th_emp/observation_formalisme_full_0_bundle.zip}; son README désigne \texttt{NGeGenBrain\_observation\_formalisme\_full\_0.tex} comme maître consolidé.
+\item Révisions dans le bundle : \texttt{NGeGenBrain\_observation\_formalisme\_next\_0.tex} (source), \texttt{NGeGenBrain\_observation\_formalisme\_next\_1.tex} (suite consolidée et fichier autonome), ainsi qu'un audit, une matrice de traçabilité et un vérificateur.
+\item Deux campagnes sur les sondes adaptatives : le bundle de base et \texttt{experience\_NGeGenBrain\_sondes\_adaptatives\_bundle\_final\_v1\_2.zip}.
+\item Artefacts logiciels NGeGenBrain v1, v2 et v3, audits et données diverses. Ils sont utilisés ici pour établir le contexte expérimental, pas pour les assimiler à la théorie mathématique.
+\end{itemize}
+
+\textbf{Écart de nommage à conserver dans la traçabilité.} Le nom donné dans la demande, \texttt{theorie\_des\_empreintes\_complete\_order\_5.tex}, n'est pas le nom exact du fichier découvert dans l'archive. Le candidat effectivement présent est \texttt{DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex}. Le rapport n'efface pas cette divergence et ne prétend pas qu'un fichier portant exactement le premier nom a été trouvé.
+
+Le README du bundle indique trois sources de 25, 21 et 12 chapitres (58 chapitres sources avant consolidation). Le maître \texttt{full\_0} effectivement consolidé possède lui-même 51 chapitres. La différence de comptage entre sources et maître signifie que la numérotation a été remaniée ou fusionnée; elle ne prouve pas, sans confrontation de la matrice de traçabilité, une omission mathématique.
+
+\section{Empreinte structurelle du corpus : comptage reproductible}
+Un comptage lexical des commandes LaTeX a été réalisé sur les deux textes maîtres. Ce tableau décrit leur structure textuelle; il ne juge ni la validité d'une preuve ni l'originalité d'un résultat.
+\begin{center}
+\small
+\begin{tabular}{p{3.1cm}rrrrp{1.9cm}p{1.9cm}}
+\toprule
+Source & Parts & Chaps. & Sect. & Déf. & Énoncés (n) & Preuves (env.)\\
+\midrule
+Théorie des empreintes \texttt{order\_5} & 5 & 25 & 102 & 45 & 94 & 86\\
+Observation \texttt{full\_0} & 8 & 51 & 105 & 94 & 81 & 81\\
+\bottomrule
+\end{tabular}
+\end{center}
+Dans le fichier de théorie, les 94 énoncés théorématiques comptés correspondent à 49 propositions, 27 théorèmes et 18 corollaires; il existe 86 environnements \texttt{proof} explicites. Le différentiel de huit est un signal de revue de preuve, pas une preuve qu'il manque huit démonstrations : certaines preuves peuvent être rédigées autrement, ou un environnement peut être omis. Dans \texttt{full\_0}, le comptage de 81 est la somme de 53 propositions, 25 environnements \texttt{theoreme} et 3 corollaires; on compte 81 environnements \texttt{proof}. L'égalité des deux nombres ne certifie pas leur correspondance un à un ni leur correction logique. Les audits et matrices des sources restent nécessaires pour une revue proposition par proposition.
+
+\section{Niveaux de preuve utilisés}
+Chaque conclusion de ce rapport relève d'un des statuts suivants :
+\begin{description}[style=nextline]
+\item[Source] définition ou assertion explicitement présente dans l'un des textes audités.
+\item[Déduction] conséquence démontrée ci-dessous à partir de définitions indiquées.
+\item[Constat technique] résultat d'une commande, d'un audit, d'une empreinte ou d'un CSV présent dans l'archive.
+\item[Rapporté] fait mentionné dans le rapport source mais non réexécuté ici.
+\item[Interprétation] lecture conceptuelle compatible avec le corpus, sans la présenter comme un théorème.
+\item[Non établi] affirmation pour laquelle les sources ou les preuves examinées ne suffisent pas.
+\end{description}
+
+\section{Pipeline de travail}
+Le pipeline de comparaison est : (1) vérifier l'identité et l'intégrité des archives; (2) inventorier les révisions et la traçabilité; (3) extraire les définitions primitives et les quantificateurs; (4) formuler la restriction qui permet de comparer les noyaux; (5) prouver les propriétés partagées; (6) répertorier les objets et les résultats supplémentaires de chaque côté; (7) vérifier les affirmations empiriques contre les audits et les tables; (8) rendre un verdict gradué; (9) compiler et valider le document, puis sauvegarder les éléments de preuve.
+
+\chapter{Architecture mathématique de la théorie des empreintes}
+\section{Objets, contextes, sondes et observation}
+Le texte de théorie pose des ensembles de contextes \(\Pcal\), d'objets \(\X\) et une famille de sondes \(\Fcal\). Une application d'observation scalaire est
+\[
+\Phi:\Pcal\times\X\times\Fcal\longrightarrow\R.
+\]
+Pour un contexte fixé \(P\) et une famille finie \(\Fcal_K=\{f_1,\ldots,f_K\}\), la signature est le vecteur
+\[
+\I^{P}_{\Phi,\Fcal_K}(x)=\bigl(\Phi(P,x,f_1),\ldots,\Phi(P,x,f_K)\bigr).
+\]
+Pour une famille \(\Gcal\subseteq\Fcal\) non nécessairement finie, elle est l'application
+\[
+\I^{P}_{\Phi,\Gcal}:\X\to\R^{\Gcal},\qquad
+x\mapsto (f\mapsto\Phi(P,x,f)).
+\]
+Le mot « empreinte » désigne donc l'application ou sa valeur, selon le contexte. Une signature est relative à une famille de sondes, à un contexte, à une application d'observation et à un codage déclaré; elle n'est pas une essence absolue de l'objet.
+
+\section{Indiscernabilité, fibres et quotient}
+La relation canonique est
+\[
+x\sim_{\Phi,P,\Gcal}y\iff \I^{P}_{\Phi,\Gcal}(x)=\I^{P}_{\Phi,\Gcal}(y).
+\]
+Elle partitionne \(\X\) en fibres. L'application quotient envoie \(x\) vers sa classe \([x]\), et l'image observée \(\I(\X)\) est l'espace des signatures effectivement atteintes. Deux objets de même empreinte ne sont pas nécessairement identiques; ils sont seulement indiscernables pour cette famille précise de sondes et ce contexte.
+
+\section{Raffinement et fermeture}
+Une échelle \((\Lambda,\preceq)\) donne des familles croissantes \((\Fcal_\lambda)\). Si \(\lambda\preceq\mu\), la signature à \(\mu\) contient au moins les coordonnées visibles à \(\lambda\), d'où un raffinement monotone des fibres. La fermeture observationnelle d'une famille \(\Gcal\) regroupe les sondes dont les réponses se factorisent par la signature déjà produite :
+\[
+\cl_{P,\lambda}(\Gcal)=\{f\in\Fcal_\lambda:\exists h,\ \Phi(P,x,f)=h(\I^P_{\Phi,\Gcal}(x))\ \forall x\in\X\}.
+\]
+Sous les conditions de domaine écrites dans la définition, cette fermeture est extensive, monotone et idempotente. Une sonde ajoutée qui est déjà une fonction des coordonnées présentes ne sépare aucune nouvelle paire.
+
+\section{Géométrie des seuils et dynamique}
+Le texte définit le seuil de séparation d'une paire par le supremum des niveaux auxquels la paire demeure indiscernable, en indiquant que le cas vide ou non borné requiert des conventions. La fonction de seuil engendre un squelette hiérarchique si elle satisfait la loi du minimum double. Le document indique aussi un piège de bord important : le supremum ne dit pas à lui seul si le niveau critique appartient à l'ensemble d'indiscernabilité; une hypothèse d'atteinte ou une donnée de bord est requise.
+
+Lorsque \(K(x,y)>0\) et satisfait la loi du minimum double, la fonction \(d_K(x,x)=0\), \(d_K(x,y)=e^{-K(x,y)}\) pour \(x\ne y\), satisfait l'inégalité ultramétrique forte. Cette géométrie par seuils constitue un développement central qui ne se réduit pas au seul dictionnaire observationnel.
+
+Le manuscrit prolonge encore le noyau par les transitions compatibles, les trajectoires, les profils de stabilisation, l'identité interne, les tours et réflexions, l'apprentissage et la méta-observation, la recherche sous contraintes et des extensions récursives. Ces chapitres comportent des statuts de preuve différents; le fait qu'ils figurent dans le même volume ne permet pas de les traiter tous comme des conséquences immédiates de la définition initiale.
+
+\chapter{Architecture mathématique du formalisme de l'observation}
+\section{Observation typée et admissibilité}
+Le maître \texttt{full\_0} redéfinit un objet étudié comme un élément \(x\in\X\), qui peut être un modèle, un sous-module, une représentation, un état, une règle candidate ou une trajectoire, à condition que son type soit déclaré. Le contexte \(p\) inclut les facteurs contrôlés ou enregistrés susceptibles d'influencer la réponse : entrée, tokenizer, masque, graine, précision, appareil, version logicielle, état, intervention et configuration de sonde, entre autres.
+
+Une sonde \(f\) y est spécifiée par un identifiant et une version, un domaine/codomaine, une acquisition, des préconditions, un coût, un niveau d'intrusion, une sérialisation et un contrôle. Le codomaine général est propre à chaque sonde, \(Y_f\), et l'observation est \(\Phi(p,x,f)\in Y_f\). Cela généralise le cas scalaire \(Y_f=\R\). Les sorties absentes, censurées et les erreurs doivent être encodées explicitement, pas remplacées par zéro.
+
+Le protocole admissible délimite où l'observation est définie. Hors de son domaine, la valeur est « non définie » ou « non disponible ». Cette clause est opérationnelle : elle évite qu'un résultat manquant soit silencieusement interprété comme une mesure nulle.
+
+\section{Mesure exacte, bruit et tolérance}
+Le formalisme distingue une fonction déterministe exacte d'une loi de mesure \(Q_f(\cdot\mid p,x)\) et d'un modèle bruité explicite. Il précise que les équivalences exactes exigent une sérialisation canonique comparable. Une comparaison tolérante coordonnée par coordonnée est écrite, pour une métrique \(d_f\), sous la forme
+\[
+\I_\Gcal^p(x)\approx_\varepsilon\I_\Gcal^p(y)\iff
+\forall f\in\Gcal,\ d_f(\Phi(p,x,f),\Phi(p,y,f))\leq\varepsilon_f.
+\]
+Le texte souligne à juste titre que cette relation est réflexive et symétrique, mais pas nécessairement transitive; elle ne doit donc pas être appelée une relation d'équivalence sans fermeture transitive ou autre construction adaptée.
+
+\section{Empreinte, dossier d'évidence et mécanismes}
+Le dossier d'évidence est un objet différent de l'empreinte : il conserve les données brutes utiles, les contextes, le protocole, les interventions, les versions, les incertitudes, les événements manquants et la provenance. Le formalisme sépare aussi l'observation, l'enregistrement, l'invariant relatif à une famille de transformations, l'information résiduelle, la trace temporelle, le mécanisme candidat, le mécanisme exécutable et la validation indépendante.
+
+Pour le problème inverse, l'observation construit d'abord une classe de mécanismes compatibles avec un dossier. La sélection d'un membre de cette classe n'établit pas son identification. La reconstruction exacte nécessite des hypothèses supplémentaires assurant l'unicité au sein de la classe annoncée. L'identifiabilité est donc un prédicat relatif à un protocole, une population de contextes, une classe de modèles et une notion d'équivalence des sorties.
+
+\chapter{Alignement formel : preuves et limites}
+\section{Proposition d'équivalence sur le noyau commun}
+\begin{proposition}[Alignement exact après restriction]
+Soient \(P\in\Pcal\), \(\X\) un ensemble d'objets, \(\Gcal\) une famille de sondes admissibles et \(\Phi\) déterministe, avec sorties scalaires réelles comparées exactement. Construisons le formalisme observationnel avec le même \(\Phi\), le même contexte fixé \(p=P\), la même famille \(\Gcal\) et le même codage de signature. Alors les empreintes des deux textes sont la même application \(\X\to\R^{\Gcal}\); elles induisent la même relation d'indiscernabilité, les mêmes fibres et le même quotient.
+\end{proposition}
+\begin{proof}
+Par restriction, dans les deux textes, la coordonnée indexée par chaque \(f\in\Gcal\) vaut la même quantité \(\Phi(P,x,f)\). Deux applications à valeurs dans \(\R^{\Gcal}\) dont toutes les coordonnées sont égales pour chaque \(x\) sont égales point par point. L'égalité de signatures entre \(x\) et \(y\) est donc identique dans les deux constructions. Les relations sont alors égales; leurs classes, qui sont les ensembles des éléments reliés à chaque \(x\), sont égales, de même que les ensembles quotients canoniques.\end{proof}
+
+\begin{remark}
+La proposition établit une identité dans le cas restreint. Elle n'affirme pas que les signatures bruitées, multi-codomaines ou dotées de métadonnées d'évidence sont toujours réductibles sans perte à un vecteur réel. Pour comparer les cas généraux, il faut indiquer une application de représentation et démontrer qu'elle préserve exactement les distinctions pertinentes.
+\end{remark}
+
+\section{Raffinement monotone des sondes}
+\begin{proposition}[Ajout de coordonnées et raffinement]
+Si \(\Gcal_0\subseteq\Gcal_1\), alors \(x\sim_{\Gcal_1}y\) implique \(x\sim_{\Gcal_0}y\). Ainsi la partition de \(\X\) induite par \(\Gcal_1\) raffine celle induite par \(\Gcal_0\).
+\end{proposition}
+\begin{proof}
+L'égalité de deux signatures indexées par \(\Gcal_1\) implique l'égalité de toutes les coordonnées indexées par sa sous-famille \(\Gcal_0\). C'est exactement l'implication déclarée. Les fibres plus fines sont les intersections des distinctions nouvelles avec les anciennes fibres; elles ne peuvent jamais réunir des objets précédemment séparés.\end{proof}
+
+\section{Théorème de factorisation}
+\begin{theorem}[Critère nécessaire et suffisant de factorisation]
+Soit \(I:\X\to Z\), et soit \(A:\X\to W\). Il existe une unique application \(\bar A:I(\X)\to W\) telle que \(A=\bar A\circ I\) si et seulement si \(A\) est constante sur chaque fibre de \(I\), c'est-à-dire \(I(x)=I(y)\Rightarrow A(x)=A(y)\).
+\end{theorem}
+\begin{proof}
+(\(\Rightarrow\)) Si \(I(x)=I(y)\), alors \(A(x)=\bar A(I(x))=\bar A(I(y))=A(y)\). (\(\Leftarrow\)) Supposons \(A\) constante sur les fibres. Pour \(z\in I(\X)\), il existe au moins un \(x\) tel que \(I(x)=z\). Posons \(\bar A(z)=A(x)\). Si \(x'\) est un autre représentant du même \(z\), alors \(I(x)=I(x')\), donc \(A(x)=A(x')\); la définition est indépendante du représentant. Par construction, \(A=\bar A\circ I\). Toute application satisfaisant cette identité doit envoyer chaque \(I(x)\) sur \(A(x)\), ce qui impose son unicité sur l'image \(I(\X)\).\end{proof}
+
+Ce théorème est le pont le plus général entre les deux formalismes. Il ne permet pas de reconstruire ce qui varie à l'intérieur d'une fibre; il dit précisément qu'une propriété ne peut être transportée sur l'espace des empreintes que si elle ne varie pas à l'intérieur des classes indiscernables.
+
+\section{Contre-exemple : la tolérance ne suffit pas à former un quotient}
+\begin{proposition}[Non-transitivité possible de la proximité tolérante]
+Sur \(\R\) muni de la distance absolue et du seuil \(\varepsilon=1\), la relation \(a\approx b\) si \(|a-b|\leq 1\) n'est pas transitive.
+\end{proposition}
+\begin{proof}
+Prenons \(a=0\), \(b=0.75\) et \(c=1.5\). Alors \(|a-b|=0.75\leq1\), et \(|b-c|=0.75\leq1\), mais \(|a-c|=1.5>1\). On a donc \(a\approx b\) et \(b\approx c\), sans \(a\approx c\). La proximité tolérante ne produit donc pas à elle seule des classes d'équivalence ni un quotient canonique ordinaire.\end{proof}
+
+\section{Seuils : conséquence logique et condition de bord}
+\begin{theorem}[Loi du minimum double]
+Soit \(\Theta\) une fonction de paires issue du seuil de persistance de l'indiscernabilité dans une filtration de sondes croissantes. Pour trois objets distincts, on a
+\[
+\Theta(\{x,z\})\geq\min\{\Theta(\{x,y\}),\Theta(\{y,z\})\}.
+\]
+\end{theorem}
+\begin{proof}
+Fixons un niveau \(t\) strictement inférieur au minimum des deux seuils de droite. Par la définition du supremum d'un segment initial de niveaux, chacun des couples \((x,y)\) et \((y,z)\) est indiscernable à tout niveau admissible strictement inférieur à leurs seuils, dès lors qu'on considère les niveaux intérieurs garantis par la filtration. À ce niveau commun, l'égalité des signatures est transitive : \(I_t(x)=I_t(y)\) et \(I_t(y)=I_t(z)\) impliquent \(I_t(x)=I_t(z)\). Le troisième couple reste donc indiscernable pour tout niveau strictement sous le minimum, et son supremum ne peut être inférieur à ce minimum. Le raisonnement ne fixe pas l'appartenance au niveau critique lui-même; celle-ci demande la convention de bord signalée dans la théorie source.\end{proof}
+
+\begin{remark}[Pourquoi le supremum ne suffit pas au point critique]
+Deux segments de niveaux peuvent avoir le même supremum tout en étant l'un fermé et l'autre ouvert à ce bord. La fonction de seuil conserve la borne mais pas nécessairement le statut exact de la paire au niveau critique. Toute reconstruction de la filtration complète doit conserver une convention de bord ou une variable qui enregistre l'atteinte.
+\end{remark}
+
+\section{Contre-exemple : une empreinte ne donne pas un mécanisme unique}
+\begin{proposition}[Non-identifiabilité par observations finies sans structure]
+Soit \(D_{\mathrm{test}}\subsetneq D\). En l'absence d'une restriction de classe qui lie les valeurs non testées aux valeurs testées, les observations sur \(D_{\mathrm{test}}\) ne déterminent pas une fonction de réponse unique sur \(D\).
+\end{proposition}
+\begin{proof}
+Choisissons \(u^*\in D\setminus D_{\mathrm{test}}\) et deux fonctions \(F_0,F_1:D\to Y\) qui coïncident sur tous les points observés, mais telles que \(F_0(u^*)\ne F_1(u^*)\). Un dossier ne contenant que les valeurs sur \(D_{\mathrm{test}}\) est identique pour les deux fonctions. Toute procédure qui n'utilise que ce dossier reçoit donc la même entrée dans les deux cas et ne peut déduire laquelle est la fonction réelle sur \(u^*\). Il s'agit d'une non-identifiabilité logique; elle n'interdit pas l'identification sous une classe de modèles et des hypothèses supplémentaires vérifiées.\end{proof}
+
+\chapter{Alignement terminologique et différences de portée}
+% Compact column padding for the dense terminology matrix to avoid a marginal overfull box.
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{p{2.5cm}p{4.4cm}p{4.5cm}p{3.2cm}}
+\toprule
+\textbf{Concept} & \textbf{Théorie des empreintes} & \textbf{Formalisme de l'observation} & \textbf{Verdict d'alignement}\\
+\midrule\endhead
+Objet \(x\) & Élément de \(\X\); l'identité qui compte est relative à l'observation & Objet typé : modèle, module, état, représentation, règle ou trajectoire & Aligné au niveau abstrait; observation précise le type\\
+Contexte \(P/p\) & Contexte qui paramètre \(\Phi\) et les familles de sondes & Tuple opérationnel comprenant entrée, état, environnement, version, graine, tokenizer, interventions, etc. & Même rôle mathématique; granularité opérationnelle accrue\\
+Sonde \(f\) & Élément d'une famille de fonctions de mesure & Opérateur versionné, avec domaine, codomaine, préconditions, coût, intrusivité et sérialisation & Même noyau; spécification enrichie\\
+Observation \(\Phi(p,x,f)\) & Réponse scalaire réelle dans la définition de base & Réponse dans un codomaine \(Y_f\), exact, stochastique, manquant ou censuré & Le cas observationnel généralise le cas scalaire sous représentation préservant les valeurs\\
+Empreinte \(I(x)\) & Vecteur fini ou fonction de réponses indexée par les sondes & Signature dérivée du protocole; les métadonnées peuvent être conservées séparément & Même concept central, pas synonyme du dossier entier\\
+{\small Indiscernabilité} & Égalité exacte des signatures & Égalité exacte ou compatibilité tolérante annoncée & Égalité alignée; la proximité peut ne pas être transitive\\
+Fibre / quotient & Fibres de l'application de signature et quotient canonique & Même construction lorsqu'une relation d'équivalence exacte est définie & Identique dans le cas commun\\
+Fermeture / redondance & Sondes factorisables par une signature existante & Redondance conditionnelle au contexte, à la famille et au domaine d'évaluation & Alignement extensionnel; la redondance empirique finie n'est pas universelle\\
+Seuil / hiérarchie & Géométrie de filtrations et seuils; niveau critique exige une convention de bord & Échelles, facettes et hiérarchies; accent sur contexte, provenance et mesure & Recouvrement partiel; la théorie pousse plus loin la géométrie des seuils\\
+Invariance & Dépend de la signature/famille et des transformations déclarées dans les extensions & Propriété distincte de la constance sur les fibres; transformations/contextes explicites & À ne jamais identifier sans démonstration\\
+Dossier d'évidence & Pas identique à l'empreinte; la provenance est un enrichissement de protocole & Objet riche conservant données brutes, contextes, interventions, provenance, incertitudes & Extension opérationnelle, information pas nécessairement contenue dans l'empreinte\\
+Problème inverse & Factorisation et reconstruction relative à une empreinte & Ensemble de mécanismes compatibles, sélection, identification, mécanisme exécutable & Formalisation observationnelle plus explicite sur l'identifiabilité\\
+Intervention & Opération sur des transitions/familles compatibles dans les extensions & Opérateur versionné, cible exacte, contrôles, restauration, hashes et effet mesuré & Complémentarité; l'effet mesuré ne nomme pas à lui seul un mécanisme\\
+Temps & Trajectoires et profils de stabilisation observationnelle & Traces d'événements, horloges, événements manquants, fenêtres, contraintes de replay & Recouvrement, enrichissement opérationnel dans l'observation live\\
+\bottomrule
+\end{longtable}
+\setlength{\tabcolsep}{6pt}
+
+\section{Même théorie ? Suite ou partie ?}
+Trois questions différentes doivent être séparées.
+\begin{enumerate}
+\item \textbf{Même noyau ? Oui, sous restriction.} Les définitions d'empreinte, d'indiscernabilité, de fibre et de quotient coïncident lorsqu'on fixe le contexte, le codomaine scalaire, l'égalité exacte et la même famille de sondes.
+\item \textbf{Même théorie complète ? Non.} Les deux volumes ont des objets auxiliaires, objectifs et domaines de garantie distincts. Le dossier d'évidence, la compatibilité d'acquisition, le bruit, la provenance et la sélection d'un mécanisme ne sont pas juste de nouveaux noms pour l'empreinte; la géométrie des seuils, les transports et l'identité interne ne se déduisent pas automatiquement du protocole observationnel.
+\item \textbf{Le formalisme de l'observation est-il une suite ?} Mathématiquement, il prolonge le cadre de base sur certains axes opérationnels et inverse-problème. Historiquement, le mot « suite » exigerait une chronologie/versionnage indépendant; les seules sources étudiées établissent une compatibilité conceptuelle et des relations de dépendance, pas la causalité historique de la rédaction.
+\end{enumerate}
+
+Le rapport évite une relation d'inclusion globale non prouvée. Le jugement le plus exact est celui d'une **extension conservatrice du noyau commun sous restriction**, avec complémentarité des développements hors du noyau. Les deux systèmes peuvent partager un socle sans que tout théorème de l'un soit automatiquement un théorème de l'autre.
+
+\chapter{Conséquences théoriques, conceptuelles et opérationnelles}
+\section{Conséquences théoriques}
+\begin{itemize}
+\item Une propriété \(A\) est représentable comme fonction de l'empreinte si et seulement si elle est constante sur les fibres pertinentes. Ceci donne un critère exact de compatibilité pour toute tentative de reconstruction à partir d'une signature.
+\item La résolution par ajout de sondes raffine les classes; elle ne garantit pas qu'une famille donnée atteigne l'injectivité. L'existence d'une échelle injective doit être démontrée séparément.
+\item Une métrique ou une ultramétrique dérivée n'est légitime que sous les hypothèses de seuils correspondantes. Le point de bord ne doit pas être tacitement assimilé au côté strict.
+\item Une proximité tolérante n'induit pas nécessairement un quotient; si un quotient tolérant est voulu, sa construction (fermeture transitive, clustering ou espace métrique probabiliste) fait partie du modèle et peut modifier les classes.
+\item Une preuve de reconstruction de la sortie ne vaut pas preuve d'identification du mécanisme interne. Deux mécanismes peuvent appartenir à la même classe comportementale pour le protocole et diverger sous d'autres sondes.
+\end{itemize}
+
+\section{Conséquences conceptuelles}
+L'empreinte est une interface entre un objet et un protocole d'observation. Elle est relative mais pas arbitraire : elle doit être définie avec son domaine et ses sondes. L'observation brute, le résumé, l'invariant sous transformation, la causalité, le mécanisme et l'explication sont des catégories distinctes. Les confondre crée des glissements de portée : par exemple, une sortie stable au cours de quelques fenêtres prouve la stabilité du résumé mesuré, pas celle du modèle en entier.
+
+\section{Conséquences opérationnelles}
+Un pipeline compatible doit conserver des identifiants/versionnements de sondes, le contexte réel, l'état d'admissibilité, la sortie brute, les erreurs/censures, les hashes des artefacts, les fenêtres temporelles, l'intervention, les contrôles, les données de validation et les critères d'acceptation. Les résultats doivent mentionner le domaine pour lequel ils ont été établis et le modèle d'erreur. Pour un mécanisme candidat, il faut conserver la classe de candidats éliminés ou encore compatibles; une sélection heuristique n'est pas transformée en identification par simple journalisation.
+
+\chapter{Architecture et pipeline complet d'étude}
+\section{Pipeline de référence}
+\begin{enumerate}
+\item \textbf{Spécifier.} Déclarer \(\X\), le type des objets, le contexte \(P\), les transformations, les familles \(\Fcal_\lambda\), les codomaines, l'admissibilité et le modèle de mesure.
+\item \textbf{Acquérir.} Exécuter uniquement les sondes autorisées; enregistrer valeurs et non-valeurs, temps, erreurs, graine, provenance et coût.
+\item \textbf{Construire l'empreinte.} Indexer sans ambiguïté les réponses, déclarer le prétraitement, l'arrondi, les tolérances et les données manquantes.
+\item \textbf{Comparer.} Définir l'égalité exacte ou une relation tolérante dont les propriétés sont réellement démontrées; ne pas supposer la transitivité.
+\item \textbf{Calculer les fibres.} Construire l'équivalence, l'image observée et le quotient pour le domaine spécifié.
+\item \textbf{Évaluer la résolution.} Ajouter des sondes et calculer les nouveaux raffinements. Pour les seuils, conserver la convention au niveau critique.
+\item \textbf{Tester les invariants.} Nommer la famille de transformations et quantifier le domaine sur lequel l'égalité revendiquée est mesurée ou démontrée.
+\item \textbf{Formuler l'inverse.} Définir la classe des mécanismes admissibles et l'ensemble compatible avec le dossier; établir les conditions d'unicité avant d'annoncer une identification.
+\item \textbf{Intervenir et falsifier.} Enregistrer cible exacte, contrôles négatifs/positifs, restauration et effet apparié; rechercher des contextes qui distinguent les hypothèses encore compatibles.
+\item \textbf{Valider et livrer.} Séparer résultats théoriques, observations empiriques, interprétations, contre-exemples et questions ouvertes; conserver commandes, graines, versions et hashes.
+\end{enumerate}
+
+\section{Commandes de contrôle/reproduction}
+Les chemins ci-dessous correspondent à l'environnement de travail qui accompagne cette version. Une installation TeX fournit `pdflatex`; la validation de l'archive source peut être répétée ainsi :
+\begin{verbatim}
+unzip -tq /mnt/data/sources_ng_adapt_0.zip
+sha256sum /mnt/data/sources_ng_adapt_0.zip
+pdflatex -interaction=nonstopmode -halt-on-error rapport_th_emp_vs_obs_1.tex
+bash scripts/validate_sonde_adapt_1.sh
+\end{verbatim}
+Les commandes `unzip -tq` et `sha256sum` vérifient l'intégrité/identité des fichiers, pas la validité scientifique des propositions. La compilation vérifie la syntaxe et la résolution typographique, pas la vérité des démonstrations.
+
+\chapter{Résultats, interprétation et statut des conclusions}
+\section{Résultats de cette comparaison}
+\begin{longtable}{p{5.3cm}p{2.1cm}p{6.7cm}}
+\toprule
+\textbf{Conclusion} & \textbf{Statut} & \textbf{Justification}\\
+\midrule\endhead
+La signature a le même noyau abstrait dans les deux textes & Démontré sous restriction & Identité coordonnée par coordonnée avec même \(\Phi\), contexte, sondes et codage.\\
+L'égalité des empreintes induit les mêmes fibres & Démontré sous restriction & Les applications de signature sont identiques; l'égalité sur \(\X\) est donc la même.\\
+Les propriétés constantes sur les fibres factorisent par l'image des signatures & Démontré & Théorème de factorisation donné et prouvé dans ce rapport.\\
+Le formalisme de l'observation est strictement inclus dans toute la théorie des empreintes & Non établi et trop fort sans définitions de traduction & Plusieurs développements sont seulement partiellement recouverts.\\
+Les deux textes sont strictement identiques comme théorie complète & Rejeté comme description du corpus & Les types d'objets, le dossier d'évidence, l'inverse et les développements de seuils/dynamique diffèrent.\\
+Le texte observationnel est historiquement la suite linéaire de la théorie & Non établi par ce corpus seul & L'alignement conceptuel n'est pas une preuve de chronologie d'écriture.\\
+Toute empreinte permet de retrouver l'objet/mécanisme & Faux sans injectivité ou identifiabilité établie & Une application non injective possède des fibres contenant plusieurs objets; l'inverse peut rester multivoque.\\
+Une empreinte stable prouve l'invariance sous transformation & Faux sans hypothèse supplémentaire & La stabilité sur les fibres à contexte fixé n'est pas une égalité entre contextes/transformations.\\
+\bottomrule
+\end{longtable}
+
+\section{Limites méthodologiques et questions ouvertes}
+Ce rapport compare les textes sources, les audits et les données explicites de traçabilité. Il ne remplace pas une revue humaine indépendante, ligne par ligne, de chacun des centaines d'énoncés du volume de théorie et des 81 preuves que le bundle observationnel compte structurellement. Une compilation réussie ou un compte égal de théorèmes et de preuves n'est pas un assistant de preuve. Les affirmations héritées des journaux de version sont rapportées avec leur statut au lieu d'être prises pour une garantie externe.
+
+Un prochain cycle de développement peut formaliser les morphismes entre les deux univers plus largement : une application de codage \(c_f:Y_f\to Z_f\) est acceptable pour comparer les empreintes si et seulement si les distinctions d'intérêt sont préservées (idéalement injectivité sur l'image admissible). En contexte stochastique, l'objet à comparer peut être une loi de réponse plutôt qu'une valeur; ce choix doit être fixé avant l'expérience. Enfin, toute traduction globale des chapitres de seuils ou d'identité interne devrait donner une correspondance chapitre/théorème et une preuve de conservation des hypothèses, pas seulement une table de termes.
+
+\section{Conclusion générale}
+La réponse mathématiquement défendable est la suivante : le formalisme de l'observation partage avec la théorie des empreintes un noyau exact défini par la réponse des sondes, la signature et le quotient d'indiscernabilité. Sur ce noyau, l'alignement est prouvable. Le formalisme de l'observation élargit et rend plus opérationnelles les notions de protocole, de codomaines, d'incertitude, de preuve d'origine, d'intervention et d'identification des mécanismes; la théorie des empreintes comprend, de son côté, des développements géométriques et récursifs qui ne sont pas absorbés automatiquement dans le seul vocabulaire opérationnel.
+
+Il ne s'agit donc ni de deux théories sans rapport, ni de deux textes intégralement interchangeables. La meilleure classification est **socle partagé + extensions complémentaires, avec équivalence démontrée seulement sur une restriction explicitée**. La suite historique reste une hypothèse documentaire distincte de ce verdict logique.
+
+\appendix
+\chapter{Validation de la version 1 et intégrité de la chaîne de preuves}
+Ce rapport est une comparaison théorique et non une réplication expérimentale des réseaux; les expériences v1.2 sont néanmoins examinées comme corpus connexe et leur provenance doit rester vérifiable. La source ZIP d'origine passe le test d'intégrité, les 29 ZIP imbriqués contrôlés passent également, et les 529 fichiers listés dans le manifeste du bundle v1.2 correspondent à leurs SHA-256 d'origine après restauration de la copie de référence. Les sorties nouvellement réexécutées sont stockées séparément et ne sont pas écrites dans cette copie de référence.
+
+La validation opérationnelle distincte a contrôlé les tableaux v1.2 (48 résultats par graine/méthode et 13\,392 prédictions de classification; 81 cibles et 324\,000 prédictions d'imitation; 18 lignes système, 96 mesures de fidélité de composants et 4\,752 prédictions de composition). La comparaison sur sept artefacts publics a réussi avec des écarts numériques maximaux nuls pour les champs comparés, à tolérance \(10^{-6}\). Les contrôles d'accès ont passé pour les phases (12/12 classification, 8/8 imitation, 14/14 composition) et les contrôles de partition de composition 6/6. Le statut est \texttt{PASS\_WITH\_LIMITATIONS}; les contrôles techniques établissent la cohérence des artefacts comparés, non la correction universelle d'une théorie.
+
+La tentative monolithique qui dépassa 600 secondes reste inscrite comme incident d'orchestration; les phases ont ensuite été rejouées séparément. Le wrapper shell a capturé le code de retour 0 pour la composition dans `logs/v1\_2\_phase\_rerun/composition\_persistent.exitcode`; une note préliminaire contraire a été corrigée après vérification du fichier de statut. Ces détails ne changent pas les preuves de correspondance formelle exposées dans les chapitres précédents; ils rendent seulement la provenance et le statut empirique plus auditables.
+
+\chapter{Registre de traçabilité des sources}
+\begin{longtable}{p{4.7cm}p{8.9cm}}
+\toprule
+\textbf{Source copiée dans la livraison} & \textbf{Rôle dans l'analyse}\\
+\midrule\endhead
+\path{references/theory/DDD_Base_theorie_des_empreintes_complete_order_5.tex} & Source primaire de la théorie; définitions de \(\Phi\), empreintes, indiscernabilité, fermeture, seuils, géométrie, dynamique et extensions.\\
+\path{references/observation/NGeGenBrain_observation_formalisme_full_0.tex} & Maître observationnel; définitions typées, admissibilité, bruit, empreinte, quotient, invariance, évidence, reconstruction et interventions.\\
+\path{references/observation/NGeGenBrain_observation_formalisme_next_1.tex} & Suite associée et version autonome sur invariant/variant, résidu et temps.\\
+\path{references/observation/audit_NGeGenBrain_observation_formalisme_full_0.md} & Périmètre de consolidation, décisions de correction et limites déclarées.\\
+\path{references/observation/traceabilite_NGeGenBrain_observation_formalisme_full_0.csv} & Cartographie chapitre par chapitre des trois sources de la consolidation.\\
+\path{references/adaptive_v1_2/rapport_experience_sondes_adaptatives_final_v1_2.tex} & Statut empirique du RBF adaptatif, de l'imitation neuronale et de la composition.\\
+\path{references/ngbrain_v1/REPORT_AUDIT_NGeGenBrain_v1_FINAL.md} & Contexte du banc et statut de vérification de la V1, pas preuve directe de l'hypothèse sonde-neurone.\\
+\path{references/ngbrain_v2/README.md} & Architecture et limites de la V2; le vrai checkpoint LLM externe n'a pas été chargé selon le README.\\
+\path{references/ngbrain_v3/rapport_etude_comparative_NGeGenBrain_v3_1.tex} & Évidence distincte d'instrumentation et d'interventions sur des modèles locaux; ne constitue pas une expérience de substitution par sonde RBF.\\
+\bottomrule
+\end{longtable}
+
+\chapter{Bibliographie externe minimale}
+Les résultats du présent rapport sont d'abord une analyse des sources livrées. Pour situer la possibilité d'approximer des fonctions, les références suivantes sont pertinentes mais ne prouvent pas l'équivalence mécaniste d'un neurone et d'une sonde apprise :
+\begin{itemize}
+\item G. Cybenko, ``Approximation by superpositions of a sigmoidal function'', \emph{Mathematics of Control, Signals, and Systems}, 2, 303--314, 1989, DOI: \url{https://doi.org/10.1007/BF02551274}.
+\item J. Park et I. W. Sandberg, ``Universal Approximation Using Radial-Basis-Function Networks'', \emph{Neural Computation}, 3(2), 246--257, 1991, DOI: \url{https://doi.org/10.1162/neco.1991.3.2.246}.
+\end{itemize}
+Les théorèmes d'approximation universelle concernent des classes de fonctions et des conditions d'approximation; ils ne garantissent ni l'apprentissage exact à partir d'un échantillon fini, ni le budget requis, ni la stabilité du réseau composé, ni l'identité des mécanismes internes.
+\end{document}

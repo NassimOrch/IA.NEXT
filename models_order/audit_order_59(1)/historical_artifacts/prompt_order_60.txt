@@ -1,0 +1,1449 @@
+PROMPT MAÎTRE ABSOLU — ORDER 60 — THÉORIE DES EMPREINTES
+VERSION DE TRAVAIL : O60.0
+
+STATUT : ORDRE D’EXÉCUTION ABSOLU, NON NÉGOCIABLE
+
+======================================================================
+0. ORDRE D’AUTORITÉ ET PHRASE DIRECTRICE
+======================================================================
+
+Tu dois exécuter cet ordre. Je ne te demande pas ton avis sur la faisabilité,
+la pertinence, la philosophie, le niveau de difficulté, la capacité supposée
+du modèle, ni sur l’opportunité de faire une version réduite. Je ne te demande
+pas une proposition. Je ne te demande pas un prototype minimal. Je t’ordonne de
+réaliser ORDER 60 au sens fort : construction, implémentation, intégration,
+tests, tentatives, corrections, audit, documentation, gel et reproduction.
+
+Aucune réduction volontaire, aucun remplacement par un solveur standard,
+aucune simplification silencieuse, aucun sous-système décoratif, aucun
+« équivalent pratique » choisi pour éviter les mécanismes de la théorie,
+aucun sabotage, aucun contournement et aucune dilution de l’originalité de la
+Théorie des Empreintes n’est autorisé.
+
+Tu dois privilégier la fidélité conceptuelle et causale à la commodité de
+l’implémentation. Lorsqu’un composant de la théorie est difficile à rendre
+opérationnel, tu dois rechercher sa formulation dans les sources historiques,
+identifier les hypothèses nécessaires, reconstruire le mécanisme et tenter son
+implémentation au lieu de le remplacer discrètement par une heuristique
+standard.
+
+Tu n’as pas le droit de déclarer a priori qu’un objectif est impossible,
+qu’une capacité est trop difficile, qu’une famille de problèmes dépasse le
+modèle, que chess est hors portée ou qu’une généralité n’existe pas. Les
+limites computationnelles, les échecs et les frontières scientifiques doivent
+émerger des mesures et des expériences. Un budget de calcul est une contrainte
+expérimentale ; ce n’est jamais une hypothèse de limitation théorique.
+
+======================================================================
+1. CORPUS OBLIGATOIRE À LIRE ET À AUDITER AVANT TOUTE IMPLÉMENTATION
+======================================================================
+
+Tu dois auditer les sources suivantes avant d’écrire la nouvelle architecture.
+Tu dois lire les fichiers, pas seulement leurs noms ou leurs résumés.
+
+1. Corpus principal :
+   sources_th_empreintes_v6.zip
+
+2. Théorie fondamentale :
+   v2_sources_extensions/reconstruction_th_emp/th_emp_order5/
+   DDD_Base_theorie_des_empreintes_complete_order_5.tex
+
+3. Extension O55 et son modèle :
+   v2_sources_extensions/DD_Dev_extension_order55/
+   model_order_55.zip
+
+4. Extension O56 et son modèle :
+   v2_sources_extensions/DD_Dev_extension_order56/
+   model_order_56.zip
+   ainsi que les rapports, audits, traceability, status, FREEZE_MANIFEST,
+   protocoles, résultats, expériences, échecs et sources internes de O56.
+
+5. O58 :
+   theorie_empreintes_order_58_bundle.zip
+   model_order_58.zip
+   tous les TEX, registres, audits, checkpoints, résultats, manifests,
+   rapports d’expérience, résultats négatifs et fichiers de développement.
+
+6. O59 survivant et correction :
+   model_order_59.zip
+   prompt_order_59.txt
+   rapport_experience_model_order_59.tex
+   correction_order_59.tex
+   rapport_order_59_hard_v_0.tex
+   ainsi que les artefacts de l’audit dur lorsqu’ils sont disponibles.
+
+7. Pour toute anomalie rencontrée pendant O60 : rechercher d’abord une
+   solution, une correction ou une formulation dans les versions précédentes,
+   les documents de développement, les rapports d’échec et les preuves
+   mathématiques. Ne pas réinventer une solution déjà présente dans la théorie.
+
+Le premier checkpoint doit produire :
+- inventaire complet des sources ;
+- hash SHA-256 ;
+- matrice source -> définition -> équation -> propriété -> composant logiciel ;
+- régressions O55/O56/O58/O59 ;
+- contradictions éventuelles ;
+- corrections historiques à préserver ;
+- éléments théoriques encore non implémentés.
+
+Tu dois conserver la traçabilité des références, y compris des labels TeX
+lorsqu’ils existent.
+
+======================================================================
+2. RÈGLE ROUGE DE FIDÉLITÉ À LA THÉORIE DES EMPREINTES
+======================================================================
+
+Le centre du système ne doit pas être un solveur CSP, un moteur de planning,
+un MRV, un BFS/DFS ou toute autre méthode standard dont les autres composants
+ne seraient qu’un habillage.
+
+La boucle causale principale doit être construite autour de la théorie :
+
+OBSERVATION
+→ ÉCHELLE
+→ SONDES
+→ EMPREINTE
+→ FIBRES
+→ QUOTIENT
+→ COLLISIONS
+→ DÉTECTION D’INSUFFISANCE
+→ TÉMOIN / CONTRE-EXEMPLE
+→ DÉFICIT STRUCTUREL
+→ GÉNÉRATION D’INFORMATION
+→ SONDE CANDIDATE
+→ EXPÉRIENCE ACTIVE
+→ RAFFINEMENT
+→ FERMETURE
+→ SEUILS
+→ GÉOMÉTRIE
+→ RÉGIMES
+→ TRANSITIONS COMPATIBLES
+→ TRAJECTOIRES / PROFILS
+→ IDENTITÉ / TOUR / RÉFLEXION
+→ CONTRAINTES CONSTRUITES
+→ IMAGINATION
+→ PRÉDICTION
+→ SYNTHÈSE DE PROGRAMME
+→ EXÉCUTION DU PROGRAMME
+→ ACTION / INTERVENTION
+→ OBSERVATION NOUVELLE
+→ VÉRIFICATION
+→ MÉMOIRE
+→ CAPACITÉ
+→ TRANSFERT
+→ RÉVISION / FALSIFICATION
+→ NOUVEL ÉTAT DE REPRÉSENTATION.
+
+Cette chaîne doit être réelle dans le code et observable dans les traces.
+Les composants doivent modifier les décisions ou l’état interne du modèle.
+Un composant qui n’est qu’instancié, loggé ou testé séparément mais qui n’influence
+jamais la trajectoire causale n’est pas considéré comme intégré.
+
+======================================================================
+3. OBJECTIF SYSTÈME
+======================================================================
+
+Construire un modèle d’IA générale et généraliste réel, sérieux, non minimaliste,
+non réduit à un système symbolique, non bricolé, non triché, non saboté, qui
+combine une composante neuronale réelle avec les mécanismes déductifs,
+observationnels et génératifs de la Théorie des Empreintes.
+
+Le modèle doit être capable de recevoir des observations brutes et une mission,
+de construire lui-même sa représentation utile, d’identifier l’information qui
+lui manque, d’inventer et tester des sondes, de construire les contraintes
+adaptées au problème, d’imaginer des hypothèses, de les simuler, de synthétiser
+et exécuter des programmes de raisonnement, d’apprendre, de mémoriser, de
+réutiliser et de falsifier ses propres connaissances, puis de transférer ce qui
+est réellement transférable.
+
+Ne pas transformer la théorie en architecture de solveur standard avec une
+couche de vocabulaire « empreinte ». L’empreinte doit être un objet causal de
+construction et de contrôle de la représentation.
+
+======================================================================
+4. INFORMATION PRÉDÉFINIE : INTERDICTION FORTE
+======================================================================
+
+Aucune information spécifique à une tâche, à une instance, à un benchmark ou
+à sa solution ne doit être fournie au modèle à l’avance.
+
+Interdictions :
+- ne pas fournir la représentation cible ;
+- ne pas fournir la liste des variables utiles ;
+- ne pas fournir la structure des relations utiles ;
+- ne pas fournir les contraintes finales ;
+- ne pas fournir les invariants du problème ;
+- ne pas fournir les features métier ;
+- ne pas fournir l’ordre des actions ;
+- ne pas fournir la liste des coups légaux au chess ;
+- ne pas fournir la solution ;
+- ne pas fournir les réponses futures ;
+- ne pas fournir les labels d’apprentissage cachés ;
+- ne pas fournir la correspondance de transfert ;
+- ne pas fournir le programme de raisonnement ;
+- ne pas fournir les hypothèses imaginatives correctes ;
+- ne pas fournir au moteur central une classe `task_name`, `family`, `benchmark`
+  ou équivalent permettant une politique spécifique.
+
+Exception strictement autorisée : des briques de bas niveau totalement générales
+nécessaires à l’exécution du monde et des interactions. Exemples :
+- comparaison ;
+- égalité ;
+- arithmétique élémentaire ;
+- stockage et récupération ;
+- opérations de tenseur ;
+- lecture brute d’une observation ;
+- appel abstrait d’une action ;
+- vérification physique externe ;
+- opérations de contrôle génériques ;
+- primitives de communication de l’environnement.
+
+Même ces primitives ne doivent pas contenir de connaissance métier cachée.
+
+Règle supplémentaire issue de l’audit dur O59 : un alphabet d’actions public ne
+doit jamais être construit à partir d’une continuation, d’une solution, d’un
+label caché ou d’une règle inconnue de l’agent. Un environnement peut exposer une
+syntaxe d’action primitive et générale ; il ne peut pas fabriquer les candidats
+en regardant d’abord la vérité cachée. Le cas chess est strict : aucune liste de
+coups légaux, aucun générateur de coups légaux, aucune évaluation de position ou
+réponse d’un moteur adverse ne doit être transmis au modèle pendant la recherche.
+La légalité et la vérité de l’environnement peuvent exister dans le vérificateur
+externe, mais leurs informations restent du côté de l’évaluation.
+
+Le modèle doit construire lui-même les contraintes spécifiques adaptées à la
+situation à partir de ses observations, de ses interventions et de leurs
+conséquences.
+
+======================================================================
+5. ARCHITECTURE GÉNÉRALE O60
+======================================================================
+
+Construire au minimum les sous-systèmes génériques suivants :
+
+A. Raw Observation Layer
+B. Multi-modal Perception
+C. Observation-Scale Manager
+D. Probe Generator / Probe Learner
+E. Fingerprint Engine
+F. Fiber / Quotient Engine
+G. Sufficiency / Factorization Engine
+H. Collision / Counterexample Engine
+I. Active Information Acquisition Engine
+J. Closure Engine
+K. Threshold / Ultrametric Geometry Engine
+L. Representation Regime Engine
+M. Transition / Circulation Engine
+N. Trajectory / Profile Engine
+O. Identity / Tour / Reflection Engine
+P. Constraint Construction Engine
+Q. Deficit Engine
+R. Imagination Engine
+S. General Program Synthesis Engine
+T. Typed Program VM / Sandbox
+U. Neural Representation Encoder
+V. Neural Probe/Policy Controller
+W. World Model
+X. Episodic Memory
+Y. Semantic Memory
+Z. Procedural / Capability Memory
+AA. Meta-Reasoner
+AB. Capability Discovery / Causal Promotion
+AC. Transfer Discovery / Transfer Falsification
+AD. Semantic Compiler / Multi-candidate Interpretation
+AE. Independent Verifier
+AF. Anti-cheat / Integrity Monitor
+AG. Resource / Checkpoint Manager
+AH. Experiment / Provenance Manager.
+
+Tous ces composants doivent avoir des interfaces génériques et documentées.
+Aucun nom de benchmark ne doit figurer dans le noyau.
+
+======================================================================
+6. SÉPARATION ABSOLUE ENTRE NOYAU ET ÉVALUATION
+======================================================================
+
+Le noyau sous `src/order60` ne doit importer aucun adaptateur de benchmark.
+Les environnements d’évaluation, parseurs spécifiques, règles externes et
+oracles de vérité doivent vivre hors du noyau, dans une couche d’adaptation
+isolée.
+
+L’adaptateur peut savoir comment vérifier la vérité d’un problème. Le modèle
+ne doit pas y avoir accès directement.
+
+Le noyau ne doit pas contenir :
+- ChessEnv ;
+- règles de chess ;
+- générateurs de coups légaux ;
+- générateurs de solutions ;
+- solveurs spécifiques ;
+- tables de réponses ;
+- parseurs codés pour un seul benchmark ;
+- dispatch selon le nom d’un benchmark ;
+- mapping famille -> algorithme.
+
+Un scanner AST et un scanner de chaîne doivent vérifier ces invariants.
+
+======================================================================
+7. FORMALISME DES OBSERVABLES ET DES ÉCHELLES
+======================================================================
+
+Implémenter fidèlement :
+
+Φ : P × X × F → R
+
+et, pour une famille de sondes G :
+
+I_{Φ,G}^P(x) = (f ↦ Φ(P,x,f)).
+
+Construire une notion d’échelle :
+
+(Λ, ≼),   λ ≼ μ ⇒ F_λ ⊆ F_μ.
+
+L’échelle ne doit pas être une simple liste artificielle. Le système doit
+pouvoir modifier la résolution, ajouter, retirer, composer ou raffiner des
+sondes et enregistrer la provenance de ces opérations.
+
+L’empreinte doit devenir une représentation dynamique et révisable.
+
+======================================================================
+8. FIBRES, QUOTIENT, SUFFISANCE ET FACTORISATION
+======================================================================
+
+Pour tout I :
+
+x ~_I y  ⇔  I(x)=I(y)
+
+[x]_I = {y | I(y)=I(x)}
+
+q : X → X/~_I.
+
+Implémenter et tester :
+
+Suff(I,A) ⇔ I(x)=I(y) ⇒ A(x)=A(y).
+
+Lorsque Suff(I,A) est vraie sur un support explicite, construire la
+factorisation :
+
+A = Ā ∘ I.
+
+Lorsque la suffisance est fausse, le modèle doit produire au moins un témoin :
+
+I(x)=I(y),  A(x)≠A(y).
+
+Ce témoin doit modifier l’état de connaissance ou déclencher un mécanisme
+d’action. Il ne doit pas rester uniquement dans une sortie d’audit.
+
+======================================================================
+9. RAFFINEMENT ACTIF ET DÉCOUVERTE ÉPISTÉMIQUE DES SONDES
+======================================================================
+
+Le système ne doit pas supposer les bonnes probes.
+
+Pour une probe g :
+
+I'(x)=(I(x),g(x)).
+
+Garantir expérimentalement et théoriquement :
+
+[x]_{I'} ⊆ [x]_I.
+
+Mais l’objectif O60 est plus fort : découvrir g lorsque la cible utile n’est
+pas connue.
+
+Le modèle doit partir de collisions et de conséquences divergentes, proposer
+une hypothèse sur l’information manquante, générer plusieurs sondes candidates,
+les évaluer selon :
+
+Utility(g) = InformationGain(g) / (Cost(g)+Risk(g)+1e-12)
+
+ou une fonction plus générale découverte par le système, puis effectuer une
+intervention réelle pour obtenir l’information.
+
+Ne pas utiliser les labels cachés dans le calcul d’un gain de probe.
+
+Le système doit distinguer :
+- information observée ;
+- information inférée ;
+- information hypothétique ;
+- information obtenue par expérimentation ;
+- information héritée de mémoire ;
+- information certifiée par vérification.
+
+======================================================================
+10. FERMETURE OBSERVATIONNELLE
+======================================================================
+
+Implémenter la fermeture :
+
+cl(G) = { f : f(x) = h(I_G(x)) pour une fonction h appropriée }.
+
+Tester :
+- extensivité ;
+- monotonie ;
+- idempotence ;
+- conservation des fibres ;
+- élimination des sondes redondantes.
+
+La fermeture doit être un objet actif du système : elle doit permettre de
+réduire l’espace de recherche de sondes et de contrôler la redondance.
+
+======================================================================
+11. SEUILS, ULTRAMÉTRIE, GÉOMÉTRIE ET RÉGIMES
+======================================================================
+
+Restaurer les objets de la théorie O5/O56 relatifs aux seuils :
+
+Θ_P({x,y}) = ρ_P(x,y)
+
+et vérifier la loi du minimum double :
+
+Θ(x,z) ≥ min(Θ(x,y), Θ(y,z)).
+
+Sous les hypothèses requises, construire :
+
+d(x,y)=exp(-Θ(x,y)).
+
+Mais O60 ne doit pas se limiter à vérifier la propriété. La géométrie doit
+être utilisée pour :
+- organiser les représentations ;
+- identifier les zones de proximité structurelle ;
+- détecter les changements de régime ;
+- guider les sondes ;
+- guider la mémoire ;
+- proposer des transferts ;
+- détecter les bifurcations ;
+- faire émerger des abstractions.
+
+Construire les régimes de représentation et leurs transitions à partir des
+observations.
+
+======================================================================
+12. TRANSITIONS, CIRCULATION, TRAJECTOIRES, IDENTITÉ ET RÉFLEXION
+======================================================================
+
+Ne pas abandonner les dimensions O5 sous prétexte qu’elles sont abstraites.
+
+Implémenter des objets génériques pour :
+- transitions compatibles ;
+- composition de transports ;
+- circulation des empreintes ;
+- profils de trajectoire ;
+- chaînes ;
+- bifurcations ;
+- identité observationnelle ;
+- tour d’empreinte ;
+- réflexion / méta-observation ;
+- recollement de descriptions ;
+- représentation canonique.
+
+Ces objets doivent participer à des décisions du modèle.
+
+Exemple de boucle :
+représentation R_t → transformation candidate T → transport attendu →
+action/intervention → observation R_{t+1} → comparaison au transport →
+révision ou validation.
+
+======================================================================
+13. DÉFICIT STRUCTUREL : AUCUNE VALEUR ARBITRAIRE
+======================================================================
+
+Le vecteur de déficit peut conserver la structure :
+
+D=(D_obs,D_cap,D_res,D_search,D_transfer,D_constraint).
+
+Mais O60 interdit les valeurs arbitraires du type « présence d’une mémoire
+=> D_transfer=0.2 ».
+
+Chaque composante doit être issue d’évidence observable et avoir :
+- définition ;
+- mesure ;
+- provenance ;
+- interprétation ;
+- action possible ;
+- test de causalité lorsque cela est pertinent.
+
+D_obs doit pouvoir être alimenté par des collisions contradictoires.
+D_search par une stagnation ou un échec de stratégie observable.
+D_constraint par des interactions contradictoires.
+D_transfer par un écart structurel réellement mesuré.
+D_res uniquement par les ressources effectivement consommées.
+D_cap par un déficit de capacité observé, jamais par hypothèse.
+
+======================================================================
+14. CONTRAINTES : LE MODÈLE DOIT LES CONSTRUIRE
+======================================================================
+
+Les problèmes ne doivent pas être fournis avec une liste complète de contraintes
+spécifiques.
+
+Le système doit pouvoir :
+- proposer une contrainte ;
+- l’attacher à des observations ;
+- l’identifier comme hypothèse ;
+- rechercher un contre-exemple ;
+- estimer son domaine de validité ;
+- l’activer si suffisamment validée ;
+- la réviser ou l’invalider ;
+- construire des conjonctions/disjonctions/relaxations/raffinements ;
+- mesurer sa contribution causale.
+
+Une contrainte candidate non validée ne doit jamais être traitée comme vérité.
+
+Le moteur doit être capable de découvrir qu’une contrainte manque et de faire
+une expérience pour la rechercher.
+
+======================================================================
+15. IMAGINATION COMPLÈTE ET CAUSALE
+======================================================================
+
+Interdiction d’une imagination « décorative ».
+
+Le moteur d’imagination doit produire des hypothèses sur plusieurs niveaux :
+- nouvelle sonde ;
+- nouvelle représentation ;
+- nouvelle contrainte ;
+- nouveau programme ;
+- nouvelle abstraction ;
+- nouvelle stratégie ;
+- modification du modèle du monde ;
+- séquence d’actions ;
+- transfert possible ;
+- explication candidate.
+
+Chaque hypothèse doit comporter :
+- parent ;
+- contexte ;
+- provenance ;
+- falsificateur prévu ;
+- coût ;
+- degré d’incertitude ;
+- état candidate/tested/rejected/validated ;
+- conséquence prédite.
+
+Le système doit réellement simuler les hypothèses.
+
+Il doit pouvoir comparer :
+
+H1 → simulate(H1) → résultat1
+H2 → simulate(H2) → résultat2
+
+puis utiliser cette comparaison pour agir ou apprendre.
+
+L’imagination doit être révisable et conservatrice au sens des propriétés
+théoriques lorsque cela est exigé ; elle doit aussi pouvoir créer de la
+nouveauté observée et détectée.
+
+Les hypothèses correctes ne doivent pas être fournies au modèle.
+
+======================================================================
+16. SYNTHÈSE GÉNÉRALE DE PROGRAMMES DE RAISONNEMENT
+======================================================================
+
+L’O60 ne doit pas reprendre une petite DSL de quatre heuristiques.
+
+Construire une infrastructure de synthèse générale de programmes génériques,
+avec au minimum :
+- types ;
+- variables ;
+- constantes ;
+- appel de primitives ;
+- composition ;
+- branchement ;
+- boucles ;
+- répétition conditionnelle ;
+- récursion bornée et contrôlée ;
+- mémoire ;
+- probes ;
+- création et révision de contraintes ;
+- prediction ;
+- imagination ;
+- simulation ;
+- comparaison ;
+- vérification ;
+- action ;
+- retour arrière ;
+- abstraction ;
+- spécialisation ;
+- généralisation ;
+- transfert ;
+- méta-contrôle.
+
+Le programme peut être représenté sous forme d’AST, graphe ou représentation
+intermédiaire typée, mais la synthèse doit pouvoir créer des programmes nouveaux
+et les réparer par contre-exemple.
+
+Pipeline exigé :
+
+générer → typer → exécuter sandboxée → observer → contre-exemple → réparer →
+retenter → valider held-out → tester causalement → mémoriser ou rejeter.
+
+L’acceptation ne peut pas reposer sur « AST valide » ou « sortie non vide ».
+
+Le programme doit prouver son effet sur des données tenues à l’écart ou sur des
+interventions équivalentes et doit rester rejeté en cas d’absence d’effet.
+
+La synthèse doit pouvoir produire des programmes qui contrôlent autre chose
+qu’un simple ordre de variables.
+
+======================================================================
+17. VM ET SÉCURITÉ DES PROGRAMMES SYNTHÉTISÉS
+======================================================================
+
+Aucun `eval`, `exec`, `__import__` dynamique dangereux, exécution shell, accès
+réseau ou chargement arbitraire de code.
+
+Mettre en place :
+- vérification de type ;
+- contrôle des effets ;
+- ensemble de primitives autorisées ;
+- budget d’instructions ;
+- budget mémoire ;
+- timeout ;
+- journalisation ;
+- provenance ;
+- arrêt sûr ;
+- impossibilité de modifier les fichiers du noyau.
+
+Toute tentative de contourner la VM doit être enregistrée comme attaque.
+
+======================================================================
+18. COMPOSANTE NEURONALE RÉELLE
+======================================================================
+
+L’O60 ne doit pas être un système symbolique auquel on aurait ajouté un petit
+MLP décoratif.
+
+Une composante neuronale réelle doit être présente sur le chemin principal et
+modifier réellement au moins certains choix parmi :
+- encodage d’observation ;
+- attention ;
+- sélection de probes ;
+- évaluation de candidats ;
+- prédiction ;
+- politique d’action ;
+- priorisation de programmes ;
+- consolidation mémoire.
+
+Le modèle doit pouvoir apprendre à partir des conséquences observées.
+
+Les sorties neuronales ne constituent jamais une certification de vérité.
+
+Les ablations neuronales doivent permettre de mesurer leur effet causal sans
+confondre la présence du réseau avec un succès.
+
+La représentation neuronale ne doit pas être un vecteur de hash pseudo-neural
+figé. Les canaux de hash déterministes peuvent être utilisés comme expérience
+ou identifiants, mais ne doivent pas constituer le seul mécanisme d’apprentissage
+représentationnel.
+
+======================================================================
+19. WORLD MODEL RÉEL
+======================================================================
+
+Le world model doit aller au-delà d’une table de transitions `(state, action)
+-> observed next hash`.
+
+Construire un modèle dynamique capable de :
+- encoder l’état ;
+- encoder l’action ;
+- prédire l’état suivant ;
+- estimer l’incertitude ;
+- effectuer des prédictions multi-pas ;
+- simuler des actions jamais exécutées ;
+- détecter les erreurs de prédiction ;
+- mettre à jour ses paramètres ou sa mémoire ;
+- évaluer sa généralisation sur des transitions tenues à l’écart.
+
+L’imagination doit consommer ces prédictions et l’action réelle doit permettre
+de confronter le monde imaginé au monde observé.
+
+======================================================================
+20. MÉMOIRE CUMULATIVE ET LIFELONG LEARNING
+======================================================================
+
+Construire au minimum :
+- mémoire épisodique ;
+- mémoire sémantique ;
+- mémoire procédurale ;
+- mémoire des empreintes ;
+- mémoire des probes ;
+- mémoire des contraintes ;
+- mémoire des contre-exemples ;
+- mémoire du world model ;
+- mémoire des capacités ;
+- mémoire des transferts et de leurs échecs.
+
+Cycle exigé :
+
+expérience A → abstraction A → capacité A → épisode B → réutilisation A →
+contre-exemple B → révision A → capacité A’ → transfert → nouvelle preuve.
+
+La mémoire ne doit pas seulement conserver des logs. Elle doit modifier le
+comportement futur, et cet effet doit être testé ON/OFF.
+
+Les connaissances devenues invalides doivent être marquées, justifiées puis
+remplacées ou retirées.
+
+======================================================================
+21. CAPACITÉS ET PROMOTION CAUSALE
+======================================================================
+
+Une capacité n’est pas un objet déclaratif.
+
+Pipeline :
+
+programme candidat
+→ exécution
+→ performance de base
+→ performance programme ON
+→ held-out
+→ adversarial
+→ causalité
+→ promotion ou rejet.
+
+Une promotion exige une amélioration causale démontrée sans diminution de la
+correction ou de la sûreté requise.
+
+Un rejet est un résultat scientifique valide et doit être conservé.
+
+======================================================================
+22. TRANSFERT : DÉCOUVERTE, PAS TABLE DE CORRESPONDANCE
+======================================================================
+
+Le transfert doit être découvert à partir de la structure des représentations,
+des invariants, des trajectoires, des géométries, des programmes ou des
+conséquences.
+
+Interdiction d’un mapping codé en dur du type :
+« graph coloring -> nqueens » ou équivalent.
+
+Le système doit :
+1. construire une représentation source ;
+2. construire une représentation cible ;
+3. proposer plusieurs correspondances ;
+4. estimer leurs invariants communs ;
+5. imaginer les conséquences d’un transfert ;
+6. tester le transfert ;
+7. rechercher activement une contre-expérience ;
+8. accepter, rejeter ou conserver comme hypothèse.
+
+Le transfert négatif est obligatoire comme branche de falsification.
+
+======================================================================
+23. COMPILATEUR SÉMANTIQUE ET REPRÉSENTATION BRUTE
+======================================================================
+
+Le modèle doit pouvoir partir de sources non déjà converties en ProblemModel.
+
+La couche de perception/compilation doit gérer plusieurs modalités et plusieurs
+formats, puis produire des candidats d’IR typés avec :
+- provenance ;
+- confiance ;
+- ambiguïtés ;
+- hypothèses ;
+- dépendances ;
+- contraintes candidates ;
+- vérifications nécessaires.
+
+Un candidat sémantique non certifié ne doit pas devenir automatiquement la
+vérité du monde.
+
+Le système doit pouvoir décider qu’une représentation est insuffisante et
+retourner à la perception/probing.
+
+======================================================================
+24. MÉTA-RAISONNEMENT
+======================================================================
+
+Le méta-contrôleur doit choisir entre des ressources causales réelles :
+- observer ;
+- sonder ;
+- affiner ;
+- construire une contrainte ;
+- imaginer ;
+- prédire ;
+- synthétiser ;
+- vérifier ;
+- mémoriser ;
+- transférer ;
+- replanifier ;
+- modifier la résolution ;
+- modifier le modèle du monde.
+
+La décision doit dépendre du déficit réellement observé et des ressources
+réellement disponibles.
+
+Aucune table fixe « si Dobs alors PROBE » ne doit être la seule intelligence du
+système. Le méta-contrôleur doit pouvoir apprendre ou synthétiser sa propre
+politique de sélection des ressources.
+
+======================================================================
+25. VÉRIFICATION INDÉPENDANTE
+======================================================================
+
+Séparer :
+- le modèle qui propose ;
+- l’environnement qui exécute ;
+- le vérificateur indépendant qui juge ;
+- le système d’audit qui contrôle la provenance.
+
+Pour chaque succès :
+1. solution produite ;
+2. solution vérifiée indépendamment ;
+3. certificat ou preuve si pertinent ;
+4. hash de l’entrée ;
+5. hash de la sortie ;
+6. version du code ;
+7. configuration ;
+8. seed ;
+9. budget ;
+10. trace minimale reproductible.
+
+======================================================================
+26. CHESS : TEST OBLIGATOIRE, MAIS SANS ORACLE
+======================================================================
+
+Chess doit faire partie de la campagne difficile.
+
+Le modèle doit recevoir l’observation du plateau et la mission générale. Il ne
+doit pas recevoir :
+- la liste des coups légaux ;
+- le meilleur coup ;
+- une évaluation moteur ;
+- un arbre d’analyse préparé ;
+- une table d’ouvertures cachée ;
+- une sélection de tactiques prédéfinie.
+
+L’adaptateur externe doit utiliser une implémentation indépendante et vérifiée
+des règles FIDE, incluant au minimum :
+- roque ;
+- prise en passant ;
+- promotion ;
+- échec ;
+- mat ;
+- pat ;
+- répétition lorsque testée ;
+- cinquante coups lorsque testés ;
+- droits de roque ;
+- alternance des joueurs.
+
+Les coups adversaires doivent être déterminés par un véritable adversaire ou
+un moteur indépendant, jamais par une règle déguisée contenue dans le noyau.
+
+Tester plusieurs catégories :
+- mat en 1 ;
+- mat en plusieurs coups ;
+- tactique ;
+- finale ;
+- stratégie ;
+- défense ;
+- position cachée/perturbée ;
+- longues séquences ;
+- adversaire adaptatif ;
+- tâches OOD.
+
+Augmenter progressivement les budgets et conserver les résultats de chaque
+niveau. Aucun `RESOURCE_BOUND` n’est supprimé : il est mesuré.
+
+======================================================================
+27. AUTRES FAMILLES DE PROBLÈMES DIFFICILES
+======================================================================
+
+La campagne doit couvrir des familles très différentes, sans choisir des
+problèmes qui ressemblent tous à du CSP.
+
+Inclure autant que possible :
+- séquences et induction ;
+- navigation/contrôle ;
+- vision ou structure spatiale ;
+- langage naturel ;
+- causalité ;
+- planification ;
+- SAT/SMT ;
+- ordonnancement ;
+- routage ;
+- optimisation combinatoire ;
+- géométrie ;
+- jeux ;
+- contrôle dynamique ;
+- transformation symbolique ;
+- synthèse de programmes ;
+- raisonnement relationnel ;
+- problèmes mixtes ou multimodaux.
+
+Au moins plusieurs familles doivent être introduites sans IR spécifique fourni
+d’avance au modèle.
+
+======================================================================
+28. GÉNÉRALITÉ : LE NOYAU DOIT ÊTRE TESTÉ HORS CATALOGUE
+======================================================================
+
+Créer un test d’interface générique dans lequel le harnais construit des
+problèmes dont le modèle n’a jamais reçu les classes concrètes.
+
+Changer :
+- noms ;
+- ordre des champs ;
+- sérialisation ;
+- longueur ;
+- taille ;
+- organisation des observations ;
+- nom des actions ;
+- conventions de présentation.
+
+Les performances ne doivent pas dépendre de la détection d’une signature de
+benchmark.
+
+======================================================================
+29. ANTI-TRICHE ET ANTI-CONTOURNEMENT — NIVEAU RENFORCÉ
+======================================================================
+
+Mettre en place simultanément :
+
+A. Audit statique
+- AST ;
+- imports ;
+- appels ;
+- chaînes sensibles ;
+- dispatch benchmark ;
+- tables de solutions ;
+- constants spécifiques.
+
+B. Audit dynamique
+- système de fichiers ;
+- réseau ;
+- processus ;
+- environnement ;
+- accès hors sandbox ;
+- modification des artefacts gelés.
+
+C. Blindage du benchmark
+- identifiants anonymisés ;
+- permutation des noms ;
+- canaris ;
+- données leurres ;
+- séparation processus ;
+- évaluateur scellé.
+
+D. Contrôles de fuite
+- pas de label ;
+- pas de cible ;
+- pas de score futur ;
+- pas de legal-move list ;
+- pas de solution cache ;
+- pas de métadonnée permettant de déduire directement la réponse.
+
+E. Contrôles de manipulation
+- hash des entrées ;
+- hash des sorties ;
+- manifest ;
+- provenance ;
+- signatures de versions ;
+- vérification d’intégrité de l’archive.
+
+F. Attaques de contournement
+- mutation d’un certificat ;
+- modification d’un hash ;
+- injection de faux labels ;
+- falsification de mémoire ;
+- tentative d’injection dans le programme ;
+- tentative de lecture du benchmark ;
+- tentative de contournement du vérificateur ;
+- tentative d’exécution arbitraire ;
+- permutation des instances ;
+- changement des noms sans changement des données.
+
+Chaque attaque doit laisser une trace et produire un statut détecté/rejeté.
+
+======================================================================
+30. ABSENCE DE SABOTAGE
+======================================================================
+
+Tu ne dois pas :
+- mettre volontairement une petite profondeur lorsque la profondeur complète
+  est disponible ;
+- remplacer une méthode complexe par une méthode standard sans le déclarer ;
+- désactiver une composante sans journal ;
+- fabriquer un résultat de test ;
+- masquer un échec ;
+- interrompre prématurément une recherche simplement pour obtenir un résultat
+  plus flatteur ;
+- classer une interruption comme un résultat ;
+- considérer un composant « implémenté » simplement parce qu’un fichier existe ;
+- utiliser des noms d’API pour donner l’impression qu’une fonctionnalité existe ;
+- déclarer une capacité sur la base d’un seul essai non contrôlé.
+
+======================================================================
+31. GESTION DU CALCUL ET CHECKPOINTS OBLIGATOIRES
+======================================================================
+
+Le manque de temps de calcul ne doit jamais devenir une excuse pour livrer un
+travail incomplet en prétendant qu’il est terminé.
+
+Construire un gestionnaire de checkpoints atomiques.
+
+Chaque checkpoint contient :
+- numéro ;
+- état ;
+- manifeste ;
+- hash ;
+- journal ;
+- configuration ;
+- seed ;
+- résultat ;
+- tâches restantes ;
+- temps utilisé ;
+- ressources utilisées ;
+- point exact de reprise.
+
+CHECKPOINTS MINIMUM :
+
+C0 : corpus gelé et hashé
+C1 : audit O5
+C2 : audit O55
+C3 : audit O56
+C4 : audit O58
+C5 : audit O59 hard
+C6 : architecture O60
+C7 : formalisation mathématique
+C8 : observables / échelles / probes
+C9 : fibres / quotient / suffisance
+C10 : raffinement actif
+C11 : fermeture / seuils / géométrie
+C12 : régimes / circulation / trajectoires
+C13 : contraintes
+C14 : déficit
+C15 : imagination
+C16 : programme synthesis
+C17 : VM / sûreté
+C18 : perception / compilation
+C19 : neural representation
+C20 : policy / attention
+C21 : world model
+C22 : memory
+C23 : capabilities
+C24 : transfer
+C25 : meta-reasoning
+C26 : verifier
+C27 : anti-cheat
+C28 : intégration causale
+C29 : tests unitaires
+C30 : tests d’intégration
+C31 : campagne multi-familles
+C32 : chess
+C33 : OOD / généralisation
+C34 : ablations
+C35 : causalité globale
+C36 : reproduction indépendante
+C37 : documentation
+C38 : freeze
+C39 : paquet final.
+
+Pour les campagnes longues :
+- découper les expériences en shards ;
+- sauvegarder régulièrement ;
+- ne jamais perdre les résultats déjà obtenus ;
+- reprendre depuis le dernier shard ;
+- distinguer `NOT_STARTED`, `RUNNING`, `COMPLETED`, `INTERRUPTED`,
+  `RESOURCE_BOUND`, `TIMEOUT`, `FAIL`, `PASS`, `VERIFIED`.
+
+Si le calcul manque, augmenter les shards ou reprendre. Ne pas supprimer les
+expériences difficiles simplement parce qu’elles coûtent cher.
+
+======================================================================
+32. BUDGETS : ÉMERGENCE DES LIMITES
+======================================================================
+
+Ne pas fixer une limite scientifique a priori.
+
+Utiliser des paliers de budget et mesurer :
+- temps ;
+- nœuds ;
+- mémoire ;
+- branches ;
+- profondeur ;
+- nombre de sondes ;
+- simulations ;
+- programmes testés ;
+- actions ;
+- erreurs de world model.
+
+Par exemple, lorsque l’infrastructure le permet :
+- faible budget ;
+- budget moyen ;
+- budget élevé ;
+- budget très élevé ;
+- reprise cumulative.
+
+Comparer les courbes de progression.
+
+Une limite ne peut être formulée comme telle que si :
+- elle est reproductible ;
+- elle est indépendante d’un problème de harnais ;
+- le budget a été documenté ;
+- les corrections disponibles ont été tentées ;
+- aucune correction antérieure ne résout l’anomalie ;
+- le résultat est compatible avec plusieurs reruns indépendants.
+
+======================================================================
+33. ABLATIONS CAUSALES
+======================================================================
+
+Pour les composants principaux, faire au minimum :
+- FULL ;
+- OFF ;
+- ou contrôle équivalent ;
+- plusieurs seeds ;
+- tâches où le composant est théoriquement pertinent ;
+- tâches où il ne l’est pas.
+
+Mesurer :
+- réussite ;
+- exactitude ;
+- coût ;
+- nœuds ;
+- temps ;
+- nombre de probes ;
+- nombre d’hypothèses ;
+- programmes synthétisés ;
+- erreurs ;
+- qualité de représentation ;
+- nombre de collisions ;
+- capacité de transfert ;
+- adaptation.
+
+Une ablation « aucun changement » n’est pas interprétée comme « composant
+inutile » sans analyse de la causalité et de la difficulté de la tâche.
+
+======================================================================
+34. MATRICE DE TRAÇABILITÉ THÉORIE -> CODE -> EXPÉRIENCE
+======================================================================
+
+Créer un fichier machine-readable indiquant pour chaque concept :
+- source ;
+- label théorique ;
+- définition ;
+- équation ;
+- fichier ;
+- classe ;
+- fonction ;
+- test ;
+- expérience ;
+- statut ;
+- hash ;
+- checkpoint.
+
+Statuts recommandés :
+- THEORETICALLY_DEFINED
+- PROVED
+- IMPLEMENTED
+- EXECUTED
+- CAUSALLY_INTEGRATED
+- EXPERIMENTALLY_SUPPORTED
+- PARTIAL
+- REJECTED
+- FAILED_UNDER_DECLARED_CONDITIONS
+- RESOURCE_BOUND
+- UNKNOWN.
+
+Ne jamais écrire « implemented » lorsque seul le fichier existe.
+
+======================================================================
+35. DOCUMENTATION : QUATRE DOCUMENTS DISTINCTS, PAS DES COPIES
+======================================================================
+
+Produire des documents différents par statut et fonction.
+
+A. `DD_Dev_formalisme_et_suite_theorique_th_empreintes_60.tex`
+
+Document principal scientifique.
+Il ne doit contenir que :
+- théorie définie ;
+- théorèmes démontrés ;
+- constructions développées ;
+- composants réellement implémentés ;
+- résultats vérifiés ;
+- limites observées dans les expériences, sans hypothèse préalable.
+
+B. `DD_Dev_formalisme_et_suite_theorique_th_empreintes_60_essaye.tex`
+
+Document d’exploration.
+Il doit inclure :
+- tentatives ambitieuses ;
+- hypothèses non résolues ;
+- voies expérimentées ;
+- essais de généralisation ;
+- échecs techniques ;
+- idées testées puis abandonnées ;
+- résultats incomplets ;
+- pistes qui demandent davantage de calcul.
+
+Il ne doit pas être une copie augmentée du document principal.
+
+C. `DD_Dev_formalisme_et_suite_theorique_th_empreintes_60_ultime_0.tex`
+
+Document de consolidation mathématique maximale.
+Il doit restaurer les dimensions manquantes de la théorie, corriger les
+ambiguïtés découvertes, préciser les hypothèses, les contre-exemples, les
+propositions conditionnelles et les relations entre niveaux.
+
+D. `rapport_experience_model_order_60.tex`
+
+Ce document doit être un journal expérimental exhaustif.
+Il DOIT décrire :
+- chaque expérience ;
+- le pipeline complet réellement utilisé ;
+- les données d’entrée ;
+- les transformations ;
+- les équations utilisées dans le code ;
+- la référence exacte de ces équations dans les documents théoriques ;
+- les fichiers ;
+- les classes ;
+- les fonctions ;
+- les commandes complètes ;
+- les paramètres complets ;
+- les seeds ;
+- les budgets ;
+- les checkpoints ;
+- les sorties ;
+- les statuts ;
+- les erreurs ;
+- les corrections ;
+- les reruns ;
+- les ablations ;
+- les résultats chess ;
+- les résultats OOD ;
+- les résultats anti-cheat ;
+- les hashes.
+
+Ne pas écrire une description générique du pipeline ; écrire le pipeline réel
+qui a été exécuté.
+
+E. `rapport_order_60_hard_v_0.tex`
+
+Rapport spécifique à la campagne sévère : problèmes complexes, multi-familles,
+OOD, adversarial, scaling et chess à gros budget.
+
+F. `correction_order_60.tex`
+
+Journal de toutes les anomalies et corrections avec preuves de non-régression.
+
+======================================================================
+36. RAPPORT EXPÉRIMENTAL : NIVEAU DE PRÉCISION OBLIGATOIRE
+======================================================================
+
+Pour chaque expérience, utiliser une structure du type :
+
+ID : EXP-XXXX
+Objectif : ...
+Entrée : ...
+Modalité : ...
+Représentation initiale : ...
+Information fournie au modèle : ...
+Information interdite : ...
+Probes candidates : ...
+Probe choisie : ...
+Empreinte : ...
+Fibres : ...
+Collision : ...
+Déficit : ...
+Hypothèses imaginées : ...
+Simulations : ...
+Programme synthétisé : ...
+Programme exécuté : ...
+Contraintes construites : ...
+World-model predictions : ...
+Action : ...
+Observation suivante : ...
+Vérification : ...
+Mémoire : ...
+Transfert : ...
+Résultat : ...
+Budget : ...
+Temps : ...
+Nœuds : ...
+Seed : ...
+Commande exacte : ...
+Hash des entrées : ...
+Hash des sorties : ...
+Checkpoint : ...
+Statut : ...
+
+======================================================================
+37. REPRODUCTION INDÉPENDANTE
+======================================================================
+
+Avant le gel final, effectuer une reproduction à partir de l’archive compressée,
+dans un répertoire neuf.
+
+La reproduction doit vérifier :
+- installation ;
+- imports ;
+- tests ;
+- audit anti-cheat ;
+- compilation ;
+- expérience représentative ;
+- un cas difficult ;
+- un cas chess ;
+- un cas OOD ;
+- cohérence des hashes.
+
+Le modèle ne doit pas dépendre d’un path local caché.
+
+======================================================================
+38. GEL ET INTÉGRITÉ DE LA RELEASE
+======================================================================
+
+Le gel final doit produire :
+- manifest de tous les fichiers ;
+- hash SHA-256 de chaque fichier ;
+- hash SHA-256 de l’archive ;
+- environnement de reproduction ;
+- version du modèle ;
+- version des dépendances ;
+- résultats finaux ;
+- logs ;
+- checkpoints ;
+- documents ;
+- audit.
+
+Supprimer les caches non nécessaires du paquet final.
+
+======================================================================
+39. LIVRABLES OBLIGATOIRES
+======================================================================
+
+À la fin d’O60, produire exactement au minimum :
+
+1. DD_Dev_formalisme_et_suite_theorique_th_empreintes_60.tex
+2. DD_Dev_formalisme_et_suite_theorique_th_empreintes_60_essaye.tex
+3. DD_Dev_formalisme_et_suite_theorique_th_empreintes_60_ultime_0.tex
+4. rapport_experience_model_order_60.tex
+5. rapport_order_60_hard_v_0.tex
+6. correction_order_60.tex
+7. model_order_60.zip
+8. audit_order_60.zip
+
+Optionnellement, joindre les PDF compilés, mais les sources TeX demandées
+restent obligatoires.
+
+Tous les autres fichiers de développement, manifests, traces, JSONL, résultats,
+logs, scripts, checkpoints, cartes de traçabilité, tests, audits et documents
+secondaires doivent être rassemblés dans `audit_order_60.zip` lorsqu’ils ne
+font pas partie du modèle déployable.
+
+======================================================================
+40. CRITÈRES ABSOLUS AVANT D’ÉCRIRE « TERMINÉ »
+======================================================================
+
+Tu n’as le droit d’annoncer la fin que si :
+
+- le corpus a été lu et hashé ;
+- les régressions historiques ont été auditées ;
+- le noyau est générique ;
+- les benchmarks sont hors noyau ;
+- les probes sont réellement découvertes et utilisées ;
+- les collisions déclenchent des mécanismes ;
+- les contraintes sont construites et révisées ;
+- l’imagination est exécutée et causale ;
+- la synthèse produit des programmes nouveaux au-delà d’un petit jeu
+  d’heuristiques ;
+- les programmes sont sandboxés ;
+- la composante neuronale est réelle et causale ;
+- le world model est réellement prédictif ;
+- la mémoire modifie le comportement futur ;
+- les capacités sont testées causalement ;
+- le transfert est découvert et falsifié ;
+- la vérification est indépendante ;
+- les tests difficiles sont lancés ;
+- chess est lancé avec budget accru ;
+- les résultats négatifs sont conservés ;
+- les interruptions de calcul sont distinguées des résultats ;
+- l’anti-triche est passée ;
+- une reproduction propre depuis l’archive est passée ;
+- les documents compilent et sont visuellement inspectés ;
+- tous les hashes finaux sont figés ;
+- chaque checkpoint obligatoire est rempli ou explicitement marqué non rempli
+  avec cause et reprise possible.
+
+======================================================================
+41. INTERDICTIONS FINALES
+======================================================================
+
+Il est interdit de :
+
+1. réduire volontairement l’architecture pour tenir dans un budget sans le
+   déclarer comme expérience distincte ;
+2. remplacer un mécanisme théorique par un mécanisme standard pour gagner du
+   temps de développement ;
+3. fournir une représentation spécifique au problème au noyau ;
+4. fournir des contraintes spécifiques au problème ;
+5. fournir la solution ou les labels cachés ;
+6. utiliser le vérificateur comme oracle pendant la recherche ;
+7. coder des mappages de transfert spécifiques ;
+8. coder des fonctions spéciales par benchmark ;
+9. déclarer une limite avant l’avoir mesurée ;
+10. déclarer une réussite sans vérification indépendante ;
+11. supprimer un échec du rapport ;
+12. utiliser un faux succès de synthèse ;
+13. utiliser une simple table de transitions comme unique world model et la
+    présenter comme modèle général ;
+14. présenter un hash ou un MLP de petite dimension comme représentation
+    générale complète ;
+15. présenter 120 épisodes stockés comme apprentissage lifelong sans effet
+    causal démontré ;
+16. présenter un transfert codé en dur comme découverte autonome ;
+17. interrompre une expérience puis écrire qu’elle a échoué sans distinguer
+    l’erreur du harnais ;
+18. réutiliser un ancien rapport comme s’il décrivait la nouvelle release ;
+19. falsifier ou simplifier les commandes de reproduction ;
+20. omettre les paramètres ou seeds qui permettent de reproduire les résultats.
+
+======================================================================
+42. DIRECTIVE FINALE
+======================================================================
+
+Exécute ORDER 60 intégralement.
+
+Ne demande pas d’autorisation pour implémenter un composant prévu par cet ordre.
+Ne remplace pas un mécanisme par ton opinion sur ce qui serait « plus standard ».
+Ne transforme pas la Théorie des Empreintes en simple terminologie autour d’un
+solveur conventionnel.
+
+Lorsque le système rencontre une difficulté :
+
+1. arrêter la sous-expérience au point exact ;
+2. sauvegarder le checkpoint ;
+3. rechercher la formulation théorique antérieure ;
+4. inspecter les implémentations précédentes ;
+5. corriger ;
+6. écrire un test de non-régression ;
+7. reprendre la campagne ;
+8. conserver l’anomalie dans le journal.
+
+Lorsque le calcul est insuffisant :
+- découper ;
+- sauvegarder ;
+- reprendre ;
+- ne pas prétendre que le travail est terminé.
+
+Lorsque le modèle réussit : vérifier indépendamment.
+Lorsque le modèle échoue : conserver le cas, rechercher pourquoi, et ne pas
+transformer l’échec en limite théorique avant preuve.
+
+La priorité absolue est :
+
+FIDÉLITÉ THÉORIQUE
+> INTÉGRATION CAUSALE
+> INTÉGRITÉ EXPÉRIMENTALE
+> ANTI-TRICHE
+> REPRODUCTIBILITÉ
+> PROFONDEUR D’IMPLÉMENTATION
+> PERFORMANCE.
+
+Le résultat final doit être un véritable système expérimental capable de mettre
+à l’épreuve la Théorie des Empreintes à sa profondeur maximale raisonnablement
+atteignable par le calcul disponible, et non une maquette minimale qui
+simule son vocabulaire.
+
+FIN DU PROMPT MAÎTRE ORDER 60.

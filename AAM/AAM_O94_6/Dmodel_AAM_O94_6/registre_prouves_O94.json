@@ -1,0 +1,508 @@
+{
+  "schema": "aam-o94-proof-registry-v1",
+  "version": "0.94.0",
+  "generated_unix": 1792317997.2263525,
+  "source_archives": {
+    "paths_and_sha256": {
+      "/mnt/data/Amodel_AAM_O93_0_modifier.zip": "c70d63388fd5be0f584609a4454cb6279df81d29f5d76625012ca36c3d6454d5",
+      "/mnt/data/Dmodel_AAM_O93_1.zip": "1316374f1adffefa8ddd2bb389b5e91521297d2a627316e6911d8b742f80ef0a",
+      "/mnt/data/work_O94/input_audit/sources_AAM_17.zip": "add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38"
+    },
+    "baseline_integrity": "logs/O94_baseline_integrity.json"
+  },
+  "normative_documents": [
+    "formalisme_O94.tex",
+    "laboratoire_O94.tex",
+    "checklist_de_travail_O94.json",
+    "checklist_erreurs_model.json",
+    "checklist_erreurs_no_model.json"
+  ],
+  "summary": {
+    "requirement_count": 13,
+    "implementation_complete_claimed": false,
+    "local_regression_status": "PASS_BOUNDED_SEGMENTED",
+    "collected_cases": 274,
+    "test_modules": 47,
+    "passed_modules": 47,
+    "full_sms_5574_status": "NOT_VALIDATED",
+    "native_windows_hardware_external_services": "NOT_RUN",
+    "phase_status": {
+      "P0": "COMPLETE_EVIDENCED",
+      "P1": "COMPLETE_EVIDENCED",
+      "P2": "COMPLETE_EVIDENCED",
+      "P3": "COMPLETE_EVIDENCED",
+      "P4": "COMPLETE_EVIDENCED",
+      "P5": "COMPLETE_EVIDENCED",
+      "P6": "COMPLETE_EVIDENCED",
+      "P7": "COMPLETE_EVIDENCED"
+    },
+    "current_phase": "P7",
+    "overall_status": "P7_COMPLETE_EVIDENCED"
+  },
+  "phases": {
+    "P0": {
+      "name": "Inventaire source et intégrité des entrées",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "source_inventory.json",
+        "logs/O94_baseline_integrity.json",
+        "logs/O94_baseline_integrity.json"
+      ],
+      "closure_note": null
+    },
+    "P1": {
+      "name": "Formalisation et validation des briques fondamentales",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "formalisme_O94.tex",
+        "aam_o93/base_blocks.py",
+        "tests/test_o94_base_blocks.py",
+        "logs/O94_P1_20261018T092205Z.json"
+      ],
+      "closure_note": null
+    },
+    "P2": {
+      "name": "Persistance atomique et reprise WinError32",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "aam_atomic_io.py",
+        "tests/test_o94_atomic_replace_retry.py",
+        "logs/O94_P2_20261018T092301Z.json"
+      ],
+      "closure_note": null
+    },
+    "P3": {
+      "name": "Traces d'observation, RAG adaptatif et résolution continue",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "aam_o93/observer.py",
+        "aam_o93/semantic_rag.py",
+        "aam_o93/runtime.py",
+        "tests/test_o94_rag_adaptive.py",
+        "tests/test_o94_trace_resolution_reward.py",
+        "logs/O94_P3_20261018T092415Z.json",
+        "logs/O94_P3_20261018T092444Z.json"
+      ],
+      "closure_note": null
+    },
+    "P4": {
+      "name": "Backend LLM, graphe causal et ergonomie UI",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "aam_o92/engine.py",
+        "aam_o93/ui.py",
+        "tests/test_o94_local_llm_adapter.py",
+        "tests/test_p6_memory_causal_graph_view.py",
+        "logs/O94_P4_20261018T092544Z.json",
+        "logs/O94_P4_20261018T092841Z.json",
+        "logs/O94_P4_20261018T092917Z.json",
+        "tests/test_o94_continuous_resolution_ui.py"
+      ],
+      "closure_note": "Tests ciblés passent y compris résolution continue UI et changement effectif de politique de récupération; tests Windows/serveurs LLM externes réels non exécutés et explicitement hors du périmètre validé."
+    },
+    "P5": {
+      "name": "Tests de non-régression et analyse des écarts",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "logs/O94_test_results.json",
+        "logs/O94_P5_20261018T095427Z.json",
+        "logs/O94_P5_20261018T095437Z.json",
+        "checklist_erreurs_model.json",
+        "checklist_erreurs_no_model.json",
+        "evidence/O94_P5_closure.json"
+      ],
+      "closure_note": "PASS_BOUNDED_SEGMENTED: 274/274 cas collectés et 47/47 modules couverts par reçus réussis; compileall PASS. SMS intégral (5 574 lignes) NOT_VALIDATED; intégrations matérielles/externes NOT_RUN. Les tentatives initiales en échec/timeout sont conservées puis reliées à leurs retests."
+    },
+    "P6": {
+      "name": "Rapports, registre de preuves et sauvegarde",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "laboratoire_O94.tex",
+        "formalisme_O94.tex",
+        "registre_prouves_O94.json",
+        "sav_AAM_O94"
+      ],
+      "closure_note": null
+    },
+    "P7": {
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "evidence/O94_P7_closure.json",
+        "O94_livraison_manifest.json",
+        "MANIFEST_SHA256.json",
+        "logs/O94_P7_snapshot_manifest_mock_artifact.json",
+        "tests/test_o94_snapshot_portability.py"
+      ]
+    }
+  },
+  "entries": [
+    {
+      "id": "O94-A0-BASE-BLOCKS",
+      "request": "Formaliser les compétences, méthodes et règles de base puis rendre les compositions inspectables.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/base_blocks.py::BASE_BLOCKS",
+        "aam_o93/base_blocks.py::ARCHITECTURE_COMPOSITION",
+        "aam_o93/base_blocks.py::BaseBlockRegistry.catalog",
+        "aam_o93/base_blocks.py::BaseBlockRegistry.validate",
+        "aam_o93/competence.py::CompositionRepository"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (onglet/carte Briques de base et commandes de composition)"
+      ],
+      "tests": [
+        "tests/test_o94_base_blocks.py",
+        "tests/test_p3_competencies.py",
+        "tests/test_p4_competence_graph.py"
+      ],
+      "evidence": [
+        "logs/O94_P1_20261018T092205Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "Le catalogue et la composition déclarative sont intégrés et testés localement, mais des sous-systèmes historiques restent enveloppés par des adaptateurs : le dépôt ne démontre pas que toute ligne de tous les chemins historiques est déjà réécrite exclusivement comme composition de briques."
+      ]
+    },
+    {
+      "id": "O94-A1-SEMANTIC-RAG",
+      "request": "RAG observation-first : multi-espaces, sondes, itoken/vtoken, poids corpus-relatifs, recherche traçable et budgets adaptatifs.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+        "aam_o93/semantic_rag.py::SemanticRAG.search",
+        "aam_o93/semantic_rag.py::WEIGHT_VERSION",
+        "aam_o93/runtime.py::rebuild_semantic_rag",
+        "aam_o93/runtime.py::search_semantic_knowledge"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (chargement sources, inspection/gestion des espaces sémantiques, recherche)"
+      ],
+      "tests": [
+        "tests/test_o94_rag_adaptive.py",
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_o931_sparse_proximity_optimization.py",
+        "tests/test_o931_record_preserving_rag.py"
+      ],
+      "evidence": [
+        "logs/O94_P3_20261018T092415Z.json",
+        "logs/O94_P3_20261018T092444Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "Les poids et proximités sont des heuristiques relatives au corpus, pas une vérité sémantique universelle. Le build courant dispose de six familles de sondes connues et de budgets explicites. La pertinence sur le corpus SMS complet de 5 574 lignes reste NOT_VALIDATED."
+      ]
+    },
+    {
+      "id": "O94-A2-FINGERPRINT-NEURONS-AND-LANGUAGE",
+      "request": "Identifier les neurones d’empreintes et éviter de présenter un petit modèle local comme un LLM fondation.",
+      "status": "ARCHITECTURES_IDENTIFIED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o92/learning.py::FingerprintNeuronNetwork",
+        "aam_o92/language.py::FingerprintTokenAttentionLM",
+        "aam_o92/language.py::train_language_model",
+        "aam_o92/engine.py::chat_with_evidence",
+        "aam_o92/engine.py (adaptateurs openai_compatible et ollama)"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (sélecteur de capsule de langue, réglages d’entraînement, configuration API locale)"
+      ],
+      "tests": [
+        "tests/test_o931_language_model_training_surface.py",
+        "tests/test_o931_chat_pipeline.py",
+        "tests/test_o94_local_llm_adapter.py",
+        "tests/test_o94_cli_contract.py"
+      ],
+      "evidence": [
+        "logs/O94_P4_20261018T092544Z.json",
+        "logs/O94_P4_20261018T092841Z.json",
+        "logs/O94_P4_20261018T092917Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "verified_facts": [
+        "FingerprintNeuronNetwork est un réseau entraînable à couche cachée tanh sur caractéristiques d’empreintes. FingerprintTokenAttentionLM est un petit modèle de prédiction du prochain token avec embeddings et attention. Le package ne contient pas les poids d’un LLM fondation généraliste. Les adaptateurs documentés acceptent des endpoints OpenAI-compatible ou Ollama."
+      ],
+      "limitations": [
+        "Le connecteur vers un serveur réel et la génération via un fournisseur externe n’ont pas été acceptés sur un serveur réel durant cette session. La capacité de charger n’importe quel fichier de poids propriétaire de n’importe quel fournisseur n’est pas revendiquée; le support éprouvé porte sur les protocoles compatibles spécifiés."
+      ]
+    },
+    {
+      "id": "O94-A3-ATOMIC-WRITES-WINERROR32",
+      "request": "Gérer une erreur temporaire de fichier verrouillé sans corrompre la cible ni contourner les ACL.",
+      "status": "RETRY_POLICY_UNIT_TESTED_BOUNDED",
+      "code_references": [
+        "aam_atomic_io.py::safe_replace",
+        "aam_atomic_io.py::atomic_write_json"
+      ],
+      "ui_references": [
+        "Tous les chemins persistants qui appellent la couche d’écriture atomique, avec contrôle d’erreur remontée à l’appelant."
+      ],
+      "tests": [
+        "tests/test_o94_atomic_replace_retry.py",
+        "tests/test_p8_security.py::test_failed_atomic_checkpoint_replace_preserves_previous_checkpoint"
+      ],
+      "evidence": [
+        "logs/O94_P2_20261018T092301Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "WinError32/33 est simulé dans le présent environnement Linux. Le comportement NTFS/ACL/handles réels demeure NOT_RUN."
+      ]
+    },
+    {
+      "id": "O94-A4-OBSERVE-BLACKBOX",
+      "request": "Observer les états/séquences comme données, garder les empreintes et ne pas exécuter le contenu observé.",
+      "status": "TRACE_CAPTURE_IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/observer.py::observe_trace",
+        "aam_o93/observer.py::observe_adapter_trace",
+        "aam_o93/runtime.py::observe_trace",
+        "aam_o92/engine.py (acquisition de trace blackbox)"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (action Observer, sources et inspection des observations)"
+      ],
+      "tests": [
+        "tests/test_o94_trace_resolution_reward.py",
+        "tests/test_p1_observer.py",
+        "tests/test_p1_o930_observer_upgrade.py",
+        "tests/test_p7_integrated.py"
+      ],
+      "evidence": [
+        "logs/O94_P3_20261018T092415Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "La trace d’événements établit des états observés et des signatures répétées; elle ne prouve ni causalité par simple adjacence ni reproduction parfaite/généralisation d’une compétence arbitraire. Les capteurs physiques n’ont pas été ouverts."
+      ]
+    },
+    {
+      "id": "O94-A5-CAUSAL-GRAPH",
+      "request": "Distinguer les arcs causaux métier de la chaîne d’intégrité et rendre le graphe inspectable.",
+      "status": "UI_AND_CONTRACT_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/memory.py (parents causaux explicites)",
+        "aam_o93/ui.py (vue graphe causal et parents hors fenêtre)"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py::view_memory_causal_graph (vue causal scrollable)"
+      ],
+      "tests": [
+        "tests/test_p6_memory_causal_graph_view.py",
+        "tests/test_p8_action_router.py",
+        "tests/test_p8_integration.py"
+      ],
+      "evidence": [
+        "logs/O94_P4_20261018T092841Z.json",
+        "logs/O94_P4_20261018T092917Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "Le graphe visualise les relations explicitement enregistrées; il n’infère pas automatiquement les causes réelles. Tests visuels UI exécutés sous Xvfb, pas une revue d’utilisabilité avec utilisateurs."
+      ]
+    },
+    {
+      "id": "O94-A6-CONTINUOUS-RESOLUTION",
+      "request": "Réessayer par politiques distinctes et ne déclarer une solution vérifiée que si un vérificateur indépendant passe.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py::resolve_continuously",
+        "aam_o93/runtime.py::solve",
+        "aam_o93/competence.py::CompetenceRegistry._verify"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (commande de résolution continue depuis le chat)"
+      ],
+      "tests": [
+        "tests/test_o94_continuous_resolution_ui.py",
+        "tests/test_o94_trace_resolution_reward.py"
+      ],
+      "evidence": [
+        "logs/O94_P3_20261018T092444Z.json",
+        "logs/O94_P4_20261018T092917Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "La boucle est soumise à un budget explicite de temps/itérations et respecte l’annulation. Sans vérificateur, l’état reste non résolu/non vérifié; ce mécanisme n’est pas une preuve qu’une solution sera toujours trouvée."
+      ]
+    },
+    {
+      "id": "O94-A7-UI-AND-ERGONOMICS",
+      "request": "Clarifier l’interface pour observer, gérer les sources, les sondes, compétences, entraînement, mémoire et chat.",
+      "status": "DESKTOP_UI_RETAINED_AND_REGRESSION_TESTED",
+      "code_references": [
+        "aam_o93/ui.py::AAMApp",
+        "aam_o93/ui.py (tabs for chat, observation, probes, competencies, training, internet/settings)"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (titre O94, contrôles de modèle/langue, sources/espaces et graphe causal)"
+      ],
+      "tests": [
+        "tests/test_p6_ui_integration.py",
+        "tests/test_p6_probe_ui_contracts.py",
+        "tests/test_p6_ui_initial_catalog_sequence.py",
+        "tests/test_o931_ui_smoke.py",
+        "tests/test_o94_continuous_resolution_ui.py"
+      ],
+      "evidence": [
+        "logs/O94_P4_20261018T092917Z.json",
+        "logs/O94_P5_20261018T095029Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "L’application reste Tkinter; aucune migration en application web n’a été faite. Les tests valident les contrats/initialisations locaux mais ne remplacent pas une étude d’utilisabilité ou une revue visuelle complète."
+      ]
+    },
+    {
+      "id": "O94-A8-OPTIMISATION-ET-ORCHESTRATION",
+      "request": "Adapter les budgets d’observation/RAG et harmoniser les routes de tâches avec audit et provenance.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/semantic_rag.py::SemanticRAG.rebuild",
+        "aam_o93/semantic_rag.py::SemanticRAG.search",
+        "aam_o93/runtime.py::solve",
+        "aam_o93/runtime.py::resolve_continuously",
+        "aam_o93/runtime.py::action dispatch"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (focus, politique RAG, budgets et commandes du runtime)"
+      ],
+      "tests": [
+        "tests/test_o931_sparse_proximity_optimization.py",
+        "tests/test_p8_action_router.py",
+        "tests/test_p8_integration.py",
+        "tests/test_o94_rag_adaptive.py"
+      ],
+      "evidence": [
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "Les heuristiques et budgets sont mesurables et configurables, mais leur optimalité universelle ou qualité sur tous les corpus n’est pas démontrée."
+      ]
+    },
+    {
+      "id": "O94-A9-CAUSAL-REWARD-PUNISHMENT",
+      "request": "Utiliser le feedback de l’utilisateur comme signal causal de préférence, sans que le runtime puisse le convertir en vérité.",
+      "status": "IMPLEMENTED_LOCAL_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/reward_policy.py::CausalRewardPolicy.update",
+        "aam_o93/reward_policy.py::CausalRewardPolicy.adjustment_for",
+        "aam_o93/runtime.py::rate_task"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (feedback de tâche/chat et inspection mémoire)"
+      ],
+      "tests": [
+        "tests/test_o94_trace_resolution_reward.py",
+        "tests/test_p5_autonomy_o930.py",
+        "tests/test_p8_integration.py"
+      ],
+      "evidence": [
+        "logs/O94_P3_20261018T092444Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "Le signal modifie une préférence de routage bornée, pas la vérité d’une réponse. La preuve porte sur les règles causales locales, pas sur une amélioration générale de toutes les performances."
+      ]
+    },
+    {
+      "id": "O94-AUTONOMY-AND-PERSISTENT-MEMORY",
+      "request": "Démarrer l’autonomie avec le runtime et tracer ses actions/mémoires jusqu’à l’arrêt explicite.",
+      "status": "AUTONOMY_LIFECYCLE_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/autonomy.py",
+        "aam_o93/runtime.py::AAMRuntime",
+        "aam_o93/memory.py"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py::AAMApp (start/stop runtime and autonomous loop)"
+      ],
+      "tests": [
+        "tests/test_o931_autonomy_boot_lifecycle.py",
+        "tests/test_p6_autonomy.py",
+        "tests/test_p8_integration.py"
+      ],
+      "evidence": [
+        "logs/O94_test_results.json",
+        "checkpoints/P6_complete.json (historique hérité; voir les reçus O94 pour la régression actuelle)"
+      ],
+      "limitations": [
+        "L’autonomie est testée dans le runtime/app et peut être arrêtée; cela ne valide pas l’apprentissage autonome illimité ni toutes les chaînes de causalité en situation ouverte."
+      ]
+    },
+    {
+      "id": "O94-MULTIMODAL-AND-DATASETS",
+      "request": "Lire plusieurs formats de fichiers et distinguer empreinte brute, décodage et compréhension sémantique.",
+      "status": "READERS_IMPLEMENTED_BOUNDED_SEMANTICS_CONDITIONAL",
+      "code_references": [
+        "aam_o93/dataset_io.py",
+        "aam_o93/media_readers.py",
+        "aam_o93/observer.py::observe_path",
+        "aam_o92/engine.py (media recognition status)"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (inspection dataset, source RAG et commande Observer)"
+      ],
+      "tests": [
+        "tests/test_p7_dataset_service.py",
+        "tests/test_p7_integrated.py",
+        "tests/test_p8_security.py"
+      ],
+      "evidence": [
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "Les décodeurs et outils optionnels gouvernent la disponibilité OCR/ASR/vidéo. La présence d’une empreinte brute n’est jamais déclarée comme compréhension sémantique. Aucune caméra/capteur physique n’a été validé."
+      ]
+    },
+    {
+      "id": "O94-SECURITY-AND-CAUSAL-AUDIT",
+      "request": "Bloquer l’exécution arbitraire des données observées, protéger chemins/archives/événements et garder les traces causales.",
+      "status": "SECURITY_REGRESSION_TESTED_BOUNDED",
+      "code_references": [
+        "aam_o93/runtime.py (typed contracts/action router)",
+        "aam_o93/observer.py (symlink/size checks)",
+        "aam_o93/memory.py (integrity hash chain)",
+        "aam_atomic_io.py"
+      ],
+      "ui_references": [
+        "aam_o93/ui.py (actions passées par routeur du runtime)"
+      ],
+      "tests": [
+        "tests/test_p8_action_router.py",
+        "tests/test_p8_integration.py",
+        "tests/test_p8_security.py",
+        "tests/test_o94_atomic_replace_retry.py"
+      ],
+      "evidence": [
+        "logs/O94_P5_20261018T095257Z.json",
+        "logs/O94_P5_20261018T095319Z.json",
+        "logs/O94_P5_20261018T095330Z.json",
+        "logs/O94_test_results.json"
+      ],
+      "limitations": [
+        "La suite locale couvre les menaces explicitement testées; aucune garantie absolue de sécurité ni test d’ACL NTFS/attaque physique ne peut être inféré de ces tests."
+      ]
+    }
+  ],
+  "validation": {
+    "status": "PASS_BOUNDED",
+    "preflight_status": "PASS_BOUNDED",
+    "all_referenced_code_files_exist": true,
+    "all_referenced_test_files_exist": true,
+    "missing_code_references": [],
+    "missing_test_references": [],
+    "test_report_sha256": "74114c0f2eb26df8748cf1d14ce06a4834f39b3bc2d018bbeef32006da54c2ac",
+    "formalism_sha256_before_registry_build": "bb746ce3a2e83e00d1a4c17f0b8cc9798aa8f6075889eeacad308a2c868aaa26",
+    "laboratory_sha256_before_registry_build": "0704ac1a05dbe8d9a43cf56e47b4e8ad8ba164f0c9468f7af314dcf246f7bade"
+  },
+  "claim_boundary": "The registry is a traceability/audit index. It distinguishes implemented and locally tested contracts from partial integration and unrun external acceptance. It is not a universal proof of capability or future success.",
+  "history": [
+    {
+      "event": "P7 release gate closed",
+      "timestamp_utc": "2026-10-18T10:56:35Z",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "evidence/O94_P7_closure.json",
+      "implementation_complete_claimed": false
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "project": "eGenBrain_v4_extreme_experimental_campaign",
+  "version": "1.0",
+  "created_utc": "2026-10-24T19:34:54.004273+00:00",
+  "protocol_rules": [
+    "Aucune prédiction de réussite ou échec avant mesure.",
+    "Aucun target-answer mapping injecté dans le modèle ou dans les faits/règles d’entrée.",
+    "La référence n’est lue qu’après fin et hash des inférences.",
+    "Toutes les sorties y compris erreurs/abstentions/contradictions restent dans les données brutes.",
+    "Aucun changement après gel sans nouvelle version, diff, hash et séparation baseline/candidate.",
+    "Une phase ne peut être close que si ses critères de sortie sont passés; un échec ou un blocage empêche d’avancer, mais est lui-même un résultat documenté.",
+    "Le changement d’identifiant du suivi P5 confirmatoire en P5C est documentaire; aucun script, cas, moteur, hash de protocole ou résultat n’est modifié."
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Rétablir les chemins, geler la version et établir la traçabilité",
+      "status": "completed",
+      "exit_criteria": [
+        "archives source CRC et empreintes validées",
+        "sources restaurées sans modification et hashées",
+        "checklists de départ consultées et copiées",
+        "snapshot de départ créé et restaurable",
+        "aucune réponse cible chargée dans le runner"
+      ],
+      "evidence": [
+        "logs/P0_inventory.json",
+        "logs/P0_source_manifest_validation.json",
+        "logs/P0_runtime_identity.json",
+        "logs/P0_runtime_reassembly.json",
+        "seed_evidence/logs/clean_install_receipt_v4.json",
+        "logs/P0_legacy_regression_suite.txt",
+        "logs/P0_legacy_regression_summary.json",
+        "sav_exp_v4/P0_source_locked/snapshot_manifest.json"
+      ],
+      "notes": "Les 740 membres du manifeste Amodel passent les hashes. La base runtime restaurée correspond exactement au SHA-256 vérifié antérieurement (1 648 779 264 octets); le recontrôle SQLite local a dépassé le délai après assemblage, donc la preuve d’intégrité utilisée est le reçu antérieur correspondant au même hash exact: integrity_check=ok, FK=0. Régression locale: 136 tests découverts, 133 OK, 3 skippés parce que la MG n’est pas installée dans le chemin du source bundle; ce n’est pas présenté comme un PASS complet des 136.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "P1",
+      "name": "Préenregistrement des questions, familles, contrôles et réponses scellées",
+      "status": "completed",
+      "exit_criteria": [
+        "mêmes requêtes et cas communs entre ablations",
+        "familles indépendantes, négatifs et contradictoires définis",
+        "cibles séparées du code d’inférence et scellées",
+        "règles de scoring/abstention fixées avant exécution"
+      ],
+      "evidence": [
+        "experiments/protocol_v1.json",
+        "experiments/public_cases.json",
+        "experiments/public_case_manifest.json",
+        "logs/P1_protocol_lock_audit.json",
+        "logs/P1_public_case_audit.json",
+        "logs/P1_reference_seal_receipt.json",
+        "logs/P1_snapshot_verification.json"
+      ],
+      "notes": "Préenregistrement fermé avant les nouvelles inférences. 477 cas, 9 familles, 5 modes appariés (2 385 runs) et 120 tests d’induction × 4 modes (480 runs); requêtes identiques par case across modes; cibles séparées mode 0600, absent des cas publics; les audits de leakage statique et du registre de référence PASS. Les inférences n’ont pas encore été lancées au moment de cette clôture.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "P2",
+      "name": "Expérience A — induction d’opérateurs numériques depuis exemples",
+      "status": "completed",
+      "exit_criteria": [
+        "add et multiply testés séparément opérateurs désactivés",
+        "équations d’apprentissage et combinaisons de test séparées",
+        "contrôles de mémorisation et de non-identifiabilité",
+        "résultats bruts complets et erreurs conservés"
+      ],
+      "evidence": [
+        "results/raw/operator_induction_disabled.jsonl",
+        "results/raw/operator_induction_manifest.json",
+        "results/scored/operator_induction_scored.json",
+        "logs/P2_raw_integrity_audit.json",
+        "sav_exp_v4/P2_operator_induction.tar.gz"
+      ],
+      "notes": "480/480 runs finis; 0 fuite de référence; 480/480 paires uniques; toutes les bases présentes et leurs hashes correspondent. Pour add et multiply, opérateur désactivé: 0/60 exacts avec exemples et 0/60 sans exemples, les 120 par opérateur étant des exceptions ValueError operator_not_registered_or_disabled. Opérateur activé: 60/60 exacts pour chaque bras avec et sans exemples. Effet marginal des exemples observé: 0 cas modifié. Ce résultat concerne l’implémentation et le protocole testés, pas une conclusion d’impossibilité théorique.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "P3",
+      "name": "Expérience B — primitives/unités inédites après gel moteur",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "noms d’unités et facteurs générés après gel moteur",
+        "aucun code/primitive spécifique aux noms ajoutés",
+        "transfert positif, manque de primitive et contradictions mesurés"
+      ],
+      "evidence": [
+        "results/raw/P3_new_unit_transfer/units.jsonl",
+        "results/raw/P3_new_unit_transfer/paired_ablation_manifest.json",
+        "results/scored/new_unit_transfer_scored.json",
+        "logs/P3_raw_integrity_audit.json",
+        "sav_exp_v4/P3_new_unit_transfer.tar.gz"
+      ],
+      "notes": "60 noms opaques unités/entités créés après gel moteur; 300 runs appariés, toutes bases et hashes contrôlés. Sur échelles présentes: operators_only=30/30 et full_v4=30/30 exacts; primitive absente: 15/15 abstentions correctes tous modes; facteurs contradictoires: operators_only et full_v4 acceptent un résultat numérique dans 15/15 cas contradictoires, au lieu d’abstention/conflit. Une déviation de procédure d’unblinding du fichier de référence après P2 et avant la fin des autres familles est enregistrée; la suite demeure gelée et aucun target n’est fourni à l’inférence.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "P4",
+      "name": "Expérience C — séparation faits/règles/cibles et audit de fuite",
+      "status": "completed_with_documented_deviation",
+      "exit_criteria": [
+        "audit de chemins/données/prompt/code",
+        "empreintes et provenance de chaque fait/règle",
+        "références chargées uniquement après fermeture des runs"
+      ],
+      "evidence": [
+        "logs/P1_reference_seal_receipt.json",
+        "checklist_erreurs_no_model.json"
+      ],
+      "notes": "FINAL AUDIT 2026-10-24T20:56:24.348867+00:00: La phase pilote est closée avec PDEV-001 documentée : le scoring P2 a ouvert la référence avant la fin des familles pilotes. Les scores pilotes restent exploratoires; la branche confirmatoire P4R/P5C avait son protocole propre.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P5",
+      "name": "Expérience D — ablations appariées, échantillon élargi, plusieurs graines",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "ensemble de cas/requêtes identique entre configurations",
+        "plusieurs familles et contrôles négatifs/contradictoires",
+        "table de résultats complets et écarts par paire"
+      ],
+      "evidence": [
+        "logs/checklist_consultation_exp_v4.jsonl",
+        "logs/confirmatory_v2/live_run_monitor.json",
+        "logs/execution_journal.jsonl",
+        "sav_exp_v4/latest_confirmatory_progress.json",
+        "results/scored/confirmatory_v4_effective/summary.json",
+        "results/scored/operator_induction_scored.json",
+        "results/scored/new_unit_transfer_scored.json"
+      ],
+      "notes": "Exécution démarrée sous protocole gelé. Opérateur (480×2 graines), unités (300×2), révision (5×2) et certificats (17×2) terminés; matrices appariées et intégration NL encore en cours au dernier checkpoint. Exceptions/abstentions préservées; aucun score ni contenu de référence lu. Un timeout initial du runner apparié a laissé 226 lignes fsync puis le même runner a repris sans supprimer de ligne.\n2026-10-24 clôture brute : les six suites × deux graines sont complètes, 6 678/6 678 enregistrements. Audit fail-closed a identifié uniquement ENVEXP-010 (base v2 DEPTH_64_1/full_v4 dont l’empreinte enregistrée diverge) comme problème bloquant et un avertissement de métadonnée v3 révision ligne 4 (AUDIT-002). Les références restent fermées. Replay des cinq modes pour DEPTH_64_1 dans les deux graines préenregistré avant scoring.\nScript de scoring supplémentaire validé syntaxiquement et préenregistré avant toute inférence sur extension; EXTEXP-002 résolu avant exécution. Replay profond DEPTH_64_1 toujours en cours, une ligne durable par graine, références fermées.\nFINAL AUDIT 2026-10-24T20:56:24.348867+00:00: Les suites pilotes et confirmatoires ont été exécutées et scorées. Les anomalies, abstentions et exceptions restent visibles dans les bruts et registres; l’audit pilote n’est pas présenté comme propre a posteriori.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P6",
+      "name": "Expérience E — conflits, retrait/révision de prémisses",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "contradictions conservées sans arbitrage caché",
+        "suppression/modification invalidant support et conclusions",
+        "comportement révisé et effets collatéraux mesurés"
+      ],
+      "evidence": [
+        "logs/confirmatory_repair/effective_raw_closure_audit.json",
+        "results/scored/confirmatory_v4_effective/summary.json"
+      ],
+      "notes": "FINAL AUDIT 2026-10-24T20:56:24.348867+00:00: Révision mesurée sur deux graines : après retrait, statut de requête ABSTAIN mais lignes dérivées anciennes persistantes; modification de prémisse reconfigure le résultat; conflit booléen structuré en exception; conflit d’échelles en abstention sur les cas de révision.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P7",
+      "name": "Expérience F — profondeur, induction de règles et structures",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "profondeurs graduelles contrôlées",
+        "règles intermédiaires explicites retirées dans certains bras",
+        "application vs induction vs apprentissage structurel distingués"
+      ],
+      "evidence": [
+        "results/scored/confirmatory_v4_effective/summary.json",
+        "results/scored/extension_v1/summary.json",
+        "logs/confirmatory_repair/effective_raw_closure_audit.json"
+      ],
+      "notes": "FINAL AUDIT 2026-10-24T20:56:24.348867+00:00: La fermeture répond aux cas profonds et aux positifs avec règle fournie; l’extension « induction sans règle » ne fournit pas de réponses correctes dans les familles structurelles préenregistrées. Les durées observées à profondeur 64 atteignent plusieurs minutes et sont conservées.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P8",
+      "name": "Expérience G — vérification indépendante et adversariale des certificats",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "vérificateur distinct du producteur",
+        "tests tamper, frontières, unités, décimaux et dépendances",
+        "tous résultats bruts et certificats archivés"
+      ],
+      "evidence": [
+        "results/scored/confirmatory_v4_effective/summary.json",
+        "experiments/confirmatory_v3/run_certificate_tests_v3.py"
+      ],
+      "notes": "FINAL AUDIT 2026-10-24T20:56:24.348867+00:00: Vérificateur indépendant séparé : rejette typed_tampered_dims que le vérificateur intégré accepte. Les certificats de composition quantité ne sont pas produits pour les fixtures concernées et restent non évaluables.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P9",
+      "name": "Expérience H — langue, sémantique, paraphrases et généralisation",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "requêtes de langue naturelle tenues à l’écart du développement",
+        "faits/règles sémantiques sourcés et distincts des cibles",
+        "paraphrases, négation, coréférence simplifiée, ambiguïtés, contradiction et abstention évaluées"
+      ],
+      "evidence": [
+        "results/scored/confirmatory_v4_effective/summary.json",
+        "results/scored/extension_v1/summary.json",
+        "logs/extension_v1/raw_closure_audit.json"
+      ],
+      "notes": "FINAL AUDIT 2026-10-24T20:56:24.348867+00:00: Les requêtes linguistiques structurées et l’intégration quantité sont mesurées séparément. Dans l’extension en langue naturelle, 480/480 sorties sont NO_ASCR_RESULTS avec fallback, sans abstention explicite, sans exception et sans réponse textuelle correcte.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P10",
+      "name": "Analyse statistique, reproductibilité et rapport intégral",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "résultats négatifs et abstentions inclus",
+        "hashs, commandes, environnement, limites et écarts documentés",
+        "rapport TeX compilable et livrables vérifiés"
+      ],
+      "evidence": [
+        "rapport_plus_eGenBrain_v4.tex",
+        "rapport_plus_eGenBrain_v4.pdf",
+        "logs/report_pdf_render_receipt.json"
+      ],
+      "notes": "Rapport recompilé et rendu en 15 pages; contrôles PDFium 15/15 et Poppler 15/15; zéro référence LaTeX non résolue, zéro boîte overfull; 21 avertissements underfull non bloquants consignés. Tous résultats négatifs et non évaluables sont conservés.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P4R",
+      "name": "Préenregistrement confirmatoire verrouillé : deux graines, 6 suites et reprise checkpointable",
+      "status": "completed",
+      "exit_criteria": [
+        "hash exact du protocole/scénarios/scripts fixé",
+        "références scellées par hash/permissions et non lues par l’inférence",
+        "snapshot restaure toutes les sources verrouillées",
+        "aucune inférence confirmatoire lancée avant le verrouillage"
+      ],
+      "evidence": [
+        "experiments/confirmatory_v2/protocol_confirmatory_v2.json",
+        "logs/confirmatory_v2/protocol_lock_receipt.json",
+        "logs/confirmatory_v2/P4R_snapshot_restore_check.json",
+        "sav_exp_v4/P4R_protocol_locked.tar.gz"
+      ],
+      "notes": "Deux graines (20261025, 20261026), 477 cas chacune, 9 familles, 3 339 enregistrements prévus par graine; total 6 678. Les cibles restent scellées, seule la preuve de scellage (hash/count/mode) est référencée. Hash du protocole : 7db515998086faa061a8a3535d6f0aa9514ff0fef527972fde335bd03fa08e8b.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "P5C",
+      "name": "P5C — Exécution confirmatoire (toutes familles, avant unblinding)",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "tous les fichiers bruts des deux graines présents et hashés",
+        "6 678 enregistrements, aucune paire dupliquée/manquante",
+        "toutes les références sont absentes des runners",
+        "SQLite/hash/provenance/queries appariées contrôlées",
+        "aucun scoring ni lecture de cibles avant clôture globale"
+      ],
+      "evidence": [
+        "logs/checklist_consultation_exp_v4.jsonl",
+        "logs/confirmatory_v2/live_run_monitor.json",
+        "logs/execution_journal.jsonl",
+        "sav_exp_v4/latest_confirmatory_progress.json",
+        "logs/confirmatory_repair/effective_raw_closure_audit.json",
+        "logs/extension_v1/raw_closure_audit.json",
+        "results/scored/confirmatory_v4_effective/summary.json",
+        "results/scored/extension_v1/summary.json"
+      ],
+      "notes": "Clôture confirmatoire : 6 678/6 678 bruts, toutes les suites des deux graines terminées. Le rejeu préenregistré des cinq modes sur DEPTH_64_1 est terminé (10 lignes), et la vue effective passe l’audit. ENVEXP-010 original et AUDIT-002 sont conservés; le pilote PDEV-001 est exclu de la conclusion confirmatoire. L’extension est close: 1 280/1 280 bruts et scores audités.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "P11",
+      "name": "Emballage des livrables, inventaire des checklists et validation des archives",
+      "status": "completed_with_findings",
+      "exit_criteria": [
+        "archive des bases SQLite contrôlée par zstd et inventaire tar",
+        "toutes les checklists copiées dans une archive avec chemins relatifs et hashes",
+        "bundle des preuves extrait/testé et hashes enregistrés",
+        "point de sauvegarde final P11 restaurable et cohérent"
+      ],
+      "evidence": [
+        "database_archive_manifest.json",
+        "experiments/package_deliverables_v4.py",
+        "/mnt/data/bases_sqlite_eGenBrain_v4_exp.tar.zst",
+        "/mnt/data/checklists_exp_v4.zip",
+        "/mnt/data/preuves_et_checklists_eGenBrain_v4.zip",
+        "/mnt/data/final_package_validation_v4.json",
+        "/mnt/data/SHA256SUMS_eGenBrain_v4.txt"
+      ],
+      "notes": "Clôture P11: archive SQLite 4 478 fichiers dont 4 476 bases, zstd -t et tar compare réussis. La livraison est figée dans un répertoire à identifiant unique; les deux ZIP passent les tests CRC, l’absence de doublons et la vérification des octets incorporés. Les SHA-256 exacts sont dans le reçu externe.",
+      "updated_utc": "2026-10-24T21:13:59.971927+00:00",
+      "snapshot_dir": "/mnt/data/egenbrain_v4_exp_work/sav_exp_v4/P11_final_deliverables_checkpoint_20261024",
+      "snapshot_archive": "/mnt/data/egenbrain_v4_exp_work/sav_exp_v4/P11_final_deliverables_checkpoint_20261024.tar.gz"
+    }
+  ],
+  "current_phase": "P11_closed_with_findings",
+  "last_updated": "2026-10-24T21:15:34.865309+00:00",
+  "phase_model": {
+    "legacy_pilot_track": "P0–P10 conserve l’historique, les déviations et résultats du pilote. Le pilote touché par PDEV-001 reste exclu de l’interprétation confirmatoire principale.",
+    "confirmatory_track": [
+      "P4R: completed — protocole, cas et hashes verrouillés avant inférence.",
+      "P5C: completed_with_findings — matrices appariées et suites auxiliaires sur deux graines complètes; 6 678 lignes primaires brutes et 1 280 lignes extension auditées.",
+      "P6C: completed_with_findings — fermeture brute et audits indépendants réussis; incident historique ENVEXP-010 conservé, vue effective préenregistrée validée.",
+      "P7C: completed_with_findings — références ouvertes uniquement après audit confirmatoire; scoring et statistiques reproductibles.",
+      "P8C: completed_with_findings — analyses approfondies et résultats linguistico-sémantiques complétés.",
+      "P9C: non exécutée comme correction de modèle; v4 reste gelé et inchangé. Les corrections candidates exigent une nouvelle version et un protocole indépendant.",
+      "P11: completed_with_findings — checklists, rapport, archives, preuves et checkpoints finaux préparés et hashés."
+    ]
+  },
+  "updated_utc": "2026-10-24T21:15:34.865309+00:00",
+  "final_status": "completed_with_documented_findings",
+  "final_note": "Phases closes avec résultats, déviations et anomalies documentés. Aucun échec n’est retiré, aucune sortie non évaluable n’est renommée succès; aucun verdict universel sur la théorie n’est inféré."
+}

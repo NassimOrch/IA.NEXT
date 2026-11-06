@@ -1,0 +1,5 @@
+# Dmodel_NGeGenBrain_v0
+
+Runtime exécutable : CLI, interface web locale, AST compositionnel, contrats/types, maillage et certificats, mémoire, ASCRC, ASCR-NG reconstruit, synthèse bornée/reprenable, modèle du monde, exemples, tests, formalismes et documentation. Aucune dépendance tierce Python n'est utilisée ; Python 3.11+ reste nécessaire. Le binaire d'interpréteur Windows n'a pas pu être inclus, car la résolution DNS vers python.org échouait dans l'environnement de construction. Sous Windows x64, `tools/bootstrap_python_windows.ps1` installe le paquet officiel épinglé par SHA-256 si Internet est disponible ; sinon installez Python 3.11+ vous-même. Lire `README.md`, `docs/USER_GUIDE.md`, `docs/PORTABILITY.md` et `docs/REPORT_AUDIT_NGeGenBrain_v0.md`.
+
+Windows : `launch_NGeGenBrain_v0.bat` pour l'interface, `ngbrain_NGeGenBrain_v0.bat` pour le CLI, `test_NGeGenBrain_v0.bat` pour les tests. Linux/macOS : `python3 ngbrain.py init`, puis `python3 ngbrain.py serve --host 127.0.0.1 --port 8765`. Tests : `python3 ngbrain.py test`. Reçu courant : 54 tests, sous portée documentée.

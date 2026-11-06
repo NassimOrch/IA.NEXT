@@ -1,0 +1,202 @@
+{
+  "schema": "aam-o94-3-proof-register-v1",
+  "version": "O94_3",
+  "created_utc": "2026-10-19T15:59:07Z",
+  "parent_artifacts": [
+    {
+      "version": "O94_0",
+      "archive": "Dmodel_AAM_O94_0.zip"
+    },
+    {
+      "version": "O94_1",
+      "archive": "Dmodel_AAM_O94_1_HF1.zip"
+    },
+    {
+      "version": "O94_2",
+      "archive": "Dmodel_AAM_O94_2.zip"
+    }
+  ],
+  "principle": "Un statut signifie que les preuves listées ont été vérifiées dans la portée indiquée; il ne prédit ni succès ni échec futur du potentiel général.",
+  "features": [
+    {
+      "id": "OBS-001",
+      "name": "Observation passive filesystem en direct",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/observation_live.py",
+        "aam_o93/cli.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P1_observation_live.json",
+        "tests/test_o943_passive_observation.py",
+        "tests/test_o943_cli_live_e2e.py"
+      ],
+      "scope": "AAM crée le JSONL, émet événements de démarrage/snapshot/ajout/modification/suppression et rapport final; budget et hash-chain vérifiés.",
+      "limits": "Observation du dossier autorisé; ne constitue pas une inspection mémoire universelle."
+    },
+    {
+      "id": "OBS-002",
+      "name": "Observation processus et trafic réseau",
+      "status": "IMPLEMENTED_TESTED_WITH_FIXTURES_BOUNDED",
+      "code": [
+        "aam_o93/observation_live.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P1_observation_live.json",
+        "tests/test_o943_passive_observation.py"
+      ],
+      "scope": "Snapshots PID réels et tests de capture via fixtures TShark/dumpcap; support PCAPNG et champs de payload opt-in.",
+      "limits": "Capture réelle sur NIC non exécutée ici; exige outils et droits système; TLS reste chiffré."
+    },
+    {
+      "id": "UI-001",
+      "name": "Défilement des onglets denses",
+      "status": "IMPLEMENTED_TESTED_UNDER_XVFB",
+      "code": [
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P2_scrollable_ui.json",
+        "tests/test_o943_ui_contracts.py"
+      ],
+      "scope": "Canvas, scrollbar verticale et molette contrôlés dans observer/modèles/composition/RAG."
+    },
+    {
+      "id": "MODEL-001",
+      "name": "Chargement TorchScript local CPU",
+      "status": "IMPLEMENTED_TESTED_WITH_REAL_TORCHSCRIPT_FIXTURE",
+      "code": [
+        "aam_o93/model_integration.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P3_model_integration.json",
+        "tests/test_o943_model_adapter_contracts.py"
+      ],
+      "scope": "Petit module torch.jit.trace sauvegardé puis chargé via torch.jit.load; inférence JSON tensorielle vérifiée.",
+      "limits": "state_dict .pth exige l’architecture et un adaptateur spécifique; aucun checkpoint utilisateur réel fourni."
+    },
+    {
+      "id": "MODEL-002",
+      "name": "Adaptateurs Transformers/Ollama/OpenAI-compatible/AAM workspace",
+      "status": "CONTRACT_AND_FIXTURE_TESTED",
+      "code": [
+        "aam_o93/model_integration.py",
+        "aam_o93/ui.py",
+        "examples/model_adapters"
+      ],
+      "evidence": [
+        "receipts/O94_3/P3_model_integration.json"
+      ],
+      "scope": "Backends visibles et contrats contrôlés; endpoints distants par fixtures.",
+      "limits": "Aucun Ollama ou endpoint OpenAI réel sollicité."
+    },
+    {
+      "id": "COMP-001",
+      "name": "Catalogue de compétences, méthodes et règles de base",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/base_blocks.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P4_composition_learning.json",
+        "tests/test_o94_base_blocks.py"
+      ],
+      "scope": "Catalogue affiché et passé au compilateur."
+    },
+    {
+      "id": "COMP-002",
+      "name": "Apprentissage de candidats depuis traces live et lookup train-only",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/block_learning.py",
+        "aam_o93/runtime.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P4_composition_learning.json",
+        "tests/test_o943_runtime_integration.py",
+        "tests/test_o943_learned_blocks_and_composition.py"
+      ],
+      "scope": "Les traces passives créent candidats de structure à revue manuelle; les traces entrée/cible non ambiguës créent lookup exact train-only.",
+      "limits": "N’implique pas généralisation universelle; unseen unresolved."
+    },
+    {
+      "id": "COMP-003",
+      "name": "Compilation/exécution de composition déclarative",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/program_composer.py",
+        "aam_o93/competence_graph.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "receipts/O94_3/P4_composition_learning.json"
+      ],
+      "scope": "Compilation vers artefact JSON versionné, save/run et refus des identifiants inconnus; aucune exécution de code arbitraire."
+    },
+    {
+      "id": "RAG-001",
+      "name": "Conservation RAG historique O94_0/O94_1/O94_2",
+      "status": "BYTE_PARITY_AND_RUNTIME_REGRESSION_PASS",
+      "code": [
+        "aam_o93/semantic_rag.py",
+        "aam_o92/retrieval.py"
+      ],
+      "evidence": [
+        "rapport_O94_3/rag_parity_O94_0_O94_1_O94_2.json",
+        "receipts/O94_3/P5_rag_regression.json",
+        "receipts/O94_3/P5_rag_hash_parity.json"
+      ],
+      "scope": "Hashes byte-à-byte identiques dans les archives parentes.",
+      "limits": "P5 re-exécutera les tests runtime avant de fermer le point."
+    }
+  ],
+  "phase_status": {
+    "P0": "COMPLETE_EVIDENCED",
+    "P1": "COMPLETE_EVIDENCED",
+    "P2": "COMPLETE_EVIDENCED",
+    "P3": "COMPLETE_EVIDENCED",
+    "P4": "COMPLETE_EVIDENCED",
+    "P5": "COMPLETE_EVIDENCED",
+    "P6": "COMPLETE_EVIDENCED",
+    "P7": "COMPLETE_EVIDENCED",
+    "P8": "COMPLETE_EVIDENCED"
+  },
+  "open_scope_items": [
+    "Capture réelle sur interface réseau avec TShark/Dumpcap dépend de l’environnement et n’a pas été exécutée ici.",
+    "Clonage général d’un programme arbitraire reste une affirmation non démontrée par les tests de support fini.",
+    "Capture continue de tous capteurs/multimodal n’est pas encore revendiquée sans adaptateurs."
+  ],
+  "updated_utc": "2026-10-19T16:41:00Z",
+  "validation_summary": {
+    "status": "PASS_BOUNDED",
+    "test_file_inventory": 66,
+    "P5_test_files": 6,
+    "P6_test_files": 60,
+    "test_file_coverage_exact_once": true,
+    "P6_segmented_batches_passed": 15,
+    "reported_tests_passed_P5": 47,
+    "reported_tests_passed_P6": 321,
+    "reported_tests_passed_combined": 368,
+    "reported_subtests_passed_P6": 21,
+    "compileall_source_files_scanned": 328,
+    "matrix_receipt": "receipts/O94_3/P6_matrix_reconciliation.json",
+    "compileall_receipt": "receipts/O94_3/P6_compileall.json",
+    "document_compile_receipt": "receipts/O94_3/P7_document_compile.json",
+    "historical_failed_attempts_excluded": [
+      "P6_batch_01_interrupted_attempt.json",
+      "P6_batch_05_attempt1.json",
+      "P6_batch_09_attempt1.json",
+      "P6_batch_14_attempt1.json"
+    ],
+    "candidate_package_status": "PASS_BOUNDED",
+    "candidate_receipt": "receipts/O94_3/P8_candidate_verification.json",
+    "P8_status": "COMPLETE_EVIDENCED",
+    "final_exact_archive_hashes": "external sidecar O94_3_final_delivery_verification.json"
+  }
+}

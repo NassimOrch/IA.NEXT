@@ -1,0 +1,564 @@
+{
+  "schema": "aam-o94-6-phase-checklist-v1",
+  "title": "O94.6 — audit expérimental et corrections pilotées par preuves",
+  "version": "0.94.6",
+  "parent_version": "0.94.5",
+  "current_phase": "COMPLETE",
+  "global_status": "P0_P8_COMPLETE_EVIDENCED",
+  "rule": "Aucune phase ne peut être close sans critères objectifs et reçus signés. Les sorties de test restent séparées du code et des oracles de test.",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Geler O94.5 et reproduire les anomalies hors-échantillon",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [],
+      "criteria": [
+        "Conserver les essais O94.5 originaux en lecture seule.",
+        "Relire les checklists O94.5 et les registres d’erreurs.",
+        "Reproduire les erreurs de pertinence RAG et multi-question à partir des sorties enregistrées."
+      ],
+      "evidence": [
+        "receipts/O94_6/P0_baseline_review.json"
+      ],
+      "evidence_policy": "preserve_observed_outcomes",
+      "interpretation": "P0 reconstitue la reference O94.5, y compris ses reponses incorrectes. Ces preuves negatives sont attendues et ne doivent pas etre converties en tests PASS.",
+      "artifacts": [
+        "real_task_tests/O94_5_baseline/evidence/single_fact_trials.json",
+        "real_task_tests/O94_5_baseline/evidence/multi_question_rag_direct.json",
+        "real_task_tests/O94_5_baseline/evidence/ingest_receipt.json"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Corriger la pertinence RAG par entité et segmentation des enregistrements",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "Préserver les identifiants structurés pendant la tokenisation et le classement.",
+        "Séparer les lignes qui représentent des unités factuelles distinctes sans coder les réponses attendues.",
+        "Réexécuter des essais hors-échantillon sur des identifiants et valeurs absents du code AAM.",
+        "Le statut PASS_BOUNDED ne doit pas masquer un candidat manifestement sans relation."
+      ],
+      "evidence": [
+        "receipts/O94_6/P1_entity_rag_pytest.json",
+        "receipts/O94_6/P1_o945_replay_execution.json"
+      ],
+      "artifacts": [
+        "aam_o93/semantic_rag.py",
+        "aam_o93/resolution_tree.py",
+        "tests/test_o946_entity_rag.py",
+        "scripts/o946_replay_o945_regression.py",
+        "real_task_tests/O94_6_replay/evidence/o945_regression_replay.json"
+      ],
+      "closure_summary": "Three independent entity-RAG regression tests pass; historical O94.5 corpus replay reproduces all seven answers from its separate oracle (7/7) with the oracle excluded from AAMRuntime."
+    },
+    {
+      "id": "P2",
+      "name": "Orchestrer et agréger plusieurs questions sans perdre les sous-questions",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1"
+      ],
+      "criteria": [
+        "Détecter les questions séparées et les clauses interrogatives coordonnées.",
+        "Propager les entités contextuelles aux questions anaphoriques.",
+        "Produire une sortie par question avec statut, preuves et citations indépendants.",
+        "Ne pas injecter d’oracle ni de réponse dans le runtime."
+      ],
+      "evidence": [
+        "receipts/O94_6/P2_phase_only_final.json",
+        "receipts/O94_6/P2_unified_chat_pipeline_final_retest.json",
+        "receipts/O94_6/P2_raw_retrieval_diagnostic.json",
+        "receipts/O94_6/P2_solve_route_diagnostic.json"
+      ],
+      "closure_summary": "Phase-only final campaign: 7/7 pass. Three multi-question tests validate punctuation/conjunction split, entity-context carry and explicit missing entity behavior. Four integration tests validate model+RAG+memory+causal reward, visible provider errors, real Tk chat and tool-decoded ephemeral attachment. Separate fresh diagnostic confirms raw semantic retrieval has evidence and integration rerun passes; earlier mismatch retained as historical incident, not deleted.",
+      "artifacts": [
+        "tests/test_o946_multi_question.py",
+        "tests/test_o945_chat_unified_pipeline.py",
+        "logs/O94_6/P2_phase_only_final.log",
+        "logs/O94_6/P2_unified_chat_pipeline_final_retest.log",
+        "logs/O94_6/P2_raw_retrieval_diagnostic.log"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Fiabiliser les générations longues, délais d’attente et erreurs visibles",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P2"
+      ],
+      "criteria": [
+        "Aucune génération lente achevée ne doit être abandonnée silencieusement ni affichée tronquée.",
+        "L’interface affiche l’état en cours et l’état final; la fermeture de l’interface ne doit pas exécuter un callback Tk sur un widget détruit.",
+        "Tester succès après délai, timeout sur fournisseur HTTP avec délai explicite et erreur fournisseur.",
+        "Ne pas prétendre qu’un adaptateur Python arbitraire peut être interrompu de force dans le processus; documenter cette frontière de cancellation, et garantir que la réponse finale ou erreur devient visible."
+      ],
+      "evidence": [
+        "receipts/O94_6/P3_phase_only_final.json",
+        "receipts/O94_6/P3_http_timeout_test.json"
+      ],
+      "opening_note": "P2 closed with phase-only 7/7 retest. Dedicated P3 execution starts now; preliminary combined P3 tests are retained but do not substitute for this phase-isolated run.",
+      "artifacts": [
+        "tests/test_o946_long_generation_ui.py",
+        "tests/test_o946_generation_timeouts.py",
+        "tests/test_o946_model_absent_rag_fallback.py",
+        "logs/O94_6/P3_phase_only_final.log",
+        "logs/O94_6/P3_http_timeout_test.log"
+      ],
+      "closure_summary": "4/4 phase-isolated tests pass: delayed >20k character response remains complete and visible, network-provider timeout appears as an explicit integration error, no-model RAG path is extractive, provider exceptions are surfaced and penalize reliability. The generic in-process Python adapter has no safe forced cancellation primitive; this boundary is documented instead of falsely claiming cancellation support."
+    },
+    {
+      "id": "P4",
+      "name": "Auditer la programmation compositionnelle sur un éditeur réel et modifiable",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P3"
+      ],
+      "criteria": [
+        "Conserver le graphe de composition, ses briques, versions, paramètres et empreintes.",
+        "Compiler en artefact exécutable, exécuter des cas d’usage, rapporter stdout/stderr/exit code.",
+        "Tester modification et recompilation."
+      ],
+      "evidence": [
+        "receipts/O94_6/P4_composition_quality_gate_final.json",
+        "real_task_tests/O94_6_replay/evidence/composition_quality_gate/composition_quality_gate_execution.json",
+        "real_task_tests/O94_6_replay/evidence/composition_quality_gate/direct_cli_execution.json",
+        "real_task_tests/O94_6_replay/evidence/composed_editor_build_test.json",
+        "receipts/O94_6/P4_phase_closure.json"
+      ],
+      "opening_note": "P3 closed on 4/4 phase-isolated tests; P4 now audits compositional programming, editable graph/blocks, real compilation and an executable multi-file project.",
+      "artifacts": [
+        "examples/compositions/O94_6_project_quality_gate.json",
+        "examples/compositions/O94_6_quality_gate_demo/README.md",
+        "examples/compositions/O94_6_quality_gate_demo/src/assetops/__init__.py",
+        "examples/compositions/O94_6_quality_gate_demo/src/assetops/cli.py",
+        "examples/compositions/O94_6_quality_gate_demo/src/assetops/models.py",
+        "examples/compositions/O94_6_quality_gate_demo/src/assetops/planner.py",
+        "examples/compositions/O94_6_quality_gate_demo/tests/test_planner.py",
+        "scripts/o946_run_composition_quality_gate.py",
+        "real_task_tests/O94_6_replay/compositions/editor_build_test_compose.json",
+        "real_task_tests/O94_6_replay/composed_editor_project/README.md",
+        "real_task_tests/O94_6_replay/composed_editor_project/pyproject.toml",
+        "real_task_tests/O94_6_replay/composed_editor_project/mini_editor/__init__.py",
+        "real_task_tests/O94_6_replay/composed_editor_project/mini_editor/cli.py",
+        "real_task_tests/O94_6_replay/composed_editor_project/mini_editor/core.py",
+        "real_task_tests/O94_6_replay/composed_editor_project/tests/test_editor_core.py"
+      ],
+      "closure_summary": "La composition JSON éditable est compilée en source Python et bytecode, exécutée sur un projet multi-fichiers indépendant, comparée au mode interprété, et une variante modifiée change les paramètres/résultats. Cela ne prouve pas que l’application métier a été inventée automatiquement par AAM; le projet est un artefact d’évaluation indépendant.",
+      "completed_utc": "2026-10-20T16:15:12Z",
+      "closure_receipt": "receipts/O94_6/P4_phase_closure.json",
+      "criterion_results": {
+        "composition_receipt_pass": true,
+        "compiled_interpreted_equivalent": true,
+        "edited_variant_changes_compiled_behavior": true,
+        "compiled_runtime_build_pass": true,
+        "compiled_runtime_tests_pass": true,
+        "editor_build_and_test_pass": true,
+        "direct_cli_runs": true,
+        "compiler_regression_suite_pass": true,
+        "current_savepoint_manifest_present": true,
+        "parent_savepoint_verified": true
+      },
+      "closure_note": "Only machine-readable status receipts are listed under evidence. The composition DSL source is an artifact and its SHA-256 is recorded by the closure receipt."
+    },
+    {
+      "id": "P5",
+      "name": "Observer un processus complexe avec outils réels et produire une capsule rejouable",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P4"
+      ],
+      "criteria": [
+        "Capturer des observations outillées, traces temporelles et hash des entrées/sorties.",
+        "Séparer cas observés et cas de validation tenus à l’écart.",
+        "Tenter la reproduction avec et sans nouvelle entrée; ne pas falsifier une généralisation.",
+        "Préparer un script reproductible sur le PC de l’utilisateur."
+      ],
+      "evidence": [
+        "receipts/O94_6/P5_observation_run.json",
+        "receipts/O94_6/P5_pc_style_replay.json",
+        "receipts/O94_6/P5_phase_closure.json"
+      ],
+      "opening_note": "P4 closed after a phase-isolated composed project quality-gate execution and source/bytecode hashes. P5 now validates independent live process observation and the exact-replay boundary.",
+      "completed_utc": "2026-10-20T16:19:43Z",
+      "closure_receipt": "receipts/O94_6/P5_phase_closure.json",
+      "criterion_results": {
+        "observation_report_pass": true,
+        "external_process_and_input_hashes_match": true,
+        "trace_hash_matches_report": true,
+        "all_eight_inputs_captured": true,
+        "train_test_split_preserved": true,
+        "all_six_training_pairs_replayed_exactly": true,
+        "both_holdouts_are_unresolved_and_excluded": true,
+        "standalone_export_runs_all_eight": true,
+        "replay_command_works_from_external_cwd": true,
+        "pc_replay_instructions_exist": true
+      },
+      "artifacts": [
+        "real_task_tests/O94_6_replay/evidence/observed_invoice_process.json",
+        "real_task_tests/O94_6_replay/observed_process/invoice_observation_trace.jsonl.report.json",
+        "real_task_tests/O94_6_replay/observed_process/invoice_observation_trace.jsonl",
+        "real_task_tests/O94_6_replay/observed_process/invoice_pipeline_target.py",
+        "real_task_tests/O94_6_replay/observed_process/invoice_cases.jsonl",
+        "real_task_tests/O94_6_replay/observed_process/invoice_reproduction_capsule.json",
+        "real_task_tests/O94_6_replay/observed_process/invoice_replica_standalone.py",
+        "real_task_tests/O94_6_replay/observed_process/invoice_observation_checkpoint.json",
+        "real_task_tests/O94_6_replay/observed_process/README_REPRODUCTION_SUR_PC.md",
+        "scripts/o946_observe_invoice_pipeline.py",
+        "scripts/o946_refresh_savepoint.py"
+      ],
+      "closure_summary": "Observation outillée et capsule portable confirmées. Le processus cible est exécuté en sous-processus; les six couples d’entraînement sont rejoués exactement. Les deux cas tenus à l’écart restent explicitement UNRESOLVED; cela ne prouve pas la synthèse ni la généralisation de l’algorithme."
+    },
+    {
+      "id": "P6",
+      "name": "Vérifier résolution continue, récompense et synchronisation du chat",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P5"
+      ],
+      "criteria": [
+        "Tester au moins un problème à plusieurs étapes avec vérificateur séparé.",
+        "Démontrer adaptation de stratégie après échec et maintien des signaux distincts.",
+        "Intégrer RAG, observation, modèle sélectionné, mémoire et traces de récompense."
+      ],
+      "evidence": [
+        "receipts/O94_6/P6_resolution_reward_chat.json",
+        "receipts/O94_6/P6_phase_closure.json"
+      ],
+      "completed_utc": "2026-10-20T16:26:48Z",
+      "closure_receipt": "receipts/O94_6/P6_phase_closure.json",
+      "criterion_results": {
+        "live_runtime_rag_resolution_passes_independent_post_solve_verifier": true,
+        "live_rag_source_provenance_and_memory_integrity_present": true,
+        "verified_reward_event_is_causally_emitted": true,
+        "composition_cli_runs_and_independent_evaluator_matches": true,
+        "chat_reward_multiquestion_missing_model_and_long_generation_regressions_pass": true,
+        "targeted_suite_includes_all_required_test_families": true,
+        "savepoints_present_and_nonempty": true,
+        "historical_environment_runner_incidents_are_resolved_by_retest": true
+      },
+      "artifacts": [
+        "scripts/o946_p6_experiments.py",
+        "scripts/o946_close_p6.py",
+        "logs/O94_6/P6_resolution_reward_chat_pytest.log",
+        "logs/O94_6/P6_composition_cli_output.json",
+        "real_task_tests/O94_6_replay/observed_process/README_REPRODUCTION_SUR_PC.md"
+      ],
+      "closure_summary": {
+        "live_resolution": "Real AAMRuntime + local semantic RAG; independent post-solve contains constraint passed; one verified reward event emitted; output remains tagged RAG-direct extractive and is not an LLM evaluation.",
+        "composition": "Shipped multi-file composed CLI ran four assets; independently recomputed overdue values and action classes matched all emitted records.",
+        "integration_tests": "16 passed, 0 failed in targeted suite: causal routing (including strategy switch tested with stubbed solve), actual runtime reward/rating integration, adapter-provider/chat/RAG contract, multi-question handling, RAG-only without model, and long-generation/UI behavior.",
+        "model_weights_boundary": "No actual user SmolLM2 weights were available in this environment; adapter contract/provider orchestration tests do not certify those weights or semantic quality of a loaded transformer."
+      }
+    },
+    {
+      "id": "P7",
+      "name": "Rédiger le rapport de tests, le manuel compositionnel, le guide UI et la lettre au lycéen",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P6"
+      ],
+      "criteria": [
+        "Chaque test contient prompt/commande/sortie réelle/statut/temps/hashes/interprétation.",
+        "Manuel compositionnel contient graphe et briques utilisés, sortie, réutilisation et modification.",
+        "Guide UI décrit chaque onglet/contrôle livré, selon l’interface réellement présente.",
+        "Lettre au lycéen en français simple, sans survendre les capacités."
+      ],
+      "evidence": [
+        "receipts/O94_6/P7_documentation_validation.json",
+        "receipts/O94_6/P7_release_identity_retest.json",
+        "receipts/O94_6/P7_live_answer_evidence.json",
+        "real_task_tests/O94_6_replay/evidence/P7_capital_chat_evidence.json",
+        "real_task_tests/O94_6_replay/evidence/P7_long_generation_raw_evidence.json",
+        "real_task_tests/O94_6_replay/evidence/composed_editor_build_test.json",
+        "real_task_tests/O94_6_replay/evidence/observed_invoice_process.json",
+        "receipts/O94_6/P7_phase_closure.json"
+      ],
+      "completed_utc": "2026-10-20T16:59:16Z",
+      "closure_receipt": "receipts/O94_6/P7_phase_closure.json",
+      "artifacts": [
+        "RAPPORT_TESTS_O94_6_FR.md",
+        "GUIDE_PROGRAMMATION_COMPOSITIONNELLE_O94_6.md",
+        "GUIDE_INTERFACE_AAM_O94_6.md",
+        "LETTRE_AU_LYCEEN_O94_6.md",
+        "formalisme_O94_6.tex",
+        "laboratoire_O94_6.tex",
+        "README_O94_6_FR.md",
+        "real_task_tests/O94_6_replay/observed_process/README_REPRODUCTION_SUR_PC.md",
+        "real_task_tests/O94_6_replay/observed_process/invoice_replica_standalone.py",
+        "real_task_tests/O94_6_replay/observed_process/invoice_replay_inputs_train.jsonl",
+        "real_task_tests/O94_6_replay/observed_process/invoice_replay_inputs_holdout.jsonl",
+        "examples/compositions/O94_6_quality_gate_demo/README.md",
+        "scripts/o946_replay_invoice_capsule_demo.py",
+        "real_task_tests/O94_6_replay/evidence/P7_chat_raw_answer_trials.json"
+      ],
+      "interpretation": "Les reçus JSON porteurs d’un champ status sont les evidence-gates; les sorties brutes sans champ status (ex. P7_chat_raw_answer_trials.json, qui expose overall_status) restent des artefacts audités et ne sont pas traitées comme des reçus de phase."
+    },
+    {
+      "id": "P8",
+      "name": "Valider les checklists, l’audit, la restauration et les archives finales",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P7"
+      ],
+      "criteria": [
+        "Préflight, compileall, tests ciblés et suite complète exécutés depuis une extraction neuve.",
+        "Les archives passent CRC, hashes, restauration et restent sous 220 Mo chacune.",
+        "Les preuves distinguent les tests exécutés ici de ceux à rejouer sur PC."
+      ],
+      "evidence": [
+        "receipts/O94_6/P8_segmented_full_test_matrix.json",
+        "receipts/O94_6/P8_matrix_registration.json",
+        "receipts/O94_6/P8_fresh_extract_full_matrix.json",
+        "receipts/O94_6/P8_candidate_archive_verification.json",
+        "receipts/O94_6/P8_candidate_extract_manifest_verify.json",
+        "receipts/O94_6/P8_candidate_extract_preflight.json",
+        "receipts/O94_6/P8_candidate_extract_compileall.json",
+        "receipts/O94_6/P8_matrix_snapshot_policy_retest.json",
+        "receipts/O94_6/P8_phase_closure.json"
+      ],
+      "started_utc": "2026-10-20T16:59:16Z",
+      "artifacts": [
+        "receipts/O94_6/P8_candidate3_full_suite.json",
+        "logs/O94_6/P8_candidate3_full_suite.log",
+        "receipts/O94_6/P8_rag_entity_parent_gate_retest.json",
+        "logs/O94_6/P8_rag_entity_parent_gate_retest.log",
+        "receipts/O94_6/P8_rag_entity_parent_gate_retest2.json",
+        "logs/O94_6/P8_rag_entity_parent_gate_retest2.log",
+        "scripts/o946_pytest_exit_safe.py",
+        "tests/test_o946_hyphenated_entity_disambiguation.py",
+        "receipts/O94_6/P8_exit_safe_runner_smoke.json",
+        "receipts/O94_6/P8_chat_rag_multique.json",
+        "logs/O94_6/P8_chat_rag_multique.log",
+        "receipts/O94_6/P8_generation_long_wait_model_absent_and_chat_integrated.json",
+        "logs/O94_6/P8_generation_long_wait_model_absent_and_chat_integrated.log",
+        "receipts/O94_6/P8_composition_observation_reward_release_identity.json",
+        "logs/O94_6/P8_composition_observation_reward_release_identity.log",
+        "receipts/O94_6/P8_continuous_resolution_causal_reward_composition_dispatch.json",
+        "logs/O94_6/P8_continuous_resolution_causal_reward_composition_dispatch.log",
+        "receipts/O94_6/P8_runner_timeout_branch_smoke.json",
+        "receipts/O94_6/P8_integrated_RAG_multiq_long_chat_observation_composition_unreceipted_timeout.json",
+        "receipts/O94_6/P8_full_matrix_01_of_12.json",
+        "receipts/O94_6/P8_full_matrix_02_of_12.json",
+        "receipts/O94_6/P8_full_matrix_03_of_12.json",
+        "receipts/O94_6/P8_full_matrix_04_of_12.json",
+        "receipts/O94_6/P8_full_matrix_05_of_12.json",
+        "receipts/O94_6/P8_full_matrix_06_of_12.json",
+        "receipts/O94_6/P8_full_matrix_07_of_12.json",
+        "receipts/O94_6/P8_full_matrix_08_of_12.json",
+        "receipts/O94_6/P8_full_matrix_09_of_12.json",
+        "receipts/O94_6/P8_full_matrix_10_of_12.json",
+        "receipts/O94_6/P8_full_matrix_11_of_12.json",
+        "receipts/O94_6/P8_full_matrix_12_of_12.json",
+        "receipts/O94_6/P8_segmented_full_test_matrix_raw_workspace_paths.json",
+        "logs/O94_6/P8_segmented_full_test_matrix_orchestrator.log",
+        "RAPPORT_TESTS_O94_6_FR.md",
+        "docs/O94_6/RAPPORT_TESTS_O94_6_FR.md",
+        "README_O94_6_FR.md",
+        "receipts/O94_6/P8_fresh_extract_full_matrix.json",
+        "receipts/O94_6/P8_candidate_archive_verification.json",
+        "receipts/O94_6/P8_candidate_extract_manifest_verify.json",
+        "receipts/O94_6/P8_candidate_extract_preflight.json",
+        "receipts/O94_6/P8_candidate_extract_compileall.json",
+        "receipts/O94_6/P8_matrix_snapshot_policy_retest.json",
+        "receipts/O94_6/P8_matrix_snapshot_mutability_failure.json",
+        "receipts/O94_6/P8_matrix_snapshot_mutability_partial_matrix.json",
+        "logs/O94_6/P8_matrix_snapshot_mutability_failure.log",
+        "logs/O94_6/P8_matrix_snapshot_policy_targeted.log",
+        "tests/test_o945_standalone_preflight.py",
+        "scripts/refresh_o946_savepoint.py",
+        "receipts/O94_6/P8_phase_closure.json"
+      ],
+      "opening_note": "P8 includes an extracted-candidate suite that initially reported 438 passed / 4 failed and timed out during Tkinter finalizers; those exact failure traces are retained. The three RAG regressions and parent-gate test were corrected and the focused rerun passed 18/18. A fresh complete suite must pass using the exit-safe QA runner before closing this phase. The exhaustive segmented matrix subsequently executed all 92 test files in 12 bounded processes: 448 cumulative pytest successes, zero failures, zero timeout; full result and all group receipts are preserved in the P8 matrix receipt. Final archive verification remains a separate exit criterion. The exhaustive segmented matrix executed every one of 92 test files once in 12 processes: 448 cumulative successes, zero failures, zero timeouts. Final archive verification is a separate closure criterion. A fresh candidate extraction subsequently passed manifest verification, O94.6 preflight, compileall, and the 92-file segmented matrix: 448 cumulative successes, zero failures and zero timeouts. Final release verification after phase closure remains mandatory. A fresh candidate extraction subsequently passed manifest verification, O94.6 preflight, compileall, and the 92-file segmented matrix: 448 cumulative successes, zero failures and zero timeouts. Final release verification after phase closure remains mandatory. A fresh candidate extraction subsequently passed manifest verification, O94.6 preflight, compileall, and the 92-file segmented matrix: 449 cumulative successes, zero failures and zero timeouts. Final release verification after phase closure remains mandatory.",
+      "matrix_summary": {
+        "status": "PASS_BOUNDED",
+        "test_files_count": 92,
+        "test_files_executed_count": 92,
+        "unique_test_files": 92,
+        "groups": 12,
+        "passed_sum_across_batches": 449,
+        "failed_sum_across_batches": 0,
+        "timed_out_groups": 0,
+        "receipt": "receipts/O94_6/P8_fresh_extract_full_matrix.json"
+      },
+      "matrix_on_fresh_extraction": {
+        "status": "PASS_BOUNDED",
+        "test_file_count": 92,
+        "unique_test_files": 92,
+        "groups": 12,
+        "passed_sum_across_groups": 449,
+        "failed_sum_across_groups": 0,
+        "timeouts": 0,
+        "receipt": "receipts/O94_6/P8_fresh_extract_full_matrix.json"
+      },
+      "completed_utc": "2026-10-20T18:49:46Z",
+      "closure_receipt": "receipts/O94_6/P8_phase_closure.json",
+      "closure_summary": "Matrice segmentée de l’extraction fraîche: 92/92 fichiers, 12 lots, 449 réussites cumulées, 0 échec, 0 timeout; manifeste PASS avec 0 fichier/hash invalide; preflight PASS_BOUNDED; compileall PASS_BOUNDED; composition, observation et documents de reprise présents. Historique des tentatives antérieures conservé, y compris la suite monolithique en échec et ses causes.",
+      "criterion_results": {
+        "candidate_matrix": "PASS_BOUNDED",
+        "test_files": 92,
+        "unique_test_files": 92,
+        "groups": 12,
+        "cumulative_passed": 449,
+        "cumulative_failed": 0,
+        "timeouts": 0,
+        "candidate_manifest_verification": "PASS",
+        "bad_paths_or_hashes": 0,
+        "candidate_preflight": "PASS_BOUNDED",
+        "compileall": "PASS_BOUNDED",
+        "under_220MiB_candidate_archive": true,
+        "manuals_and_raw_task_evidence_present": true,
+        "fresh_extracted_candidate": "PASS_BOUNDED"
+      }
+    }
+  ],
+  "updated_utc": "2026-10-20T18:49:46Z",
+  "history": [
+    {
+      "timestamp": "2026-10-20T15:40:00+01:00",
+      "event": "P0 initialized from independent O94.5 real-task evidence; identified false-positive RAG status and incomplete compound question answer."
+    },
+    {
+      "timestamp": "2026-10-20T15:44:14+00:00",
+      "event": "P1 closed on 3/3 entity-RAG tests and 7/7 O94.5 historical replay; P2 opened for compound-question, chat and generation integration."
+    },
+    {
+      "timestamp": "2026-10-20T15:51:09+00:00",
+      "event": "P2 closed after isolated phase-only campaign: 7 passed, 0 failed; compound multi-question pipeline, unified RAG/model/chat/reward, real Tk route, and attachment decode evidence recorded. P3 opened for dedicated long-generation/timeout/cancellation campaign."
+    },
+    {
+      "timestamp": "2026-10-20T15:51:54+00:00",
+      "event": "P3 explicitly opened after P2 COMPLETE_EVIDENCED; phase-isolated long-generation/timeout/error validation begins."
+    },
+    {
+      "timestamp": "2026-10-20T15:55:35+00:00",
+      "event": "P3 closed PASS_BOUNDED from isolated tests (4 passed); P4 opened for compositional programming and real compilation audit. Criteria amended to distinguish supported network timeouts from non-forcible arbitrary in-process adapter cancellation."
+    },
+    {
+      "timestamp_utc": "2026-10-20T16:15:12Z",
+      "phase": "P4",
+      "event": "phase_completed",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_6/P4_phase_closure.json",
+      "next_phase": "P5"
+    },
+    {
+      "timestamp_utc": "2026-10-20T16:19:43Z",
+      "phase": "P5",
+      "event": "phase_completed_with_scope_limits",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_6/P5_phase_closure.json",
+      "next_phase": "P6",
+      "note": "Generalization remains unproven; no success claim for held-out inputs."
+    },
+    {
+      "timestamp_utc": "2026-10-20T16:26:48Z",
+      "phase": "P6",
+      "event": "phase_completed",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_6/P6_phase_closure.json",
+      "next_phase": "P7"
+    },
+    {
+      "event": "phase_completed",
+      "phase": "P7",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_6/P7_phase_closure.json",
+      "timestamp_utc": "2026-10-20T16:59:16Z",
+      "next_phase": "P8"
+    },
+    {
+      "event": "phase_started",
+      "phase": "P8",
+      "status": "IN_PROGRESS",
+      "timestamp_utc": "2026-10-20T16:59:16Z",
+      "reason": "P7 closure checks passed; packaging and fresh-extraction verification begin now"
+    },
+    {
+      "event": "P7 evidence/artefact schema normalization",
+      "phase": "P7",
+      "status": "CORRECTED",
+      "timestamp_utc": "2026-10-20T16:55:00Z",
+      "details": "The raw chat data file exposes overall_status rather than status; it remains a required artifact, not a phase-gate receipt."
+    },
+    {
+      "event": "p8_exit_safe_runner_smoke",
+      "phase": "P8",
+      "operation": "pytest_exit_safe_runner_smoke",
+      "status": "PASS_BOUNDED",
+      "receipt": "receipts/O94_6/P8_exit_safe_runner_smoke.json",
+      "timestamp_utc": "2026-10-20T17:41:26.587336+00:00",
+      "note": "QA wrapper passed three independent entity-disambiguation tests and exited cleanly after pytest.main."
+    },
+    {
+      "event": "P8_RAG_multiquestion_regression_retest",
+      "phase": "P8",
+      "status": "PASS_BOUNDED",
+      "receipt": "receipts/O94_6/P8_chat_rag_multique.json",
+      "timestamp_utc": "2026-10-20T17:49:39.088800+00:00",
+      "details": "22 passed; French hyphenation entity-lock regression and multi-question dispatch validated."
+    },
+    {
+      "event": "P8_generation_wait_model_absent_and_UI_retest",
+      "phase": "P8",
+      "status": "PASS_BOUNDED",
+      "receipt": "receipts/O94_6/P8_generation_long_wait_model_absent_and_chat_integrated.json",
+      "timestamp_utc": "2026-10-20T17:49:39.088800+00:00",
+      "details": "7 passed; long output, provider timeout, RAG-only fallback, model integration, UI and attachment decoding."
+    },
+    {
+      "event": "P8_observation_composition_reward_retest",
+      "phase": "P8",
+      "status": "PASS_BOUNDED",
+      "receipt": "receipts/O94_6/P8_composition_observation_reward_release_identity.json",
+      "timestamp_utc": "2026-10-20T17:49:39.088800+00:00",
+      "details": "13 passed; FFmpeg/FFprobe, Tesseract, composition compiler/workbench, release identity."
+    },
+    {
+      "event": "P8_continuous_resolution_reward_autonomy_retest",
+      "phase": "P8",
+      "status": "PASS_BOUNDED",
+      "receipt": "receipts/O94_6/P8_continuous_resolution_causal_reward_composition_dispatch.json",
+      "timestamp_utc": "2026-10-20T17:49:39.088800+00:00",
+      "details": "19 passed; reward dimensions, causal routing, composition dispatch and autonomous loop."
+    },
+    {
+      "event": "P8_timeout_runner_branch_smoke",
+      "phase": "P8",
+      "status": "PASS_BOUNDED",
+      "receipt": "receipts/O94_6/P8_runner_timeout_branch_smoke.json",
+      "timestamp_utc": "2026-10-20T17:49:39.088800+00:00",
+      "details": "Intentional timeout fixture: runner terminates process group in 2.0073s and emits TIMEOUT receipt."
+    },
+    {
+      "timestamp_utc": "2026-10-20T18:49:46Z",
+      "event": "P8_CLOSED",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "receipts/O94_6/P8_phase_closure.json",
+      "summary": "Clôture fondée sur la matrice exhaustive de l’extraction fraîche et les vérifications de packaging candidate."
+    }
+  ],
+  "updated_for": "P8 matrix receipt snapshot mutability fix; targeted regression 3/3 passed; awaiting fresh-candidate full matrix",
+  "last_execution": {
+    "phase": "P8",
+    "operation": "pytest_exit_safe_runner_smoke",
+    "status": "PASS_BOUNDED",
+    "result": "receipts/O94_6/P8_exit_safe_runner_smoke.json",
+    "tests_reported": 3,
+    "exit_code": 0,
+    "timestamp_unix": 1792518086.588026
+  }
+}

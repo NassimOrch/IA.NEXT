@@ -1,0 +1,131 @@
+\documentclass[11pt,a4paper,openany]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}\sloppy
+\title{Formalisation opérationnelle d'eGenBrain\_v1\\\large Conforme au code et au modèle livré}
+\author{Dossier de formalisation et de traçabilité}
+\date{22 octobre 2026}
+\begin{document}\maketitle\tableofcontents
+\chapter*{Statut et règle de lecture}
+Ce document formalise le système effectivement présent dans le dépôt de livraison. Il distingue (i) une définition mathématique opérationnelle, (ii) une propriété testée, (iii) un comportement empirique observé et (iv) une hypothèse restant ouverte. Une fonction de code ou un test fini n'est pas une preuve de vérité factuelle. Le registre \texttt{preuves\_eGenBrain\_v1.json} associe les sections de la source \texttt{eGenBrain\_1.tex} aux références de code et aux résultats disponibles. Les éléments de la théorie DDD qui ne sont pas codés restent expressément marqués comme non revendiqués.
+
+\chapter{Objets, données et conventions}
+\section{Observations source et paires canoniques}
+Une observation source est notée $o_i=(s_i,t_i,q_i,a_i,m_i)$, où $s_i$ est le fichier et l'identifiant de provenance, $t_i$ la tâche, $q_i$ le prompt, $a_i$ la réponse observée et $m_i$ les métadonnées. Le corpus brut est $\mathcal{D}_{raw}=\{o_i\}_{i=1}^{N}$. À l'entraînement, les observations de même signature canonique peuvent être regroupées en un exemple $e_j$, mais leur multiplicité $\mu_j$ et leurs références source demeurent conservées. Le modèle livré contient $N=134\,759$ observations/br ains et $112\,992$ paires canoniques; par construction, $\sum_j\mu_j=N$.
+
+La signature de regroupement est définie par le code avec tâche, prompt et réponse normalisés; le groupe de split, lui, dépend de la tâche et du prompt normalisé, et non de la réponse :
+\[
+\sigma(t,q,a)=\operatorname{SHA256}(t\Vert 0\Vert NFC(q)'\Vert 0\Vert NFC(a)'),\qquad
+\gamma(t,q)=\operatorname{SHA256}(t\Vert 0\Vert NFKC(q)_{casefold,espaces}).
+\]
+Ces expressions décrivent les séparateurs NUL et les normalisations effectivement utilisées; elles ne sont pas des identifiants sémantiques universels.
+
+\section{Tokenisation, identité et occurrences}
+Pour une chaîne $x$, le tokenizeur renvoie $\tau(x)=(u_1,\ldots,u_m)$ avec position, surface, forme canonique, offsets $[b_i,e_i)$ et indicateur lexical. La forme canonique des occurrences est la normalisation Unicode NFKC suivie de \texttt{casefold}. Les runs de lettres/chiffres/underscore sont lexicaux; les autres caractères non blancs apparaissent comme occurrences de ponctuation/symbole. On conserve les offsets originaux et les positions répétées. L'identité lexicale canonique n'assimile pas synonymes, paraphrases ni concepts.
+
+\section{Brain individuel durable}
+Chaque observation garde un brain durable $B_i=(id_i,task_i,Q_i,A_i,O_i,R_i,P_i,H_i)$ où $Q_i$ et $A_i$ sont les textes prompt/réponse, $O_i$ les occurrences ordonnées, $R_i$ les relations locales, $P_i$ la provenance et $H_i$ une empreinte calculée. Les occurrences restent distinctes même quand plusieurs occurrences partagent le même token canonique. Le brain est une structure de données, pas un agent autonome.
+
+\chapter{Construction hors ligne : fusion et maillage global}
+\section{Identités fusionnées et provenance conservée}
+On définit les tokens canoniques observés $V=\{c(u):u\in O_i, i\in train\}$. Des occurrences différentes peuvent pointer vers la même identité lexicale $c$, sans perdre leur position dans leur brain. Une relation globale est une arête dirigée $(u,v,\rho,w,S,\kappa)$ contenant type, support/poids, références de support et statut relationnel $\kappa$. Le graphe global opérationnel est $G=(V,E)$. Les arêtes d'ordre proviennent des séquences dans les brains du split \texttt{train}; les splits de validation/test ne doivent pas alimenter ce maillage.
+
+La multiplicité brute d'une paire aide à préserver les occurrences et le support, mais la fréquence ne prouve pas une causalité. Le modèle actuellement livré contient 125\,453 identités de tokens, 1\,811\,636 lignes d'indexation occurrence-token et 756\,568 arêtes globales. Le contrôle d'intégrité atteste les compteurs et les références de support, pas la véracité du corpus.
+
+\section{Relations causales et anti-causales}
+Le statut relationnel appartient à $\{unknown,causal\_natural,anticausal\}$. Une relation inconnue ne devient pas naturelle par cooccurrence ni par fréquence. Le moteur applique les annotations explicites, avec contraintes dures ou pénalités souples selon le modèle de règle configuré. Une violation anti-causale dure rend le candidat inadmissible; une règle souple intervient comme pénalité, non comme interdiction absolue. Le corpus livré contient zéro annotation causale et zéro annotation anti-causale. Le mécanisme est testé sur annotations explicites synthétiques, mais son bénéfice empirique sur un corpus causalement annoté reste non évalué.
+
+\chapter{Recherche en ligne et maillage contextuel}
+\section{Brain du prompt et alignement ordonné}
+Pour le prompt $q$, le moteur construit un contexte local $C_q$ à partir des occurrences réelles du prompt. Les occurrences du prompt demeurent distinctes; le code représente leurs relations contextuelles dirigées pour toute paire distincte. Ce maillage contextuel est conceptuellement séparé du graphe global d'apprentissage. Les répétitions sont des occurrences distinctes et une ancre requise doit être alignée sur une occurrence/position compatible.
+
+\section{Alignement et orientation}
+Une correspondance admissible doit respecter l'ordre des ancres et les règles d'alignement implémentées. L'existence individuelle des tokens dans $G$ ne suffit pas : une trajectoire ordonnée admissible est nécessaire. Les relations intermédiaires sont permises dans certaines configurations du modèle; les contraintes anti-causales dures peuvent bloquer un candidat. Le code peut retourner $NO\_MATCH$ si la trajectoire structurelle est absente, et $UNKNOWN$ quand la preuve lexicale exploitable est insuffisante. La distinction entre échec de recherche et preuve que la réponse n'existe pas doit être maintenue.
+
+\section{Réponse, provenance et états}
+La recherche renvoie un résultat structuré $(status,task,answer,trace)$ et expose les références source quand un candidat est trouvé. Les états opérationnels comprennent \texttt{FOUND}, \texttt{NO\_MATCH} et \texttt{UNKNOWN}. \texttt{FOUND} signifie que le critère structurel codé a accepté un candidat; il ne veut pas dire que la réponse est factuellement ou sémantiquement juste. Les résultats du test web montrent d'ailleurs qu'une réponse \texttt{FOUND} peut être sémantiquement inadéquate sur un prompt personnalisé.
+
+\chapter{Empreintes opérationnelles imbriquées}
+\section{Sondes finies}
+Pour une requête et un candidat, le profil observé est composé de quatre couches déclarées :
+\begin{enumerate}[label=\arabic*.]
+\item \textbf{identité lexicale}: fréquences des tokens de requête et fréquences de présence dans le candidat;
+\item \textbf{alignement ordonné}: positions de requête, token, position cible et offsets; complétude de l'alignement;
+\item \textbf{écosystème relationnel}: arêtes d'ordre/support, hits causaux/anti-causaux, violations et règles d'intermédiaires;
+\item \textbf{provenance}: hashes des références sources et métadonnées (ou déclaration que la sonde de provenance est désactivée).
+\end{enumerate}
+Chaque couche plus fine incorpore la charge utile de la couche précédente. Si $F_{k+1}(x)=F_{k+1}(y)$ pour l'égalité de charge utile avant hash, alors l'égalité des sous-objets antérieurs est préservée; des tests vérifient cette monotonie sur les objets opérationnels utilisés. Le hash SHA-256 est une empreinte de sérialisation JSON canonique, non une distance sémantique. Cette construction ne représente pas toute la théorie DDD d'ordre 5 : notamment, le pipeline ne met pas en oeuvre un système universel de seuils, d'ultramétrique, d'imagination, de promotion certifiée ou de transfert.
+
+\chapter{Invariants et frontières épistémiques}
+\section{Invariants vérifiables}
+Les invariants vérifiés sur le modèle gelé sont : (1) intégrité SQLite; (2) aucune violation de clé étrangère; (3) aucune fuite de groupe de prompt entre splits; (4) aucun index de token de document provenant de validation/test; (5) hashes d'observations source concordants lors de l'audit P3; (6) la somme des multiplicités vaut 134\,759; (7) l'évaluation laisse inchangé le SHA-256 du modèle. Ces points concernent l'intégrité et la procédure, non la qualité globale des réponses.
+
+\section{Propriétés non démontrées}
+Aucune de ces vérifications ne prouve que (a) toutes les réponses sont exactes, (b) l'architecture génère une compréhension sémantique générale, (c) toute requête peut être résolue, (d) les relations causales sont fiables, ou (e) les mécanismes théoriques hors code existent implicitement. Les résultats empiriques doivent être interprétés selon la tâche, l'effectif et la latence observée.
+
+\chapter{Algorithme de construction et algorithme de recherche}
+\section{Construction hors ligne}
+\begin{enumerate}
+\item découvrir les sources permises et calculer leurs hashes;
+\item lire chaque format, convertir les lignes valides en observations normalisées et enregistrer les erreurs de parsing;
+\item calculer les signatures canoniques et conserver les références/multiplicités;
+\item former les groupes de split par tâche et prompt normalisé avec la graine déterministe;
+\item écrire les exemples canoniques et le brain durable pour chacune des observations;
+\item indexer les occurrences du split train et agréger les arêtes globales ordonnées;
+\item écrire les annotations explicites sans promotion implicite de \texttt{unknown};
+\item vérifier les relations, les contraintes, les clés étrangères et l'intégrité SQLite;
+\item publier atomiquement la nouvelle base et produire le manifeste SHA-256.
+\end{enumerate}
+
+\section{Recherche en ligne}
+\subsection{Contrat de routage par tâche}
+Soit $h$ l'indication explicite fournie par l'appelant. Si $h\in\{\texttt{chat},\texttt{math\_qa},\texttt{sms\_classification}\}$, la tâche $t$ utilisée par la recherche est $t=h$; une valeur explicite non autorisée est rejetée. Si aucune indication n'est fournie, le code applique uniquement les règles de repli définies dans \texttt{route\_task}. Cette règle évite de substituer silencieusement un autre index au sous-graphe demandé. Elle est vérifiée par \texttt{test\_explicit\_math\_task\_hint\_routes\_to\_math\_index} et \texttt{logs/math\_task\_route\_regression.log}. Le routage est un prérequis d'une mesure valide, mais ne garantit pas l'exactitude sémantique de la réponse.
+
+\begin{enumerate}
+\item déterminer la tâche depuis l'indication explicite ou le routeur opérationnel;
+\item tokeniser le prompt en conservant les offsets et les répétitions;
+\item construire le contexte local de la requête;
+\item retrouver des candidats via l'index lexical et le maillage global;
+\item vérifier la trajectoire et l'alignement ordonné; tester les contraintes explicites;
+\item éliminer les candidats inadmissibles et ordonner ceux qui restent par le score codé;
+\item produire \texttt{FOUND} et la provenance lorsqu'un candidat est admis, sinon \texttt{NO\_MATCH} ou \texttt{UNKNOWN};
+\item enregistrer la trace d'observation. L'inférence est testée sans mutation de la base.
+\end{enumerate}
+
+\chapter{Interfaces et commandes}
+Le serveur local expose chat, statistiques, exemples train, inventaire/inspection de datasets, upload, entraînement asynchrone vers une nouvelle base, activation explicite du modèle, évaluation, interrogation de job et console applicative. La console applique une liste blanche de commandes (aide, stats, vérification, chat, inspection, entraînement, évaluation); elle n'exécute pas un shell arbitraire. CLI : \texttt{python -m egenbrain --help}; commandes principales : \texttt{train}, \texttt{serve}, \texttt{chat}, \texttt{evaluate}, \texttt{inspect-dataset}. L'accès web par défaut est local sur \texttt{127.0.0.1:8765}.
+
+\chapter{Référence d'implémentation}
+\begin{longtable}{p{.25\linewidth}p{.37\linewidth}p{.26\linewidth}}
+\toprule Concept & Point d'entrée code & Test/log décisif\\\midrule
+Tokenisation et offsets & \texttt{egenbrain/core.py:canonicalize, tokenize} & \texttt{tests/test\_core.py}\\
+Brain durable & \texttt{egenbrain/core.py:build\_local\_brain}; \texttt{egenbrain/train.py:\_insert\_model} & \texttt{logs/p3\_structural\_audit.json}\\
+Données / Parquet & \texttt{egenbrain/datasets.py:read\_rows}; \texttt{egenbrain/parquet\_flat.py} & \texttt{logs/parquet\_reader\_probe\_v1.log}\\
+Maillage / recherche & \texttt{egenbrain/core.py:EGenBrain.search} & \texttt{tests/test\_core.py}\\
+Empreintes & \texttt{egenbrain/observations.py:candidate\_observation\_profile} & \texttt{tests/test\_observations.py}\\
+Évaluation & \texttt{egenbrain/evaluate.py:run\_evaluation} & \texttt{logs/p5\_test\_evaluation\_extended.json}\\
+API / studio & \texttt{egenbrain/server.py} et \texttt{web/} & \texttt{logs/p4\_live\_http\_smoke.json}\\
+Intégrité / empaquetage & \texttt{scripts/verify\_integrity.py}, \texttt{scripts/reassemble\_model.py} & \texttt{logs/p6\_prepackage\_integrity.json}\\
+\bottomrule
+\end{longtable}
+Les lignes exactes et hashes des sources sont dans le JSON de preuves, qui recense chaque rubrique de la source eGenBrain_1 et chaque rubrique de DDD ordre 5.
+
+\chapter{Routage corrigé et résultats empiriques mis à jour}
+Le routage explicite est vérifié par une régression ciblée. Les évaluations corrigées (\texttt{logs/p5\_test\_routed\_v2.json}, \texttt{logs/p5\_validation\_routed\_v2.json}) conservent le hash de la base avant/après et vérifient intégrité et non-fuite. Les résultats sont : math 57/100 FOUND au test, 47/100 en validation, mais 0/100 exact-match math dans chaque split; SMS 5/10 et 7/10 exacts; chat 0/3 et 0/1 FOUND. FOUND représente l'admissibilité structurelle, non une preuve de réponse exacte. Les anciennes métriques math sont conservées comme historiques invalidées par l'erreur de routage.
+
+\chapter{Routage corrigé et résultats empiriques mis à jour}
+Le routage explicite est vérifié par une régression ciblée. Les évaluations corrigées (\texttt{logs/p5\_test\_routed\_v2.json}, \texttt{logs/p5\_validation\_routed\_v2.json}) conservent le hash de la base avant/après et vérifient intégrité et non-fuite. Les résultats sont : math 57/100 FOUND au test, 47/100 en validation, mais 0/100 exact-match math dans chaque split; SMS 5/10 et 7/10 exacts; chat 0/3 et 0/1 FOUND. FOUND représente l'admissibilité structurelle, non une preuve de réponse exacte. Les anciennes métriques math sont conservées comme historiques invalidées par l'erreur de routage.
+
+\chapter{Routage corrigé et résultats empiriques mis à jour}
+Le routage explicite est vérifié par une régression ciblée. Les évaluations corrigées (\texttt{logs/p5\_test\_routed\_v2.json}, \texttt{logs/p5\_validation\_routed\_v2.json}) conservent le hash de la base avant/après et vérifient intégrité et non-fuite. Les résultats sont : math 57/100 FOUND au test, 47/100 en validation, mais 0/100 exact-match math dans chaque split; SMS 5/10 et 7/10 exacts; chat 0/3 et 0/1 FOUND. FOUND représente l'admissibilité structurelle, non une preuve de réponse exacte. Les anciennes métriques math sont conservées comme historiques invalidées par l'erreur de routage.
+
+\chapter{Statut formel du modèle livré}
+Le système implémente un pipeline déterministe de brains persistants, fusion lexicale, maillage d'ordre global, contexte local, alignement, contraintes explicites, traçabilité, interfaces et mesures reproductibles. Les résultats initiaux sur les petits échantillons sont conservés mais leurs métriques math sont invalidées par un défaut de routage désormais corrigé. Après correction, le test donne 57/100 réponses math FOUND et la validation 47/100; l'exact-response-match math est 0/100 dans les deux splits et le F1-token moyen est 0,126596/0,106234. Le chat reste à 0/3 FOUND au test et 0/1 en validation; SMS obtient 5/10 labels exacts au test et 7/10 en validation. Les annotations causales/anti-causales d'entraînement sont absentes. Ainsi, le statut est : implémentation exécutée et structurellement auditée; qualité empirique mixte, avec accès au bon sous-graphe réparé mais justesse des réponses math non démontrée; couverture DDD partielle plutôt qu'intégrale.
+\end{document}

@@ -1,0 +1,159 @@
+{
+  "schema": "aam-o94-1-environment-error-ledger-v1",
+  "title": "Registre des blocages d’environnement — AAM O94_1",
+  "parent_ledger": "checklist_erreurs_no_model.json",
+  "parent_sha256": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef",
+  "updated_utc": "2026-10-19T09:46:49Z",
+  "updated_for": "P7 startup fix + fresh archive extraction tests; native Windows BAT still listed as not tested",
+  "items": [
+    {
+      "incident_id": "O941-E001",
+      "phase": "P3",
+      "category": "real_provider_not_configured",
+      "severity": "VALIDATION_PENDING",
+      "status": "OPEN",
+      "summary": "Aucun endpoint LLM utilisateur ni jeu de poids local externe n’a été fourni dans la session; les appels réels ne sont donc pas validés.",
+      "impact": "Les tests HTTP simulés vérifient le contrat sans prouver l’accessibilité ou la qualité d’un backend réel.",
+      "evidence": [
+        "tests/test_o941_model_integration.py"
+      ],
+      "remediation": "Configurer/autoriser un endpoint ou dossier de poids et relancer le test manuel."
+    },
+    {
+      "incident_id": "O941-E002",
+      "phase": "P3",
+      "category": "optional_training_dependencies",
+      "severity": "ENVIRONMENT_DEPENDENT",
+      "status": "NOT_TESTED_ON_REAL_WEIGHTS",
+      "summary": "L’entraînement LoRA dépend de torch, transformers, peft, du format des poids, de modules cibles adéquats et des ressources matérielles.",
+      "impact": "Aucune assertion de mise à jour des poids n’est faite sans un run effectivement enregistré.",
+      "evidence": [
+        "aam_o93/model_integration.py"
+      ],
+      "remediation": "Tester avec un modèle compatible local, des dépendances figées et un petit jeu de données maîtrisé."
+    },
+    {
+      "incident_id": "O941-E003",
+      "phase": "P5",
+      "category": "platform_coverage",
+      "severity": "NOT_VALIDATED",
+      "status": "OPEN",
+      "summary": "La capture de cible n’a pas été exécutée sur Windows dans cette session; la gestion des groupes de processus varie selon le système.",
+      "impact": "La validation de timeout/arrêt ne vaut pas test natif Windows.",
+      "evidence": [
+        "tests/test_o941_blackbox.py"
+      ],
+      "remediation": "Exécuter le jeu de tests sur Windows propre et documenter les écarts."
+    },
+    {
+      "incident_id": "O941-E004",
+      "phase": "P5",
+      "category": "physical_devices",
+      "severity": "ENVIRONMENT_DEPENDENT",
+      "status": "NOT_TESTED",
+      "summary": "Aucun test matériel caméra, audio, vidéo, OCR ou capteur physique n’est couvert par la nouvelle suite O94_1.",
+      "impact": "La disponibilité dépend des pilotes et lecteurs présents sur la machine cible.",
+      "evidence": [
+        "formalisme_O94_1.tex",
+        "laboratoire_O94_1.tex"
+      ],
+      "remediation": "Faire des tests d’acceptation sur les périphériques et les formats effectifs."
+    },
+    {
+      "incident_id": "O941-E005",
+      "phase": "P1",
+      "category": "phase_transition_harness",
+      "severity": "PROCESS_DEVIATION",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le premier appel du helper de transition a bloqué la clôture parce qu’il exigeait la dépendance P1 déjà complète avant de pouvoir marquer P1 complète dans la même transaction.",
+      "impact": "Aucun saut de phase ni passage à P2 n’a eu lieu; l’outil de transition a été corrigé.",
+      "evidence": [
+        "logs/O94_1/P1_transition_attempt_blocked.json",
+        "scripts/o941_transition_phase.py"
+      ],
+      "remediation": "Relancer la transition avec les quatre preuves de sortie; la clôture et le passage à P2 sont atomiques et sont requis pour résoudre cet incident.",
+      "resolved_utc": "2026-10-19T08:26:19Z",
+      "resolution_evidence": [
+        "sav_AAM_O94_1/phase_records/P1_transition.json"
+      ],
+      "resolution_summary": "Le validateur de transition a été corrigé; la fermeture atomique de phase a ensuite réussi avec les critères et reçus attendus."
+    },
+    {
+      "incident_id": "O941-E006",
+      "phase": "P5",
+      "category": "external_execution_wrapper_interruption",
+      "severity": "EXECUTION_UNMEASURED",
+      "status": "RESOLVED_BY_ABORT_AND_SHARDING",
+      "summary": "Le wrapper externe a été interrompu avant émission du reçu du lot UI/RAG; les processus enfants ont persisté et ont été arrêtés explicitement.",
+      "impact": "Aucun succès ni échec de test de ce lot ne peut être déduit; la sortie n’a pas été capturée fiablement.",
+      "evidence": [
+        "logs/O94_1/P5_regression_release_ui_rag_interrupted.json"
+      ],
+      "remediation": "Remplacer le lot par des sous-lots plus courts avec reçu individuel.",
+      "resolved_utc": "2026-10-19T08:41:35Z",
+      "resolution_summary": "L’arbre de processus orphelin a été arrêté; les tests seront mesurés dans des lots individuels."
+    },
+    {
+      "incident_id": "O941-E007",
+      "phase": "P5",
+      "category": "phase_transition_harness",
+      "severity": "HARNESS_STATE_TRANSITION_CONTRACT_MISMATCH",
+      "status": "RESOLVED_BY_STATE_RECONCILIATION",
+      "summary": "Le runner externe a affiché BLOCKED après que la commande enfant a validé la transition atomique P5→P6; reçu interne, checklist et enregistrement de transition concordent.",
+      "impact": "Le message externe ne décrit pas l’état durable après exécution; aucune issue de test modèle n’est inférée.",
+      "evidence": [
+        "logs/O94_1/P5_transition_wrapper_reconciliation.json",
+        "logs/O94_1/P5_transition_P6.json",
+        "sav_AAM_O94_1/phase_records/P5_transition.json"
+      ],
+      "remediation": "Vérifier le reçu enfant et la checklist après changement de phase; invoquer directement l’utilitaire de transition lorsque l’effet attendu modifie current_phase.",
+      "resolved_utc": "2026-10-19T08:57:18Z",
+      "resolution_summary": "Concordance contrôlée entre le reçu PASS_BOUNDED, le record P5→P6 et l’état P6 IN_PROGRESS."
+    },
+    {
+      "incident_id": "O941-E008",
+      "phase": "P7",
+      "category": "standalone_release_packaging",
+      "severity": "PREFLIGHT_BLOCKED_BY_EXTERNAL_SAVEPOINT_REFERENCE",
+      "status": "RESOLVED_BOUNDED_RETEST_PASS",
+      "summary": "Le lanceur Windows quittait sans UI quand Dmodel_AAM_O94_1.zip était extrait seul : le contrôle O94.1 attendait sav_AAM_O94_1 à un chemin relatif vers le ZIP de suivi, qui n’est pas présent lors d’un démarrage depuis le seul ZIP modèle.",
+      "impact": "Le préflight et le chemin UI passent dans le modèle extrait en arbre de travail; il reste à vérifier la même chose après extraction du ZIP final.",
+      "evidence": [
+        "logs/O94_1/P7_startup_root_cause.json",
+        "logs/O94_1/P7_regression_final_receipt.json"
+      ],
+      "remediation": "Copie locale du point de sauvegarde, chemin map local, préflight explicite dans le lanceur, journal Windows persistant et pause sur erreur.",
+      "opened_utc": "2026-10-19T09:31:05Z",
+      "resolved_utc": "2026-10-19T09:46:49Z",
+      "resolution_evidence": [
+        "logs/O94_1/P7_startup_root_cause.json",
+        "logs/O94_1/P7_archive_candidate_verification.json",
+        "logs/O94_1/P7_cli_status.json",
+        "logs/O94_1/P7_ui_smoke.json"
+      ],
+      "resolution_summary": "Le ZIP candidat extrait seul passe CRC/manifeste, le preflight, le statut CLI et 8 tests de démarrage/UI après extraction fraîche. Le lanceur conserve ses diagnostics sur Windows; l’exécution native BAT sur Windows n’a pas été faite dans cet environnement."
+    },
+    {
+      "incident_id": "O941-E009",
+      "phase": "P7",
+      "category": "stale_test_fixture_count_assumption",
+      "severity": "TEST_HARNESS_CONTRACT_MISMATCH",
+      "status": "RESOLVED_RETEST_PASS",
+      "summary": "Le premier test du ZIP extrait a passé le préflight et le démarrage runtime, mais deux assertions test supposaient 497 fichiers fixes alors que le manifeste de sauvegarde étendu contient 521 entrées.",
+      "impact": "Deux assertions du harnais ont échoué; ces assertions ne reflétaient plus le contrat dynamique du manifeste. Aucun échec runtime/UI n’a été inféré de ces deux erreurs.",
+      "evidence": [
+        "logs/O94_1/P7_candidate_extraction_first_attempt.json",
+        "tests/test_o941_standalone_startup.py"
+      ],
+      "remediation": "Comparer les comptes de fichiers au nombre déclaré dans le manifeste, en conservant un seuil de non-régression de 497 entrées; rerun depuis une extraction fraîche.",
+      "opened_utc": "2026-10-19T09:43:11Z",
+      "resolved_utc": "2026-10-19T09:46:49Z",
+      "resolution_evidence": [
+        "logs/O94_1/P7_candidate_extraction_first_attempt.json",
+        "logs/O94_1/P7_archive_candidate_verification.json",
+        "tests/test_o941_standalone_startup.py"
+      ],
+      "resolution_summary": "Les assertions fixes ont été remplacées par une comparaison au manifeste réel (avec seuil minimal de non-régression); la nouvelle archive extraite exécute 8 tests de démarrage/UI sans échec."
+    }
+  ]
+}

@@ -1,0 +1,1521 @@
+{
+  "schema": "aam-o94-1-work-checklist-v1",
+  "title": "Checklist séquentielle O94_1",
+  "created_utc": "2026-10-19T08:20:00Z",
+  "rule": "Aucune phase suivante ne peut devenir IN_PROGRESS/ACTIVE avant que chaque dépendance antérieure soit COMPLETE_EVIDENCED ou COMPLETE. Après chaque exécution, enregistrer résultat, erreurs, hashes, checklists et documents concernés. Les statuts d’évidence sont bornés et ne prédisent pas le potentiel général.",
+  "reference_formalism": "formalisme_O94_1.tex",
+  "reference_laboratory": "laboratoire_O94_1.tex",
+  "reference_error_model": "checklist_erreurs_model_O94_1.json",
+  "reference_error_environment": "checklist_erreurs_no_model_O94_1.json",
+  "reference_parent_checklists": [
+    "checklist_de_travail_O94_0.json",
+    "checklist_erreurs_model.json",
+    "checklist_erreurs_no_model.json"
+  ],
+  "current_phase": "COMPLETE",
+  "global_status": "COMPLETE_EVIDENCED_WITH_SCOPE_LIMITS",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Inventaire, provenance et intégrité des archives O94_0",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [],
+      "entry_criteria": [
+        "Archives Dmodel et Amodel présentes."
+      ],
+      "exit_criteria": [
+        "CRC ZIP validés",
+        "Hashes des archives et sources embarquées consignés",
+        "Références théorie/formalismes identifiées"
+      ],
+      "evidence": [
+        "logs/O94_1/P0_input_integrity.json"
+      ],
+      "completed_utc": "2026-10-19T08:20:00Z"
+    },
+    {
+      "id": "P1",
+      "name": "Normalisation des briques et contrats opérationnels O94_1",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "entry_criteria": [
+        "P0 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "Formalisme décrit compétences/méthodes/règles",
+        "Contrats modèle, RAG, mémoire et boîte noire explicités",
+        "Catalogue des briques sans références cassées",
+        "Test catalogue passé"
+      ],
+      "evidence": [
+        "formalisme_O94_1.tex",
+        "laboratoire_O94_1.tex",
+        "aam_o93/base_blocks.py",
+        "tests/test_o94_base_blocks.py",
+        "logs/O94_1/P1_base_blocks_test.json",
+        "logs/O94_1/P1_latex_tool_probe.json",
+        "logs/O94_1/P1_tex_compile.json",
+        "scripts/compile_o941_python.py",
+        "logs/O94_1/P1_python_compile_retest.json"
+      ],
+      "completed_utc": "2026-10-19T08:26:19Z",
+      "criterion_results": [
+        {
+          "criterion": "Formalisme décrit compétences/méthodes/règles",
+          "status": "PASS_BOUNDED",
+          "proof": "formalisme_O94_1.tex",
+          "proof_sha256": "f58cc61e597a7843b497a3368749ca3b2160620975052457f7d269a69324e661",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Contrats modèle, RAG, mémoire et boîte noire explicités",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/model_integration.py",
+          "proof_sha256": "486d6208481da96cab58ce31105b63653fbb2a97ccd4c60231cc6a89c893f02f",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Catalogue des briques sans références cassées",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P1_base_blocks_test.json",
+          "proof_sha256": "c366b8c5d01f8f6869db92ab8cb86eea18dca024816693451dd9155c6dbad86f",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Test catalogue passé",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P1_tex_compile.json",
+          "proof_sha256": "367457b3ea41b48410779b202cdfb470982df73710b09c11111f9da05b219c3f",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests."
+    },
+    {
+      "id": "P2",
+      "name": "Capture active et reproduction comportementale hors source",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1"
+      ],
+      "entry_criteria": [
+        "P1 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "Capture autorisée et sans shell",
+        "Délais/caps gérés",
+        "Capsule entraînée sur train uniquement",
+        "Holdout non injecté et entrée inconnue UNRESOLVED",
+        "Script autonome testé"
+      ],
+      "evidence": [
+        "aam_o93/blackbox.py",
+        "tests/test_o941_blackbox.py",
+        "logs/O94_1/P2_blackbox_tests.json",
+        "logs/O94_1/P2_blackbox_safe_replace_retest.json",
+        "logs/O94_1/P2_python_compile_safe_replace.json"
+      ],
+      "completed_utc": "2026-10-19T08:29:53Z",
+      "criterion_results": [
+        {
+          "criterion": "Capture autorisée et sans shell",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/blackbox.py",
+          "proof_sha256": "cf3e569522cf697e00c332e2f4d3a77737efa7ada0bc17f0a5131416d21eec4f",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Délais/caps gérés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_safe_replace_retest.json",
+          "proof_sha256": "35e183615d60d593f443c06a5b790db5b6fb2ea3d7a8c3c68b2fb598ae20c201",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Capsule entraînée sur train uniquement",
+          "status": "PASS_BOUNDED",
+          "proof": "tests/test_o941_blackbox.py",
+          "proof_sha256": "629045f69fede4b3ff216e3da9919be4c2f438e1465c537eba393a1fb57ae841",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Holdout non injecté et entrée inconnue UNRESOLVED",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_safe_replace_retest.json",
+          "proof_sha256": "35e183615d60d593f443c06a5b790db5b6fb2ea3d7a8c3c68b2fb598ae20c201",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Script autonome testé",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_python_compile_safe_replace.json",
+          "proof_sha256": "2b4e846e77dfdbf0b4adca98ef25e804e0a7008f79739fbb18380a16ca00672d",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests.",
+      "reopened_utc": "2026-10-19T08:29:28Z",
+      "reopen_reason": "Revalidate blackbox after shared atomic safe_replace change to trace/capsule/script writes.",
+      "previous_completion": {
+        "status": "COMPLETE_EVIDENCED",
+        "completed_utc": "2026-10-19T08:26:43Z",
+        "criterion_results": [
+          {
+            "criterion": "Capture autorisée et sans shell",
+            "status": "PASS_BOUNDED",
+            "proof": "aam_o93/blackbox.py",
+            "proof_sha256": "9de445550e8f7d9313775ba9cc81b50ccb06dc895102ec023ce30916293ea7df",
+            "receipt_status": null
+          },
+          {
+            "criterion": "Délais/caps gérés",
+            "status": "PASS_BOUNDED",
+            "proof": "logs/O94_1/P2_blackbox_tests.json",
+            "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+            "receipt_status": "PASS_BOUNDED"
+          },
+          {
+            "criterion": "Capsule entraînée sur train uniquement",
+            "status": "PASS_BOUNDED",
+            "proof": "tests/test_o941_blackbox.py",
+            "proof_sha256": "629045f69fede4b3ff216e3da9919be4c2f438e1465c537eba393a1fb57ae841",
+            "receipt_status": null
+          },
+          {
+            "criterion": "Holdout non injecté et entrée inconnue UNRESOLVED",
+            "status": "PASS_BOUNDED",
+            "proof": "logs/O94_1/P2_blackbox_tests.json",
+            "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+            "receipt_status": "PASS_BOUNDED"
+          },
+          {
+            "criterion": "Script autonome testé",
+            "status": "PASS_BOUNDED",
+            "proof": "logs/O94_1/P2_blackbox_tests.json",
+            "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+            "receipt_status": "PASS_BOUNDED"
+          }
+        ],
+        "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests.",
+        "evidence": [
+          "aam_o93/blackbox.py",
+          "tests/test_o941_blackbox.py",
+          "logs/O94_1/P2_blackbox_tests.json"
+        ]
+      }
+    },
+    {
+      "id": "P3",
+      "name": "Intégration multi-backend LLM et politique d’entraînement",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P2"
+      ],
+      "entry_criteria": [
+        "P2 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "Registre versionné et secrets hors registre",
+        "Allowlist / HTTPS vérifiés",
+        "Politiques export dataset vs mise à jour de poids distinguées",
+        "Tests backend simulé passés"
+      ],
+      "evidence": [
+        "aam_o93/model_integration.py",
+        "tests/test_o941_model_integration.py",
+        "logs/O94_1/P3_imported_source_probe.json",
+        "logs/O94_1/P3_model_integration_tests_final_retest.json"
+      ],
+      "completed_utc": "2026-10-19T08:32:28Z",
+      "criterion_results": [
+        {
+          "criterion": "Registre versionné et secrets hors registre",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/model_integration.py",
+          "proof_sha256": "5ffc51a01d6e00c113d8f0c0d1a78cc3c195ce9a5079df9fad2ddf1ff750153f",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Allowlist / HTTPS vérifiés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P3_model_integration_tests_final_retest.json",
+          "proof_sha256": "f7200f155bf38255619bd69429f7afb7bd560aa2d83ef65c864ac2da5f1fd8b4",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Politiques export dataset vs mise à jour de poids distinguées",
+          "status": "PASS_BOUNDED",
+          "proof": "tests/test_o941_model_integration.py",
+          "proof_sha256": "00b2df9495313d6c68680fc0e6230ae8dd3c3282ca07431ff57e82c85e05174e",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Tests backend simulé passés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P3_model_integration_tests_final_retest.json",
+          "proof_sha256": "f7200f155bf38255619bd69429f7afb7bd560aa2d83ef65c864ac2da5f1fd8b4",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests."
+    },
+    {
+      "id": "P4",
+      "name": "Assemblage runtime, interface, audit et compositions de base",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P3"
+      ],
+      "entry_criteria": [
+        "P3 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "CLI/UI accessibles et syntaxiquement valides",
+        "Runtime audite les appels",
+        "Catalogue briques relié aux nouveaux blocs",
+        "Smoke tests runtime/UI passés"
+      ],
+      "evidence": [
+        "aam_o93/runtime.py",
+        "aam_o93/cli.py",
+        "aam_o93/ui.py",
+        "aam_o93/base_blocks.py",
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json",
+        "logs/O94_1/P4_ui_smoke.json",
+        "logs/O94_1/P4_integrated_contract_regression.json",
+        "logs/O94_1/P4_python_compileall.json",
+        "logs/O94_1/P4_exit_evidence_matrix_build.json"
+      ],
+      "completed_utc": "2026-10-19T08:37:32Z",
+      "criterion_results": [
+        {
+          "criterion": "CLI/UI accessibles et syntaxiquement valides",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_exit_evidence_matrix.json",
+          "proof_sha256": "abe5d6e6d305dc3e913ce1854c77361005b8e351b35c497e38e5ba192dc836c9",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Runtime audite les appels",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json",
+          "proof_sha256": "b79fb317722fb7329fe2b1bc104e0fff3b24ba5014331ac5a315e291f28ec4e3",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Catalogue briques relié aux nouveaux blocs",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_integrated_contract_regression.json",
+          "proof_sha256": "65453ffb9c45a71b9c90ca374aacb8d390ff8295e55877e785b8227729e6bee5",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Smoke tests runtime/UI passés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_ui_smoke.json",
+          "proof_sha256": "2e4323d95cdc48d8d8547dee3100d170437ce7f707fcba08df51160828262290",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests."
+    },
+    {
+      "id": "P5",
+      "name": "Régression globale, sécurité et validation de portée",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P4"
+      ],
+      "entry_criteria": [
+        "P4 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "Tests ciblés et régression disponibles exécutés",
+        "Chaque échec classé modèle ou environnement",
+        "Hashes sources comparés avant/après",
+        "Aucune assertion hors portée"
+      ],
+      "evidence": [
+        "logs/O94_1",
+        "checklist_erreurs_model_O94_1.json",
+        "checklist_erreurs_no_model_O94_1.json",
+        "logs/O94_1/P5_regression_foundation_01_retest.json",
+        "logs/O94_1/P5_record_external_interruption.json",
+        "logs/O94_1/P5_regression_o931_core.json",
+        "logs/O94_1/P5_regression_release_identity_ui.json",
+        "logs/O94_1/P5_regression_memory_rag_resolution.json",
+        "logs/O94_1/P5_regression_sms_corpus_sample.json",
+        "logs/O94_1/P5_regression_sms_retrieval.json",
+        "logs/O94_1/P5_regression_ui_resolution_continuous.json",
+        "logs/O94_1/P5_regression_atomic_llm_reward.json",
+        "logs/O94_1/P5_regression_manifest_portability.json",
+        "logs/O94_1/P5_regression_rag_adaptive.json",
+        "logs/O94_1/P5_regression_autonomy_knowledge_preflight.json",
+        "logs/O94_1/P5_regression_p6_memory_competence.json",
+        "logs/O94_1/P5_regression_p6_probes_ui.json",
+        "logs/O94_1/P5_regression_p6_ui_matrix.json",
+        "logs/O94_1/P5_regression_p7_dataset_training.json",
+        "logs/O94_1/P5_regression_p8_security_router.json",
+        "logs/O94_1/P5_regression_preregistered_capacity.json",
+        "logs/O94_1/P5_regression_portable_acceptance.json",
+        "logs/O94_1/P5_regression_o941_runtime_blackbox.json",
+        "logs/O94_1/P5_regression_matrix_build.json",
+        "logs/O94_1/P5_integrity_compare_retest.json",
+        "logs/O94_1/P5_regression_matrix_rebuild.json",
+        "logs/O94_1/P5_finalize_evidence_and_lab_retest3.json",
+        "logs/O94_1/P5_integrity_compare_final.json",
+        "logs/O94_1/P5_finalize_final_scope_and_failure_classification.json"
+      ],
+      "completed_utc": "2026-10-19T08:55:23Z",
+      "criterion_results": [
+        {
+          "criterion": "Tests ciblés et régression disponibles exécutés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_regression_matrix_rebuild.json",
+          "proof_sha256": "b470a19a8a6cf0e5c7a0caa21ac5a2667655e0daa27b280b30ec52a17bca2f32",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Chaque échec classé modèle ou environnement",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_finalize_final_scope_and_failure_classification.json",
+          "proof_sha256": "31307f6d74fe176155781546fcf2cafdcd3f02e92a106d5725f8bb09faff4c61",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Hashes sources comparés avant/après",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_integrity_compare_final.json",
+          "proof_sha256": "735b007b3aea96fc62ed84b79a940fbe5d73362faec22f379bad16e7b494567e",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Aucune assertion hors portée",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_finalize_final_scope_and_failure_classification.json",
+          "proof_sha256": "31307f6d74fe176155781546fcf2cafdcd3f02e92a106d5725f8bb09faff4c61",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests."
+    },
+    {
+      "id": "P6",
+      "name": "Finalisation formelle, manifeste, sauvegarde et conditionnement",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P5"
+      ],
+      "entry_criteria": [
+        "P5 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "Formalismes/rapports à jour et relus",
+        "Point de sauvegarde vérifiable",
+        "Trois archives CRC valides et chacune sous 220 MB",
+        "Manifeste SHA-256 et protocole de récupération inclus"
+      ],
+      "evidence": [
+        "laboratoire_O94_1.tex",
+        "formalisme_O94_1.tex",
+        "sav_AAM_O94_1",
+        "MANIFEST_SHA256.json",
+        "logs/O94_1/P6_reconcile_transition_wrapper.json",
+        "logs/O94_1/P6_prepare_release_metadata.json",
+        "logs/O94_1/P6_prepare_release_metadata_retest.json",
+        "logs/O94_1/P6_cli_launcher_regression.json",
+        "logs/O94_1/P6_tex_compile_check.json",
+        "logs/O94_1/P6_build_release_candidate.json",
+        "logs/O94_1/P6_prepare_release_metadata_refs_retest.json",
+        "logs/O94_1/P6_validate_release_documents.json",
+        "logs/O94_1/P6_verify_savepoint.json",
+        "logs/O94_1/P6_verify_candidate_manifest_protocol.json"
+      ],
+      "completed_utc": "2026-10-19T09:03:56Z",
+      "criterion_results": [
+        {
+          "criterion": "Formalismes/rapports à jour et relus",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_validate_release_documents.json",
+          "proof_sha256": "674dba084b5016b1b7e80c3ae51082ea07c4c447da6216a22f9afe71dd6d665a",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Point de sauvegarde vérifiable",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_verify_savepoint.json",
+          "proof_sha256": "2105b2c07134ac6f9608e487e2de90503a5fc28675a187015c8d4581408f2502",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Trois archives CRC valides et chacune sous 220 MB",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_build_release_candidate.json",
+          "proof_sha256": "1bb8356fbc187458f312972491adb6e706aa0ca2ad8a3163b808037706e78e29",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Manifeste SHA-256 et protocole de récupération inclus",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_verify_candidate_manifest_protocol.json",
+          "proof_sha256": "b1c7bd3acf257b43f9afc5feedd511852dcf5bee2d25a1c632974966e409ec23",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests."
+    },
+    {
+      "id": "P7",
+      "name": "Correction du démarrage autonome et robustesse du lanceur Windows",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P6"
+      ],
+      "entry_criteria": [
+        "P0-P6 sont COMPLETE_EVIDENCED.",
+        "La cause du préflight bloquant est consignée dans un reçu."
+      ],
+      "exit_criteria": [
+        "Le modèle extrait seul passe le préflight O94.1.",
+        "Le manifeste du point de sauvegarde intégré est vérifié sans erreur.",
+        "Le démarrage CLI du runtime réussit depuis le dossier du modèle uniquement.",
+        "Le smoke test UI passe sous affichage virtuel après extraction fraîche.",
+        "Le ZIP candidat après correction passe CRC, chemins sûrs et manifeste interne; le ZIP final exact est contrôlé dans le reçu externe de livraison.",
+        "Les lanceurs Windows enregistrent les erreurs et laissent le message visible en cas d’échec."
+      ],
+      "evidence": [
+        "logs/O94_1/P7_startup_root_cause.json",
+        "logs/O94_1/P7_standalone_preflight.json",
+        "logs/O94_1/P7_savepoint_integrity.json",
+        "logs/O94_1/P7_cli_status.json",
+        "logs/O94_1/P7_ui_smoke.json",
+        "logs/O94_1/P7_launcher_static_check.json",
+        "logs/O94_1/P7_archive_candidate_verification.json",
+        "logs/O94_1/P7_regression_postdoc_receipt.json",
+        "logs/O94_1/P7_tex_compile.json"
+      ],
+      "started_utc": "2026-10-19T09:31:05Z",
+      "completed_utc": "2026-10-19T09:46:49Z",
+      "result_summary": "Cause racine corrigée : le savepoint requis est inclus et référencé localement; les BAT utilisent un préflight visible et journalisé. Le ZIP candidat extrait passe intégrité, preflight, CLI et UI (8 tests); la régression ciblée passe (27 tests). Le test natif Windows reste hors de cet environnement et ne constitue pas une affirmation de réussite native.",
+      "criterion_results": [
+        {
+          "criterion": "Le modèle extrait seul passe le préflight O94.1.",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P7_standalone_preflight.json"
+        },
+        {
+          "criterion": "Le manifeste du point de sauvegarde intégré est vérifié sans erreur.",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P7_savepoint_integrity.json"
+        },
+        {
+          "criterion": "Le démarrage CLI du runtime réussit depuis le dossier du modèle uniquement.",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P7_cli_status.json"
+        },
+        {
+          "criterion": "Le smoke test UI passe sous affichage virtuel après extraction fraîche.",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P7_ui_smoke.json"
+        },
+        {
+          "criterion": "Le ZIP candidat après correction passe CRC, chemins sûrs et manifeste interne.",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P7_archive_candidate_verification.json"
+        },
+        {
+          "criterion": "Les lanceurs Windows enregistrent les erreurs et laissent le message visible en cas d’échec.",
+          "status": "PASS_STATIC_CONTRACT_NATIVE_WINDOWS_NOT_TESTED",
+          "proof": "logs/O94_1/P7_launcher_static_check.json"
+        }
+      ]
+    }
+  ],
+  "reference_formalism_sha256_current": "cd2f8a56f230a0d1679ea9ad8562813d985a707c70750aafe9d4d4075922648f",
+  "reference_laboratory_sha256_current": "b827967746f53e43504842ee6b751b39af0bf56bd0cc6a05ff5f4289cafe6ea0",
+  "reference_error_model_sha256_current": "ed03bfd088790a411a875ced42e64e648373725664dcba831334d4cd5d40a20a",
+  "reference_error_environment_sha256_current": "5399d0be7ee5ac2992ffe8a3c2322c655b0b7f8d3dc8e992fd1eb95a98b2c456",
+  "execution_history": [
+    {
+      "report": "logs/O94_1/P1_base_blocks_test.json",
+      "phase": "P1",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "7e15266061ed0d31aa89e2241ce9ed802cf0173def79bf29c0398d727932d5d2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:23:04Z"
+    },
+    {
+      "report": "logs/O94_1/P1_latex_tool_probe.json",
+      "phase": "P1",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "1720062b964abb8121ba0ee89074c328923489fbb12b226e0ccf69ea83a35bac",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:23:11Z"
+    },
+    {
+      "report": "logs/O94_1/P1_tex_compile.json",
+      "phase": "P1",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "5e876ea02076eba5bf97a54a14f8c30ffa96be471a48bb4c6342e71fd1ccbdff",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:23:28Z"
+    },
+    {
+      "report": "logs/O94_1/P1_python_compile.json",
+      "phase": "P1",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "2ec412452eeb0a775daf331f3a33cae97a00550b7eb2f49530719f0b23742752",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:24:03Z"
+    },
+    {
+      "report": "logs/O94_1/P1_python_compile_retest.json",
+      "phase": "P1",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "708865b0335cb896697abc802159ae2b1591aca6b04ee1cffc749cf937bd135a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:25:08Z"
+    },
+    {
+      "report": "logs/O94_1/P1_transition_attempt_blocked.json",
+      "phase": "P1",
+      "status": "BLOCKED",
+      "exit_code": null,
+      "finished_utc": "2026-10-19T08:26:40Z",
+      "category": "phase_transition_harness"
+    },
+    {
+      "report": "logs/O94_1/P2_blackbox_tests.json",
+      "phase": "P2",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "2c947b84ed421d1e43ed77152fc306f0f9483686b0ccb87abb063728ee1f9b13",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:26:32Z"
+    },
+    {
+      "report": "logs/O94_1/P2_reopen_for_regression.json",
+      "phase": "P2",
+      "status": "ADMINISTRATIVE_REOPEN",
+      "exit_code": 0,
+      "finished_utc": "2026-10-19T08:29:28Z",
+      "reason": "Regression verification required after persistence changes."
+    },
+    {
+      "report": "logs/O94_1/P2_blackbox_safe_replace_retest.json",
+      "phase": "P2",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "9e6c75735c6bf7ed1bfc10109e9f1be70acb32d0807a31c66184e09963655c49",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:29:41Z"
+    },
+    {
+      "report": "logs/O94_1/P2_python_compile_safe_replace.json",
+      "phase": "P2",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "708865b0335cb896697abc802159ae2b1591aca6b04ee1cffc749cf937bd135a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:29:47Z"
+    },
+    {
+      "report": "logs/O94_1/P3_model_integration_tests.json",
+      "phase": "P3",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "960228fdc86a7be271417f5233c8ef4ea9e156f5b261f8994f07951ee869832c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:31:25Z"
+    },
+    {
+      "report": "logs/O94_1/P3_imported_source_probe.json",
+      "phase": "P3",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "4036391e832d6f20480cd04f5cb50eafdb813149e93840fa0777549937999033",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:31:52Z"
+    },
+    {
+      "report": "logs/O94_1/P3_model_integration_tests_retest.json",
+      "phase": "P3",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "49983283315546161b4dc5630e6d34b37386be585a7701c93bdfb493cbbde3f6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:32:06Z"
+    },
+    {
+      "report": "logs/O94_1/P3_model_integration_tests_final_retest.json",
+      "phase": "P3",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "fac8aaadc73a18f429accef33900b10cfd78bd95c7687ad6e7c91bc437aa1b8d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:32:21Z"
+    },
+    {
+      "report": "logs/O94_1/P4_runtime_cli_baseblocks_smoke.json",
+      "phase": "P4",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "cc26352ffa10c9d355e461232af72d8d58f2d31b5c740be33308cd324513b242",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:33:43Z"
+    },
+    {
+      "report": "logs/O94_1/P4_runtime_cli_baseblocks_retest.json",
+      "phase": "P4",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "41da1d60bb1c90eb50eb2106d624f7bbbea9fadab205073eb4392f3295671ba8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:35:14Z"
+    },
+    {
+      "report": "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json",
+      "phase": "P4",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "606bd36bfc3e94e4a9aabab7e720313f5f78263f491d13605201f1bc33e88b73",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:35:32Z"
+    },
+    {
+      "report": "logs/O94_1/P4_ui_smoke.json",
+      "phase": "P4",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "35fb015ee616292f890bd836f75e7de19d40b10c1641cf0be5fa8c85337a43b3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:35:56Z"
+    },
+    {
+      "report": "logs/O94_1/P4_integrated_contract_regression.json",
+      "phase": "P4",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "6ac5971c068e80f2583d7b50b33e2ba7e81eab9c2e29b91859ee799b034ca850",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:36:31Z"
+    },
+    {
+      "report": "logs/O94_1/P4_python_compileall.json",
+      "phase": "P4",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:36:38Z"
+    },
+    {
+      "report": "logs/O94_1/P4_exit_evidence_matrix_build.json",
+      "phase": "P4",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "e16e2cae913c4d58637c48de56dce54fe38cf065495c5103303da71fcbe3f698",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:37:26Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_foundation_01.json",
+      "phase": "P5",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "82eee84a15db8dde6aec4f850100583952b0f7f487aeb13ceef6497daa08e180",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:39:05Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_foundation_01_retest.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "695a4f050d7e67c2d66402667085947c98d7b75cff0ec97648bee5c69b614371",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:39:59Z"
+    },
+    {
+      "report": "logs/O94_1/P5_record_external_interruption.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "7c9a95a8f07eecde23e44608cbafa37747b03e0912e2d7e588e02a5dc299f11d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:41:35Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_release_ui_rag_interrupted.json",
+      "phase": "P5",
+      "status": "INTERRUPTED_EXTERNAL_TOOL",
+      "finished_utc": "2026-10-19T08:42:12Z",
+      "reliable_test_exit_code": null,
+      "reliable_stdout_available": false,
+      "counted_as_test_result": false
+    },
+    {
+      "report": "logs/O94_1/P5_regression_o931_core.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "816a1aca55dee4fa7ee7c21ef6069c12064e1c1adf0641bb53e277823af471ff",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:42:45Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_release_identity_ui.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "81326f6614454ce6ec4794404f3fa2ee8994bfe1418ccd6161b90a6eb53016a1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:42:57Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_memory_rag_resolution.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "3fd932dd76d666746e7d424e5aefd3f7d12b242b4f1cc427d46d5f8be0a029d7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:43:05Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_sms_corpus_sample.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "0988f38f73e919625f15c824170a775d475cfad6a8bfa055ef1beb89ced98d4f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:43:21Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_sms_retrieval.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "904e6a65fe7b5dd387428a9375d9427987c1edbb131c4b6c84e3fc86aa4d71c6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:43:41Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_ui_resolution_continuous.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "d26564259b8e2d2798aace70578e5fb23ff2ae82c64e3c6ef3b19bca28b04016",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:43:50Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_atomic_llm_reward.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "1558b4d8f56605cb75539366aacdb2b0fb3a49bc2fc2d93cef48055fc5408786",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:43:57Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_manifest_portability.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "58745d8011883213acd6d3ad00c73a2860f68e432f60fc956b8cb2a8bb6d8181",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:44:03Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_rag_adaptive.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "aad379e7b2a64858e712e62619e117bec18395755c8c673c8e0ff100744c7455",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:44:09Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_autonomy_knowledge_preflight.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "f69804dc115fae97fc9b34f6c1554be796e1f870f1929586d0ed6fc1261762ae",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:44:25Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_p6_memory_competence.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "2b5f15360fef5f47b742ebe90e9896fb9a6d8026a3b8492733bb379a73ce4010",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:44:36Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_p6_probes_ui.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "c3caf92e8f359f292e5b0affc5bfcdc7610111a3a8c907b4187091d041ab1264",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:44:45Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_p6_ui_matrix.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "82051bac1b9b988dff3b082b900c41405be68476ab2c285808f48508de509fab",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:44:53Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_p7_dataset_training.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "232966b3de3cfe17d499a206735ac673511d14282aae215de9e9f2131bbf0db9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:45:18Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_p8_security_router.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "1373cb8f9ca4d0c3415ab79bb5f23f9daf1c768d4a899cc181d03078184e1fe8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:45:29Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_preregistered_capacity.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "bbb720f7f870fe62bbb8a7d0478e52d8253d4fc0386bc15553d530b34bc19537",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:45:39Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_portable_acceptance.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "5d98ed83bc651ce9eec29944bc55a0231a65c6890060fb18c0886d414391da35",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:45:47Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_o941_runtime_blackbox.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "3ffbda01b83d79b8b44f18760a234e1d36aa89786050f7ce3ebecefbe7b92453",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:46:44Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_matrix_build.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "76557954b47b786bd2dba1635f97e3286369d558931fd97144728abae26a31c6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:47:34Z"
+    },
+    {
+      "report": "logs/O94_1/P5_integrity_compare_run.json",
+      "phase": "P5",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "06aee965c65ba4df71abd48747031e263ec4fa0a4748ccd55e8aca9c5aeb3ee8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:48:13Z"
+    },
+    {
+      "report": "logs/O94_1/P5_integrity_compare_retest.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "3b491522870ee03480528f655cf368fcf55e7fcd9787cde6036726dbb8883429",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:48:38Z"
+    },
+    {
+      "report": "logs/O94_1/P5_regression_matrix_rebuild.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "24bb3c537e7d7da595c601cb6a4d1e808ab662060af02a70cc1bf0138db7efca",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:50:01Z"
+    },
+    {
+      "report": "logs/O94_1/P5_finalize_evidence_and_lab.json",
+      "phase": "P5",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "878a0dea9a8159798503adb7ac5a29daff61ba67e8cee67f31710612216180b0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:51:15Z"
+    },
+    {
+      "report": "logs/O94_1/P5_finalize_evidence_and_lab_retest.json",
+      "phase": "P5",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "29409f0ff0acb6fcda9da809785b18a3531ea6239786ba39713661e6d0d551a7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:53:48Z"
+    },
+    {
+      "report": "logs/O94_1/P5_finalize_evidence_and_lab_retest2.json",
+      "phase": "P5",
+      "status": "FAIL",
+      "exit_code": 1,
+      "stdout_sha256": "e556e82c0e8a63e24d18a670b5e1c88ba6ef430a6c5e2781e48f31e31c93d618",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:54:11Z"
+    },
+    {
+      "report": "logs/O94_1/P5_finalize_evidence_and_lab_retest3.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "678284789fc1d89dec6f9536bc3e8e31079b90851fa9d23770cb263f3e3c0ff3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:54:30Z"
+    },
+    {
+      "report": "logs/O94_1/P5_integrity_compare_final.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "3b491522870ee03480528f655cf368fcf55e7fcd9787cde6036726dbb8883429",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:55:00Z"
+    },
+    {
+      "report": "logs/O94_1/P5_finalize_final_scope_and_failure_classification.json",
+      "phase": "P5",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "678284789fc1d89dec6f9536bc3e8e31079b90851fa9d23770cb263f3e3c0ff3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:55:05Z"
+    },
+    {
+      "report": "logs/O94_1/P6_reconcile_transition_wrapper.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "fdaf79af71abcdafa42f349be8fc0e1c8fc23d1614686d8caf4be95f0a30c337",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:57:18Z"
+    },
+    {
+      "report": "logs/O94_1/P6_prepare_release_metadata.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "46c632435495792911be42957b35a57c377d4420785d7796d523671f99545147",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:58:57Z"
+    },
+    {
+      "report": "logs/O94_1/P6_prepare_release_metadata_retest.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "46c632435495792911be42957b35a57c377d4420785d7796d523671f99545147",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T08:59:11Z"
+    },
+    {
+      "report": "logs/O94_1/P6_cli_launcher_regression.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "76a05acf5f7bb763e4a2cb097e6491bfc057003975e2bf48bede2fff2e9ebb04",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:01:06Z"
+    },
+    {
+      "report": "logs/O94_1/P6_tex_compile_check.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "5e876ea02076eba5bf97a54a14f8c30ffa96be471a48bb4c6342e71fd1ccbdff",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:01:12Z"
+    },
+    {
+      "report": "logs/O94_1/P6_build_release_candidate.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "c0454cb9f5b871d618e601634460025d5651fdf3e828538a6abbe6c2fc745653",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:01:38Z"
+    },
+    {
+      "report": "logs/O94_1/P6_prepare_release_metadata_refs_retest.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "46c632435495792911be42957b35a57c377d4420785d7796d523671f99545147",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:02:30Z"
+    },
+    {
+      "report": "logs/O94_1/P6_validate_release_documents.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "33dc1c7be9d8aca3d8dddc1bd688b1251a03a9e838b348dd3cd8c887dbc77675",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:03:29Z"
+    },
+    {
+      "report": "logs/O94_1/P6_verify_savepoint.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "533f7d176ed58c4aef7b663f131f3611c90e2523315b970792c498c410a1d690",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:03:30Z"
+    },
+    {
+      "report": "logs/O94_1/P6_verify_candidate_manifest_protocol.json",
+      "phase": "P6",
+      "status": "PASS_BOUNDED",
+      "exit_code": 0,
+      "stdout_sha256": "f2978904c0d99dc1d2c3cded85569434553dfdba7ab01b0a0ac4e3c01b15063c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_utc": "2026-10-19T09:03:32Z"
+    },
+    {
+      "report": "logs/O94_1/P7_startup_root_cause.json",
+      "phase": "P7",
+      "status": "ROOT_CAUSE_IDENTIFIED",
+      "exit_code": 0,
+      "finished_utc": "2026-10-19T09:31:05Z",
+      "category": "standalone_package_contract"
+    }
+  ],
+  "updated_utc": "2026-10-19T09:46:49Z",
+  "transition_history": [
+    {
+      "from_phase": "P1",
+      "to_phase": "P2",
+      "timestamp_utc": "2026-10-19T08:26:19Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "f58cc61e597a7843b497a3368749ca3b2160620975052457f7d269a69324e661",
+        "laboratoire_O94_1.tex": "766462d03fd23b94dd02e1a6b2c3eed4b42dd83a182a2ca05b2ad04476f3fadf",
+        "checklist_de_travail_O94_1.json": "414949c8b4c73eb3e1ac30d7d893cd1adde62b645ec310394c8cd533b194ba39",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "ab1c1c3b33a9f16251f9b710f4d3e09fdab55884380df1842ab945c90a2e3e8c",
+        "checklist_erreurs_no_model_O94_1.json": "085db7d239a1ad49c2e2f97a41929e2d4b3ef9dce3060d878a422c0298dd0e8c",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "Formalisme décrit compétences/méthodes/règles",
+          "status": "PASS_BOUNDED",
+          "proof": "formalisme_O94_1.tex",
+          "proof_sha256": "f58cc61e597a7843b497a3368749ca3b2160620975052457f7d269a69324e661",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Contrats modèle, RAG, mémoire et boîte noire explicités",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/model_integration.py",
+          "proof_sha256": "486d6208481da96cab58ce31105b63653fbb2a97ccd4c60231cc6a89c893f02f",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Catalogue des briques sans références cassées",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P1_base_blocks_test.json",
+          "proof_sha256": "c366b8c5d01f8f6869db92ab8cb86eea18dca024816693451dd9155c6dbad86f",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Test catalogue passé",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P1_tex_compile.json",
+          "proof_sha256": "367457b3ea41b48410779b202cdfb470982df73710b09c11111f9da05b219c3f",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    },
+    {
+      "from_phase": "P2",
+      "to_phase": "P3",
+      "timestamp_utc": "2026-10-19T08:26:43Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "f58cc61e597a7843b497a3368749ca3b2160620975052457f7d269a69324e661",
+        "laboratoire_O94_1.tex": "766462d03fd23b94dd02e1a6b2c3eed4b42dd83a182a2ca05b2ad04476f3fadf",
+        "checklist_de_travail_O94_1.json": "1c49498b3380446d20afd4f2992712ee967a1a37fb8c3d5d6fe25d60129ddb4b",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "ab1c1c3b33a9f16251f9b710f4d3e09fdab55884380df1842ab945c90a2e3e8c",
+        "checklist_erreurs_no_model_O94_1.json": "b260712d5f385d66940d619a8b1709a9ef37ffd26d6b1f9a3dd935a81bde826a",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "Capture autorisée et sans shell",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/blackbox.py",
+          "proof_sha256": "9de445550e8f7d9313775ba9cc81b50ccb06dc895102ec023ce30916293ea7df",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Délais/caps gérés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_tests.json",
+          "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Capsule entraînée sur train uniquement",
+          "status": "PASS_BOUNDED",
+          "proof": "tests/test_o941_blackbox.py",
+          "proof_sha256": "629045f69fede4b3ff216e3da9919be4c2f438e1465c537eba393a1fb57ae841",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Holdout non injecté et entrée inconnue UNRESOLVED",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_tests.json",
+          "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Script autonome testé",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_tests.json",
+          "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    },
+    {
+      "from_phase": "P2",
+      "to_phase": "P3",
+      "timestamp_utc": "2026-10-19T08:29:53Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "f58cc61e597a7843b497a3368749ca3b2160620975052457f7d269a69324e661",
+        "laboratoire_O94_1.tex": "766462d03fd23b94dd02e1a6b2c3eed4b42dd83a182a2ca05b2ad04476f3fadf",
+        "checklist_de_travail_O94_1.json": "0e79d0f83d7472eab3ded899caf789e29ac892a617a45e59696380719a2d3e00",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "ab1c1c3b33a9f16251f9b710f4d3e09fdab55884380df1842ab945c90a2e3e8c",
+        "checklist_erreurs_no_model_O94_1.json": "b260712d5f385d66940d619a8b1709a9ef37ffd26d6b1f9a3dd935a81bde826a",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "Capture autorisée et sans shell",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/blackbox.py",
+          "proof_sha256": "cf3e569522cf697e00c332e2f4d3a77737efa7ada0bc17f0a5131416d21eec4f",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Délais/caps gérés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_safe_replace_retest.json",
+          "proof_sha256": "35e183615d60d593f443c06a5b790db5b6fb2ea3d7a8c3c68b2fb598ae20c201",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Capsule entraînée sur train uniquement",
+          "status": "PASS_BOUNDED",
+          "proof": "tests/test_o941_blackbox.py",
+          "proof_sha256": "629045f69fede4b3ff216e3da9919be4c2f438e1465c537eba393a1fb57ae841",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Holdout non injecté et entrée inconnue UNRESOLVED",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_blackbox_safe_replace_retest.json",
+          "proof_sha256": "35e183615d60d593f443c06a5b790db5b6fb2ea3d7a8c3c68b2fb598ae20c201",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Script autonome testé",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P2_python_compile_safe_replace.json",
+          "proof_sha256": "2b4e846e77dfdbf0b4adca98ef25e804e0a7008f79739fbb18380a16ca00672d",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    },
+    {
+      "from_phase": "P3",
+      "to_phase": "P4",
+      "timestamp_utc": "2026-10-19T08:32:28Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "2074d36e6a6cba0507b0b3e6435b1ab0f42721684842612099e780a50177b79b",
+        "laboratoire_O94_1.tex": "74eef43128fe3da2c42247b2bcab8dd530060224986ddb2c1e568b70960514a5",
+        "checklist_de_travail_O94_1.json": "8b317a320aa91a86f7b14a6d06c853b7fea81333a6e1b9d73393c7e84e7cfaa2",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "3c781c80c02c756546a4730b460e037c0e0461a883971f4705ca18eac598a21f",
+        "checklist_erreurs_no_model_O94_1.json": "b260712d5f385d66940d619a8b1709a9ef37ffd26d6b1f9a3dd935a81bde826a",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "Registre versionné et secrets hors registre",
+          "status": "PASS_BOUNDED",
+          "proof": "aam_o93/model_integration.py",
+          "proof_sha256": "5ffc51a01d6e00c113d8f0c0d1a78cc3c195ce9a5079df9fad2ddf1ff750153f",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Allowlist / HTTPS vérifiés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P3_model_integration_tests_final_retest.json",
+          "proof_sha256": "f7200f155bf38255619bd69429f7afb7bd560aa2d83ef65c864ac2da5f1fd8b4",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Politiques export dataset vs mise à jour de poids distinguées",
+          "status": "PASS_BOUNDED",
+          "proof": "tests/test_o941_model_integration.py",
+          "proof_sha256": "00b2df9495313d6c68680fc0e6230ae8dd3c3282ca07431ff57e82c85e05174e",
+          "receipt_status": null
+        },
+        {
+          "criterion": "Tests backend simulé passés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P3_model_integration_tests_final_retest.json",
+          "proof_sha256": "f7200f155bf38255619bd69429f7afb7bd560aa2d83ef65c864ac2da5f1fd8b4",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    },
+    {
+      "from_phase": "P4",
+      "to_phase": "P5",
+      "timestamp_utc": "2026-10-19T08:37:32Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "2074d36e6a6cba0507b0b3e6435b1ab0f42721684842612099e780a50177b79b",
+        "laboratoire_O94_1.tex": "74eef43128fe3da2c42247b2bcab8dd530060224986ddb2c1e568b70960514a5",
+        "checklist_de_travail_O94_1.json": "6708b4bfcc875e05db05e3286c33898e77d5380669870672637c772f8bc96e70",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "4531fa2b747484ea3af26ba91a48997f601a02b9957592bdbc671f003a283b05",
+        "checklist_erreurs_no_model_O94_1.json": "b260712d5f385d66940d619a8b1709a9ef37ffd26d6b1f9a3dd935a81bde826a",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "CLI/UI accessibles et syntaxiquement valides",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_exit_evidence_matrix.json",
+          "proof_sha256": "abe5d6e6d305dc3e913ce1854c77361005b8e351b35c497e38e5ba192dc836c9",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Runtime audite les appels",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json",
+          "proof_sha256": "b79fb317722fb7329fe2b1bc104e0fff3b24ba5014331ac5a315e291f28ec4e3",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Catalogue briques relié aux nouveaux blocs",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_integrated_contract_regression.json",
+          "proof_sha256": "65453ffb9c45a71b9c90ca374aacb8d390ff8295e55877e785b8227729e6bee5",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Smoke tests runtime/UI passés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P4_ui_smoke.json",
+          "proof_sha256": "2e4323d95cdc48d8d8547dee3100d170437ce7f707fcba08df51160828262290",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    },
+    {
+      "from_phase": "P5",
+      "to_phase": "P6",
+      "timestamp_utc": "2026-10-19T08:55:23Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "2074d36e6a6cba0507b0b3e6435b1ab0f42721684842612099e780a50177b79b",
+        "laboratoire_O94_1.tex": "1912946c8b757fa535a90db8245f5826185f1591737425ab2ba930845260602f",
+        "checklist_de_travail_O94_1.json": "b3544aad81aabc1cb704d3b01c68208b220b87a81b86ffd74397637c9fcae5d9",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "ff4e008b66ba5484b503778f1cde01495333330f2be789c5ed213f0ad51be08d",
+        "checklist_erreurs_no_model_O94_1.json": "4feb570549d5224ba03703c491b09434f9962bfbc59de97b163bf51519771ea6",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "Tests ciblés et régression disponibles exécutés",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_regression_matrix_rebuild.json",
+          "proof_sha256": "b470a19a8a6cf0e5c7a0caa21ac5a2667655e0daa27b280b30ec52a17bca2f32",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Chaque échec classé modèle ou environnement",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_finalize_final_scope_and_failure_classification.json",
+          "proof_sha256": "31307f6d74fe176155781546fcf2cafdcd3f02e92a106d5725f8bb09faff4c61",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Hashes sources comparés avant/après",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_integrity_compare_final.json",
+          "proof_sha256": "735b007b3aea96fc62ed84b79a940fbe5d73362faec22f379bad16e7b494567e",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Aucune assertion hors portée",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P5_finalize_final_scope_and_failure_classification.json",
+          "proof_sha256": "31307f6d74fe176155781546fcf2cafdcd3f02e92a106d5725f8bb09faff4c61",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    },
+    {
+      "from_phase": "P6",
+      "to_phase": "COMPLETE",
+      "timestamp_utc": "2026-10-19T09:03:56Z",
+      "control_hashes_before": {
+        "formalisme_O94_1.tex": "2074d36e6a6cba0507b0b3e6435b1ab0f42721684842612099e780a50177b79b",
+        "laboratoire_O94_1.tex": "1912946c8b757fa535a90db8245f5826185f1591737425ab2ba930845260602f",
+        "checklist_de_travail_O94_1.json": "a083abba5cefbe671c2a6e383dc5af0d9b6ad3149e9c6105bcef68c5d2b6685e",
+        "chemins_O94.json": "3f831d17084f355e690ff0bdb4944d239ddee8c4f676c0ed1d3c0c51e91e4c63",
+        "checklist_erreurs_model_O94_1.json": "ff4e008b66ba5484b503778f1cde01495333330f2be789c5ed213f0ad51be08d",
+        "checklist_erreurs_no_model_O94_1.json": "705d3b039a3dfb9675b9d735e56b4dc8e2d6001cf633241f4d55c15c3e9fc56c",
+        "checklist_erreurs_model.json": "f4dfc8b1341500a6d216735d65cf97a07e654b6fa5965c18392d6acc993143a2",
+        "checklist_erreurs_no_model.json": "4585154901b3ff1f05a7e469e0cc4cadc8ec95179597b6130f3c92b6b1b8d4ef"
+      },
+      "criterion_results": [
+        {
+          "criterion": "Formalismes/rapports à jour et relus",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_validate_release_documents.json",
+          "proof_sha256": "674dba084b5016b1b7e80c3ae51082ea07c4c447da6216a22f9afe71dd6d665a",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Point de sauvegarde vérifiable",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_verify_savepoint.json",
+          "proof_sha256": "2105b2c07134ac6f9608e487e2de90503a5fc28675a187015c8d4581408f2502",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Trois archives CRC valides et chacune sous 220 MB",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_build_release_candidate.json",
+          "proof_sha256": "1bb8356fbc187458f312972491adb6e706aa0ca2ad8a3163b808037706e78e29",
+          "receipt_status": "PASS_BOUNDED"
+        },
+        {
+          "criterion": "Manifeste SHA-256 et protocole de récupération inclus",
+          "status": "PASS_BOUNDED",
+          "proof": "logs/O94_1/P6_verify_candidate_manifest_protocol.json",
+          "proof_sha256": "b1c7bd3acf257b43f9afc5feedd511852dcf5bee2d25a1c632974966e409ec23",
+          "receipt_status": "PASS_BOUNDED"
+        }
+      ],
+      "gate": "PASS_BOUNDED"
+    }
+  ],
+  "reopen_history": [
+    {
+      "timestamp_utc": "2026-10-19T08:29:28Z",
+      "reopened_phase": "P2",
+      "previous_phase": {
+        "status": "COMPLETE_EVIDENCED",
+        "completed_utc": "2026-10-19T08:26:43Z",
+        "criterion_results": [
+          {
+            "criterion": "Capture autorisée et sans shell",
+            "status": "PASS_BOUNDED",
+            "proof": "aam_o93/blackbox.py",
+            "proof_sha256": "9de445550e8f7d9313775ba9cc81b50ccb06dc895102ec023ce30916293ea7df",
+            "receipt_status": null
+          },
+          {
+            "criterion": "Délais/caps gérés",
+            "status": "PASS_BOUNDED",
+            "proof": "logs/O94_1/P2_blackbox_tests.json",
+            "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+            "receipt_status": "PASS_BOUNDED"
+          },
+          {
+            "criterion": "Capsule entraînée sur train uniquement",
+            "status": "PASS_BOUNDED",
+            "proof": "tests/test_o941_blackbox.py",
+            "proof_sha256": "629045f69fede4b3ff216e3da9919be4c2f438e1465c537eba393a1fb57ae841",
+            "receipt_status": null
+          },
+          {
+            "criterion": "Holdout non injecté et entrée inconnue UNRESOLVED",
+            "status": "PASS_BOUNDED",
+            "proof": "logs/O94_1/P2_blackbox_tests.json",
+            "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+            "receipt_status": "PASS_BOUNDED"
+          },
+          {
+            "criterion": "Script autonome testé",
+            "status": "PASS_BOUNDED",
+            "proof": "logs/O94_1/P2_blackbox_tests.json",
+            "proof_sha256": "10874242c626ac693a0fdfae7b69d1ef13fa03a022a3b2fb95a813f226b39dd2",
+            "receipt_status": "PASS_BOUNDED"
+          }
+        ],
+        "result_summary": "All listed exit criteria have current file evidence; proofs are bounded to their declared tests.",
+        "evidence": [
+          "aam_o93/blackbox.py",
+          "tests/test_o941_blackbox.py",
+          "logs/O94_1/P2_blackbox_tests.json"
+        ]
+      },
+      "previous_active_phase": "P3",
+      "reason": "Shared safe_replace/atomic-persistence patch changed blackbox output writes after P2 had been marked complete; the regression suite must be rerun under the phase runner before P3 resumes.",
+      "action": "P2 returned to IN_PROGRESS; P3 reset to NOT_STARTED; no P3 work is accepted as phase evidence until P2 revalidation completes."
+    }
+  ],
+  "completion_note": "Toutes les phases de cette livraison sont closes selon les preuves bornées listées. La validation finale du fichier ZIP exact est publiée comme rapport externe; l’exécution native Windows du BAT et dépendances matérielles réelles restent explicitement non testées."
+}

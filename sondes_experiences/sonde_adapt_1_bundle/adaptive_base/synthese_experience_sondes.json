@@ -1,0 +1,107 @@
+{
+  "experiment": "Comparaison réseau neuronal / ensemble de sondes adaptatives sur two moons",
+  "data": {
+    "train_samples": 1200,
+    "test_samples": 4000,
+    "noise": 0.22,
+    "train_data_seed": 20261028,
+    "test_data_seed": 20261029,
+    "standardization": "StandardScaler ajusté uniquement sur le jeu d’entraînement"
+  },
+  "training": {
+    "initialization_seeds": [
+      101,
+      202,
+      303,
+      404,
+      505
+    ],
+    "epochs": 500,
+    "optimizer": "Adam",
+    "learning_rate": 0.02,
+    "weight_decay": 0.0001,
+    "batching": "full-batch",
+    "loss": "binary cross-entropy with logits"
+  },
+  "metrics": {
+    "reseau_neuronal_MLP": {
+      "accuracy": {
+        "mean": 0.9587,
+        "sd_sample": 0.0006708203932499478
+      },
+      "auc": {
+        "mean": 0.99189225,
+        "sd_sample": 0.0004902761976681889
+      },
+      "log_loss": {
+        "mean": 0.11086326782968159,
+        "sd_sample": 0.0029551114194746506
+      },
+      "f1": {
+        "mean": 0.9590114158481325,
+        "sd_sample": 0.0006727679862175399
+      },
+      "final_train_loss": {
+        "mean": 0.1007307305932045,
+        "sd_sample": 0.0027906185910281035
+      },
+      "trainable_parameters": {
+        "mean": 49.0,
+        "sd_sample": 0.0
+      }
+    },
+    "sondes_adaptatives_RBF": {
+      "accuracy": {
+        "mean": 0.9600500000000001,
+        "sd_sample": 0.0005419870847169666
+      },
+      "auc": {
+        "mean": 0.990641475,
+        "sd_sample": 0.00011517867912503748
+      },
+      "log_loss": {
+        "mean": 0.11740409957135893,
+        "sd_sample": 0.0008133147084517188
+      },
+      "f1": {
+        "mean": 0.9603295789050499,
+        "sd_sample": 0.0005463194647783992
+      },
+      "final_train_loss": {
+        "mean": 0.11258858442306519,
+        "sd_sample": 0.002377983870297993
+      },
+      "trainable_parameters": {
+        "mean": 49.0,
+        "sd_sample": 0.0
+      }
+    },
+    "sondes_fixes_ablation": {
+      "accuracy": {
+        "mean": 0.8623,
+        "sd_sample": 0.007364186988391883
+      },
+      "auc": {
+        "mean": 0.9199103750000001,
+        "sd_sample": 0.008314327060487172
+      },
+      "log_loss": {
+        "mean": 0.35497699501866087,
+        "sd_sample": 0.01848629068251276
+      },
+      "f1": {
+        "mean": 0.8637859528083043,
+        "sd_sample": 0.0070041612648738035
+      },
+      "final_train_loss": {
+        "mean": 0.34330208897590636,
+        "sd_sample": 0.02031320116235641
+      },
+      "trainable_parameters": {
+        "mean": 13.0,
+        "sd_sample": 0.0
+      }
+    }
+  },
+  "interpretation_note": "La moyenne et l’écart-type sont calculés sur 5 initialisations du modèle, sur un jeu de test fixe. Ils mesurent surtout la sensibilité à l’initialisation, pas l’incertitude due au choix des données."
+}

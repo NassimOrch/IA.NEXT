@@ -1,0 +1,153 @@
+\documentclass[11pt,a4paper,openany]{book}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}\usepackage{lmodern}
+\usepackage[a4paper,margin=2.2cm]{geometry}\usepackage{amsmath,amssymb,booktabs,longtable,tabularx,hyperref,enumitem}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}\sloppy
+\title{Rapport complet d'implémentation, entraînement, validation et audit\\eGenBrain\_v1}
+\author{Dossier technique et expérimental}
+\date{22 octobre 2026}
+\begin{document}\maketitle\tableofcontents
+\chapter*{Résumé exécutif}
+Ce rapport documente un modèle opérationnel construit à partir de \texttt{eGenBrain\_1.tex} et des datasets disponibles, distinct de la base héritée eGenBrain\_v0. Le modèle actif est une base SQLite de 1\,648\,779\,264 octets dont le SHA-256 est \texttt{736a953b0350f1212bf87c2e46dceba1a68b0ff9797d5ec07214bb87526842ea}. Le contrôle SQLite renvoie \texttt{ok}; il n'existe aucune violation de clé étrangère, fuite de groupes entre splits ou index token-document issu de validation/test. La suite P6 avait passé 55 tests; après modification des scripts de réassemblage, la régression finale P7 passe 60 tests en 3,129 secondes, avec \texttt{ResourceWarning} promus en erreurs.
+
+L'évaluation held-out, en revanche, est mixte : 5/18 prompts test donnent FOUND (13 NO\_MATCH); 7/16 prompts validation donnent FOUND (9 NO\_MATCH). Sur SMS, l'exact-match parmi toutes les requêtes est de 50\% sur le test et 70\% sur validation. Les cas chat/math retenus ne sont pas résolus. Les latences p95 agrégées sont d'environ 6,58 s sur le test et 4,99 s sur validation, pilotées par des cas SMS lents. Le résultat d'un protocole marqué PASS signifie que ce dernier s'est terminé avec intégrité et isolation vérifiées; il ne signifie pas une qualité élevée.
+
+\chapter{Description et portée}
+\section{Objectif}
+Construire la version eGenBrain\_v1 conformément aux objets principaux du nouveau formalisme : brain par observation, conservation d'occurrences et provenance, fusion d'identités lexicales, maillage global orienté, maillage de prompt séparé, alignement orienté, contraintes explicites, recherche traçable, mesures par empreintes et interface web/CLI. Les éléments non implémentés de la théorie DDD sont indexés dans le registre de preuves au lieu d'être implicitement présentés comme réalisés.
+
+\section{Sources et intégrité des entrées}
+L'archive de ressources d'origine \texttt{resources\_0.zip} mesure 170\,970\,895 octets; SHA-256 \texttt{5c748b3faa930d184243d506f493905a91fa032fa71397c6b0c4714e5abfbc41}. L'archive v0 est préservée comme référence historique, SHA-256 \texttt{7c2cbb630907b2a9960cfacaa4a154236162e2f0cc5f0bb7f1dea15a6ebcc16a}. Sources utilisées pour l'entraînement v1 :
+\begin{center}\begin{tabular}{lll}\toprule Fichier & Lignes/observations effectivement retenues & SHA-256\\\midrule
+\texttt{batch\_dataset.jsonl} & 783 lignes valides environ; ligne 784 rejetée comme JSON invalide & \texttt{ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081}\\
+\texttt{Screenplay\_dataset.jsonl} & 4\,000 exemples & \texttt{03e27acb02d89f17ffdca10bf94d1125a2be743d9065055d5448b51a3994ba81}\\
+\texttt{smsspamcollection.zip} & SMS du zip original/augmenté, multiplicité source traçable & \texttt{7fecc7384a0905eb21fff50110eb6d0f82e5efa83241c16e5d8065e80e5c4f4a}\\
+\texttt{0000.parquet} & 7\,473 paires question/réponse décodées en entier & \texttt{ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d}\\\bottomrule\end{tabular}\end{center}
+Les quatre hashes sont inscrits dans le manifeste d'entraînement. Aucune ligne JSONL invalide n'a été réparée en silence. Le lecteur Parquet autonome a décodé les 7\,473 paires du fichier fourni sans ligne manquante; son domaine de compatibilité est celui des encodages observés dans ce fichier, pas chaque variante Parquet existante.
+
+\chapter{Architecture}
+\section{Modules}
+\begin{itemize}
+\item \texttt{core.py}: normalisation, tokenisation à offsets, brain local, chargement du graphe global, alignement, recherche et traces;
+\item \texttt{train.py}: ingestion, canonisation, split déterministe, brain durable, index, graphe et publication atomique SQLite;
+\item \texttt{datasets.py} et \texttt{parquet\_flat.py}: JSON/JSONL/NDJSON, CSV/TSV, ZIP et lecteur Parquet hors ligne;
+\item \texttt{observations.py}: quatre empreintes imbriquées;
+\item \texttt{evaluate.py}: sélection d'échantillons distincts, métriques et ablations held-out;
+\item \texttt{server.py}, \texttt{web/}: chat, Studio de dataset/entraînement, état des jobs, activation du modèle, console applicative;
+\item \texttt{__main__.py} et scripts: CLI, contrôle d'intégrité, audit et réassemblage de base fractionnée.
+\end{itemize}
+
+\section{Pipeline complet}
+\begin{enumerate}
+\item lecture des sources, hashes et rapports d'anomalies;
+\item création des observations, canonisation et conservation des références source;
+\item attribution train/validation/test par groupe tâche-prompt;
+\item persistance du brain distinct pour chaque observation brute, y compris celles agrégées dans une paire canonique;
+\item indexation des occurrences du train et fusion de l'ordre dans le maillage global;
+\item construction d'un contexte local de prompt pour chaque requête, séparé du graphe appris;
+\item recherche de candidats, alignement ordonné et vérification de contraintes explicitement annotées;
+\item retour de statut/réponse/trace de provenance;
+\item audit structurel, contrôle SHA-256, puis évaluations held-out et ablations;
+\item interface locale pour entraînement supplémentaire vers une base nouvelle, avec activation explicite séparée.
+\end{enumerate}
+
+\chapter{Commandes d'exécution}
+Les dépendances runtime sont la bibliothèque standard Python 3.10+; aucune bibliothèque de machine learning externe n'est requise. Depuis la racine du répertoire livré :
+\begin{verbatim}
+python -m egenbrain --help
+python -m egenbrain train --data data/dataset --output model/custom.sqlite3
+python -m egenbrain serve --model model/eGenBrain_v1.sqlite3 --host 127.0.0.1 --port 8765
+python -m egenbrain chat --model model/eGenBrain_v1.sqlite3 --message "Hello"
+python -m egenbrain evaluate --model model/eGenBrain_v1.sqlite3 --split test --out logs/eval.json
+python -m egenbrain inspect-dataset data/dataset/0000.parquet
+python3 scripts/verify_integrity.py --model model/eGenBrain_v1.sqlite3
+python -W error::ResourceWarning -m unittest discover -s tests -v
+\end{verbatim}
+Le script \texttt{run.sh} vérifie l'intégrité avant de démarrer; sous Windows, utiliser \texttt{run.bat}. Le Studio web n'exécute pas un shell arbitraire : il expose uniquement les commandes applicatives autorisées. Les entraînements du Studio sont écrits dans une nouvelle base; le remplacement du modèle actif exige un appel explicite d'activation.
+
+\chapter{Résultats de construction et de structure}
+\section{Statistiques finales}
+\begin{center}\begin{tabular}{lr}\toprule Mesure & Valeur\\\midrule
+Observations/brains durables & 134\,759\\
+Paires canoniques & 112\,992\\
+Tokens canoniques & 125\,453\\
+Indexations occurrence-token & 1\,811\,636\\
+Arêtes globales & 756\,568\\
+Relations annotées explicites & 0\\
+Somme des multiplicités & 134\,759\\
+Fuite de groupes entre splits & 0\\
+Entrées indexées hors train & 0\\
+Violations clés étrangères & 0\\
+\texttt{PRAGMA integrity\_check} & \texttt{ok}\\
+Tests de régression P7 & 60/60 passés\\\bottomrule\end{tabular}\end{center}
+Les splits des paires canoniques totalisent 13/1/3 chat (train/validation/test), 5\,978/747/748 maths et 84\,398/10\,550/10\,554 SMS. Le corpus chat ne donne que 17 prompts distincts au total; validation n'en contient qu'un et test trois. Toute métrique chat qui en découle est peu précise.
+
+\section{Audit et sauvegarde}
+Le hash du modèle actif et de la sauvegarde \texttt{sav\_eGenBrain\_v1/eGenBrain\_v1\_P5\_verified.sqlite3} concorde : \texttt{736a953b0350f1212bf87c2e46dceba1a68b0ff9797d5ec07214bb87526842ea}. Un fichier P2 historique à un hash différent est conservé; il correspond à l'ancienne génération avant modifications de métadonnées et ne doit pas être confondu avec la sauvegarde P5 courante.
+
+\chapter{Évaluations historiques avant correction du routage}
+\section{Évaluation historique du split test — math invalidée}
+Résultat conservé comme historique de la première campagne : 18 prompts distincts, 5 FOUND, 13 NO\_MATCH. Cette campagne a été relue après découverte d'un défaut de routage : \texttt{task\_hint=math\_qa} était envoyé vers le sous-graphe \texttt{chat}. Les métriques mathématiques de ce fichier ne sont donc pas une mesure valide de la tâche math; elles ne sont pas supprimées, mais remplacées pour l'analyse courante par \texttt{logs/p5\_test\_routed\_v2.json}.
+
+\section{Évaluation historique du split validation — math invalidée}
+Résultat conservé comme historique : 16 prompts distincts, 7 FOUND et 9 NO\_MATCH. Les métriques mathématiques sont invalidées par la même anomalie de routage; l'évaluation de validation corrigée est \texttt{logs/p5\_validation\_routed\_v2.json}.
+
+\section{Ablations}
+Sur un sous-échantillon test de six prompts, la configuration complète retrouve 2/6 FOUND; la suppression du maillage contextuel produit 6/6 FOUND mais ne relève l'exact-match qu'à 2/6. Sur quatre prompts de validation pour ablation, la configuration de référence est à 1/4 exact, et la suppression du maillage contextuel est à 2/4 exact; sans orientation globale, l'alignement est à 0/6 sur le sous-échantillon test et 0/4 en validation. Les tailles d'ablations sont trop faibles pour des conclusions générales, mais elles montrent qu'un taux FOUND plus haut peut coexister avec une précision sémantique inchangée ou insuffisante. Il serait incorrect de cacher cet écart ou de choisir une variante seulement parce qu'elle retourne plus de réponses.
+
+\section{Intégrité du test}
+Les campagnes historiques et corrigées sont toutes conservées. Pour les métriques actuelles par tâche, les fichiers de référence sont \texttt{logs/p5\_test\_routed\_v2.json} et \texttt{logs/p5\_validation\_routed\_v2.json}; leur hash de base avant/après est identique, leur intégrité SQLite est \texttt{ok}, aucune fuite de groupe n'est constatée et leur statut expérimental est PASS. Les anciens journaux ne sont pas effacés; leurs mesures mathématiques sont explicitement invalidées en raison du routeur corrigé.
+
+\chapter{Routage par tâche corrigé et réévaluation held-out}
+\section{Défaut identifié et correction}
+Le diagnostic a établi que l'indication explicite \texttt{math\_qa} était silencieusement redirigée vers \texttt{chat}. L'indication était donc ignorée et le moteur consultait 13 exemples chat du train au lieu des 5\,978 exemples mathématiques. La régression \texttt{test\_explicit\_math\_task\_hint\_routes\_to\_math\_index} couvre maintenant ce cas. Les métriques mathématiques des expériences historiques demeurent dans le dossier mais sont invalidées comme mesure du sous-graphe math. Le modèle SQLite n'a pas été modifié pour ce correctif de routage.
+
+\section{Résultats corrigés du split test}
+Le protocole corrigé couvre 113 prompts distincts : 3 chat, 100 math et 10 SMS. Le SHA-256 reste identique avant/après. Chat : 0/3 FOUND. Math : 57/100 FOUND, 43/100 NO\_MATCH, exact-response-match 0/100, F1-token whitespace moyen 0,126596; latence moyenne 1\,422,313 ms et p95 2\,989,274 ms. SMS : 5/10 FOUND et 5/10 labels exacts; les NO\_MATCH sont comptés incorrects. Les mesures complètes, les traces par inférence et les ablations sont dans \texttt{logs/p5\_test\_routed\_v2.json}.
+
+\section{Résultats corrigés du split validation}
+Le protocole corrigé couvre 111 prompts distincts : 1 chat, 100 math et 10 SMS. Le SHA-256 reste identique avant/après. Chat : 0/1 FOUND. Math : 47/100 FOUND, 53/100 NO\_MATCH, exact-response-match 0/100, F1-token whitespace moyen 0,106234; latence moyenne 1\,090,527 ms et p95 2\,574,454 ms. SMS : 7/10 FOUND et 7/10 labels exacts; les NO\_MATCH sont comptés incorrects. Les mesures complètes figurent dans \texttt{logs/p5\_validation\_routed\_v2.json}.
+
+\section{Interprétation et conséquence}
+Le correctif a un effet positif vérifiable sur l'accès au bon sous-graphe : le taux structurel FOUND math est de 57\% au test et 47\% en validation, contre les anciennes requêtes math mal routées. Il ne faut toutefois pas confondre FOUND et la justesse de la réponse. Aucune des 200 réponses mathématiques n'est textuellement exacte selon la métrique exacte et les F1-token moyens restent faibles. La tâche d'amélioration de pertinence/réponse reste donc ouverte; les réponses attendues des splits tenus à l'écart n'ont pas été injectées dans la base ou dans les candidats. Le modèle conserve les résultats positifs et négatifs dans leur contexte et le SHA-256 de référence ne change pas.
+
+\chapter{Interface web et expérience réelle d'entraînement}
+Le smoke test HTTP est à 10/10 : santé, statistiques, exemples, datasets, inspection intégrale du Parquet, upload CSV, inspection CSV, commandes d'aide/statistiques et chat tracé. La régression de serveur est comprise dans la suite finale de 60 tests passés. En essai de bout en bout, le Studio a reçu un CSV de deux lignes et lancé un job entraîné en environ 110,757 secondes; la nouvelle base est passée au contrôle SQLite, puis l'activation explicite a été confirmée et sa persistance après redémarrage testée.
+
+Cette réussite opérationnelle n'est pas une validation de la réponse. Dans cet essai, la question personnalisée « unique web import question » a donné NO\_MATCH, et « second question » a produit une réponse longue de screenplay sans rapport pertinent. Ces observations sont conservées dans les logs et alimentent l'anomalie qualité M-QUALITY-001. L'état de job/activation est donc vert; la qualité sémantique de cette micro-expérience ne l'est pas.
+
+\chapter{Interprétation des résultats}
+\section{Résultats positifs}
+\begin{itemize}
+\item ingestion effective des quatre sources, y compris les 7\,473 lignes Parquet;
+\item présence d'un brain durable par observation et comptages de multiplicités cohérents;
+\item provenance auditée, SHA-256 reproductible et zéro divergence dans l'audit P3;
+\item isolation stricte des splits et intégrité SQLite vérifiée;
+\item CLI, serveur, chat, Studio datasets, entraînement web et activation explicite fonctionnent sur des tests directs;
+\item 60 tests passés sur le code livré, incluant le cas de contrainte anti-causale explicitement annotée;
+\item pipeline d'évaluation/ablations reproduit sans modifier la base de référence.
+\end{itemize}
+\section{Résultats négatifs ou ouverts}
+\begin{itemize}
+\item chat : aucune réponse FOUND sur 3 prompts testés au test, et 0/1 validation;
+\item math après correction du routeur : 57/100 FOUND au test et 47/100 en validation, mais 0/100 exact-match dans chacun des splits (F1-token moyen 0,1266 et 0,1062);
+\item SMS : taux d'exactitude toutes requêtes de 50\% test et 70\% validation, avec NO\_MATCH comptés comme échec;
+\item latence p95 SMS de l'ordre de 6,58 s et 4,99 s;
+\item un prompt utilisateur ajouté a reçu une réponse sémantiquement inadéquate malgré FOUND;
+\item les 4 sources ne contiennent aucune annotation causale/anti-causale;
+\item la théorie DDD complète ordre 5 n'est pas intégralement implémentée : seules des sondes d'empreintes opérationnelles limitées le sont.
+\end{itemize}
+
+\chapter{Conséquences théoriques, conceptuelles et opérationnelles}
+\section{Théoriques}
+La correspondance de structure, de chemin et de provenance est testable indépendamment de la véracité d'une réponse. Le graphe d'ordre et les relations explicitement annotées doivent rester des objets distincts. Le mécanisme d'empreinte est un protocole fini de comparaison interne, pas une preuve d'équivalence sémantique universelle. La théorie DDD reste une source dont chaque titre est tracé; la traçabilité n'implique pas l'implémentation.
+\section{Conceptuelles}
+Un brain conservé comme dossier structuré ne doit pas être confondu avec une instance autonome de cognition. La fusion des identités supprime les doublons d'identité lexicale mais ne supprime pas les occurrences ni les références; la séparation de ces couches est essentielle au sens du modèle. FOUND est un statut structurel et doit être mesuré séparément d'exact-match et de jugement humain.
+\section{Opérationnelles}
+Le modèle est volumineux (base reconstruite 1,649 Go), donc les livrables Dmodel sont divisés en archives de fragments. Un script réassemble octet par octet et compare SHA-256 avant publication. Un utilisateur doit extraire les fragments dans l'arborescence indiquée, exécuter le script de réassemblage et relancer le contrôle d'intégrité avant usage.
+
+\chapter{Checklist, erreurs, commandes et statut des phases}
+P0 (inventaire), P1 (socle), P2 (build complet), P3 (audit structurel), P4 (web/CLI), P5 (évaluation tenue à l'écart) et P6 (formalisation/preuves) sont marquées closes sur leurs critères de processus et leurs artifacts vérifiables. P7 ne se ferme qu'après archives testées et test de réassemblage exact. Les anomalies de qualité M-QUALITY, M-ALIGN et M-PERF demeurent ouvertes; elles ne sont pas invalidées par la réussite des phases de build/audit. L'historique est dans les deux checklists d'erreurs.
+
+\chapter{Conclusions et statut du modèle}
+\textbf{Statut global : modèle réellement construit, entraîné, audité et utilisable pour expérimentation locale; conformité structurelle et interface établies par les tests disponibles; qualité de réponse mixte et encore insuffisamment généralisable.} Les observations positives figurent au même titre que les échecs et les lacunes. Rien dans ce dossier ne suppose à l'avance réussite ou impossibilité : le verdict de qualité est celui mesuré sur les échantillons disponibles et les zones ouvertes sont nommées pour des expériences suivantes sans fuite de réponses attendues.
+\end{document}

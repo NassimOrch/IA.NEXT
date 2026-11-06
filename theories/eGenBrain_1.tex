@@ -1,0 +1,2243 @@
+%bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{report}
+
+% ============================================================
+%  THEORIE DU MAILLAGE CONTEXTUEL ET DE LA NAVIGATION CAUSALE
+% ============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\geometry{margin=2.5cm}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  pdftitle={Theorie du maillage contextuel et de la navigation causale},
+  pdfauthor={}
+}
+
+% ----------------------------
+% Environnements mathematiques
+% ----------------------------
+
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{postulat}[definition]{Postulat}
+\newtheorem{hypothese}[definition]{Hypothèse}
+\newtheorem{convention}[definition]{Convention}
+
+\theoremstyle{plain}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theoreme}[definition]{Théorème}
+\newtheorem{lemme}[definition]{Lemme}
+\newtheorem{corollaire}[definition]{Corollaire}
+
+\theoremstyle{remark}
+\newtheorem{remarque}[definition]{Remarque}
+\newtheorem{limitation}[definition]{Limitation}
+
+% ----------------------------
+% Notations
+% ----------------------------
+
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\E}{\mathcal{E}}
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\Path}{\operatorname{Path}}
+\newcommand{\Occ}{\operatorname{Occ}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\id}{\operatorname{id}}
+\newcommand{\Compat}{\operatorname{Compat}}
+\newcommand{\Align}{\operatorname{Align}}
+\newcommand{\Nat}{\operatorname{Nat}}
+\newcommand{\Anti}{\operatorname{Anti}}
+\newcommand{\Obs}{\operatorname{Obs}}
+\newcommand{\FP}{\operatorname{FP}}
+\newcommand{\Emb}{\operatorname{Emb}}
+\newcommand{\Next}{\operatorname{Next}}
+\newcommand{\Hist}{\operatorname{Hist}}
+\newcommand{\End}{\operatorname{End}}
+
+\title{
+  \textbf{Théorie du maillage contextuel}\\
+  \textbf{et de la navigation causale}\\[0.6em]
+  \large Formalisation des brains, de la fusion des tokens,
+  des écosystèmes relationnels, de l'alignement et de la recherche
+  contextuelle de réponse
+}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+% ============================================================
+\chapter{Objet, périmètre et principes fondamentaux}
+% ============================================================
+
+\section{Objet de la théorie}
+
+La présente théorie décrit un système de traitement du langage
+construit directement à partir d'un dataset de couples
+prompt/réponse, sans exiger qu'un modèle neuronal de type LLM
+soit préalablement entraîné pour construire sa structure
+relationnelle.
+
+Le système suit quatre opérations principales :
+
+\[
+\boxed{
+\text{Dataset}
+\longrightarrow
+\text{Brains}
+\longrightarrow
+\text{Maillage global}
+\longrightarrow
+\text{Navigation contextuelle}
+}
+\]
+
+Le dataset est d'abord décomposé en exemples individuels.
+Chaque exemple donne lieu à un brain qui conserve sa trajectoire
+et sa provenance. Les identités communes des tokens sont ensuite
+fusionnées dans un maillage global, sans supprimer les relations
+qui proviennent des trajectoires d'origine.
+
+Lorsqu'un nouveau prompt est présenté, un maillage contextuel
+distinct est construit. Il sert à rechercher, dans le maillage
+global, des trajectoires qui correspondent au prompt et qui
+permettent de construire une réponse.
+
+La cohérence recherchée repose conjointement sur :
+
+\begin{enumerate}[label=\arabic*.]
+  \item l'alignement entre le prompt et une structure du maillage
+        global ;
+  \item la possibilité d'intermédiaires entre les éléments alignés ;
+  \item l'orientation de la trajectoire de recherche ;
+  \item les directions naturelles conservées dans le maillage ;
+  \item les relations anti-causales du maillage ;
+  \item la compatibilité de la réponse en construction avec le
+        prompt complet et avec les éléments déjà produits.
+\end{enumerate}
+
+La théorie distingue ces mécanismes de la vérité factuelle :
+une structure cohérente peut contenir des informations erronées
+si les données qui l'ont construite sont erronées.
+
+\section{Principes non négociables}
+
+\begin{postulat}[Autonomie initiale des brains]
+Chaque exemple du dataset est d'abord représenté par un brain
+propre. Les trajectoires provenant d'exemples distincts ne sont
+pas confondues lors de cette première construction.
+\end{postulat}
+
+\begin{postulat}[Fusion des identités communes]
+Le maillage global possède une identité canonique pour chaque
+token reconnu comme commun selon la règle d'identité déclarée.
+La fusion ne doit pas supprimer les relations ni la provenance
+des occurrences qui ont été fusionnées.
+\end{postulat}
+
+\begin{postulat}[Séparation des deux maillages]
+Le maillage contextuel d'un prompt n'est jamais incorporé au
+maillage global du seul fait qu'il est construit. Il constitue
+un motif de recherche indépendant qui interroge le maillage
+global.
+\end{postulat}
+
+\begin{postulat}[Double condition de cohérence structurelle]
+Une réponse recherchée doit satisfaire un alignement contextuel
+et une organisation orientée de la trajectoire. La sélection
+doit également tenir compte des relations naturelles et
+anti-causales déjà inscrites dans le maillage global.
+\end{postulat}
+
+\begin{remarque}
+Ces postulats définissent l'architecture théorique. Ils ne
+constituent pas, à eux seuls, une preuve expérimentale que le
+système atteint une qualité de réponse déterminée.
+\end{remarque}
+
+\section{Niveaux à ne pas confondre}
+
+La théorie distingue les objets suivants :
+
+\begin{itemize}
+  \item la donnée brute : le texte fourni par le dataset ;
+  \item l'occurrence : une apparition déterminée d'un token dans
+        un exemple précis ;
+  \item l'identité canonique : le token partagé auquel plusieurs
+        occurrences sont rattachées ;
+  \item le brain : la structure relationnelle d'un exemple ;
+  \item le maillage global : le réseau obtenu par fusion des
+        identités communes ;
+  \item le maillage contextuel : la structure construite à partir
+        du prompt courant ;
+  \item l'alignement : la correspondance entre le motif contextuel
+        et une structure du maillage global ;
+  \item la réponse candidate : une trajectoire proposée par la
+        recherche ;
+  \item la réponse émise : la réalisation textuelle retenue par
+        la politique de sortie.
+\end{itemize}
+
+Une relation entre tokens ne constitue pas automatiquement une
+relation sémantique certifiée. Une direction appelée
+« causale » dans le modèle ne constitue pas automatiquement une
+causalité physique ou une preuve de vérité.
+
+% ============================================================
+\chapter{Dataset, tokenisation et construction des brains}
+% ============================================================
+
+\section{Dataset}
+
+\begin{definition}[Dataset de couples prompt/réponse]
+Un dataset est une famille finie ou dénombrable
+\[
+\D=\{d_1,d_2,\ldots,d_n\},
+\]
+où chaque exemple est de la forme
+\[
+d_i=(P_i,R_i,m_i).
+\]
+Ici :
+\begin{itemize}
+  \item \(P_i\) est le prompt ;
+  \item \(R_i\) est la réponse associée ;
+  \item \(m_i\) désigne les métadonnées disponibles, notamment
+        l'identifiant de l'exemple, la source et les annotations
+        éventuelles.
+\end{itemize}
+\end{definition}
+
+La réponse \(R_i\) est conservée comme réponse observée dans le
+dataset. Sa présence ne prouve pas, à elle seule, qu'elle est
+vraie ou optimale.
+
+\section{Tokenisation et identité}
+
+\begin{definition}[Tokenisation]
+Une fonction de tokenisation est une application
+\[
+\operatorname{Tok}:\text{Textes}\longrightarrow\Sigma^*,
+\]
+où \(\Sigma\) est l'ensemble des identités de tokens du système
+et \(\Sigma^*\) l'ensemble des séquences finies de ces tokens.
+
+Pour chaque exemple \(d_i\), on écrit
+\[
+\operatorname{Tok}(P_i)=(p_{i,1},\ldots,p_{i,k_i})
+\]
+et
+\[
+\operatorname{Tok}(R_i)=(r_{i,1},\ldots,r_{i,\ell_i}).
+\]
+\end{definition}
+
+La règle d'identité des tokens doit être fixée avant la fusion.
+Elle peut reposer sur une tokenisation donnée et une normalisation
+explicitement déclarée.
+
+Par défaut, deux tokens sont communs lorsqu'ils possèdent la
+même identité lexicale canonique dans cette tokenisation.
+
+Il ne faut pas confondre :
+\[
+\text{même forme de token}
+\qquad\text{et}\qquad
+\text{même sens dans tous les contextes}.
+\]
+
+La fusion porte sur l'identité déclarée, pas sur une hypothèse
+implicite d'identité sémantique universelle.
+
+\section{Occurrences et identité canonique}
+
+\begin{definition}[Occurrence de token]
+Une occurrence est un objet identifié par un quadruplet
+\[
+o=(i,s,j,x),
+\]
+où \(i\) identifie l'exemple, \(s\in\{P,R\}\) désigne le prompt
+ou la réponse, \(j\) est la position dans la séquence et \(x\)
+est l'identité canonique du token.
+
+Deux occurrences peuvent donc être distinctes tout en partageant
+la même identité canonique.
+\end{definition}
+
+Par exemple, les occurrences de \texttt{bien} dans
+\[
+\texttt{je vais bien},
+\qquad
+\texttt{il va très bien aujourd'hui},
+\qquad
+\texttt{c'est bien}
+\]
+sont trois occurrences distinctes, mais elles peuvent être
+rattachées au même nœud canonique \texttt{bien}.
+
+Cette distinction est fondamentale :
+la fusion rend l'identité commune, mais ne doit pas effacer
+l'histoire des occurrences.
+
+\section{Trajectoire d'un exemple}
+
+\begin{definition}[Trajectoire ordonnée d'un exemple]
+Pour un exemple \(d_i\), la trajectoire textuelle complète est
+la séquence ordonnée
+\[
+\tau_i=
+(p_{i,1},\ldots,p_{i,k_i},
+r_{i,1},\ldots,r_{i,\ell_i}).
+\]
+Elle conserve séparément la frontière entre prompt et réponse.
+\end{definition}
+
+On représente les relations de succession observées dans le
+prompt par
+\[
+p_{i,j}\longrightarrow p_{i,j+1},
+\qquad 1\leq j<k_i,
+\]
+et celles observées dans la réponse par
+\[
+r_{i,j}\longrightarrow r_{i,j+1},
+\qquad 1\leq j<\ell_i.
+\]
+
+La frontière prompt/réponse est représentée par une relation
+typée :
+\[
+p_{i,k_i}
+\overset{\mathrm{début\_réponse}}{\longrightarrow}
+r_{i,1}.
+\]
+
+Cette dernière relation signifie que la réponse suit le prompt
+dans l'exemple observé. Elle ne signifie pas que le dernier token
+du prompt est la cause physique de la réponse.
+
+\section{Définition du brain}
+
+\begin{definition}[Brain d'un exemple]
+Le brain de l'exemple \(d_i\) est un multigraphe orienté, typé et
+traçable
+\[
+B_i=(V_i,E_i,\lambda_i,\pi_i).
+\]
+Ses composantes sont :
+
+\begin{itemize}
+  \item \(V_i\) : les nœuds représentant les occurrences de tokens
+        de l'exemple ;
+  \item \(E_i\) : les relations orientées entre ces occurrences ;
+  \item \(\lambda_i\) : l'étiquette de chaque relation, par
+        exemple succession dans le prompt, succession dans la
+        réponse ou frontière prompt/réponse ;
+  \item \(\pi_i\) : la provenance des nœuds et des relations,
+        notamment l'identifiant de l'exemple et les positions.
+\end{itemize}
+\end{definition}
+
+Le brain n'est pas un simple ensemble de tokens. Il conserve
+l'ordre observé, les frontières entre prompt et réponse et
+l'origine de chaque relation.
+
+\begin{proposition}[Conservation de la trajectoire dans un brain]
+Si le brain conserve les occurrences, leur ordre et les relations
+de succession, la trajectoire textuelle de l'exemple peut être
+reconstruite à partir de sa structure ordonnée.
+\end{proposition}
+
+\begin{proof}
+Chaque occurrence conserve sa position dans l'exemple et chaque
+relation de succession relie deux positions consécutives.
+La succession des occurrences est donc reconstructible à partir
+des relations et des positions conservées.
+\end{proof}
+
+\begin{remarque}
+Cette proposition concerne la reconstruction de la trajectoire
+observée. Elle ne garantit pas que la trajectoire contient toutes
+les informations sémantiques ou toutes les causes réelles de
+l'énoncé.
+\end{remarque}
+
+% ============================================================
+\chapter{Fusion des brains et construction du maillage global}
+% ============================================================
+
+\section{Principe de fusion}
+
+Au départ, les brains sont construits séparément :
+\[
+B_1,B_2,\ldots,B_n.
+\]
+
+La fusion intervient ensuite sur les identités communes.
+Elle ne consiste pas à supprimer arbitrairement les trajectoires
+pour ne conserver qu'une liste de mots.
+
+Le principe est :
+\[
+\boxed{
+\text{identité canonique commune}
++
+\text{relations conservées}
++
+\text{provenance conservée}
+}
+\]
+
+\section{Définition du maillage global}
+
+\begin{definition}[Maillage global]
+Le maillage global est un multigraphe orienté, typé et traçable
+\[
+G=(V_G,E_G,\lambda_G,\pi_G).
+\]
+
+Il est construit à partir de l'ensemble des brains. Les occurrences
+qui partagent une même identité canonique sont rattachées à un
+nœud canonique commun, tandis que les relations issues des brains
+sont conservées avec leur type et leur provenance.
+\end{definition}
+
+Pour une identité canonique \(x\), on note
+\[
+v_x\in V_G
+\]
+le nœud correspondant.
+
+L'ensemble des occurrences qui lui sont rattachées est
+\[
+\Occ(x)=
+\{o:\text{l'identité canonique de }o\text{ est }x\}.
+\]
+
+Les relations issues des occurrences sont projetées sur les
+identités canoniques, sans supprimer leurs traces d'origine.
+
+\section{Fusion et préservation des relations}
+
+Soit
+\[
+q: \bigcup_{i=1}^{n}V_i\longrightarrow V_G
+\]
+l'application qui rattache chaque occurrence à son identité
+canonique.
+
+Si une relation orientée de type \(\ell\) relie une occurrence
+\(u\) à une occurrence \(v\), la relation correspondante dans
+le maillage global est
+\[
+q(u)\overset{\ell}{\longrightarrow}q(v),
+\]
+avec conservation de la provenance de cette relation.
+
+Plusieurs relations peuvent aboutir à la même paire de nœuds
+canoniques. Elles ne doivent pas être confondues si elles diffèrent
+par leur type, leur contexte ou leur provenance.
+
+\begin{proposition}[La fusion conserve les relations tracées]
+Si chaque relation fusionnée conserve son type et sa provenance,
+alors la fusion des identités communes ne supprime pas
+l'information permettant d'identifier les relations observées
+dans les brains d'origine.
+\end{proposition}
+
+\begin{proof}
+Toute relation d'un brain est projetée vers une relation du
+maillage global et conserve une référence à son brain d'origine.
+La relation peut ainsi être retrouvée depuis le maillage global
+par sa provenance. La fusion peut donc partager les identités
+sans effacer les trajectoires sources.
+\end{proof}
+
+\begin{remarque}
+La proposition dépend de la conservation effective des références
+de provenance. Si les relations sont fusionnées en une simple
+arête non typée, sans historique ni multiplicité, cette propriété
+n'est plus garantie.
+\end{remarque}
+
+\section{La redondance utile}
+
+La redondance d'identité est réduite :
+plusieurs occurrences du même token partagent un nœud canonique.
+
+En revanche, la diversité des relations reste présente.
+
+Ainsi, le nœud \texttt{bien} n'est pas une occurrence unique
+qui aurait perdu son histoire. Il devient un point d'accès commun
+à plusieurs relations et à plusieurs trajectoires observées.
+
+On peut schématiser :
+\[
+\begin{aligned}
+B_1 &: \texttt{je}\to\texttt{vais}\to\texttt{bien},\\
+B_2 &: \texttt{il}\to\texttt{va}\to\texttt{très}
+       \to\texttt{bien}\to\texttt{aujourd'hui},\\
+B_3 &: \texttt{c'est}\to\texttt{bien}.
+\end{aligned}
+\]
+
+Après fusion, les occurrences de \texttt{bien} partagent une
+identité canonique. Les relations provenant des trois brains
+restent néanmoins distinguables par leur direction, leur type
+et leur provenance.
+
+\section{Directions naturelles}
+
+\begin{definition}[Direction naturelle observée]
+Une direction naturelle observée est une relation orientée
+\[
+x\overset{\mathrm{Nat}}{\longrightarrow}y
+\]
+qui provient d'une succession observée dans une trajectoire,
+ou d'une règle explicite du modèle déclarée comme naturelle.
+\end{definition}
+
+Dans une réponse telle que
+\[
+\texttt{je vais bien merci},
+\]
+la succession observée donne notamment
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{merci}.
+\]
+
+Dans
+\[
+\texttt{c'est bien de le dire},
+\]
+on observe notamment
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{de}.
+\]
+
+Dans
+\[
+\texttt{oui bien que},
+\]
+on observe notamment
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{que}.
+\]
+
+Le nœud \texttt{bien} dispose donc de plusieurs directions
+naturelles issues de trajectoires distinctes.
+
+\section{L'écosystème d'un token}
+
+\begin{definition}[Écosystème relationnel]
+L'écosystème relationnel d'un token canonique \(x\), noté
+\[
+\E(x),
+\]
+est l'ensemble des relations du maillage global incidentes à
+\(x\), conservées avec leur orientation, leur type et leur
+provenance.
+\end{definition}
+
+L'écosystème ne se réduit pas aux voisins immédiatement
+suivants dans une seule phrase. Il rassemble les relations
+issues de l'ensemble des brains dans lesquels l'identité
+canonique apparaît.
+
+On distingue :
+\[
+\E_{\mathrm{Nat}}(x)
+\]
+pour les relations naturelles, et
+\[
+\E_{\mathrm{Anti}}(x)
+\]
+pour les relations anti-causales.
+
+Ces ensembles sont des sous-ensembles typés de l'écosystème
+global :
+\[
+\E(x)=
+\E_{\mathrm{Nat}}(x)
+\cup
+\E_{\mathrm{Anti}}(x)
+\cup
+\E_{\mathrm{autres}}(x).
+\]
+
+\begin{remarque}
+L'écosystème est plus riche qu'une liste de voisins : il contient
+les types de relations et leurs traces. Deux tokens peuvent avoir
+les mêmes voisins apparents tout en possédant des écosystèmes
+différents si les directions, les contextes ou les provenances
+diffèrent.
+\end{remarque}
+
+\section{Directions naturelles et multiplicité}
+
+Le nombre d'occurrences d'un token n'est pas l'unique information
+conservée par le maillage. La diversité des directions observées
+est elle-même une partie de l'information relationnelle.
+
+Pour chaque paire de tokens \((x,y)\), on peut conserver :
+\[
+M_{\mathrm{Nat}}(x,y)
+=
+\{\text{traces des relations naturelles }x\to y\}.
+\]
+
+La multiplicité observable de la relation peut être calculée par
+\[
+m_{\mathrm{Nat}}(x,y)
+=
+|M_{\mathrm{Nat}}(x,y)|
+\]
+lorsque cet ensemble est fini.
+
+Cette multiplicité est une mesure de fréquence ou de répétition
+des relations enregistrées. Elle ne doit pas être confondue avec
+la totalité de l'information contextuelle.
+
+\begin{proposition}[La fusion n'oblige pas à perdre la multiplicité]
+Le partage d'un nœud canonique par plusieurs occurrences est
+compatible avec la conservation du nombre de relations observées,
+dès lors que les relations et leurs provenances ne sont pas
+supprimées.
+\end{proposition}
+
+\begin{proof}
+La multiplicité est calculée sur l'ensemble des traces de
+relations conservées. La fusion des identités ne supprime pas
+ces traces lorsque la règle de fusion les préserve. Le nombre
+de relations observées reste donc calculable.
+\end{proof}
+
+% ============================================================
+\chapter{Causalité naturelle et anti-causalité}
+% ============================================================
+
+\section{Statut de la causalité dans cette théorie}
+
+Le mot « causalité » désigne ici d'abord une structure interne
+du modèle : une orientation et un type de relation utilisés pour
+organiser les trajectoires et contraindre la recherche.
+
+Il ne faut pas automatiquement interpréter une relation
+\[
+x\to y
+\]
+comme la preuve que \(x\) est une cause physique ou sémantique
+de \(y\).
+
+Une relation observée dans un texte peut représenter un ordre,
+une continuation, une association contextuelle ou une annotation.
+Une affirmation de causalité réelle demanderait des éléments
+supplémentaires qui ne sont pas fournis par la seule succession
+des tokens.
+
+\section{Causalité naturelle}
+
+\begin{definition}[Relation causale naturelle du modèle]
+Une relation
+\[
+x\overset{\mathrm{Nat}}{\longrightarrow}y
+\]
+est une relation que le modèle classe dans sa catégorie
+naturelle. Dans la construction initiale, elle est notamment
+produite par la succession effective \(x,y\) dans une trajectoire
+observée.
+\end{definition}
+
+La catégorie naturelle sert à préserver les continuations
+observées et à les rendre accessibles dans le maillage global.
+
+Exemples :
+\[
+\begin{aligned}
+\texttt{bien}&\overset{\mathrm{Nat}}{\longrightarrow}\texttt{merci},\\
+\texttt{bien}&\overset{\mathrm{Nat}}{\longrightarrow}\texttt{de},\\
+\texttt{bien}&\overset{\mathrm{Nat}}{\longrightarrow}\texttt{que}.
+\end{aligned}
+\]
+
+Ces trois relations proviennent de trajectoires textuelles
+distinctes, mais elles partagent le même nœud canonique source.
+
+\section{Anti-causalité}
+
+\begin{definition}[Relation anti-causale du modèle]
+Une relation
+\[
+x\overset{\mathrm{Anti}}{\longrightarrow}y
+\]
+est une relation explicitement classée comme anti-causale dans
+le maillage. Elle conserve sa propre orientation et sa propre
+étiquette. Elle n'est pas automatiquement identifiée à la
+relation inverse \(y\to x\).
+\end{definition}
+
+Cette définition respecte le sens spécifique que la catégorie
+anti-causale possède dans le modèle. Elle ne suppose pas que
+l'anti-causalité soit simplement une inversion de l'ordre des
+tokens.
+
+Dans l'exemple de travail, on conserve les relations déclarées :
+\[
+\begin{aligned}
+\texttt{bien}&\overset{\mathrm{Anti}}{\longrightarrow}\texttt{c'est},\\
+\texttt{bien}&\overset{\mathrm{Anti}}{\longrightarrow}\texttt{oui},\\
+\texttt{bien}&\overset{\mathrm{Anti}}{\longrightarrow}\texttt{vais}.
+\end{aligned}
+\]
+
+Ces relations sont distinctes des relations naturelles
+\(\texttt{bien}\to\texttt{merci}\),
+\(\texttt{bien}\to\texttt{de}\) et
+\(\texttt{bien}\to\texttt{que}\).
+
+\begin{remarque}
+Une relation anti-causale ne peut pas être déduite uniquement
+de la présence d'un token avant un autre. Sa règle de
+classification doit être définie et traçable dans le système.
+Les exemples ci-dessus sont des étiquettes fournies par le
+modèle, et non une loi universelle de la langue française.
+\end{remarque}
+
+\section{Fonction des relations anti-causales dans la recherche}
+
+L'anti-causalité doit contribuer au mécanisme de sélection ;
+elle ne peut pas être une simple étiquette décorative.
+
+On distingue deux usages compatibles, dont l'application dépend
+de la règle de recherche déclarée.
+
+\begin{definition}[Exclusion anti-causale]
+Une relation anti-causale joue un rôle d'exclusion lorsqu'une
+règle déclarée établit qu'elle est incompatible avec la
+continuation naturelle recherchée dans le contexte courant.
+Dans ce cas, elle empêche de traiter cette relation comme une
+continuation naturelle admissible.
+\end{definition}
+
+\begin{definition}[Réorientation anti-causale]
+Une relation anti-causale joue un rôle de réorientation lorsqu'elle
+signale une direction de contraste ou une région relationnelle
+alternative à examiner. Elle ne devient pas pour autant une
+continuation naturelle.
+\end{definition}
+
+\begin{postulat}[Usage opératoire de l'anti-causalité]
+Lors de la recherche, une relation anti-causale doit influencer
+soit l'admissibilité d'une continuation, soit l'orientation de
+l'exploration, soit les deux lorsque la politique déclarée le
+permet. Elle ne doit jamais être silencieusement convertie en
+relation naturelle.
+\end{postulat}
+
+\begin{remarque}
+La catégorie anti-causale ne signifie pas que chaque relation
+anti-causale doit être rejetée dans toutes les situations.
+Une relation peut être pertinente comme contraste ou comme
+indication d'une autre région du maillage. La règle exacte
+doit être déterminée par le protocole d'usage de la catégorie.
+\end{remarque}
+
+\section{Pourquoi les trois niveaux de contraintes coopèrent}
+
+Le mécanisme global articule :
+\[
+\boxed{
+\text{alignement du prompt}
++
+\text{orientation de recherche}
++
+\text{écosystème naturel/anti-causal}
+}
+\]
+
+L'alignement repère les structures qui correspondent au prompt.
+L'orientation détermine le sens du parcours de recherche.
+L'écosystème distingue les continuations naturelles des relations
+qui possèdent un autre statut.
+
+Ces contraintes peuvent éliminer de nombreux parcours
+incompatibles. Elles ne garantissent cependant pas que toute
+réponse retenue soit factuellement vraie : cette propriété
+dépend notamment de la qualité des données et des relations
+enregistrées.
+
+% ============================================================
+\chapter{Construction du maillage contextuel du prompt}
+% ============================================================
+
+\section{Séparation structurelle}
+
+\begin{definition}[Maillage contextuel]
+Pour un prompt \(P\), le maillage contextuel est une structure
+\[
+C_P=(V_P,E_P,\lambda_P),
+\]
+construite à partir des tokens du prompt et de leurs relations
+contextuelles. Il sert de motif de recherche dans le maillage
+global.
+\end{definition}
+
+Le maillage contextuel n'est pas une partie du maillage global.
+Il n'ajoute aucun token, aucune relation et aucune provenance
+au maillage global par sa seule construction.
+
+On dispose donc de deux objets distincts :
+\[
+G=(V_G,E_G,\lambda_G,\pi_G)
+\]
+et
+\[
+C_P=(V_P,E_P,\lambda_P).
+\]
+
+La recherche utilise \(C_P\) pour interroger \(G\), mais ne
+fusionne pas leurs structures :
+\[
+C_P\not\hookrightarrow G
+\]
+au sens d'une insertion structurelle automatique.
+
+\section{Tokens d'ancrage et variables contextuelles}
+
+Soit le prompt tokenisé
+\[
+P=(x_1,x_2,\ldots,x_n).
+\]
+
+Les \(x_i\) sont les tokens d'ancrage du prompt. On intercale
+entre eux des variables contextuelles
+\[
+c_0,c_1,\ldots,c_n,c_x.
+\]
+
+Les variables \(c_i\) ne désignent pas un token lexical fixé.
+Elles désignent des emplacements de correspondance capables
+d'accepter des structures du maillage global.
+
+\begin{definition}[Valeur admissible d'une variable contextuelle]
+Une valeur admissible d'une variable \(c_i\) peut être :
+\begin{enumerate}[label=\alph*)]
+  \item un token canonique ;
+  \item une séquence finie de tokens ;
+  \item une trajectoire orientée du maillage global ;
+  \item un sous-graphe ou un ensemble de tokens muni de relations,
+        lorsque la règle de correspondance autorise cette forme.
+\end{enumerate}
+\end{definition}
+
+La liberté de \(c_i\) n'est pas une permission d'ignorer les
+contraintes. La structure affectée à \(c_i\) doit appartenir au
+maillage global et respecter les règles de compatibilité
+déclarées.
+
+\section{Colonne vertébrale ordonnée du prompt}
+
+La structure de base du motif est :
+\[
+c_0\to x_1\to c_1\to x_2\to c_2
+\to\cdots\to x_n\to c_x.
+\]
+
+Cette écriture exprime une organisation ordonnée des ancres et
+des emplacements contextuels. Elle ne signifie pas que chaque
+\(c_i\) correspond à un seul token ou à une seule arête.
+
+Par exemple, pour
+\[
+P=\texttt{je vais bien},
+\]
+on écrit :
+\[
+c_0\to\texttt{je}\to c_1
+\to\texttt{vais}\to c_2
+\to\texttt{bien}\to c_x.
+\]
+
+Si le maillage global contient une trajectoire compatible dans
+laquelle plusieurs tokens ou une trajectoire entière se trouvent
+entre \texttt{je} et \texttt{vais}, la variable \(c_1\) peut
+correspondre à cette structure intermédiaire. La même règle
+s'applique aux autres variables contextuelles.
+
+\section{Multidirectionnalité contextuelle}
+
+La colonne vertébrale ne suffit pas à représenter l'idée du
+maillage contextuel. Le prompt doit également être traité comme
+une configuration relationnelle où les tokens peuvent contribuer
+conjointement à l'orientation de la recherche.
+
+On ajoute donc des relations contextuelles entre les ancres,
+ainsi que des relations entre les ancres et les emplacements
+contextuels.
+
+Pour le prompt \texttt{je vais bien}, le motif peut contenir
+notamment :
+\[
+\begin{aligned}
+c_0&\to\texttt{je},&
+c_0&\to\texttt{vais},&
+c_0&\to\texttt{bien},&
+c_0&\to c_x,\\
+\texttt{je}&\to\texttt{vais},&
+\texttt{je}&\to\texttt{bien},&
+\texttt{je}&\to c_x,\\
+\texttt{vais}&\to\texttt{je},&
+\texttt{vais}&\to\texttt{bien},&
+\texttt{vais}&\to c_x,\\
+\texttt{bien}&\to\texttt{je},&
+\texttt{bien}&\to\texttt{vais},&
+\texttt{bien}&\to c_x.
+\end{aligned}
+\]
+
+Les relations précises du motif sont fixées par la règle de
+construction contextuelle. Le motif peut conserver des relations
+réciproques entre tokens même lorsque sa colonne vertébrale
+principale est ordonnée.
+
+\begin{remarque}
+Une relation contextuelle réciproque n'est pas automatiquement
+une relation naturelle du maillage global. Les relations du
+motif décrivent comment le prompt est utilisé comme contexte ;
+les relations du maillage global décrivent la structure
+relationnelle enregistrée dans le dataset.
+\end{remarque}
+
+\section{La direction \(c_0\to c_x\)}
+
+\begin{definition}[Orientation de recherche]
+La relation
+\[
+c_0\longrightarrow c_x
+\]
+désigne l'orientation globale du parcours de recherche associé
+au motif contextuel. Elle organise la progression depuis
+l'entrée contextuelle vers la sortie recherchée.
+\end{definition}
+
+Cette orientation ne doit pas être confondue avec :
+\begin{itemize}
+  \item l'ordre de lecture seul ;
+  \item une relation réciproque de contextualisation ;
+  \item une causalité physique démontrée.
+\end{itemize}
+
+Dans le modèle, \(c_0\to c_x\) impose que la recherche soit
+orientée. Les variables intermédiaires permettent de conserver
+la souplesse de l'alignement tout en gardant cette orientation.
+
+% ============================================================
+\chapter{Alignement contextuel dans le maillage global}
+% ============================================================
+
+\section{Définition de l'alignement}
+
+\begin{definition}[Alignement contextuel]
+Un alignement du prompt \(P\) dans le maillage global \(G\) est
+une correspondance entre les ancres du maillage contextuel et
+des occurrences ou identités du maillage global, accompagnée
+d'une affectation admissible aux variables \(c_i\), qui respecte
+les contraintes structurelles déclarées du motif.
+\end{definition}
+
+On note l'ensemble des alignements admissibles :
+\[
+\Align(P,G).
+\]
+
+Un élément
+\[
+\alpha\in\Align(P,G)
+\]
+est un certificat d'alignement. Il précise au minimum :
+\begin{itemize}
+  \item où chaque ancre du prompt est retrouvée ;
+  \item quelle structure est affectée à chaque variable \(c_i\) ;
+  \item quels chemins ou relations relient les ancres ;
+  \item quelle orientation est utilisée ;
+  \item quelles relations et provenances du maillage global
+        soutiennent la correspondance.
+\end{itemize}
+
+\section{Les intermédiaires sont autorisés}
+
+Pour un prompt abstrait
+\[
+P=(a,b,c),
+\]
+un alignement ne doit pas exiger que \(a\), \(b\) et \(c\)
+soient trois voisins directs.
+
+Il peut avoir la forme :
+\[
+c_0\to a\to
+\underbrace{u_1\to\cdots\to u_k}_{c_1}
+\to b\to
+\underbrace{v_1\to\cdots\to v_m}_{c_2}
+\to c\to c_x.
+\]
+
+Les tokens \(u_j\) et \(v_j\) sont des éléments du maillage
+global qui servent d'intermédiaires. Ils ne sont pas supposés
+faire partie du prompt original.
+
+Les variables contextuelles peuvent aussi correspondre à une
+structure relationnelle plus large lorsque la règle de
+correspondance le permet.
+
+\begin{definition}[Alignement ordonné avec intermédiaires]
+Un alignement est ordonné avec intermédiaires lorsque les ancres
+\(a,b,c\) sont retrouvées dans l'ordre exigé par le motif, tout
+en autorisant entre elles des chemins ou sous-structures
+admissibles du maillage global.
+\end{definition}
+
+\section{Correspondance et identité lexicale}
+
+La correspondance entre un token du prompt et un token canonique
+du maillage global repose sur la règle d'identité déclarée.
+
+Si \(x\) est un token du prompt, on recherche un nœud global
+\(v_x\) portant la même identité canonique, ou une correspondance
+explicitement autorisée par le protocole.
+
+Cette correspondance ne fusionne pas le nœud du prompt avec le
+nœud global. Elle est une relation de recherche :
+\[
+\mu_P:V_P\longrightarrow V_G
+\]
+lorsqu'une telle correspondance est définie.
+
+La fonction \(\mu_P\) est une application de correspondance,
+pas une opération de fusion structurelle.
+
+\section{Pourquoi la présence des tokens ne suffit pas}
+
+\begin{proposition}[La présence isolée des ancres n'implique pas
+un alignement admissible]
+La présence de chacun des tokens d'un prompt dans le maillage
+global ne suffit pas à établir un alignement contextuel. Il faut
+également satisfaire les contraintes de relation, d'ordre et
+d'orientation du motif.
+\end{proposition}
+
+\begin{proof}
+L'appartenance individuelle des ancres à \(V_G\) n'établit
+aucune relation entre leurs occurrences. Or la définition de
+l'alignement exige une affectation des variables contextuelles
+et des relations qui satisfont le motif. La présence des tokens
+est donc une condition éventuellement nécessaire, mais non
+suffisante.
+\end{proof}
+
+\section{La condition d'orientation}
+
+Un alignement doit respecter l'orientation de recherche
+\(c_0\to c_x\). Les correspondances ne sont pas acceptées
+uniquement parce qu'elles contiennent les bons tokens.
+
+\begin{definition}[Alignement orienté]
+Un alignement est orienté lorsque les structures affectées aux
+variables contextuelles et les relations utilisées permettent
+de parcourir le motif dans le sens \(c_0\to c_x\), conformément
+aux contraintes déclarées.
+\end{definition}
+
+L'orientation est une condition sur le parcours de recherche.
+Elle n'établit pas, par elle-même, que la réponse est vraie.
+
+% ============================================================
+\chapter{Recherche de réponse et activation du maillage}
+% ============================================================
+
+\section{Du motif à la région pertinente}
+
+Le maillage contextuel ne sert pas uniquement à attribuer un
+score aux tokens du maillage global. Il définit une configuration
+à rechercher.
+
+Pour un prompt \(P\), l'ensemble
+\[
+\Align(P,G)
+\]
+réunit les alignements admissibles.
+
+Chaque alignement active une partie du maillage global :
+les ancres correspondantes, les chemins intermédiaires et les
+relations qui soutiennent l'alignement.
+
+\begin{definition}[Région activée]
+La région activée par le prompt est l'union des nœuds et relations
+qui participent à au moins un alignement admissible :
+\[
+\A(P,G)=
+\bigcup_{\alpha\in\Align(P,G)}
+\operatorname{Support}(\alpha).
+\]
+Si aucun alignement n'existe, on pose
+\[
+\A(P,G)=\varnothing.
+\]
+\end{definition}
+
+Cette définition exprime le fait que le contexte peut activer
+plusieurs chemins compatibles à la fois. Elle ne réduit pas
+automatiquement le contexte à un seul chemin gagnant.
+
+\section{Diversité compatible avec le contexte}
+
+La diversité des directions est prise en compte à travers
+l'ensemble des alignements admissibles et leurs supports.
+Une direction ne devient pas pertinente uniquement parce
+qu'elle est fréquente ; elle doit appartenir à une structure
+compatible avec le prompt.
+
+Pour un nœud \(x\), on peut définir l'ensemble des directions
+naturelles activées par le prompt :
+\[
+\Next_{\mathrm{Nat}}(x\mid P,G)=
+\left\{
+y:
+x\overset{\mathrm{Nat}}{\longrightarrow}y
+\text{ et la relation appartient à une continuation compatible}
+\right\}.
+\]
+
+De même, les relations anti-causales activées sont :
+\[
+\Next_{\mathrm{Anti}}(x\mid P,G)=
+\left\{
+y:
+x\overset{\mathrm{Anti}}{\longrightarrow}y
+\text{ et la relation est pertinente pour la recherche courante}
+\right\}.
+\]
+
+Ces deux ensembles ne sont pas interchangeables. Le premier
+contient des directions naturelles admissibles ; le second
+contient des relations anti-causales qui peuvent contribuer
+à l'exclusion ou à la réorientation selon le protocole.
+
+\section{Rôle du prompt complet}
+
+Le choix d'une continuation ne dépend pas seulement du dernier
+token atteint. Il dépend du prompt complet et de la structure
+déjà parcourue.
+
+On note \(H_t\) l'historique de la réponse produite jusqu'à
+l'étape \(t\), et \(S_t\) l'état de recherche, qui contient
+notamment :
+\begin{itemize}
+  \item le motif contextuel courant ;
+  \item les ancres déjà alignées ;
+  \item les chemins déjà parcourus ;
+  \item les relations naturelles et anti-causales examinées ;
+  \item les éléments de réponse déjà produits ;
+  \item les certificats de provenance des continuations candidates.
+\end{itemize}
+
+La sélection suivante s'écrit abstraitement :
+\[
+S_{t+1}=
+\mathcal{U}(S_t,G,C_P,H_t),
+\]
+où \(\mathcal{U}\) est la règle de mise à jour déclarée.
+
+La génération est donc une navigation dynamique : chaque
+nouvel élément produit modifie l'état de recherche et peut
+modifier la région activée.
+
+\section{Recherche d'une réponse dans les trajectoires du dataset}
+
+Les brains conservent la frontière entre prompt et réponse.
+Le maillage global conserve les relations qui en proviennent.
+Lorsqu'un alignement du prompt est trouvé, le système peut
+rechercher les continuations de réponse soutenues par les
+trajectoires sources correspondantes.
+
+On distingue deux voies compatibles :
+
+\begin{enumerate}[label=\arabic*.]
+  \item \textbf{Voie par exemple aligné :} l'alignement correspond
+        à une région d'un brain source. Le système examine la
+        réponse attachée à cet exemple et les relations qui
+        permettent de la retrouver.
+  \item \textbf{Voie par navigation relationnelle :} plusieurs
+        relations du maillage global sont combinées pour trouver
+        une continuation qui respecte l'alignement, l'orientation
+        et l'écosystème naturel/anti-causal.
+\end{enumerate}
+
+La seconde voie autorise une réponse qui ne reproduit pas
+nécessairement une seule réponse mémorisée, à condition que
+la continuation construite reste soutenue par les relations
+et les trajectoires disponibles.
+
+\section{Condition structurelle de recevabilité d'une réponse}
+
+\begin{definition}[Réponse structurellement recevable]
+Une réponse candidate \(R\) est structurellement recevable pour
+un prompt \(P\) relativement au maillage global \(G\) si :
+
+\begin{enumerate}[label=(\roman*)]
+  \item il existe au moins un alignement admissible
+        \(\alpha\in\Align(P,G)\) ;
+  \item la trajectoire de recherche respecte l'orientation
+        \(c_0\to c_x\) ;
+  \item la continuation proposée est reliée à la région alignée
+        par des relations et des trajectoires admissibles ;
+  \item les relations naturelles et anti-causales pertinentes
+        ont été prises en compte conformément à leur type ;
+  \item la provenance des relations utilisées est conservée.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Absence de soutien structurel]
+Si aucune relation ni trajectoire admissible ne relie une réponse
+candidate à un alignement du prompt, cette réponse ne satisfait
+pas la définition de recevabilité structurelle.
+\end{proposition}
+
+\begin{proof}
+La définition exige une continuation reliée à une région alignée
+par des relations et des trajectoires admissibles. Si un tel
+soutien n'existe pas, la condition (iii) est fausse. La réponse
+ne peut donc pas être déclarée structurellement recevable.
+\end{proof}
+
+Cette proposition formalise le rejet d'une réponse arbitraire
+sans correspondance ni chemin de soutien. Elle ne prétend pas
+que toute réponse soutenue structurellement est vraie.
+
+% ============================================================
+\chapter{Boucles, répétitions et progression de la recherche}
+% ============================================================
+
+\section{Le problème des boucles}
+
+Un maillage peut contenir des cycles. Par exemple :
+\[
+\texttt{bien}\to\texttt{très}\to\texttt{bien}.
+\]
+
+Si la recherche se limite à suivre le voisinage local du dernier
+token, elle peut répéter indéfiniment ce cycle sans faire
+progresser la réponse.
+
+La solution ne consiste pas à interdire toute répétition de
+token : une répétition peut être légitime dans une langue.
+Il faut distinguer une répétition textuelle utile d'une boucle
+de recherche qui ne fait aucun progrès.
+
+\section{État de progression}
+
+\begin{definition}[État de progression]
+L'état de progression \(S_t\) comprend la position de recherche
+dans le motif contextuel, l'historique \(H_t\), les alignements
+retenus, les relations déjà examinées et les conditions de
+terminaison.
+\end{definition}
+
+\begin{postulat}[Progression ou terminaison]
+Chaque étape de recherche doit satisfaire au moins l'une des
+conditions suivantes :
+\begin{enumerate}[label=\alph*)]
+  \item elle fait progresser l'alignement ou la continuation
+        vers une partie non encore satisfaite du motif ;
+  \item elle apporte une nouvelle relation ou un nouveau
+        certificat de soutien pertinent ;
+  \item elle explore explicitement une branche alternative ;
+  \item elle termine la recherche selon une règle de terminaison
+        déclarée.
+\end{enumerate}
+Une transition qui ne satisfait aucune de ces conditions ne
+peut pas être répétée indéfiniment comme si elle apportait un
+progrès.
+\end{postulat}
+
+Cette règle ne supprime pas les cycles du maillage. Elle évite
+que la procédure de recherche reste bloquée dans un cycle sans
+avancer dans la tâche.
+
+\section{Terminaison}
+
+La réponse peut être terminée lorsqu'une condition de sortie
+déclarée est satisfaite, notamment :
+\begin{itemize}
+  \item rencontre d'une frontière de fin de réponse conservée
+        dans les données ;
+  \item atteinte d'une condition de complétude du motif de sortie ;
+  \item atteinte d'une limite de génération fixée par le système ;
+  \item absence de continuation admissible, auquel cas le système
+        doit signaler l'échec ou l'insuffisance de soutien plutôt
+        que fabriquer silencieusement une réponse.
+\end{itemize}
+
+La limite de génération est une contrainte d'implémentation.
+Elle ne doit pas être présentée comme une propriété intrinsèque
+du maillage.
+
+% ============================================================
+\chapter{Procédure opérationnelle complète}
+% ============================================================
+
+\section{Construction hors ligne}
+
+La construction du maillage global s'effectue en plusieurs
+étapes.
+
+\begin{enumerate}[label=\arabic*.]
+  \item Tokeniser chaque prompt et chaque réponse avec la même
+        règle d'identité déclarée.
+  \item Construire un brain par exemple, en conservant les
+        occurrences, l'ordre, les frontières prompt/réponse et
+        les relations de succession.
+  \item Déterminer les identités canoniques communes selon la
+        règle de normalisation fixée.
+  \item Fusionner les identités communes dans le maillage global.
+  \item Conserver toutes les relations utiles avec leur type,
+        leur orientation et leur provenance.
+  \item Distinguer les directions naturelles des relations
+        anti-causales selon une règle d'étiquetage explicite.
+  \item Vérifier que chaque relation du maillage global peut être
+        reliée à une provenance ou à une règle déclarée.
+\end{enumerate}
+
+\section{Recherche en ligne}
+
+Pour un nouveau prompt \(P\), la procédure est :
+
+\begin{enumerate}[label=\arabic*.]
+  \item Construire le maillage contextuel \(C_P\), sans l'insérer
+        dans le maillage global.
+  \item Identifier les ancres et les relations contextuelles
+        du motif.
+  \item Rechercher les correspondances des ancres dans le
+        maillage global.
+  \item Affecter les variables \(c_i\) à des tokens, chemins ou
+        structures admissibles.
+  \item Retenir les alignements qui respectent les contraintes
+        de relation et l'orientation \(c_0\to c_x\).
+  \item Activer les régions du maillage global soutenant ces
+        alignements.
+  \item Examiner les continuations issues des trajectoires
+        alignées et des relations naturelles disponibles.
+  \item Utiliser les relations anti-causales pour l'exclusion ou
+        la réorientation, selon la règle déclarée.
+  \item Mettre à jour l'état contextuel en tenant compte du prompt
+        complet et de l'historique de réponse.
+  \item Continuer tant qu'une progression admissible est possible.
+  \item Terminer sur une condition explicite, ou signaler qu'aucune
+        continuation suffisamment soutenue n'a été trouvée.
+\end{enumerate}
+
+\section{Pseudo-code de référence}
+
+Le pseudo-code suivant décrit la logique, sans imposer un langage
+de programmation ni une structure de données particulière.
+
+\begin{verbatim}
+CONSTRUCTION_HORS_LIGNE(dataset):
+    brains = []
+
+    pour chaque exemple (prompt, reponse, metadata):
+        tokens_prompt  = TOKENISER(prompt)
+        tokens_reponse = TOKENISER(reponse)
+
+        brain = CONSTRUIRE_BRAIN(
+            tokens_prompt,
+            tokens_reponse,
+            metadata
+        )
+
+        brains.ajouter(brain)
+
+    G = FUSIONNER_IDENTITES(brains)
+    CONSERVER_RELATIONS_TYPES_PROVENANCES(G)
+    ETIQUETER_RELATIONS_NATURELLES_ET_ANTICAUSALES(G)
+
+    retourner G
+
+
+RECHERCHE(P, G):
+    C = CONSTRUIRE_MAILLAGE_CONTEXTUEL(P)
+    # C reste distinct de G.
+
+    alignements = TROUVER_ALIGNEMENTS(C, G)
+
+    si alignements est vide:
+        retourner ECHEC_ALIGNEMENT
+
+    region = ACTIVER_SUPPORTS(alignements)
+    etat = INITIALISER_ETAT(P, C, region)
+
+    tant que non TERMINAL(etat):
+        candidats = TROUVER_CONTINUATIONS(etat, G)
+
+        candidats = APPLIQUER_ORIENTATION_C0_VERS_CX(candidats)
+        candidats = VERIFIER_COMPATIBILITE_NATURELLE(candidats)
+        candidats = TRAITER_RELATIONS_ANTICAUSALES(candidats)
+
+        si candidats est vide:
+            retourner ECHEC_CONTINUATION
+
+        etat = METTRE_A_JOUR_ETAT(
+            etat,
+            candidats,
+            prompt_complet=P,
+            historique=etat.historique
+        )
+
+        si non PROGRESSION(etat):
+            retourner ECHEC_PROGRESSION
+
+    retourner REALISER_REPONSE(etat)
+\end{verbatim}
+
+\begin{remarque}
+Les opérations \texttt{TROUVER\_ALIGNEMENTS},
+\texttt{VERIFIER\_COMPATIBILITE\_NATURELLE} et
+\texttt{TRAITER\_RELATIONS\_ANTICAUSALES} sont des modules
+dont les règles doivent être définies et testées. Le pseudo-code
+ne prétend pas que leur simple nomination constitue déjà un
+algorithme exécutable complet.
+\end{remarque}
+
+% ============================================================
+\chapter{Exemple intégré : l'écosystème de \texttt{bien}}
+% ============================================================
+
+\section{Brains initiaux}
+
+Considérons les exemples suivants :
+\[
+\begin{aligned}
+P_1/R_1 &: \texttt{je vais bien normalement},\\
+P_2/R_2 &: \texttt{il va très bien aujourd'hui},\\
+P_3/R_3 &: \texttt{c'est bien de le dire},\\
+P_4/R_4 &: \texttt{oui bien que},\\
+P_5/R_5 &: \texttt{il faut beau ce soir}.
+\end{aligned}
+\]
+
+Chaque ligne représente ici une trajectoire textuelle illustrative.
+Dans un dataset réel, les frontières entre prompts et réponses
+doivent être conservées séparément, conformément à la définition
+des brains.
+
+Les brains sont d'abord construits indépendamment. Les occurrences
+de \texttt{bien} appartiennent à leurs brains respectifs, sans
+être encore fusionnées.
+
+\section{Fusion}
+
+Les occurrences ayant l'identité canonique \texttt{bien} sont
+rattachées au même nœud du maillage global.
+
+Les directions naturelles observées comprennent notamment :
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{normalement}
+\]
+et
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{aujourd'hui}.
+\]
+
+Dans les autres trajectoires, les relations naturelles suivantes
+sont également conservées :
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{de},
+\qquad
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{que}.
+\]
+
+Le nœud \texttt{bien} devient ainsi un point d'accès vers un
+écosystème de directions issues de plusieurs trajectoires.
+
+Les relations anti-causales déclarées dans le modèle sont
+conservées séparément :
+\[
+\begin{aligned}
+\texttt{bien}
+&\overset{\mathrm{Anti}}{\longrightarrow}\texttt{c'est},\\
+\texttt{bien}
+&\overset{\mathrm{Anti}}{\longrightarrow}\texttt{oui},\\
+\texttt{bien}
+&\overset{\mathrm{Anti}}{\longrightarrow}\texttt{vais}.
+\end{aligned}
+\]
+
+Ces relations ne sont pas automatiquement transformées en
+continuations naturelles.
+
+\section{Nouveau prompt : \texttt{va-t-il bien aujourd'hui ?}}
+
+Le prompt courant est tokenisé selon la règle choisie. Pour
+simplifier la notation, on représente ses ancres par :
+\[
+P=(\texttt{va},\texttt{il},\texttt{bien},
+\texttt{aujourd'hui}).
+\]
+
+Le maillage contextuel est construit séparément du maillage
+global. Il contient une colonne vertébrale ordonnée avec des
+emplacements intermédiaires, ainsi que les relations
+multidirectionnelles prévues par la règle de construction.
+
+La recherche ne se contente pas de constater que le token
+\texttt{bien} existe dans le maillage. Elle recherche un
+alignement qui prend en compte la configuration du prompt :
+\[
+\{\texttt{va},\texttt{il},\texttt{bien},
+\texttt{aujourd'hui}\}.
+\]
+
+Les correspondances avec \texttt{va}, \texttt{il} et
+\texttt{aujourd'hui} peuvent contribuer à identifier des chemins
+compatibles avec le prompt. Elles ne suffisent pas isolément :
+il faut également une trajectoire admissible et une orientation
+cohérente.
+
+\section{Pourquoi l'écosystème importe}
+
+Une fois \texttt{bien} retrouvé, la recherche examine les
+directions et relations de son écosystème, mais ne les traite
+pas toutes de façon identique.
+
+La direction
+\[
+\texttt{bien}
+\overset{\mathrm{Nat}}{\longrightarrow}
+\texttt{aujourd'hui}
+\]
+est directement soutenue par une trajectoire naturelle
+compatible avec certains éléments du prompt.
+
+Les relations anti-causales vers \texttt{c'est}, \texttt{oui}
+et \texttt{vais} conservent un statut différent. Elles peuvent
+servir à distinguer ou réorienter l'exploration, mais ne doivent
+pas être assimilées automatiquement à des continuations naturelles.
+
+L'ensemble du prompt guide la sélection ; l'écosystème global
+apporte les directions disponibles ; la trajectoire orientée
+contraint la recherche.
+
+\section{Limite de l'exemple}
+
+Cet exemple illustre le mécanisme, mais ne suffit pas à déterminer
+à lui seul une réponse exacte à la question. Il faudrait connaître
+le dataset complet, les brains effectivement construits, les
+relations enregistrées et la règle de traitement des relations
+anti-causales.
+
+La théorie doit éviter de fabriquer une continuation précise
+lorsque le maillage disponible ne la soutient pas.
+
+% ============================================================
+\chapter{Théorie des empreintes : définitions et usage dans le modèle}
+% ============================================================
+
+\section{Pourquoi introduire les empreintes}
+
+La théorie des empreintes fournit un cadre pour décrire ce qu'un
+protocole d'observation distingue effectivement. Elle ne remplace
+ni la construction des brains ni la fusion des identités.
+
+Dans le présent modèle, elle sert à caractériser des tokens,
+des trajectoires ou des alignements selon un ensemble déclaré
+d'observations. Elle permet de préciser quand deux objets sont
+indiscernables relativement à ce protocole.
+
+Il faut distinguer :
+\[
+\text{identité lexicale}
+\quad\neq\quad
+\text{équivalence observationnelle}.
+\]
+
+La première règle décide quels tokens partagent une identité
+canonique. La seconde décide quels objets donnent les mêmes
+résultats sous un protocole d'observation.
+
+\section{Espaces d'observation et sondes}
+
+\begin{definition}[Objets observés, contextes et sondes]
+Soient :
+\begin{itemize}
+  \item \(\X\), un ensemble d'objets observables ;
+  \item \(\mathcal P\), un ensemble de contextes ;
+  \item \(\F\), une famille de sondes ;
+  \item \(\Phi\), une fonction d'observation.
+\end{itemize}
+
+On pose :
+\[
+\Phi:\mathcal P\times\X\times\F\longrightarrow\R.
+\]
+
+Pour un contexte \(P\), un objet \(x\) et une sonde \(f\),
+\[
+\Phi(P,x,f)
+\]
+est la valeur observée lorsque le protocole applique \(f\) à
+l'objet \(x\) dans le contexte \(P\).
+\end{definition}
+
+Une sonde est une opération d'observation définie par le
+protocole. Elle ne doit pas être présentée comme une source
+automatique de vérité sémantique.
+
+\section{Empreinte informationnelle}
+
+\begin{definition}[Empreinte informationnelle]
+Pour une famille finie de sondes
+\[
+\F_K=\{f_1,\ldots,f_K\},
+\]
+l'empreinte informationnelle d'un objet \(x\) dans le contexte
+\(P\) est :
+\[
+I_{\Phi,\F_K}^{P}(x)
+=
+\bigl(
+\Phi(P,x,f_1),\ldots,\Phi(P,x,f_K)
+\bigr).
+\]
+\end{definition}
+
+L'empreinte est donc une représentation produite par un protocole
+d'observation déterminé. Elle ne représente pas une essence
+absolue de l'objet, indépendamment de toute observation.
+
+\section{Application aux objets du maillage}
+
+Dans cette théorie, les objets observés peuvent notamment être :
+\[
+x\in
+\{
+\text{token},
+\text{occurrence},
+\text{brain},
+\text{trajectoire},
+\text{alignement},
+\text{continuation candidate}
+\}.
+\]
+
+Les sondes doivent être définies en fonction du type d'objet.
+Par exemple, pour une trajectoire candidate, un protocole peut
+observer :
+\begin{itemize}
+  \item si les ancres du prompt sont présentes dans l'ordre exigé ;
+  \item si les relations intermédiaires sont admissibles ;
+  \item si l'orientation de recherche est respectée ;
+  \item quelles relations naturelles soutiennent la continuation ;
+  \item quelles relations anti-causales sont activées ;
+  \item si la provenance des relations est disponible ;
+  \item si une condition de terminaison est atteinte.
+\end{itemize}
+
+Ces exemples définissent des familles de sondes possibles. Ils
+ne signifient pas que leurs sorties numériques sont déjà fixées :
+le protocole doit spécifier leur valeur et leurs conditions
+d'application avant qu'elles soient utilisées.
+
+\section{Indiscernabilité observationnelle}
+
+\begin{definition}[Indiscernabilité]
+Pour un contexte \(P\) et une famille de sondes \(\F_K\), on
+définit :
+\[
+x\sim_{\Phi,P,\F_K}y
+\iff
+I_{\Phi,\F_K}^{P}(x)
+=
+I_{\Phi,\F_K}^{P}(y).
+\]
+Deux objets sont indiscernables lorsque le protocole choisi
+produit exactement la même empreinte pour les deux objets.
+\end{definition}
+
+\begin{proposition}
+La relation \(\sim_{\Phi,P,\F_K}\) est une relation d'équivalence.
+\end{proposition}
+
+\begin{proof}
+La réflexivité découle de
+\(I(x)=I(x)\). La symétrie découle de
+\(I(x)=I(y)\Rightarrow I(y)=I(x)\). La transitivité découle de
+\(I(x)=I(y)\) et \(I(y)=I(z)\Rightarrow I(x)=I(z)\).
+\end{proof}
+
+\section{Fibres observationnelles et quotient}
+
+\begin{definition}[Fibre observationnelle]
+La fibre de \(x\) est la classe :
+\[
+[x]_{\Phi,P,\F_K}
+=
+\{y\in\X:y\sim_{\Phi,P,\F_K}x\}.
+\]
+Elle regroupe tous les objets indiscernables de \(x\) sous le
+protocole déclaré.
+\end{definition}
+
+\begin{definition}[Quotient observationnel]
+Le quotient est l'ensemble des classes d'indiscernabilité :
+\[
+\X/{\sim_{\Phi,P,\F_K}}.
+\]
+La projection canonique est :
+\[
+q(x)=[x]_{\Phi,P,\F_K}.
+\]
+\end{definition}
+
+Le quotient décrit les distinctions que le protocole permet
+effectivement de faire. Deux objets appartenant à la même fibre
+ne peuvent pas être distingués par les sondes retenues, même
+si leurs identités brutes sont différentes.
+
+\section{Utilisation dans la théorie du maillage}
+
+Les empreintes interviennent dans le présent modèle pour trois
+usages.
+
+\subsection{Comparer des trajectoires candidates}
+
+On peut observer deux trajectoires candidates sous un même
+protocole. Si leurs empreintes sont égales, elles sont
+indiscernables relativement à ce protocole.
+
+Cela ne prouve pas qu'elles sont identiques à tous les niveaux :
+cela signifie uniquement que les sondes choisies ne les
+distinguent pas.
+
+\subsection{Comparer des alignements}
+
+Deux alignements différents peuvent satisfaire les mêmes
+observables de correspondance. Ils peuvent alors appartenir à
+la même fibre observationnelle.
+
+Cette situation indique que le protocole actuel ne permet pas
+de les distinguer. Elle ne justifie pas d'inventer une différence
+qui n'est pas observée.
+
+\subsection{Évaluer le raffinement d'un protocole}
+
+Si une famille de sondes \(\F_1\) est incluse dans une famille
+\(\F_2\), alors :
+\[
+\F_1\subseteq\F_2
+\]
+et
+\[
+I_{\Phi,\F_2}^{P}(x)=I_{\Phi,\F_2}^{P}(y)
+\Rightarrow
+I_{\Phi,\F_1}^{P}(x)=I_{\Phi,\F_1}^{P}(y).
+\]
+
+Une famille plus riche peut distinguer davantage d'objets, mais
+elle ne les distingue effectivement que si ses nouvelles sondes
+produisent des observations différentes.
+
+\section{Pourquoi l'empreinte ne remplace pas la fusion lexicale}
+
+\begin{proposition}[Distinction entre fusion lexicale et quotient
+observationnel]
+La fusion de deux occurrences de même identité canonique ne
+découle pas automatiquement de leur indiscernabilité
+observationnelle. Réciproquement, deux objets indiscernables
+sous un protocole ne doivent pas nécessairement être fusionnés
+en une seule identité lexicale.
+\end{proposition}
+
+\begin{proof}
+La fusion lexicale est définie par une règle d'identité portant
+sur les tokens. L'indiscernabilité est définie par l'égalité
+des sorties d'un protocole d'observation. Ces deux relations
+ont des définitions et des objectifs distincts ; aucune
+implication générale entre elles n'est donc établie sans
+hypothèse supplémentaire.
+\end{proof}
+
+Cette distinction est importante pour éviter de confondre
+l'identité du token avec son rôle dans une trajectoire donnée.
+
+\section{Séparation entre observation et sémantique}
+
+Une empreinte est un résultat d'observation. Une interprétation
+sémantique de cette empreinte nécessite un protocole d'interprétation
+supplémentaire.
+
+De même, une relation du maillage peut être observée et enregistrée
+sans que sa signification sémantique soit automatiquement
+certifiée.
+
+La théorie du maillage utilise donc les empreintes pour rendre
+les distinctions et les comparaisons explicites, et non pour
+transformer une représentation en vérité par simple définition.
+
+% ============================================================
+\chapter{Propriétés établies, hypothèses et limites}
+% ============================================================
+
+\section{Propriétés établies par construction}
+
+Les propriétés suivantes découlent des définitions, sous réserve
+que les structures requises soient effectivement conservées.
+
+\begin{enumerate}[label=\arabic*.]
+  \item Chaque exemple peut être représenté par un brain séparé.
+  \item Les occurrences de tokens peuvent partager une identité
+        canonique dans le maillage global.
+  \item La fusion des identités est compatible avec la conservation
+        des trajectoires, si les relations et leur provenance
+        sont conservées.
+  \item Le maillage contextuel peut être construit séparément du
+        maillage global.
+  \item Les variables contextuelles peuvent accepter des
+        structures intermédiaires, si leur règle d'affectation
+        l'autorise.
+  \item Un alignement exige plus que la simple présence des tokens :
+        il exige des relations et une orientation admissibles.
+  \item Une réponse sans relation de soutien vers un alignement
+        du prompt ne satisfait pas la définition de recevabilité
+        structurelle.
+  \item Les relations naturelles et anti-causales peuvent être
+        distinguées par leurs types.
+  \item Les empreintes définissent une indiscernabilité
+        observationnelle et les fibres associées.
+\end{enumerate}
+
+\section{Hypothèses de fonctionnement à tester}
+
+Les affirmations suivantes sont des hypothèses de conception
+ou des hypothèses expérimentales, pas des théorèmes issus des
+seules définitions :
+
+\begin{enumerate}[label=\arabic*.]
+  \item Le maillage global contient suffisamment de trajectoires
+        pertinentes pour répondre à une proportion utile de
+        prompts nouveaux.
+  \item Les alignements contextuels éliminent une partie importante
+        des continuations sans rapport avec la question.
+  \item La conservation des directions naturelles améliore la
+        sélection des continuations.
+  \item Le traitement des relations anti-causales réduit les
+        continuations structurellement incompatibles.
+  \item La combinaison du prompt complet, des chemins activés et
+        de l'historique limite les boucles de génération.
+  \item La navigation dans le maillage permet de produire des
+        réponses nouvelles qui ne sont pas seulement la copie
+        d'une réponse unique du dataset.
+\end{enumerate}
+
+Ces hypothèses doivent être évaluées par des expériences où les
+conditions de test, les métriques et les cas d'échec sont définis.
+
+\section{Cohérence structurelle et vérité factuelle}
+
+\begin{proposition}[Absence de garantie factuelle par la seule
+cohérence relationnelle]
+La cohérence structurelle d'une réponse dans le maillage global
+ne suffit pas à démontrer sa vérité factuelle.
+\end{proposition}
+
+\begin{proof}
+Le maillage est construit à partir de données et de règles
+d'étiquetage. Si les données contiennent une affirmation fausse
+et que les relations correspondantes sont conservées, la
+structure peut rester cohérente avec cette affirmation fausse.
+La cohérence interne ne suffit donc pas à établir la vérité
+externe.
+\end{proof}
+
+Cette limite n'annule pas le mécanisme de recherche. Elle
+précise ce qu'il permet d'établir : une réponse structurellement
+soutenue, non une vérité garantie indépendamment de ses sources.
+
+\section{Limites opérationnelles et traitement}
+
+\subsection{Ambiguïté lexicale}
+
+Un même token canonique peut apparaître dans plusieurs contextes
+et avoir des rôles différents. La théorie conserve ces différences
+par les trajectoires, les relations et les empreintes éventuelles.
+Elle ne doit pas supposer que l'identité lexicale implique une
+identité de rôle.
+
+\subsection{Relations anti-causales insuffisamment définies}
+
+Si l'étiquette anti-causale n'a aucune règle opérationnelle,
+le système ne peut pas l'utiliser de manière reproductible.
+
+Le contournement correct n'est pas de supprimer cette catégorie,
+mais de déclarer une règle de classification, une provenance et
+un effet sur la recherche. Les relations non classées doivent
+rester non classées plutôt que recevoir une étiquette inventée.
+
+\subsection{Absence d'alignement}
+
+Si
+\[
+\Align(P,G)=\varnothing,
+\]
+aucun alignement admissible n'a été trouvé selon le protocole
+courant.
+
+Le système doit signaler cette absence, élargir la recherche
+selon une règle explicite, ou demander de nouvelles données.
+Il ne doit pas présenter une continuation arbitraire comme
+si elle avait été soutenue par le maillage.
+
+\subsection{Plusieurs alignements compatibles}
+
+Plusieurs alignements peuvent satisfaire toutes les contraintes.
+La théorie n'impose pas de prétendre qu'un seul est objectivement
+meilleur lorsque les observations ne les distinguent pas.
+
+Le système peut conserver plusieurs branches, présenter plusieurs
+réponses candidates ou utiliser une politique de sortie
+déterministe clairement déclarée. Cette dernière est une règle
+d'implémentation, pas une conséquence automatique de la fusion.
+
+\subsection{Coût de recherche}
+
+Un maillage peut être très grand et contenir de nombreux chemins.
+La théorie définit les contraintes de pertinence, mais ne garantit
+pas que leur recherche exhaustive soit toujours peu coûteuse.
+
+Une implémentation peut utiliser des index, des caches ou des
+bornes de recherche, à condition que ces optimisations ne soient
+pas présentées comme des preuves de validité. Toute restriction
+de recherche doit être documentée, car elle peut exclure des
+alignements qui existent dans le maillage complet.
+
+% ============================================================
+\chapter{Protocole de validation expérimentale}
+% ============================================================
+
+\section{Objectif}
+
+L'objectif expérimental est de déterminer si le mécanisme
+\[
+\text{brains}
+\to
+\text{fusion}
+\to
+\text{alignement}
+\to
+\text{navigation}
+\]
+produit effectivement des réponses plus pertinentes et plus
+structurellement soutenues que des mécanismes de référence.
+
+L'expérience ne doit pas confondre :
+\begin{itemize}
+  \item l'existence d'un maillage ;
+  \item la possibilité de trouver un alignement ;
+  \item la qualité de la réponse produite ;
+  \item la vérité factuelle de la réponse ;
+  \item le coût de calcul.
+\end{itemize}
+
+\section{Conditions à comparer}
+
+On peut comparer plusieurs configurations :
+\begin{enumerate}[label=\arabic*.]
+  \item trajectoires sans fusion d'identités ;
+  \item maillage avec fusion, mais sans maillage contextuel ;
+  \item maillage avec alignement contextuel, sans contraintes
+        anti-causales ;
+  \item maillage avec alignement, orientation et relations
+        naturelles ;
+  \item modèle complet avec relations naturelles et
+        anti-causales, historique de génération et gestion des
+        boucles.
+\end{enumerate}
+
+Chaque configuration doit utiliser le même dataset et des
+conditions d'évaluation comparables.
+
+\section{Mesures à enregistrer}
+
+Les mesures possibles comprennent :
+\begin{itemize}
+  \item proportion de prompts possédant au moins un alignement ;
+  \item proportion de réponses disposant d'une provenance
+        structurelle traçable ;
+  \item taux de réponses sans relation admissible vers le prompt ;
+  \item taux de boucles sans progression ;
+  \item nombre d'alignements compatibles par prompt ;
+  \item coût de recherche par prompt ;
+  \item qualité de pertinence évaluée selon un protocole déclaré ;
+  \item exactitude factuelle, lorsque des références vérifiables
+        sont disponibles ;
+  \item proportion de réponses nouvelles par rapport aux réponses
+        brutes du dataset.
+\end{itemize}
+
+Les métriques de qualité doivent être définies avant les tests.
+Aucun indicateur isolé ne prouve à lui seul la validité complète
+de la théorie.
+
+\section{Provenance et auditabilité}
+
+Chaque réponse candidate devrait pouvoir être accompagnée d'un
+certificat interne indiquant :
+\begin{itemize}
+  \item les ancres du prompt retrouvées ;
+  \item les valeurs affectées aux variables \(c_i\) ;
+  \item les chemins utilisés ;
+  \item les relations naturelles prises en compte ;
+  \item les relations anti-causales examinées ;
+  \item les brains ou exemples sources pertinents ;
+  \item les règles de recherche appliquées ;
+  \item les éventuelles contraintes de calcul ou de troncature.
+\end{itemize}
+
+Ce certificat ne prouve pas la vérité de la réponse. Il permet
+de vérifier si la réponse est effectivement soutenue par le
+mécanisme annoncé.
+
+% ============================================================
+\chapter{Synthèse formelle}
+% ============================================================
+
+\section{Architecture complète}
+
+Le modèle peut être résumé par les objets suivants :
+\[
+\begin{aligned}
+\D&=\text{dataset de couples prompt/réponse},\\
+B_i&=\text{brain de l'exemple }i,\\
+G&=\text{maillage global fusionné},\\
+C_P&=\text{maillage contextuel du prompt }P,\\
+\Align(P,G)&=\text{ensemble des alignements admissibles},\\
+\A(P,G)&=\text{région activée par ces alignements},\\
+S_t&=\text{état de recherche à l'étape }t,\\
+H_t&=\text{historique de génération}.
+\end{aligned}
+\]
+
+La construction hors ligne est :
+\[
+\boxed{
+\D
+\longrightarrow
+\{B_i\}_{i=1}^{n}
+\longrightarrow
+G
+}
+\]
+
+La recherche en ligne est :
+\[
+\boxed{
+P
+\longrightarrow
+C_P
+\longrightarrow
+\Align(P,G)
+\longrightarrow
+\A(P,G)
+\longrightarrow
+S_t
+\longrightarrow
+R
+}
+\]
+
+La relation entre \(C_P\) et \(G\) est une relation de recherche,
+pas une fusion :
+\[
+\boxed{C_P\text{ interroge }G,\quad C_P\text{ ne s'incorpore pas à }G.}
+\]
+
+La cohérence structurelle est définie par :
+\[
+\boxed{
+\begin{gathered}
+\text{alignement contextuel}\\
++\ \text{orientation }c_0\to c_x\\
++\ \text{compatibilité avec les directions naturelles}\\
++\ \text{traitement des relations anti-causales}\\
++\ \text{traçabilité des relations de soutien}.
+\end{gathered}
+}
+\]
+
+\section{Formulation finale de la théorie}
+
+La théorie construit, à partir d'un dataset, un brain distinct
+pour chaque exemple prompt/réponse. Chaque brain conserve les
+occurrences de tokens, l'ordre des trajectoires, les relations
+observées et leur provenance. Les identités communes sont
+ensuite fusionnées dans un maillage global : les tokens deviennent
+des points d'accès partagés, tandis que les relations issues des
+trajectoires restent conservées.
+
+Chaque token canonique possède un écosystème relationnel. Cet
+écosystème distingue les directions naturelles et les relations
+anti-causales, dont le rôle doit être déclaré et appliqué pendant
+la recherche. La fusion factorise les identités communes sans
+réduire l'ensemble relationnel à un voisinage indifférencié.
+
+Lorsqu'un prompt arrive, le système construit un maillage
+contextuel indépendant. Les tokens du prompt y forment des ancres
+reliées par une structure multidirectionnelle. Les variables
+\(c_i\) acceptent des tokens, des ensembles ou des trajectoires
+intermédiaires du maillage global. Elles rendent ainsi possible
+l'alignement de plusieurs ancres sans exiger qu'elles soient
+directement voisines.
+
+Le parcours de recherche est orienté par \(c_0\to c_x\). La
+présence des ancres ne suffit pas : un alignement admissible
+doit respecter la structure contextuelle et son orientation.
+Les régions activées par les alignements servent ensuite à
+rechercher des continuations issues des trajectoires du dataset
+et des relations du maillage global.
+
+La réponse en construction reste soumise au prompt complet,
+aux éléments déjà produits, aux directions naturelles et au
+traitement des relations anti-causales. La recherche n'est donc
+pas réduite au choix local du voisin le plus fréquent : elle
+navigue dans un maillage de trajectoires factorisées sous des
+contraintes contextuelles et relationnelles.
+
+La théorie des empreintes complète cette architecture en
+définissant comment les tokens, trajectoires et alignements
+peuvent être observés, comparés et regroupés selon leurs
+empreintes informationnelles. Elle ne remplace ni la règle
+d'identité lexicale ni les contraintes de recherche. Elle rend
+explicites les distinctions effectivement visibles sous un
+protocole d'observation.
+
+Le résultat visé est une génération dont les continuations
+doivent être soutenues par un alignement et une trajectoire
+compatibles avec l'organisation du maillage. La théorie définit
+ainsi un mécanisme interne de contrainte et de discrimination
+des réponses candidates, sans confondre cohérence structurelle,
+validité sémantique et vérité factuelle.
+
+\end{document}

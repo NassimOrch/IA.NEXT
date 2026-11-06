@@ -1,0 +1,69 @@
+# Analyse statistique — EX8 v010
+
+## Plan d’analyse
+
+La métrique primaire est la log-loss. Pour chaque bras, les différences candidate−MLP sont appariées graine par graine et observation par observation. Les résumés incluent moyenne/écart-type, IC t apparié 95 %, bootstrap imbriqué descriptif (resampling des graines et des observations, stratifié par classe), test exact par inversion des signes sur cinq différences de graines et correction Benjamini–Hochberg sur 36 comparaisons (18 arms × deux MLP). Avec cinq graines, le plus petit p bilatéral exact possible est 0,0625. Les cinq graines ne sont pas des domaines indépendants.
+
+## Moyennes par bras
+
+| arm                         |   n |   P_total_mean |   candidate_log_loss_mean |   candidate_log_loss_sd |   matched_MLP_log_loss_mean |   ge4x_MLP_log_loss_mean |   delta_vs_matched_mean |   wins_vs_matched |   fit_seconds_end_to_end_mean_corrected |   latency_batch1_p50_ms_mean |   rbf_centre_evaluations_per_example | serial_layers   |
+|:----------------------------|----:|---------------:|--------------------------:|------------------------:|----------------------------:|-------------------------:|------------------------:|------------------:|----------------------------------------:|-----------------------------:|-------------------------------------:|:----------------|
+| A0_CORRECTED_PCA2           |   5 |       806.0000 |                    0.0431 |                  0.0204 |                      0.0543 |                   0.0517 |                 -0.0112 |                 3 |                                  1.8731 |                       0.2028 |                              56.0000 | —               |
+| A1_RBF_LITE_PCA2            |   5 |       395.0000 |                    0.0676 |                  0.0098 |                      0.0568 |                   0.0517 |                  0.0108 |                 1 |                                  1.1711 |                       0.1692 |                              16.0000 | —               |
+| A2_RBF_LITE_PCA4            |   5 |       473.0000 |                    0.0831 |                  0.0148 |                      0.0573 |                   0.0519 |                  0.0258 |                 0 |                                  0.4837 |                       0.1717 |                              16.0000 | —               |
+| A3_RETRO_LITE_PCA2          |   5 |       379.0000 |                    0.0625 |                  0.0098 |                      0.0568 |                   0.0521 |                  0.0057 |                 1 |                                  1.7915 |                       0.1702 |                              16.0000 | —               |
+| A4_RETRO_FULL_PCA2          |   5 |       760.0000 |                    0.0592 |                  0.0029 |                      0.0540 |                   0.0513 |                  0.0052 |                 0 |                                  1.1920 |                       0.2020 |                              56.0000 | —               |
+| B10_ACTION_LANGUAGE_5P_SOFT |   5 |       884.0000 |                    0.0414 |                  0.0049 |                      0.0547 |                   0.0508 |                 -0.0133 |                 5 |                                  0.9179 |                       0.3318 |                              20.0000 | 1.0             |
+| B11_ACTION_GATE_5P_K4       |   5 |       835.0000 |                    0.0444 |                  0.0034 |                      0.0543 |                   0.0522 |                 -0.0099 |                 5 |                                  0.8025 |                       0.1163 |                              20.0000 | 1.0             |
+| B1_NO_OOF_GREEDY            |   5 |      6742.0000 |                    0.0814 |                  0.0051 |                      0.0491 |                   0.0474 |                  0.0323 |                 0 |                                  2.9554 |                       0.7539 |                             280.0000 | 5.0             |
+| B2_NO_OOF_JOINT             |   5 |      6742.0000 |                    0.0969 |                  0.0072 |                      0.0491 |                   0.0474 |                  0.0477 |                 0 |                                  0.8583 |                       0.7531 |                             280.0000 | 5.0             |
+| B3_COMPACT15_5L             |   5 |      2928.0000 |                    0.0630 |                  0.0174 |                      0.0525 |                   0.0490 |                  0.0105 |                 1 |                                  3.1966 |                       0.7885 |                             120.0000 | 5.0             |
+| B4_COMPACT15_3L             |   5 |      2926.0000 |                    0.0695 |                  0.0076 |                      0.0525 |                   0.0501 |                  0.0170 |                 0 |                                  2.5997 |                       0.4760 |                             120.0000 | 3.0             |
+| B5_COMPACT15_K4             |   5 |      2508.0000 |                    0.0586 |                  0.0180 |                      0.0524 |                   0.0492 |                  0.0062 |                 1 |                                  4.1318 |                       0.6185 |                              60.0000 | 5.0             |
+| B6_SELECTIVE_L2             |   5 |      6748.0000 |                    0.0699 |                  0.0080 |                      0.0500 |                   0.0465 |                  0.0199 |                 0 |                                  3.4381 |                       0.8128 |                             280.0000 | 5.0             |
+| B6_SELECTIVE_L2L4           |   5 |      6754.0000 |                    0.0687 |                  0.0061 |                      0.0500 |                   0.0465 |                  0.0187 |                 0 |                                  4.5016 |                       0.8014 |                             280.0000 | 5.0             |
+| B6_SELECTIVE_L4             |   5 |      6748.0000 |                    0.0687 |                  0.0058 |                      0.0500 |                   0.0465 |                  0.0188 |                 0 |                                  3.6751 |                       0.7571 |                             280.0000 | 5.0             |
+| B7_VARIANCE_WEIGHT          |   5 |      6759.0000 |                    0.0618 |                  0.0089 |                      0.0500 |                   0.0465 |                  0.0118 |                 0 |                                  4.0500 |                       1.6129 |                             280.0000 | 5.0             |
+| B8_ACTION_CODEBOOK          |   5 |      6792.0000 |                    0.0619 |                  0.0053 |                      0.0510 |                   0.0478 |                  0.0109 |                 0 |                                  4.4385 |                       1.7241 |                             280.0000 | 5.0             |
+| B9_RETRO_OUTER              |   5 |      6755.0000 |                    0.0713 |                  0.0112 |                      0.0500 |                   0.0465 |                  0.0213 |                 0 |                                  4.4176 |                       0.8240 |                             280.0000 | 5.0             |
+
+## Piste A
+
+A0 corrigée (PCA2) obtient une log-loss moyenne de 0,04307 (SD 0,02042), contre 0,05429 pour le MLP apparié et 0,05171 pour le MLP ≥4×. Elle gagne sur 3/5 graines seulement. L’IC t apparié de delta vs MLP apparié est [-0,03770 ; 0,01525] ; le bootstrap imbriqué est [-0,04247 ; 0,02165]. L’avantage moyen reste donc non établi malgré un point-estimate favorable. L’amplitude de variation par graine est grande (0,0121 à 0,0628).
+
+A1 RBF-lite (16 centres évalués vs 56 pour A0) coûte moins cher en calcul local et gagne environ 16,5 % en latence batch 1, mais la log-loss se dégrade de 0,04307 à 0,06760 ; elle perd contre le MLP apparié de 0,01084 en moyenne. A2 PCA4 est encore moins favorable (0,08312). La projection PCA4 n’améliore donc pas cette grille.
+
+A3 RETRO-lite améliore la moyenne sur A1 (0,06247 vs 0,06760) mais reste moins bonne que le MLP apparié (delta +0,00572). Son déclencheur n’a activé que deux graines sur cinq. A4 RETRO-full ne déclenche dans aucune graine et reste inférieur aux MLP. La maturation n’a donc pas démontré un avantage stable sur la piste A.
+
+## Piste B — récursion
+
+Les deux bras sans OOF sont nettement moins bons que leurs MLP : B1 greedy 0,08140 (fit 3,06 s) ; B2 joint 0,09686 (fit 0,87 s). L’entraînement joint est le plus rapide, mais dégrade davantage la qualité. L’absence d’OOF n’est pas une simplification qualité-préservante dans ces implémentations.
+
+B3 15 probes/5 couches obtient 0,06299 ; B4 15 probes/3 couches 0,06946. La réduction du nombre de niveaux diminue la latence batch 1 de 0,789 à 0,476 ms (environ -40 %) mais coûte environ 0,00647 de log-loss. Le nombre de probes et les évaluations de centres restent à 15/120 dans les deux bras : ce contraste isole surtout la profondeur.
+
+B5 K=4 compte 60 évaluations de centres contre 120 pour B3, latence batch 1 0,619 contre 0,789 ms (environ -22 %) ; son log-loss moyenne 0,05862 est proche/meilleure que B3, mais son temps de fit moyen est supérieur (3,98 vs 3,25 s) et le MLP apparié reste meilleur de 0,00619. C’est l’ablation récursive la plus intéressante pour réduire le calcul sans changer les cinq niveaux, sans preuve de supériorité au MLP.
+
+Les correcteurs sélectifs B6 (couche 2, 4 ou 2+4) sont tous moins bons que MLP. Corriger plus de couches n’apporte pas de bénéfice net. Le calcul OOF des couches non corrigées reste nécessaire au chaînage des couches supérieures : la correction sélective ne supprime donc pas le coût de production des logits OOF. B7 variance et B8 action codebook sur la récursion complète ne réduisent pas les 280 opérations de centres ; leurs latences dépassent même la récursion simple.
+
+B9 RETRO ne déclenche dans aucune des cinq graines et alpha vaut zéro au meilleur checkpoint : ce bras n’a pas testé un global effectivement actif au modèle sélectionné. Le moniteur observe une seule trace de gate final ; cela peut manquer la maturation des niveaux précédents.
+
+## Piste 5 — B10 contre B11
+
+B10 et B11 partagent un backbone strictement apparié (5 probes parallèles D4/K4, une couche, 20 évaluations de centres). B10 remplace le gate standard par une table floue de 9 états × 5 poids continus. B10 obtient 0,04139 vs 0,04443 pour B11 ; delta apparié moyen -0,00304, 5/5 graines en faveur de B10. Mais l’IC t 95 % [-0,00734 ; 0,00127] et le bootstrap imbriqué [-0,01425 ; 0,00507] incluent zéro ; test exact p=0,0625 et BH q≈0,0833. Le gain de log-loss n’est donc pas établi au seuil 5 %.
+
+Le coût est clair : B10 0,332 ms batch 1 p50 contre 0,116 ms pour B11, soit 2,85× plus lent, pour 49 paramètres supplémentaires. La table n’économise pas les évaluations RBF et les diagnostics montrent une table presque uniforme dans trois graines sur cinq. Le bénéfice calculatoire observé provient surtout de la nouvelle base légère à une couche / cinq probes, pas de la table elle-même. La piste 5 est formalisée et testée, mais n’a pas prouvé qu’un langage d’actions remplace efficacement le calcul.
+
+## Second domaine SMS
+
+| arm                        |   n |   candidate_log_loss_mean |   candidate_log_loss_sd |   matched_MLP_log_loss_mean |   ge4x_MLP_log_loss_mean |   delta_vs_matched_mean |   delta_vs_ge4x_mean |   wins_vs_matched |   wins_vs_ge4x | historically_exposed   | pristine_holdout   |
+|:---------------------------|----:|--------------------------:|------------------------:|----------------------------:|-------------------------:|------------------------:|---------------------:|------------------:|---------------:|:-----------------------|:-------------------|
+| v010_sms_A0_CORRECTED_PCA2 |   5 |                   0.10682 |                 0.00424 |                     0.07268 |                  0.07738 |                 0.03414 |              0.02944 |                 0 |              0 | True                   | False              |
+| v010_sms_B3_COMPACT15_5L   |   5 |                   0.10811 |                 0.00463 |                     0.07609 |                  0.09036 |                 0.03202 |              0.01776 |                 0 |              0 | True                   | False              |
+| SMS_ACTION_CONTROL_V010    |   5 |                   0.10349 |                 0.00525 |                     0.07413 |                  0.08315 |                 0.02937 |              0.02034 |                 0 |              0 | True                   | False              |
+| SMS_ACTION_LANGUAGE_V010   |   5 |                   0.10020 |                 0.00459 |                     0.07413 |                  0.08087 |                 0.02607 |              0.01933 |                 0 |              0 | True                   | False              |
+
+La réplication SMS est historiquement exposée (EX5/V007/V009). Les quatre candidates A0, B3, B10 et B11 perdent sur les cinq graines face au MLP apparié et au MLP ≥4×. Elle constitue un signal externe négatif utile, mais pas une validation indépendante vierge. Le test final et l’adaptation SMS ne sont pas évalués.
+
+## Conclusion statistique
+
+Aucun avantage moyen des deux grandes pistes n’est établi comme généralisation externe. A0 demeure une candidate de développement qualité à variance élevée ; B5 est une piste de réduction RBF intéressante mais encore sous les MLP ; B10 est un résultat exploratoire favorable sur Wisconsin mais non reproduit face au MLP sur SMS et plus lent que son contrôle B11.

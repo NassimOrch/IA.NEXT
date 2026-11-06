@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{longtable,booktabs,array,enumitem,hyperref,xcolor,amsmath,amssymb}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Formalisme opérationnel du modèle AAM O94\_1}
+\author{Dossier technique AAM — incrément O94\_1}
+\date{19 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Objet, provenance et règle d'interprétation}
+Ce document fixe les contrats opérationnels de l'incrément O94\_1 au-dessus de la base O94\_0. La livraison réutilise les archives O94\_0 sans réécrire les artefacts historiques. La traçabilité d'entrée est consignée dans \texttt{logs/O94\_1/P0\_input\_integrity.json}. Les archives Dmodel et Amodel fournies ont réussi \texttt{ZipFile.testzip()} au moment de l'inventaire; l'archive imbriquée \texttt{source\_material/source\_archive/sources\_AAM\_17.zip} aussi. Les hashes SHA-256 sont conservés dans le reçu.
+
+Le fichier principal de théorie des empreintes embarqué demeure \texttt{source\_material/theorie\_emp/DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex}; l'original est conservé sans modification. Ce formalisme met en œuvre des mécanismes bornés inspirés des principes d'observation multi-vues, d'empreintes, d'invariants/variants, de provenance et de composition. Il ne prétend pas que chaque ligne historique a déjà été réécrite en composition exclusive de briques.
+
+\paragraph{Règle de preuve.} Une preuve d'exécution, une égalité sur une entrée déjà observée, un score de test et une généralisation sont quatre affirmations distinctes. Toute sortie de modèle génératif reste \emph{non vérifiée} jusqu'à validation indépendante. L'absence d'un résultat dans un jeu de tests donné n'est ni une preuve d'impossibilité générale, ni une raison pour coder une réponse cible en dur.
+
+\section{Vocabulaire normalisé : compétence, méthode, règle}
+\begin{longtable}{p{0.17\linewidth}p{0.38\linewidth}p{0.37\linewidth}}
+\toprule
+Type & Définition normative & Test de frontière \\
+\midrule
+Compétence de base & Capacité invoquable avec un contrat d'entrée/sortie stable, réutilisable dans plusieurs domaines, sans intégrer une réponse particulière à la tâche. & Le même identifiant reste utile sur plusieurs tâches et peut être testé indépendamment. \\
+Méthode de base & Procédure générique qui transforme un état/données en un autre état selon un ordre, un budget et une règle d'arrêt explicites. & La méthode peut être appliquée par plusieurs compétences, et expose étapes et provenance. \\
+Règle de base & Invariant ou restriction de contrôle qui demeure vrai quel que soit le domaine ou la trajectoire retenue. & La règle se vérifie comme prédicat sur les entrées, les transitions ou les preuves. \\
+Compétence composée & Graphe typé de compétences et méthodes existantes, de conditions déclaratives permises et de règles d'accès; elle est enregistrée et testée comme une nouvelle capacité. & Chaque nœud et chaque arête possède un contrat; aucune exécution de code arbitraire implicite. \\
+\bottomrule
+\end{longtable}
+Une bonne idée n'est pas « de base » parce qu'elle paraît importante : elle doit démontrer une généralité. Les identifiants canoniques sont publiés par \texttt{aam\_o93/base\_blocks.py}. Le catalogue O94\_1 ajoute : \texttt{C-BLACKBOX-REPRODUCE}, \texttt{C-MODEL-INTEGRATE}, \texttt{M-TRACE-TO-REPLICA}, \texttt{R-HOLDOUT-SEPARATION} et \texttt{R-NO-REMOTE-CODE}. Les compositions de sous-systèmes sont des plans déclarés et des points de liaison testés; elles ne constituent pas une preuve que tout le code ancien a été intégralement factorisé.
+
+\section{Objectif opérationnel et architecture}
+L'objectif d'ingénierie est un runtime local-first qui réunit : (i) un générateur choisi explicitement (capsule AAM, serveur local compatible, Ollama ou poids Transformers locaux), (ii) un espace RAG final dérivé des sources observées, (iii) une mémoire événementielle et un arbre de résolution progressif, (iv) des compétences et compositions déclaratives, (v) une boucle autonome bornée et causalement journalisée, et (vi) des adaptateurs d'observation autorisés. Internet demeure facultatif, explicite et soumis à allowlist.
+
+\begin{verbatim}
+Sources locales / entrées autorisées
+       | observe -> sondes -> empreintes -> index des sources
+       v
+RAG maître -> micro-RAG -> enregistrements atomiques -> contexte sélectionné
+       |                                             |
+       +-> mémoire / arbre de résolution ------------+
+                                                     v
+Requête -> observation du contexte -> orchestration -> modèle choisi
+                                                     |
+                                                     v
+                                      vérification / statut non conclusif
+                                                     |
+                            feedback + résultats -> mémoire causale / récompense
+
+Cible de boîte noire autorisée -> tests I/O -> trace train/holdout
+             -> capsule entraînée sur train seulement -> replay hors source
+             -> évaluation du holdout / non-résolu si entrée inconnue
+
+Modèle local/HTTP -> adaptateur versionné -> politique d'inférence/entraînement
+             -> réponse explicitement choisie -> RAG + mémoire + compétences AAM
+\end{verbatim}
+
+Le runtime reste le point d'orchestration. L'intégration d'un fournisseur ne supprime pas le RAG, la mémoire, les règles de sécurité ni la vérification d'AAM. Un modèle ne peut pas changer directement la politique de récompense : seuls les événements de tâche et les retours authentifiés par les APIs existantes influencent les préférences de routage.
+
+\section{Contrat d'intégration des modèles}
+\subsection{Manifeste versionné}
+Chaque modèle est enregistré avec un identifiant stable, un backend, un nom de modèle, une politique d'entraînement, une politique de prompt et des métadonnées. Schéma et registre : \texttt{aam-o93/model\_integration.py}. Les backends disponibles sont :
+\begin{itemize}[nosep]
+\item \texttt{ollama} : endpoint loopback par défaut, API conversation ;
+\item \texttt{openai\_compatible} : endpoint HTTP compatible Chat Completions ;
+\item \texttt{transformers\_local} : répertoire de poids local préexistant, sans téléchargement implicite, avec \texttt{local\_files\_only=True} et \texttt{trust\_remote\_code=False}.
+\end{itemize}
+Un registre signale un backend comme enregistré, pas comme disponible. Un test d'inférence réel et un test de contenu doivent suivre. Les réponses sont marquées non vérifiées.
+
+\subsection{Contrat réseau et secrets}
+Loopback HTTP est autorisé pour les services locaux. Un endpoint distant exige simultanément un réglage réseau activé, un hôte explicitement autorisé et HTTPS. Les redirections sont refusées; les identifiants dans l'URL sont rejetés. Une clé API est lue depuis la variable d'environnement dont le nom est enregistré, jamais sa valeur. Le code ne prétend pas qu'une cible hostile est isolée : l'exécution locale de programmes conserve les privilèges OS du compte et nécessite un bac à sable externe pour les cibles non fiables.
+
+\subsection{Politiques d'entraînement}
+\begin{longtable}{p{0.22\linewidth}p{0.34\linewidth}p{0.34\linewidth}}
+\toprule
+Politique & Effet autorisé & Ce que le résultat ne prétend pas \\
+\midrule
+\texttt{inference\_only} & Utiliser le modèle sans entraînement de poids. & Aucun apprentissage de paramètres. \\
+\texttt{export\_supervised\_pairs} & Préparer des couples instruction/réponse, en excluant les splits de validation/test. & Aucun poids n'est mis à jour. \\
+\texttt{transformers\_lora} & Entraînement LoRA explicite pour un modèle Transformers local et des modules cibles déclarés, si les dépendances optionnelles sont disponibles. & L'entraînement n'établit ni qualité, ni fidélité, ni généralisation; une évaluation tenue à l'écart est requise. \\
+\bottomrule
+\end{longtable}
+Les formats supervisés pris en charge sont JSON, JSONL/NDJSON et CSV avec champs explicites \texttt{input} et \texttt{target}. En présence d'étiquettes \texttt{split}, chaque ligne doit être étiquetée et un groupe d'entrées textuellement identiques ne peut pas être partagé entre train et holdout; ce cas est rejeté comme fuite de données. Si aucun split n'est fourni et si le corpus contient au moins trois entrées uniques, un holdout déterministe est assigné par groupe d'entrée avant la préparation du jeu d'entraînement. En dessous de trois groupes uniques, le registre explicite \texttt{NO\_HOLDOUT\_UNIQUE\_INPUTS\_LT\_3}; aucune évaluation tenue à l'écart n'est alors prétendue. Toute politique de préparation ou d'entraînement rapporte le nombre de lignes exclues et la politique de split.
+
+Un corpus de documents dépourvu de cibles n'est pas automatiquement converti en supervision factuelle. Les plafonds de données doivent être adaptés par configuration contrôlée si un corpus plus gros le requiert; ils ne sont pas une conclusion sur le potentiel du modèle.
+
+\section{RAG, micro-RAG et arbre de résolution}
+Le pipeline hérité reste : observation/ingestion, segmentation adaptée au format, empreintes et provenance, construction d'espaces sémantiques intermédiaires par sondes, agrégation en espace final puis recherche. Les lecteurs de corpus structurés conservent autant que possible l'unité des enregistrements et les sources exposent leur provenance. Le moteur de recherche lexical demeure une stratégie explicitement sélectionnable et non le contrat sémantique par défaut.
+
+Le micro-RAG est un raffinement hiérarchique : index maître, sélection des unités intermédiaires, puis lecture d'enregistrements atomiques. L'arbre de résolution augmente sa profondeur selon le contexte et le budget; il ne doit pas interpréter un score lexical comme une vérité. Une réponse finale ne doit pas juxtaposer aveuglément des enregistrements distants. Les résultats de recherche ne remplacent pas la vérification du modèle, et les citations de provenance prouvent où se trouvait le contexte, pas que la réponse dérivée est vraie.
+
+Les rôles d'itoken/vtoken et leurs poids dépendent du corpus, des sondes, de la normalisation et des observations effectivement disponibles. Ils doivent être versionnés et reproductibles. Aucun nombre fixe d'espaces ou de sondes ne peut être déclaré optimal pour tous corpus; une politique adaptative doit utiliser taille, hétérogénéité, stabilité observée, coût et critères de sortie. La taille d'un index ne constitue pas une preuve d'apprentissage de capacité.
+
+\section{Observation active en boîte noire}
+\subsection{Objet et interface}
+O94\_1 introduit un chemin d'exécution active pour une cible accessible par une commande \texttt{argv} et une entrée JSON/texte sur stdin (ou un placeholder d'argument). AAM lance séparément la commande autorisée pour chaque cas, sans shell, collecte stdout et codes de sortie, calcule des empreintes de provenance et écrit la trace JSONL. L'interface demande une confirmation explicite avant de lancer la cible. Les délais, le nombre de cas, la taille d'entrées/sorties et la taille du corpus de cas sont bornés.
+
+\subsection{Pipeline de reproduction}
+\begin{enumerate}[nosep]
+\item Définir des entrées de test indépendantes et vérifier que l'exécution est autorisée.
+\item Capture : enregistrer seulement les couples entrée/sortie réussis; conserver statut, durées, hashes, erreurs résumées et identité d'exécutable sans persister les variables secrètes.
+\item Séparer les entrées en \texttt{train} et \texttt{test} par groupe d'entrées uniques; un split explicite est prioritaire.
+\item Construire une capsule lookup à partir de \texttt{train} seulement; exclure les cas ambigus où une même entrée a produit des sorties incompatibles.
+\item Réexécuter la capsule exportée dans un processus séparé, sans charger ni appeler le programme observé.
+\item Évaluer le holdout sans l'insérer dans la capsule. Une entrée absente de la table devient \texttt{UNRESOLVED}; aucune invocation du programme original n'est permise en repli.
+\end{enumerate}
+
+\subsection{Portée démontrable et frontière}
+Le statut \texttt{PASS\_BOUNDED\_EXACT\_MATCH} certifie l'égalité pour une entrée présente dans la capsule et un artefact dont l'intégrité est vérifiée. Le taux de réussite du holdout est une mesure empirique sur ce split précis. Cette implémentation est un premier adaptateur comportemental d'I/O structuré : elle n'est pas, à elle seule, un clone algorithmique arbitraire et ne capture pas automatiquement une interface graphique, un processus qui n'expose aucune entrée/sortie contrôlable, une caméra, un bus matériel, une base de données distante ou un flux vidéo continu. Ces sources nécessitent des adaptateurs typés supplémentaires, des autorisations et des cas de test adaptés; leur absence ne doit pas être convertie en verdict de possibilité ou impossibilité générale.
+
+La table lookup restitue un comportement mémorisé, pas la méthode causale qui a produit la sortie. Une compétence plus générale doit être apprise ou composée séparément et évaluée sur des entrées inédites. Aucun code de la cible observée n'est importé, exécuté ni injecté dans la capsule. La capsule peut servir de compétence exacte à domaine fini mais ne doit pas se présenter comme algorithme général.
+
+\section{Boucle autonome, récompense et arrêt}
+L'autonomie démarre avec le runtime selon les réglages hérités et produit des événements de mémoire; l'utilisateur peut suspendre la boucle via les contrôles exposés. L'auto-observation et les requêtes partagent des journaux causaux, mais le hash de chaîne d'audit (intégrité) ne doit pas être confondu avec une flèche causale métier. Une flèche exige un parent d'événement explicitement déclaré.
+
+La résolution continue répète des trajectoires sous budget et critères d'arrêt explicites. Elle doit s'arrêter ou rendre un état non conclusif en cas de budget épuisé, d'absence de vérificateur, de cible inaccessible ou d'échec d'exécution. « Continuer jusqu'à réussite » est représenté comme politique de poursuite bornée et relançable, non comme promesse de réussite universelle ou boucle infinie incontrôlée.
+
+La récompense de l'utilisateur ajuste une préférence de stratégie / orchestration, sans garantir la vérité d'une réponse. Une punition ne permet pas d'effacer une observation ni d'altérer rétroactivement les preuves. Les paramètres de politique restent contrôlés par le runtime et versionnés; le modèle n'a pas d'API libre pour les modifier. Le poids d'une mémoire ou d'un espace sémantique ne peut être ajusté temporairement qu'au travers d'une fonction dédiée, lorsque le réglage utilisateur l'autorise.
+
+\section{Multimodal et observation de systèmes réels}
+Les formats supportés dépendent des lecteurs et dépendances réellement installés. O94\_1 maintient les lecteurs hérités et la capture caméra explicite disponible dans l'interface lorsqu'un périphérique compatible existe. La nouvelle capture active couvre le contrat de commande / stdin / stdout. Les adaptateurs OCR, audio, vidéo, GUI et capteurs doivent enregistrer leur méthode d'acquisition et les transformations, et doivent être testés dans l'environnement physique correspondant.
+
+L'observation d'un programme interne ne doit pas contourner authentification, licence ou contrôles d'accès. Avant toute capture, le propriétaire doit autoriser l'action et réduire les permissions de la cible. Une exécution de programme n'est pas une sandbox de sécurité. Les actions réseau, déploiements SQL et migrations destructrices ne sont pas exécutées sans compétence spécifique, test sur bac à sable, sauvegarde, vérification indépendante et autorisation de chaque effet externe.
+
+\section{Interface et contrat d'expérience}
+La UI existante est conservée et enrichie :
+\begin{itemize}[nosep]
+\item Chat : choix explicite des modèles intégrés et consultation du résultat; le modèle distant n'est pas substitué silencieusement si l'appel échoue.
+\item Observation : sélectionner une source, choisir les cas JSON/JSONL, définir la commande \texttt{argv}, autoriser explicitement la capture, puis construire et tester une capsule.
+\item Intégration des modèles : déclarer le fournisseur, URL ou dossier local, règle d'entraînement, tester une génération et lancer la politique sur un corpus supervisé.
+\item RAG, mémoire, compétences et autonomie conservent leurs panneaux existants et leur journal d'audit.
+\end{itemize}
+L'interface reste Tkinter dans cet incrément. Une migration web ne doit pas être simulée par un thème CSS ni considérée comme accomplie; elle demanderait un contrat de service, un modèle de permissions, des tests d'ergonomie et une migration d'état dédiés.
+
+\section{Protocole de phase et registres de preuve}
+Les phases sont ordonnées et chaque phase possède des critères d'entrée, de sortie, des preuves et un statut. Une phase suivante ne peut être déclarée active tant que toutes les phases antérieures ne sont pas marquées \texttt{COMPLETE\_EVIDENCED} ou \texttt{COMPLETE}. Les sources de contrôle sont : \texttt{chemins\_O94.json}, \texttt{checklist\_de\_travail\_O94\_1.json}, les deux registres O94\_1 d'erreurs, les registres historiques et ce formalisme.
+
+Toute exécution doit produire un résultat enregistré et un hash; toute erreur ou non-détermination demeure dans les registres. Des commandes sont fournies dans le laboratoire. Une phase ne sera pas marquée terminée sur une simple compilation si elle requiert un test fonctionnel, ni sur un test simulé si elle requiert un serveur réel.
+
+\section{Gabarit obligatoire des rapports}
+Chaque rapport O94\_1 doit contenir, dans cet ordre :
+\begin{enumerate}[nosep]
+\item Description et question testée ;
+\item Architecture / composants et versions ;
+\item Pipeline complet, y compris entrée, transformation, sortie et provenance ;
+\item Commandes d'exécution exactes ;
+\item Résultats bruts et hash des pièces jointes ;
+\item Interprétation, avec séparation observations / inférences ;
+\item Conséquences théoriques, conceptuelles et opérationnelles ;
+\item Conclusion ;
+\item Statut du modèle : confirmé, partiel, non évalué ou bloqué, toujours avec portée.
+\end{enumerate}
+
+\section{Statuts normalisés}
+\begin{itemize}[nosep]
+\item \texttt{PASS\_BOUNDED} : les assertions de ce test ont réussi dans sa portée définie ;
+\item \texttt{PASS\_BOUNDED\_EXACT\_MATCH} : égalité pour une entrée déjà apprise / enregistrée ;
+\item \texttt{PARTIAL} : plusieurs cas ont abouti, mais au moins un cas ne satisfait pas le contrat ;
+\item \texttt{UNRESOLVED} : aucune réponse fondée sur les données disponibles; pas de repli sur la cible source ;
+\item \texttt{NOT\_EVALUATED} : les conditions de mesure ne sont pas réunies ;
+\item \texttt{BLOCKED} : contrôle de phase, permission ou dépendance requis non satisfait.
+\end{itemize}
+
+\section{Conclusion et statut O94\_1}
+Le changement opérationnel principal est l'apparition d'un flux actif de capture entrée/sortie, de construction d'une capsule hors source et de mesure tenue à l'écart, combiné à une registry de modèles intégrables et à des politiques d'entraînement déclaratives. C'est une base exécutable à périmètre explicite. Le clonage universel d'objets arbitraires, les compétences de reconstruction algorithmique généralisées, les observations multimodales génériques et les migrations SQL / déploiements réseau autonomes ne sont pas déclarés acquis par ces seuls éléments. Ils sont des chantiers distincts dont les résultats doivent être mesurés, sans présumer de leur succès ni de leur échec.
+
+\section{Contrat de distribution autonome et journalisation concurrente}
+
+\subsection{Invariants de démarrage}
+Une distribution qui se déclare autonome doit embarquer ou générer localement toutes les ressources bloquantes de son préflight. Un chemin vers un dossier voisin de sauvegarde est utile à l'archive de suivi, mais ne peut être une dépendance obligatoire du démarrage de \texttt{Dmodel\_AAM\_O94\_1.zip}. Dans O94.1-HF1, \texttt{chemins\_O94.json} distingue donc le point runtime \texttt{sav\_AAM\_O94\_1} intégré de la copie d'archive conservée dans le ZIP de suivi. Les deux copies sont comparables par SHA-256 et leur provenance reste explicite.
+
+Le contrat du lanceur Windows comporte les étapes suivantes : localisation de Python, validation de la version minimale, vérification de Tk/Tcl, préflight explicite de l'arbre local, démarrage du module UI, et conservation des diagnostics. Tout statut non nul doit conduire à un journal consultable et à une console maintenue ouverte; un lancement silencieux n'est pas une preuve de succès.
+
+\subsection{Écritures concurrentes dans la mémoire historique}
+La boucle autonome et une opération utilisateur peuvent appeler le journal historique O92 depuis différents fils du même processus. Pour préserver une chaîne causale, \texttt{HashChainJournal.append} sérialise comme une seule section critique : lecture du hash de fin, allocation de séquence, calcul de l'événement, ajout complet de la ligne, flush et synchronisation. Un \texttt{RLock} protège aussi les lecteurs qui consultent le compteur ou vérifient la chaîne dans le même processus. Sans verrou, les opérations concurrentes risquent de calculer le même parent, de mélanger des écritures et de rendre une queue JSONL illisible.
+
+Le contrat de ce verrou est borné au même processus. Si une configuration permet à plusieurs processus indépendants d'écrire dans le même fichier journal, il faut en plus un verrou interprocessus ou un écrivain unique; la présente correction ne prétend pas apporter cette primitive multiplateforme.
+
+\subsection{Vérifiabilité}
+L'ensemble de tests O94.1-HF1 vérifie le préflight du modèle extrait seul, les empreintes du point de sauvegarde, la route CLI `status`, la route CLI `ui` avec la classe Tk réelle sous affichage virtuel, et 120 événements ajoutés depuis dix fils concurrents suivis d'une vérification de la chaîne. Ces tests constituent des contrats de démarrage et d'intégrité, mais ne remplacent pas l'exécution du BAT sur une installation Windows réelle.
+
+\end{document}

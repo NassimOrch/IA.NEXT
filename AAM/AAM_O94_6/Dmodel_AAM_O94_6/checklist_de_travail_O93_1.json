@@ -1,0 +1,1800 @@
+{
+  "schema": "aam-o931-work-checklist-v1",
+  "title": "Checklist phasée O93_1 — correction ciblée du chat RAG/modèle et de l’ergonomie",
+  "created_unix": 1791980356.1118495,
+  "updated_unix": 1791990162.107281,
+  "updated_for": "p4_exact_archive_validation_logged_with_10x_autonomy_intermit_monitor",
+  "reference_formalism_baseline": "formalisme_O93_0.tex",
+  "reference_checklist_baseline": "checklist_de_travail_O93_0.json",
+  "reference_error_model": "checklist_erreurs_model.json",
+  "reference_error_environment": "checklist_erreurs_no_model.json",
+  "reference_formalism_incremental": "formalisme_O93_1.tex",
+  "reference_laboratory_incremental": "laboratoire_O93_1.tex",
+  "current_phase": "P4",
+  "global_status": "P4_COMPLETE_LOCAL_TESTED_BOUNDED_FULL_SMS_NOT_VALIDATED",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "rule": "Une phase suivante ne démarre qu’après preuve de tous les critères de sortie de la phase courante. Modifier un composant invalide les preuves dépendantes. Aucun comportement n’est déclaré réussi sur simple présence d’un fichier ou d’un label.",
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Reproduction et périmètre O93_1",
+      "status": "COMPLETE",
+      "depends_on": [],
+      "exit_criteria": [
+        "Consultation des références normatives et registres O93_0 enregistrée",
+        "Reproduction RAG+modèle entraîné échouant réellement dans O93_0 conservée",
+        "Inventaire/empreintes de base conservés, aucun original modifié"
+      ],
+      "gates": [
+        {
+          "criterion": "Défaut de baseline reproduit",
+          "status": "PASS",
+          "evidence": [
+            "logs/O931/baseline_chat_reproduction.json",
+            "logs/O931/baseline_reproduction.stdout.txt",
+            "logs/O931/baseline_reproduction.exitcode"
+          ]
+        },
+        {
+          "criterion": "Formalisme et laboratoire incrémentaux construits",
+          "status": "PASS",
+          "evidence": [
+            "formalisme_O93_1.tex",
+            "laboratoire_O93_1.tex"
+          ]
+        }
+      ],
+      "completed_unix": 1791980403.1396706
+    },
+    {
+      "id": "P1",
+      "name": "Chaîne de réponse RAG + génération réelle",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "depends_on": [
+        "P0"
+      ],
+      "exit_criteria": [
+        "Le RAG récupère les sources et identifiants cités",
+        "Un backend/capsule de langue est réellement appelé si disponible/sélectionné",
+        "Le résultat lie route, capsule/backend et hash de prompt/contexte",
+        "Le fallback extractif n’annonce jamais une génération absente",
+        "Tests positifs et négatifs exécutés"
+      ],
+      "attempts": [
+        {
+          "at_unix": 1791980814.2831244,
+          "command": "pytest -q tests/test_o931_chat_pipeline.py",
+          "result": "FAIL_ENVIRONMENT",
+          "evidence": "logs/O931/p1_chat_pipeline_tests.stdout.txt",
+          "interpretation": "collection error only; not a runtime test verdict"
+        },
+        {
+          "at_unix": 1791980841.6828268,
+          "command": "PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py",
+          "result": "FAIL: 4 failed, 1 passed",
+          "evidence": "logs/O931/p1_chat_pipeline_tests_retry.stdout.txt",
+          "interpretation": "Functional run exposed capsule id/list contract mismatch or false test assumption plus no-RAG route still did not call a trained capsule; P1 remains open"
+        },
+        {
+          "at_unix": 1791980890.5263455,
+          "command": "PYTHONPATH=. diagnostic capsule-contract script",
+          "result": "DIAGNOSIS_RECORDED",
+          "evidence": "logs/O931/capsule_contract_diagnosis.json",
+          "interpretation": "training-id test assumption clarified; actual generation status mapping defect confirmed"
+        },
+        {
+          "at_unix": 1791980915.223039,
+          "command": "python -m py_compile aam_o93/runtime.py aam_o92/engine.py aam_o93/ui.py aam_o93/cli.py tests/test_o931_chat_pipeline.py",
+          "result": "PASS",
+          "evidence": "logs/O931/p1_compile.stdout.txt",
+          "interpretation": "syntax/import compilation only; does not validate runtime behavior"
+        },
+        {
+          "at_unix": 1791980945.3181329,
+          "command": "PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py",
+          "result": "FAIL: 3 failed, 2 passed",
+          "evidence": "logs/O931/p1_chat_pipeline_tests_after_status_fix.stdout.txt",
+          "interpretation": "Actual generation and model-selection paths now execute; three assertions expose (1) journal event schema assumption, (2) exact-answer expectation not guaranteed by extractive ranking, and (3) run_id/skill_id test mismatch. Investigate the evidence-ranking concern rather than relaxing its assertion."
+        },
+        {
+          "at_unix": 1791981008.8149767,
+          "command": "python -m py_compile aam_o93/runtime.py tests/test_o931_chat_pipeline.py",
+          "result": "PASS",
+          "evidence": "logs/O931/p1_compile_after_fixes.stdout.txt",
+          "interpretation": "syntax check only; next pytest is required"
+        },
+        {
+          "at_unix": 1791981059.0766902,
+          "command": "PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py",
+          "result": "PASS: 5 passed",
+          "evidence": "logs/O931/p1_chat_pipeline_tests_whole_passage_fix.stdout.txt",
+          "interpretation": "Proves real trained compact LM invocation with semantic RAG context, provenance hashes, honest no-model fallback, explicit invalid-model refusal and readable formatter. Configured endpoint evidence contract remains the last P1 test."
+        },
+        {
+          "at_unix": 1791981111.9885798,
+          "command": "PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py",
+          "result": "PASS: 6 passed",
+          "evidence": "logs/O931/p1_chat_pipeline_tests_local_backend.stdout.txt",
+          "interpretation": "Actual capsule invocation and O93 semantic context contract validated. Backend network service itself was not contacted; endpoint contract test used controlled fake endpoint."
+        }
+      ],
+      "completed_unix": 1791981111.9885798,
+      "gates": [
+        {
+          "criterion": "RAG récupère passages/citations et les injecte à une capsule compacte entraînée",
+          "status": "PASS",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_chat_rag_passes_retrieved_evidence_to_actually_trained_model",
+            "logs/O931/p1_chat_pipeline_tests_local_backend.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Génération réellement exécutée, identifiant et hash de capsule/prompts/contexte traçables",
+          "status": "PASS",
+          "evidence": [
+            "logs/O931/p1_chat_pipeline_tests_local_backend.stdout.txt",
+            "aam_o93/runtime.py::_generate_chat_from_evidence"
+          ]
+        },
+        {
+          "criterion": "Fallback sans modèle annoncé comme extractif et ne déclarant aucune génération inexistante",
+          "status": "PASS",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_chat_without_a_valid_generator_is_explicitly_extractive"
+          ]
+        },
+        {
+          "criterion": "Sélection manuelle invalide refusée sans substitution silencieuse",
+          "status": "PASS",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_explicit_unknown_language_model_fails_closed"
+          ]
+        },
+        {
+          "criterion": "Sans index RAG, chat peut appeler une capsule entraînée et marque l’absence de preuves locales",
+          "status": "PASS",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_chat_mode_uses_trained_model_without_rag_index"
+          ]
+        },
+        {
+          "criterion": "Backend local sélectionné reçoit le contexte de la recherche sémantique O93",
+          "status": "PASS_BOUNDED_CONTRACT_TEST",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_explicit_local_backend_receives_o93_semantic_context_not_legacy_search"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "UI chat lisible et ergonomie",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "depends_on": [
+        "P1"
+      ],
+      "exit_criteria": [
+        "Contrôles chat regroupés en sections lisibles",
+        "Transcript humain, citations et route visibles",
+        "JSON technique séparé mais conservé pour audit",
+        "Tests du formateur de réponse et sélection de modèle"
+      ],
+      "started_unix": 1791981111.9885798,
+      "gates": [
+        {
+          "criterion": "Formateur de réponse lisible et citation/model/route visibles",
+          "status": "PASS_UNIT_TEST",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_human_readable_ui_formatter_shows_answer_route_model_and_sources"
+          ]
+        },
+        {
+          "criterion": "Historique lisible, métadonnées techniques conservées et bouton de détails activé après réponse",
+          "status": "PASS_UI_SMOKE",
+          "evidence": [
+            "tests/test_o931_ui_smoke.py",
+            "logs/O931/p2_ui_history_detail_retest.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Suite combinée RAG, génération et interface exécutée ensemble",
+          "status": "PASS_COMBINED_INTEGRATION",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py",
+            "tests/test_o931_ui_smoke.py",
+            "logs/O931/p2_combined_pipeline_ui_suite.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Mise en page chat lisible aux résolutions modestes; aucun contrôle principal coupé",
+          "status": "RESOLVED_RETEST_PASS",
+          "evidence": [
+            "logs/O931/O93_1_chat_ui_visual_audit.png"
+          ]
+        },
+        {
+          "criterion": "Fenêtre et contrôles essentiels restent dans les limites horizontales de l’écran réel",
+          "status": "PASS_RESPONSIVE_LAYOUT_RETEST",
+          "evidence": [
+            "tests/test_o931_ui_smoke.py",
+            "logs/O931/p2_responsive_layout_ui_smoke.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Capture réelle après correction responsive, contrôles essentiels intégralement dans l’écran",
+          "status": "PASS_VISUAL_RETEST",
+          "evidence": [
+            "logs/O931/O93_1_chat_ui_visual_retest.png",
+            "logs/O931/p2_responsive_visual_verification.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Les contrôles bas de fenêtre (évaluation/feedback) restent entièrement visibles à 1024px de hauteur",
+          "status": "RESOLVED_RETEST_PASS",
+          "evidence": [
+            "logs/O931/O93_1_chat_ui_visual_retest.png"
+          ]
+        },
+        {
+          "criterion": "Évaluation utilisateur et bouton de feedback entièrement dimensionnés et dans l’écran",
+          "status": "PASS_VISUAL_RETEST",
+          "evidence": [
+            "tests/test_o931_ui_smoke.py",
+            "logs/O931/p2_vertical_visibility_retest.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Feedback visible and usable at 1280x1024 after visual capture",
+          "status": "PASS_VERTICAL_VISUAL_RETEST",
+          "evidence": [
+            "logs/O931/O93_1_chat_ui_visual_final.png",
+            "logs/O931/p2_final_vertical_visual_check.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Dernier retest combiné avant clôture de P2",
+          "status": "PASS_7_TESTS",
+          "evidence": [
+            "logs/O931/p2_final_combined_suite.stdout.txt"
+          ]
+        },
+        {
+          "criterion": "Sélecteur UI rafraîchi et capable de sélectionner une capsule réellement entraînée",
+          "status": "PASS_ACTUAL_TRAINED_CAPSULE",
+          "evidence": [
+            "tests/test_o931_ui_smoke.py::test_chat_model_selector_lists_and_selects_a_real_trained_capsule",
+            "logs/O931/p2_actual_trained_model_selector_test.stdout.txt"
+          ]
+        }
+      ],
+      "attempts": [
+        {
+          "at_unix": 1791981170.9124737,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_ui_smoke.py",
+          "result": "PASS: 1 passed",
+          "evidence": "logs/O931/p2_ui_smoke.stdout.txt",
+          "interpretation": "Real Tk construction/layout smoke passed under Xvfb; history full-metadata separation test is being added before P2 exit"
+        },
+        {
+          "at_unix": 1791981205.1692088,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_ui_smoke.py",
+          "result": "FAIL: 1 failed on Tcl object/string assertion",
+          "evidence": "logs/O931/p2_ui_history_and_detail.stdout.txt",
+          "interpretation": "The UI initialized and history-content/metadata assertions passed; only the test assertion on Tk cget state type failed."
+        },
+        {
+          "at_unix": 1791981298.2799327,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_ui_smoke.py",
+          "result": "PASS: 1 passed",
+          "evidence": "logs/O931/p2_ui_history_detail_retest.stdout.txt",
+          "interpretation": "Retest after converting Tk cget(state) to str(): real Tk UI initializes, renders human-readable assistant transcript, stores full result in metadata, and enables separate technical-details control."
+        },
+        {
+          "at_unix": 1791981324.7796607,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py",
+          "result": "PASS: 7 passed",
+          "evidence": "logs/O931/p2_combined_pipeline_ui_suite.stdout.txt",
+          "interpretation": "Combined RAG→trained capsule→chat response path and real Tk history/technical-details path pass together under Xvfb."
+        },
+        {
+          "at_unix": 1791981375.5079536,
+          "command": "xvfb-run -a PYTHONPATH=. python Tk screenshot capture (ImageGrab) at 1280x1024",
+          "result": "PASS_CAPTURE_UI_LAYOUT_DEFECT_FOUND",
+          "evidence": "logs/O931/O93_1_chat_ui_visual_audit.png; logs/O931/p2_visual_audit.stdout.txt",
+          "interpretation": "Actual application started and all nine tabs rendered; visual inspection found chat content controls extending beyond the available 1280px screen width (parameters and right-aligned controls clipped). P2 remains open; responsive layout correction required."
+        },
+        {
+          "at_unix": 1791981453.0966866,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_ui_smoke.py",
+          "result": "PASS: 1 passed",
+          "evidence": "logs/O931/p2_responsive_layout_ui_smoke.stdout.txt",
+          "interpretation": "Actual Tk widgets under Xvfb pass right-bound checks at the real display width; geometry now fits the screen and chat settings are laid out on multiple rows."
+        },
+        {
+          "at_unix": 1791981478.5095003,
+          "command": "xvfb-run -a Python Tk screenshot + widget boundary inspection",
+          "result": "PASS_RESPONSIVE_CAPTURE",
+          "evidence": "logs/O931/O93_1_chat_ui_visual_retest.png; logs/O931/p2_responsive_visual_verification.stdout.txt",
+          "interpretation": "At 1280x1024 the application window ends at x=1260; every key control (mode, competence, RAG policy, model selector, focus, attachment and technical details) ends within screen width. Visual capture rechecked."
+        },
+        {
+          "at_unix": 1791981504.3790145,
+          "command": "Manual inspection of logs/O931/O93_1_chat_ui_visual_retest.png after responsive horizontal retest",
+          "result": "PASS_HORIZONTAL_FAIL_VERTICAL_OVERFLOW",
+          "evidence": "logs/O931/O93_1_chat_ui_visual_retest.png",
+          "interpretation": "Horizontal clipping is resolved. The bottom Evaluation utilisateur/feedback controls are still partially clipped at screen height 1024; do not close P2 until vertical layout is adjusted and visually retested."
+        },
+        {
+          "at_unix": 1791981543.5610604,
+          "command": "xvfb-run -a Tk geometry diagnostic at 1280x1024",
+          "result": "DIAGNOSIS_RECORDED_VERTICAL_SPACE_DEFICIT",
+          "evidence": "logs/O931/p2_vertical_geometry_diagnostics.stdout.txt",
+          "interpretation": "Root height 940px (y=20..960); conversation frame consumes y=545..924; evaluation frame gets only 10px height and its button 1x1. Increase display-adaptive height and reduce the conversation widget requested height to preserve visible feedback controls."
+        },
+        {
+          "at_unix": 1791981577.093142,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_ui_smoke.py",
+          "result": "PASS: 1 passed",
+          "evidence": "logs/O931/p2_vertical_visibility_retest.stdout.txt",
+          "interpretation": "Widget geometry assertions pass: responsive window, key controls and feedback frame/button are inside display bounds at 1280x1024. Final screenshot is still required for visual confirmation before resolving the vertical-overflow issue."
+        },
+        {
+          "at_unix": 1791981601.7965436,
+          "command": "xvfb-run -a real Tk screenshot + feedback geometry inspection",
+          "result": "PASS_VERTICAL_VISUAL_GEOMETRY",
+          "evidence": "logs/O931/O93_1_chat_ui_visual_final.png; logs/O931/p2_final_vertical_visual_check.stdout.txt",
+          "interpretation": "At 1280x1024 the window fits (x=20..1260, y=20..1000); feedback frame is 67px high, comment entry 26px, button 31px, all within screen. Initial clipped captures remain preserved."
+        },
+        {
+          "at_unix": 1791981643.8038626,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py",
+          "result": "PASS: 7 passed",
+          "evidence": "logs/O931/p2_final_combined_suite.stdout.txt",
+          "interpretation": "Final combined rerun passes after responsive layout and vertical feedback fixes; both real UI and the RAG/model pipeline pass in the same invocation."
+        },
+        {
+          "at_unix": 1791981685.0659819,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_ui_smoke.py",
+          "result": "PASS: 2 passed",
+          "evidence": "logs/O931/p2_actual_trained_model_selector_test.stdout.txt",
+          "interpretation": "The selector lists a compact language capsule created by the real trainer inside the workspace and accepts its exact run_id as the selected model. The existing live layout/history smoke also passes."
+        },
+        {
+          "at_unix": 1791981726.2780783,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py",
+          "result": "PASS: 8 passed",
+          "evidence": "logs/O931/p2_phase_exit_suite.stdout.txt",
+          "interpretation": "Final phase-exit run combines RAG/model usage, readable transcript, raw technical details, actual trained capsule selector, horizontal/vertical geometry assertions and live Tk construction."
+        }
+      ],
+      "completed_unix": 1791981726.2780783,
+      "completion_scope": "The chat/RAG/model integration and redesigned Tk chat are validated locally under a controlled temporary workspace and Xvfb 1280x1024. Real external endpoint/network access is not validated; model factual quality is not certified by invocation tests."
+    },
+    {
+      "id": "P3",
+      "name": "Non-régression et intégration",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "depends_on": [
+        "P2"
+      ],
+      "exit_criteria": [
+        "Modules de test concernés passés",
+        "Régression complète tentée; tout test interrompu déclaré non validé",
+        "Préflight et sécurité repassent",
+        "Aucune donnée source modifiée"
+      ],
+      "started_unix": 1791981726.2780783,
+      "attempts": [
+        {
+          "at_unix": 1791981794.7960308,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p1_o930_observer_upgrade.py tests/test_p1_observer.py tests/test_p2_probes.py tests/test_p3_competencies.py tests/test_p3_semantic_rag.py tests/test_p4_acquisition.py tests/test_p4_competence_graph.py",
+          "result": "FAIL: 87 passed, 3 failed, 7 subtests passed",
+          "evidence": "logs/O931/p3_regression_batch1_core_rag_observer.stdout.txt",
+          "interpretation": "All three failures are stale/ambiguous regression oracles to investigate: expected old version 0.93.0, expected P10 to be IN_PROGRESS although O93_0 baseline correctly leaves P10 NOT_STARTED, and an O93_0 proof counter that includes O93_1 entries. Runtime-related 87 tests pass; keep P3 open and do not normalize failures away."
+        },
+        {
+          "at_unix": 1791981859.990113,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p1_o930_observer_upgrade.py tests/test_p1_observer.py tests/test_p2_probes.py tests/test_p3_competencies.py tests/test_p3_semantic_rag.py tests/test_p4_acquisition.py tests/test_p4_competence_graph.py",
+          "result": "FAIL: 89 passed, 1 failed, 7 subtests passed",
+          "evidence": "logs/O931/p3_regression_batch1_core_rag_observer_retest.stdout.txt",
+          "interpretation": "Two stale assertions were corrected and their initial failures are retained; one additional legacy proof-registry test fails because at least one entry lacks the legacy `requirement` field. Inspect entry schemas and fix the registry schema or its contract-preserving adapter rather than suppressing the check."
+        },
+        {
+          "at_unix": 1791981897.478883,
+          "command": "Inspect registre_prouves.json entries missing canonical fields",
+          "result": "DIAGNOSIS_CONFIRMED_3_LEGACY_ENTRIES",
+          "evidence": "logs/O931/proof_registry_schema_diagnosis.json",
+          "interpretation": "Three legacy O930 P9 entries use feature/references rather than canonical requirement/traceability. The registry is being normalized additively; statuses and evidence are unchanged."
+        },
+        {
+          "at_unix": 1791981918.4414365,
+          "command": "env PYTHONPATH=. pytest -q tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py",
+          "result": "PASS: 12 passed",
+          "evidence": "logs/O931/p3_corrective_contract_retest.stdout.txt",
+          "interpretation": "The O93_1 version oracle, baseline P10 NOT_STARTED phase logic, O930-scoped counter, and canonical proof registry entry schema all pass in the two previously failing legacy-contract modules."
+        },
+        {
+          "at_unix": 1791981955.2583063,
+          "command": "PYTHONPATH=. pytest -q tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_o931_chat_pipeline.py tests/test_p3_semantic_rag.py tests/test_p3_competencies.py tests/test_p1_observer.py tests/test_p1_o930_observer_upgrade.py",
+          "result": "FAIL: 55 passed, 1 failed, 7 subtests passed",
+          "evidence": "logs/O931/p3_regression_batch1_retest.stdout.txt",
+          "interpretation": "Les anciennes assertions de version/phase/portée du compteur ont passé; le contrôle strict du registre a détecté trois entrées héritées sans les clés requirement/traceability exigées. Preuve brute conservée; normalisation additive appliquée et retest requis."
+        },
+        {
+          "at_unix": 1791981963.5624492,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_p4_ui_integration.py tests/test_p5_autonomy_o930.py tests/test_p5_knowledge.py tests/test_p6_autonomy.py tests/test_p6_competence_profiles.py tests/test_p6_memory_causal_graph_view.py tests/test_p6_memory_event_inspection.py tests/test_p6_probe_management.py tests/test_p6_probe_ui_contracts.py tests/test_p6_source_inspector.py tests/test_p6_ui_initial_catalog_sequence.py tests/test_p6_ui_integration.py",
+          "result": "FAIL: 62 passed, 1 failed",
+          "evidence": "logs/O931/p3_regression_batch2_autonomy_memory_ui.stdout.txt",
+          "interpretation": "One legacy knowledge test requires the answer to mention a specific phrase from its previous extraction-oriented response; the new runtime actually invoked the trained compact LM and emitted a poorly formed output. This is not yet classified as a stale assertion: inspect the source, retrieved evidence, answer selection policy and capsule quality. Keep P3 open."
+        },
+        {
+          "at_unix": 1791982013.3748043,
+          "command": "PYTHONPATH=. pytest -q tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_o931_chat_pipeline.py tests/test_p3_semantic_rag.py tests/test_p3_competencies.py tests/test_p1_observer.py tests/test_p1_o930_observer_upgrade.py",
+          "result": "PASS_BOUNDED: 56 passed, 0 failed, 7 subtests passed",
+          "evidence": "logs/O931/p3_regression_batch1_after_registry_schema_fix_result.json",
+          "interpretation": "Replayed after additive normalization of the three legacy O930 P9 proof records. P3 remains open pending other regression groups, security/preflight and integrity checks."
+        },
+        {
+          "at_unix": 1791982119.6811984,
+          "command": "env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_p5_knowledge.py",
+          "result": "FAIL: 12 passed, 1 failed",
+          "evidence": "logs/O931/p3_candidate_quality_gate_retest.stdout.txt",
+          "interpretation": "The new generic candidate quality gate correctly selected observed passage fallback for a fake backend response that had no lexical anchors to the RAG evidence. A test still expected the fake phrase as user answer even though its purpose is to verify only context injection. Correct the assertion to inspect candidate_text plus answer_source, not bypass the output-quality policy."
+        },
+        {
+          "at_unix": 1791982121.3125954,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm pytest -q tests/test_p2_probes.py tests/test_p4_acquisition.py tests/test_p4_competence_graph.py tests/test_p4_ui_integration.py tests/test_p5_autonomy_o930.py tests/test_p5_knowledge.py",
+          "result": "FAIL: 48 passed, 1 failed",
+          "evidence": "logs/O931/p3_regression_batch2_result.json",
+          "interpretation": "Le routage sémantique et les preuves passent, mais la réponse LM contenait beaucoup de <unk>. Ajout d’un défaut runtime à traiter; P3 ouverte."
+        },
+        {
+          "at_unix": 1791982152.1121418,
+          "command": "env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_p5_knowledge.py",
+          "result": "PASS: 13 passed",
+          "evidence": "logs/O931/p3_candidate_gate_contract_retest.stdout.txt",
+          "interpretation": "The previously failing knowledge-routing test now gets an evidence-first answer when the compact candidate is malformed; actual model invocation/provenance still exists. Controlled backend contract now verifies candidate retention plus source-anchored fallback. Generic quality-gate test passes."
+        },
+        {
+          "at_unix": 1791982189.7721717,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_p4_ui_integration.py tests/test_p5_autonomy_o930.py tests/test_p5_knowledge.py tests/test_p6_autonomy.py tests/test_p6_competence_profiles.py tests/test_p6_memory_causal_graph_view.py tests/test_p6_memory_event_inspection.py tests/test_p6_probe_management.py tests/test_p6_probe_ui_contracts.py tests/test_p6_source_inspector.py tests/test_p6_ui_initial_catalog_sequence.py tests/test_p6_ui_integration.py",
+          "result": "PASS: 63 passed",
+          "evidence": "logs/O931/p3_regression_batch2_autonomy_memory_ui_retest.stdout.txt",
+          "interpretation": "The full autonomy/memory/UI batch passes after generic candidate-quality selection prevents malformed generation from replacing the evidence-backed answer. No module in this batch failed."
+        },
+        {
+          "at_unix": 1791982234.793635,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_p7_dataset_service.py tests/test_p7_integrated.py tests/test_p7_training_control.py tests/test_p8_action_router.py tests/test_p8_integration.py tests/test_p8_security.py",
+          "result": "PASS_BOUNDED: 61 passed, 0 failed, 14 subtests passed",
+          "evidence": "logs/O931/p3_regression_batch3_dataset_training_security_result.json",
+          "interpretation": "Dataset/training integration, common router, end-to-end integration and security suites passed in local bounded environment; external service/device acceptance is not implied."
+        },
+        {
+          "at_unix": 1791982262.2852569,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o930_preflight_dependency_closure.py tests/test_p9_capacity_evidence.py tests/test_p9_preflight_status_vocabulary.py tests/test_p9_preregistered_v2_integrity.py",
+          "result": "FAIL: 22 passed, 1 failed",
+          "evidence": "logs/O931/p3_regression_batch4_p9_compatibility.stdout.txt",
+          "interpretation": "A source-inspection test still expects the preflight implementation to accept only gate strings starting PASS; current code also accepts explicit terminal bounded-closure statuses, required by the O93_0 P8/P9 protocol. Update the test to assert current semantics and negative cases, not a stale exact source substring."
+        },
+        {
+          "at_unix": 1791982305.1024256,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o930_preflight_dependency_closure.py tests/test_p9_capacity_evidence.py tests/test_p9_preflight_status_vocabulary.py tests/test_p9_preregistered_v2_integrity.py",
+          "result": "PASS: 23 passed",
+          "evidence": "logs/O931/p3_regression_batch4_p9_compatibility_retest.stdout.txt",
+          "interpretation": "The closure predicate is now tested behaviorally with positive and negative cases for bounded terminal gates; the P9 capacity and preflight compatibility modules pass."
+        },
+        {
+          "at_unix": 1791982430.4186358,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p1_o930_observer_upgrade.py tests/test_p1_observer.py tests/test_p2_probes.py tests/test_p3_competencies.py tests/test_p3_semantic_rag.py tests/test_p4_acquisition.py tests/test_p4_competence_graph.py",
+          "result": "PASS: 92 passed, 7 subtests passed",
+          "evidence": "logs/O931/p3_core_retest_after_gate.stdout.txt; logs/O931/p3_core_retest_after_gate.exitcode",
+          "interpretation": "Core O93_1 chat/RAG/model/UI plus baseline observer/probe/RAG/competence/acquisition regression passes on the current source tree after the generic generated-candidate quality gate. P3 remains open pending the remaining module batches, CLI/compile/smoke verification, and phase gate review."
+        },
+        {
+          "at_unix": 1791982432.4798303,
+          "command": "python -m py_compile aam_o93/ui.py tests/test_o931_chat_pipeline.py && xvfb-run -a env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py",
+          "result": "PASS_BOUNDED: 10 passed, 0 failed",
+          "evidence": "logs/O931/p3_ui_formatter_contract_test_result.json",
+          "interpretation": "Formatter displays the runtime answer_source and candidate_quality_gate contract; Tk smoke remains green. P3 remains open for remaining preflight/integrity checks."
+        },
+        {
+          "at_unix": 1791982493.9286253,
+          "command": "xvfb-run -a env PYTHONPATH=. pytest -q tests/test_p7_dataset_service.py tests/test_p7_integrated.py tests/test_p7_training_control.py tests/test_p8_action_router.py tests/test_p8_integration.py tests/test_p8_security.py",
+          "result": "PASS_BOUNDED: 61 passed, 14 subtests passed",
+          "evidence": "logs/O931/p3_services_training_security_retest.stdout.txt; logs/O931/p3_services_training_security_retest.exitcode",
+          "interpretation": "Dataset ingestion/training control and the inherited action-router/integration/security suites pass on the O93_1 code after the chat answer quality selection change. P3 remains open until the remaining retests, executable smoke, compilation, and P3 exit-gate review are complete."
+        },
+        {
+          "at_unix": 1791982527.123227,
+          "command": "PYTHONPATH=. python -m aam_o93 --help; AAM_O93_HOME=$(mktemp -d) PYTHONPATH=. python -m aam_o93 status; PYTHONPATH=. python -m compileall -q aam_o93 aam_o92 tests scripts",
+          "result": "PASS: CLI help exit 0; isolated CLI status exit 0; compileall exit 0 with one SyntaxWarning in legacy script scripts/o930_p6_reconcile_source_inspector.py:63 (invalid escape sequence \\_)",
+          "evidence": "logs/O931/p3_cli_help.stdout.txt; logs/O931/p3_cli_help.exitcode; logs/O931/p3_cli_status.stdout.txt; logs/O931/p3_cli_status.exitcode; logs/O931/p3_compileall.stdout.txt; logs/O931/p3_compileall.exitcode",
+          "interpretation": "CLI entry and isolated workspace status work; status accurately reports empty RAG/autonomy stopped for the fresh workspace and explicitly keeps Internet disabled. Compileall returns 0 but emits one non-fatal syntax warning in a legacy report script; inspect and decide if a narrowly scoped warning cleanup is warranted. This CLI status does not itself prove GUI startup autonomy behavior."
+        },
+        {
+          "at_unix": 1791982581.5098894,
+          "command": "PYTHONPATH=. python -m aam_o93 solve --help; PYTHONPATH=. python -m aam_o93 knowledge-ingest --help; PYTHONPATH=. python -m aam_o93 acquire-skill --help; PYTHONPATH=. python -m aam_o93 ui --help",
+          "result": "PASS: all four help commands exited 0",
+          "evidence": "logs/O931/cli_solve_help.stdout.txt; logs/O931/cli_knowledge_ingest_help.stdout.txt; logs/O931/cli_acquire_skill_help.stdout.txt; logs/O931/cli_ui_help.stdout.txt and matching exitcode files",
+          "interpretation": "Confirmed user-facing command syntax for the O93_1 guide. The compilation warning previously logged is isolated to a legacy O930 reconciliation script embedded LaTeX with an unescaped underscore; likely a non-functional warning, but fix narrowly to make compilation clean."
+        },
+        {
+          "at_unix": 1791982624.5719244,
+          "command": "python -W error::SyntaxWarning -m compileall -q aam_o93 aam_o92 tests scripts",
+          "result": "PASS: exit 0 with SyntaxWarning elevated to error; no warnings/errors",
+          "evidence": "logs/O931/p3_compileall_warning_fix.stdout.txt; logs/O931/p3_compileall_warning_fix.exitcode",
+          "interpretation": "Resolved the non-fatal invalid-escape warning by escaping the literal underscore correctly in the legacy script source string; intended emitted LaTeX content remains unchanged. The source archive and historical O93_0 formalism/lab were not edited."
+        },
+        {
+          "at_unix": 1791982674.0996017,
+          "command": "P3 exit gate reconciliation: logs/O931/P3_exit_gate_report.json",
+          "result": "FAIL_GATE: 10/11 checks passed; source archive check assumed root path and found no root-level sources_AAM_17.zip",
+          "evidence": "logs/O931/P3_exit_gate_report.json",
+          "interpretation": "Do not close P3. This is currently a provenance-path verification failure, not evidence the original archive is absent. Resolve using source_inventory.json and a path-safe search, then rerun the gate under preflight."
+        },
+        {
+          "at_unix": 1791982688.9607406,
+          "command": "Inspect source_inventory.json and resolve declared source archive path without filesystem writes",
+          "result": "DIAGNOSIS: archive is declared at source_material/source_archive/sources_AAM_17.zip; gate path assumption was incorrect; hash retest pending",
+          "evidence": "source_inventory.json; logs/O931/P3_exit_gate_report.json",
+          "interpretation": "The initial gate failure is attributable to the gate checker assuming root-level location. Preserve the failed report and use a path-confined manifest-declared resolution for retest."
+        },
+        {
+          "at_unix": 1791982718.887177,
+          "command": "Resolve source_inventory.json source_archive path with confinement and compare SHA-256/size to inventory",
+          "result": "PASS: source archive path confined; SHA-256 add72728952cd4ec83b6994a02d28022339fbbed29835d40c01b8f26bca60c38 matches; size 39,758,574 bytes matches",
+          "evidence": "logs/O931/source_provenance_retest.json",
+          "interpretation": "The archive is present and uncorrupted relative to the stored inventory. The prior gate failure was a path-assumption defect in the gate check. The preserved red gate report remains in history; the path-check issue is resolved only after this matching hash/size evidence."
+        },
+        {
+          "at_unix": 1791982767.5050478,
+          "command": "P3 final phase exit gate after all regression batches and source-provenance retest",
+          "result": "PASS_GATE_BOUNDED: 11/11 exit criteria passed",
+          "evidence": "logs/O931/P3_exit_gate_report_retest.json; logs/O931/source_provenance_retest.json",
+          "interpretation": "P3 is complete in bounded local scope. First gate failure (wrong root-path assumption) is preserved and resolved with manifest-declared path + matching SHA-256 and size. P4 packaging/audit is authorized; P10 is not involved or claimed."
+        },
+        {
+          "at_unix": 1791982873.0830245,
+          "command": "Static inspection of aam_o93/__init__.py, runtime boot/status and CLI status output",
+          "result": "FAIL: public __version__=0.93.0-dev0 but runtime reports 0.93.1-dev0",
+          "evidence": "aam_o93/__init__.py; aam_o93/runtime.py:104,307,1868; logs/O931/p3_cli_status.stdout.txt",
+          "interpretation": "A release metadata consistency defect was found during packaging. Reopen P3; make version identifiers coherent then run relevant tests before re-closing P3."
+        },
+        {
+          "at_unix": 1791983020.6250327,
+          "command": "timeout 95s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance_bounded.py",
+          "result": "FAIL_BOUNDED_RETEST_REQUIRED: actual 120-row SMS sample trained a capsule and invoked it, but semantic retrieval returned only a continuation fragment for the held-out £900 SMS; marker absent from top-k and prompt. Test harness shutdown also appended after TemporaryDirectory cleanup and raised FileNotFoundError. Original archive and sample hashes unchanged.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_initial_fail.json; logs/O931/real_corpus_sms_chat_acceptance_bounded_initial_fail.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_initial_fail.stderr.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_initial_fail.exitcode.json",
+          "interpretation": "This is a real retrieval defect: fixed-width character chunking split an SMS record. It is not evidence that language-model invocation is absent: the trained capsule was called and its capsule/prompt/context hashes and audit event exist. The full corpus run exceeded the runner window, so it remains unvalidated. Preserve P3 open."
+        },
+        {
+          "at_unix": 1791983020.6250327,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/runtime.py scripts/o931_real_corpus_chat_acceptance_bounded.py tests/test_o931_record_preserving_rag.py && timeout 35s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_record_preserving_rag.py",
+          "result": "PASS_BOUNDED: compilation warning promoted to error exits 0; 1 record-boundary regression test passed",
+          "evidence": "logs/O931/p3_record_aware_chunking_true_record_retest.stdout.txt; logs/O931/p3_record_aware_chunking_true_record_retest.stderr.txt; logs/O931/p3_record_aware_chunking_true_record_retest.exitcode",
+          "interpretation": "The record-preserving TSV/SMS chunker passes an isolated regression with real tab/newline characters and confirms every row, including the target, stays intact and is retrievable. The full bounded end-to-end SMS rerun is still required before resolving the retrieval incident."
+        },
+        {
+          "at_unix": 1791983145.752186,
+          "command": "timeout 95s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance_bounded.py (record-aware chunking retest)",
+          "result": "PASS_BOUNDED report written; held-out real SMS row appears in top-5 semantic evidence and the captured prompt; explicit trained compact capsule id/hash matches; candidate rejected by generic quality gate and cited RAG fallback delivered; source hashes unchanged. Outer runner did not capture shell exit code and stderr file is empty; isolate normal shutdown/exit path before declaring test process clean.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_retest.json; logs/O931/real_corpus_sms_chat_acceptance_bounded_retest.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_retest.stderr.txt; logs/O931/preflight_before_real_sms_e2e_record_preserving_retest.json; logs/O931/preflight_before_real_sms_e2e_record_preserving_retest_o931.json",
+          "interpretation": "The original retrieval miss is fixed on a real held-out SMS and the exact trained capsule is proven invoked; generation quality gate correctly avoids presenting malformed output. End-to-end result is locally PASS_BOUNDED, but process exit/cleanup must be separately confirmed and full-corpus run remains unvalidated."
+        },
+        {
+          "at_unix": 1791983145.752186,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/runtime.py scripts/o931_real_corpus_chat_acceptance_bounded.py tests/test_o931_record_preserving_rag.py && timeout 35s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_record_preserving_rag.py",
+          "result": "PASS_BOUNDED: 1 passed in 0.64s; no SyntaxWarning; source hash invariant held",
+          "evidence": "logs/O931/p3_record_aware_chunking_true_record_retest.stdout.txt; logs/O931/p3_record_aware_chunking_true_record_retest.exitcode",
+          "interpretation": "Unit regression confirms each record is stored exactly once and the held-out row is retrievable intact; paired with the bounded real-SMS report, this resolves the specific fixed-width row-splitting defect."
+        },
+        {
+          "at_unix": 1791983266.7945738,
+          "command": "timeout 45s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance_bounded.py (shutdown diagnostics)",
+          "result": "PASS_BOUNDED pipeline; runtime.close returned CLOSED and emitted STAGE runtime_close_end; however external execution wrapper timed out and no shell exit-code file was produced, so process exit remains unresolved.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_shutdown_diagnostic.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_shutdown_diagnostic.stderr.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_retest.json",
+          "interpretation": "Retrieval and generation evidence are valid and source hashes unchanged; close() reports clean, but Python process does not return to shell cleanly or the runner cannot capture it. Add thread/process shutdown diagnostics and require a normal code 0 before closing this gate."
+        },
+        {
+          "at_unix": 1791983405.4638588,
+          "command": "timeout -k 2s 55s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance_bounded.py (thread/atexit diagnostic)",
+          "result": "INTERMEDIATE_PASS_BOUNDED_REPORT; runner timed out after STAGE runtime_close_begin without a close result, runtime_close_end, atexit marker, or shell exit code. stdout/stderr and runner outcome preserved.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_process_exit_diagnostic.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_process_exit_diagnostic.stderr.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_process_exit_diagnostic.exitcode.json",
+          "interpretation": "No new inference about model capability. The RAG and model execution part again completed successfully, but the runtime-close/post-close process exit is now a confirmed separate P3 issue to instrument at the stop/checkpoint layers."
+        },
+        {
+          "at_unix": 1791983554.6407785,
+          "command": "nohup bash -c 'timeout -k 2s 55s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance_bounded.py > logs/O931/real_corpus_sms_chat_acceptance_bounded_close_layers.stdout.txt 2> logs/O931/real_corpus_sms_chat_acceptance_bounded_close_layers.stderr.txt; rc=$?; echo $rc > logs/O931/real_corpus_sms_chat_acceptance_bounded_close_layers.exitcode'",
+          "result": "PASS_BOUNDED and normal process exit captured as 0; close instrumentation shows stop_requested append, checkpoint preflight, write_checkpoint, stop status STOPPED, runtime status CLOSED, runtime_close_end, atexit_reached; no stderr.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_close_layers.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_close_layers.stderr.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_close_layers.exitcode; logs/O931/real_corpus_sms_chat_acceptance_bounded_retest.json",
+          "interpretation": "Normal close and exit are demonstrated when run detached from the interactive command channel. The earlier missing code receipts were command-runner timeouts; no functional shutdown defect remains on this evidence. Keep full-corpus timeout as a separate unvalidated scope."
+        },
+        {
+          "at_unix": 1791983757.3081188,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/runtime.py scripts/o931_real_corpus_chat_acceptance_bounded.py tests/test_o931_record_preserving_rag.py; timeout 40s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_record_preserving_rag.py",
+          "result": "PASS: py_compile exit 0; 2 unit tests passed, 0 failed (record-preserving chunking plus record-level fallback selection).",
+          "evidence": "logs/O931/p3_record_ranked_fallback_pycompile.stdout.txt; logs/O931/p3_record_ranked_fallback_pycompile.stderr.txt; logs/O931/p3_record_ranked_fallback_pycompile.exitcode; logs/O931/p3_record_ranked_fallback_unit.stdout.txt; logs/O931/p3_record_ranked_fallback_unit.stderr.txt; logs/O931/p3_record_ranked_fallback_unit.exitcode; logs/O931/preflight_before_record_fallback_test.json",
+          "interpretation": "New generic fallback logic detects line-oriented/tabular chunks, ranks complete records by query-token overlap and returns only top cited records. It does not use dataset-specific terms or expected answer text. Unit test proves no unrelated rows are included. Real corpus end-to-end delivery assertion remains pending; P3 stays IN_PROGRESS."
+        },
+        {
+          "at_unix": 1791983912.8258693,
+          "command": "nohup detached timeout-bounded run of scripts/o931_real_corpus_chat_acceptance_bounded.py with 120 real SMS rows (pre-discrimination gate)",
+          "result": "PASS_BOUNDED; exit code 0; answer contains held-out full row and shrank from 3249 to 733 characters, but includes two additional partially related records; source hashes unchanged; runtime CLOSED cleanly.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_record_ranked.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_record_ranked.stderr.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_record_ranked.exitcode; logs/O931/real_corpus_sms_chat_acceptance_bounded_retest.json",
+          "interpretation": "This run demonstrates end-to-end delivery to the user, not merely retrieval/prompt inclusion. The target row and citation appear in output, and the process exits normally. The 1000-character budget and a record-score margin were added after this run, so a new final retest is required before resolving ambiguity."
+        },
+        {
+          "at_unix": 1791983912.8258693,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/runtime.py scripts/o931_real_corpus_chat_acceptance_bounded.py tests/test_o931_record_preserving_rag.py; timeout 45s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_record_preserving_rag.py tests/test_o931_chat_pipeline.py",
+          "result": "PASS: compile exit 0; 10 tests passed, 0 failed.",
+          "evidence": "logs/O931/p3_record_match_discrimination_compile.stdout.txt; logs/O931/p3_record_match_discrimination_compile.stderr.txt; logs/O931/p3_record_match_discrimination_compile.exitcode; logs/O931/p3_record_match_discrimination_tests.stdout.txt; logs/O931/p3_record_match_discrimination_tests.stderr.txt; logs/O931/p3_record_match_discrimination_tests.exitcode; logs/O931/preflight_before_record_match_discrimination.json",
+          "interpretation": "The stricter generic ranking and answer length bound compile cleanly, with record-level fallback and chat pipeline unit contracts passing. End-to-end retest is pending; P3 remains IN_PROGRESS."
+        },
+        {
+          "at_unix": 1791984004.4038231,
+          "command": "Detached: AAM_O931_REPORT_PATH=logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.json timeout -k 2s 55s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance_bounded.py",
+          "result": "PASS_BOUNDED; shell exit 0; 120 real SMS rows; relevant row excluded from language-model training but included in RAG; actual trained compact model invoked; malformed candidate rejected; fallback displays one full cited target record only (340 chars); answer-budget gate passes; source archive and selected RAG source hashes unchanged; runtime closes CLOSED cleanly.",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.json; logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.stderr.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.exitcode; logs/O931/preflight_before_final_record_discrimination_e2e.json",
+          "interpretation": "End-to-end bounded real-data criteria pass for retrieval, trained capsule invocation, prompt/context/citation provenance, user-visible selected record, ≤1000-character fallback, clean shutdown and unchanged source hashes. Full 5574-row experiment remains UNVALIDATED after earlier timeout. P3 remains open pending version-identity test and remaining regression gates."
+        },
+        {
+          "at_unix": 1791984026.3938913,
+          "command": "timeout 65s env PYTHONPATH=. TERM=xterm pytest -q tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py",
+          "result": "PASS: 12 passed, 0 failed, exit 0.",
+          "evidence": "logs/O931/p3_version_metadata_foundation_retest.stdout.txt; logs/O931/p3_version_metadata_foundation_retest.stderr.txt; logs/O931/p3_version_metadata_foundation_retest.exitcode; logs/O931/preflight_before_version_metadata_regression.json",
+          "interpretation": "Foundational and O930 artifact tests pass after version identity correction. The specific version fields will be independently inspected and asserted before resolving the release-identity ledger item. P3 remains IN_PROGRESS."
+        },
+        {
+          "at_unix": 1791984140.0104237,
+          "command": "timeout 70s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_autonomy_boot_lifecycle.py tests/test_p6_autonomy.py",
+          "result": "FAIL: 2 failed, 6 passed",
+          "evidence": "logs/O931/p3_autonomy_lifecycle_initial_fail.json; logs/O931/p3_autonomy_lifecycle_initial_fail.stdout.txt",
+          "interpretation": "Autostart/pulse occurred. One O93_1 acceptance assertion misread the intentionally flattened recent_events API; one P6 check raced a pulse before the reasoning append completed. Both retained as red results until exact retest."
+        },
+        {
+          "at_unix": 1791984188.521481,
+          "command": "timeout 80s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_autonomy_boot_lifecycle.py tests/test_p6_autonomy.py",
+          "result": "FAIL: 1 failed, 7 passed",
+          "evidence": "logs/O931/p3_autonomy_lifecycle_retest.json; logs/O931/p3_autonomy_lifecycle_retest.stdout.txt",
+          "interpretation": "Two prior test-harness assumptions are resolved: recent_events is a reduced view and reasoning-file creation needs a bounded wait. P6 suite now passes. Remaining failure is only the new acceptance test requesting recent_events(limit=2000), above the documented maximum of 1000; rerun after using the full audit file or a compliant limit."
+        },
+        {
+          "at_unix": 1791984229.3904462,
+          "command": "timeout 80s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_autonomy_boot_lifecycle.py tests/test_p6_autonomy.py",
+          "result": "PASS: 8 passed, 0 failed",
+          "evidence": "logs/O931/p3_autonomy_lifecycle_final_targeted.json; logs/O931/p3_autonomy_lifecycle_final_targeted.stdout.txt",
+          "interpretation": "The runtime boot policy now autostarts autonomy by default. User-request pause/resume, explicit stop without closing AAM, restart, clean close and audit integrity pass. The P6 reasoning persistence test passes after its wait condition became synchronized with durable append."
+        },
+        {
+          "at_unix": 1791984297.5790436,
+          "command": "timeout 80s xvfb-run -a env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_ui_smoke.py",
+          "result": "TIMEOUT_INCOMPLETE; no test results captured",
+          "evidence": "logs/O931/p3_ui_autonomy_lifecycle_retest.json; logs/O931/p3_ui_autonomy_lifecycle_retest.stdout.txt",
+          "interpretation": "The full Tk UI smoke suite remained alive beyond 80 seconds and the outer runner did not receive a result. This is a test lifecycle/runner anomaly to isolate; do not mark any test pass from this attempt."
+        },
+        {
+          "at_unix": 1791984379.4783943,
+          "command": "timeout -k 2s 32s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -vv -s tests/test_o931_ui_smoke.py::test_o931_chat_layout_initializes_and_model_controls_are_visible",
+          "result": "TIMEOUT_INCOMPLETE after collection; 1 test entered",
+          "evidence": "logs/O931/p3_ui_single_test_diagnostic.json; logs/O931/p3_ui_single_test_diagnostic.stdout.txt",
+          "interpretation": "Single test reproduces the UI hang; no test body result. Next run will add flushed stage markers and a faulthandler traceback to localize the blocking call."
+        },
+        {
+          "at_unix": 1791984453.5804248,
+          "command": "timeout -k 2s 26s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -vv -s tests/test_o931_ui_smoke.py::test_o931_chat_layout_initializes_and_model_controls_are_visible",
+          "result": "TIMEOUT_WITH_STACK_TRACE: UI lifecycle action blocked by modal busy dialog",
+          "evidence": "logs/O931/p3_ui_stack_diagnostic.json; logs/O931/p3_ui_stack_diagnostic.stdout.txt",
+          "interpretation": "Confirmed defect: manual autonomy stop/restart immediately calls async status refresh; if another UI task owns the busy gate, _run opens modal info and blocks the lifecycle action. Fix only lifecycle status rendering and add busy-state retest."
+        },
+        {
+          "at_unix": 1791984598.8182786,
+          "command": "timeout -k 2s 30s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -vv -s tests/test_o931_ui_smoke.py::test_o931_chat_layout_initializes_and_model_controls_are_visible",
+          "result": "1 passed in 0.58s",
+          "evidence": "logs/O931/p3_ui_lifecycle_busy_gate_retest.stdout.txt; logs/O931/p3_ui_lifecycle_busy_gate_retest.exitcode; logs/O931/p3_ui_lifecycle_busy_gate_retest.json",
+          "interpretation": "The corrected manual autonomy stop/restart controls no longer call the shared asynchronous status runner and do not open a modal busy dialog when an unrelated UI task is active. The test asserts autonomy can stop while AAM stays open, restart, and then close AAM explicitly. This is a targeted Xvfb/UI test, not full UI acceptance."
+        },
+        {
+          "at_unix": 1791984637.610556,
+          "command": "timeout -k 3s 90s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -vv -s tests/test_o931_ui_smoke.py",
+          "result": "2 passed in 0.88s",
+          "evidence": "logs/O931/p3_full_ui_smoke_after_busy_gate_fix.stdout.txt; logs/O931/p3_full_ui_smoke_after_busy_gate_fix.exitcode; logs/O931/p3_full_ui_smoke_after_busy_gate_fix.json",
+          "interpretation": "The entire O93_1 Tk smoke file passes under Xvfb, including busy-state autonomy stop/restart with AAM left open, explicit AAM close, responsive controls, and actual trained capsule selection. No external OS or physical device acceptance implied."
+        },
+        {
+          "at_unix": 1791984694.459386,
+          "command": "timeout -k 3s 100s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py tests/test_o931_autonomy_boot_lifecycle.py tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p1_o930_observer_upgrade.py tests/test_p1_observer.py tests/test_p2_probes.py tests/test_p3_competencies.py tests/test_p3_semantic_rag.py tests/test_p4_acquisition.py tests/test_p4_competence_graph.py",
+          "result": "93 passed, 7 subtests passed in 17.14s",
+          "evidence": "logs/O931/p3_core_regression_after_lifecycle_ui_fix.stdout.txt; logs/O931/p3_core_regression_after_lifecycle_ui_fix.exitcode; logs/O931/p3_core_regression_after_lifecycle_ui_fix.json",
+          "interpretation": "Core chat/RAG/capsule, UI smoke, runtime autonomy boot lifecycle, legacy foundation, observer/probes, competencies, semantic RAG and acquisition regression all pass on the current O93_1 source tree after UI lifecycle fix. Local bounded regression only; source data unchanged check still pending."
+        },
+        {
+          "at_unix": 1791984731.5237188,
+          "command": "timeout -k 3s 100s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -q tests/test_p4_ui_integration.py tests/test_p5_autonomy_o930.py tests/test_p5_knowledge.py tests/test_p6_autonomy.py tests/test_p6_competence_profiles.py tests/test_p6_memory_causal_graph_view.py tests/test_p6_memory_event_inspection.py tests/test_p6_probe_management.py tests/test_p6_probe_ui_contracts.py tests/test_p6_source_inspector.py tests/test_p6_ui_initial_catalog_sequence.py tests/test_p6_ui_integration.py",
+          "result": "63 passed in 11.34s",
+          "evidence": "logs/O931/p3_autonomy_memory_ui_after_lifecycle_fix.stdout.txt; logs/O931/p3_autonomy_memory_ui_after_lifecycle_fix.exitcode; logs/O931/p3_autonomy_memory_ui_after_lifecycle_fix.json",
+          "interpretation": "Autonomy scheduling, causal memory, competency profiles, probe management, source inspection and UI integration pass after the default runtime autonomy startup and UI busy-gate lifecycle changes. Local regression only."
+        },
+        {
+          "at_unix": 1791984783.3266618,
+          "command": "timeout -k 3s 100s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -q tests/test_p7_dataset_service.py tests/test_p7_integrated.py tests/test_p7_training_control.py tests/test_p8_action_router.py tests/test_p8_integration.py tests/test_p8_security.py",
+          "result": "61 passed, 14 subtests passed in 21.34s",
+          "evidence": "logs/O931/p3_dataset_training_router_security_after_lifecycle_fix.stdout.txt; logs/O931/p3_dataset_training_router_security_after_lifecycle_fix.exitcode; logs/O931/p3_dataset_training_router_security_after_lifecycle_fix.json",
+          "interpretation": "Dataset ingestion, training controls, task routing, end-to-end integration and security tests pass on the current O93_1 source tree after lifecycle/UI fixes; these local mocked/bounded tests do not claim external device or service acceptance."
+        },
+        {
+          "at_unix": 1791984829.6385734,
+          "command": "timeout -k 3s 100s xvfb-run -a env PYTHONPATH=. TERM=xterm python -u -m pytest -q tests/test_o930_preflight_dependency_closure.py tests/test_p9_capacity_evidence.py tests/test_p9_preflight_status_vocabulary.py tests/test_p9_preregistered_v2_integrity.py",
+          "result": "23 passed in 0.16s",
+          "evidence": "logs/O931/p3_phase_gate_compatibility_after_lifecycle_ui_fix.stdout.txt; logs/O931/p3_phase_gate_compatibility_after_lifecycle_ui_fix.exitcode; logs/O931/p3_phase_gate_compatibility_after_lifecycle_ui_fix.json",
+          "interpretation": "Preflight dependency closure, bounded terminal status vocabulary, preregistered integrity and phase-order compatibility tests pass; P3 remains active and P4 is not launched by this run."
+        },
+        {
+          "at_unix": 1791984980.9728627,
+          "command": "AAM_O931_REPORT_PATH=logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.json timeout -k 3s 110s env PYTHONPATH=. python -u scripts/o931_real_corpus_chat_acceptance_bounded.py",
+          "result": "ERROR_INCOMPLETE: BrokenPipe at stage rag_ingested after 37.003s; no final RAG/model response result",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.json; logs/O931/p3_real_sms_acceptance_after_lifecycle_ui_fix_attempt1.json",
+          "interpretation": "Do not classify this run as a model failure or acceptance pass. The interruption aligns with a stdout/command-runner BrokenPipe before the training/chat result. Preserve as a failed attempt and rerun with file redirection rather than tee/pipeline."
+        },
+        {
+          "at_unix": 1791985113.9636357,
+          "command": "AAM_O931_REPORT_PATH=logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.json timeout -k 3s 100s env PYTHONPATH=. python -u scripts/o931_real_corpus_chat_acceptance_bounded.py > logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.stdout.txt 2>&1",
+          "result": "APPLICATION_REPORT_PASS_BOUNDED; OUTER_TOOL_TIMEOUT_NO_EXITCODE_RECEIPT",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.json; logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_after_lifecycle_fix_attempt1.json; logs/O931/p3_real_sms_acceptance_after_lifecycle_ui_fix_attempt1.json; logs/O931/p3_real_sms_acceptance_after_lifecycle_ui_fix_attempt2.json",
+          "interpretation": "Strong positive evidence for real local routing/RAG/capsule invocation and provenance, with an explicit model-quality limitation: the compact capsule candidate was generated but unusable, so user-visible output came from cited retrieval fallback. Do not claim that generated text itself was a good answer. Retest runner exit handling separately before marking the acceptance shell lifecycle clean."
+        },
+        {
+          "at_unix": 1791985251.7809732,
+          "command": "AAM_O931_REPORT_PATH=logs/O931/real_corpus_sms_chat_acceptance_bounded_exit_isolation.json timeout -k 2s 80s env PYTHONPATH=. python -u scripts/o931_real_corpus_chat_acceptance_bounded.py > logs/O931/real_corpus_sms_chat_acceptance_bounded_exit_isolation.stdout.txt 2>&1",
+          "result": "APPLICATION_PASS_BOUNDED; FOREGROUND_TOOL_TIMEOUT_NO_WRAPPER_EXITCODE",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_exit_isolation.json; logs/O931/real_corpus_sms_chat_acceptance_bounded_exit_isolation.stdout.txt; logs/O931/p3_real_sms_acceptance_exit_isolation_attempt3.json",
+          "interpretation": "Application report reaches PASS_BOUNDED at 39.862 s; held-out SMS appears in retrieval evidence, exact model prompt and delivered cited fallback; trained capsule hash matches, model invocation and rejection events are present, original archive and sample remain unchanged, runtime reports CLOSED/STOPPED and lock release, and atexit is reached. The tool invocation hit its foreground execution ceiling before a wrapper exit-code receipt could be produced. Re-run in a detached worker with persistent exit-code file to distinguish tool ceiling from process exit hang."
+        },
+        {
+          "at_unix": 1791985333.736222,
+          "command": "nohup supervised runner: timeout -k 3s 75s env PYTHONPATH=. python -u scripts/o931_real_corpus_chat_acceptance_bounded.py with stdout redirection and persistent PID/exit-code receipt",
+          "result": "application=PASS_BOUNDED; runner_exit_code=0; duration=40.146s; model_invoked=True; heldout_in_evidence/prompt/answer=True/True/True; answer_source=extractive_fallback; chars=340; source_unchanged=True/True; runtime_shutdown_clean=True",
+          "evidence": "logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.json; logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.stdout.txt; logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.exitcode; logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.wrapper_receipt; logs/O931/p3_real_sms_acceptance_detached_exit_check.json",
+          "interpretation": "The detached, supervised runner exits normally with code 0 and the acceptance report passes. It demonstrates actual semantic-RAG retrieval and exact-prompt inclusion of a held-out SMS row, invocation of the trained local capsule with matching hash, provenance, source hash preservation and clean autonomy shutdown. The model candidate was genuinely generated but was unusable (<unk>, too few tokens, zero RAG anchors), so the delivered answer was a cited complete-record extractive fallback. This is not evidence that the compact model independently generated a correct answer; it is evidence that the runtime transparently rejects an unusable candidate and serves retrieved source evidence."
+        },
+        {
+          "at_unix": 1791985426.020132,
+          "command": "env PYTHONPATH=. python -u -m pytest -q tests/test_o931_release_identity.py",
+          "result": "FAIL: test assumes raw audit event[\"payload\"][\"version\"], KeyError; public/status version assertions passed",
+          "evidence": "logs/O931/p3_release_identity_consistency.stdout.txt; logs/O931/p3_release_identity_consistency.exitcode; logs/O931/p3_release_identity_consistency_attempt1.json",
+          "interpretation": "Do not resolve the prior release metadata issue yet. Preserve this failed test and align the assertion to the real hash-chained event record schema after inspecting it; if version truly absent, correct runtime emission rather than weakening the check."
+        },
+        {
+          "at_unix": 1791985471.1397882,
+          "command": "env PYTHONPATH=. python -u -m pytest -q tests/test_o931_release_identity.py",
+          "result": "1 passed in 0.23s",
+          "evidence": "logs/O931/p3_release_identity_consistency_retest.stdout.txt; logs/O931/p3_release_identity_consistency_retest.exitcode; tests/test_o931_release_identity.py; logs/O931/p3_release_identity_consistency_retest.json",
+          "interpretation": "Package __version__, runtime status version, raw hash-chained runtime.boot payload.data.version, and checkpoint state runtime_version all match 0.93.1; audit hash verification and runtime close pass. The previous failure was corrected by aligning the test to the actual memory-event schema, not by relaxing release identity checks."
+        },
+        {
+          "at_unix": 1791985684.8666253,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_ui_smoke.py tests/test_o931_autonomy_boot_lifecycle.py tests/test_p0_foundation.py tests/test_p0_o930_artifacts.py tests/test_p1_o930_observer_upgrade.py tests/test_p1_observer.py tests/test_p2_probes.py tests/test_p3_competencies.py tests/test_p3_semantic_rag.py tests/test_p4_acquisition.py tests/test_p4_competence_graph.py",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/core_rag_observer_ui.stdout.txt",
+          "interpretation": "Retest pass on the current O93_1 source tree.",
+          "receipt": "logs/O931/core_rag_observer_ui.json",
+          "stderr": "logs/O931/core_rag_observer_ui.stderr.txt",
+          "exit_code": 0,
+          "duration_seconds": 20.921
+        },
+        {
+          "at_unix": 1791985759.9083815,
+          "command": "PYTHONPATH=. python -u scripts/o931_finalize_p3_regression.py (five groups; process externally interrupted during autonomy_memory_ui group)",
+          "result": "INTERRUPTED_OUTER_RUNNER_NO_GROUP_RECEIPT",
+          "evidence": "logs/O931/p3_final_regression_matrix_outer_timeout.json",
+          "interpretation": "Harness interruption only; group two has no verdict and is rerun separately with child-process-group cleanup."
+        },
+        {
+          "at_unix": 1791985781.6851034,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_p4_ui_integration.py tests/test_p5_autonomy_o930.py tests/test_p5_knowledge.py tests/test_p6_autonomy.py tests/test_p6_competence_profiles.py tests/test_p6_memory_causal_graph_view.py tests/test_p6_memory_event_inspection.py tests/test_p6_probe_management.py tests/test_p6_probe_ui_contracts.py tests/test_p6_source_inspector.py tests/test_p6_ui_initial_catalog_sequence.py tests/test_p6_ui_integration.py",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_final_autonomy_memory_ui.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_final_autonomy_memory_ui.json",
+          "exit_code": 0,
+          "duration_seconds": 14.745
+        },
+        {
+          "at_unix": 1791985814.3551493,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_p7_dataset_service.py tests/test_p7_integrated.py tests/test_p7_training_control.py tests/test_p8_action_router.py tests/test_p8_integration.py tests/test_p8_security.py",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_final_dataset_training_router_security.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_final_dataset_training_router_security.json",
+          "exit_code": 0,
+          "duration_seconds": 26.721
+        },
+        {
+          "at_unix": 1791985823.7008855,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_o930_preflight_dependency_closure.py tests/test_p9_capacity_evidence.py tests/test_p9_preflight_status_vocabulary.py tests/test_p9_preregistered_v2_integrity.py",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_final_preregistered_p9_compatible.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_final_preregistered_p9_compatible.json",
+          "exit_code": 0,
+          "duration_seconds": 2.967
+        },
+        {
+          "at_unix": 1791985832.8861187,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_release_identity.py",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_final_release_identity.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_final_release_identity.json",
+          "exit_code": 0,
+          "duration_seconds": 2.822
+        },
+        {
+          "at_unix": 1791985898.3320892,
+          "command": "/opt/pyvenv/bin/python -W error::SyntaxWarning -m compileall -q aam_o92 aam_o93 tests scripts",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_final_compile_source_integrity.json",
+          "interpretation": "Warning-as-error compileall and source/archive integrity verification; full-corpus stress experiment remains separately NOT_VALIDATED.",
+          "exit_code": 0
+        },
+        {
+          "at_unix": 1791986027.121498,
+          "command": "timeout -k 5s 420s env PYTHONPATH=. python -u scripts/o931_real_corpus_chat_acceptance.py (supervised detached full-corpus retry)",
+          "result": "TIMEOUT_NON_VALIDATED: supervisor exit 124 after 420 seconds; no report emitted",
+          "evidence": "logs/O931/p3_full_sms_corpus_acceptance_timeout_receipt.json",
+          "interpretation": "Actual 5,574-row corpus test timed out while constructing/processing the full semantic RAG; this diagnoses a scalability problem in the current sparse-vector similarity aggregation, not model success/failure. Source archive remains hashed and unchanged. P3 remains open for exact algorithmic optimization and retest.",
+          "receipt": "logs/O931/p3_full_sms_corpus_acceptance_timeout_receipt.json",
+          "exit_code": 124,
+          "duration_seconds": 420
+        },
+        {
+          "at_unix": 1791986183.6321251,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/semantic_rag.py tests/test_o931_sparse_proximity_optimization.py; timeout -k 2s 80s env PYTHONPATH=. TERM=xterm python -m pytest -q tests/test_o931_sparse_proximity_optimization.py tests/test_p3_semantic_rag.py tests/test_o931_record_preserving_rag.py",
+          "result": "PASS_BOUNDED: compile exit 0; 17 tests passed in 1.68s",
+          "evidence": "logs/O931/p3_sparse_opt_test_receipt.json",
+          "receipt": "logs/O931/p3_sparse_opt_test_receipt.json",
+          "exit_code": 0,
+          "interpretation": "Exact inverted sparse-cosine similarity was checked against the previous exhaustive cosine semantics on deterministic synthetic vectors; core semantic-RAG and record-preserving tests passed. Full corpus performance remains unvalidated and P3 stays open."
+        },
+        {
+          "at_unix": 1791986282.0893123,
+          "command": "AAM_O931_REPORT_PATH=logs/O931/real_corpus_sms_chat_acceptance_sparse_opt.json timeout -k 5s 420s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance.py (detached supervised runner)",
+          "result": "INTERRUPTED_FOR_SCALABILITY_DIAGNOSIS_NON_VALIDATED: runner exit 143 after ~315s; no progress beyond source_loaded",
+          "evidence": "logs/O931/p3_full_sms_sparse_run_interrupted_receipt.json",
+          "receipt": "logs/O931/p3_full_sms_sparse_run_interrupted_receipt.json",
+          "pid": 10866,
+          "interpretation": "The initial inverted-postings optimization passed exactness unit tests but did not demonstrate acceptable progress on the complete 5,574-row source after >5 min CPU. This run was stopped to implement a stronger exact optimization; not a pass/fail judgment on model potential.",
+          "exit_code": 143
+        },
+        {
+          "at_unix": 1791986670.4095838,
+          "command": "Detached full corpus retest receipt review",
+          "result": "NOT_VALIDATED_INTERRUPTED_SUPERVISOR",
+          "evidence": [
+            "logs/O931/p3_full_sms_exact_sparse_retest_started.json",
+            "logs/O931/real_corpus_sms_chat_acceptance_sparse_opt.stdout.txt",
+            "logs/O931/real_corpus_sms_chat_acceptance_sparse_opt.exitcode",
+            "logs/O931/real_corpus_sms_chat_acceptance_sparse_opt.wrapper_receipt"
+          ],
+          "interpretation": "The optimized 5,574-row retest terminated with supervisor/process exit 143 after 328 seconds, no final application report; it is not counted as pass or model failure."
+        },
+        {
+          "at_unix": 1791986687.826752,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/semantic_rag.py tests/test_o931_sparse_proximity_optimization.py; timeout -k 2s 80s env PYTHONPATH=. pytest -q tests/test_o931_sparse_proximity_optimization.py tests/test_p3_semantic_rag.py tests/test_o931_record_preserving_rag.py",
+          "result": "FAIL_BOUNDED_RETEST_REQUIRED: 1 failed, 18 passed; generic max-cosine helper did not exclude self when query/peer sets overlap",
+          "evidence": "logs/O931/p3_feature_sum_sparse_failure_receipt.json",
+          "receipt": "logs/O931/p3_feature_sum_sparse_failure_receipt.json",
+          "exit_code": 1,
+          "interpretation": "This is a contract failure in the new sparse max helper. Preserve the red receipt; fix self-exclusion and rerun before any full-corpus test."
+        },
+        {
+          "at_unix": 1791986732.8664148,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_language_model_training_surface.py::test_runtime_training_creates_chat_selectable_capsule_and_chat_invokes_it tests/test_o931_language_model_training_surface.py::test_language_model_stop_keeps_checkpoint_but_does_not_publish_partial_capsule tests/test_o931_language_model_training_surface.py::test_cli_exposes_and_executes_explicit_language_model_training",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_language_model_training_api_cli_stop.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_language_model_training_api_cli_stop.json",
+          "exit_code": 0,
+          "duration_seconds": 2.527
+        },
+        {
+          "at_unix": 1791986733.448632,
+          "command": "python -W error::SyntaxWarning -m py_compile aam_o93/semantic_rag.py tests/test_o931_sparse_proximity_optimization.py; timeout -k 2s 80s env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_sparse_proximity_optimization.py tests/test_p3_semantic_rag.py tests/test_o931_record_preserving_rag.py",
+          "result": "PASS_BOUNDED: compile exit 0; 19 tests passed in 1.81s",
+          "evidence": "logs/O931/p3_feature_sum_sparse_retest_receipt.json",
+          "receipt": "logs/O931/p3_feature_sum_sparse_retest_receipt.json",
+          "exit_code": 0,
+          "interpretation": "Exact normalized-feature aggregation and block sparse max passed tests against legacy exhaustive scores within 1e-12, including self exclusion; semantic-RAG and record-preserving regression passed. Full corpus rerun still required."
+        },
+        {
+          "at_unix": 1791986761.6559284,
+          "command": "AAM_O931_REPORT_PATH=logs/O931/real_corpus_sms_chat_acceptance_feature_sum.json timeout -k 5s 420s env PYTHONPATH=. TERM=xterm python -u scripts/o931_real_corpus_chat_acceptance.py (detached supervised runner)",
+          "result": "RUNNING: 5,574 rows loaded; exact normalized feature-sum mean plus block sparse max implementation; progress markers enabled",
+          "evidence": "logs/O931/p3_full_sms_feature_sum_block_sparse_max_started.json",
+          "receipt": "logs/O931/p3_full_sms_feature_sum_block_sparse_max_started.json",
+          "exit_code": null,
+          "interpretation": "Fresh full-corpus RAG/chat/training experiment after P3 preflight PASS and 19-test algorithm equivalence retest. Status must not be promoted until final JSON report and persistent shell exit code are both read."
+        },
+        {
+          "at_unix": 1791987037.4049735,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm pytest -q tests/test_o931_language_model_training_surface.py::test_ui_training_button_trains_and_selects_capsule_in_chat tests/test_o931_ui_smoke.py",
+          "result": "NOT_VALIDATED_INTERRUPTED_OUTER_TOOL",
+          "evidence": "logs/O931/p3_language_model_training_ui_xvfb.stdout.txt; logs/O931/p3_language_model_training_ui_xvfb.stderr.txt; logs/O931/p3_language_model_ui_stack_diagnostic.stderr.txt",
+          "interpretation": "The first real UI test did not produce a pytest verdict before the outer tool interruption. Follow-up stack diagnostics reproduced a blocking modal from the scheduled semantic-space catalog refresh while busy; preserve as an environment/test-run interruption, and separately fix the reproduced UI defect.",
+          "exit_code": 124,
+          "diagnostic_receipt": "logs/O931/p3_ui_scheduled_catalog_modal_diagnosis.json"
+        },
+        {
+          "at_unix": 1791987047.6983507,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_ui_busy_catalog_refresh.py tests/test_o931_language_model_training_surface.py::test_ui_training_button_trains_and_selects_capsule_in_chat",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_ui_deferred_catalog_refresh.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_ui_deferred_catalog_refresh.json",
+          "exit_code": 0,
+          "duration_seconds": 3.444
+        },
+        {
+          "at_unix": 1791987125.0213714,
+          "command": "PYTHONPATH=. python -u scripts/o931_single_batch_runner.py --label p3_language_model_training_ui_smoke_retest --timeout 65 --xvfb tests/test_o931_language_model_training_surface.py::test_ui_training_button_trains_and_selects_capsule_in_chat tests/test_o931_ui_smoke.py tests/test_o931_ui_busy_catalog_refresh.py",
+          "result": "NOT_VALIDATED_INTERRUPTED_OUTER_TOOL_AFTER_THREE_DOTS",
+          "evidence": "logs/O931/p3_language_model_training_ui_smoke_retest.stdout.txt; logs/O931/p3_language_model_training_ui_smoke_retest.stderr.txt",
+          "interpretation": "Three tests emitted successful pytest dots before the outer tool interrupted the process; no final summary/code was written. No aggregate success is inferred. Re-run tests individually to isolate the fourth test.",
+          "exit_code": null,
+          "diagnostic": "stdout has three dots; stderr empty; process exited by external termination"
+        },
+        {
+          "at_unix": 1791987134.8959723,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_language_model_training_surface.py::test_ui_training_button_trains_and_selects_capsule_in_chat",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_lm_training_ui_single.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_lm_training_ui_single.json",
+          "exit_code": 0,
+          "duration_seconds": 3.181
+        },
+        {
+          "at_unix": 1791987147.6435862,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_ui_smoke.py::test_o931_chat_layout_initializes_and_model_controls_are_visible",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_ui_smoke_layout_single.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_ui_smoke_layout_single.json",
+          "exit_code": 0,
+          "duration_seconds": 2.943
+        },
+        {
+          "at_unix": 1791987156.7480605,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_ui_smoke.py::test_chat_model_selector_lists_and_selects_a_real_trained_capsule",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_ui_real_trained_capsule_single.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_ui_real_trained_capsule_single.json",
+          "exit_code": 0,
+          "duration_seconds": 2.963
+        },
+        {
+          "at_unix": 1791987181.8379714,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_language_model_training_surface.py::test_language_model_training_pause_resume_is_cooperative",
+          "result": "FAIL",
+          "evidence": "logs/O931/p3_lm_training_pause_resume.stdout.txt",
+          "interpretation": "Group failed/interrupted; preserved without promotion to pass.",
+          "receipt": "logs/O931/p3_lm_training_pause_resume.json",
+          "exit_code": 1,
+          "duration_seconds": 2.277
+        },
+        {
+          "at_unix": 1791987237.1998336,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_language_model_training_surface.py::test_language_model_training_pause_resume_is_cooperative",
+          "result": "FAIL",
+          "evidence": "logs/O931/p3_lm_training_pause_resume_retest.stdout.txt",
+          "interpretation": "Group failed/interrupted; preserved without promotion to pass.",
+          "receipt": "logs/O931/p3_lm_training_pause_resume_retest.json",
+          "exit_code": 1,
+          "duration_seconds": 12.206
+        },
+        {
+          "at_unix": 1791987258.615861,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_language_model_training_surface.py::test_language_model_training_pause_resume_is_cooperative",
+          "result": "FAIL",
+          "evidence": "logs/O931/p3_lm_training_pause_resume_bounded.stdout.txt",
+          "interpretation": "Group failed/interrupted; preserved without promotion to pass.",
+          "receipt": "logs/O931/p3_lm_training_pause_resume_bounded.json",
+          "exit_code": 1,
+          "duration_seconds": 3.032
+        },
+        {
+          "at_unix": 1791987283.811048,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_language_model_training_surface.py::test_language_model_training_pause_resume_is_cooperative",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_lm_training_pause_resume_final.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_lm_training_pause_resume_final.json",
+          "exit_code": 0,
+          "duration_seconds": 2.776
+        },
+        {
+          "at_unix": 1791987370.7052512,
+          "command": "env PYTHONPATH=. /opt/pyvenv/bin/python -u -m pytest -q tests/test_o931_chat_pipeline.py tests/test_p3_semantic_rag.py tests/test_o931_language_model_training_surface.py::test_runtime_training_creates_chat_selectable_capsule_and_chat_invokes_it tests/test_o931_language_model_training_surface.py::test_language_model_stop_keeps_checkpoint_but_does_not_publish_partial_capsule tests/test_o931_language_model_training_surface.py::test_cli_exposes_and_executes_explicit_language_model_training tests/test_o931_language_model_training_surface.py::test_language_model_training_pause_resume_is_cooperative",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p3_current_chat_rag_lm_regression.stdout.txt",
+          "interpretation": "Group test suite passed.",
+          "receipt": "logs/O931/p3_current_chat_rag_lm_regression.json",
+          "exit_code": 0,
+          "duration_seconds": 7.763
+        }
+      ],
+      "gates": [
+        {
+          "criterion": "Generation quality failure has a generic, non-target-specific rejection/fallback test and is resolved only after retest",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py::test_unusable_generated_candidate_is_traced_but_not_selected_over_observed_evidence",
+            "logs/O931/p3_candidate_gate_contract_retest.stdout.txt",
+            "logs/O931/p3_regression_batch2_autonomy_memory_ui_retest.stdout.txt"
+          ],
+          "checked_unix": 1791982321.153589
+        },
+        {
+          "criterion": "Dataset/training, router, integration and security regression batch passed",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p3_regression_batch3_dataset_training_security_result.json"
+          ],
+          "checked_unix": 1791982321.153589
+        },
+        {
+          "criterion": "Transcript formatter transparently explains actual model invocation versus delivered fallback",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "aam_o93/ui.py::format_chat_result",
+            "tests/test_o931_chat_pipeline.py::test_human_readable_formatter_explains_extractive_fallback_after_rejecting_candidate",
+            "logs/O931/p3_ui_formatter_contract_test_result.json"
+          ],
+          "checked_unix": 1791982432.4798303
+        },
+        {
+          "criterion": "Extractive fallback selects relevant complete records from multi-record tabular chunks, preserves citations and avoids dumping unrelated records",
+          "status": "PASS_BOUNDED_E2E",
+          "evidence": [
+            "aam_o93/runtime.py::AAMRuntime._extractive_fallback",
+            "tests/test_o931_record_preserving_rag.py::test_extractive_fallback_selects_complete_relevant_record_from_multirecord_chunk",
+            "logs/O931/p3_record_match_discrimination_tests.stdout.txt",
+            "logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.json",
+            "logs/O931/real_corpus_sms_chat_acceptance_bounded_final_record_discrimination.exitcode"
+          ],
+          "checked_unix": 1791984004.4038231
+        },
+        {
+          "criterion": "Autonomy automatically starts at runtime boot, remains available across a user request, can be manually stopped without closing AAM, can restart, and stops cleanly on runtime close",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "tests/test_o931_autonomy_boot_lifecycle.py",
+            "tests/test_p6_autonomy.py",
+            "logs/O931/p3_autonomy_lifecycle_final_targeted.json",
+            "logs/O931/p3_autonomy_lifecycle_10x_retest.txt",
+            "logs/O931/p4_archive_validation_amodel_autonomy_intermit_retest.json"
+          ],
+          "scope": "local runtime lifecycle; no external permissions implied",
+          "note": "A single initial archive-suite timing failure is retained in the error ledger; standalone, grouped, full-suite and 10x fresh-workspace retests passed. Monitor status remains explicit."
+        },
+        {
+          "criterion": "UI autonomy stop/restart controls remain usable while unrelated UI work owns the busy gate; stopping the loop leaves AAM open and explicit close shuts it down.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "tests/test_o931_ui_smoke.py::test_o931_chat_layout_initializes_and_model_controls_are_visible",
+            "logs/O931/p3_ui_lifecycle_busy_gate_retest.stdout.txt",
+            "logs/O931/p3_ui_lifecycle_busy_gate_retest.exitcode",
+            "logs/O931/p3_ui_lifecycle_busy_gate_retest.json"
+          ],
+          "checked_unix": 1791984598.8182786
+        },
+        {
+          "criterion": "Full Tk UI smoke suite passes after lifecycle controls were made independent of the shared async busy gate.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "tests/test_o931_ui_smoke.py",
+            "logs/O931/p3_full_ui_smoke_after_busy_gate_fix.stdout.txt",
+            "logs/O931/p3_full_ui_smoke_after_busy_gate_fix.exitcode",
+            "logs/O931/p3_full_ui_smoke_after_busy_gate_fix.json"
+          ],
+          "checked_unix": 1791984637.610556
+        },
+        {
+          "criterion": "Core regression after runtime-autonomy and UI busy-gate changes; chat/RAG/generation, trained capsule selection, UI and legacy subsystems remain green.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "tests/test_o931_chat_pipeline.py",
+            "tests/test_o931_ui_smoke.py",
+            "tests/test_o931_autonomy_boot_lifecycle.py",
+            "logs/O931/p3_core_regression_after_lifecycle_ui_fix.stdout.txt",
+            "logs/O931/p3_core_regression_after_lifecycle_ui_fix.exitcode",
+            "logs/O931/p3_core_regression_after_lifecycle_ui_fix.json"
+          ],
+          "checked_unix": 1791984694.459386
+        },
+        {
+          "criterion": "Autonomy, causal memory, competency and UI integration regression passes after runtime/UI lifecycle changes.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p3_autonomy_memory_ui_after_lifecycle_fix.stdout.txt",
+            "logs/O931/p3_autonomy_memory_ui_after_lifecycle_fix.exitcode",
+            "logs/O931/p3_autonomy_memory_ui_after_lifecycle_fix.json"
+          ],
+          "checked_unix": 1791984731.5237188
+        },
+        {
+          "criterion": "Dataset/training, task routing, end-to-end integration and security suite passes after lifecycle/UI source changes.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p3_dataset_training_router_security_after_lifecycle_fix.stdout.txt",
+            "logs/O931/p3_dataset_training_router_security_after_lifecycle_fix.exitcode",
+            "logs/O931/p3_dataset_training_router_security_after_lifecycle_fix.json"
+          ],
+          "checked_unix": 1791984783.3266618
+        },
+        {
+          "criterion": "Phase transition and preregistered integrity gate tests pass without prematurely starting the next phase.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p3_phase_gate_compatibility_after_lifecycle_ui_fix.stdout.txt",
+            "logs/O931/p3_phase_gate_compatibility_after_lifecycle_ui_fix.exitcode",
+            "logs/O931/p3_phase_gate_compatibility_after_lifecycle_ui_fix.json"
+          ],
+          "checked_unix": 1791984829.6385734
+        },
+        {
+          "criterion": "Real bundled SMS acceptance: held-out original row present in RAG and exact prompt, trained capsule genuinely invoked, answer provenance and source hashes verified, clean runtime shutdown and recorded runner exit status.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.json",
+            "logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.stdout.txt",
+            "logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.exitcode",
+            "logs/O931/real_corpus_sms_chat_acceptance_bounded_detached_exit_check.wrapper_receipt",
+            "logs/O931/p3_real_sms_acceptance_detached_exit_check.json"
+          ],
+          "checked_unix": 1791985333.736222
+        },
+        {
+          "criterion": "O93_1 release identity is consistent across public API, runtime status, runtime boot event and checkpoint version fields.",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p3_release_identity_consistency_retest.stdout.txt",
+            "logs/O931/p3_release_identity_consistency_retest.exitcode",
+            "tests/test_o931_release_identity.py",
+            "logs/O931/p3_release_identity_consistency_retest.json"
+          ],
+          "checked_unix": 1791985471.1397882
+        },
+        {
+          "criterion": "Post-release-identity current P3 exit gate",
+          "status": "PASS_GATE_BOUNDED",
+          "evidence": [
+            "logs/O931/P3_exit_gate_post_release_identity_retests.json"
+          ],
+          "checked_unix": 1791985988.031109
+        },
+        {
+          "criterion": "Post-release-identity current P3 exit gate",
+          "status": "PASS_GATE_BOUNDED",
+          "evidence": [
+            "logs/O931/P3_exit_gate_post_LM_training_UI_retests.json"
+          ],
+          "checked_unix": 1791987487.0393543
+        }
+      ],
+      "completed_unix": 1791987487.0393543,
+      "completion_scope": "Core 93 tests + 7 subtests; current chat/RAG/LM regression 24; autonomy/memory/UI 63; dataset/training/router/security 61 + 14 subtests; P9-compatible 23; release identity 1; warning-as-error compile/source integrity; explicit LM API/CLI/UI capsule publication, cooperative pause/resume and stop-checkpoint tests; Tk UI layout/capsule selector/busy catalog refresh under Xvfb; real SMS bounded 120-row held-out test proves retrieval, prompt injection, exact trained capsule invocation, cited extractive fallback and source immutability. Full 5,574-row SMS acceptance remains NOT_VALIDATED and is not claimed passed.",
+      "exit_gate": {
+        "status": "PASS_GATE_BOUNDED",
+        "evidence": "logs/O931/P3_exit_gate_post_LM_training_UI_retests.json",
+        "checks": 15,
+        "passed": 15,
+        "failed": 0,
+        "deferred_validation": "O931-P3-REAL-SMS-FULL-CORPUS-TIMEOUT-001 remains NOT_VALIDATED"
+      },
+      "previous_completions": [
+        {
+          "at_unix": 1791982767.5050478,
+          "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+          "gate": "logs/O931/P3_exit_gate_report_retest.json",
+          "note": "Closure invalidated narrowly by package audit discovering mismatch between aam_o93.__version__ and runtime/status metadata. Retained historical closure proof, but it no longer authorizes P4 until relevant version/runtime tests pass."
+        },
+        {
+          "at_unix": 1791985988.031109,
+          "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+          "gate": "logs/O931/P3_exit_gate_post_release_identity_retests.json",
+          "note": "Phase reclosed after current O93_1 release identity and regression retests. Full corpus stress test remains explicitly NOT_VALIDATED."
+        },
+        {
+          "at_unix": 1791987487.0393543,
+          "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+          "gate": "logs/O931/P3_exit_gate_post_LM_training_UI_retests.json",
+          "note": "Phase reclosed after current O93_1 release identity and regression retests. Full corpus stress test remains explicitly NOT_VALIDATED."
+        }
+      ],
+      "reopened_unix": 1791982873.0830245,
+      "reopen_reason": "Packaging audit found aam_o93/__init__.py reports 0.93.0-dev0 while runtime boot/status report 0.93.1-dev0; release identity inconsistency must be fixed and retested.",
+      "history": [
+        {
+          "at_unix": 1791986116.518079,
+          "event": "P3 re-opened after a new 5,574-row SMS full-corpus acceptance attempt timed out at 420s without a report. Exact sparse-cosine optimization is now required; no test of that optimization has been run yet."
+        },
+        {
+          "at_unix": 1791990162.107281,
+          "event": "P3 post-extraction audit retry: full 49-test suite and ten autonomy lifecycle repetitions passed; the single earlier pulse timeout remains tracked as intermittent, not erased."
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Paquet et audit O93_1",
+      "status": "COMPLETE_LOCAL_TESTED_BOUNDED",
+      "depends_on": [
+        "P3"
+      ],
+      "exit_criteria": [
+        "Guide français complet inclus",
+        "Registre et checklists synchronisés",
+        "Manifestes recalculés",
+        "ZIP valides, extraction propre, self-check et tests sur extraction"
+      ],
+      "authorized_unix": 1791987487.0393543,
+      "started_unix": 1791987487.0393543,
+      "attempts": [
+        {
+          "at_unix": 1791982786.1188686,
+          "command": "python scripts/o931_preflight.py --label p4_packaging_audit_start",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/preflight_p4_packaging_audit_start.stdout.txt",
+          "interpretation": "P3 has formal exit gate PASS 11/11; P4 packaging/audit started. P4 scope is reports/guide/proof registry/manifest regeneration and independent extraction checks."
+        },
+        {
+          "at_unix": 1791987731.0530672,
+          "command": "xvfb-run -a env PYTHONPATH=. TERM=xterm /opt/pyvenv/bin/python -W error::SyntaxWarning -m pytest -q tests/test_o931_chat_pipeline.py tests/test_o931_language_model_training_surface.py tests/test_o931_ui_smoke.py tests/test_o931_ui_busy_catalog_refresh.py tests/test_o931_autonomy_boot_lifecycle.py tests/test_o931_record_preserving_rag.py tests/test_o931_sparse_proximity_optimization.py tests/test_o931_release_identity.py tests/test_p8_security.py tests/test_p8_integration.py",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p4_prepackage_regression.json",
+          "interpretation": "Current O93_1 package-preparation regression. A failed/timeout result is retained; P4 remains open until package extraction tests pass.",
+          "exit_code": 0,
+          "duration_seconds": 14.543
+        },
+        {
+          "at_unix": 1791988089.6036162,
+          "command": "pdflatex -interaction=nonstopmode -halt-on-error formalisme_O93_1.tex; laboratoire_O93_1.tex; then collect logs",
+          "result": "PASS_BOUNDED_AFTER_COLLECTOR_RETRY",
+          "evidence": "logs/O931/p4_tex_compile_retest.json",
+          "interpretation": "The first receipt collector failed due to assumed stdout filename; raw pdflatex output files proved both source files compiled; corrected collector recorded source and output hashes. No PDF visual inspection performed."
+        },
+        {
+          "at_unix": 1791988119.205012,
+          "command": "python scripts/o931_preflight.py --label p4_versioned_docs_and_registry_update; update guide/README/report/proof supplement",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p4_docs_sync_receipt.json",
+          "interpretation": "O93_1 guide status fixed; distinct LM training documented; versioned evidence supplement added. Legacy O93_0 proof registry left unchanged."
+        },
+        {
+          "at_unix": 1791988119.205012,
+          "command": "pdflatex -interaction=nonstopmode -halt-on-error formalisme_O93_1.tex; laboratoire_O93_1.tex",
+          "result": "PASS_BOUNDED_AFTER_COLLECTOR_RETRY",
+          "evidence": "logs/O931/p4_tex_compile_retest.json",
+          "interpretation": "Both TeX files compile. Initial literal \\n defect in formalisme was corrected; an initial collector naming assumption failed after pdflatex returned 0, and was recorded/resolved."
+        },
+        {
+          "at_unix": 1791988119.205012,
+          "command": "python verify_manifest.py --help",
+          "result": "RESOLVED_TOOL_USAGE",
+          "evidence": "logs/O931/p4_verification_tool_usage.json",
+          "interpretation": "The script accepts the package root as its first positional argument and does not implement --help; no data was changed. Final validation will pass a fresh extraction path."
+        },
+        {
+          "at_unix": 1791988186.767258,
+          "command": "python scripts/o931_refresh_manifests.py --root . --package Dmodel_AAM_O93_1 > logs/O931/p4_candidate_dmodel_manifest_refresh.json; python verify_manifest.py .",
+          "result": "FAIL_ONE_HASH_MISMATCH",
+          "evidence": "logs/O931/p4_candidate_manifest_verification_initial_failure.json",
+          "interpretation": "The stdout redirection mutated a manifest-listed file after manifest generation. Packaging method corrected; sources/dataset were not modified; phase remains open."
+        },
+        {
+          "at_unix": 1791988512.4408815,
+          "command": "pdflatex compilation output collector for follow-up extraction",
+          "result": "PASS_BOUNDED",
+          "evidence": "logs/O931/p4_followup_content_retest.json",
+          "interpretation": "Both TeX source files compiled with -halt-on-error; first collector assumption about filenames failed and is preserved separately. Corrected collector validated the actual output files."
+        },
+        {
+          "at_unix": 1791988650.3624737,
+          "command": "Synchronize candidate extraction receipts and resolve manifest redirection/mapping errors",
+          "result": "PASS_BOUNDED_CANDIDATES; FINAL_ARCHIVES_PENDING",
+          "evidence": "logs/O931/p4_candidate_validation_summary.json",
+          "interpretation": "Candidate tests passed, but the exact final archive still has to be rebuilt and re-extracted after P4 closure."
+        },
+        {
+          "at_unix": 1791988788.2585156,
+          "command": "Review P4 exit criteria, candidate extraction checks, manifest self-checks, proof register and TeX source compilation",
+          "result": "PASS_GATE_BOUNDED; final archive rebuild and exact hash extraction retest follow",
+          "evidence": "logs/O931/p4_candidate_validation_summary.json",
+          "interpretation": "Candidate Dmodel/Amodel each pass 49 target tests from clean extraction; follow-up content/manifest/TeX checks pass. Full corpus SMS remains NOT_VALIDATED."
+        },
+        {
+          "at_unix": 1791988788.2585156,
+          "command": "Close P4 after candidate package gates, synchronize documents, registries and error ledgers",
+          "result": "PASS_GATE_BOUNDED; exact final archives will be independently retested before release",
+          "evidence": "logs/O931/p4_phase_closure_gate.json",
+          "interpretation": "All P4 candidate exit criteria pass in local bounded scope. Full SMS acceptance is separately NOT_VALIDATED; external platform/hardware/network acceptance is NOT_RUN."
+        },
+        {
+          "at_unix": 1791989084.947299,
+          "command": "TERM=xterm PYTHONPATH=. xvfb-run -a python -W error::SyntaxWarning -m pytest -q [10 targeted chat/RAG/LM training/UI/autonomy/security modules]",
+          "result": "PASS_BOUNDED: 49 passed in 14.34s; fresh source regression",
+          "evidence": "logs/O931/p4_final_source_regression.json",
+          "interpretation": "Replayed after current O93_1 guide/checklist synchronization. Current source tree passes. Does not promote full SMS corpus acceptance; that remains NOT_VALIDATED.",
+          "exit_code": 0,
+          "duration_seconds": 14.34
+        }
+      ],
+      "history": [
+        {
+          "at_unix": 1791982873.0830245,
+          "event": "P4 paused: release audit found inconsistent O93_1 version metadata, which reopens P3 under dependency rules. Resume only after P3 relevant retests and new phase gate."
+        },
+        {
+          "at_unix": 1791985988.031109,
+          "event": "P4 resumed only after P3 current exit gate passed; full SMS corpus stress experiment remains separately NOT_VALIDATED."
+        },
+        {
+          "at_unix": 1791986116.518079,
+          "event": "P4 package/audit work paused: prior phase P3 re-opened by full-corpus performance timeout. Preserve earlier P4 prep attempts but do not proceed with P4 until P3 is re-closed through new evidence."
+        },
+        {
+          "at_unix": 1791987487.0393543,
+          "event": "P4 resumed only after P3 current exit gate passed; full SMS corpus stress experiment remains separately NOT_VALIDATED."
+        }
+      ],
+      "gates": [
+        {
+          "criterion": "Versioned O93_1 TeX sources compile with halt-on-error",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "formalisme_O93_1.tex",
+            "laboratoire_O93_1.tex",
+            "logs/O931/p4_tex_compile_retest.json",
+            "logs/O931/p4_tex_final_compile.json"
+          ]
+        },
+        {
+          "criterion": "French guide/README, versioned evidence register and P4 report synchronized",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "GUIDE_UTILISATEUR_O93_1.md",
+            "README.md",
+            "README_O93_RELEASE_FR.md",
+            "DELIVERY_STATE.txt",
+            "registre_prouves_O93_1.json",
+            "rapports_O93_1/rapport_phase_P4.md",
+            "logs/O931/p4_docs_sync_receipt.json"
+          ]
+        },
+        {
+          "criterion": "Model candidate: ZIP CRC, clean extraction, manifest, CLI status and target regression",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p4_candidate_dmodel_zip_build.json",
+            "logs/O931/p4_candidate_dmodel_clean_extraction.json",
+            "logs/O931/p4_candidate_dmodel_manifest_verify_extracted.json",
+            "logs/O931/p4_candidate_dmodel_cli_status.json",
+            "logs/O931/p4_candidate_dmodel_pytest_receipt.json"
+          ]
+        },
+        {
+          "criterion": "Audit candidate built from current code: clean extraction, manifest and same target regression",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p4_candidate_amodel_zip_build.json",
+            "logs/O931/p4_candidate_amodel_clean_extraction.json",
+            "logs/O931/p4_candidate_amodel_manifest_verify_extracted.json",
+            "logs/O931/p4_candidate_amodel_cli_status.json",
+            "logs/O931/p4_candidate_amodel_pytest_receipt.json"
+          ]
+        },
+        {
+          "criterion": "Follow-up candidate: clean extraction, manifest and required content/TeX compilation",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p4_candidate_followup_zip_build.json",
+            "logs/O931/p4_candidate_followup_clean_extraction.json",
+            "logs/O931/p4_candidate_followup_manifest_verify_extracted.json",
+            "logs/O931/p4_followup_content_retest.json"
+          ]
+        },
+        {
+          "criterion": "Manifest refresh redirection issue resolved after retest",
+          "status": "PASS_BOUNDED",
+          "evidence": [
+            "logs/O931/p4_candidate_manifest_verification_initial_failure.json",
+            "logs/O931/p4_candidate_dmodel_manifest_refresh_safe_result.json",
+            "logs/O931/p4_candidate_dmodel_manifest_verify_safe_result.json"
+          ]
+        },
+        {
+          "criterion": "P4 phase exit gate passed for documented bounded local package scope; final ZIP hashes/extraction/test receipts attached to delivery manifest and follow-up",
+          "status": "PASS_GATE_BOUNDED",
+          "evidence": [
+            "logs/O931/p4_phase_closure_gate.json",
+            "logs/O931/p4_candidate_validation_summary.json"
+          ]
+        }
+      ],
+      "completed_unix": 1791988788.2585156
+    }
+  ],
+  "history": [
+    {
+      "at_unix": 1791980356.1118495,
+      "event": "O93_1 incremental scope created; baseline reproduced; P0 in progress"
+    },
+    {
+      "at_unix": 1791980403.1396723,
+      "event": "P0 closed with PASS_REPRODUCED; next phase P1 authorized; initial defect retained OPEN until correction retest"
+    },
+    {
+      "at_unix": 1791980814.2831244,
+      "event": "P1 first pytest collection interrupted by missing PYTHONPATH; no functional tests ran; runner issue logged and next run will use PYTHONPATH=."
+    },
+    {
+      "at_unix": 1791980841.6828268,
+      "event": "P1 first functional test run completed: four failures retained, diagnosis required; no phase advance"
+    },
+    {
+      "at_unix": 1791980890.5263455,
+      "event": "P1 diagnosis: training uses run_id and the generator returns GENERATED_UNGROUNDED; one runtime status mapping defect confirmed; fix required before gate"
+    },
+    {
+      "at_unix": 1791980915.223039,
+      "event": "P1 patch: compact generator status GENERATED_UNGROUNDED is now treated as executed but unverified; py_compile passed; integration retest pending"
+    },
+    {
+      "at_unix": 1791980945.3181329,
+      "event": "P1 retest: 2 passed, 3 failed; generation was actually invoked; retain retrieval-evidence coverage concern and fix test contracts after inspection"
+    },
+    {
+      "at_unix": 1791981008.8149767,
+      "event": "P1 fixes applied: accept GENERATED_UNGROUNDED as an executed-but-unverified generation; use whole passages in extractive fallback; align event_type/run_id assertions; compile passed, retest pending"
+    },
+    {
+      "at_unix": 1791981059.0766902,
+      "event": "P1 core gates pass 5/5; remaining gate is O93 local-backend context contract test before closure"
+    },
+    {
+      "at_unix": 1791981111.9885798,
+      "event": "P1 closed COMPLETE_LOCAL_TESTED_BOUNDED with six passing integration tests; P2 authorized"
+    },
+    {
+      "at_unix": 1791981170.9124737,
+      "event": "P2 first real Tk smoke under Xvfb passed 1/1; next test verifies transcript/history metadata separation"
+    },
+    {
+      "at_unix": 1791981205.1692088,
+      "event": "P2 history/detail smoke retained as failed due to Tcl state comparison; test-only conversion fix required before closure"
+    },
+    {
+      "at_unix": 1791981298.2799327,
+      "event": "P2 UI/history retest passed 1/1 after fixing Tcl return-type assertion; actual runtime/UI unchanged for this test-only fix."
+    },
+    {
+      "at_unix": 1791981324.7796607,
+      "event": "Combined RAG/model/UI suite passed 7/7 under Xvfb; retains earlier UI assertion failure as historical evidence and marks it resolved after isolated and combined retests."
+    },
+    {
+      "at_unix": 1791981375.5079536,
+      "event": "Visual UI audit captured real Tk desktop; detected horizontally clipped settings/action controls at 1280px. Keep P2 open and adapt chat layout for narrow windows before retest."
+    },
+    {
+      "at_unix": 1791981453.0966866,
+      "event": "Responsive layout retest passed 1/1 after actual layout inspection found clipping at 1280px. Window is sized to available display and parameter controls use multiple rows; test verifies right bounds for the root and important widgets."
+    },
+    {
+      "at_unix": 1791981478.5095003,
+      "event": "Responsive visual retest passed; 1280x1024 screen capture confirms window right edge=1260 and all key widgets inside display bounds. Initial clipped screenshot remains in history as resolved defect."
+    },
+    {
+      "at_unix": 1791981504.3790145,
+      "event": "Follow-up screenshot review confirms horizontal overflow fixed but evaluation/feedback section is vertically clipped near the bottom at 1024px screen height; new issue opened and P2 stays in progress."
+    },
+    {
+      "at_unix": 1791981543.5610604,
+      "event": "Measured vertical overflow: evaluation frame received only 10px and feedback button 1x1 at 1280x1024 due to vertical space pressure. Fix geometry and conversation requested height, then verify full feedback section bounds."
+    },
+    {
+      "at_unix": 1791981577.093142,
+      "event": "Vertical feedback visibility assertions passed 1/1 after increasing adaptive window height and reducing initial transcript requested height. Capture review remains pending."
+    },
+    {
+      "at_unix": 1791981601.7965436,
+      "event": "Vertical visual retest confirms complete evaluation frame and button visible; window fits 1280x1024 display. UI horizontal/vertical overflow defects resolved by retests; P2 can proceed to combined verification before closure."
+    },
+    {
+      "at_unix": 1791981643.8038626,
+      "event": "Final P2 combined RAG/chat/actual Tk UI suite passed 7/7; both initial horizontal and vertical clipping incidents have passing visual and widget-bound retests. Reviewing phase exit criteria before formally closing P2."
+    },
+    {
+      "at_unix": 1791981685.0659819,
+      "event": "Actual trained capsule selector test passed; a capsule was trained on a small source file, appeared in the UI dropdown after refresh, and was selectable by its exact run_id. UI smoke 2/2 passed."
+    },
+    {
+      "at_unix": 1791981726.2780783,
+      "event": "P2 formally closed COMPLETE_LOCAL_TESTED_BOUNDED after 8/8 phase-exit tests and actual screenshot/geometry evidence; P3 regression/integration now authorized and started."
+    },
+    {
+      "at_unix": 1791981794.7960308,
+      "event": "P3 batch 1 retained with three failures; investigate whether test expectations improperly span O93_0 baseline and O93_1 increment, and scope proof counters to their documented namespace before retest."
+    },
+    {
+      "at_unix": 1791981859.990113,
+      "event": "Batch1 retest eliminated version, phase-status and verified-counter failures; now exposes one remaining registry schema inconsistency (missing requirement field). Keep P3 open and investigate registry entry schema."
+    },
+    {
+      "at_unix": 1791981897.478883,
+      "event": "Proof registry schema diagnosis: normalized three existing O930 P9 records additively, kept status and evidence unchanged; strict test remains as-is and must pass on retest."
+    },
+    {
+      "at_unix": 1791981918.4414365,
+      "event": "Corrective contract retest passed 12/12; all three initial failures now have explicit cause and fix while their first red outputs remain preserved."
+    },
+    {
+      "at_unix": 1791981955.2583063,
+      "event": "P3 retest: resolve three stale O930 oracle checks and preserve newly found registry schema defect; applied additive registry normalization, phase remains IN_PROGRESS."
+    },
+    {
+      "at_unix": 1791981963.5624492,
+      "event": "P3 batch 2 retained: 62 passed and one semantic knowledge test failed because compact LM output was garbled and displaced an expected knowledge-reader answer. Investigate output-selection/grounding without hardcoding the expected phrase."
+    },
+    {
+      "at_unix": 1791982013.3748043,
+      "event": "P3 regression batch 1 passed after registry schema normalization; four related error-ledger items marked RESOLVED_RETEST_PASS with linked receipt. P3 remains IN_PROGRESS."
+    },
+    {
+      "at_unix": 1791982119.6811984,
+      "event": "Candidate quality gate test run retained; 12 passed and one test oracle expected a fake endpoint answer despite missing evidence anchors. Update only the assertion to verify candidate trace and evidence-backed fallback."
+    },
+    {
+      "at_unix": 1791982121.3125954,
+      "event": "P3 batch 2 revealed low-quality compact model text served to user despite successful semantic retrieval; logged O931-P3-GENERATION-QUALITY-001, no phase advance."
+    },
+    {
+      "at_unix": 1791982152.1121418,
+      "event": "Candidate gate retest passed 13/13 across O93_1 chat and legacy knowledge integration; generated text is still invoked and traced, but malformed/unanchored candidate no longer displaces observed passages."
+    },
+    {
+      "at_unix": 1791982189.7721717,
+      "event": "P3 autonomy/memory/UI batch retest passed 63/63 after candidate-selection fix; the previously failing P5 knowledge test is now green."
+    },
+    {
+      "at_unix": 1791982234.793635,
+      "event": "P3 batch 3 passed 61 tests plus 14 subtests across dataset/training, action router, integration and security."
+    },
+    {
+      "at_unix": 1791982262.2852569,
+      "event": "P3 batch 4 retained 22 passes and one stale static source-string assertion in O930 preflight dependency test; update the test to verify bounded closure vocabulary and still reject non-terminal gates."
+    },
+    {
+      "at_unix": 1791982305.1024256,
+      "event": "P3 batch4 retest passed 23/23 after replacing a brittle source-substring check with behavior tests. Invalid/missing closure evidence is still required to block phase closure."
+    },
+    {
+      "at_unix": 1791982321.153589,
+      "event": "P3 candidate quality defect resolved by generic candidate-integrity gate: model calls remain traced, broken/unanchored output falls back to cited observed passages; 13-test contract retest and 63-test integration retest pass. Batch 3 completed 61 tests + 14 subtests. P3 remains open pending final matrix and source/manifest checks."
+    },
+    {
+      "at_unix": 1791982391.42525,
+      "event": "Reviewed the O93_1 generation delivery UI contract; runtime fields answer_source/candidate_quality_gate did not match unused formatter fields. Formatter patched; targeted retest required. Generation quality defect remains resolved by candidate gate tests."
+    },
+    {
+      "at_unix": 1791982399.1637182,
+      "event": "Preflight p3_core_retest_after_gate returned PASS_BOUNDED; all baseline and O93_1 formalism/checklists/error ledgers parsed; hashes recorded in logs/O931/preflight_p3_core_retest_after_gate.stdout.txt. Core regression authorized; P3 remains open."
+    },
+    {
+      "at_unix": 1791982430.4186358,
+      "event": "P3 core regression retest after generic candidate quality gate: 92 passed, 7 subtests passed, exit code 0. Raw stdout and exit code preserved. No new failing test. P3 stays IN_PROGRESS until remaining batches and exit criteria are reviewed."
+    },
+    {
+      "at_unix": 1791982432.4798303,
+      "event": "UI metadata contract mismatch resolved by retest: 10 chat/UI tests pass and py_compile succeeds; error ledger item O931-P3-UI-QUALITY-CONTRACT-001 resolved. P3 remains in progress."
+    },
+    {
+      "at_unix": 1791982459.6291435,
+      "event": "Preflight p3_services_training_security_retest PASS_BOUNDED. All O93_0 and O93_1 source/formalism/checklist/error ledgers parsed; evidence stored in logs/O931/preflight_p3_services_training_security_retest.stdout.txt. Dataset/training/security regression retest authorized; current phase remains P3."
+    },
+    {
+      "at_unix": 1791982493.9286253,
+      "event": "P3 dataset/training/security regression retest passed: 61 tests and 14 subtests; exit code 0. Raw result retained at logs/O931/p3_services_training_security_retest.stdout.txt. No new failures."
+    },
+    {
+      "at_unix": 1791982509.1672256,
+      "event": "Preflight p3_cli_compile_smoke returned PASS_BOUNDED; normative files and all required ledgers valid. CLI help/status smoke and source compilation authorized."
+    },
+    {
+      "at_unix": 1791982527.123227,
+      "event": "CLI --help and isolated status returned exit 0; compileall returned 0 with one non-fatal SyntaxWarning in scripts/o930_p6_reconcile_source_inspector.py line 63. All outputs/exit codes retained. P3 still open; warning reviewed before closure."
+    },
+    {
+      "at_unix": 1791982559.7151372,
+      "event": "Preflight p3_legacy_syntax_warning_review PASS_BOUNDED; normatives and four ledgers parse; a non-fatal invalid-escape warning in a historical documentation-generating script is under review."
+    },
+    {
+      "at_unix": 1791982581.5098894,
+      "event": "Actual subcommand help for solve, knowledge-ingest, acquire-skill, and ui all exited 0. Captured command syntax for guide. Static inspection scoped compile warning to unescaped LaTeX underscore within legacy script string; original O93_0 formalism/lab files remain unchanged by the inspection."
+    },
+    {
+      "at_unix": 1791982600.825123,
+      "event": "Preflight p3_fix_legacy_compile_warning PASS_BOUNDED. A one-character escaping fix is authorized in legacy utility source to make compileall warning-free; it leaves generated LaTeX content semantically unchanged."
+    },
+    {
+      "at_unix": 1791982624.5719244,
+      "event": "Compile warning issue O931-P3-LEGACY-SYNTAX-WARNING-001 retested successfully: compileall with SyntaxWarning promoted to error exits 0, no output. Marked resolved after retest; original compile warning remains recorded in earlier evidence."
+    },
+    {
+      "at_unix": 1791982655.4055877,
+      "event": "Preflight p3_exit_gate_preflight PASS_BOUNDED. Gate reconciliation is authorized; this command only checks evidence completeness and does not itself close P3."
+    },
+    {
+      "at_unix": 1791982674.0996017,
+      "event": "P3 exit gate first attempt FAIL_GATE: 10/11 pass because the gate script looked only at the root for sources_AAM_17.zip. P3 remains open; original failure report retained; correct path according to inventory before retest."
+    },
+    {
+      "at_unix": 1791982688.9607406,
+      "event": "P3 source provenance diagnosis: source_inventory.json declares the archive at source_material/source_archive/sources_AAM_17.zip; first gate checked only root, so remains open until path-confined SHA-256 retest."
+    },
+    {
+      "at_unix": 1791982706.3254802,
+      "event": "Preflight p3_corrected_exit_gate PASS_BOUNDED; path-confined SHA-256 retest of the manifest-declared source archive authorized."
+    },
+    {
+      "at_unix": 1791982718.887177,
+      "event": "Source provenance retest PASS: inventory-relative path source_material/source_archive/sources_AAM_17.zip is confined within the package and matches SHA-256 + size exactly. The earlier FAIL_GATE was a false negative due to root-path assumption; original failed gate receipt retained."
+    },
+    {
+      "at_unix": 1791982741.5903304,
+      "event": "Preflight p3_final_exit_gate PASS_BOUNDED after resolving manifest-relative source path. Final P3 gate may verify all phase exit criteria; no phase status changed by preflight."
+    },
+    {
+      "at_unix": 1791982767.5050478,
+      "event": "P3 closed COMPLETE_LOCAL_TESTED_BOUNDED after final exit gate PASS 11/11. Core 92 tests + 7 subtests; services/training/security 61 + 14; autonomy/memory/UI 63; strict compatibility 23; warning-free compile; source archive SHA/size match. P4 package/audit authorized, remains NOT_STARTED until its own preflight. P10 remains not part of O93_1 current increment."
+    },
+    {
+      "at_unix": 1791982786.1188686,
+      "event": "P4 packaging/audit started after its own preflight PASS_BOUNDED. P3 status is COMPLETE_LOCAL_TESTED_BOUNDED. All previous failed receipts remain preserved; P10 remains NOT_STARTED/out of this increment."
+    },
+    {
+      "at_unix": 1791982873.0830245,
+      "event": "P3 reopened after packaging audit found aam_o93.__version__ 0.93.0-dev0 vs runtime/status 0.93.1-dev0. Previous bounded P3 completion remains in history but is stale for release artifact; P4 is blocked until corrected metadata and affected regressions pass."
+    },
+    {
+      "at_unix": 1791982885.5906878,
+      "event": "Preflight p3_version_metadata_fix PASS_BOUNDED; version metadata fix and dependent retests authorized. P4 remains blocked."
+    },
+    {
+      "at_unix": 1791982919.4465284,
+      "event": "Saved PASS_BOUNDED preflight receipt for version identity fix. Targeted code/test change follows; P4 remains blocked until P3 re-closes."
+    },
+    {
+      "at_unix": 1791983020.6250327,
+      "event": "P3 bounded real SMS acceptance revealed row-splitting retrieval defect and runtime-cleanup harness error; initial failing evidence preserved. Added record-aware ingestion chunking and a focused regression, which passes 1/1; P3 remains open pending real-corpus rerun."
+    },
+    {
+      "at_unix": 1791983145.752186,
+      "event": "Record-aware chunking retest on actual bundled SMS subset: held-out row is preserved as a full chunk, retrieved into top-5 evidence and prompt to the explicitly trained capsule; output candidate malformed and generic quality gate correctly returns cited fallback; archive and RAG input hashes unchanged. Report PASS_BOUNDED written but runner exit code not captured; shutdown/exit diagnostic remains open, P3 not closed."
+    },
+    {
+      "at_unix": 1791983266.7945738,
+      "event": "Shutdown-instrumented actual SMS retest records runtime.close status CLOSED and stage close_end with empty stderr; execution wrapper nevertheless times out before shell exit-code receipt. RUNTIME-EXIT issue remains open; no phase advancement."
+    },
+    {
+      "at_unix": 1791983405.4638588,
+      "event": "Shutdown diagnostic again stalls after runtime_close_begin after a full PASS_BOUNDED real-SMS report; phase remains P3. Preserve the result and isolate whether AutonomousLoop.stop or the final checkpoint blocks."
+    },
+    {
+      "at_unix": 1791983554.6407785,
+      "event": "Detached, timeout-bounded end-to-end real SMS test exits normally with code 0; runtime close/checkpoint/atexit all observed; RUNTIME-EXIT harness anomaly resolved. P3 remains open for fallback response quality, regression replay, source integrity and phase gate."
+    },
+    {
+      "at_unix": 1791983757.3081188,
+      "event": "P3 unit retest passes 2/2 after generic record-level extractive fallback. Earlier actual SMS response was 3249 characters and bundled 3 semantic chunks/many records; the new test verifies relevant complete record selection. The bounded real-corpus acceptance gate is strengthened to require the held-out row to appear in the displayed answer; that new end-to-end retest is pending. P3 remains IN_PROGRESS."
+    },
+    {
+      "at_unix": 1791983912.8258693,
+      "event": "Real SMS end-to-end record-level fallback run exits 0 and delivers held-out row, 733 chars versus 3249 before fix; audit shows same trained capsule invoked, malformed candidate rejected and source hashes unchanged. Two additional partial keyword matches were still delivered, so P3 keeps the fallback quality error open. A stricter best-record margin, ≤1000-character acceptance gate and unique report path are introduced and must be retested."
+    },
+    {
+      "at_unix": 1791984004.4038231,
+      "event": "Final bounded real-SMS acceptance retest PASS_BOUNDED: one complete held-out record is delivered in 340 characters with source citation; trained capsule id/hash matched; prompt/context hashes and generation audit prove actual call; malformed candidate remains preserved but not selected; archive/sample hashes unchanged; runtime close and shell exit 0. P3 still open pending version metadata retest and remaining regression gates."
+    },
+    {
+      "at_unix": 1791984026.3938913,
+      "event": "P3 foundation/artifact regression after package version metadata correction passed 12/12. The release identity mismatch remains open until a direct assertion confirms public version, runtime metadata, CLI metadata and package manifest all identify O93_1 consistently."
+    },
+    {
+      "at_unix": 1791984598.8182786,
+      "event": "Targeted Xvfb UI lifecycle retest passed 1/1 after removing modal status refresh from manual stop/restart handlers; busy state preserved, loop stop/restart works, AAM remains open until explicit close. Full UI suite still pending."
+    },
+    {
+      "at_unix": 1791984637.610556,
+      "event": "Full Tk smoke suite passed 2/2 under Xvfb after busy-gate fix; prior suite timeout and stack diagnostic remain preserved as resolved incident evidence."
+    },
+    {
+      "at_unix": 1791984694.459386,
+      "event": "Core regression passed 93 tests plus 7 subtests after lifecycle/UI changes; no new test errors. Continue remaining regression batches and integrity gates before P3 closure."
+    },
+    {
+      "at_unix": 1791984731.5237188,
+      "event": "Autonomy/memory/UI regression passed 63 tests after lifecycle and busy-gate changes."
+    },
+    {
+      "at_unix": 1791984783.3266618,
+      "event": "Dataset/training/router/security regression passed 61 tests plus 14 subtests on current source tree."
+    },
+    {
+      "at_unix": 1791984829.6385734,
+      "event": "Phase-gate compatibility and preregistered integrity tests passed 23/23; P3 remains open pending real-corpus and integrity retests."
+    },
+    {
+      "at_unix": 1791984980.9728627,
+      "event": "Bounded SMS acceptance attempt 1 interrupted with BrokenPipeError after RAG ingestion; no model/chat verdict; archive/sample source hashes recorded and unchanged. Retry will redirect output directly to a file."
+    },
+    {
+      "at_unix": 1791985113.9636357,
+      "event": "Bounded real SMS acceptance body passed 120-row held-out RAG/capsule/provenance checks; 340-char cited extractive fallback was delivered because the actual trained capsule generated unusable unknown-token candidate. Source hashes unchanged and runtime shutdown clean. Outer command runner timed out without exit-code receipt; do not close P3 until runner status is independently reconciled."
+    },
+    {
+      "at_unix": 1791985251.7809732,
+      "event": "Second no-pipe real SMS run completed full PASS_BOUNDED report, closed runtime and reached atexit, but foreground tool call timed out before shell exit code; detached supervised retry is required to verify wrapper/process exit unambiguously."
+    },
+    {
+      "at_unix": 1791985333.736222,
+      "event": "Detached bounded real-SMS acceptance passed with runner exit code 0; exact held-out data is retrieved, passed to trained capsule, candidate quality gate rejects the unknown-token candidate, cited record fallback delivered, source hashes unchanged, runtime closes cleanly. Prior foreground wrapper interruption preserved and reconciled."
+    },
+    {
+      "at_unix": 1791985426.020132,
+      "event": "Release identity test initial attempt failed because raw audit event shape did not match the test assumption for payload/version. Kept version mismatch ledger open and added a failed-test receipt; inspect actual event schema before retest."
+    },
+    {
+      "at_unix": 1791985471.1397882,
+      "event": "Release identity retest passed 1/1: __version__, runtime status, raw boot event data.version and checkpoint state.runtime_version all 0.93.1; audit integrity and runtime close also pass."
+    },
+    {
+      "at_unix": 1791986027.121498,
+      "event": "P3 full-corpus SMS acceptance retry reached supervised 420s limit with no report (exit 124). Recorded as nonvalidated performance timeout; identified exhaustive sparse-vector-to-itoken comparisons in semantic_rag._aggregate as the likely scaling hotspot. P3 kept open; exact inverted-feature index optimization and equivalence tests required before rerun."
+    },
+    {
+      "at_unix": 1791986116.518079,
+      "event": "Protocol correction: preflight returned P4 despite P3 having newly reopened due full-corpus 420s timeout. Reverted current_phase to P3 and blocked P4; will rerun preflight before any new tests."
+    },
+    {
+      "at_unix": 1791986183.6321251,
+      "event": "Exact sparse inverted-index optimization passed 17 targeted tests including equivalence with brute-force cosine means/maxima, semantic RAG regression and line-preserving RAG tests. Full corpus retest remains required before closing P3."
+    },
+    {
+      "at_unix": 1791986562.6546295,
+      "event": "Controlled stop of full-corpus run on exact-postings version: no rag_ingested progress marker after ~315s of CPU saturation; exit 143 recorded as nonvalidated. Proceed to exact aggregate mean and block sparse max optimization; keep P3 open."
+    },
+    {
+      "at_unix": 1791986687.826752,
+      "event": "Exact feature-sum/block-sparse optimization test attempt failed one edge case: query token appeared in peer set and was included in the max. Failure preserved; helper must explicitly exclude self then retest."
+    },
+    {
+      "at_unix": 1791986733.448632,
+      "event": "The first block-sparse max test attempt found self-comparison when helper query/peer sets overlap. Failure preserved. After self-exclusion correction, compilation passed and all 19 sparse-equivalence + semantic-RAG + record-preserving tests passed. P3 stays open for full-corpus performance and regression."
+    },
+    {
+      "at_unix": 1791989084.947299,
+      "event": "P4 final current-source regression passed 49 tests; isolated CLI status confirms runtime 0.93.1 and autonomy RUNNING. Full SMS corpus remains NOT_VALIDATED. Exact final archive extraction receipts will be external/follow-up evidence."
+    },
+    {
+      "at_unix": 1791989453.4510956,
+      "event": "P4 release rebuild: builder stdout parsing corrected; first rebuild completed for Dmodel/Amodel/followup with CRC and manifest checks PASS. Exact final ZIPs still require clean extraction tests."
+    }
+  ]
+}

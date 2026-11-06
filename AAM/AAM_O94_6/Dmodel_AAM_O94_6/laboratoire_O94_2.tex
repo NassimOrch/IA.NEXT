@@ -1,0 +1,96 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[a4paper,margin=2.1cm]{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Laboratoire O94.2 : validation de l'observation en action et de la programmation par composition}
+\author{Dossier de tests reproductibles AAM}
+\date{19 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Description et objectif}
+Ce laboratoire corrige les défauts rapportés sur O94.1 : le message « case count 1484 exceeds configured cap 200 », l'échec d'analyse des conteneurs JSON nommés \verb|case|, l'absence de sondage visible en streaming et l'absence d'un espace clairement identifiable pour importer les modèles locaux ou programmer par composition. Il conserve le modèle et les sources O94.1 au lieu de remplacer les fonctions historiques.
+
+\section{Architecture testée}
+Les composants ciblés sont : \path{aam_o93/blackbox.py} (lecture et capture, flux JSONL, sondes), \path{aam_o93/runtime.py} (gestion des sessions et fermeture sûre), \path{aam_o93/model_integration.py} (registres backend local/distant/adaptateur), \path{aam_o93/program_composer.py} (compilation sûre des compositions), \path{aam_o93/base_blocks.py} (briques de base), \path{aam_o93/ui.py} (panneaux visibles), plus le préflight et les pièces de version. La construction reste incrémentale et garde O94.1 comme parent historique.
+
+\section{Pipeline du laboratoire}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Vérifier les hashes/CRC de l'archive HF1 O94.1 et inventorier les fichiers avant modification.
+  \item Tester les chargeurs sur JSON à liste racine, \verb|case|, \verb|cases|, dictionnaire de cas, champs standards et champs imbriqués ; tester CSV/TSV et le cap paramétré.
+  \item Lancer une cible de démonstration qui reste en cours d'exécution, envoyer plusieurs lignes, vérifier réponses observées, timestamps, trace JSONL et arrêt propre.
+  \item Générer des variantes distinctes d'une graine et vérifier que le flux les envoie véritablement à la cible ; conserver le résultat de la cible, pas une réponse attendue injectée.
+  \item Tester l'intégration d'un adaptateur Python local explicitement autorisé : refus avant autorisation, hash du fichier, génération, et politique d'entraînement dont le holdout est absent des données train.
+  \item Initialiser la UI sous Xvfb et vérifier les onglets Observer, Modèles locaux / PyTorch et Programmation par composition, ainsi que les contrôles de budget/mapping/sondes.
+  \item Compiler tous les fichiers Python et exécuter les lots de régression ciblés ; consigner chaque erreur puis son retest.
+  \item Vérifier formalisme/laboratoire, checklists, manifestes de sauvegarde, extraction des ZIP, CRC et hashes finaux.
+\end{enumerate}
+
+\section{Commandes d'exécution}
+\begin{verbatim}
+python -m compileall -q aam_o93 tests/test_o942_live_observation.py
+python -m pytest -q tests/test_o942_live_observation.py
+python -m pytest -q tests/test_o941_blackbox.py \
+  tests/test_o941_runtime_integration.py
+python -m pytest -q tests/test_o941_model_integration.py
+python scripts/o942_regression_batches.py \
+  --batch-start 0 --batch-count 30 \
+  --group-size 2 --timeout 75
+PYTHONPATH=. xvfb-run -a python -m pytest -q \
+  tests/test_o931_ui_smoke.py -k chat_layout
+PYTHONPATH=. xvfb-run -a python -m pytest -q \
+  tests/test_o931_ui_smoke.py -k trained_capsule
+pdflatex -interaction=nonstopmode -halt-on-error formalisme_O94_2.tex
+pdflatex -interaction=nonstopmode -halt-on-error laboratoire_O94_2.tex
+\end{verbatim}
+La première commande de régression globale a dépassé la fenêtre du harnais et n'a pas produit de reçu agrégé. Le runner a ensuite été corrigé pour fermer le groupe de processus au timeout, puis la matrice a été exécutée en lots de deux fichiers.
+
+\section{Résultats observés et reçus}
+\small\begin{longtable}{|p{0.40\linewidth}|p{0.15\linewidth}|p{0.34\linewidth}|}\hline
+\textbf{Vérification} & \textbf{Résultat} & \textbf{Portée de preuve} \\\hline
+Lecture JSON \verb|{"case": [...]}| sur 1484 lignes & PASS & Ingestion, alias \verb|prompt|/\verb|answer|/\verb|fold|, limite UI configurable à 2000 \\\hline
+Champs imbriqués et collection nommée & PASS & \verb|payload.text|, collection \verb|samples|, mappings explicites \\\hline
+Colonnes CSV et cap de cas & PASS & \verb|message|/\verb|label|, erreur de cap informative \\\hline
+Streaming de cible persistante & PASS & Script jouet local, deux paires réellement échangées et persistées \\\hline
+Sondes générées depuis graine & PASS & Mutations JSON bornées et uniques dans la ronde, sorties provenant de la cible \\\hline
+Capsule hors source & PASS & La trace live est ré-ingérable ; la capsule reste limitée aux entrées observées \\\hline
+Composition DSL & PASS & Séquence M-SEQUENCE, compétence et règle résolues, identifiant inconnu rejeté \\\hline
+Adaptateur PyTorch explicite simulé & PASS & Consentement obligatoire, génération, train reçoit 2 cas et exclut 1 holdout \\\hline
+UI premier écran & PASS individuel & Xvfb : nouveaux onglets/champs/boutons instanciés \\\hline
+UI sélecteur de capsule & PASS individuel & Xvfb : capsule entraînée devient sélectionnable \\\hline
+Compilation source Python & PASS & \verb|compileall| sur modules modifiés et tests \\\hline
+Matrice de régression par lots (60 fichiers) & PASS & 30/30 lots ; 349 tests et 21 sous-tests rapportés \\\hline
+LaTeX formalisme & PASS & Compilation pdflatex sans erreur fatale, reçu T40 \\\hline
+LaTeX laboratoire & PASS & Compilation pdflatex sans erreur fatale, reçu T41 \\\hline
+\end{longtable}\normalsize
+
+Les erreurs rencontrées pendant le développement ont été conservées dans les registres O94.2, avec le statut et le reçu de retest : détection initiale de \verb|fold|, concurrence UI, assertions devenues obsolètes, chemins d'import des runners, dérive des registres, timeouts de commandes agrégées, encodage de sortie du receipt runner et syntaxe LaTeX inline. Les reçus antérieurs restent présents ; le décompte ci-dessus utilise uniquement les résultats récents qui ont passé leur contrôle pré-exécution. Les rapports détaillés sont dans \path{logs/O94_2/} et le registre de preuves.
+
+\section{Interprétation}
+L'ancienne erreur de 1484 cas était due au plafond logiciel et à une hypothèse de schéma/nom de clé : elle est résolue dans le chargeur et rendue explicite dans l'UI. Le streaming change aussi le flux d'acquisition : la cible demeure active entre les échanges, et les traces sont écrites pendant l'expérience ; le modèle n'a plus besoin d'un fichier prérempli pour le mode live. Les sondes automatiques sont des mutations de la graine et doivent être adaptées si l'objet cible a un schéma d'entrée complexe.
+
+L'espace Modèles locaux expose le chargement Transformers de poids locaux, les endpoints compatibles Ollama/OpenAI et un contrat extensible d'adaptateur PyTorch. Un adaptateur simulé valide l'API et le respect du holdout, mais ne démontre pas la qualité d'un modèle réel. La programmation par composition devient visible et compilation/exécution passe par la DSL de briques ; il reste nécessaire de valider chaque composition sur des tâches réelles.
+
+\section{Conséquences théoriques, conceptuelles et opérationnelles}
+\subsection{Théoriques}
+La capture devient un processus d'échantillonnage interactif et non seulement une importation a posteriori. La diversité d'entrée, la provenance et la séparation train/test sont des variables mesurées. Un clone est évalué à partir du domaine couvert, non inféré d'une simple création de fichier.
+\subsection{Conceptuelles}
+Les compétences effectuent des opérations, les méthodes organisent des séquences et les règles encadrent les contrats. Les modèles LLM locaux/externes fournissent des capacités spécialisées ; AAM coordonne leur emploi avec mémoire, RAG et les compositions existantes sans prétendre qu'un backend opaque est identique au runtime AAM.
+\subsection{Opérationnelles}
+Les utilisateurs voient désormais le mapping des clés et les budgets, la cible de streaming persistante, une action de sondage automatique, l'import de modèles local, et l'éditeur de composition. Le code personnalisé de modèle s'exécute seulement après autorisation explicite. Les adaptateurs GUI, DB, OCR, audio/vidéo ou matériels doivent exposer un canal d'observation approprié.
+
+\section{Statut du modèle}
+\textbf{État :} les défauts de parsing, de visibilité et d'absence d'un chemin de capture streaming sont corrigés pour les formats/protocoles documentés et les tests bornés passent. Les preuves ne montrent pas un clonage général de logiciel arbitraire ; cette capacité reste l'objectif de recherche et doit être mise à l'épreuve par des jeux d'essais indépendants et adaptateurs dédiés. Le test Windows natif, les poids externes de l'utilisateur et les périphériques réels nécessitent un environnement approprié et restent marqués non testés, sans en tirer de conclusion sur le potentiel futur d'AAM.
+
+\section{Vérification de l’archive candidate après extraction fraîche}
+Le contrôle de l’archive précédente a détecté une divergence entre le code courant et le contenu embarqué. Dans le paquet précédent, \verb|aam_o93/cli.py| utilisait encore la fermeture CLI antérieure : deux événements étaient capturés et un rapport \verb|STOPPED| était écrit, puis la commande terminait avec \verb|UnboundLocalError| et le code retour 1. L’incident est conservé dans \path{logs/O94_2/T88_archive_cli_failure_before_rebuild.json}; ce résultat n’est pas compté comme réussite.
+
+Le candidat corrigé a ensuite été reconstruit depuis l’arbre de travail versionné, puis extrait dans un répertoire neuf. Son hash SHA-256 est \verb|96155d58059a6d76c0eea46d9f05ac8b38db8b82ff5ab36356659db0cf76be62|. Le reçu \path{logs/O94_2/T93_candidate_extraction_runtime_verification.json} rapporte : préflight \verb|PASS_BOUNDED|, 18 tests ciblés, UI sous Xvfb, compilation Python, catalogue de modèles, catalogue de briques et flux CLI live tous réussis. Le test live a envoyé deux valeurs à une cible persistante : les réponses effectivement reçues étaient \verb|BONJOUR| et \verb|AAM|; deux événements ont été sauvegardés, le rapport d’arrêt indique \verb|STOPPED|, la cible sort avec le code 0 et aucune \verb|UnboundLocalError| n’est observée.
+
+Cette preuve porte sur le candidat pré-clôture. Les sommes de contrôle exactes de la livraison reconstruite après clôture sont consignées dans le sidecar \path{O94_2_final_delivery_verification.json}, pour éviter une référence circulaire dans l’archive elle-même. L’exécution native du lanceur sous Windows reste à vérifier sur un poste Windows.
+\end{document}

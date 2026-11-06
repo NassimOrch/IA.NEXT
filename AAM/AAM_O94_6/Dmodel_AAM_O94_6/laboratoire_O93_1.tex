@@ -1,0 +1,90 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}\usepackage[french]{babel}\usepackage{geometry}\usepackage{longtable}\usepackage{hyperref}
+\geometry{margin=2cm}
+\title{Laboratoire expérimental AAM O93\_1}\author{Reprise incrémentale}\date{14 octobre 2026}
+\begin{document}\maketitle
+\section{But}
+Reproduire les problèmes d'utilisation du RAG et du modèle entraîné rapportés par l'utilisateur, corriger la chaîne de réponse ainsi que le rendu de conversation, puis tester le paquet livré. Le formalisme complet de référence est \texttt{formalisme\_O93\_0.tex}; le présent laboratoire ne remplace pas les résultats des phases historiques.
+\section{Hypothèse testée}
+Un défaut probable est que le branchement RAG retourne une enveloppe de preuves statique avant d'invoquer un modèle de langue disponible. Une seconde anomalie est le rendu de l'objet de résultat intégral en JSON dans le transcript. Les hypothèses doivent être confirmées par instrumentation effective et non par inspection seule.
+\section{Reproduction réelle de la version O93\_0}
+Un workspace temporaire reçoit un corpus local synthétique non présent dans les jeux de tests historiques; le RAG sémantique est construit depuis ce corpus, puis un modèle de langue compact est entraîné. Une requête factuelle de chat est envoyée et sont relevés route, evidence, answer\_type, génération et événements de génération du journal.
+\begin{verbatim}
+Reproduction exécutée avant correction : voir logs/O931/baseline_chat_reproduction.json
+Corpus synthétique : faits Velorin/Kestrel-17; température 18 degrés C; inspection 240 heures.
+\end{verbatim}
+Résultat initial : RAG PASS\_BOUNDED, capsule de langue disponible, route \texttt{document\_retrieval\_semantic}, réponse \texttt{evidence\_bundle}, génération \texttt{NOT\_RUN}, aucun événement \texttt{language\_model.generated}. Le résultat est local et ne dépend pas d'un accès réseau.
+\section{Architecture de correction}
+Après récupération RAG, transmettre à un backend réellement sélectionné uniquement les passages cités et la requête utilisateur, marquer chaque passage comme donnée non fiable et produire une sortie qui distingue la génération vérifiée de la sortie non vérifiée. Si aucun générateur n'est utilisable, répondre par extraction citée à partir des passages récupérés. Ne jamais effacer le paquet de preuves, les citations ou les statuts de décodage.
+\section{Tests requis}
+\begin{longtable}{p{0.28\linewidth}p{0.55\linewidth}p{0.1\linewidth}}
+T1 & RAG + capsule LM réellement entraînée : événement de génération présent, hash de capsule lié et citations intactes. & requis\\
+T2 & RAG sans modèle LM : réponse extractive bornée, aucune génération faussement déclarée. & requis\\
+T3 & Modèle manuel absent/corrompu : erreur explicite, aucune substitution silencieuse. & requis\\
+T4 & Endpoint configuré : le contexte vient du RAG sémantique O93 et non du seul index lexical O92. & requis\\
+T5 & Transcript : texte lisible, citations visibles, métadonnées techniques consultables séparément. & requis\\
+T6 & Corpus vide/hors index : absence de preuve honnête; toute génération restante est étiquetée. & requis\\
+T7 & Régression, smoke CLI, préflight, manifestes, ZIP et extraction propre. & requis\\
+\end{longtable}
+\section{Résultats et registre}
+Chaque commande, stdout, stderr, code retour, hashes et erreurs sont écrits dans \texttt{logs/O931/}. Les checklists et le registre de preuve sont mis à jour après chaque lot. Les échecs initiaux restent conservés même après correction.
+\section{Résultats P1 — chaîne de réponse réelle}
+Commande exécutée après préflight : \texttt{PYTHONPATH=. pytest -q tests/test\_o931\_chat\_pipeline.py}. Le lot final P1 a réussi : 6 tests, 0 échec, reçu dans \texttt{logs/O931/p1\_chat\_pipeline\_tests\_local\_backend.stdout.txt}. Les lots intermédiaires en échec sont conservés dans les mêmes journaux et dans les checklists; ils ne sont pas effacés.
+\begin{itemize}
+\item T1 : PASS — corpus local observé dans RAG; capsule entraînée réellement invoquée; le prompt capturé contient un marqueur unique présent uniquement dans la source; capsule, prompt et contexte identifiés par hash; événement de génération vérifié dans les journaux.
+\item T2 : PASS — lorsqu'aucune capsule valide n'est disponible, le résultat indique \texttt{NOT\_RUN} et retourne des passages complets issus des sources avec citations.
+\item T3 : PASS — un identifiant de modèle manuel inconnu est refusé sans substitution.
+\item T4 : PASS\_BOUNDED — le contrat d'un backend local explicitement choisi reçoit directement les passages sémantiques O93. Le test emploie un endpoint factice et ne constitue pas un essai réseau réel.
+\item T5 : PASS\_UNIT — le transcript formate réponse, route, statut du générateur, identifiant, hash et citations sans afficher l'objet JSON brut. Le smoke graphique natif est dans P2.
+\item T6 : PASS\_BOUNDED — sans RAG, le mode chat peut appeler une capsule entraînée; l'absence d'évidence locale est explicitement signalée.
+\end{itemize}
+Interprétation : le défaut de court-circuit RAG→génération est corrigé sur cette version. Une génération exécutée par un petit modèle au prochain token ne garantit pas que la réponse soit exacte ou instruction-following; chaque génération reste marquée non vérifiée. La qualité interlingue, l'exécution d'un endpoint utilisateur réel et la validité universelle du RAG ne sont pas établies par ces tests.
+\section{Guide utilisateur}
+Le guide O93\_1 couvre le workspace, chargement des sources, RAG final, sélection de modèle, provenance, entraînement de modèle de langue versus compétence, autonomie, permissions, médias et dépannage.
+\section{Essai supplémentaire — intégrité de la candidate générée}
+Une régression réelle a montré qu’une récupération sémantique correcte peut être suivie d’une candidate du petit modèle contenant des marqueurs \texttt{<unk>} et donc inutilisable. Le runtime conserve maintenant la candidate, son SHA-256, les indicateurs du filtre et la trace d’invocation; il sert les passages observés avec citations lorsqu’un défaut structurel est détecté. Le contrôle ne compare jamais la réponse à une chaîne attendue et n’essaie pas de noter la vérité. Les preuves de retest sont \texttt{logs/O931/p3\_candidate\_gate\_contract\_retest.stdout.txt} et \texttt{logs/O931/p3\_regression\_batch2\_autonomy\_memory\_ui\_retest.stdout.txt}. Un appel de génération marqué comme exécuté ne signifie pas que son texte a été retenu comme réponse finale.
+
+\section{Essai réel SMS — repli au niveau de l'enregistrement}
+Le test sur les 120 premières lignes réellement lues depuis le dataset SMS livré tient une ligne hors entraînement tout en l'incluant dans la source observée par le RAG. La capsule compact local est entraînée sur les autres lignes, son identifiant et SHA-256 sont confirmés, puis sa génération est réellement exécutée avec hash du prompt et du contexte. Sur l'essai précédent, la candidate contenait des marqueurs \texttt{<unk>} et a été rejetée sans être présentée comme réponse. Le fallback précédent contenait toutefois plusieurs enregistrements non pertinents dans des chunks entiers (3 249 caractères). Un nouveau test générique classe désormais les enregistrements complets d'un chunk tabulaire et vérifie citation, pertinence relative et absence de lignes hors sujet. Les tests unitaires sont dans \texttt{logs/O931/p3\_record\_ranked\_fallback\_unit.stdout.txt} (2/2 pass). Le retest bout-en-bout qui exige aussi la présence du record tenu hors entraînement dans la réponse finale demeure à exécuter; P3 reste ouvert jusque-là. Le contrôle d'intégrité doit confirmer que l'archive source SMS et l'échantillon indexé restent byte-identiques.
+\section{Retest final du fallback tabulaire — résultat}
+Commande lancée après préflight : \texttt{timeout -k 2s 55s env PYTHONPATH=. TERM=xterm python -u scripts/o931\_real\_corpus\_chat\_acceptance\_bounded.py}, avec le chemin du rapport propre défini par \texttt{AAM\_O931\_REPORT\_PATH}. Résultat : \texttt{PASS\_BOUNDED}, code de sortie externe 0. Le test a observé 120 SMS authentiques du dataset distribué et tenu l'enregistrement cible hors du corpus d'entraînement du modèle de langue compact. La source RAG contient cet enregistrement et la recherche sémantique le récupère; le prompt capturé l'inclut; les champs de génération montrent que la capsule réellement entraînée, dont le hash correspond, a été invoquée. La candidate a été marquée \texttt{GENERATED\_UNVERIFIED} mais rejetée par le garde-fou structurel (marqueurs spéciaux/ancrage lexical insuffisant). Le résultat présenté est donc un fallback extractif, non le texte brut de la candidate : un seul enregistrement complet de 340 caractères, avec citation de la source. Les SHA-256 de l'archive originale et du fichier RAG restent inchangés; l'arrêt donne \texttt{CLOSED} et le shell retourne 0. Reçu : \texttt{logs/O931/real\_corpus\_sms\_chat\_acceptance\_bounded\_final\_record\_discrimination.json}. Le corpus complet de 5 574 lignes reste \texttt{UNVALIDATED} car l'essai initial a dépassé la fenêtre externe de 120 s; ce résultat borné ne remplace pas cet essai intégral.
+\section{Interprétation et limites}
+Un retrieval trouvé et un événement de génération prouvent un branchement logiciel exécuté, pas la qualité universelle de la réponse. Un modèle compact au prochain-token peut produire une sortie médiocre; elle est donc étiquetée non vérifiée et accompagnée des sources. Backends réseau réels, matériels et systèmes non disponibles restent explicitement non testés.
+
+\section{P3 — Essai du corpus complet et optimisation de proximité}
+Un essai initial du corpus SMS intégral (5\,574 lignes) a épuisé une limite supervisée de 420 secondes sans rapport final (code 124, sortie vide). Il est inscrit comme \texttt{TIMEOUT\_NON\_VALIDATED}, sans attribuer ce timeout à une incapacité du modèle. L'inspection de l'agrégation sémantique a trouvé une boucle de cosinus exhaustive entre les tokens et les tokens invariants malgré la parcimonie des vecteurs.
+
+Une première implémentation par index inversé exact a réussi l'équivalence mais n'a pas progressé au-delà du marqueur \texttt{source\_loaded} après environ 315 s; elle a été arrêtée pour diagnostic (code 143) et conservée comme essai non validé. L'implémentation suivante calcule la moyenne des cosinus par somme normalisée des caractéristiques et calcule le maximum à l'aide d'une multiplication creuse par blocs quand SciPy est disponible, avec un repli inversé exact. Les tests \texttt{tests/test\_o931\_sparse\_proximity\_optimization.py}, les tests de sémantique P3 et les tests de conservation de lignes passent ensemble (19 tests après ajout des assertions de moyenne linéaire et maximum creux). Le test compare les moyennes et maxima à la méthode exhaustive avec une tolérance de $10^{-12}$ et vérifie que la moyenne garde tous les pairs valides au dénominateur lorsque les paires sans intersection contribuent zéro. Reçu : \texttt{logs/O931/p3\_sparse\_opt\_test\_receipt.json}.
+
+Le retest intégral instrumenté a terminé sans marqueur d'ingestion : un run supervisé de 420 s avait déjà terminé avec le code 124; le retest utilisant l'agrégation sparse exacte est resté au stade \texttt{source\_loaded} et a été arrêté par supervision avec le code 143 après environ 328 s. Les deux reçus et journaux restent conservés. Le test complet du corpus de 5\,574 lignes est donc \texttt{NOT\_VALIDATED}: il ne peut être qualifié ni de réussi ni d'échec fonctionnel du modèle. L'acceptation bornée sur 120 lignes réelles a, en revanche, son rapport PASS\_BOUNDED, code shell 0 et arrêt propre; cela constitue un périmètre distinct.
+
+P3 avait été rouverte par le test intégral et le pointeur a été replacé sur P3 avec P4 bloquée. Le test de fermeture doit désormais inclure les nouveaux reçus du modèle de langue, de l'interface réelle et des rafraîchissements différés. Aucune transition de phase n'est autorisée sans que le préflight et la porte P3 soient passés sur le code courant. Les traces historiques antérieures restent conservées.
+
+
+\section{Anomalie reproduite — chemin d'entraînement du modèle de langue non exposé}
+L'inspection des contrats de runtime confirme que \texttt{WorkbenchService.train\_language\_model} existe, mais l'onglet Entraînement n'expose que l'ingestion RAG, l'acquisition d'une compétence supervisée, et l'observation non supervisée. Le chat, quant à lui, peuple son sélecteur avec les capsules de langue \texttt{language\_models}. Il existait donc une ambiguïté concrète entre « acquérir une compétence » et « entraîner le générateur de chat ». Le même chemin n'était pas accessible par une sous-commande CLI dédiée. Cette anomalie est enregistrée dans \texttt{O931-P3-LM-TRAINING-SURFACE-001} avant correction.
+
+\section{Correction incrémentale requise — entraînement génératif explicite}
+Exposer \texttt{AAMRuntime.train\_language\_model}, la commande \texttt{train-language-model} et un bouton distinct dans l'onglet Entraînement. L'action est routée et journalisée; elle doit calculer une empreinte des fichiers sources, utiliser le contrôleur pause/reprise/arrêt coopératif, sauvegarder un checkpoint sur arrêt et ne publier dans le catalogue qu'une capsule complète et intègre. Après entraînement, démontrer que la capsule est listée, sélectionnable puis réellement appelée par le chat. Le texte généré demeure non vérifié et peut être rejeté au profit d'un extrait RAG cité. Un arrêt à checkpoint n'est pas présenté comme reprise automatique tant qu'un tel mécanisme n'a pas été testé.
+
+
+\section{Anomalie UI reproduite et corrigée — rafraîchissement de catalogue pendant l'entraînement}
+La tentative de smoke test du bouton d'entraînement du modèle de langue s'est bloquée dans la fenêtre Tk sous Xvfb. La pile capturée montre un callback programmé \texttt{\_refresh\_spaces} appelant \texttt{\_run} alors que \texttt{busy=True}; le garde-fou ouvrait une boîte modale. Le runner externe a interrompu cette tentative sans rapport pytest, résultat conservé comme \texttt{NOT\_VALIDATED}; le diagnostic de pile, lui, établit la cause du blocage UI.
+
+La correction différencie désormais les rafraîchissements programmés des actions utilisateurs. Les catalogues des espaces sémantiques, compositions et profils ont chacun un rappel différé unique; lorsqu'un worker occupe l'interface, aucun dialogue modal ne s'ouvre. Reçus après correction: \texttt{p3\_ui\_deferred\_catalog\_refresh.json} (2 tests passés), \texttt{p3\_lm\_training\_ui\_single.json} (1), \texttt{p3\_ui\_smoke\_layout\_single.json} (1), \texttt{p3\_ui\_real\_trained\_capsule\_single.json} (1), et \texttt{p3\_current\_chat\_rag\_lm\_regression.json} (24). Chaque test est lancé sous préflight et le premier échec reste dans le registre.
+
+L'API/CLI entraînement/publier/arrêt passe 3 tests; pause/reprise coopérative passe 1 test, avec checkpoint observé au point de pause et événement de reprise. L'entraînement arrêté ne publie pas une capsule partielle et ne revendique pas une reprise automatique depuis checkpoint.
+
+
+\section{P4 -- Guide et préparation du paquet O93\_1}
+La version utilisateur est \texttt{0.93.1}; la phase P3 est fermée dans son périmètre local borné, tandis que P4 porte le guide, le registre incrémental de preuves, les manifestes et les vérifications d'extraction propres. Le guide \texttt{GUIDE\_UTILISATEUR\_O93\_1.md} distingue explicitement l'acquisition d'une compétence et l'entraînement du modèle génératif de chat, et fournit les étapes UI/CLI ainsi que le diagnostic du chemin RAG→capsule→candidate→réponse affichée.
+
+Le reçu pré-emballage \texttt{logs/O931/p4\_prepackage\_regression.json} rapporte 49 tests passés, code retour 0, sur le code actuel. Les suites se chevauchent et leurs totaux ne sont pas additionnés comme s'il s'agissait de tests uniques. Le paquet final doit être extrait dans un répertoire neuf, vérifier son manifeste, démarrer la CLI puis exécuter les mêmes tests ciblés avant la clôture de P4.
+
+L'acceptation réelle bornée sur 120 SMS confirme l'ingestion, la récupération de la ligne tenue hors apprentissage, son injection dans le prompt, l'invocation de la capsule entraînée (hash correspondant), et la restitution d'un extrait cité après rejet d'une candidate contenant des marqueurs \texttt{<unk>}. L'essai du corpus complet de 5\,574 lignes a dépassé les budgets de temps supervisés; son statut demeure \texttt{NOT\_VALIDATED}, sans interprétation comme prédiction du potentiel du modèle. La validité des packages ne remplace pas les essais externes de P10.
+
+
+\section{Résultat de sortie de P4}
+Le gate candidat P4 a passé : les paquets candidat Dmodel et Amodel sont chacun extraits dans des dossiers neufs, vérifient leurs manifestes et passent 49 tests ciblés; le paquet candidat de suivi vérifie 702 fichiers déclarés, 6 registres JSON, la concordance des deux copies des journaux d'erreurs et compile les deux sources TeX. La phase P4 est clôturée au statut \texttt{COMPLETE\_LOCAL\_TESTED\_BOUNDED}. Les archives de release sont reconstruites depuis l'état synchronisé et feront l'objet d'un reçu exact de hash/extraction/tests dans le manifeste détaché. Cette clôture locale n'inclut pas l'acceptation externe OS/matériel/réseau.
+
+\end{document}

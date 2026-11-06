@@ -1,0 +1,154 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.2cm}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\sloppy
+\setlist{nosep}
+\title{Rapport d'experience --- model ORDER 59}
+\author{Campagne executee le 20 septembre 2026}
+\date{}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\begin{abstract}
+Ce rapport decrit seulement les executions archivees. Il donne l'environnement, les commandes, les configurations, le pipeline, les equations utilisees dans le code, les resultats, les ablations, les controles d'integrite et les interruptions. Les resultats negatifs sont conserves.
+\end{abstract}
+
+\section{Environnement}
+Python 3.13. La machine d'execution dispose de NumPy, PyTorch, pytest et pdflatex. Le package O59 est configure pour le layout \texttt{src/} via setuptools. Installation :
+\begin{verbatim}
+cd /tmp/order59_work/model_order_59
+python -m pip install -e . --no-build-isolation -q
+pytest -q
+\end{verbatim}
+La passe finale de \texttt{pytest -q} sur la release corrective retourne \texttt{24 passed}. Une seconde passe a produit le meme resultat avant le gel. La couverture du noyau est de 87\% des lignes instrumentees.
+
+\section{Campagne exacte}
+La commande complete est :
+\begin{verbatim}
+cd /tmp/order59_work/audit_order_59/scripts
+python run_experiments.py
+\end{verbatim}
+Les campagnes hard finales utilisent un seed 59059. La campagne multi-familles utilise 4 s, 30 pas, 20000 evaluations, 64 branches et 120 programmes candidats. La campagne chess longue utilise 60 s, 10 pas agent, 100000 evaluations, 4096 branches et 400 programmes candidats; chaque position est lancee comme shard independant. Les sorties finales sont archivees dans l audit O59 hard.
+
+\section{Pipeline causal}
+Le chemin execute est :
+\[
+\begin{aligned}
+O_t&\to P_t\to I_t\to\Pi_t\to D_t\to M_t\\
+&\to\{probe,constraint,predict,imagine,synth,transfer,verify\}\\
+&\to A_t\to E\to O_{t+1}.
+\end{aligned}
+\]
+Plus concretement :
+\begin{enumerate}
+\item \texttt{GenericPerceiver} transforme l'observation brute en \texttt{Observation}.
+\item \texttt{GenericProbeFactory} construit des sondes generiques ; \texttt{build\_partition} construit les fibres.
+\item Les collisions servent au calcul de $D_{obs}$.
+\item \texttt{MetaController} choisit une ressource de raisonnement.
+\item \texttt{EAAttention} et \texttt{NeuralProbeController} orientent le choix de probe.
+\item \texttt{ConstraintInducer} fabrique des contraintes a partir des interactions.
+\item \texttt{PredictiveModel} met a jour le support et le modele lineaire.
+\item \texttt{ImaginationEngine} produit une hypothese et \texttt{multi\_step} la simule dans le monde interne.
+\item \texttt{ProgramSynthesizer} enumere des AST et \texttt{ProgramVM} les execute sans code arbitraire.
+\item Le score final des actions combine feedback empirique, prediction, nouveaute, contraintes induites, signal neural conditionne, programme execute et resultat d imagination action-specifique. Une verification independante rejette les propositions non admissibles avant action.
+\item \texttt{env.act} est la seule source de transition reelle ; le resultat est ensuite memoire et monde-model.
+\end{enumerate}
+
+\section{Equations et fonctions associees}
+Empreinte :
+\[
+I_P(x)=(p_1(x),\ldots,p_k(x)).
+\]
+Suffisance :
+\[
+I_P(x)=I_P(y)\Rightarrow A(x)=A(y).
+\]
+Factorisation :
+\[
+A=\bar A\circ I_P.
+\]
+Raffinement :
+\[
+I_{P+g}(x)=I_{P+g}(y)\Rightarrow I_P(x)=I_P(y),
+\]
+donc $[x]_{P+g}\subseteq[x]_P$.
+
+Seuil : la paire reste dans la meme fibre jusqu'au premier niveau qui la separe. Test du minimum-double :
+\[
+\Theta(x,z)\ge \min\{\Theta(x,y),\Theta(y,z)\}.
+\]
+Ultrametrique :
+\[
+d(x,y)=e^{-\Theta(x,y)}\quad(x\neq y).
+\]
+Prediction empirique :
+\[
+\widehat P(s'\mid s,a)=\frac{N(s,a,s')}{\sum_u N(s,a,u)}.
+\]
+Composition imaginative :
+\[
+H\to W(H)\to\widehat O_H\to\Delta_H\to score(A).
+\]
+Deficit :
+\[
+D=(D_{obs},D_{cap},D_{res},D_{search},D_{transfer},D_{constraint}).
+\]
+
+Les fonctions correspondantes sont dans \texttt{core.py}, \texttt{agent.py}, \texttt{prediction.py}, \texttt{imagination.py}, \texttt{constraints.py}, \texttt{geometry.py} et \texttt{latent.py}.
+
+\section{Resultats principaux}
+\begin{longtable}{p{3.7cm}p{2cm}p{2cm}p{1.4cm}p{4.5cm}}
+\toprule
+Experience & Statut & Score & Pas & Instruments observables \\
+\midrule
+HiddenPermutation & PARTIAL & 0.4 & 12 & 21 probes, 1 program, 576 evaluations VM \\
+Sequence & PARTIAL & 0.142857 & 7 & 6 probes, 1 program, 12 evaluations VM \\
+Maze & PARTIAL & 0.0 & 12 & 21 probes, 1 program, 36 evaluations VM \\
+VisualPattern & PARTIAL & 0.0 & 7 & 6 probes, 1 program, 8 evaluations VM \\
+Chess mate-in-one & PARTIAL & 0.0 & 2 & 1 probe, imagination active \\
+Chess open & PARTIAL & 0.0 & 2 & 1 probe, imagination active \\
+\bottomrule
+\end{longtable}
+
+Les six scores sont des observations sous les budgets de cette campagne. Aucun n'est converti en limite theorique.
+
+\section{Chess et absence d'oracle}
+L'agent recoit \texttt{board}, \texttt{turn} et \texttt{last}. Il fabrique des actions a partir du plateau observe et d'une notation de coordonnees. La liste des coups legaux n'est jamais fournie au modele : l adaptateur expose seulement un alphabet d actions generique (toutes les coordonnees UCI candidates), tandis que la legalite est evaluee uniquement dans l adaptateur. Aucun score de position ou moteur chess n'est injecte dans l'agent.
+
+\section{Ablations}
+Le script historique execute 21 conditions : chacun des sept flags \texttt{use\_probes}, \texttt{use\_imagination}, \texttt{use\_synthesis}, \texttt{use\_memory}, \texttt{use\_world\_model}, \texttt{use\_neural}, \texttt{use\_constraints} est coupe sur Sequence, Maze et Visual. Ces lignes sont dans \texttt{main\_results.json}. L'interpretation doit comparer la variation reelle ; elle ne doit pas conclure qu'une brique est inutile lorsqu'une suite ne la sollicite pas.
+
+\section{Memoire}
+La repetition de SequenceEnv donne 0.2 a l'episode 2 avec memoire et 0.2 au controle sans memoire. Le retrieval de programme est implemente, mais aucun gain causal n'est observe dans cette experience. Ce resultat negatif est conserve.
+
+\section{Capacite}
+Le gate de capacite rejette l'exemple dont le cout \texttt{on} est superieur au cout \texttt{off} (\texttt{causal\_delta=-1}). La promotion n'est donc jamais declarative.
+
+\section{Transfert}
+Le decouvreur de transfert retrouve la correspondance structurale \texttt{c->z}, \texttt{a->x}, \texttt{b->y}, score 1.0. Une certification independante sur deux cas retourne VERIFIED. Le mecanisme est general dans sa forme de recherche par signature, mais la campagne ne constitue pas une preuve de transfert ouvert universel.
+
+\section{Anti-triche et tests}
+Le test \texttt{test\_anticheat.py} applique \texttt{StaticAuditor}. Il interdit \texttt{eval}, \texttt{exec}, \texttt{os.system}, dispatch explicite sur benchmark/task/family et motif de tables de solutions. \texttt{ProgramVM} n'execute pas de code Python dynamique.
+
+\section{Checkpoints}
+Les checkpoints C0--C18 historiques sont materialises dans l'audit. Chaque checkpoint contient au minimum : identifiant, etat, hash de l'etape, fichiers ou fonctions touches, tests executés, anomalies et diff conceptuel.
+
+\section{Interruption et contrainte de calcul}
+Un essai intermediaire a 140 pas et horizon plus long a depasse le timeout global. L'analyse a relie cet incident au cout cumulatif du scoring de programmes et de l'entrainement neural. La campagne finale borne ces deux couts. L'incident reste dans \texttt{logs/experiment\_interruption.txt} et est traite comme contrainte de ressource mesuree.
+
+\section{Traceabilite vers les sources}
+Le concept d'empreinte, de fibre, de fermeture, de seuil, de minimum-double, de latent canonique, d'identite et de reflexion provient principalement du DDD O5. Les structures executables de fibres, contraintes et recherche proviennent des models O55/O56. Les extensions actives, compilateur, transfert conditionnel, anti-cheat et corrections proviennent de O58. La matrice de correspondance complete est dans \texttt{source\_audit/implementation\_traceability.json}.
+
+\section{Conclusion experimentale}
+La release O59.0.2 verifie que le chemin de construction de representation et plusieurs composants avances sont appeles pendant les episodes : sondes et reconstruction de representation sont executees pendant les episodes, les hypotheses d'imagination passent par une simulation interne, et les programmes synthetises sont executes dans une VM. Les performances restent partielles sous les budgets utilises, y compris chess. Ce constat ne permet pas de conclure a une limite de generalite ; il definit simplement l'etat mesure de la campagne.
+
+\end{document}

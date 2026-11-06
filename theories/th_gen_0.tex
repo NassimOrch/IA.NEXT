@@ -1,0 +1,2245 @@
+%bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\geometry{margin=2.6cm}
+
+% ============================================================
+% THEOREM ENVIRONMENTS
+% ============================================================
+
+\newtheorem{definition}{Définition}[section]
+\newtheorem{hypothesis}[definition]{Hypothèse}
+\newtheorem{assumption}[definition]{Postulat de modélisation}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{corollary}[definition]{Corollaire}
+\newtheorem{remark}[definition]{Remarque}
+
+% ============================================================
+% COMMANDS
+% ============================================================
+
+\newcommand{\X}{\mathcal X}
+\newcommand{\D}{\mathcal D}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\HH}{\mathcal H}
+\newcommand{\W}{\mathcal W}
+\newcommand{\V}{\mathcal V}
+\newcommand{\E}{\mathcal E}
+\newcommand{\F}{\mathcal F}
+\newcommand{\I}{\mathcal I}
+\newcommand{\T}{\mathcal T}
+\newcommand{\Rel}{\mathcal R}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{Théorie des empreintes et architecture
+    informationnelle des modèles de langage}}\\[0.5cm]
+    {\large Formalisation du modèle observationnel, mémoriel,
+    relationnel et émergent de la représentation distribuée}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{abstract}
+Ce document formalise une hypothèse théorique selon laquelle la compréhension
+de la mémoire, de la connaissance, de la généralisation et de certains aspects
+de l'intelligence d'un modèle de langage doit être recherchée non pas
+prioritairement dans des unités localisées représentant individuellement des
+concepts, mais dans l'organisation distribuée des structures informationnelles
+produites par l'apprentissage.
+
+Le cadre proposé est construit à partir de la théorie des empreintes
+informationnelles. L'observation constitue l'opération fondamentale par
+laquelle un système accède à une partie d'un domaine d'information. Une
+empreinte est alors une représentation produite relativement à un dispositif
+d'observation, à une résolution et à un contexte. Plusieurs observations
+peuvent produire des empreintes partiellement communes. Leur organisation
+forme un maillage relationnel dans lequel une même composante interne peut
+participer à plusieurs structures sémantiques distinctes.
+
+Dans cette perspective, un neurone poly-sémantique n'est pas nécessairement
+un neurone qui ``contient'' plusieurs concepts incompatibles. Il peut être une
+composante commune à plusieurs empreintes distribuées. La généralisation est
+alors interprétée comme l'exploitation de structures communes à plusieurs
+empreintes, tandis que la spécialisation correspond à l'apparition de
+distinctions supplémentaires lorsque la résolution représentationnelle
+augmente.
+
+Le présent texte distingue explicitement les définitions mathématiques, les
+conséquences formelles, les hypothèses de modélisation et les conjectures
+empiriques. Il ne prétend donc pas démontrer que cette interprétation est
+déjà établie expérimentalement ; il fournit le formalisme nécessaire pour la
+rendre testable.
+\end{abstract}
+
+\tableofcontents
+
+% ============================================================
+\section{Objet et statut de la théorie}
+% ============================================================
+
+\subsection{Problème général}
+
+Les modèles de langage de grande taille (LLM) présentent des comportements
+qui semblent difficilement réductibles à une interprétation locale de leurs
+unités internes. En particulier, des analyses de neurones peuvent montrer
+qu'une même unité est activée dans des contextes sémantiques apparemment très
+différents.
+
+Un exemple conceptuel est constitué par une unité activée à la fois dans des
+contextes relatifs à un \emph{chat} et à une \emph{voiture}. Une interprétation
+naïve consisterait à attribuer au neurone une représentation composite du type
+``chat + voiture''. Une autre hypothèse est cependant possible : le neurone
+pourrait être une composante commune de plusieurs structures distribuées dont
+les significations globales sont différentes.
+
+La présente théorie étudie cette seconde possibilité.
+
+\subsection{Principe méthodologique}
+
+Le principe méthodologique fondamental est le suivant :
+
+\begin{quote}
+Une unité interne ne doit pas être identifiée avec la signification globale
+d'une représentation sans avoir déterminé la structure relationnelle dans
+laquelle cette unité intervient.
+\end{quote}
+
+Ainsi, on distingue systématiquement :
+
+\[
+\text{unité interne}
+\neq
+\text{empreinte}
+\neq
+\text{concept}
+\neq
+\text{connaissance}.
+\]
+
+Une unité peut participer à plusieurs empreintes sans que ces empreintes
+soient identiques.
+
+\subsection{Statut épistémique}
+
+Le formalisme contient quatre niveaux qu'il convient de ne pas confondre :
+
+\begin{enumerate}[label=\arabic*.]
+    \item les définitions mathématiques ;
+    \item les propriétés déductibles de ces définitions ;
+    \item les hypothèses de modélisation appliquées aux LLM ;
+    \item les hypothèses empiriques qui doivent être vérifiées
+    expérimentalement.
+\end{enumerate}
+
+Une conséquence mathématique du formalisme ne constitue donc pas
+automatiquement une affirmation empirique sur les LLM.
+
+% ============================================================
+\section{Cadre observationnel général}
+% ============================================================
+
+\subsection{Domaine des objets}
+
+Soit $\X$ un domaine d'objets, d'états, d'événements ou de configurations
+susceptibles d'être observés.
+
+Une observation n'est jamais considérée ici comme un accès absolu à l'objet.
+Elle est définie relativement à un dispositif observationnel.
+
+On introduit :
+
+\[
+\Phi :
+\mathcal P \times \X \times \F
+\longrightarrow
+\R,
+\]
+
+où :
+
+\begin{itemize}
+    \item $\mathcal P$ est l'espace des contextes ou configurations
+    observationnelles ;
+    \item $\F$ est une famille de sondes ou fonctions d'observation ;
+    \item $\Phi(P,x,f)$ est la réponse obtenue lorsqu'on observe $x$
+    dans le contexte $P$ au moyen de la sonde $f$.
+\end{itemize}
+
+\subsection{Empreinte}
+
+\begin{definition}[Empreinte observationnelle]
+Pour $P\in\mathcal P$, $\lambda\subseteq\F$ et $x\in\X$, on définit
+l'empreinte de $x$ relativement à $(P,\lambda)$ par
+
+\[
+I_{\Phi,\lambda}^{P}(x)
+=
+\left(
+f\mapsto \Phi(P,x,f)
+\right)_{f\in\lambda}.
+\]
+
+L'empreinte est donc une fonction sur l'ensemble des observations disponibles.
+\end{definition}
+
+Cette définition implique immédiatement que deux objets peuvent être
+distincts tout en possédant la même empreinte relativement à une famille
+d'observations donnée.
+
+\begin{definition}[Indiscernabilité observationnelle]
+Pour $x,y\in\X$, on pose
+
+\[
+x\sim_{\Phi,P,\lambda}y
+\quad\Longleftrightarrow\quad
+I_{\Phi,\lambda}^{P}(x)
+=
+I_{\Phi,\lambda}^{P}(y).
+\]
+
+\end{definition}
+
+La relation $\sim_{\Phi,P,\lambda}$ est une relation d'équivalence.
+
+Elle définit donc une partition de $\X$ en classes d'indiscernabilité.
+
+\subsection{Résolution}
+
+Une famille de sondes peut être organisée par un paramètre de résolution
+$\lambda$ appartenant à un ensemble ordonné $(\Lambda,\leq)$.
+
+On suppose que
+
+\[
+\lambda_1\leq\lambda_2
+\]
+
+signifie que $\lambda_2$ permet au moins autant de distinctions
+observationnelles que $\lambda_1$.
+
+On obtient alors une famille :
+
+\[
+\left(
+\sim_{\lambda}
+\right)_{\lambda\in\Lambda}.
+\]
+
+Lorsque la résolution augmente, les classes d'équivalence peuvent se
+subdiviser :
+
+\[
+[x]_{\lambda_2}
+\subseteq
+[x]_{\lambda_1}
+\qquad
+\text{si }
+\lambda_1\leq\lambda_2.
+\]
+
+Ainsi :
+
+\[
+\boxed{
+\text{augmentation de résolution}
+\Longrightarrow
+\text{augmentation potentielle du nombre de distinctions}.
+}
+\]
+
+% ============================================================
+\section{Mémoire, connaissance et intelligence}
+% ============================================================
+
+\subsection{Principe général}
+
+Dans le cadre présent, il est préférable de ne pas identifier la mémoire à un
+conteneur d'objets et la connaissance à une collection d'objets stockés.
+
+On introduit plutôt trois notions structurelles.
+
+\begin{definition}[Mémoire]
+Une mémoire est une structure capable de conserver, de manière persistante,
+des traces ou des transformations d'empreintes produites par des observations
+antérieures.
+\end{definition}
+
+Symboliquement :
+
+\[
+\boxed{
+\text{Mémoire}
+=
+\text{persistance structurée d'empreintes ou de transformations
+d'empreintes}.
+}
+\]
+
+\begin{definition}[Connaissance]
+Une connaissance est une organisation relationnelle suffisamment stable
+d'un ensemble d'empreintes pour permettre leur identification, comparaison,
+transformation ou réutilisation dans un contexte ultérieur.
+\end{definition}
+
+Ainsi :
+
+\[
+\boxed{
+\text{Connaissance}
+=
+\text{organisation relationnelle des empreintes}.
+}
+\]
+
+\begin{definition}[Intelligence]
+Dans le présent cadre, l'intelligence désigne la capacité dynamique d'un
+système à exploiter, transformer, combiner ou sélectionner des structures
+issues de ses empreintes afin de produire des distinctions, prédictions,
+décisions ou transformations adaptées à un problème.
+\end{definition}
+
+Ainsi :
+
+\[
+\boxed{
+\text{Intelligence}
+=
+\text{exploitation dynamique des structures d'empreintes}.
+}
+\]
+
+Ces trois notions ne sont donc pas indépendantes :
+
+\[
+\boxed{
+\text{observation}
+\rightarrow
+\text{empreinte}
+\rightarrow
+\text{mémoire}
+\rightarrow
+\text{organisation}
+\rightarrow
+\text{connaissance}
+\rightarrow
+\text{exploitation dynamique}
+\rightarrow
+\text{intelligence}.
+}
+\]
+
+% ============================================================
+\section{L'Univers comme domaine informationnel}
+% ============================================================
+
+\subsection{Hypothèse philosophique et modèle théorique}
+
+Une intuition fondamentale du modèle est que l'Univers peut être considéré,
+au niveau informationnel, comme un domaine extrêmement vaste de phénomènes
+susceptibles de produire des traces observables.
+
+Cette proposition doit être distinguée de l'affirmation physique selon
+laquelle l'Univers serait littéralement une mémoire.
+
+On adopte donc la formulation plus faible :
+
+\begin{assumption}[Domaine informationnel]
+L'Univers peut être modélisé, pour les besoins de cette théorie, comme un
+domaine $\mathcal U$ contenant des états et des phénomènes dont certaines
+propriétés peuvent produire des empreintes accessibles à des observateurs.
+\end{assumption}
+
+Ainsi :
+
+\[
+\mathcal U
+\supseteq
+\X_{\mathrm{obs}},
+\]
+
+où $\X_{\mathrm{obs}}$ désigne l'ensemble des phénomènes effectivement
+accessibles à un système donné.
+
+\subsection{Limitation de l'observateur}
+
+Un observateur individuel ne peut généralement pas accéder à l'ensemble
+de $\mathcal U$.
+
+Il dispose d'un ensemble limité de sondes :
+
+\[
+\lambda_O\subsetneq\F.
+\]
+
+Son état informationnel est donc :
+
+\[
+I_{\lambda_O}(x),
+\]
+
+et non une représentation absolue de $x$.
+
+La connaissance acquise par un observateur est par conséquent une projection
+partielle du domaine informationnel accessible.
+
+\subsection{Accumulation collective}
+
+Soient $O_1,\ldots,O_m$ plusieurs observateurs possédant des familles de
+sondes :
+
+\[
+\lambda_{O_1},\ldots,\lambda_{O_m}.
+\]
+
+Une coopération peut produire :
+
+\[
+\lambda_{\mathrm{collectif}}
+=
+\bigcup_{i=1}^{m}\lambda_{O_i}.
+\]
+
+Sous l'hypothèse que ces observations sont complémentaires, on peut avoir :
+
+\[
+\lambda_{\mathrm{collectif}}
+\supsetneq
+\lambda_{O_i}.
+\]
+
+La résolution collective peut donc dépasser celle d'un observateur isolé.
+
+On obtient alors conceptuellement :
+
+\[
+\boxed{
+\text{coopération}
+\rightarrow
+\text{élargissement des observations}
+\rightarrow
+\text{augmentation de résolution}
+\rightarrow
+\text{nouvelles distinctions}
+\rightarrow
+\text{nouvelles structures de connaissance}.
+}
+\]
+
+Il s'agit ici d'une conséquence du modèle observationnel, et non d'une loi
+empirique universelle sur les sociétés humaines.
+
+% ============================================================
+\section{Passage aux modèles de langage}
+% ============================================================
+
+\subsection{Dataset}
+
+Soit
+
+\[
+\D=\{d_1,d_2,\ldots,d_N\}
+\]
+
+un dataset d'apprentissage.
+
+Chaque donnée $d_i$ est une séquence de tokens :
+
+\[
+d_i=(t_{i,1},t_{i,2},\ldots,t_{i,L_i}).
+\]
+
+On note $\mathcal V$ le vocabulaire du modèle :
+
+\[
+t_{i,j}\in\mathcal V.
+\]
+
+Le dataset constitue l'environnement informationnel auquel le modèle est
+exposé pendant l'apprentissage.
+
+\subsection{Représentation vectorielle}
+
+À chaque token $t\in\mathcal V$ est associé une représentation initiale :
+
+\[
+e(t)\in\R^{d}.
+\]
+
+Cependant, la représentation effectivement utilisée par les couches internes
+dépend du contexte.
+
+On écrit donc :
+
+\[
+h_{i,j}^{(0)}
+=
+E(t_{i,j}),
+\]
+
+puis, pour les couches $\ell=1,\ldots,L$ :
+
+\[
+h_{i,j}^{(\ell)}
+=
+F_{\ell}
+\left(
+h_{i,1}^{(\ell-1)},
+\ldots,
+h_{i,L_i}^{(\ell-1)}
+\right).
+\]
+
+La représentation finale est :
+
+\[
+h_{i,j}^{(L)}.
+\]
+
+Ainsi, un token n'est pas nécessairement associé à un vecteur invariant
+indépendant du contexte.
+
+% ============================================================
+\section{Empreinte interne d'un LLM}
+% ============================================================
+
+\subsection{Définition}
+
+Soit un modèle paramétré par $\theta$.
+
+Pour une donnée $d$, on définit son état interne comme :
+
+\[
+H_\theta(d)
+=
+\left\{
+h_{j}^{(\ell)}
+\right\}_{j,\ell}.
+\]
+
+On appelle cette structure une \emph{empreinte interne} de la donnée
+relativement au modèle $\theta$ :
+
+\[
+\boxed{
+I_\theta(d)=H_\theta(d).
+}
+\]
+
+Cette définition ne prétend pas que l'état interne constitue l'unique
+empreinte pertinente. On peut également définir des projections :
+
+\[
+I_{\theta,\lambda}(d)
+=
+P_\lambda(H_\theta(d)),
+\]
+
+où $P_\lambda$ sélectionne une famille d'observables internes correspondant
+à une résolution $\lambda$.
+
+\subsection{Empreinte d'un token contextualisé}
+
+Pour le token $t_j$ dans le contexte $d$, on peut définir :
+
+\[
+I_\theta(t_j\mid d)
+=
+\left(
+h_j^{(0)},h_j^{(1)},\ldots,h_j^{(L)}
+\right).
+\]
+
+Ainsi, le même token lexical peut produire différentes empreintes :
+
+\[
+I_\theta(t\mid d_1)
+\neq
+I_\theta(t\mid d_2).
+\]
+
+La signification n'est donc pas nécessairement localisée dans le token
+lui-même.
+
+% ============================================================
+\section{Dépendance relationnelle et ``récursion''}
+% ============================================================
+
+\subsection{Problème terminologique}
+
+L'intuition initiale emploie le terme ``récursion'' pour désigner le fait
+qu'une donnée provoque des dépendances entre plusieurs dimensions, plusieurs
+tokens et plusieurs niveaux de représentation.
+
+Le terme ``récursion'' est trop large pour constituer directement une
+définition mathématique.
+
+On introduit donc une notion plus précise :
+
+\begin{definition}[Dépendance relationnelle itérée]
+Une dépendance relationnelle itérée est une chaîne de transformations dans
+laquelle l'état représentatif à un niveau donné dépend d'états antérieurs,
+du contexte et des interactions entre plusieurs composantes.
+\end{definition}
+
+Formellement :
+
+\[
+H^{(\ell+1)}
+=
+F_\ell
+\left(
+H^{(\ell)},C^{(\ell)}
+\right),
+\]
+
+où $C^{(\ell)}$ représente l'information contextuelle accessible au niveau
+$\ell$.
+
+La répétition :
+
+\[
+H^{(0)}
+\rightarrow
+H^{(1)}
+\rightarrow
+\cdots
+\rightarrow
+H^{(L)}
+\]
+
+constitue le processus relationnel itéré.
+
+\subsection{Structure relationnelle d'une donnée}
+
+À une donnée $d_i$ est associée une structure :
+
+\[
+R_i
+=
+R_\theta(d_i).
+\]
+
+Cette structure peut contenir :
+
+\begin{itemize}
+    \item les tokens ;
+    \item leurs positions ;
+    \item leurs représentations ;
+    \item les dépendances entre tokens ;
+    \item les interactions entre dimensions ;
+    \item les activations des unités internes ;
+    \item les transformations produites par les couches.
+\end{itemize}
+
+Ainsi :
+
+\[
+d_i
+\longrightarrow
+R_i.
+\]
+
+Le dataset produit donc une famille :
+
+\[
+\mathcal R_\theta(\D)
+=
+\{R_1,\ldots,R_N\}.
+\]
+
+% ============================================================
+\section{Maillage informationnel}
+% ============================================================
+
+\subsection{Définition}
+
+Les structures $R_i$ ne sont généralement pas supposées indépendantes.
+
+Deux données distinctes peuvent partager une composante interne :
+
+\[
+R_i\cap R_j\neq\varnothing.
+\]
+
+On définit alors le maillage informationnel du modèle par :
+
+\[
+\boxed{
+\mathfrak M_\theta(\D)
+=
+\bigcup_{i=1}^{N}R_\theta(d_i),
+}
+\]
+
+muni des relations d'intersection, de dépendance et de transformation
+entre ses composantes.
+
+Le maillage n'est donc pas une simple somme des données.
+
+Il résulte du recouvrement des structures produites par leur traitement
+commun.
+
+\subsection{Superposition}
+
+Soient deux données $d_a$ et $d_b$ telles que :
+
+\[
+R_a\neq R_b.
+\]
+
+Il peut néanmoins exister :
+
+\[
+R_a\cap R_b\neq\varnothing.
+\]
+
+On appelle ce phénomène \emph{superposition structurelle}.
+
+Il ne signifie pas :
+
+\[
+d_a=d_b
+\]
+
+ni :
+
+\[
+\operatorname{sem}(d_a)=\operatorname{sem}(d_b).
+\]
+
+Il signifie seulement que certaines composantes de leurs structures
+internes sont communes.
+
+% ============================================================
+\section{Neurone comme composante structurelle}
+% ============================================================
+
+\subsection{Unité interne}
+
+Soit $\mathcal N=\{n_1,\ldots,n_M\}$ l'ensemble des unités internes étudiées.
+
+Pour chaque unité $n_k$, on définit une fonction d'activation :
+
+\[
+a_k:
+\D
+\rightarrow
+\R.
+\]
+
+Une unité est donc une fonction qui participe aux états internes produits
+par le traitement des données.
+
+\subsection{Support d'activation}
+
+Pour un seuil $\tau\geq0$, on définit :
+
+\[
+\supp_\tau(n_k)
+=
+\{d\in\D:
+|a_k(d)|\geq\tau\}.
+\]
+
+Une unité peut donc intervenir dans plusieurs familles de données :
+
+\[
+d_a,d_b\in\supp_\tau(n_k).
+\]
+
+Cela ne permet cependant pas de conclure que l'unité représente
+individuellement la signification commune aux données.
+
+\subsection{Hypothèse de compositionalité distribuée}
+
+\begin{hypothesis}[Compositionalité distribuée]
+Une empreinte interne sémantiquement significative est généralement une
+structure distribuée de plusieurs unités, et non une unité isolée.
+\end{hypothesis}
+
+On écrit :
+
+\[
+I_\theta(d)
+\approx
+\mathcal C_\theta(d)
+\subseteq
+\mathcal N,
+\]
+
+où $\mathcal C_\theta(d)$ désigne une structure de composantes internes
+participant conjointement à l'empreinte de $d$.
+
+Cette hypothèse est compatible avec l'existence d'unités poly-sémantiques.
+
+% ============================================================
+\section{Poly-sémanticité}
+% ============================================================
+
+\subsection{Définition}
+
+Soit $d_a$ un contexte relatif à un chat et $d_b$ un contexte relatif à une
+voiture.
+
+Supposons :
+
+\[
+a_k(d_a)\neq0
+\]
+
+et :
+
+\[
+a_k(d_b)\neq0.
+\]
+
+On pourrait conclure naïvement :
+
+\[
+n_k
+=
+\text{représentation de ``chat + voiture''}.
+\]
+
+La présente théorie refuse cette inférence.
+
+\subsection{Interprétation structurelle}
+
+Supposons plutôt :
+
+\[
+\mathcal C_\theta(d_a)
+\subseteq\mathcal N
+\]
+
+et
+
+\[
+\mathcal C_\theta(d_b)
+\subseteq\mathcal N.
+\]
+
+Il est possible que :
+
+\[
+\mathcal C_\theta(d_a)
+\cap
+\mathcal C_\theta(d_b)
+\neq
+\varnothing.
+\]
+
+Si :
+
+\[
+n_k
+\in
+\mathcal C_\theta(d_a)
+\cap
+\mathcal C_\theta(d_b),
+\]
+
+alors $n_k$ participe aux deux empreintes.
+
+On obtient :
+
+\[
+\boxed{
+n_k\in
+\mathcal C_\theta(d_a)
+\cap
+\mathcal C_\theta(d_b)
+\quad\not\Rightarrow\quad
+n_k=\operatorname{concept}(d_a,d_b).
+}
+\]
+
+Le neurone est alors un élément commun d'une structure distribuée.
+
+% ============================================================
+\section{Exemple : chat et voiture}
+% ============================================================
+
+Considérons :
+
+\[
+d_c=\text{``Le chat mange.''}
+\]
+
+et :
+
+\[
+d_v=\text{``La voiture roule.''}
+\]
+
+On suppose :
+
+\[
+\mathcal C_\theta(d_c)
+=
+\{n_1,n_4,n_8,n_{17},n_{31}\}
+\]
+
+et :
+
+\[
+\mathcal C_\theta(d_v)
+=
+\{n_2,n_8,n_{17},n_{24},n_{31}\}.
+\]
+
+Alors :
+
+\[
+\mathcal C_\theta(d_c)
+\cap
+\mathcal C_\theta(d_v)
+=
+\{n_8,n_{17},n_{31}\}.
+\]
+
+Il existe donc une superposition.
+
+Mais :
+
+\[
+d_c\neq d_v.
+\]
+
+La signification globale des deux empreintes reste distincte.
+
+La théorie propose alors de rechercher les propriétés relationnelles
+communes responsables de l'intersection.
+
+Par exemple, de manière hypothétique :
+
+\[
+\text{entité}
+\rightarrow
+\text{action}
+\rightarrow
+\text{état dynamique}.
+\]
+
+Cette interprétation n'est toutefois qu'une hypothèse tant qu'elle n'est pas
+validée par une analyse expérimentale des représentations.
+
+% ============================================================
+\section{Généralisation}
+% ============================================================
+
+\subsection{Principe}
+
+Soient plusieurs données :
+
+\[
+d_1,\ldots,d_m
+\]
+
+dont les empreintes sont différentes :
+
+\[
+I_\theta(d_i)\neq I_\theta(d_j)
+\qquad(i\neq j).
+\]
+
+Supposons néanmoins qu'elles partagent une structure :
+
+\[
+S
+\subseteq
+\bigcap_{i=1}^{m}
+\mathcal C_\theta(d_i).
+\]
+
+Alors $S$ constitue une structure commune aux différentes empreintes.
+
+\begin{definition}[Structure généralisable]
+Une structure $S$ est dite généralisable relativement à une famille
+$\{d_1,\ldots,d_m\}$ si elle est identifiable dans leurs empreintes
+respectives et demeure exploitable pour une nouvelle donnée présentant une
+structure compatible.
+\end{definition}
+
+La généralisation peut alors être représentée schématiquement par :
+
+\[
+\boxed{
+\text{plusieurs empreintes}
+\rightarrow
+\text{structure commune}
+\rightarrow
+\text{réutilisation}
+\rightarrow
+\text{généralisation}.
+}
+\]
+
+La généralisation ne nécessite donc pas que les données soient identiques.
+
+Elle nécessite l'existence d'une structure commune suffisamment stable.
+
+% ============================================================
+\section{Résolution et abstraction}
+% ============================================================
+
+\subsection{Résolution interne}
+
+On introduit une famille de projections :
+
+\[
+P_\lambda:
+\mathcal H
+\rightarrow
+\mathcal H_\lambda,
+\]
+
+où $\lambda$ représente un niveau de résolution.
+
+L'empreinte observée à cette résolution est :
+
+\[
+I_{\theta,\lambda}(d)
+=
+P_\lambda(I_\theta(d)).
+\]
+
+Deux données peuvent être indiscernables à faible résolution :
+
+\[
+I_{\theta,\lambda_1}(d_a)
+=
+I_{\theta,\lambda_1}(d_b),
+\]
+
+mais distinguables à résolution supérieure :
+
+\[
+I_{\theta,\lambda_2}(d_a)
+\neq
+I_{\theta,\lambda_2}(d_b),
+\qquad
+\lambda_1<\lambda_2.
+\]
+
+On retrouve ainsi le principe fondamental de la théorie des empreintes :
+
+\[
+\boxed{
+\text{résolution faible}
+\rightarrow
+\text{moins de distinctions},
+}
+\]
+
+et :
+
+\[
+\boxed{
+\text{résolution élevée}
+\rightarrow
+\text{davantage de distinctions}.
+}
+\]
+
+\subsection{Abstraction}
+
+Une abstraction peut être interprétée comme une structure qui reste stable
+lorsque certaines distinctions sont supprimées.
+
+Soit :
+
+\[
+P_{\lambda_1}
+\]
+
+une projection de résolution inférieure à :
+
+\[
+P_{\lambda_2}.
+\]
+
+Une structure $S$ est abstraite relativement à
+$(\lambda_1,\lambda_2)$ si :
+
+\[
+P_{\lambda_1}(S)
+\]
+
+conserve une propriété relationnelle présente dans :
+
+\[
+P_{\lambda_2}(S).
+\]
+
+Ainsi, une abstraction peut être conçue comme une structure stable à
+plusieurs niveaux de résolution.
+
+% ============================================================
+\section{Lien avec l'indiscernabilité de la théorie des empreintes}
+% ============================================================
+
+On définit :
+
+\[
+d_1
+\sim_{\theta,\lambda}
+d_2
+\quad\Longleftrightarrow\quad
+I_{\theta,\lambda}(d_1)
+=
+I_{\theta,\lambda}(d_2).
+\]
+
+Cette relation définit une partition du domaine des données.
+
+Lorsque la résolution augmente, on peut obtenir :
+
+\[
+[d]_{\lambda_2}
+\subseteq
+[d]_{\lambda_1}.
+\]
+
+Le système passe donc d'une représentation grossière :
+
+\[
+\X/{\sim_{\lambda_1}}
+\]
+
+à une représentation plus fine :
+
+\[
+\X/{\sim_{\lambda_2}}.
+\]
+
+La hiérarchie des représentations peut ainsi être décrite par :
+
+\[
+\X/{\sim_{\lambda_1}}
+\longrightarrow
+\X/{\sim_{\lambda_2}}
+\longrightarrow
+\cdots.
+\]
+
+Cette structure fournit une interprétation formelle de l'idée selon laquelle
+une augmentation de résolution permet de raffiner progressivement la
+connaissance.
+
+% ============================================================
+\section{Seuil de distinction dans un LLM}
+% ============================================================
+
+Pour deux données $x,y$, on peut définir un seuil de distinction interne :
+
+\[
+\Theta_\theta(x,y)
+=
+\sup
+\left\{
+\iota(\lambda):
+x\sim_{\theta,\lambda}y
+\right\},
+\]
+
+sous réserve des conditions nécessaires sur l'échelle $\iota$.
+
+Cette quantité mesure le niveau maximal auquel les deux données restent
+indiscernables relativement à la famille d'observations choisie.
+
+On obtient alors :
+
+\[
+\Theta_\theta(x,y)
+\]
+
+comme analogue interne du seuil observationnel de la théorie des empreintes.
+
+Sous les hypothèses appropriées sur la filtration des observations, on
+retrouve une structure ultramétrique potentielle :
+
+\[
+\Theta_\theta(x,z)
+\geq
+\min
+\{
+\Theta_\theta(x,y),
+\Theta_\theta(y,z)
+\}.
+\]
+
+Cette propriété ne doit toutefois être revendiquée que si les hypothèses
+permettant la construction de la filtration sont effectivement satisfaites
+dans le système étudié.
+
+% ============================================================
+\section{Du dataset au maillage de connaissances}
+% ============================================================
+
+Le processus d'apprentissage est schématisé par :
+
+\[
+\D
+\xrightarrow{\text{observation}}
+\mathfrak M_\theta(\D)
+\xrightarrow{\text{optimisation}}
+\theta^\ast.
+\]
+
+Plus explicitement :
+
+\[
+d_i
+\longrightarrow
+I_{\theta}(d_i)
+\longrightarrow
+R_\theta(d_i)
+\]
+
+pour chaque :
+
+\[
+i=1,\ldots,N.
+\]
+
+L'ensemble des structures produit :
+
+\[
+\mathfrak M_\theta(\D)
+=
+\bigcup_{i=1}^{N}R_\theta(d_i).
+\]
+
+L'apprentissage modifie progressivement $\theta$, donc les structures
+produites par les données.
+
+On peut ainsi représenter :
+
+\[
+\theta_0
+\rightarrow
+\theta_1
+\rightarrow
+\cdots
+\rightarrow
+\theta_T
+=
+\theta^\ast.
+\]
+
+À chaque étape :
+
+\[
+\mathfrak M_{\theta_t}(\D)
+\]
+
+peut évoluer.
+
+% ============================================================
+\section{Apprentissage comme construction d'un espace relationnel}
+% ============================================================
+
+Soit une fonction de perte :
+
+\[
+\mathcal L(\theta;\D).
+\]
+
+L'apprentissage cherche :
+
+\[
+\theta^\ast
+\in
+\argmin_\theta
+\mathcal L(\theta;\D).
+\]
+
+La présente théorie ajoute une interprétation structurelle :
+
+\[
+\boxed{
+\text{optimisation}
+\rightarrow
+\text{modification des représentations}
+\rightarrow
+\text{modification du maillage d'empreintes}.
+}
+\]
+
+Ainsi, le dataset n'est pas simplement mémorisé comme une liste.
+
+Il impose des contraintes statistiques et relationnelles sur l'espace des
+paramètres.
+
+Le modèle cherche une organisation de $\theta$ permettant de réduire la
+perte sur l'ensemble des observations d'apprentissage.
+
+% ============================================================
+\section{Mémoire distribuée}
+% ============================================================
+
+\subsection{Principe}
+
+Si une information donnée est distribuée sur plusieurs paramètres et
+plusieurs unités, il n'est pas nécessaire qu'un emplacement unique
+corresponde à cette information.
+
+On peut représenter une information $K$ par :
+
+\[
+K
+\rightsquigarrow
+\mathcal S_K
+\subseteq
+\mathcal N\times\mathcal L,
+\]
+
+où $\mathcal S_K$ est son support structurel.
+
+Deux connaissances $K_1,K_2$ peuvent donc satisfaire :
+
+\[
+\mathcal S_{K_1}
+\cap
+\mathcal S_{K_2}
+\neq
+\varnothing.
+\]
+
+Cette propriété fournit un modèle formel de la mémoire distribuée et de la
+superposition.
+
+\subsection{Conséquence}
+
+Le fait qu'une composante participe à deux connaissances ne signifie pas que
+ces connaissances sont identiques :
+
+\[
+\boxed{
+\mathcal S_{K_1}\cap\mathcal S_{K_2}\neq\varnothing
+\not\Rightarrow
+K_1=K_2.
+}
+\]
+
+Il s'agit précisément du mécanisme permettant théoriquement de comprendre
+la poly-sémanticité sans attribuer plusieurs concepts contradictoires à une
+même unité isolée.
+
+% ============================================================
+\section{Connaissance comme graphe d'empreintes}
+% ============================================================
+
+On peut représenter le système par un graphe :
+
+\[
+G_\theta=(V,E),
+\]
+
+où les sommets peuvent représenter :
+
+\begin{itemize}
+    \item des tokens ;
+    \item des représentations ;
+    \item des unités internes ;
+    \item des empreintes ;
+    \item des structures relationnelles.
+\end{itemize}
+
+Les arêtes représentent des relations telles que :
+
+\begin{itemize}
+    \item dépendance ;
+    \item coactivation ;
+    \item transformation ;
+    \item attention ;
+    \item projection ;
+    \item interaction ;
+    \item partage structurel.
+\end{itemize}
+
+Une connaissance n'est alors plus nécessairement un sommet :
+
+\[
+K\neq v.
+\]
+
+Elle peut être une sous-structure :
+
+\[
+K\equiv G_K\subseteq G_\theta.
+\]
+
+Cette représentation est cohérente avec l'hypothèse selon laquelle la
+connaissance est une organisation relationnelle plutôt qu'un objet localisé.
+
+% ============================================================
+\section{Intelligence émergente}
+% ============================================================
+
+On définit un opérateur général de transformation :
+
+\[
+\Gamma_\theta:
+\mathcal I
+\rightarrow
+\mathcal I,
+\]
+
+où $\mathcal I$ désigne l'espace des états informationnels internes.
+
+L'intelligence fonctionnelle du système est alors associée non seulement à
+la quantité d'information mémorisée, mais à la structure des transformations
+qu'il peut effectuer :
+
+\[
+I
+\rightarrow
+\Gamma_\theta(I)
+\rightarrow
+\Gamma_\theta^2(I)
+\rightarrow
+\cdots.
+\]
+
+Ainsi :
+
+\[
+\boxed{
+\text{intelligence}
+\not\equiv
+\text{quantité brute de mémoire}.
+}
+\]
+
+Elle dépend également de la capacité du système à transformer et exploiter
+les structures mémorisées.
+
+% ============================================================
+\section{Observation, mémoire, connaissance et intelligence}
+% ============================================================
+
+Le modèle complet peut être résumé par la chaîne :
+
+\[
+\boxed{
+\begin{array}{ccccccccc}
+\text{Domaine}
+&
+\xrightarrow{\text{observation}}
+&
+\text{Empreintes}
+&
+\xrightarrow{\text{persistance}}
+&
+\text{Mémoire}
+&
+\xrightarrow{\text{organisation}}
+&
+\text{Connaissance}
+&
+\xrightarrow{\text{transformation}}
+&
+\text{Intelligence}.
+\end{array}
+}
+\]
+
+Dans un LLM :
+
+\[
+\boxed{
+\begin{array}{ccccccccc}
+\D
+&
+\longrightarrow
+&
+I_\theta(\D)
+&
+\longrightarrow
+&
+\theta^\ast
+&
+\longrightarrow
+&
+\mathfrak M_{\theta^\ast}
+&
+\longrightarrow
+&
+\Gamma_{\theta^\ast}.
+\end{array}
+}
+\]
+
+Cette correspondance est une hypothèse de modélisation et non une identité
+mathématique automatique entre mémoire humaine et paramètres d'un LLM.
+
+% ============================================================
+\section{Hypothèse centrale sur la boîte noire}
+% ============================================================
+
+\begin{hypothesis}[Hypothèse de la boîte noire par maillage d'empreintes]
+La difficulté à interpréter un LLM pourrait provenir en partie du fait que
+les significations fonctionnelles pertinentes ne sont pas localisées dans
+des unités individuelles mais distribuées dans un maillage de structures
+d'empreintes qui se recouvrent, se transforment et interagissent à plusieurs
+niveaux de résolution.
+\end{hypothesis}
+
+Cette hypothèse peut être représentée par :
+
+\[
+\boxed{
+\text{boîte noire}
+\approx
+\text{structure distribuée difficile à factoriser localement}.
+}
+\]
+
+Elle conduit à remplacer la question :
+
+\[
+\text{``Que représente ce neurone ?''}
+\]
+
+par :
+
+\[
+\boxed{
+\text{``Dans quelles empreintes et quelles structures relationnelles
+ce neurone intervient-il ?''}
+}
+\]
+
+% ============================================================
+\section{Hypothèse de superposition}
+% ============================================================
+
+\begin{hypothesis}[Superposition structurelle]
+Lorsque plusieurs structures informationnelles utilisent une même
+sous-structure interne, leurs supports peuvent se recouvrir sans que les
+structures globales soient identiques.
+\end{hypothesis}
+
+Formellement :
+
+\[
+R_a\neq R_b,
+\qquad
+R_a\cap R_b\neq\varnothing.
+\]
+
+Cette situation constitue le modèle théorique minimal de la poly-sémanticité.
+
+Une unité $n$ peut satisfaire :
+
+\[
+n\in R_a
+\]
+
+et :
+
+\[
+n\in R_b
+\]
+
+tout en ayant :
+
+\[
+R_a\neq R_b.
+\]
+
+% ============================================================
+\section{Hypothèse de généralisation par invariants}
+% ============================================================
+
+Soit une famille :
+
+\[
+\{R_i\}_{i\in I}.
+\]
+
+On recherche une structure :
+
+\[
+S
+\]
+
+telle que :
+
+\[
+S\subseteq R_i
+\]
+
+pour un nombre suffisamment important de $i$.
+
+La généralisation est alors associée à la conservation de $S$ lorsque le
+système rencontre une nouvelle donnée :
+
+\[
+R_{\mathrm{new}}
+\]
+
+telle que :
+
+\[
+S\subseteq R_{\mathrm{new}}.
+\]
+
+On obtient :
+
+\[
+\boxed{
+\text{généralisation}
+=
+\text{réutilisation d'une structure relationnelle commune}.
+}
+\]
+
+Cette définition permet de distinguer :
+
+\[
+\text{généralisation}
+\]
+
+de :
+
+\[
+\text{mémorisation littérale}.
+\]
+
+% ============================================================
+\section{Hypothèse de résolution}
+% ============================================================
+
+La théorie propose que la représentation d'un même domaine puisse être
+observée à plusieurs niveaux :
+
+\[
+\lambda_1<\lambda_2<\cdots<\lambda_m.
+\]
+
+À faible résolution, plusieurs états peuvent appartenir à la même classe :
+
+\[
+x\sim_{\lambda_1}y.
+\]
+
+À résolution supérieure :
+
+\[
+x\not\sim_{\lambda_2}y.
+\]
+
+Une représentation générale peut donc coexister avec des représentations
+plus spécialisées.
+
+Schématiquement :
+
+\[
+\boxed{
+\text{général}
+\leftarrow
+\text{basse résolution}
+}
+\]
+
+et :
+
+\[
+\boxed{
+\text{spécialisation}
+\leftarrow
+\text{augmentation de résolution}.
+}
+\]
+
+Cette formulation fournit une interprétation possible du passage de
+catégories générales à des concepts plus précis.
+
+% ============================================================
+\section{Architecture conceptuelle complète}
+% ============================================================
+
+Le modèle complet peut être représenté comme suit :
+
+\[
+\begin{array}{cccccc}
+\text{Dataset}
+&
+\longrightarrow
+&
+\text{Observations}
+&
+\longrightarrow
+&
+\text{Empreintes}
+&
+\\[0.2cm]
+&&
+\downarrow
+&&
+\downarrow
+&
+\\[0.2cm]
+&&
+\text{Dimensions}
+&
+\longrightarrow
+&
+\text{Interactions}
+&
+\\[0.2cm]
+&&
+&&
+\downarrow
+&
+\\[0.2cm]
+&&
+&&
+\text{Structures relationnelles}
+&
+\\[0.2cm]
+&&
+&&
+\downarrow
+&
+\\[0.2cm]
+&&
+&&
+\text{Maillage}
+&
+\\[0.2cm]
+&&
+&&
+\downarrow
+&
+\\[0.2cm]
+&&
+&&
+\text{Superposition}
+&
+\\[0.2cm]
+&&
+&&
+\downarrow
+&
+\\[0.2cm]
+&&
+&&
+\text{Généralisation}
+&
+\\[0.2cm]
+&&
+&&
+\downarrow
+&
+\\[0.2cm]
+&&
+&&
+\text{Comportement intelligent}.
+&
+\end{array}
+\]
+
+% ============================================================
+\section{Correspondance avec la théorie générale des empreintes}
+% ============================================================
+
+La correspondance proposée est :
+
+\begin{center}
+\begin{tabular}{>{\raggedright}p{0.32\textwidth}
+                >{\raggedright\arraybackslash}p{0.55\textwidth}}
+\toprule
+\textbf{Théorie des empreintes}
+&
+\textbf{Interprétation LLM proposée}
+\\
+\midrule
+Observation
+&
+Traitement d'une donnée par le modèle
+\\
+Empreinte
+&
+État ou structure interne produite par le traitement
+\\
+Résolution
+&
+Niveau de détail auquel une représentation est observée
+\\
+Indiscernabilité
+&
+Équivalence de représentations relativement à une observation interne
+\\
+Classe d'équivalence
+&
+Ensemble de données indistinguables à une résolution donnée
+\\
+Seuil
+&
+Niveau auquel deux structures deviennent distinguables
+\\
+Quotient
+&
+Espace des représentations distinguées par une famille d'observations
+\\
+Fermeture
+&
+Ensemble d'informations déductibles à partir d'une empreinte donnée
+\\
+Transport
+&
+Transformation d'une représentation entre espaces ou niveaux
+\\
+Structure hiérarchique
+&
+Organisation des représentations à plusieurs niveaux de résolution
+\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Précaution sur le mot ``émergence''}
+% ============================================================
+
+Le terme ``émergence'' doit être employé avec précision.
+
+Le fait qu'une propriété soit difficile à attribuer à une unité individuelle
+ne démontre pas automatiquement qu'elle est émergente au sens fort.
+
+Dans le présent cadre, on utilisera donc :
+
+\begin{definition}[Émergence structurelle]
+Une propriété est dite structurellement émergente lorsqu'elle est définie
+sur une configuration collective d'éléments et ne peut pas être identifiée
+à la propriété isolée d'un élément individuel sans perdre une partie de sa
+définition.
+\end{definition}
+
+Ainsi, si :
+
+\[
+P=P(R)
+\]
+
+où :
+
+\[
+R=\{n_1,\ldots,n_k\},
+\]
+
+et qu'il n'existe pas de fonction individuelle $p$ telle que :
+
+\[
+P(R)=p(n_i)
+\]
+
+pour un seul $i$, alors $P$ est une propriété structurelle du réseau.
+
+% ============================================================
+\section{Prédictions expérimentales}
+% ============================================================
+
+La théorie devient scientifiquement testable lorsqu'elle produit des
+prédictions discriminantes.
+
+\subsection{Prédiction 1 : non-localité de la signification}
+
+Si une propriété sémantique $S$ correspond à une empreinte distribuée, alors
+la suppression d'une seule unité ne devrait pas nécessairement supprimer
+$S$.
+
+On peut tester :
+
+\[
+\Delta S
+=
+S(G_\theta)-S(G_\theta\setminus n).
+\]
+
+Une faible valeur de $\Delta S$ pour certaines unités serait compatible
+avec une représentation distribuée.
+
+\subsection{Prédiction 2 : structure de recouvrement}
+
+Pour deux familles sémantiques $A$ et $B$, on peut mesurer :
+
+\[
+J(A,B)
+=
+\frac{
+|\mathcal C(A)\cap\mathcal C(B)|
+}{
+|\mathcal C(A)\cup\mathcal C(B)|
+}.
+\]
+
+La théorie prédit qu'un recouvrement non nul ne suffit pas à établir
+une identité sémantique.
+
+\subsection{Prédiction 3 : dépendance au contexte}
+
+Pour un même token $t$ :
+
+\[
+I_\theta(t\mid d_1)
+\neq
+I_\theta(t\mid d_2)
+\]
+
+dans de nombreux contextes.
+
+Une analyse pertinente doit donc mesurer la variation :
+
+\[
+\Delta_I
+=
+d
+\left(
+I_\theta(t\mid d_1),
+I_\theta(t\mid d_2)
+\right).
+\]
+
+\subsection{Prédiction 4 : raffinement avec la résolution}
+
+Si le modèle possède effectivement une organisation hiérarchique de
+représentations, on devrait pouvoir observer des relations du type :
+
+\[
+\Pi_{\lambda_2}
+\preceq
+\Pi_{\lambda_1}
+\]
+
+où $\Pi_\lambda$ représente la partition induite par la résolution
+$\lambda$.
+
+\subsection{Prédiction 5 : généralisation par structures communes}
+
+Une structure identifiée dans plusieurs familles de données devrait pouvoir
+être réactivée dans une nouvelle famille présentant des relations
+structurelles analogues, même lorsque les éléments lexicaux sont différents.
+
+% ============================================================
+\section{Limites actuelles}
+% ============================================================
+
+Le présent formalisme ne démontre pas les affirmations suivantes :
+
+\begin{enumerate}
+    \item que tout LLM possède nécessairement la structure décrite ;
+    \item que toute poly-sémanticité observée provient de ce mécanisme ;
+    \item que la théorie des empreintes constitue l'explication complète de
+    la mémoire humaine ;
+    \item que l'intelligence humaine et celle d'un LLM sont identiques ;
+    \item que l'Univers est littéralement une mémoire ;
+    \item que toute généralisation est nécessairement une conséquence d'un
+    seuil de résolution ;
+    \item que la superposition structurelle est la seule cause de la
+    poly-sémanticité.
+\end{enumerate}
+
+Ces propositions constituent des hypothèses ou des programmes de recherche.
+
+% ============================================================
+\section{Thèse centrale}
+% ============================================================
+
+La thèse centrale du modèle peut être condensée dans l'énoncé suivant :
+
+\begin{quote}
+\textbf{
+Un système intelligent peut être compris comme un système qui acquiert,
+conserve, organise et transforme des empreintes produites par ses
+observations. Lorsque ces empreintes sont distribuées dans une architecture
+à plusieurs niveaux et que plusieurs structures peuvent partager des
+composantes communes, une même unité interne peut participer à plusieurs
+structures sémantiques distinctes. La généralisation résulte alors de
+l'exploitation de structures communes entre plusieurs empreintes, tandis que
+la spécialisation correspond à l'apparition de distinctions supplémentaires
+lorsque la résolution augmente.
+}
+\end{quote}
+
+Sous forme symbolique :
+
+\[
+\boxed{
+\text{Observation}
+\rightarrow
+\text{Empreinte}
+\rightarrow
+\text{Organisation}
+\rightarrow
+\text{Maillage}
+\rightarrow
+\text{Superposition}
+\rightarrow
+\text{Généralisation}
+\rightarrow
+\text{Transformation}
+\rightarrow
+\text{Intelligence}.
+}
+\]
+
+La boîte noire d'un LLM pourrait alors être reformulée non comme l'existence
+d'un contenu mystérieusement caché dans chaque neurone, mais comme le
+problème inverse consistant à reconstruire, à partir des observations
+accessibles, une structure distribuée d'empreintes dont les composantes sont
+partagées, contextualisées, hiérarchisées et dépendantes de la résolution.
+
+\[
+\boxed{
+\text{Boîte noire}
+=
+\text{problème de reconstruction d'une structure interne d'empreintes}.
+}
+\]
+
+% ============================================================
+\section{Programme mathématique ultérieur}
+% ============================================================
+
+La formalisation ouvre plusieurs problèmes qui doivent être traités
+séparément.
+
+\subsection{Problème A : définition exacte de l'empreinte neuronale}
+
+Construire une application :
+
+\[
+I_\theta:
+\D
+\rightarrow
+\mathcal L_\theta
+\]
+
+dont la nature soit définie indépendamment de l'interprétation intuitive
+des activations.
+
+\subsection{Problème B : définition exacte du maillage}
+
+Construire :
+
+\[
+\mathfrak M_\theta(\D)
+\]
+
+comme un objet mathématique doté d'une structure précise de nœuds, d'arêtes,
+de relations et éventuellement de poids.
+
+\subsection{Problème C : définition de la superposition}
+
+Définir une mesure :
+
+\[
+\operatorname{Overlap}(R_i,R_j)
+\]
+
+permettant de distinguer :
+
+\[
+\text{simple coactivation},
+\]
+
+de :
+
+\[
+\text{partage structurel}.
+\]
+
+\subsection{Problème D : définition de la résolution interne}
+
+Construire une filtration :
+
+\[
+\mathcal I_{\lambda_1}
+\subseteq
+\mathcal I_{\lambda_2}
+\subseteq
+\cdots
+\]
+
+compatible avec les empreintes réellement mesurables dans un LLM.
+
+\subsection{Problème E : lien entre structure et comportement}
+
+Déterminer les conditions sous lesquelles une propriété structurelle :
+
+\[
+S\subseteq\mathfrak M_\theta
+\]
+
+produit effectivement une propriété comportementale observable :
+
+\[
+B(S).
+\]
+
+\subsection{Problème F : distinction entre mémorisation et généralisation}
+
+Définir des critères permettant de distinguer :
+
+\[
+\text{récupération d'une structure mémorisée}
+\]
+
+de :
+
+\[
+\text{construction d'une structure généralisée}.
+\]
+
+% ============================================================
+\section{Conclusion}
+% ============================================================
+
+Le cadre développé ici propose une interprétation unifiée dans laquelle
+l'observation constitue le mécanisme fondamental d'acquisition
+d'information, l'empreinte constitue la représentation produite par cette
+observation, la mémoire correspond à la persistance de ces structures, la
+connaissance à leur organisation relationnelle et l'intelligence à leur
+exploitation dynamique.
+
+Appliqué aux LLM, le modèle conduit à abandonner une identification trop
+simple :
+
+\[
+\text{neurone}=\text{concept}.
+\]
+
+Il propose plutôt :
+
+\[
+\boxed{
+\text{neurone}
+\in
+\text{structure d'empreinte}
+}
+\]
+
+et :
+
+\[
+\boxed{
+\text{concept ou connaissance}
+\approx
+\text{configuration relationnelle distribuée}.
+}
+\]
+
+Une même unité peut alors appartenir à plusieurs structures :
+
+\[
+n\in R_a\cap R_b,
+\qquad
+R_a\neq R_b,
+\]
+
+sans contradiction.
+
+Le phénomène apparemment paradoxal du neurone associé à des concepts
+éloignés peut ainsi être reformulé comme un problème de superposition
+structurelle et de résolution observationnelle.
+
+La proposition fondamentale reste cependant une hypothèse scientifique :
+
+\[
+\boxed{
+\text{La structure distribuée des empreintes pourrait constituer
+une partie essentielle de l'explication de la boîte noire des LLM.}
+}
+\]
+
+Sa valeur scientifique dépendra de la possibilité de construire les objets
+$\mathfrak M_\theta$, $I_{\theta,\lambda}$ et
+$\operatorname{Overlap}$ de manière opérationnelle, puis de vérifier
+expérimentalement les prédictions qui en découlent.
+    
+\end{document}

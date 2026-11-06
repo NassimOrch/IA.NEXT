@@ -1,0 +1,271 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.15cm}
+\usepackage{microtype}
+\usepackage{booktabs,longtable,array,tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\hypersetup{colorlinks=true,linkcolor=teal!55!black,urlcolor=blue!55!black,pdftitle={Etude comparative et audit de NGeGenBrain v3_1},pdfauthor={NGeGenBrain - dossier experimental}}
+\setlist[itemize]{leftmargin=1.3em,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=2pt,topsep=3pt}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\ok}{\textbf{EXECUTE}}
+\newcommand{\partialstatus}{\textbf{PARTIEL}}
+\newcommand{\notproven}{\textbf{NON DEMONTRE}}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{NGeGenBrain v3\_1}
+\rhead{Etude comparative multi-vues}
+\cfoot{\thepage}
+\title{\textbf{NGeGenBrain v3\_1}\\Etude comparative des modeles sources, audit des interventions et reconstruction multi-vues}
+\author{Dossier experimental et de reproductibilite}
+\date{28 octobre 2026}
+\begin{document}
+\maketitle
+\begin{center}
+\fcolorbox{teal!40!black}{teal!4}{\parbox{0.92\linewidth}{\textbf{Conclusion principale.} Les deux modeles fournis, SmolLM2 et TinyLLM, ont ete charges depuis les archives locales reelles et instrumentes. NGeGenBrain v3\_1 ajoute un routeur d'observation a huit vues au petit modele autonome v3\_0 tout en conservant exactement son chemin de generation. Cela preserve les acquis du tiny LM, mais ne constitue pas une reconstruction mecaniste complete des modeles sources.}}
+\end{center}
+\tableofcontents
+\newpage
+
+\section{Description et objectif}
+Cette etude corrige quatre lacunes de la livraison precedente : comparaison insuffisante avec les modeles sources reels, couverture de chargement local incomplete, interface et lanceur insuffisamment valides, et interventions internes trop grossieres pour distinguer les effets propres des blocs. Elle reprend le protocole du fichier \code{prompt_NGeGenBrain_v2.txt} et le logiciel contenu dans \code{Dmodel_NGeGenBrain_v2.zip}. Les deux fichiers ont ete extraits de l'archive source utilisateur et leurs empreintes sont consignees dans le manifeste d'audit.
+
+Les questions testees sont distinctes :
+\begin{enumerate}
+\item Les modeles locaux fournis sont-ils reels, lisibles, executables et instrumentables par NGeGenBrain v3\_1 ?
+\item Que montrent des observations top-down et bottom-up, ainsi que des interventions controlees ?
+\item Le modele produit par NGeGenBrain v3\_1 se comporte-t-il comme les modeles sources sur des textes identiques ?
+\item La nouvelle facette d'observation a-t-elle ete apprise sans degrader le chemin de generation qui fonctionnait deja ?
+\end{enumerate}
+Le protocole ne suppose ni la reussite ni l'echec. Les resultats defavorables et les candidats rejetes sont conserves dans le registre d'audit.
+
+\section{Architecture et provenance des quatre artefacts}
+\begin{longtable}{p{2.6cm}p{2.8cm}p{2.4cm}p{2.0cm}p{4.6cm}}
+\toprule
+\textbf{Artefact} & \textbf{Format / architecture} & \textbf{Parametres} & \textbf{Couches} & \textbf{Provenance et role}\\
+\midrule
+\endhead
+SmolLM2 fourni & GGUF Q8\_0, famille Llama & 134\,514\,432 (estimation du lecteur) & 30 blocs & Archive utilisateur \code{SmolLM2-135M-Instruct-Q8_0.zip}; chargement local avec tokenizer GGUF et instrumentation des blocs.\\
+TinyLLM fourni & PyTorch, \code{TinyllmForCausalLM}, SentencePiece & 76\,868\,096 & 8 blocs, largeur 512 & Archive utilisateur \code{tinny_llm.zip}; chargement du vrai \code{pytorch_model.bin}, configuration et tokenizer.\\
+Etudiant v3\_0 & GRU autoregressif byte-level & 54\,536 & 1 GRU & Archive du modele produit dans la livraison v3\_0; controle historique et chemin generatif de reference.\\
+Etudiant v3\_1 & Meme coeur generatif v3\_0 + routeur d'observation separe & 55\,568 & 1 GRU + routeur & Archive finale \code{model_produit_NG_v3_1.zip}; 1\,032 parametres nouveaux dans le routeur d'observation, generation conservee.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Empreintes des artefacts sources}
+\begin{itemize}
+\item Archive utilisateur globale \code{models_NGeGenBrain.zip} : SHA-256 \code{1fada32dde3a734b0ea00b158c0716b852254a16fb1aa4efb1acff9178a8a75e}.
+\item Prompt normatif V2 : SHA-256 \code{fec2096e0afc31771403418f3ab9927c62a9f2f880e1abf92b7074f1c5385c21}.
+\item Archive logiciel V2 : SHA-256 \code{244f843baed4a391343a31e4a4e636f6418074b4fa553d65f3ef72a757d49b1c}.
+\item Archive SmolLM2 : SHA-256 \code{25942bd79e4354942b8a029d7087debc20b21c8ecc6f5c6c2a43c07f3756a829} ; poids GGUF extraits : \code{40f7094960b6ede829145d102ca79451b364b27d9d8694d4406e002024cff357}.
+\item Archive TinyLLM : SHA-256 \code{356c0c32085b919ba870846c31181a841b3afeb48bd017d5313dfb600f4bb171} ; checkpoint PyTorch : \code{12d2a766fb4fe3edee65fce4971b87d7afae646b43fb784ef627fbb92c62d90e}.
+\end{itemize}
+Ces empreintes relient l'etude aux archives effectivement fournies. Le manifeste contient aussi les chemins, les versions logicielles et l'empreinte du script d'experience.
+
+\section{Protocole complet}
+\subsection{Chargement reel et inspection}
+Chaque archive de modele a ete importee par l'adaptateur adapte a son format, puis le modele a execute une passe avant donnant des logits finis. Pour SmolLM2, le lecteur interprete les tenseurs GGUF Q8\_0 / F16 / F32, le vocabulaire de 49\,152 elements et un contexte declare de 8\,192 tokens. Pour TinyLLM, le chargement utilise les vrais poids PyTorch, SentencePiece, un vocabulaire de 49\,958 pieces et un contexte de 1\,024 tokens. Ce ne sont pas des mocks : les resultats incluent les empreintes des poids, les sorties du tokenizer, les logits et les observations d'activations.
+
+\subsection{Corpus commun hors entrainement}
+Le corpus de comparaison est un jeu fixe, separe de l'entrainement du routeur : 16 textes anglais et 8 textes chinois. Pour chaque document, la metrique principale utilise le prefixe de 96 octets UTF-8, soit 1\,536 octets scores en anglais et 768 en chinois. Les empreintes SHA-256 des deux fichiers JSONL sont enregistrees dans \code{model_comparison_results.json}. Aucun de ces textes ou scores n'est lu par le constructeur du dataset d'entrainement.
+
+Le corpus est petit et les prompts de generation sont courts. Il sert a une comparaison controlee, pas a un classement universel des LLM. Le score principal est le nombre de bits negatifs par octet UTF-8 (bits/byte, BPB), utilise ici pour reduire l'effet du tokenizer different de chaque modele. Le BPB ne corrige pas les ecarts de domaine, de calibration ou de couverture linguistique.
+
+\subsection{Observations top-down et bottom-up}
+La direction top-down part des prompts et sorties : continuation brute, distribution du prochain token, entropie et score sur le corpus commun. La direction bottom-up capture la structure, les dimensions de blocs, les representations cachees et l'entropie des cartes d'attention. Les interventions sont executees sur la meme entree, avec memes poids, appareil et parametres. Pour SmolLM2 et TinyLLM, 30 et 8 sorties de blocs sont respectivement enregistrees; le modele etudiant recurrent n'a pas de tetes d'attention, ce qui est marque comme capacite absente, non simulee.
+
+\subsection{Correction des interventions}
+L'audit a identifie une intervention historique \code{zero} qui mettait a zero tout l'etat post-bloc. Les couches suivantes recevaient donc un etat nul, ce qui rendait les interventions de zeroisation a plusieurs profondeurs artificiellement similaires. Cette operation reste disponible sous son sens litteral de mise a zero de l'etat. Pour l'etude causale de cette livraison, deux modes residuels sont ajoutes et utilises :
+\begin{itemize}
+\item \code{zero_update} : supprime la transformation du bloc, mais conserve l'entree residuelle (bloc identite comme controle) ;
+\item \code{scale_update} : conserve l'entree residuelle et multiplie la mise a jour nette du bloc par le coefficient (ici 0,5).
+\end{itemize}
+Cette correction rend les effets dependants de la profondeur observables sans effacer la totalite du flux residuel. Les sorties et deltas sont ecrits dans le registre, y compris les cas sans changement du token de tete.
+
+\section{Resultats de comparaison directe}
+\subsection{Score de modelisation du langage}
+Les lignes ci-dessous correspondent aux quatre checkpoints effectivement charges et aux memes textes. Un BPB plus faible signifie que le modele attribue, sur ces prefixes, une probabilite moyenne plus elevee aux octets observes.
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Modele} & \textbf{Anglais, 1\,536 octets (BPB)} & \textbf{Chinois, 768 octets (BPB)}\\
+\midrule
+SmolLM2 source & \textbf{1,2910} & 3,6776\\
+TinyLLM source & 2,1308 & \textbf{1,6790}\\
+Etudiant v3\_0 & 2,9968 & 31,6871\\
+Etudiant v3\_1 & 2,9968 & 31,6871\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Interpretation.} Sur le petit corpus anglais controle, SmolLM2 obtient le BPB le plus bas parmi les quatre artefacts. TinyLLM est moins bien score en anglais mais nettement meilleur en chinois, ce qui concorde avec les exemples d'inference observes. Le tiny LM produit obtient un score intermediaire en anglais mais un BPB tres eleve en chinois; il n'a pas ete entraine comme modele chinois. v3\_1 conserve les mesures de v3\_0 a l'identique car la route de generation est volontairement preservee.
+
+Les exactitudes du prochain token et les perplexites natives sont disponibles dans le JSON brut, mais ne sont pas classees entre tokenizers comme si elles etaient une unite commune. Les 39,9\% d'exactitude du modele byte-level sur ce corpus anglais ne signifient pas qu'il comprend mieux les questions que SmolLM2 : l'unite predite et la distribution du vocabulaire sont differentes.
+
+\subsection{Exemples de generations brutes}
+Les sorties ne sont ni retouchees ni reformulees dans ce rapport :
+\begin{itemize}
+\item Prompt anglais de comparaison ("What is the purpose of a baseline in an experiment?") : SmolLM2 a genere \code{You are a user / You are a user / You are a user / You} ; TinyLLM a produit une continuation en chinois ; les etudiants ont genere \code{An or the reade}.
+\item Prompt chinois : SmolLM2 a en partie reutilise le gabarit de conversation anglais ; TinyLLM a repete le terme relatif a Pekin ; les etudiants ont genere \code{z| Improded a co}.
+\end{itemize}
+Ces continuations sont courtes, deterministes et utiles comme traces de comportement. Elles ne constituent pas une mesure suffisante de capacite conversationnelle generale.
+
+\section{Interventions causales sur les vrais modeles}
+Les interventions residuelles ont ete mesurees apres capture du baseline sur la meme chaine d'entree. Le tableau donne la norme L2 de la difference entre les logits de baseline et ceux intervenus. Un changement de token de tete est indique separement; il ne remplace pas une comparaison de la distribution complete.
+\begin{longtable}{p{2.4cm}p{2.0cm}p{2.2cm}r c}
+\toprule
+\textbf{Modele} & \textbf{Cible} & \textbf{Intervention} & \textbf{Delta L2 logits} & \textbf{Top-1 change}\\
+\midrule
+\endhead
+SmolLM2 & Bloc 0 & zero\_update & 3715,761 & Oui\\
+SmolLM2 & Bloc 0 & scale\_update (0,5) & 734,859 & Non\\
+SmolLM2 & Bloc 15 & zero\_update & 130,898 & Non\\
+SmolLM2 & Bloc 15 & scale\_update (0,5) & 70,934 & Non\\
+SmolLM2 & Bloc 29 & zero\_update & 2854,024 & Oui\\
+SmolLM2 & Bloc 29 & scale\_update (0,5) & 1242,216 & Oui\\
+\midrule
+TinyLLM & Bloc 0 & zero\_update & 892,074 & Oui\\
+TinyLLM & Bloc 0 & scale\_update (0,5) & 367,362 & Non\\
+TinyLLM & Bloc 4 & zero\_update & 289,872 & Oui\\
+TinyLLM & Bloc 4 & scale\_update (0,5) & 138,467 & Non\\
+TinyLLM & Bloc 7 & zero\_update & 429,854 & Non\\
+TinyLLM & Bloc 7 & scale\_update (0,5) & 151,957 & Non\\
+\bottomrule
+\end{longtable}
+
+Ces effets montrent que la distribution du prochain token depend de manieres differentes de la transformation d'un bloc sur l'entree testee. Cela ne nomme pas les fonctions semantiques des blocs : il faut reproduire les experiences sur des prompts independants, effectuer des patches de representations, tester des controles negatifs et rechercher des contre-exemples.
+
+\subsection{Interventions sur l'etudiant}
+Pour les etudiants, l'ablation de la sortie GRU change fortement les logits : delta L2 de 158,423 pour v3\_0 et 182,433 pour v3\_1; le token de tete change. En revanche, multiplier la sortie GRU par 0,5 ne produit qu'un delta L2 de 0,010 et 0,011, respectivement, sans changement du token de tete. L'invariance pratique de la normalisation finale a l'echelle est une explication plausible, mais doit etre verifiee par des interventions avant normalisation et sur plusieurs entrees. Le resultat nul est conserve comme resultat, pas ignore.
+
+\section{Construction multi-vues de v3\_1}
+\subsection{Dataset anglais}
+Le dataset \code{NG-Multiview-Observation-English-v3_1} contient 176 documents anglais ASCII : 128 pour l'entrainement, 16 pour la validation et 32 pour le test final frais (quatre par vue). Chaque partition represente huit familles d'observations : comportement de generation, statistiques du prochain token, representations cachees, attention, reponse a ablation, reponse a echelle, comportement interlingue et hypotheses/limites. Les identifiants et empreintes de texte sont disjoints entre les partitions. Les documents de validation et test sont rediges independamment des observations source et ne repetent pas les formulations du train. Le constructeur ne lit pas les scores ni les textes du corpus d'evaluation inter-modele.
+
+\subsection{Entrainement du routeur}
+Le candidat retenu est une composition preservant le chemin de generation : les poids, la GRU, la normalisation, la projection lexicale et la route generative du modele v3\_0 restent figes. Le nouvel apprentissage ne modifie que le routeur d'observation separe, de 1\,032 parametres. Configuration : graine 20261033, 1\,800 etapes, batch 8, fenetre d'entrainement 64 octets, AdamW avec taux 0,001, deux threads CPU. Le meilleur checkpoint est selectionne selon la perte de classification sur validation uniquement, a l'etape 1\,700.
+
+L'evaluation documentaire a ete rafraichie apres construction d'un test final frais, distinct du test pilote inspecte pendant le developpement. Le routeur obtient 2/16 (12,5\%) sur validation et 9/32 (28,125\%) sur le test final, soit quatre documents par vue, contre 12,5\% attendus sous choix uniforme parmi huit vues. Le resultat de test est au-dessus du hasard sur ce corpus controle, mais la validation documentaire reste au niveau du hasard et la puissance statistique est faible. Il ne suffit donc pas a soutenir une classification robuste ni une decouverte consolidee. Les poids ne sont pas reentraines lors de ce rafraichissement; seules les mesures sont recalculees sur le nouveau holdout. Une suite de travail doit augmenter le nombre d'observations independantes par vue et valider sur d'autres sujets, pas seulement sur des textes rediges selon le meme schema.
+
+\subsection{Pourquoi le fine-tuning conjoint a ete rejete}
+Un candidat distinct a modifie conjointement le chemin de generation et le routeur. Sur l'evaluation commune precedente, son BPB anglais est passe d'environ 3,066 a 4,109 et le BPB chinois d'environ 31,078 a 32,851. Cette regression est conservee dans \code{audit/experimental_candidates/joint_finetuning_regression/}; ce checkpoint n'est pas le modele livre. Le choix de preservation n'a donc pas ete effectue pour annoncer un gain, mais pour eviter de perdre une fonction deja executable lorsque le changement experimental n'apportait pas de preuve suffisante de benefice.
+
+\subsection{Preuve d'identite du chemin generatif}
+La verification independante compare v3\_0 et v3\_1 sur les 24 textes du corpus commun. Les tenseurs de logits sont bit-a-bit identiques pour chacun d'eux, l'ecart absolu maximum est 0, et les generations deterministes sont identiques pour les prompts de controle anglais et chinois. Le routeur fournit une distribution numerique finie dont la somme vaut approximativement 1. Cette preuve porte sur la preservation du chemin generatif historique, pas sur une equivalence avec SmolLM2 ou TinyLLM.
+
+\section{Comparaison des generations et du modele produit}
+Le modele produit v3\_1 contient 55\,568 parametres. Il reste donc environ 1\,383 fois plus petit que le checkpoint TinyLLM et environ 2\,421 fois plus petit que l'estimation du checkpoint SmolLM2. Les parametres d'un modele quantifie et d'un modele PyTorch ne sont pas des unites de cout exactes; les ratios sont des ordres de grandeur sur le nombre de parametres.
+
+Le modele livre est un vrai modele de langage neuronal causal byte-level, executable sans appel au modele source pendant la generation. Il peut etre charge en local, calcule des logits et genere une continuation. Sur l'evaluation multilingue courante, ses sorties restent faibles, notamment en chinois. Le rapport le classe donc comme \textbf{tiny language model experimental autonome}, pas comme un LLM competitif, ni comme une reconstruction mecaniste des modeles professeurs.
+
+\section{Audit du code, interfaces et controles d'integrite}
+\subsection{Chargement local et interface Web}
+Le registre Web a ete teste avec les archives v3\_1, SmolLM2 GGUF et TinyLLM PyTorch. Le endpoint de chargement a renvoye HTTP 200 pour chacun; le choix courant du modele a ete relu apres chaque chargement; le endpoint de chat a genere du texte. La suite verifie aussi le registre et les hashes. L'interface a ete remaniee en laboratoire local structure : navigation de conversation, modeles locaux, experiences, observations, audit/integrite; selecteur de modele, dialogue d'import ZIP/chemin local/GGUF, et zone de chat. La mise en page a ete inspectee sur viewport bureau et mobile.
+
+\subsection{Lanceur Windows}
+Le fichier \code{ngbrain_NGeGenBrain_v3_1.bat} a ete corrige pour fournir des commandes \code{install}, \code{install-hf}, \code{status}, \code{test}, \code{web}, \code{examples}, \code{report} et \code{doctor}. Le helper Python \code{scripts/launch_web.py} a ete lance pour de vrai sur Linux : il attend l'endpoint de sante, charge les trois artefacts via l'API et verifie le chat. Le fichier BAT a passe les tests statiques automatisees et les tests de delegation. \\textbf{Limite explicite :} le BAT n'a pas ete execute dans Windows lui-meme, car l'environnement de construction est Linux sans \code{cmd.exe} ni Wine. Le succes du helper Python ne doit pas etre presente comme une execution physique du BAT sous Windows.
+
+\subsection{Suites de tests}
+\begin{itemize}
+\item Suite v3\_1 : 66 tests passes apres ajout du test de semantique des interventions residuelles.
+\item Non-regression V1 : 65 tests passes via \code{ngbrain.py legacy-test}.
+\item API Web : 3 chargements reels (etudiant v3\_1, SmolLM2, TinyLLM) avec chat positif pour chaque modele.
+\item Archives : ZIP du modele valide par le lecteur ZIP; empreintes finales et extraction propre sont consignees dans le recu de validation.
+\end{itemize}
+
+\section{Confrontation a la hierarchie normative V2}
+\begin{longtable}{p{1.2cm}p{4.2cm}p{3.0cm}p{4.4cm}}
+\toprule
+\textbf{Niveau} & \textbf{Exigence du prompt V2} & \textbf{Preuve v3\_1} & \textbf{Statut scientifique}\\
+\midrule
+\endhead
+0 & Modele complet & Checkpoints reels et hashes verifies & Execute pour chargement/forward; cela ne prouve pas l'equivalence.\\
+1 & Composants & Nombre de blocs, embeddings, dimensions, heads & Execute structuralement.\\
+2 & Sous-structures & Etats caches, formes et entropie d'attention & Execute sur les prompts enregistrés; pas de labels de neurones.\\
+3 & Circuits & Interventions residuelles zero-update et scale-update & Effets locaux mesures; reproduction multisujets requise.\\
+4 & Mecanismes & Chemins candidats des blocs & Hypotheses, non consolidees semantiquement.\\
+5 & Mecanismes composes & Chemin generation + routeur d'observation & Composition executable dans l'etudiant; non-equivalence source explicite.\\
+6 & Sous-systemes & Pile transformer source et coeur LM/routeur etudiant & Inventaire architectural, pas preuve fonctionnelle exhaustive.\\
+7 & Architecture explicative & Graphe embeddings-blocs-normalisation-sortie & Formalisation structurelle disponible; explication complete non demontree.\\
+8 & Modele compose & Evaluation sur memes textes multilingues & Execution comportementale; l'etudiant est moins bon que les sources.\\
+9 & Recomposition recursive & Etudiant avec routeur multi-vues separe & Non complete au sens mecaniste; aucune equivalence ou couverture causale complete revendiquee.\\
+\bottomrule
+\end{longtable}
+
+Le protocole V2 est donc suivi comme cadre de traçabilite, mais ses niveaux scientifiques ne sont pas declares acquis par simple presence de fichiers ou de modules. L'etude n'a pas identifie de circuit sémantique unique, n'a pas prouve la causalite de toutes les fonctions et n'a pas reconstruit les poids internes des sources.
+
+\section{Interpretation, consequences et limites}
+\subsection{Resultats observés}
+\begin{itemize}
+\item Les deux modèles sources sont chargés à partir des archives fournies et exécutés directement.
+\item Les 24 textes multilingues sont scorés avec une métrique commune en bits/octet UTF-8.
+\item Les activations des 30 blocs SmolLM2 et des 8 blocs TinyLLM sont capturées pour une entrée instrumentée; les interventions changent numériquement les logits de façon dépendante de la couche.
+\item Le chemin de génération v3\_1 est identique à celui de v3\_0 sur les tests de préservation enregistrés.
+\item Le routeur multi-vues obtient 9/32 (28,1\%) sur le test final frais, au-dessus du hasard à 12,5\%; la validation documentaire est à 2/16 (12,5\%), donc sa robustesse n'est pas établie.
+\end{itemize}
+
+\subsection{Contre-exemples et limites observées}
+\begin{itemize}
+\item La classification est correcte pour 9/32 documents du test final frais, mais seulement 2/16 sur la validation documentaire; ce contraste ne justifie aucune découverte consolidée.
+\item Le petit modèle étudiant est très faible sur le chinois; ses résultats ne doivent pas être généralisés à une capacité multilingue.
+\item L'exemple de generation de TinyLLM en anglais émet du texte chinois, ce qui contredit toute revendication de bonne réponse anglaise généralisée.
+\item Le fine-tuning conjoint a dégradé le score réservé et est conservé comme contre-évidence.
+\item Les effets d'intervention n'ont été mesurés que sur une entrée par modèle dans cette campagne; l'extrapolation à un mécanisme général est interdite.
+\item Le BPB normalise l'unité de surface, mais ne rend pas le domaine et les objectifs d'entraînement identiques entre les modèles.
+\end{itemize}
+
+\subsection{Conséquences théoriques et opérationnelles}
+La correction de l'intervention sépare désormais une mise à zéro littérale de l'état d'une ablation qui conserve le résidu. Cela rend les expériences plus informatives et permet de chercher des différences entre profondeurs. Le registre de modèles permet en outre une comparaison directe répétable des checkpoints sources et étudiants. Cependant, le chemin de production actuel est volontairement conservatif : la nouvelle facette n'affecte pas la génération. L'étape suivante scientifiquement légitime serait un protocole de distillation ou de recomposition mécaniste plus riche, avec plusieurs milliers de prompts indépendants, patching d'activations, contrôles négatifs, validation interlingue et évaluation hors distribution réservée.
+
+\section{Commandes de reproduction}
+Depuis la racine du projet, dans un environnement Python 3.11+ avec dépendances installées :
+\begin{verbatim}
+python -m pytest -q
+python ngbrain.py legacy-test
+python scripts/launch_web.py --host 127.0.0.1 --port 8767 --no-browser
+\end{verbatim}
+L'etude comparative peut etre relancee avec les chemins des archives locales :
+\begin{verbatim}
+python research/model_comparison_v3_1/run_multiview_study_release.py \
+  --smol-zip PATH/SmolLM2-135M-Instruct-Q8_0.zip \
+  --tiny-zip PATH/tinny_llm.zip \
+  --student-zip PATH/model_produit_NG_v3_0.zip \
+  --student-v31-zip bundled_artifacts/model_produit_NG_v3_1.zip \
+  --output-dir audit/reproduction_run --seed 20261028
+\end{verbatim}
+La reproduction compare les mêmes checkpoints et la même logique d'évaluation, mais les temps réels peuvent varier selon CPU, RAM, versions de bibliothèques et système.
+
+\section{Traçabilité et reproductibilité}
+Le registre final se trouve dans \code{audit/source_vs_student_multiview_release_final2/}, dont les fichiers comprennent : résultats complets JSON, scores séparés, observations par modèle, registre d'expériences, corpus anglais/chinois et manifeste des textes. La preuve d'identité des générations est dans \code{preservation_identity_verification.json}. La source exacte du prompt V2 est recopiée dans \code{audit/source_materials/prompt_NGeGenBrain_v2.txt}. Le tableau de correspondance des exigences est \code{audit/v2_prompt_hierarchy_crosswalk.md}. Le modèle produit est livré séparément avec sa configuration, son checkpoint, son enregistrement d'entraînement et sa provenance.
+
+\section{Statut du modèle et conclusions}
+\begin{center}
+\small
+\begin{tabular}{p{4.8cm}p{8.3cm}}
+\toprule
+\textbf{Objet} & \textbf{Statut retenu}\\
+\midrule
+SmolLM2 source & Chargé et exécuté\\
+TinyLLM source & Chargé et exécuté\\
+Activations/attentions & Mesurées sur les entrées consignées\\
+Interventions résiduelles & Effets locaux mesurés\\
+Comparaison source/étudiants & Directe; les étudiants restent inférieurs dans plusieurs tâches\\
+Chemin génératif v3\_0/v3\_1 & Identique bit à bit sur 24 textes\\
+Routeur à huit vues & Test 9/32; validation 2/16\\
+Reconstruction mécaniste & Non démontrée\\
+Équivalence aux sources & Non revendiquée\\
+BAT sous Windows & Non exécuté physiquement sous Windows\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La version corrigée v3\_1 répond aux défauts d'import et d'observation identifiés, conserve les progrès du modèle antérieur et ajoute une route d'observation séparée qui ne corrompt pas la génération. La campagne prouve que les vrais modèles sources ont été chargés et directement expérimentés; elle ne prouve pas que leur mécanisme a été reconstruit. Le tiny LM produit reste autonome et réellement exécutable, mais petit et peu performant en génération libre. Ce statut nuancé est la conclusion conforme aux observations et aux contre-exemples disponibles.
+
+\end{document}

@@ -1,0 +1,577 @@
+{
+  "schema": "aam-o94-2-work-checklist-v1",
+  "title": "O94.2 — checklist séquentielle incrémentale",
+  "created_utc": "2026-10-19T12:38:57.642161Z",
+  "updated_utc": "2026-10-19T13:54:14.933869Z",
+  "rule": "Ne jamais ouvrir une phase si ses précédentes ne sont pas COMPLETE_EVIDENCED; chaque exécution a un reçu; incidents conservés après résolution.",
+  "reference_formalism": "formalisme_O94_2.tex",
+  "reference_laboratory": "laboratoire_O94_2.tex",
+  "reference_error_model": "checklist_erreurs_model_O94_2.json",
+  "reference_error_environment": "checklist_erreurs_no_model_O94_2.json",
+  "reference_parent_checklists": [
+    "checklist_de_travail_O94_1.json",
+    "checklist_erreurs_model.json",
+    "checklist_erreurs_no_model.json"
+  ],
+  "current_phase": "COMPLETE",
+  "global_status": "COMPLETE_EVIDENCED",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Provenance et intégrité du parent O94_1 HF1",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [],
+      "criteria": [
+        "HF1 hash/CRC et chemins vérifiés",
+        "Le parent est distingué de l’ancienne archive homonyme"
+      ],
+      "evidence": [
+        "logs/O94_2/P0_input_integrity.json"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Normalisation JSON/JSONL/CSV/TSV, mapping des champs et budgets",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P0"
+      ],
+      "criteria": [
+        "case/cases et alias reconnus",
+        "Mapping explicite et budgets exposés",
+        "Cas 1484 lignes testé"
+      ],
+      "evidence": [
+        "logs/O94_2/T01_blackbox_schema_live_composition.json"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Observation active en streaming, sondes et traces durables",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P1"
+      ],
+      "criteria": [
+        "Cible persistante sondée en direct",
+        "Trace pair-à-pair écrite durablement",
+        "Arrêt et budgets bornés"
+      ],
+      "evidence": [
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "tests/test_o942_live_observation.py",
+        "logs/O94_2/T63_blackbox_live_cli_e2e.json"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Programmation par composition des briques compétence/méthode/règle",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P2"
+      ],
+      "criteria": [
+        "DSL sûr compilé sur le catalogue",
+        "Composition valide testée et ID arbitraire rejeté"
+      ],
+      "evidence": [
+        "logs/O94_2/T05_base_blocks_retest.json",
+        "tests/test_o942_live_observation.py"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Intégration locale des modèles et politiques d’entraînement",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P3"
+      ],
+      "criteria": [
+        "Backend/adaptateur visible et versionné",
+        "Consentement et hashes",
+        "Holdout exclu du train"
+      ],
+      "evidence": [
+        "logs/O94_2/T02_model_integration.json",
+        "tests/test_o941_model_integration.py"
+      ]
+    },
+    {
+      "id": "P5",
+      "name": "Interface et CLI pour observation, modèles et composition",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P4"
+      ],
+      "criteria": [
+        "Onglets et champs présents",
+        "UI complète testée sous affichage virtuel",
+        "CLI expose blackbox-live et préflight"
+      ],
+      "evidence": [
+        "logs/O94_2/T08_ui_combined_retest.json",
+        "logs/O94_2/T10_targeted_regression_xvfb.json"
+      ]
+    },
+    {
+      "id": "P6",
+      "name": "Régression segmentée, sécurité et compilation complète",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P5"
+      ],
+      "criteria": [
+        "Chaque fichier de test reçoit un résultat exploitable",
+        "Échecs corrigés ou clairement ouverts",
+        "Compilation Python/LaTeX et CLI"
+      ],
+      "evidence": [
+        "logs/O94_2/T45_full_regression_matrix_reconciliation.json",
+        "logs/O94_2/T31_compileall.json",
+        "logs/O94_2/T40_formalism_compile_final.json",
+        "logs/O94_2/T41_laboratory_compile_final.json",
+        "logs/O94_2/T42_model_integration_final.json",
+        "logs/O94_2/T43_blackbox_and_capsule_final.json",
+        "logs/O94_2/T44_ui_and_composition_final.json",
+        "logs/O94_2/T67_regression_matrix_reconciled_after_cli_bugfix.json"
+      ],
+      "closure_note": "60/60 modules de test couverts exactement une fois; 30 reçus PASS_BOUNDED; 349 tests + 21 sous-tests rapportés passés; compileall, préflight, modèle, boîte noire, UI et les deux sources LaTeX vérifiés. Les limites d’environnement réelles restent explicites."
+    },
+    {
+      "id": "P7",
+      "name": "Formalisation, checklists, erreurs et sauvegarde restaurable",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P6"
+      ],
+      "criteria": [
+        "Formalism/laboratory à jour",
+        "Gate de phases et hashes cohérents",
+        "Savepoint copié et manifesté"
+      ],
+      "evidence": [
+        "logs/O94_2/T52_savepoint_refresh_portable_paths.json",
+        "logs/O94_2/T53_restore_check_portable_paths.json",
+        "logs/O94_2/T54_preflight_portable_paths.json",
+        "logs/O94_2/T55_final_runtime_smoke.json",
+        "sav_AAM_O94_2/savepoint_manifest.json",
+        "RESTORE_O94_2_SAVEPOINT.md",
+        "chemins_O94.json"
+      ],
+      "closure_note": "Formalisme/laboratoire présents; chemins portables, registre d’incidents append-only, savepoint restaurable (41 fichiers), vérification non destructive de restauration et préflight post-refresh PASS_BOUNDED."
+    },
+    {
+      "id": "P8",
+      "name": "Packaging, extraction fraîche et vérification indépendante",
+      "status": "COMPLETE_EVIDENCED",
+      "depends_on": [
+        "P7"
+      ],
+      "criteria": [
+        "Les trois ZIP sous 220 MiB",
+        "CRC et SHA-256 passent",
+        "Préflight/runtime vérifiés depuis extraction"
+      ],
+      "evidence": [
+        "logs/O94_2/T42_integrity_review.json",
+        "logs/O94_2/T43_release_candidate_validation.json",
+        "logs/O94_2/T63_blackbox_live_cli_e2e.json",
+        "logs/O94_2/T67_regression_matrix_reconciled_after_cli_bugfix.json",
+        "logs/O94_2/T88_archive_cli_failure_before_rebuild.json",
+        "logs/O94_2/T92_source_targeted_regression_after_release_artifact_failure.json",
+        "logs/O94_2/T93_candidate_extraction_runtime_verification.json"
+      ],
+      "closure_note": "Clôture fondée sur le candidat fraîchement extrait : le préflight, les manifests, les tests ciblés/UI/compileall/catalogues et la capture CLI live 2 échanges passent. L’échec T88 de l’ancienne archive est résolu par la reconstruction depuis l’arbre source courant; une seconde reconstruction finale est suivie d’un sidecar de vérification indépendante exact."
+    }
+  ],
+  "reference_formalism_sha256_current": "d019e080f627bb7d63c5699111233d8292e87fa0249b6b4367c547aaaf34dc22",
+  "reference_laboratory_sha256_current": "29608b8fee215538d1f40053a7a7d29ee91cc07f2088ebf6a6c4ace242a378df",
+  "reference_error_model_sha256_current": "9b3697389c7fc294dfc635b413b094fbdc3d6bdb12017098521ac0233a9af5c3",
+  "reference_error_environment_sha256_current": "8d743bf90fb3fc52fb54fe4e50ef285440dd2c546b762b2771d7967e3956fe1a",
+  "execution_history": [
+    {
+      "receipt": "logs/O94_2/T01_blackbox_schema_live_composition.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T02_model_integration.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T08_ui_combined_retest.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T10_targeted_regression_xvfb.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_04.json",
+      "status": "FAIL_REQUIRES_TRIAGE",
+      "classification": "control-bootstrap/configuration not a product pass"
+    },
+    {
+      "receipt": "scripts/o942_regression_batches.py",
+      "status": "FAIL_REQUIRES_TRIAGE",
+      "classification": "runner defect; no product test was run by this attempted batch"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_07.json",
+      "status": "FAIL_REQUIRES_TRIAGE",
+      "classification": "real dispatcher bug found; retest pending"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_01.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_02.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_02_first_attempt_stale_title.json",
+      "status": "FAIL_REQUIRES_TRIAGE"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_03.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_04_preflight_bootstrap_failure.json",
+      "status": "FAIL_REQUIRES_TRIAGE"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_05.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_06.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_07_first_attempt_unregistered_actions.json",
+      "status": "FAIL_REQUIRES_TRIAGE"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_08.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_09.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_10.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_11.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_12.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_13.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_14.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_15.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_16.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_17.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_18.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_19.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_20.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T11_suite_batch_21.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T13_phase_gate_preflight.json",
+      "status": "FAIL_REQUIRES_TRIAGE"
+    },
+    {
+      "receipt": "logs/O94_2/T14_ui_field_mapping_contract.json",
+      "status": "FAIL_REQUIRES_TRIAGE"
+    },
+    {
+      "receipt": "logs/O94_2/T15_ui_field_mapping_contract_retest.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T16_suite_batch04_retest.json",
+      "status": "FAIL_REQUIRES_TRIAGE"
+    },
+    {
+      "receipt": "logs/O94_2/T17_suite_batch04_after_mutable_drift_fix.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T18_full_segmented_matrix_stage_timeout.json",
+      "status": "TIMEOUT_HARNESS"
+    },
+    {
+      "receipt": "logs/O94_2/T19_blackbox_live_schema.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T20_model_import_integration.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T21_ui_field_mapping_and_composition.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T22_portable_acceptance.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T23_foundation_cli_preflight.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T24_rag_sms_regression_timeout.json",
+      "status": "TIMEOUT_HARNESS"
+    },
+    {
+      "receipt": "logs/O94_2/T25_runner_timeout_selftest.json",
+      "status": "TIMEOUT_HARNESS"
+    },
+    {
+      "receipt": "logs/O94_2/T26_rag_resolution.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T27_sms_retrieval.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T28_sms_corpus_sample.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T29_rag_adaptive.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T30_ui_smoke.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T31_compileall.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T40_formalism_compile_final.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T41_laboratory_compile_final.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T42_model_integration_final.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T43_blackbox_and_capsule_final.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T44_ui_and_composition_final.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T45_full_regression_matrix_reconciliation.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T52_savepoint_refresh_portable_paths.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T53_restore_check_portable_paths.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T54_preflight_portable_paths.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T55_final_runtime_smoke.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T63_blackbox_live_cli_e2e.json",
+      "status": "PASS_BOUNDED",
+      "note": "Two live JSONL exchanges; clean STOPPED report and zero exit code."
+    },
+    {
+      "receipt": "logs/O94_2/T67_regression_matrix_reconciled_after_cli_bugfix.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T59_candidate_archives_validation.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T82_candidate_extraction_runtime_verification.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T77_pre_candidate_preflight.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T79_restore_check_before_candidate.json",
+      "status": "PASS_BOUNDED"
+    },
+    {
+      "receipt": "logs/O94_2/T88_archive_cli_failure_before_rebuild.json",
+      "status": "FAIL_REQUIRES_TRIAGE",
+      "note": "Ancienne archive exacte : conservée comme incident, aucun succès revendiqué."
+    },
+    {
+      "receipt": "logs/O94_2/T93_candidate_extraction_runtime_verification.json",
+      "status": "PASS_BOUNDED",
+      "note": "Validation du candidat fraîchement extrait; le hash final post-clôture sera vérifié séparément."
+    }
+  ],
+  "transition_history": [
+    {
+      "from": null,
+      "to": "P0",
+      "status": "COMPLETE_EVIDENCED",
+      "reason": "HF1 integrity receipt exists"
+    },
+    {
+      "from": "P0",
+      "to": "P1",
+      "status": "COMPLETE_EVIDENCED",
+      "reason": "schema/budget tests pass"
+    },
+    {
+      "from": "P1",
+      "to": "P2",
+      "status": "COMPLETE_EVIDENCED",
+      "reason": "live stream tests pass"
+    },
+    {
+      "from": "P2",
+      "to": "P3",
+      "status": "COMPLETE_EVIDENCED",
+      "reason": "composition DSL tests pass"
+    },
+    {
+      "from": "P3",
+      "to": "P4",
+      "status": "COMPLETE_EVIDENCED",
+      "reason": "adapter/holdout tests pass"
+    },
+    {
+      "from": "P4",
+      "to": "P5",
+      "status": "COMPLETE_EVIDENCED",
+      "reason": "UI/CLI tests pass"
+    },
+    {
+      "from": "P5",
+      "to": "P6",
+      "status": "IN_PROGRESS",
+      "reason": "begin full regression; do not skip tests"
+    },
+    {
+      "from": "P6",
+      "to": "P7",
+      "status": "COMPLETE_EVIDENCED",
+      "timestamp_utc": "2026-10-19T13:13:55.196401Z",
+      "reason": "P6 matrix, compile, CLI and targeted integration receipts passed; failures/blocked attempts were retained with successful retests."
+    },
+    {
+      "from": "P7",
+      "to": "P8",
+      "status": "COMPLETE_EVIDENCED",
+      "timestamp_utc": "2026-10-19T13:20:22.603760Z",
+      "reason": "P7 fermé après contrôle du formalism/laboratory, chemins portables, savepoint SHA-256 et essai check-only de restauration; P8 réservé au packaging et à l’extraction indépendante."
+    },
+    {
+      "from": "P8",
+      "to": "COMPLETE",
+      "status": "COMPLETE_EVIDENCED",
+      "timestamp_utc": "2026-10-19T13:32:31.351884Z",
+      "reason": "P8 candidat : intégrité des trois ZIP, extraction fraîche du modèle, préflight/runtime, tests ciblés, UI et live CLI E2E passés; une vérification indépendante supplémentaire portera sur les archives finales reconstruites après fermeture."
+    },
+    {
+      "from": "COMPLETE",
+      "to": "P8",
+      "status": "REOPENED_FOR_RELEASE_REPAIR",
+      "timestamp_utc": "2026-10-19T13:44:27.465766Z",
+      "reason": "T88 a démontré une divergence entre code source testé et contenu du ZIP livré. La phase de packaging est réouverte; la réussite des tests source ne suffit pas."
+    },
+    {
+      "from": "P8",
+      "to": "COMPLETE",
+      "status": "COMPLETE_EVIDENCED",
+      "timestamp_utc": "2026-10-19T13:50:44.015595Z",
+      "reason": "Candidat reconstruit depuis l’arbre source courant validé après extraction fraîche (T93); T88 conservé comme incident antérieur et résolu."
+    }
+  ],
+  "reopen_history": [
+    {
+      "phase": "P6",
+      "reason": "Full suite initially ran without Xvfb / one stale O94.1 assertion; corrected and retested individually or in batches.",
+      "receipt": "logs/O94_2/T09_targeted_regression.json"
+    },
+    {
+      "phase": "P6",
+      "reason": "La gate O94.2 a identifié deux écarts du harnais de contrôle : synchronisation initiale des hashes parents, puis contrôle PowerShell absent; les causes ont été corrigées et doivent être retestées.",
+      "receipt": "logs/O94_2/T11_suite_batch_04.json"
+    },
+    {
+      "phase": "P6",
+      "reason": "Runner de régression O94.2 interrompu par une référence non liée `gate`; code corrigé. Le retest compilé et le lot sont requis avant clôture.",
+      "receipt": "scripts/o942_regression_batches.py"
+    },
+    {
+      "phase": "P6",
+      "reason": "Action-router regression found O94.2 UI identifiers not registered; IDs were added to the explicit allowlist and test_p8_action_router.py is rerun before closing P6.",
+      "receipt": "logs/O94_2/T11_suite_batch_07.json"
+    }
+  ],
+  "reference_parent_model_error_sha256_current": "71d5a1219a8b3d0193552a4b19d6aa8dc4e776dacff7d5e918ad957741ef5e99",
+  "reference_parent_environment_error_sha256_current": "24d94f1714daaf35dd41d40309bf076571fc3a50cc9df06b1f38488832812793"
+}

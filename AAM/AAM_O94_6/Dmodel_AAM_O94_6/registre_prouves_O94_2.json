@@ -1,0 +1,206 @@
+{
+  "schema": "aam-o94-2-proof-register-v1",
+  "version": "O94_2",
+  "created_utc": "2026-10-19T12:42:53.050851Z",
+  "parent_artifact": "Dmodel_AAM_O94_1_HF1.zip",
+  "parent_sha256": "f9ce8a69e77b27c3dc6767c2d78d1d07598c73c4daf98d959fd9bfae3d81ba98",
+  "principle": "Les statuts décrivent les preuves disponibles, pas une prédiction du potentiel futur du modèle. Les limites non testées restent visibles.",
+  "features": [
+    {
+      "id": "BB-001",
+      "name": "Normalisation observation tabulaire",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "requirements": [
+        "case/cases JSON",
+        "JSONL/NDJSON/CSV/TSV",
+        "auto et mapping des champs",
+        "budgets explicites"
+      ],
+      "code": [
+        "aam_o93/blackbox.py",
+        "aam_o93/ui.py",
+        "aam_o93/cli.py"
+      ],
+      "evidence": [
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "logs/O94_2/T10_targeted_regression_xvfb.json",
+        "logs/O94_2/T19_blackbox_live_schema.json",
+        "logs/O94_2/T45_full_regression_matrix_reconciliation.json"
+      ],
+      "limit": "Aucun résultat ne signifie validation d’un dataset arbitraire au-delà des formats/limites documentés."
+    },
+    {
+      "id": "BB-002",
+      "name": "Observation active en streaming JSON Lines",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/blackbox.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py",
+        "aam_o93/cli.py"
+      ],
+      "evidence": [
+        "tests/test_o942_live_observation.py",
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "logs/O94_2/T43_blackbox_and_capsule_final.json",
+        "logs/O94_2/T45_full_regression_matrix_reconciliation.json",
+        "logs/O94_2/T63_blackbox_live_cli_e2e.json",
+        "logs/O94_2/T92_source_targeted_regression_after_release_artifact_failure.json",
+        "logs/O94_2/T93_candidate_extraction_runtime_verification.json"
+      ],
+      "limit": "La cible doit être autorisée, persistante et compatible JSON Lines. Le CLI live a été vérifié après extraction du candidat; la portée reste celle des E/S observées et ne prouve pas la reconstruction interne générale."
+    },
+    {
+      "id": "BB-003",
+      "name": "Sondes automatiques distinctes vers la cible observée",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/blackbox.py",
+        "aam_o93/runtime.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "tests/test_o942_live_observation.py",
+        "logs/O94_2/T01_blackbox_schema_live_composition.json",
+        "logs/O94_2/T43_blackbox_and_capsule_final.json"
+      ],
+      "limit": "Les variantes sont structurelles et peuvent ne pas être valides pour toute cible; elles peuvent avoir des effets, donc confirmation visible."
+    },
+    {
+      "id": "PR-001",
+      "name": "Programmation par composition compétence/méthode/règle",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/program_composer.py",
+        "aam_o93/base_blocks.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "tests/test_o942_live_observation.py",
+        "logs/O94_2/T05_base_blocks_retest.json",
+        "logs/O94_2/T44_ui_and_composition_final.json"
+      ],
+      "limit": "La DSL n’affirme pas pouvoir générer une solution à tout programme imaginable; les compositions nouvelles requièrent tests indépendants."
+    },
+    {
+      "id": "LM-001",
+      "name": "Import et intégration des modèles locaux/distants",
+      "status": "IMPLEMENTED_TESTED_WITH_SIMULATED_ADAPTER",
+      "code": [
+        "aam_o93/model_integration.py",
+        "aam_o93/ui.py"
+      ],
+      "evidence": [
+        "tests/test_o941_model_integration.py",
+        "logs/O94_2/T02_model_integration.json",
+        "logs/O94_2/T08_ui_combined_retest.json",
+        "logs/O94_2/T42_model_integration_final.json"
+      ],
+      "limit": "Aucun poids tiers réel ni endpoint distant réel n’a été fourni pour cette livraison; les checkpoints PyTorch nécessitent souvent un adaptateur d’architecture."
+    },
+    {
+      "id": "LM-002",
+      "name": "Politique train/holdout sans fuite du holdout",
+      "status": "IMPLEMENTED_TESTED_BOUNDED",
+      "code": [
+        "aam_o93/model_integration.py",
+        "aam_o93/runtime.py"
+      ],
+      "evidence": [
+        "tests/test_o941_model_integration.py",
+        "logs/O94_2/T02_model_integration.json",
+        "logs/O94_2/T42_model_integration_final.json"
+      ],
+      "limit": "L’entraînement effectif ne s’exécute que si l’adaptateur expose train_model; création/export de paires n’est pas présenté comme mise à jour de poids."
+    },
+    {
+      "id": "UI-001",
+      "name": "Interface dédiée pour observation/modèles/composition",
+      "status": "IMPLEMENTED_TESTED_UNDER_XVFB",
+      "code": [
+        "aam_o93/ui.py",
+        "run_AAM_O94_2.bat",
+        "run_AAM_O94_2.ps1",
+        "run_AAM_O94_2.sh"
+      ],
+      "evidence": [
+        "logs/O94_2/T08_ui_combined_retest.json",
+        "logs/O94_2/T10_targeted_regression_xvfb.json",
+        "logs/O94_2/T44_ui_and_composition_final.json",
+        "logs/O94_2/T30_ui_smoke.json"
+      ],
+      "limit": "Les lanceurs Windows ont un contrôle statique, mais ne sont pas exécutés sur une machine Windows native dans cet environnement."
+    },
+    {
+      "id": "MM-001",
+      "name": "Observation continue générique GUI/audio/video/OCR/capteurs",
+      "status": "OPEN_ADAPTERS_REQUIRED",
+      "code": [
+        "aam_o93/ui.py",
+        "aam_o93/observer.py",
+        "aam_o93/blackbox.py"
+      ],
+      "evidence": [
+        "laboratoire_O94_2.tex"
+      ],
+      "limit": "La caméra existante permet une capture image avec autorisation; la capture continue multimodale et l’apprentissage/reproduction indépendants de leurs implémentations d’origine ne sont pas démontrés dans cette version."
+    },
+    {
+      "id": "CLONE-001",
+      "name": "Reconstruction de programme arbitraire à partir de boîte noire",
+      "status": "OPEN_RESEARCH_VALIDATION_REQUIRED",
+      "code": [
+        "aam_o93/blackbox.py",
+        "aam_o93/program_composer.py"
+      ],
+      "evidence": [
+        "laboratoire_O94_2.tex"
+      ],
+      "limit": "Une capsule reproduit le domaine observable appris; elle ne prouve pas l’équivalence de tous les états et entrées d’un logiciel général."
+    },
+    {
+      "id": "REL-001",
+      "name": "Package integrity and fresh-extraction smoke verification",
+      "status": "CANDIDATE_ARCHIVES_VERIFIED_BOUNDED",
+      "code": [
+        "scripts/o94_delivery_common.py",
+        "scripts/o942_restore_savepoint.py",
+        "scripts/o942_refresh_savepoint.py"
+      ],
+      "evidence": [
+        "logs/O94_2/T59_candidate_archives_validation.json",
+        "logs/O94_2/T82_candidate_extraction_runtime_verification.json",
+        "logs/O94_2/T88_archive_cli_failure_before_rebuild.json",
+        "logs/O94_2/T93_candidate_extraction_runtime_verification.json"
+      ],
+      "limit": "T88 documente un ZIP antérieur qui ne correspondait pas au code source courant. T93 valide le candidat reconstruit et extrait; le sidecar O94_2_final_delivery_verification.json identifiera séparément les hashes exacts de l’archive finale post-clôture."
+    }
+  ],
+  "updated_utc": "2026-10-19T13:50:44.015595Z",
+  "validation_summary": {
+    "status": "PASS_BOUNDED",
+    "test_file_inventory": 60,
+    "test_file_coverage_exact_once": true,
+    "segmented_batch_receipts": 30,
+    "reported_passed": 349,
+    "reported_subtests_passed": 21,
+    "reported_skipped": 0,
+    "reported_failed": 0,
+    "reported_errors": 0,
+    "python_compileall_receipt": "logs/O94_2/T31_compileall.json",
+    "formalism_compile_receipt": "logs/O94_2/T40_formalism_compile_final.json",
+    "laboratory_compile_receipt": "logs/O94_2/T41_laboratory_compile_final.json",
+    "matrix_receipt": "logs/O94_2/T45_full_regression_matrix_reconciliation.json",
+    "scope_note": "349 tests et 21 sous-tests reportés passés dans la matrice bornée; les résultats ne prétendent pas valider Windows natif, des poids externes réels, des endpoints distants réels ni les périphériques physiques.",
+    "final_runtime_smoke_receipt": "logs/O94_2/T55_final_runtime_smoke.json",
+    "savepoint_refresh_receipt": "logs/O94_2/T52_savepoint_refresh_portable_paths.json",
+    "restore_check_receipt": "logs/O94_2/T53_restore_check_portable_paths.json",
+    "preflight_receipt": "logs/O94_2/T54_preflight_portable_paths.json",
+    "savepoint_file_count": 41,
+    "blackbox_live_cli_e2e_receipt": "logs/O94_2/T63_blackbox_live_cli_e2e.json",
+    "candidate_archive_receipt": "logs/O94_2/T59_candidate_archives_validation.json",
+    "candidate_fresh_extraction_receipt": "logs/O94_2/T93_candidate_extraction_runtime_verification.json",
+    "previous_archive_failure_receipt": "logs/O94_2/T88_archive_cli_failure_before_rebuild.json",
+    "source_targeted_retest_receipt": "logs/O94_2/T92_source_targeted_regression_after_release_artifact_failure.json"
+  }
+}

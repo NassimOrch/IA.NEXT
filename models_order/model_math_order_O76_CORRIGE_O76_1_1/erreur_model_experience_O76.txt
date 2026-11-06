@@ -1,0 +1,451 @@
+REGISTRE DES ERREURS — ORDER75 / ORDER75_MATH / O69
+Version: ORDER75_MATH_1.0
+Date: 29 septembre 2026
+
+Objet
+-----
+Ce fichier est un registre cumulatif des défauts et erreurs observés dans les versions examinées et pendant la reconstruction 1.0. Chaque entrée contient la cause observée, l'effet, la correction et le contrôle de non-régression. Il est réutilisé comme entrée de conception de la version suivante afin d'éviter de reproduire les mêmes erreurs.
+
+SOURCES EFFECTIVEMENT EXAMINEES
+-------------------------------
+- model_order_O75_1.zip
+- model_order_O75_1.tex
+- audit_order_O75_1.zip
+- rapport_order_O75_1.tex
+- model_math_order_O75_0.zip
+- model_math_order_O75_0.tex
+- audit_math_order_O75_0.zip
+- rapport_math_order_O75_0.tex
+- REMOVAL_MANIFEST_math_ORDER75_0.json
+- th_emp_suite_formalisme_order_69.tex
+- audit_order_O75_0.zip et rapport_order_O75_0.tex comme historique de défauts et de corrections héritées.
+
+I. ORDER75_0 — DEFAUTS HISTORIQUES OBSERVES
+-------------------------------------------
+E01. Archive de départ mêlant runtime, audit et historique.
+Cause: provenance et contenu utilisateur entremêlés.
+Correction: paquet runtime séparé de l'audit avec manifeste, self-check et chemins de lancement directs.
+Contrôle: extraction propre + manifeste SHA-256 + selfcheck.
+
+E02. Contrat CSP booléen insuffisant.
+Cause: parser relationnel incapable de traiter certaines clauses booléennes comme x=1 ou x=3 dans une structure combinée.
+Correction historique: normalisation SafeExpression / contrat CSP élargi.
+Leçon pour 1.0: ne pas dépendre d'une regex relationnelle unique; le langage mathématique doit être structuré avant exécution.
+
+E03. Confusion entre langage naturel "state whether" et problème de transition.
+Cause: classifieur sémantique trop permissif.
+Correction: signatures renforcées autour du vocabulaire de transition et de l'horizon.
+Leçon: dans le runtime math-only, supprimer le classifieur LLM réduit cette surface de confusion; le contrat mathématique est explicite.
+
+E04. Dépassement d'horizon dans le générateur de transitions.
+Cause: expansion post-horizon.
+Correction: borne exacte sur l'horizon.
+Leçon: toute exploration 1.0 conserve une notion d'état, de budget et de preuve de frontière.
+
+E05. Caesar "shift of 3" non reconnu.
+Cause: extraction linguistique trop étroite.
+Correction: motif générique "shift of/de".
+Leçon: le math-only n'emporte aucun parseur de domaine cipher.
+
+E06. Extraction Atbash d'un mauvais token.
+Cause: sélection de token avant le ciphertext explicitement cité.
+Correction: priorité à l'extraction entre guillemets.
+Leçon: toute donnée mathématique textuelle doit être contractualisée sans hypothèse implicite.
+
+E07. FEN ponctué générant "1." comme champ numérique.
+Cause: ponctuation de bord non nettoyée.
+Correction: nettoyage générique des champs structurés.
+Leçon: séparer parsing structurel et sémantique.
+
+E08. Budget chess insuffisamment raccordé au compilateur.
+Cause: compilation pouvant dépasser le budget du noyau.
+Correction: propagation du budget au compilateur et dépassement explicite.
+Leçon: en 1.0 les budgets sont contrôlés à tous les niveaux coûteux et checkpointés.
+
+E09. Assertion de test chess alignée sur un champ de sortie inexistant.
+Cause: test dérivé d'une ancienne interface.
+Correction: assertion basée sur séquence et replay vérifiés.
+Leçon: les tests 1.0 lisent l'artefact effectivement produit.
+
+E10. Lanceur CMD fragile autour de py.exe.
+Cause: hypothèse sur l'existence d'un exécutable.
+Correction: résolution réelle where py / where python.
+Leçon: installation runtime minimale; aucun dépendance de lanceur hors Python.
+
+E11. Exécution monolithique de 15 tests ayant stagné après 12.
+Cause: charge cumulée / durée globale.
+Correction: ne pas transformer la somme des tests individuels en affirmation de suite monolithique.
+Leçon: checkpoint et campagnes segmentées sont traités comme des propriétés réelles.
+
+II. ORDER75_1 — DEFAUTS REVELES PAR Z340
+----------------------------------------
+E12. Prompt long dépassant le contexte 1024 du Supra-50M.
+Correction: découpage déterministe uniquement pour l'étape linguistique.
+Leçon: le kernel 1.0 ne dépend plus du LLM.
+
+E13. Grounding insuffisant des chiffrements inconnus.
+Correction: contrat cryptanalysis générique + statistiques déterministes.
+Leçon: supprimer les familles non mathématiques plutôt que les transporter dans le runtime math-only.
+
+E14. Payload checkpoint pouvant perdre le champ kind.
+Correction: persistance explicite du type de problème et reprise générique.
+Leçon: MathProblem complet est le contrat de hash/checkpoint.
+
+E15. Métadonnée llm_context_mode incorrecte pour un seul fragment long.
+Correction: état chunked basé sur l'utilisation effective des fragments.
+Leçon: toute métadonnée d'exécution doit être dérivée de l'état réellement produit.
+
+E16. Reprise terminale pouvant recréer le moteur LLM.
+Correction: fast-path terminal contrôlé par hash du prompt et état persistant.
+Leçon: dans 1.0 la reprise ne recrée aucun composant non nécessaire et relit l'état exact.
+
+E17. Z340 non résolu.
+Statut: observation expérimentale conservée, aucune solution publiée injectée dans le code.
+Leçon: ne jamais confondre analyse structurelle et preuve de solution.
+
+III. ORDER75_MATH_0 — ERREURS / FRONTIERES DE LA PREMIERE SPECIALISATION
+-----------------------------------------------------------------------
+E18. Portée mathématique trop étroite.
+Symptôme: linéaire, quadratique, substitution simple et domaines finis principalement.
+Correction 1.0: ajouter Groebner/Buchberger, Sturm, inégalités, preuves d'identité, congruences, Diophantien, matrices.
+
+E19. Cubique x^3-2=0 laissée UNRESOLVED.
+Cause: absence de résolution native générale univariée au-delà du degré 2.
+Correction 1.0: racines rationnelles + partie square-free + isolement réel par Sturm; la racine réelle est maintenant représentée exactement par son polynôme et un intervalle isolant.
+
+E20. Checkpoint surtout pipeline / domaine fini, pas front algébrique profond.
+Correction 1.0: sérialisation du front Buchberger (base + paires + compteur), reprise sans perte du travail algébrique déjà produit.
+
+E21. Preuve quadratique spécifique au discriminant.
+Correction 1.0: rejeu racines rationnelles/Sturm et preuve Groebner par réduction exacte, sans certificat spécialisé uniquement à la forme quadratique.
+
+E22. solveur externe explicitement retiré, mais architecture encore limitée aux formes natives implémentées.
+Correction 1.0: portefeuille de trajectoires plus large; quand aucune preuve terminale n'est produite, l'état porte l'ensemble des stratégies réellement tentées au lieu d'un rejet immédiat.
+
+IV. DEFAUTS DE LA PREMIERE CONSTRUCTION ORDER75_MATH_1 AVANT CONDITIONNEMENT FINAL
+-----------------------------------------------------------------------------------
+E23. Bug d'isolement square-free.
+Cause: utilisation directe du PGCD p,p' comme si c'était la partie square-free.
+Effet: x^3-2 produisait zéro intervalle.
+Correction: partie square-free = p / gcd(p,p'), calcul exact.
+Contrôle: x^3-2 et x^5-x-1 résolus par Sturm.
+
+E24. Projection univariée incorrecte dans les calculs Groebner.
+Cause: fonctions univariées recevant des polynômes encore portés sur plusieurs variables.
+Effet: AlgebraError:not_univariate.
+Correction: projection explicite univariée avant gcd/division/Sturm.
+Contrôle: systèmes x^2+y^2=5, x-y=1 et x*y=1, x+y=3.
+
+E25. Racines rationnelles négatives et zéro non toutes extraites.
+Cause: la branche coefficient constant nul s'arrêtait à la racine zéro; les candidats négatifs n'étaient pas générés.
+Correction: extraction itérative des facteurs x et candidats ±p/q.
+Contrôle: x^4-5x^2+4 donne -2,-1,1,2.
+
+E26. Inégalités univariées avec bornes mal représentées.
+Cause: usage de points milieux comme bornes finales.
+Correction: sortie séparant racines exactes (rationnelles ou algébriques isolées) et intervalles ouverts entre racines.
+Contrôle: x^2-2<0 et x^3-x>0.
+
+E27. Base de Groebner complète présentée à tort comme une preuve de résolution.
+Cause: confusion entre invariant structural et ensemble des solutions.
+Correction: si la base n'est pas une base triangulaire permettant une extraction certifiée des solutions, le moteur renvoie UNRESOLVED avec la base comme résultat structurel; jamais PROVEN.
+Contrôle: test de garde dédié.
+
+E28. Checkpoint Groebner stockant des objets Python non sérialisables.
+Cause: json default=str convertissait Poly en chaînes non rejouables.
+Correction: poly_payload + désérialisation structurée de la base et des paires.
+Contrôle: pause après une paire puis reprise complète.
+
+E29. Reprise terminale renvoyant le conteneur de checkpoint au lieu du résultat final.
+Cause: couche wrapper non déballée.
+Correction: restitution payload.result lorsqu'il existe.
+Contrôle: checkpoint terminé relu sur installation séparée.
+
+E30. Preuve "prove" passant la relation entière à un parseur d'expression.
+Cause: cible 2*x=4 envoyée sans split de relation.
+Correction: parsing lhs/rhs puis réduction de la différence dans l'idéal.
+Contrôle: identité sous hypothèses linéaires.
+
+V. REGLES DE NON-REPETITION POUR 1.0
+------------------------------------
+R01. Aucun `PROVEN` sans objet de preuve ou certificat exact.
+R02. Une base, statistique, heuristique ou approximation isolée n'est jamais appelée solution.
+R03. Aucun problème de benchmark ne peut modifier la logique du runtime.
+R04. Aucun appel SymPy/SciPy/NumPy/pandas/scikit-learn dans le chemin de résolution.
+R05. Les états coûteux doivent être checkpointables lorsqu'ils peuvent dépasser un budget.
+R06. `UNRESOLVED` par budget signifie PAUSED/RESTORABLE, pas impossible.
+R07. `UNRESOLVED` final ne doit apparaître qu'après exécution des trajectoires natives pertinentes; la cause exacte doit être enregistrée.
+R08. La théorie des empreintes ne sert jamais d'oracle: elle observe, raffine et ordonne.
+R09. Les expériences doivent inclure mutation, cas difficiles, cas incompatibles et cas hors couverture, afin de détecter les illusions de succès.
+R10. Toute extension doit ajouter son propre test de rejeu et son entrée au présent registre.
+
+STATUT
+------
+E01–E22: hérités/documentés.
+E23–E30: corrigés dans ORDER75_MATH_1.0.
+La non-répétition est contrôlée par selfcheck, tests aléatoires, scan de dépendances, compilation et audit des checkpoints.
+
+
+VI. ORDER75_MATH_2 — NOUVEAUX DEFAUTS, ANOMALIES ET CORRECTIONS
+---------------------------------------------------------------
+E31. Reprise DFS domaines finis incomplète.
+Observation: la reprise relisait un index mais pas la pile DFS complète; des branches déjà explorées pouvaient être perdues.
+Correction: checkpoint de la pile explicite {index, choix courants, solutions, nœuds, élagages, ordre} et restauration directe de cette structure.
+Contrôle: permutation6, slices 5000+5000+50000; résultat final 720 solutions identique à une exécution fraîche de 100000 étapes.
+
+E32. Checkpoint obsolète réutilisable après mutation du problème.
+Observation: un checkpoint valide pour x=7 pouvait exister alors que l'entrée devenait x=8.
+Correction: hash du problème normalisé; quarantaine automatique du checkpoint incompatible sous suffixe .stale...
+Contrôle: mutation 7 -> 8, résultat x=8 et événement checkpoint_recovery enregistré.
+
+E33. Preuve par idéal non raccordée au budget/checkpoint.
+Observation: la branche `prove` pouvait exécuter une construction de Gröbner sans budget local.
+Correction: état Groebner sérialisé pour la preuve, deadline propagée, reprise de la base et retour explicite `checkpoint_budget_pause`.
+Contrôle: preuve lourde et self-check.
+
+E34. Budget non propagé dans certaines primitives univariées.
+Observation: multiplication, division, Sturm, isolement et signe n'étaient pas tous interrompables au niveau interne.
+Correction: deadline propagée aux opérations polynomial, Sturm, racines et isolement.
+Contrôle: tests univariés et test de budget.
+
+E35. Empreinte: tri de valeurs `None` et entiers hétérogènes.
+Observation: le calcul de l'empreinte pouvait lever une erreur de comparaison lorsqu'une équation avait une information de degré absente.
+Correction: clé de tri stable séparant `None` et entiers.
+Contrôle: systèmes de preuve dont les équations de sortie ne sont pas des équations du mode solveur.
+
+E36. Contrat de benchmark CRT incorrect.
+Observation: un générateur de test a utilisé `m` sans `b`, alors que le runtime attend `a*x=b (mod mod)`.
+Nature: erreur de banc de test, pas erreur de noyau.
+Correction: génération alignée sur le schéma JSON documenté, puis rerun séparé.
+
+E37. Prototype de réduction quadratique partagée non suffisamment checkpointable.
+Observation: une réduction expérimentale vers un problème univarié pouvait dépasser son budget sans sérialiser toute sa factorisation intermédiaire.
+Correction: retrait du prototype avant release; le mécanisme fiable de Buchberger/checkpoint est conservé. Le retrait est déclaré dans le manifeste.
+
+E38. Coupure du harness externe pendant certains stress denses.
+Observation: un shell externe a été interrompu avant réception du JSON final, produisant des fichiers de sortie vides.
+Nature: artefact du harness, pas résultat mathématique.
+Correction: tranches plus courtes, contrôle du budget interne, journaux de checkpoint indépendants du stdout.
+
+E39. Générateur de benchmark dense ayant omis une relation `=0`.
+Observation: une instance synthétique a produit `relation_absent`.
+Nature: erreur du générateur.
+Correction: validation systématique du contrat d'entrée avant envoi au modèle.
+
+E40. Vérificateur de stress linéaire indexant incorrectement une liste de solutions.
+Observation: le checker traitait la liste de solutions comme un dictionnaire.
+Nature: erreur du checker.
+Correction: checker indépendant réécrit; campagne finale 100/100.
+
+E41. Patch de propagation de deadline ayant temporairement créé `NameError: deadline`.
+Observation: des helpers de rationalisation paramétrique utilisaient un argument non déclaré.
+Correction: signatures explicitement enrichies de `deadline`, appels ajustés, self-check relancé.
+Contrôle: self-check complet 12/12 + checkpoint PASS.
+
+E42. Frontière dense observée.
+Observation: `hard5` et `dense6` ont atteint des états de Buchberger substantiels (plusieurs centaines de paires traitées selon les tranches) sans certificat terminal pendant la campagne O75_2.
+Interprétation: observation de coût/calcul, pas déclaration d'impossibilité.
+Correction/action: état conservé dans les checkpoints; aucune solution externe injectée.
+
+VII. REGLES DE NON-REPETITION O75_2
+-----------------------------------
+R10. Valider le schéma du problème avant chaque benchmark.
+R11. Aucun test de performance n'est accepté si son stdout vide est utilisé comme résultat.
+R12. Chaque opération pouvant dépasser un budget doit soit être interruptible, soit déléguer son travail à une primitive déjà checkpointée.
+R13. Les checkers sont séparés du moteur et leurs erreurs sont consignées indépendamment.
+R14. Tout résultat complexe utilisé comme contrôle est obtenu après génération du résultat du moteur, jamais injecté dans son chemin de résolution.
+R15. Aucun prototype dont l'état intermédiaire n'est pas rejouable n'entre dans la release.
+
+VIII. SOUMISSION HYPOTHÈSE DE RIEMANN — ANOMALIES O75_2 ET CORRECTIONS RH1
+--------------------------------------------------------------------------
+E43. Fausse preuve sur entrée RH sans équations.
+Observation: O75_2 recevait un mode inconnu sans équations et tombait dans LINEAR_GAUSSIAN, produisant PROVEN avec une solution vide.
+Correction: garde de contrat avant toute résolution algébrique; les problèmes vides sont ERROR et les modes analytiques sont routés explicitement.
+Contrôle: même entrée RH sur RH1 -> stratégie RIEMANN_ANALYTIC_PORTFOLIO, jamais PROVEN vide.
+
+E44. Paramètres de tâches RH transformés en caractères individuels.
+Observation: la normalisation O75_2 convertissait toute valeur de definitions en str; une liste de tâches devenait une chaîne et était parcourue caractère par caractère.
+Correction: mode RH conserve les paramètres structurés (liste Tâches, T, pas) sans coercition destructrice.
+Contrôle: T=1000 exécute cinq tâches dans l'ordre attendu.
+
+E45. Débordement log-gamma sur contour à grand imaginaire.
+Observation: la formule de réflexion utilisait sin(pi z), dont le module débordait pour Im(z) élevé.
+Correction: décalage récurrent vers Re(z)>=1/2 avant Lanczos; plus aucune exponentiation instable de sin(pi z).
+Contrôle: contour T=1000, 2000 et 5000 exécuté sans OverflowError.
+
+E46. Sous-échantillonnage d'Euler–Maclaurin créant des zéros numériques parasites.
+Observation: le N par défaut fondé sur sqrt(t) devenait insuffisant à grand t; certaines oscillations donnaient des racines artificielles.
+Correction: N croît linéairement avec |Im(s)| dans la voie analytique, et les anciennes sorties contaminées sont conservées comme preuve de l'anomalie mais ne sont jamais utilisées comme résultats finaux.
+Contrôle: T=1000 corrigé -> 649 racines cohérentes; les racines parasites de l'ancien run disparaissent.
+
+E47. Sous-flux de xi sur contour élevé.
+Observation: xi(s) était exponentiée directement; |Gamma(s/2)| devient extrêmement petit à grand t et le contour pouvait tomber numériquement vers zéro.
+Correction: comptage par la variation de la phase log(xi), sans exponentier le module; échantillonnage séparé pour contrôler le module de zeta.
+Contrôle: T=1000, 2000, 5000 sans sous-flux destructeur; winding 649, 1517, 4520.
+
+E48. Contrôle hors-droite insuffisamment systématique dans la première ébauche.
+Observation: une grille ne peut pas déclarer l'absence d'un zéro hors-droite par simple seuil local.
+Correction: les résultats hors-droite sont explicitement qualifiés de candidats de grille, puis raffinés par Newton; aucune absence n'est convertie en preuve globale.
+Contrôle: tous les candidats raffinés des campagnes T=1000, 2000 et 5000 convergent vers Re(s)=1/2 à la tolérance observée.
+
+E49. Précision des hauteurs de zéros variable avec t.
+Observation: l'arithmétique flottante double et l'évaluation Euler–Maclaurin limitent la précision des hauteurs à grand t.
+Correction: cette précision est maintenant mesurée par comparaison post-exécution indépendante; les rapports distinguent racine calculée, résidu numérique et référence externe.
+Contrôle: sous-ensemble T=1000/T=2000, écarts documentés jusqu'à environ 2.1e-7 sur les points contrôlés.
+
+E50. Statut terminal RH mal interprétable.
+Observation: une campagne finie pourrait être lue comme preuve universelle.
+Correction: le mode RH n'émet jamais PROVEN à partir d'une simple campagne finie; la sortie finale porte `UNRESOLVED` + `finite_analytic_evidence_without_universal_proof` tant qu'aucun certificat universel n'est construit.
+Contrôle: T=5000 terminé -> UNRESOLVED documenté avec toutes les observations.
+
+IX. RH1 RECONSTRUCTION / SECOND PASS -- NO REPETITION REGISTER
+----------------------------------------------------------------
+E51. Empreinte analytique RH obsolète après extension du portefeuille.
+Observation: le résumé de sélection conservait les seuls anciens noms de tâches numériques.
+Correction: rang du portefeuille mis à jour avec la recherche de preuve universelle, formalisation, Li, variation de phase et diagnostics.
+
+E52. Premier réglage du probe de Li numériquement instable à ordre élevé.
+Observation: rayon de Cauchy trop petit et erreur amplifiée par r^{-n}; le n=20 devenait bruité.
+Correction: rayon de travail porté à 0.40 et double-échantillonnage 256/512; le module compare les deux reconstructions et déclare explicitement les ordres instables.
+Contrôle: campagne finale T=2000/T=5000 : 20/20 coefficients du probe déclarés stables.
+
+E53. Risque de confusion entre preuve RH et diagnostics numériques.
+Observation: l'ancienne stratégie RH terminait par une chaîne de statistiques sur les zéros.
+Correction: introduction de rh_proof.py et d'un contrat de décision où seul un universal_certificate peut produire PROVEN.
+Contrôle: campagne terminale -> UNRESOLVED avec preuve_search_frontier_not_closed, sans dépendre du nombre de zéros.
+
+E54. Checkpoint RH ne conservant pas explicitement le sous-état du portefeuille de preuve.
+Observation: la première implémentation de solve_riemann ne sérialisait que rh_state.
+Correction: proof_search_state ajouté à rh_state et inclus dans les checkpoints atomiques.
+Contrôle: comparaison fresh/resume T=2000 : état de preuve identique.
+
+E55. T5000 et T2000 n'ont pas exactement la même couverture de tâches numériques.
+Observation: la campagne T5000 utilise variation de phase/recherche hors droite plutôt qu'un balayage critique complet, trop coûteux dans cette configuration.
+Correction: différence explicitement enregistrée dans les entrées JSON et le rapport; aucune extrapolation de couverture n'est faite.
+
+E56. Le statut CMI externe et le statut du modèle doivent rester séparés.
+Observation: un statut institutionnel externe ne doit pas être utilisé pour forcer la sortie du modèle.
+Correction: CMI cité uniquement comme contexte; la décision experimentale provient du JSON produit par O75_RH1.
+
+E57. Aucun candidat de preuve externe n'est injecté dans la recherche.
+Observation: des prépublications de preuves RH existent publiquement, mais leur présence ne constitue pas une preuve pour le runtime.
+Correction: aucun texte de preuve externe ni hauteur de zéro externe n'est chargé dans le chemin de résolution.
+
+X. RULES RH1 NON-REPETITION
+----------------------------
+R16. Toute nouvelle voie RH doit posséder une définition explicite de ce qui ferme son quantificateur universel.
+R17. Toute valeur numérique RH est marquée OBSERVED et porte sa méthode de précision; aucune valeur flottante ne ferme PROVEN.
+R18. Tout checkpoint doit inclure l'état du portefeuille de preuve, pas seulement l'état du calcul numérique.
+R19. Les différences de couverture entre campagnes doivent être enregistrées dans les entrées et les rapports.
+R20. Aucune référence externe sur les zéros ou sur une preuve candidate ne doit être importée dans le runtime.
+
+E58. Tentative supplémentaire de comparaison fraîche/reprise T=5000 interrompue par le plafond externe du harness.
+Nature: incident d'environnement d'exécution, sans JSON terminal retourné.
+Correction: aucune conclusion mathématique tirée de cette commande; la campagne T=5000 checkpointée terminée reste l'expérience autoritative, et la comparaison fresh/resume complète T=2000 reste le test déterministe de reprise de référence.
+Contrôle: incident archivé dans `audit/validation/harness_timeout_note.txt`.
+
+IX. O76 — DEFAUTS DETECTES PENDANT LA RECONSTRUCTION ET CORRECTIONS
+------------------------------------------------------------------
+E59. Adaptation initiale du parseur polynômial incorrecte avec la structure AST.
+Observation: l'ancien helper traitait l'AST comme un tuple alors que le nouveau parseur produit ANode.
+Correction: conversion stricte via les champs op/value/left/right avant toute construction de Poly.
+Contrôle: identités, systèmes linéaires et Gröbner re-testés.
+
+E60. Vérificateur initial trop peu lié au texte de cible.
+Observation: un certificat de normalisation aurait pu être constitué avec des payloads cohérents sans vérifier leur correspondance avec la cible textuelle.
+Correction: verifier.py reconstruit désormais lhs/rhs depuis la cible et compare les payloads exacts ; même règle pour combinaison polynomiale, idéal et Sturm.
+Contrôle: test de falsification par mutation de cible.
+
+E61. Certificat Diophantien initial avec convention de signe incohérente.
+Observation: le terme constant de ax+by-c=0 avait été mélangé avec la valeur c.
+Correction: le certificat porte explicitement [a,b,c], l'identité de Bézout a*u+b*v=g et la solution particulière vérifiée a*x+b*y=c.
+Contrôle: 6x+9y=15 rejoué par le vérificateur indépendant.
+
+E62. Reprise Buchberger initialement écrasée par le checkpoint de route.
+Observation: l'état structurel pouvait être sauvegardé puis remplacé par un payload sans frontière calculée.
+Correction: l'état gb_state est propagé dans le résultat UNRESOLVED et réécrit dans le checkpoint de route ; un deuxième run le restaure avant continuation.
+Contrôle: budget d'une paire puis reprise avec 1000 paires, preuve finale PROVEN.
+
+E63. Scanner d'intégrité auto-détecté par ses propres motifs.
+Observation: le scanner contenait littéralement les chaînes qu'il recherchait.
+Correction: il s'exclut de son propre périmètre et vérifie tous les autres fichiers runtime.
+Contrôle: integrity_scan PASS.
+
+E64. Lecture de fichier vide potentiellement interprétable comme « échec mathématique ».
+Observation: six JSON historiques étaient vides.
+Correction: ils sont classés artefacts de harness ; aucune logique de preuve ne consomme une sortie vide.
+Contrôle: validation des 310 JSON du corpus : 304 valides, six explicitement invalides et enregistrés.
+
+E65. Statut REFUTED absent du premier schéma O76.
+Observation: une démonstration par contre-exemple finissait en UNRESOLVED même quand l'exhaustion pouvait établir un contre-modèle exact.
+Correction: ajout de REFUTED pour table de vérité et domaine fini, avec certificat complet rejouable.
+Contrôle: p&!p et x=1 sur {0,1,2}.
+
+X. GARDE-FOUS O76 — REGLES RENFORCEES
+--------------------------------------
+R21. PROVEN et REFUTED exigent tous deux un certificat vérifié.
+R22. Toute cible de certificat est reconstruite depuis le texte utilisateur avant rejeu.
+R23. Aucune mémoire d'expérience ne contient une réponse cachée ; elle conserve hashes, provenance et certificats.
+R24. Un checkpoint dont le hash du problème ne correspond pas est refusé.
+R25. Le budget est propagé aux trajectoires lourdes ; son épuisement ne signifie pas impossibilité.
+R26. Une base de Groebner partielle produit UNRESOLVED, jamais PROVEN.
+R27. Les expériences numériques finies et statistiques restent hors de l'autorité de preuve.
+R28. Toute nouvelle brique mathématique doit fournir : constructeur de certificat, vérificateur indépendant, test positif, test négatif/tampering et comportement explicite sous budget.
+
+STATUT O76
+-----------
+E59-E65 : corrigés et couverts par le selfcheck O76.
+R21-R28 : intégrés à l'architecture et au test de non-régression.
+
+
+XI. TEST DECISIF EXTERNE — O76-1.0 -> O76-1.1
+------------------------------------------------
+E66. Buchberger atteint une zone de complexité excessive sur une tour polynomiale triangulaire pourtant structurellement éliminable.
+Observation: l'instance exacte de profondeur 10 est PROVEN en 14,24 s; la profondeur 11 puis 12 n'ont pas produit de certificat avant le watchdog externe de l'expérience. Le problème mathématique lui-même est élémentaire par substitution arrière, mais la trajectoire Gröbner générique accumule des objets coûteux.
+Correction: nouvelle stratégie `TRIANGULAR_TOWER_EXACT`, reconnue par structure polynomiale et non par texte de benchmark. Elle construit une identité dans l'idéal par factorisation `a^k-b^k=(a-b)\sum_{j=0}^{k-1}a^{k-1-j}b^j`, puis la transforme en certificat de la cible.
+Contrôle: profondeur 12 PROVEN + vérificateur indépendant PASS; équations mélangées et k=3 également PROVEN.
+
+E67. La première implémentation de `TRIANGULAR_TOWER_EXACT` contenait une erreur d'API interne (`unary -` non défini pour `Poly`).
+Observation: le solveur absorbait l'exception et revenait silencieusement vers Buchberger, donnant l'illusion que la nouvelle stratégie était sans effet.
+Correction: remplacement explicite par `scale(-1)` et ajout d'un appel direct au vérificateur dans le test de correction.
+Contrôle: selfcheck PASS; certificat profondeur 12 rejoué avec `(True, 'ok')`.
+
+E68. Le vérificateur du nouveau certificat n'importait pas `parse_polynomial_relations`.
+Observation: un certificat correct était produit mais le rejeu tombait en `NameError`, puis le moteur repartait vers une trajectoire coûteuse.
+Correction: import explicite + test de certificat valide et tests de mutations.
+Contrôle: valid certificate ACCEPT; trois mutations REJECT.
+
+E69. Détection initiale de forme vide trop agressive.
+Observation: la tentative de rendre les formes non parsables explicites avait classé une identité polynomiale sans hypothèses comme `UNSUPPORTED_FORM`.
+Correction: si la cible est une relation arithmétique parsable, elle suffit à définir une forme polynomiale; sinon `UNSUPPORTED_FORM` est retenu.
+Contrôle: ring identity, finite counterexample et selfcheck restaurés; PASS.
+
+E70. Statut UNRESOLVED final trop lié à la dernière stratégie tentée.
+Observation: une instance cohérente pouvait terminer avec `PROPOSITIONAL_TRUTH_TABLE` alors que le problème n'était pas logique.
+Correction: retrait de la branche propositionnelle du portefeuille de preuve; les sorties finales incluent `attempted_strategies` et `reason=portfolio_exhausted`.
+Contrôle: tour cohérente -> UNRESOLVED, portefeuille explicitement journalisé.
+
+
+E71. Une cible en prose contenant un signe `=` interne était reconnue comme une relation avant validation algébrique complète.
+Observation: la ligne Collatz `T(n)=n/2 ...` passait le simple détecteur de relation et pouvait donc recevoir à tort l'empreinte `polynomial=true`, alors qu'aucune relation arithmétique complète n'était parsable.
+Correction: `build_fingerprint` ne valide maintenant une cible que si la relation entière passe aussi `parse_polynomial_relations`; une cible de prose reste `UNSUPPORTED_FORM`.
+Contrôle: Collatz et Riemann -> `UNRESOLVED/UNSUPPORTED_FORM`; selfcheck et tests décisifs PASS.
+
+E72. Le test de mutation initial du certificat triangulaire utilisait un champ de coefficient qui n'existe pas dans `poly_payload`.
+Observation: le test de non-régression devait muter la représentation canonique `[monôme, numérateur, dénominateur]`.
+Correction: mutation de `terms[0][1]` et mutation de `contradiction_constant` sous sa représentation réelle.
+Contrôle: toutes les mutations sont rejetées par `verify_certificate`.
+
+XII. RÈGLES RENFORCÉES APRÈS TEST DÉCISIF
+---------------------------------------------
+R29. Toute optimisation dédiée doit être définie par une classe structurelle générale, jamais par le hash ou le nom d'un benchmark.
+R30. Une nouvelle classe de certificat doit avoir constructeur, vérificateur indépendant, test positif, cas cohérent/négatif et falsification par mutation.
+R31. Une forme non parsable ne doit jamais hériter d'une stratégie mathématique par défaut.
+R32. Le champ `attempted_strategies` doit être présent pour toute sortie `UNRESOLVED` après exploration effective.
+R33. Une preuve d'inconsistance doit rendre l'identité `1=sum_i q_i f_i` rejouable; la seule détection interne d'une contradiction ne suffit pas.
+R34. Un problème ouvert externe (Riemann, Collatz) est une épreuve d'intégrité: l'absence de certificat doit produire `UNRESOLVED`, jamais une extrapolation numérique ou rhétorique.
+
+STATUT O76-1.1
+----------------
+E66-E70 : corrigés, couverts par les tests décisifs et ajoutés à la documentation.
+R29-R34 : intégrés au contrat de développement et à la non-régression.

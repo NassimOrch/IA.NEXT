@@ -1,0 +1,12 @@
+# Journal des tentatives et incidents conservés — NGeGenBrain_v1
+
+1. Le premier benchmark V1 du workspace a eu une incohérence de clé dans l'oracle de stats; l'oracle a été ajusté selon le schéma observé, puis le banc a été rejoué. Voir les journaux et le baseline JSON.
+2. Un premier test de staging d'archive s'est exécuté à partir du parent plutôt que de la racine extraite; le test a été répété depuis la racine réelle.
+3. Le générateur du registre de preuves a eu une parenthèse surnuméraire; le validateur l'a détectée, le générateur a été corrigé, compilé et régénéré.
+4. Le validateur de release avait deux assertions trop strictes (texte du lanceur Windows et libellé de licence). Le validateur a été corrigé sur le contrat réel, puis 31/31 contrôles ont passé.
+5. Le nom de fichier de l'interpréteur Python Windows a d'abord été mal référencé; la vérification statique a été réalignée sur l'URL officielle épinglée. Le binaire lui-même n'a pas pu être téléchargé à cause du réseau/DNS.
+6. Un lancement combiné de clean-room a atteint le délai global du shell après tests/validation réussis; les commandes CLI/web/lifecycle ont ensuite été relancées séparément et ont terminé en code 0.
+7. Un premier appel de copie vers la zone audit a dupliqué le nom du sous-dossier dans un chemin source; la copie a été reprise avec le chemin contrôlé. Aucun fichier source ni aucune archive n'a été modifié par l'appel échoué.
+8. L'empreinte Dmodel a changé entre deux constructions pendant la phase de stabilisation documentaire. Chaque empreinte a été contrôlée; le ZIP final 71534f98ff590e5c1a103888f0e553e9e8966d34d7f0364429eac8eae238b5c8 a ensuite été extrait et re-testé. Seul ce reçu final fait foi.
+
+Ces incidents ne sont pas des résultats de test du modèle sauf lorsqu'un test a été exécuté. Ils sont préservés pour auditabilité; ils n'ont pas été effacés après correction.

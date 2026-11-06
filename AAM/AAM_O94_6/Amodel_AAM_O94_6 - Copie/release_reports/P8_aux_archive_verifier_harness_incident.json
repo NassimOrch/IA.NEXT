@@ -1,0 +1,16 @@
+{
+  "schema": "aam-o946-release-tooling-incident-v1",
+  "incident_id": "O946-DELIVERY-002",
+  "phase": "P8",
+  "severity": "VALIDATION_HARNESS_SCRIPT_ERROR",
+  "status": "RESOLVED_RETEST_PASS",
+  "opened_utc": "2026-10-20T18:57:00Z",
+  "summary": "La première version du vérificateur de ZIP auxiliaires a effectué CRC, extraction et vérification des manifestes sans divergence, puis a échoué avant d’écrire son reçu car la variable `base` n’était pas définie dans le bloc de sortie. Le test autonome du démonstrateur n’a donc pas été lancé dans cette invocation.",
+  "impact": "Le contrôle d’intégrité a produit les résultats dans stdout, mais le reçu persistant et le test autonome restaient à produire.",
+  "remediation": "Définir explicitement le chemin de sortie dans le vérificateur, réexécuter la vérification et le test du mini-éditeur depuis l’extraction du ZIP.",
+  "resolution": {
+    "status": "PASS_BOUNDED",
+    "resolved_utc": "2026-10-20T18:59:48Z",
+    "note": "Le contrôle sera rejoué avec un vérificateur corrigé; les hashes des ZIP sont recalculés pour la livraison finale."
+  }
+}

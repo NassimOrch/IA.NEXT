@@ -1,0 +1,160 @@
+{
+  "output": "/mnt/data/NGeGenBrain_v1_work_1/baseline_hard_benchmark_v0_replayed.json",
+  "model_id": "NGeGenBrain_v0",
+  "model_version": "0.3.0",
+  "source_sha256": "6ffcc921732a9c58bda5d2aa1461bfa5d9dfad99cc5ef6e3b9331d85b078fe8d",
+  "passed": 8,
+  "failed": 7,
+  "tests": [
+    {
+      "id": "ARITH-001",
+      "verdict": "PASS",
+      "observed": "2400 matches; 0 mismatches"
+    },
+    {
+      "id": "MESH-001",
+      "verdict": "PASS",
+      "observed": "35 pairs; missing=0 extra=0"
+    },
+    {
+      "id": "MESH-002",
+      "verdict": "FAIL",
+      "observed": {
+        "new_facts": 0,
+        "q_fact_types": [
+          "String"
+        ]
+      }
+    },
+    {
+      "id": "WM-001",
+      "verdict": "FAIL",
+      "observed": {
+        "activation": {
+          "enabled": true,
+          "reason": "measured_holdout_gain_exceeds_threshold"
+        },
+        "model_exact_match_rate": 1.0,
+        "record_keys": [
+          "id",
+          "model_id",
+          "model_version",
+          "evaluation",
+          "created_at",
+          "activation_state"
+        ]
+      }
+    },
+    {
+      "id": "BUDGET-001",
+      "verdict": "FAIL",
+      "observed": {
+        "finite_status": "Partial",
+        "nonfinite_status": "Success",
+        "nonfinite_reason": null
+      }
+    },
+    {
+      "id": "BUDGET-002",
+      "verdict": "FAIL",
+      "observed": {
+        "accepted": true,
+        "error": null
+      }
+    },
+    {
+      "id": "TRACE-001",
+      "verdict": "PASS",
+      "observed": {
+        "visible_events": 200,
+        "chain": {
+          "valid": true,
+          "count": 200,
+          "problems": [],
+          "head_hash": "c0f24cb1adb5ca6133492f9de75f855f91a9c05887470fd11c47d3d92895ed8d"
+        },
+        "errors": []
+      }
+    },
+    {
+      "id": "MEM-001",
+      "verdict": "PASS",
+      "observed": {
+        "payload_error": "CRC check failed",
+        "payload_returned": true
+      }
+    },
+    {
+      "id": "MESH-003",
+      "verdict": "PASS",
+      "observed": {
+        "accepted_indices": [],
+        "persisted_count": 0
+      }
+    },
+    {
+      "id": "CERT-001",
+      "verdict": "PASS",
+      "observed": {
+        "valid_certificate": {
+          "valid": true,
+          "problems": [],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        },
+        "forged_certificate": {
+          "valid": false,
+          "problems": [
+            "conclusion_not_entailed_by_rule_and_premises"
+          ],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        }
+      }
+    },
+    {
+      "id": "TYPE-001",
+      "verdict": "PASS",
+      "observed": {
+        "checks": 10,
+        "errors": []
+      }
+    },
+    {
+      "id": "SEC-001",
+      "verdict": "PASS",
+      "observed": {
+        "status": "Success",
+        "value_equals_payload": true,
+        "value": "__import__(\"os\").system(\"echo SHOULD_NOT_RUN\")"
+      }
+    },
+    {
+      "id": "ROBUST-001",
+      "verdict": "FAIL",
+      "observed": {
+        "returned": false,
+        "exception": "RecursionError",
+        "message": "maximum recursion depth exceeded"
+      }
+    },
+    {
+      "id": "MESH-005",
+      "verdict": "FAIL",
+      "observed": {
+        "subjects": [
+          "alice",
+          "bob"
+        ],
+        "count": 2
+      }
+    },
+    {
+      "id": "MESH-006",
+      "verdict": "FAIL",
+      "observed": {
+        "observed_match_calls": 33330,
+        "reported_status": "FIXPOINT_REACHED",
+        "rule_match_attempts": 0
+      }
+    }
+  ]
+}

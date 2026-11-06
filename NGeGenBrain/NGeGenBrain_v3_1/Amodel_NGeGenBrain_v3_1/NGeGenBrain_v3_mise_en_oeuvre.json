@@ -1,0 +1,266 @@
+{
+  "components": [
+    {
+      "name": "Model Adapter Layer",
+      "paths": "src/nggegenbrain_v3/adapters/base.py, adapters/torch_adapter.py, adapters/huggingface.py",
+      "status": "IMPLEMENTE; HF adapter créé mais non exécuté sur un LLM réel dans cet environnement"
+    },
+    {
+      "name": "Model Instrumentation Layer",
+      "paths": "src/nggegenbrain_v3/adapters/torch_adapter.py",
+      "status": "IMPLEMENTE POUR MODULES PYTORCH TESTES"
+    },
+    {
+      "name": "Observation Engine",
+      "paths": "src/nggegenbrain_v3/engine.py et adapters",
+      "status": "IMPLEMENTE ET TESTE SUR MODELE SYNTHETIQUE"
+    },
+    {
+      "name": "Activation/Representation Store",
+      "paths": "src/nggegenbrain_v3/analysis/activations.py et features.py",
+      "status": "IMPLEMENTE; tests du store/analyse"
+    },
+    {
+      "name": "Intervention Engine",
+      "paths": "src/nggegenbrain_v3/adapters/torch_adapter.py",
+      "status": "IMPLEMENTE POUR MODES SUPPORTES; testé sur synthétique"
+    },
+    {
+      "name": "Experiment Engine",
+      "paths": "src/nggegenbrain_v3/analysis/causal.py",
+      "status": "IMPLEMENTE; delta apparié démontré"
+    },
+    {
+      "name": "Hypothesis Engine",
+      "paths": "src/nggegenbrain_v3/analysis/hypotheses.py",
+      "status": "IMPLEMENTE; cycle hypothèse préenregistrée→supportée testé"
+    },
+    {
+      "name": "Rule Discovery Engine",
+      "paths": "src/nggegenbrain_v3/discovery/rules.py, numeric.py",
+      "status": "IMPLEMENTE DANS DEUX CLASSES EXPLICITES, PAS INDUCTION UNIVERSELLE"
+    },
+    {
+      "name": "Causal Analysis Engine",
+      "paths": "src/nggegenbrain_v3/analysis/causal.py",
+      "status": "IMPLEMENTE COMME ANALYSE D’INTERVENTION; généralité conditionnelle au protocole"
+    },
+    {
+      "name": "Circuit Discovery Engine",
+      "paths": "src/nggegenbrain_v3/discovery/circuits.py",
+      "status": "IMPLEMENTE COMME GRAPHE D’INFLUENCES OBSERVEES"
+    },
+    {
+      "name": "Mechanism Composer",
+      "paths": "src/nggegenbrain_v3/composition.py",
+      "status": "IMPLEMENTE ET TESTE"
+    },
+    {
+      "name": "Hierarchical Abstraction Engine",
+      "paths": "src/nggegenbrain_v3/analysis/hierarchical.py",
+      "status": "IMPLEMENTE; mécanismes supérieurs restent explicitement candidats"
+    },
+    {
+      "name": "Counterexample Engine",
+      "paths": "src/nggegenbrain_v3/analysis/counterexamples.py",
+      "status": "IMPLEMENTE SUR LIGNES FOURNIES"
+    },
+    {
+      "migration_note": "Public import is implemented by package reconstruction/engine.py; former same-name reconstruction.py contains a migration note because Python resolves the package directory for this module name.",
+      "name": "Validation Engine",
+      "paths": "src/nggegenbrain_v3/reconstruction/__init__.py, src/nggegenbrain_v3/reconstruction/engine.py, src/nggegenbrain_v3/cli.py, tests/test_package_imports.py",
+      "status": "IMPLEMENTE POUR VALIDATION FOURNIE ET BENCHMARK SYNTHETIQUE"
+    },
+    {
+      "migration_note": "Public import is implemented by package reconstruction/engine.py; former same-name reconstruction.py contains a migration note because Python resolves the package directory for this module name.",
+      "name": "Reconstruction Engine",
+      "paths": "src/nggegenbrain_v3/reconstruction/engine.py, causal_lm.py, synthetic_benchmark.py; CLI reconstruct; POST /api/reconstruct-causal-lm",
+      "status": "Reconstruction symbolique V1-parité et deux recompositions comportementales indépendantes sur Transformer causal synthétique (règle train/holdout + table finie de logits); aucune équivalence de circuits revendiquée; checkpoint externe non testé"
+    },
+    {
+      "name": "Synthetic Model Laboratory",
+      "paths": "src/nggegenbrain_v3/synthetic_lab.py",
+      "status": "IMPLEMENTE ET EXECUTE POUR PARITE 4 BITS"
+    },
+    {
+      "name": "Benchmark Engine",
+      "paths": "src/nggegenbrain_v3/engine.py, cli.py",
+      "status": "IMPLEMENTE POUR TESTS DECLARES"
+    },
+    {
+      "name": "Provenance Engine",
+      "paths": "src/nggegenbrain_v3/registry.py",
+      "status": "JOURNAUX SHA256 CHAINES TESTES"
+    },
+    {
+      "name": "Evidence Registry",
+      "paths": "src/nggegenbrain_v3/registry.py et workspace officiel",
+      "status": "REGISTRES REELS, INTEGRITE VERIFIEE"
+    },
+    {
+      "name": "Formal Model Registry",
+      "paths": "src/nggegenbrain_v3/models.py",
+      "status": "MODELES SERIALISABLES ET TESTES"
+    },
+    {
+      "name": "Knowledge Graph",
+      "paths": "src/nggegenbrain_v3/discovery/circuits.py et analysis/hierarchical.py",
+      "status": "GRAPHE DE CIRCUITS/HIERARCHIE, PAS ONTOLOGIE UNIVERSELLE"
+    },
+    {
+      "name": "Experiment Graph",
+      "paths": "src/nggegenbrain_v3/analysis/causal.py, registry.py",
+      "status": "RELIER PAR ID, PROVENANCE ET REGISTRES"
+    },
+    {
+      "name": "Reproducibility Engine",
+      "paths": "src/nggegenbrain_v3/analysis/reproducibility.py",
+      "status": "MANIFEST ENVIRONNEMENT/ARTEFACTS"
+    },
+    {
+      "name": "Audit Engine",
+      "paths": "src/nggegenbrain_v3/registry.py, cli.py, scripts/validate_release.py",
+      "status": "IMPLEMENTE ET EXECUTE"
+    },
+    {
+      "name": "CLI",
+      "paths": "src/nggegenbrain_v3/cli.py, ngbrain.py",
+      "status": "CLI testée; commande reconstruct disponible pour bench synthétique et lookup sur checkpoint Hugging Face local"
+    },
+    {
+      "name": "Web Interface",
+      "paths": "src/nggegenbrain_v3/web.py, web/index.html",
+      "status": "API locale et dashboard testés; endpoint POST /api/reconstruct-causal-lm entraîne, observe, recompose et enregistre les résultats du banc causal synthétique"
+    },
+    {
+      "name": "Documentation System",
+      "paths": "README.md, docs/, formalism/",
+      "status": "PRESENT"
+    },
+    {
+      "name": "Packaging System",
+      "paths": "scripts/reassemble_bundle.py, scripts/validate_release.py, BAT",
+      "status": "IMPLEMENTE; clean-room à rejouer en release packagée"
+    },
+    {
+      "name": "Synthetic architecture ladder",
+      "paths": "src/nggegenbrain_v3/adapters/synthetic.py, cli.py (synthetic-ladder), web.py (/api/synthetic-ladder), tests/test_synthetic_architectures.py",
+      "status": "IMPLEMENTED AND TESTED ON EIGHT SEEDED ARCHITECTURES; not universal mechanism reconstruction"
+    },
+    {
+      "name": "Synthetic architecture ladder",
+      "paths": "src/nggegenbrain_v3/adapters/synthetic.py, tests/test_synthetic_architectures.py, benchmarks/results/20261027_official/synthetic_ladder_smoke.json",
+      "status": "EXECUTED FOR EIGHT SYNTHETIC LEVELS; architecture/instrumentation smoke, not universal reconstruction"
+    },
+    {
+      "name": "Test System",
+      "paths": "tests/, legacy_NGeGenBrain_v1/tests/, audit/test_runs/, audit/validation_receipt.json",
+      "status": "52 tests V2 passés; 65 tests de régression V1 passés; tests synthétiques, CLI et API Web enregistrés; aucun checkpoint LLM externe testé"
+    }
+  ],
+  "created_utc": "2026-10-27T14:00:00Z",
+  "experimental_scopes": {
+    "adversarial_counterexample_positive_control": "executed on 8 parity rows; 4 mismatches found for an intentionally incomplete candidate",
+    "causal_lm_reconstruction": {
+      "active_run_id": "20261027T153351Z",
+      "equivalence_claim": "no internal-circuit equivalence claimed; composed models do not call the source during inference",
+      "external_huggingface_checkpoint": "not executed; no local checkpoint and transformers unavailable in this environment",
+      "synthetic_trained_transformer": "executed; rule hypothesis class fit on 20 contexts, holdout on 5, generation exact match 1.0; lookup logits exact on 30 queried contexts and trajectories 1.0"
+    },
+    "causal_sweep": "executed for 8 inputs; 2 nonzero and 6 zero output effects for the selected target on the supplied set",
+    "instrumented_synthetic_intervention": "executed",
+    "numeric_expression_candidate": "executed",
+    "real_huggingface_llm": "not executed; transformers dependency/model checkpoint unavailable",
+    "synthetic_architecture_ladder": "executed for 8 model families; instrumentation and generation smoke only",
+    "synthetic_parity4": "executed"
+  },
+  "known_capability_boundaries": [
+    "Rule induction is limited to affine Boolean/XOR and a declared numeric expression grammar.",
+    "Counterexample search only tests supplied rows.",
+    "Causal inference is limited by access, interventions, controls, model behavior and coverage.",
+    "A 4-bit finite truth-table reconstruction does not imply model-weight or LLM reconstruction.",
+    "Transformer layer APIs differ; adapter capability matrix is authoritative.",
+    "Synthetic levels 1-8 test adapter/instrumentation paths; only SYNTH-PARITY-4 has an independently validated full behavioral reconstruction.",
+    "The causal language model is a random-weight synthetic test fixture, not a pretrained or semantically competent LLM."
+  ],
+  "no_artificial_outcome_bias": true,
+  "principles": [
+    "append-only provenance",
+    "explicit capability declarations",
+    "hypothesis classes, not universal rule induction",
+    "pre-registered predictions/falsification conditions",
+    "independent holdout",
+    "no hidden ground truth exposed to discovery",
+    "behavioral reconstruction kept separate from mechanistic equivalence"
+  ],
+  "release_evidence": {
+    "active_run_id": "20261027T153351Z",
+    "active_workspace": "benchmarks/results/20261027_official/workspace_20261027T153351Z",
+    "component_validation_receipt": "audit/validation_receipt.json",
+    "generated_utc": "2026-10-27T15:33:59Z",
+    "official_results": "benchmarks/results/20261027_official/official_experiment_results.json",
+    "real_open_source_llm_test": "NOT_EXECUTED: transformers and a local checkpoint are unavailable in the current environment",
+    "registry_integrity_all_valid": true,
+    "synthetic_levels_executed": 8,
+    "v1_regression_test_count": 65,
+    "v2_test_count": 52
+  },
+  "schema": "NGeGenBrain_v3_implementation_map_v1",
+  "source": "Dmodel_NGeGenBrain_v1.zip plus original source/tests/formalism preserved under legacy_NGeGenBrain_v1/",
+  "synthetic_model_catalog": [
+    {
+      "architecture": "SyntheticLinearRuleNet",
+      "id": "SYNTH-001-LINEAR",
+      "level": 1,
+      "purpose": "linear numeric map"
+    },
+    {
+      "architecture": "SyntheticParityMLP",
+      "id": "SYNTH-002-LOGIC",
+      "level": 2,
+      "purpose": "known binary parity/XOR behavior"
+    },
+    {
+      "architecture": "SyntheticInteractionMLP",
+      "id": "SYNTH-003-INTERACTION",
+      "level": 3,
+      "purpose": "explicit nonlinear input interactions"
+    },
+    {
+      "architecture": "SyntheticDistributedFeatureNet",
+      "id": "SYNTH-004-DISTRIBUTED",
+      "level": 4,
+      "purpose": "mixed/distributed hidden representation"
+    },
+    {
+      "architecture": "SyntheticCompetingPathwaysNet",
+      "id": "SYNTH-005-PATHWAYS",
+      "level": 5,
+      "purpose": "two input-dependent computational pathways"
+    },
+    {
+      "architecture": "SyntheticHierarchicalNet",
+      "id": "SYNTH-006-HIERARCHICAL",
+      "level": 6,
+      "purpose": "named compositional stages"
+    },
+    {
+      "architecture": "TinyTransformerClassifier",
+      "id": "SYNTH-007-TRANSFORMER",
+      "level": 7,
+      "purpose": "encoder Transformer instrumentation and intervention"
+    },
+    {
+      "architecture": "TinyCausalLanguageModel",
+      "id": "SYNTH-008-CAUSAL-LM",
+      "level": 8,
+      "purpose": "causal next-token generation; seeded sampling"
+    }
+  ],
+  "v1_functionality_preservation": {
+    "path": "legacy_NGeGenBrain_v1/",
+    "status": "preserved; original tests execute successfully in current environment",
+    "strategy": "complete original V1 source and tests bundled without replacing the V1 core"
+  },
+  "version": "2.0.0.dev0"
+}

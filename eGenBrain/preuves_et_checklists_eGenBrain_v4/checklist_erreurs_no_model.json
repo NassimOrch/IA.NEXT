@@ -1,0 +1,274 @@
+{
+  "project": "eGenBrain_v4_extreme_experimental_campaign",
+  "items": [
+    {
+      "id": "ENVEXP-001",
+      "status": "resolved_for_experiment_workspace",
+      "severity": "high",
+      "description": "Le workspace v4 déclaré par chemins_eGenBrain_v4.json est absent du disque au démarrage. Le code a été récupéré de l’archive d’audit; le runtime database n’est pas installé dans le chemin historique. Pas un résultat sur les capacités du modèle. Le nouveau workspace et les chemins sont créés; la discontinuité historique reste consignées comme contexte.",
+      "evidence": [
+        "source/chemins_eGenBrain_v4_initial.json",
+        "archive Amodel_eGenBrain_v4.zip",
+        "logs/P0_inventory.json"
+      ]
+    },
+    {
+      "id": "ENVEXP-002",
+      "status": "resolved_new_campaign_complete",
+      "severity": "medium",
+      "description": "Les tests antérieurs / rapports antérieurs ne remplacent pas les nouveaux essais préenregistrés. Les nouvelles expériences auront un espace de résultats séparé.",
+      "evidence": [
+        "seed_evidence/lab_results/lab_scored_report.json"
+      ],
+      "final_note": "Les campagnes indépendantes préenregistrées ont été exécutées; les résultats antérieurs sont gardés distincts.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "ENVEXP-003",
+      "status": "open_legacy_mg_dependency",
+      "severity": "medium",
+      "description": "La mémoire MG complète reconstituée est volumineuse (~1.65 GB). Les expériences maillage peuvent être menées sur des bases isolées neuves; les tests qui requièrent la MG héritée devront être explicitement séparés.",
+      "evidence": [
+        "manifest_livraison_eGenBrain_v4.json"
+      ],
+      "final_note": "La suite récupérée compte 136 tests: 133 réussis, 3 ignorés parce que l’environnement MG historique attendu n’est pas fourni sous le chemin de workspace restauré; cette contrainte reste ouverte et ne doit pas être présentée comme entièrement résolue.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "ENVEXP-004",
+      "status": "resolved_checkpointed_with_scale_findings",
+      "severity": "low",
+      "description": "Les expériences très combinatoires peuvent dépasser le temps ou le budget; le runner sera checkpointable, idempotent et conservera les échecs partiels.",
+      "evidence": [
+        "checklist_de_travail_exp_v4.json"
+      ],
+      "final_note": "Toutes les matrices prévues sont terminées grâce aux checkpoints. Les temps de fermeture profonde restent élevés et sont documentés.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "ENVEXP-005",
+      "status": "resolved",
+      "severity": "low",
+      "description": "Première invocation de reassembleur erronée: le script n’est pas dans seed_evidence; la commande a échoué avant exécution. Réorientée vers le script de livraison à la racine puis revalidation prévue. Réassemblage final confirmé; hash exact identique au reçu déjà audité.",
+      "evidence": [
+        "logs/execution_journal.jsonl",
+        "/mnt/data/reassemble_packages_eGenBrain_v4.py"
+      ]
+    },
+    {
+      "id": "ENVEXP-006",
+      "status": "resolved",
+      "severity": "low",
+      "description": "Le premier contrôle de snapshot a échoué car le générateur incluait son manifeste dans sa propre liste de hashes (auto-référence). Réparer et rerun intégralement; ne pas fermer P0 avant vérification. Le manifeste exclut désormais son propre hash; restauration temporaire contrôlée par hash sur tous les fichiers répertoriés : PASS.",
+      "evidence": [
+        "logs/P0_snapshot_restore_check.json",
+        "logs/execution_journal.jsonl"
+      ]
+    },
+    {
+      "id": "PDEV-001",
+      "status": "documented_nonrecoverable_deviation_excluded_from_confirmatory",
+      "severity": "high",
+      "description": "Le stage de scoring P2 a ouvert references_sealed.json après les 480 runs P2 entièrement hashés, mais avant que les autres familles P3/P5 aient terminé leurs inférences. Les 477 cas, les requêtes, les bras et le moteur étaient pré-enregistrés et hashés avant le scoring; aucune référence n’a été chargée dans un runner ni dans le modèle; les cas et scripts n’ont pas été modifiés en réponse aux valeurs de référence. Néanmoins, cela dévie de l’intention la plus stricte d’un unblinding unique après toutes les inférences et doit figurer explicitement dans le rapport. La référence entière a été lue par le scorer P2, pas seulement la tranche P2. Aucune tentative de cacher cette déviation.",
+      "evidence": [
+        "experiments/protocol_v1.json",
+        "experiments/score_operator_induction.py",
+        "results/scored/operator_induction_scored.json",
+        "logs/execution_journal.jsonl"
+      ],
+      "final_note": "Le scorer du pilote a ouvert tôt le fichier complet des cibles. Cette déviation ne peut être annulée; les résultats pilote restent exploratoires et sont distincts des deux graines confirmatoires/extension scellées jusqu’à la clôture.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "PDEV-002",
+      "status": "documented_excluded_from_confirmatory",
+      "severity": "high",
+      "description": "Les runs pilotes P2/P3 sont antérieurs à une régénération de public_cases.json qui a changé le hash du fichier (au moins timestamp/manifest) avant la campagne complète; les runs pilotes référencent l’ancien hash 24cfed..., alors que le workspace courant renferme 68be.... Le payload de cas est rapporté comme identique, mais les résultats pilotes sont exclus des analyses confirmatoires. Aucune cible n’a été injectée ni ouverte par les runners; ce point est une déviation de traçabilité du pilote, pas un résultat moteur.",
+      "evidence": [
+        "logs/P1_protocol_lock_audit.json",
+        "logs/P2_raw_integrity_audit.json",
+        "experiments/confirmatory_v2/protocol_confirmatory_v2.json"
+      ],
+      "final_note": "Déviation documentaire conservée, exclue de l’inférence confirmatoire.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "PDEV-003",
+      "status": "confirmed_non_evaluable_fixture_limitation_preserved",
+      "severity": "medium",
+      "description": "Les 5 tests de certificat de composition utilisent des noms synthétiques `nex` + suffixe hexadécimal numérique (ex. nex485fd11); la grammaire quantité/coût du producteur ne reconnaît pas ces prompts et répond ABSTAIN sans certificat. Ils n’évaluent donc pas la vérification d’un certificat de composition. Les lignes brutes et la fixture sont conservées, le score indépendant est noté non-évaluable. Ce n’est pas une fuite de cible ni un résultat négatif de la théorie; une suite complémentaire à noms alphabétiques doit être préenregistrée séparément, sans remplacer cette série.",
+      "evidence": [
+        "results/raw/confirmatory_v2/certificate_tests_v2.jsonl",
+        "experiments/confirmatory_v2/run_certificate_tests_v2.py",
+        "seed_evidence/base_v3/egenbrain/mesh_v4.py"
+      ],
+      "final_note": "Les fixtures de certificats quantité n’émettent pas de certificats exploitables; aucune réussite ni échec théorique n’en est inféré.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "ENVEXP-007",
+      "status": "resolved_inspection_only",
+      "severity": "low",
+      "description": "Pendant la reprise, une inspection a cherché experiments/confirmatory_v3/protocol_confirmatory_v3.json, fichier absent. Aucun lancement ni aucune modification n’a eu lieu. Le protocole commun verrouillé est experiments/confirmatory_v2/protocol_confirmatory_v2.json, qui inclut les hash du dataset v3 et ses runners. L’inspection a été corrigée en consultant ce manifeste commun et les hashes v3 individuels.",
+      "evidence": [
+        "experiments/confirmatory_v2/protocol_confirmatory_v2.json",
+        "logs/confirmatory_v3/jobs/operator.log",
+        "logs/confirmatory_v3/jobs/paired.log"
+      ]
+    },
+    {
+      "id": "ENVEXP-008",
+      "status": "resolved",
+      "severity": "low",
+      "description": "Une commande d’inspection a demandé un nom de runner abrégé inexistant (run_operator_induction_v2.py); le fichier de référence est run_operator_induction_disabled_v2.py. L’échec concernait uniquement la lecture du fichier après l’affichage du protocole; aucun modèle, script source, résultat brut ni référence scellée n’a été modifié ou lu.",
+      "evidence": [
+        "logs/execution_journal.jsonl",
+        "experiments/confirmatory_v2/run_operator_induction_disabled_v2.py"
+      ]
+    },
+    {
+      "id": "ENVEXP-009",
+      "status": "resolved_checkpoint_resume_and_final_audit",
+      "severity": "medium",
+      "description": "Les workers appariés ont été arrêtés par le moniteur à une frontière de ligne brute durable pour relocaliser les bases scratch sur tmpfs. Les copies persistantes contenaient un journal SQLite pour DEPTH_64_1/full_v4; le scratch tmpfs correspondant était différent après l’arrêt et aucune ligne brute validée ne pointait vers cette base. Toutes les 248 lignes déjà engagées par graine passent le hash du record, l’unicité de clé et la concordance SHA256 de la base référencée. À la reprise, le runner gelé supprime uniquement la base non engagée et la reconstruit; les copies persistantes sont conservées comme preuves. Revalider par audit final.",
+      "evidence": [
+        "logs/stop_at_boundary_receipt.json",
+        "logs/paired_scratch_tmpfs_relocation.json",
+        "logs/paired_scratch_pre_resume_integrity.json",
+        "experiments/confirmatory_v2/run_paired_ablation_v2.py",
+        "experiments/confirmatory_v3/run_paired_ablation_v3.py"
+      ],
+      "final_note": "Les checkpoints de reprise sont validés; le rapport, les scorings et l’audit indépendant de fin sont complets.",
+      "updated_utc": "2026-10-24T21:00:57.502658+00:00"
+    },
+    {
+      "id": "ENVEXP-010",
+      "status": "resolved_for_effective_analysis_original_raw_preserved",
+      "severity": "high",
+      "description": "Collision d’orchestration pendant la reprise P5C : un deuxième runner confirmatoire v2 a été lancé pendant que l’ancien était actif, puis terminé rapidement. Les JSONL ne contiennent aucune clé dupliquée et tous les hashes record_sha256 sont valides; cependant la base référencée par v2 ligne 249 (DEPTH_64_1/full_v4) ne correspond plus au database_sha256 préservé dans cette ligne. La copie exacte historique n’a pas été retrouvée après inventaire. L’original est conservé; un replay de tous les cinq modes sur DEPTH_64_1 pour v2 et v3 est préenregistré et doit être réalisé après la fin des matrices primaires, avant ouverture des références. La vue effective scorée utilisera une seule fois chaque ligne de replay pour ce case_id, tandis que les JSONL primaires resteront immuables.",
+      "evidence": [
+        "logs/paired_scratch_pre_resume_integrity.json",
+        "experiments/confirmatory_repair/replay_depth64_1_protocol_v1.json",
+        "experiments/confirmatory_repair/replay_depth64_1_protocol_receipt.json",
+        "logs/execution_journal.jsonl"
+      ],
+      "final_note": "La base scratch v2 de la ligne 249 / DEPTH_64_1/full_v4 reste divergente dans le journal source immuable. Le rejeu préenregistré de cinq modes sur les deux graines est conservé séparément; l’audit de la vue effective et le certificat de fermeture passent. Ce n’est pas une réparation rétroactive du fichier brut.",
+      "updated_utc": "2026-10-24T21:01:01+00:00",
+      "resolution": "Le replay préenregistré a exécuté les cinq modes du cas DEPTH_64_1 sur chacune des deux graines. Les vues effectives passent l’audit d’unicité, de requête appariée et de hash. La ligne brute historique et le hash DB divergent originaux sont conservés tels quels; seule la vue dérivée remplace le bloc désigné."
+    },
+    {
+      "id": "EXTEXP-001",
+      "status": "resolved_before_inference",
+      "severity": "low",
+      "description": "Le premier audit statique de l’extension de couverture a échoué parce que son helper de hash recevait des bytes au lieu d’un chemin. L’erreur est limitée à l’outil d’audit, aucune inférence n’avait commencé et aucune référence scellée n’a été lue. Le helper sha_bytes a été ajouté, le protocole d’extension a été relocké après correction et le nouvel audit pré-inférence a passé : 4 datasets, 400 cas, 1 280 runs prévus, zéro problème, cibles non lues.",
+      "evidence": [
+        "experiments/confirmatory_extension_v1/extension_protocol_v1.json",
+        "logs/extension_v1/pre_scoring_static_audit.json",
+        "experiments/confirmatory_extension_v1/extension_protocol_receipt_v1.json"
+      ],
+      "final_note": "Audit statique corrigé avant inférence; aucun cas/référence n’a été modifié par cet incident.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "AUDIT-002",
+      "status": "resolved_as_missing_embedded_metadata_with_clean_external_sqlite_check",
+      "severity": "medium",
+      "description": "L’audit de fermeture des 6 678 enregistrements primaires a trouvé un avertissement de métadonnée d’intégrité sur le cas de révision v3 ligne 4. Le contrôle SQLite effectif n’a pas signalé une base corrompue; inspecter la ligne brute, sa base et le code du harnais avant le scoring pour déterminer si le champ était absent/non-clean ou si la vérification effective diverge. Ne pas masquer cet avertissement.",
+      "evidence": [
+        "logs/confirmatory_v2/raw_closure_audit.json",
+        "results/raw/confirmatory_v3/revision_tests_v3.jsonl",
+        "experiments/audit_confirmatory_runs_before_scoring.py"
+      ],
+      "final_note": "Le champ de métadonnée integrity est absent d’une ligne de révision; le fichier SQLite référencé existe, son hash correspond et les contrôles indépendants PRAGMA integrity_check et foreign_key_check passent. Avertissement documentaire conservé.",
+      "updated_utc": "2026-10-24T21:01:01+00:00",
+      "resolution": "Le champ d’intégrité embarqué manque dans la ligne REV_CONFLICT_BOOL v3; ce manque est une lacune de métadonnée du format. Le hash de la base associée correspond au reçu; l’audit indépendant SQLite fournit integrity_check=ok et zero foreign-key violations. L’avertissement demeure dans le rapport."
+    },
+    {
+      "id": "EXTEXP-002",
+      "status": "resolved_before_inference",
+      "severity": "low",
+      "description": "Le premier py_compile du scorer d’extension a échoué à cause d’une apostrophe dans une regex de chaîne simple (don't know). Aucun scorer n’a été exécuté, aucune inférence d’extension n’avait commencé et aucune référence cible n’a été lue. La chaîne a été corrigée, py_compile a passé, et le protocole de scoring et son reçu ont été recalculés avec le hash final du script avant toute inférence.",
+      "evidence": [
+        "experiments/confirmatory_extension_v1/score_extension_v1.py",
+        "experiments/confirmatory_extension_v1/extension_scoring_protocol_v1.json",
+        "experiments/confirmatory_extension_v1/extension_scoring_receipt_v1.json"
+      ],
+      "final_note": "Erreur de syntaxe du scorer corrigée avant toute inférence ou ouverture de référence.",
+      "updated_utc": "2026-10-24T20:56:24.348867+00:00"
+    },
+    {
+      "id": "ENVEXP-011",
+      "status": "resolved_final_pdf_passes_pdfium_and_poppler",
+      "severity": "low",
+      "description": "La dernière source LaTeX a été recompilée en 15 pages. Les 15 pages sont rendues par PDFium et Poppler; pdfinfo reconnaît un PDF A4. Le journal LaTeX ne contient ni erreur fatale, ni citation/référence indéfinie, ni boîte débordante; il contient 21 avertissements Underfull hbox typographiques.",
+      "evidence": [
+        "logs/report_pdf_render_receipt.json",
+        "rapport_plus_eGenBrain_v4.tex",
+        "rapport_plus_eGenBrain_v4.pdf",
+        "report_render_final/contact.png"
+      ],
+      "updated_utc": "2026-10-24T21:08:22.479588+00:00",
+      "final_note": "La source et le rendu ont la même provenance et les mêmes hashes sont inscrits dans le reçu final.",
+      "title": "Rendu PDF final validé avec deux moteurs"
+    },
+    {
+      "id": "DOCEXP-001",
+      "status": "resolved_final_artifact_validation",
+      "severity": "low",
+      "description": "Le générateur de rapport est syntaxiquement valide; le PDF final fait 15 pages A4, se compile sans erreur fatale et s’affiche intégralement via PDFium et Poppler. Les références sont résolues; 21 Underfull hbox typographiques sont consignées, aucun Overfull box.",
+      "evidence": [
+        "experiments/generate_report_plus_eGenBrain_v4.py",
+        "rapport_plus_eGenBrain_v4.tex",
+        "rapport_plus_eGenBrain_v4.pdf",
+        "logs/report_pdf_render_receipt.json"
+      ],
+      "updated_utc": "2026-10-24T21:08:22.479588+00:00",
+      "title": "Rapport final LaTeX/PDF validé",
+      "final_note": "Les avertissements typographiques sont documentés, sans modification des résultats ou du moteur."
+    },
+    {
+      "id": "ENVEXP-013",
+      "status": "resolved_on_isolated_copy_original_preserved",
+      "severity": "medium",
+      "title": "Journal SQLite chaud détecté sur une copie de sauvegarde profonde",
+      "description": "Une ouverture strictement en lecture seule d’une copie a retourné attempt to write a readonly database, en présence d’un journal de rollback historique.",
+      "resolution": "Contrôle indépendant sur une copie temporaire isolée, avec journal associé et récupération SQLite normale : integrity_check=ok et zero violation FK. Original, sidecar et preuves historiques inchangés. La copie récupérée ne sert pas de source pour les scores effectifs.",
+      "evidence": [
+        "logs/final_independent_integrity_audit.json",
+        "logs/sqlite_hot_journal_recovery_audit.json"
+      ],
+      "updated_utc": "2026-10-24T21:01:01+00:00"
+    },
+    {
+      "id": "ENVEXP-012",
+      "updated_utc": "2026-10-24T21:08:22.479588+00:00",
+      "status": "resolved_source_pdf_sync_and_hash_verified",
+      "severity": "low",
+      "title": "Discordance temporaire source LaTeX / PDF résolue",
+      "description": "Un contrôle a détecté qu’un PDF précédait une mise à jour du source LaTeX. Le générateur a été corrigé, le PDF a été recompilé depuis la source actuelle, 15/15 pages ont été rendues par PDFium et Poppler, et les copies externes correspondent aux fichiers de travail par SHA-256.",
+      "evidence": [
+        "experiments/generate_report_plus_eGenBrain_v4.py",
+        "rapport_plus_eGenBrain_v4.tex",
+        "rapport_plus_eGenBrain_v4.pdf",
+        "logs/report_pdf_render_receipt.json",
+        "report_render_final/contact.png"
+      ],
+      "final_note": "Aucun résultat d’expérience, brut, cible ou fichier du moteur n’a été modifié par cette correction documentaire."
+    },
+    {
+      "id": "ENVEXP-014",
+      "status": "resolved_in_final_artifact_audit",
+      "severity": "low",
+      "description": "Les premiers scripts de validation finale ont utilisé deux noms de champs/artefacts historiques (liste pdfium_rendered_pngs et contact_sheet.png) et une assertion de comptage qui attendait 14 séries alors que le contrôleur listait correctement 18 fichiers auxiliaires. Ces erreurs sont exclusivement dans les auxiliaires d’audit : elles ne touchent aucun artefact, journal brut, score, référence scellée ni fichier du modèle. Les contrôles ont été corrigés en fonction du schéma réellement présent et du total explicite de 18 séries confirmatoires/extension.",
+      "evidence": [
+        "logs/report_pdf_render_receipt.json",
+        "report_render_final_delivery/contact.png",
+        "experiments/final_independent_integrity_audit_v1.py",
+        "logs/final_independent_integrity_audit.json"
+      ],
+      "resolution": "Les assertions du harnais ont été réalignées sur les 18 séries attendues; les 14 premières séries ont déjà été parsées sans erreur de ligne/hash. Rejouer seulement l’audit de fichiers/ligne, pas le modèle."
+    }
+  ],
+  "last_updated": "2026-10-24T21:14:25.401764+00:00",
+  "updated_utc": "2026-10-24T21:14:25.401764+00:00"
+}

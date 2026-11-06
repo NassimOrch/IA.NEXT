@@ -1,0 +1,71 @@
+{
+  "items": [
+    {
+      "check": "Model descriptor and capability matrix",
+      "evidence": "SyntheticParityMLP descriptor",
+      "id": "MODEL-001",
+      "status": "PASS_SYNTHETIC_ONLY"
+    },
+    {
+      "check": "Stable baseline with unchanged weights",
+      "evidence": "official causal experiment controls",
+      "id": "MODEL-002",
+      "status": "PASS_SYNTHETIC_SINGLE_EXPERIMENT"
+    },
+    {
+      "check": "Capture internal activations",
+      "evidence": "observations.jsonl captures layer/modules",
+      "id": "MODEL-003",
+      "status": "PASS_SYNTHETIC_ONLY"
+    },
+    {
+      "check": "Apply actual zero intervention and compare output",
+      "evidence": "baseline=1, intervention=-1, L2=2",
+      "id": "MODEL-004",
+      "status": "PASS_SYNTHETIC_SINGLE_INPUT"
+    },
+    {
+      "check": "Sweeps across input distribution and negative controls",
+      "evidence": "official_experiment_results.json: 8 comparable experiments; 2 nonzero effects, 6 zero effects; only the fixed input set is covered",
+      "id": "MODEL-005",
+      "status": "PASS_SYNTHETIC_PREDEFINED_SWEEP_8_INPUTS"
+    },
+    {
+      "check": "Compare features/circuits at several hierarchical levels",
+      "evidence": "feature summaries and hierarchical abstractions exist; broad validation pending",
+      "id": "MODEL-006",
+      "status": "PARTIAL"
+    },
+    {
+      "check": "Independent heldout reconstruction",
+      "evidence": "4/4 holdout and 16/16 finite domain",
+      "id": "MODEL-007",
+      "status": "PASS_SYNTHETIC_PARITY4_ONLY"
+    },
+    {
+      "check": "Reconstruct internal weights/mechanisms of an external LLM",
+      "evidence": "no local Hugging Face checkpoint; transformers unavailable",
+      "id": "MODEL-008",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "check": "Hidden truth never accessible to analyzer",
+      "evidence": "blinded adapter and separate auditor_only directory",
+      "id": "MODEL-009",
+      "status": "PASS_SYNTH_BENCHMARK"
+    },
+    {
+      "check": "Eight synthetic architecture levels: forward, capture, intervention and black-box capability separation",
+      "evidence": "benchmarks/results/20261027_official/synthetic_ladder_results.json",
+      "id": "MODEL-010",
+      "status": "PASS_SYNTHETIC_LADDER"
+    },
+    {
+      "check": "Hugging Face adapter contract (load flags, forward, capture, intervention, generation, gradient probe)",
+      "evidence": "tests/test_huggingface_adapter_mock.py; this does not validate compatibility with a real Transformers checkpoint",
+      "id": "MODEL-011",
+      "status": "PASS_WITH_PROTOCOL_FAITHFUL_FAKE_ONLY"
+    }
+  ],
+  "scope": "checks requiring a target model; completed values refer only to the synthetic PyTorch model, not an external LLM"
+}

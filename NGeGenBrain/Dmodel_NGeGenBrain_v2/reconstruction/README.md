@@ -1,0 +1,3 @@
+Reconstruction et composition exécutables : `src/nggegenbrain_v2/reconstruction/engine.py`, `src/nggegenbrain_v2/reconstruction/causal_lm.py`, `src/nggegenbrain_v2/reconstruction/synthetic_benchmark.py`, `src/nggegenbrain_v2/composition.py` et `src/nggegenbrain_v2/synthetic_lab.py`.
+
+Le fichier historique `src/nggegenbrain_v2/reconstruction.py` ne porte plus d’implémentation : il documente la migration, car le package `reconstruction/` est la résolution publique correcte du nom de module. L’API `ReconstructionEngine` est exportée par `reconstruction/__init__.py` et couverte par `tests/test_package_imports.py`.

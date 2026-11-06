@@ -1,0 +1,231 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.15cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,hyperref,verbatim,microtype}
+\title{Rapport ORDER 59 -- Hard V0\vspace{0.4em}\\\large Audit sévère, correction intégrale du paquet, essais multi-familles et chess à budget accru}
+\author{Journal expérimental et d'intégrité ORDER 59}
+\date{20 septembre 2026}
+\begin{document}
+\maketitle
+
+\section{Objet, périmètre et règle de sincérité}
+Ce rapport documente la relecture du modèle ORDER 59 survivant, les corrections imposées par l'audit dur, les tests de non-régression, une campagne multi-familles, une campagne chess à budget accru, ainsi qu'une vérification indépendante de l'archive corrigée. Il ne transforme aucun résultat partiel en preuve de généralité. Les statuts employés sont ceux effectivement observés : \texttt{PASS}, \texttt{PARTIAL}, \texttt{RESOURCE\_BOUND}, \texttt{UNKNOWN} ou échec du protocole.
+
+La campagne est postérieure aux corrections de l'artefact historique. Lorsque les conditions expérimentales sont interrompues par le harnais ou par une erreur de configuration, l'essai est conservé comme anomalie de protocole et n'est pas compté comme résultat scientifique.
+
+\section{Corpus et provenance}
+Le corpus historique a été audité avant la correction : théorie O5, extensions O55/O56, bundle et modèle O58, puis modèle O59 survivant. La théorie O5 contient explicitement les observables, familles de sondes, échelles, fibres, quotient, fermeture, factorisation, seuils, loi du minimum double, ultramétrique, régimes, transitions compatibles, trajectoires, identité, tour/réflexion, apprentissage canonique, méta-observation, prédiction/action, déficit, témoins, contraintes, génération/recherche, capacité/promotion, transfert, dynamique/circulation, représentation canonique, bifurcations, imagination, révision et généralisation globale.
+
+Les documents O56 ont apporté une couche logicielle plus riche comprenant compilation, IR, apprentissage de fingerprints, mémoire structurée, méta-raisonnement, imagination bornée, capacités, transfert, vérification indépendante, certificats et campagnes aveugles/OOD. L'audit O58 avait ensuite établi que son cœur réel restait surtout un solveur de représentation déjà donnée, avec plusieurs composants périphériques. Le paquet O59 dur a été construit pour tester précisément cette faiblesse.
+
+\subsection{Identifiants cryptographiques de référence}
+Les hash exacts sont regroupés par huit caractères pour la lisibilité ; les espaces sont purement typographiques et la concaténation donne la valeur hexadécimale exacte.
+
+\begin{description}
+\item[Corpus O5--O58.] {\scriptsize\texttt{08621424 a3bb0366 4d398053 e15aa208}\par\texttt{904695cc 87bbe186 26635c7a eb2099f}}
+\item[Théorie O5.] {\scriptsize\texttt{72568239 91944d2d a57a8460 517dac97}\par\texttt{259ae375 a3ccb0a2 d7f05477 af006e2a}}
+\item[Modèle O55.] {\scriptsize\texttt{e21f4323 26ba684a 7d2f43f4 b7676521}\par\texttt{34b30460 656a7a19 31741ef8 7f491120}}
+\item[Modèle O56.] {\scriptsize\texttt{ce2961c3 6dc5eb5e 25902847 595f4852}\par\texttt{49f91cdd a0f7dbe1 0dffcdce 8ecca97d}}
+\item[Modèle O58.] {\scriptsize\texttt{e4b9e6c9 8cf18f8e 3b602ad3 484bc3db}\par\texttt{281e19df 1091b5d8 76d3a25e 97c811d}}
+\item[Bundle O58.] {\scriptsize\texttt{0115b3e7 ced10beb 56d9adb2 f86dd5b0}\par\texttt{56ab62f2 9e834aea f4fe6449 bb5d7be2}}
+\item[Prompt O59.] {\scriptsize\texttt{1099e5dd 994f4310 58219236 87ea6505}\par\texttt{cdfb25cb bfb248b4 47983f40 5986acc}}
+\item[Modèle O59 d'entrée.] {\scriptsize\texttt{16531f4e e47158b2 a2bf7517 f9e81637}\par\texttt{89f9e7e9 af237f07 a2d8db0e 572fd6a3}}
+\end{description}
+
+Le hash de l'archive modèle corrective est reporté ici après reconstruction du paquet et vérification de son contenu. Les anciennes valeurs de hash restent uniquement dans le journal de correction historique.
+
+Après gel, le SHA-256 exact de l'archive corrective finale est : {\scriptsize\texttt{5bb38372 255aabca 232c9e26 e920f24a f5de2820 debec70e 8f4dd9ce d2641c96}}. Les espaces sont purement typographiques.
+
+\section{Protocole d'audit dur}
+Le contrôle a suivi un ordre reproductible : (i) décompression propre, (ii) inventaire, (iii) analyse syntaxique AST des scripts Python, (iv) vérification de la séparation noyau/adaptateurs, (v) exécution des tests, (vi) correction, (vii) seconde exécution, (viii) campagne générique sans classes d'environnement du dépôt, (ix) campagne multi-familles, (x) campagne chess à budget accru, (xi) compilation LaTeX, (xii) gel cryptographique.
+
+Chaque longue campagne est exécutée par sous-expériences atomiques. Une interruption ne devient jamais un résultat. Chaque résultat comporte la configuration, la commande, le statut et un fichier brut dans l'audit.
+
+\section{Architecture O59 effectivement auditée}
+Le noyau installable est situé dans \texttt{src/order59}. Les environnements d'évaluation, y compris chess, sont situés dans \texttt{evaluation\_adapters}. Le noyau ne contient aucune classe d'environnement de benchmark et n'utilise pas de branche conditionnelle identifiant une famille de tâche.
+
+La boucle exécutée est :
+\begin{align*}
+\text{observation brute}&\to I_P\to \text{fibres/collisions}\to D\to \text{sondage actif}\\
+&\to \text{raffinement}\to \text{fermeture/géométrie}\to \text{contraintes induites}\\
+&\to \text{prédiction}\to \text{imagination}\to \text{synthèse}\to \text{mémoire}\\
+&\to \text{méta-contrôle}\to \text{action}\to \text{vérification}.
+\end{align*}
+Les composants cités sont désormais appelés depuis le chemin principal. Cela ne suffit pas à démontrer leur puissance générale ; leur effet doit encore être séparé expérimentalement par intervention.
+
+\section{Équations et concepts exécutés}
+\subsection{Empreinte et fibre}
+Pour une famille ordonnée de sondes $P=(p_1,\ldots,p_m)$ :
+\[
+I_P(x)=\bigl(p_1(x),\ldots,p_m(x)\bigr),
+\qquad
+[x]_{I_P}=\{y:I_P(y)=I_P(x)\}.
+\]
+Le code réalise les partitions directement sur les observations. La suffisance est testée par
+\[
+I(x)=I(y)\Longrightarrow A(x)=A(y).
+\]
+Sur support fini, une collision avec deux conséquences différentes fournit un témoin d'insuffisance. La factorisation est construite seulement lorsque cette condition est vérifiée.
+
+\subsection{Raffinement et monotonicité}
+Une nouvelle empreinte est de la forme $I'(x)=(I(x),g(x))$. Le contrôle de raffinement vérifie que toute nouvelle classe est incluse dans une ancienne :
+\[
+[x]_{I'}\subseteq[x]_I.
+\]
+Cette inclusion est une propriété mathématique de la construction, non un score de performance.
+
+\subsection{Seuils et géométrie}
+Pour des probes ordonnées, le nombre de coordonnées communes avant séparation donne un seuil de paire. La condition testée est la loi du minimum double :
+\[
+\Theta(x,z)\ge \min\{\Theta(x,y),\Theta(y,z)\}.
+\]
+La transformation $d(x,y)=\exp(-\Theta(x,y))$ est ensuite contrôlée par l'inégalité ultramétrique lorsque les hypothèses correspondantes sont satisfaites.
+
+\subsection{Déficit structurel}
+Le déficit observé est un vecteur
+\[
+D=(D_{obs},D_{cap},D_{res},D_{search},D_{transfer},D_{constraint}).
+\]
+Dans la version finale corrigée, $D_{transfer}$ n'est pas déclenché par la simple présence d'un souvenir : il est calculé après comparaison effective avec une structure mémorisée et découverte d'une correspondance faible. Le temps et le nombre de nœuds proviennent d'une consommation réellement mesurée sur l'épisode.
+
+\subsection{Imagination}
+Une hypothèse $H$ est simulée par le world model et doit produire une conséquence dépendante de l'action testée. Le résultat de simulation peut donc modifier le score d'un candidat différent d'un autre candidat. Le simple enregistrement de l'hypothèse sans simulation n'est plus considéré comme usage causal.
+
+\subsection{Synthèse de programmes}
+La VM accepte un jeu typé d'opérations de raisonnement. Une proposition n'est retenue que si son évaluation sur transitions tenues à l'écart produit un signal numérique non constant et une relation positive suffisante avec les conséquences observées, sans accès direct au terme de récompense comme entrée du programme. Une proposition non démontrée est rejetée et reste dans la trace.
+
+\section{Corrections appliquées au modèle}
+\begin{enumerate}
+\item L'historique utilise les transitions et leurs indices d'occurrence, afin d'éviter les collisions artificielles produites par un simple hash d'observation répétée.
+\item Les probes déjà actives sont exclues des nouvelles sélections ; le gain rapporté correspond à la probe effectivement choisie.
+\item La fermeture observationnelle et les contrôles de géométrie des seuils sont exécutés sur la représentation courante.
+\item Les contraintes induites à partir des interactions peuvent modifier le score d'action lorsqu'une incompatibilité a été observée.
+\item La vérification indépendante contrôle les propositions et l'état interne avant de considérer une action comme admissible.
+\item Le budget temporel est global à l'épisode et les évaluations de nœuds sont cumulatives.
+\item La prédiction est conditionnée par l'action ; la chaîne de prédiction multi-pas utilise un état latent prédit.
+\item L'imagination produit un bonus spécifique à l'action simulée.
+\item La synthèse rejette maintenant tout programme dont le signal évalué n'est pas démontré comme utile.
+\item Le score neural d'action est conditionné par l'observation et l'action.
+\item Les adaptateurs d'évaluation sont séparés physiquement du noyau installable.
+\item Le package setuptools et les tests d'installation ont été rendus cohérents ; la version corrective est $59.0.2$.
+\item L'adaptateur chess a été corrigé pour la conversion UCI/plateau, la promotion, le roque et la prise en passant, avec tests de régression.
+\item L'auditeur statique contrôle en outre les imports interdits du noyau.
+\end{enumerate}
+
+\section{Tests de non-régression}
+La suite finale exécutée sur le noyau corrigé est :
+\begin{verbatim}
+PYTHONPATH=src:. pytest -q
+24 passed
+python -m compileall -q src evaluation_adapters
+PASS
+\end{verbatim}
+La couverture mesurée sur $src/order59/*.py$ est de 87\% des lignes instrumentées. Ce nombre est un indicateur de couverture de tests, pas une mesure de qualité scientifique.
+
+\section{Test d'interface générique hors catalogue}
+Un petit harnais externe a instancié trois environnements ne provenant pas du dépôt : objet structuré à permutations, transformation de chaîne, et environnement numérique scalaire. Aucun nom de benchmark n'a été transmis au noyau. Les trois épisodes ont terminé avec $PASS$ et scores égaux à $1.0$. Les probes et l'imagination ont été appelées dans les trois cas.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Environnement externe & Statut & Score & Pas & Appels imagination\\
+\midrule
+Bag structuré & PASS & 1.0 & 2 & 40\\
+Chaîne & PASS & 1.0 & 4 & 80\\
+Numérique & PASS & 1.0 & 5 & 100\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cette expérience démontre une indépendance d'interface, pas une intelligence générale.
+
+\section{Campagne multi-familles difficile}
+Huit cas ont été rejoués après correction : séquence binaire, contrôle latent, tri par opérations, bandit contextuel, séquence structurée, navigation, motif visuel et permutation cachée. La configuration commune était : $4$ secondes, $30$ pas, $20000$ évaluations internes au maximum, $64$ branches, $120$ essais de synthèse, $4$ niveaux de probing.
+
+\begin{center}
+\scriptsize
+\begin{tabular}{lrrrrr}
+\toprule
+Cas & Statut & Score & Pas & Probes & Imagination\\
+\midrule
+binaire & PARTIAL & 0.6429 & 14 & 12 & 140\\
+contrôle & PARTIAL & 0.0000 & 25 & 12 & 625\\
+tri & PARTIAL & 0.0000 & 25 & 17 & 1250\\
+bandit & PARTIAL & 0.0833 & 12 & 12 & 180\\
+séquence & PARTIAL & 0.0000 & 7 & 10 & 1695\\
+navigation & PARTIAL & 0.0000 & 30 & 25 & 600\\
+visuel & PARTIAL & 0.2857 & 7 & 7 & 70\\
+permutation & PARTIAL & 0.4000 & 30 & 17 & 7010\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Aucun de ces $PARTIAL$ n'est remplacé par une affirmation d'échec théorique. Les traces montrent en revanche que les composants actifs sont appelés pendant de vrais épisodes hétérogènes.
+
+\section{Campagne chess à budget accru}
+Pour chaque condition : $60$ secondes murales, $100000$ évaluations internes au maximum, $4096$ branches candidates, $10$ pas agent, $400$ propositions de synthèse, deux niveaux de probing. Chaque condition longue est exécutée comme shard indépendant.
+
+\begin{center}
+\scriptsize
+\begin{tabular}{lrrrr}
+\toprule
+Condition & Statut & Score & Évaluations & Imagination\\
+\midrule
+mate 1 A & PARTIAL & 0.0 & 40960 & 3195\\
+mate 1 B & PARTIAL & 0.0 & 40960 & 3195\\
+tactique C & PARTIAL & 0.0 & 40960 & 3195\\
+finale D & PARTIAL & 0.0 & 40960 & 3195\\
+adversarial A & PARTIAL & 0.0 & 40960 & 3195\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Consommation observée.} Les cinq shards ont tous effectué $10$ pas et $40960$ évaluations d’actions, sans atteindre le budget de $60$ secondes ni le plafond de $100000$ évaluations. Le facteur limitant effectif de cette campagne était donc la profondeur de l’épisode combinée au nombre de branches autorisées, et non le temps mural. Cette distinction est conservée dans les logs.
+
+L'adaptateur de la release O59 corrige les cas UCI testés, mais il ne doit pas être présenté comme un moteur chess FIDE indépendant complet. La disponibilité d'un moteur externe de référence étant absente de cet environnement, ces cinq résultats ne constituent pas une mesure de force chess compétitive.
+
+\section{Ablations et lecture causale}
+Les ablations historiques O58 avaient montré que de nombreux composants pouvaient être retirés sans changer les huit tâches simples. O59 a été conçu pour les appeler réellement sur le chemin principal, mais la campagne dure ne fournit pas encore une série d'ablations factorielle suffisante pour attribuer un gain quantitatif à chacun. La présence causale est donc mieux établie que dans O58, tandis que la taille d'effet reste à mesurer avec une campagne dédiée et contrôlée.
+
+\section{Anti-triche, anti-contournement et intégrité}
+Le scan AST final du noyau ne détecte aucun appel exécutable à $eval$, $exec$, $os.system$, ni import réseau/processus interdit. Le noyau ne contient pas les noms des environnements d'évaluation. Les tests vérifient notamment l'absence de classe chess dans le package central, l'absence de lecture de la récompense par le programme $Rank$, la conditionnement de l'action par l'observation et la conditionnement de la prédiction par l'action.
+
+L'audit ne prétend pas une preuve absolue contre un environnement arbitraire. Il établit seulement l'absence des voies de contournement testées dans l'artefact audité.
+
+\section{Anomalies de protocole rencontrées}
+Plusieurs anomalies de protocole ont été rencontrées : ancien appel de test utilisant un argument non accepté par l’environnement adversarial ; FEN de régression mal formée ; différences entre l’ancienne estimation des coups légaux et l’adaptateur corrigé ; ancien rapport LaTeX contenant une construction de rupture de ligne non définie ; incohérence de version $59.0.1$ dans le packaging ; fuite de continuation cachée dans l’alphabet d’actions de SequenceEnv ; transition interne adversariale chess qui ne répercutait initialement pas correctement les règles spéciales.
+
+\section{Ce que les résultats établissent}
+Les résultats établissent :
+\begin{itemize}
+\item une exécution stable du noyau corrigé et une installation package cohérente ;
+\item une utilisation effective des probes, fibres, fermeture, déficit, imagination, mémoire, synthèse et vérification sur des épisodes ;
+\item l'absence des voies anti-triche testées ;
+\item une indépendance d'interface sur trois environnements externes non catalogue ;
+\item des résultats difficiles explicitement conservés lorsqu'ils restent $PARTIAL$.
+\end{itemize}
+
+Ils n'établissent pas, à eux seuls, une résolution générale de problèmes arbitraires, une synthèse ouverte de programmes, un world model universel, un transfert général entre domaines éloignés, une compréhension multimodale ouverte ou une force chess compétitive. Ces phrases décrivent l'état de preuve de cette campagne, et non une limite théorique imposée à l'avance.
+
+\section{Exigences résultantes pour O60}
+L'audit fournit une direction précise. O60 doit restaurer les dimensions O5/O56 encore absentes : échelles de sondes générées, fermeture calculée comme objet dynamique, régimes et seuils utilisables dans la décision, circulation et trajectoires, identité et recollement, objet observationnel universel, génération autonome des probes, construction de contraintes à partir d'expériences, imagination composable et révisable, synthèse générale avec variables et contrôle, modèle dynamique latent plus riche, mémoire procédurale et sémantique cumulative, capacités avec essais hors échantillon et transfert découvert puis falsifié. Le noyau doit rester indépendant de tout benchmark.
+
+La contrainte de calcul doit émerger des budgets et des mesures ; elle ne doit pas devenir un prétexte pour réduire à l'avance les capacités recherchées. Chaque résultat doit être associé à un budget déclaré et à un statut observé.
+
+\section{Gel de l’archive modèle}
+L’archive modèle finale a été reconstruite depuis zéro après les corrections. Elle contient 37 fichiers déployables ou de reproduction, dont 19 fichiers Python du noyau, les tests, les adaptateurs d’évaluation, les trois documents théoriques O59, le rapport d’expérience O59 et les documents de développement nécessaires. Elle ne contient ni cache Python, ni PDF de rapport hard, ni fichiers auxiliaires LaTeX, ni répertoire d’audit de campagne.
+
+Une extraction propre de cette archive a ensuite été installée. Les commandes exactes étaient :
+\begin{verbatim}
+python -m pip install -e . --no-build-isolation
+PYTHONPATH=src:. pytest -q
+python -m compileall -q src evaluation_adapters
+\end{verbatim}
+La suite a donné \texttt{24 passed}; \texttt{compileall} a passé et l’auditeur statique a retourné \texttt{pass=true}.
+
+\section{Conclusion}
+La release corrective O59.0.2 est techniquement plus propre que l'artefact O59 survivant et que son ancien audit : plusieurs voies décoratives ou ambiguës ont été supprimées, les adaptateurs sont séparés du noyau, les budgets sont réellement contrôlés et les composants avancés sont exécutés sur des épisodes divers. La campagne dure conserve néanmoins des résultats majoritairement $PARTIAL$, en particulier sur chess. La suite logique n'est pas de masquer ces observations mais de renforcer le mécanisme général de construction de représentation et de raisonnement, tout en conservant la même discipline d'audit.
+
+\end{document}

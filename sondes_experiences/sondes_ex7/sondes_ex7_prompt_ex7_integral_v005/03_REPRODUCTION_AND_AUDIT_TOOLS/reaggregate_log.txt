@@ -1,0 +1,55 @@
+{
+  "ablations": {
+    "rows": 30,
+    "arms": 6,
+    "seeds_per_arm": {
+      "global_gates_no_lr_mod": 5,
+      "inner_coord_only": 5,
+      "local_only": 5,
+      "outer_coord_only": 5,
+      "static_global_coord": 5,
+      "uniform_gates_with_lr_mod": 5
+    }
+  },
+  "stage_oof": {
+    "rows": 10,
+    "arms": 2,
+    "seeds_per_arm": {
+      "stage_affine_gate": 5,
+      "stage_gate_only": 5
+    },
+    "oof_generation_in_pipeline": true,
+    "stage_logits_extra_extraction_included": true,
+    "stage_logits_extra_extraction_mean_seconds": 1.0115217247999682,
+    "stage_logits_parity_max_abs": 0.0
+  },
+  "recursive_base": {
+    "rows": 5,
+    "seeds": 5
+  },
+  "all_parameter_ratios_ge4": true,
+  "test_opened": false,
+  "notes": [
+    "No training was rerun; this script only pairs existing per-seed metrics with the same-seed EX7 MLP-ge4x comparator.",
+    "Ablation time compares direct model fit with MLP fit; stage-OOF pipeline time includes 3-fold OOF generation, base fit, the additional stage-logit extraction pass, and corrector fit. The stage-logit extra pass was timed by replaying existing fold checkpoints without retraining.",
+    "The recursive base-only comparison excludes any post-hoc OOF correction."
+  ]
+}
+
+Ablations aggregates:
+                 ablation  n_seeds  P_total_mean  MLP_P_total_mean  ratio_mean  ratio_min  accuracy_mean  accuracy_sd  MLP_accuracy_mean  accuracy_delta_pp_mean  log_loss_mean  log_loss_sd  MLP_log_loss_mean  log_loss_delta_abs_mean  log_loss_delta_pct_mean  candidate_fit_or_pipeline_seconds_mean  MLP_fit_seconds_mean  training_slowdown_mean  all_ratios_ge4
+   global_gates_no_lr_mod        5        6712.0           27221.0    4.055572   4.055572       0.976471     0.008319           0.985882               -0.941176       0.072710     0.009544           0.047911                 0.024799                51.697978                                3.893456              0.400555               11.381294            True
+         inner_coord_only        5        6712.0           27221.0    4.055572   4.055572       0.983529     0.006444           0.985882               -0.235294       0.063600     0.013060           0.047911                 0.015689                31.954062                                3.229680              0.400555                9.328708            True
+               local_only        5        6712.0           27221.0    4.055572   4.055572       0.976471     0.000000           0.985882               -0.941176       0.071679     0.005662           0.047911                 0.023768                49.844924                                5.013646              0.400555               14.120798            True
+         outer_coord_only        5        6712.0           27221.0    4.055572   4.055572       0.985882     0.005261           0.985882                0.000000       0.060131     0.011626           0.047911                 0.012220                24.969087                                3.430707              0.400555                9.980648            True
+      static_global_coord        5        6712.0           27221.0    4.055572   4.055572       0.983529     0.006444           0.985882               -0.235294       0.059910     0.010483           0.047911                 0.011999                24.463982                                4.548642              0.400555               13.564209            True
+uniform_gates_with_lr_mod        5        6712.0           27221.0    4.055572   4.055572       0.983529     0.006444           0.985882               -0.235294       0.062332     0.011314           0.047911                 0.014421                29.551467                                3.787583              0.400555               10.966444            True
+
+Stage OOF aggregates:
+          variant  n_seeds  P_total_mean  MLP_P_total_mean  ratio_mean  ratio_min  accuracy_mean  accuracy_sd  MLP_accuracy_mean  accuracy_delta_pp_mean  log_loss_mean  log_loss_sd  MLP_log_loss_mean  log_loss_delta_abs_mean  log_loss_delta_pct_mean  candidate_fit_or_pipeline_seconds_mean  MLP_fit_seconds_mean  training_slowdown_mean  all_ratios_ge4
+stage_affine_gate        5        6747.0           27221.0    4.034534   4.034534       0.983529     0.006444           0.985882               -0.235294       0.059958     0.017553           0.047911                 0.012048                24.061561                               22.909573              0.400555               65.040375            True
+  stage_gate_only        5        6719.0           27221.0    4.051347   4.051347       0.983529     0.006444           0.985882               -0.235294       0.060184     0.015650           0.047911                 0.012273                24.580634                               22.896428              0.400555               64.999884            True
+
+Root base aggregate:
+                variant  n_seeds  P_total_mean  MLP_P_total_mean  ratio_mean  ratio_min  accuracy_mean  accuracy_sd  MLP_accuracy_mean  accuracy_delta_pp_mean  log_loss_mean  log_loss_sd  MLP_log_loss_mean  log_loss_delta_abs_mean  log_loss_delta_pct_mean  candidate_fit_or_pipeline_seconds_mean  MLP_fit_seconds_mean  training_slowdown_mean  all_ratios_ge4
+recursive_org_base_only        5        6712.0           27221.0    4.055572   4.055572       0.983529     0.006444           0.985882               -0.235294        0.06187     0.013877           0.047911                  0.01396                28.237628                                5.920988              0.400555               17.514155            True

@@ -1,0 +1,213 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,longtable,array,geometry,hyperref,listings}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=false,pdfborder={0 0 0}}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{remark}[definition]{Remarque}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Rset}{\mathcal{R}}
+\newcommand{\W}{\mathcal{W}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\Def}{\mathsf{D}}
+\begin{document}
+\title{Rapport d’expérience du modèle Order 63}\author{Order 63 — dossier d’exécution}\date{21 septembre 2026}\maketitle
+
+\begin{abstract}
+Rapport de laboratoire reproductible pour Order 63. Toutes les commandes indiquées ci-dessous sont celles utilisées ou les équivalents exacts de reproduction. Les résultats bruts sont conservés sous \code{results/}. Les écarts entre statut empirique et interprétation théorique sont explicitement séparés.
+\end{abstract}
+
+\section{Objet et statut du rapport}
+Le rapport documente l’exécution réelle de l’architecture issue de O62. Il ne constitue pas un résumé promotionnel. Les états FAIL, EXHAUSTED, NOT\_VERIFIED et RESOURCE\_BOUND sont conservés. Le code final passe \(27/27\) tests automatisés.
+
+\section{Provenance exacte}
+\begin{longtable}{p{0.30\linewidth}p{0.56\linewidth}}
+\toprule
+Objet & SHA-256\\
+\midrule
+theorie\_base\_order5 & \code{7256823991944d2da57a8460517dac97259ae375a3ccb0a2d7f05477af006e2a}\\
+theorie\_extension\_order14 & \code{39b5d63ecd0378b3241de09d4e0f36e46d5b6a941f6acc31db3a6771a5e51fc9}\\
+developpement\_order61 & \code{0efbda7ea8d48a5ea726191bfe68c701309a2141ef415a92b1bf6dea7484a5ca}\\
+developpement\_order62 & \code{8a1107c9d96c8807a37ccdd2fb24f000ed3bc33430dc4418bba2ec17d4b3083a}\\
+prompt\_order63 & \code{105794edefa63be1859b48e6c62e8edd3ebd0bceda60ade8f2b92852302f7efe}\\
+dataset\_rs & \code{4cb04c99a89b15ad23c880270ac11c7815dcadaf54c82c58405959215e85dcc7}\\
+audit\_order62 & \code{5c6a6f6838c264fb5cdc9e865979cb6172eb9e127bc29a4f7682f2e53fefd947}\\
+model\_order62 & \code{26755fd149d5bdb684200209c415d89e7d4b93f8f3feca7666c754d57bb850e0}\\
+model\_order62\_rs & \code{28b1a4d414ebd0f0c0ab7196d6a25b3d178b5c6d41023083c3900d5fff62e538}\\
+\bottomrule
+\end{longtable}
+
+\section{Commandes de reproduction}
+\subsection{Tests logiciels}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+PYTHONPATH=src pytest -q
+# result: 27 passed in 4.49s (last run)
+\end{lstlisting}
+
+\subsection{World model sémantique}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src
+time python scripts/train_semantic_world_model.py --dataset /mnt/data/dataset_model_order_62_rs.json --out artifacts --seed 63063 --epochs 1
+\end{lstlisting}
+Résultat gelé : 320 records, 1436 transitions, 1162 train, 274 holdout, 27 actions opaques, MSE latent holdout $1.7310954885\times10^{-4}$.
+
+\subsection{RS}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src
+python scripts/train_rs.py --dataset /mnt/data/dataset_model_order_62_rs.json --world artifacts/world_model.pt --out rs_artifacts --seed 63062 --epochs 12
+python scripts/eval_rs.py --dataset /mnt/data/dataset_model_order_62_rs.json --rsdir rs_artifacts --out results/rs_eval_o63_final
+\end{lstlisting}
+Le RS voit les trajectoires vérifiées mais pas le champ \code{answer}. Le statut de la donnée est « supervised verified demonstrations », non apprentissage entièrement non supervisé.
+
+\subsection{Optimisations}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+PYTHONPATH=src python scripts/optimization_audit.py
+PYTHONPATH=src python scripts/optimization_scaling.py
+\end{lstlisting}
+Le scaling utilise trois répétitions par taille 40,80,160,320.
+
+\subsection{Campagne 18 familles}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src
+python -u scripts/compare_rs_hard_rep2.py --out results/compare_rs_hard_o63_final2 --start 0 --count 10
+python -u scripts/compare_rs_hard_rep2.py --out results/compare_rs_hard_o63_final2 --start 10 --count 8
+\end{lstlisting}
+Budget par agent : 4 secondes, 4500 évaluations, 2048 MiB.
+
+\subsection{OOD}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src
+python -u scripts/ood_opaque.py
+\end{lstlisting}
+
+\subsection{Chess opaque}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src
+python -u scripts/chess_opaque.py --steps 2 --time 30 --nodes 12000 --out results/chess_final_o63_postfix
+# Per-position post-fix execution: scripts.chess_opaque.one(...)
+\end{lstlisting}
+La boucle multi-position a rencontré une contrainte de temps externe après deux positions ; les trois autres positions ont ensuite été exécutées individuellement. Le rapport conserve donc la distinction interruption/achèvement et ne prétend pas qu’une seule boucle a terminé les cinq.
+
+\subsection{Interventions causales}
+\begin{lstlisting}
+cd /tmp/order63_build/model_order_63
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src
+python -u scripts/causal_interventions_o63.py
+\end{lstlisting}
+
+\section{Architecture et paramètres réellement gelés}
+L’encodeur sémantique est un Transformer de dimension interne 96, 3 couches, 4 têtes, longueur maximale 128 et latent 128. Le world model comporte trois membres de dynamique. Le RS utilise un MLP interne à 384 unités cachées recevant quatre blocs latents, six déficits et quatre scalaires géométriques. Les micro-mémoires ont une capacité par défaut de 4096 items.
+
+\section{Correspondance équations -- code}
+\begin{longtable}{p{0.27\linewidth}p{0.24\linewidth}p{0.35\linewidth}}
+\toprule
+Objet & Code & Référence\\
+\midrule
+$ x\sim_G y $ & \code{FingerprintEngine} & \code{geometry.py}\\
+quotient par fibres & \code{FiberQuotientEngine} & \code{geometry.py}\\
+fermeture & \code{ObservationClosureEngine} & \code{geometry.py}\\
+$D$ & \code{Order63Agent.deficit} & \code{agent.py:93--118}\\
+$z=E(x)$ & \code{SemanticTransformerEncoder} & \code{semantic\_world\_model.py}\\
+$W(z,a)$ & \code{TransitionMember} & \code{semantic\_world\_model.py}\\
+$\Delta z$ & \code{action\_effect\_embedding} & \code{semantic\_world\_model.py}\\
+$Q_{RS}$ & \code{SemanticRSNavigator.score} & \code{rs\_navigation.py:20--30}\\
+$M^k$ & \code{LocalMicroMemory} & \code{micro\_memory.py}\\
+$m^{i\to j}$ & \code{MemoryBus.send} & \code{micro\_memory.py}\\
+$\Pi$ & \code{ImaginedBranch} & \code{imagination.py}\\
+VM & \code{TypedSandboxProgramVM} & \code{program\_vm.py}\\
+validation & \code{VerifierProtocol} & \code{verification.py}\\
+checkpoint & \code{FullStateCheckpointManager} & \code{checkpoint.py}\\
+optimisation & \code{OptimizationEngine} & \code{optimizations.py}\\
+\bottomrule
+\end{longtable}
+
+\section{Résultats RS dédiés}
+La précision paire du navigateur est $0.901810585$, positive mean $0.5376870$, negative mean $0.1957862$. Holdout progression MSE : $0.0819355945$. Sur \code{symbolic}, baseline et RS sont PASS avec 1.0. Sur \code{routing}, baseline est PASS (2.6) et RS EXHAUSTED (1.2). La conclusion est que le navigateur apprend une structure, mais son effet décisionnel général n’est pas établi comme bénéfique.
+
+\section{Campagne dure 18 familles}
+
+\begin{longtable}{lrrrrrr}
+\toprule
+Famille & B statut & B r & RS statut & RS r & $\Delta r$ & nœuds RS\\
+\midrule
+hidden-rule & EXHAUSTED & -1.00 & EXHAUSTED & 0.25 & 1.25 & 24\\
+unknown-dynamics & EXHAUSTED & 0.00 & EXHAUSTED & 0.00 & 0.00 & 20\\
+sat & EXHAUSTED & 0.00 & NOT\_VERIFIED & 0.00 & 0.00 & 48\\
+routing & EXHAUSTED & 0.80 & EXHAUSTED & 0.80 & 0.00 & 16\\
+causal & EXHAUSTED & 4.00 & EXHAUSTED & 4.00 & 0.00 & 8\\
+program-synthesis & FAIL & -1.00 & FAIL & -1.00 & 0.00 & 5\\
+combinatorial & NOT\_VERIFIED & 0.60 & NOT\_VERIFIED & 1.10 & 0.50 & 40\\
+navigation & EXHAUSTED & 0.00 & EXHAUSTED & 0.00 & 0.00 & 16\\
+multimodal & FAIL & -1.00 & FAIL & -1.00 & 0.00 & 8\\
+game & NOT\_VERIFIED & 0.60 & NOT\_VERIFIED & 0.60 & 0.00 & 12\\
+sequence & EXHAUSTED & 2.00 & EXHAUSTED & 0.00 & -2.00 & 8\\
+scheduling & NOT\_VERIFIED & 0.30 & NOT\_VERIFIED & 0.10 & -0.20 & 14\\
+vision & EXHAUSTED & -2.00 & EXHAUSTED & -2.00 & 0.00 & 16\\
+planning & EXHAUSTED & 0.40 & EXHAUSTED & 0.40 & 0.00 & 11\\
+geometry & PASS & 1.00 & PASS & 1.00 & 0.00 & 2\\
+relational & FAIL & -1.00 & FAIL & -1.00 & 0.00 & 4\\
+symbolic & PASS & 1.00 & PASS & 1.00 & 0.00 & 6\\
+program-repair & FAIL & -1.00 & FAIL & -1.00 & 0.00 & 3\\
+\bottomrule
+\end{longtable}
+La moyenne de récompense appariée est 0.2056 pour la base contre 0.1806 pour RS. Ceci interdit une affirmation de promotion automatique.
+
+\section{Causalité}
+La campagne \code{causal\_interventions\_o63} donne les mêmes $-1$ sur la configuration non masquée et sur plusieurs masques, mais l’intervention imagination donne $0.25$ et modifie la séquence. RS, mémoire, synthèse, contraintes, world model, neural et représentation ont des effets différents sur les scores de fusion, mais plusieurs ne changent pas l’action discrète sur cette expérience. Le protocole distingue donc sensibilité de score et causalité comportementale.
+
+\section{Optimisations et résultats}
+\begin{longtable}{rrrr}
+\toprule
+Taille & Baseline médiane & Optimisé médiane & Speedup médian\\
+\midrule
+40 & 0.002821869 & 0.000275838 & 10.2302\\
+80 & 0.011207229 & 0.000523494 & 21.4085\\
+160 & 0.044539707 & 0.001022500 & 43.5596\\
+320 & 0.113956851 & 0.002111160 & 53.9783\\
+\bottomrule
+\end{longtable}
+Une mesure de fermeture indépendante : baseline 0.018465741 s, optimisé 0.001318598 s, speedup 14.0041x, conservation true. Les autres optimisations ont des tests de conservation sans timing.
+
+\section{OOD et chess}
+\begin{longtable}{lrrrrr}
+\toprule
+Seed & statut & récompense & étapes & nœuds & imagination\\
+\midrule
+623301 & EXHAUSTED & -0.75 & 8 & 48 & 128\\
+623302 & EXHAUSTED & 0.50 & 8 & 48 & 128\\
+623303 & EXHAUSTED & -2.00 & 8 & 48 & 128\\
+\bottomrule
+\end{longtable}
+Chess : cinq positions, actions opaques, cinq \code{NOT\_VERIFIED}; 4544 nœuds de choix, 176 branches imaginées et 0 programme promu dans chacune des exécutions unitaires post-correction. Le vérificateur externe a rejeté la proposition illégale. Aucune solution n’est revendiquée.
+
+\section{Anomalies, reprises et corrections}
+La première campagne chess O63 avait conservé \code{EXHAUSTED} après un rejet de vérification. O63 corrige désormais le statut en \code{NOT\_VERIFIED}. Une boucle multi-chess a aussi été interrompue par timeout externe ; les trois positions restantes ont été exécutées individuellement. Ces événements sont journalisés et ne sont pas effacés des résultats.
+
+L’entraînement du Transformer a été limité à une époque après constat de la contrainte de calcul. Le rapport le traite comme une limite de ressource de l’expérience et non comme une limite théorique du modèle.
+
+\section{Checkpoints et reprise}
+Les runs OOD ont produit des fichiers \code{episode\_seed\_step\_8.pt/json}. Le test de round-trip passe. Le système ne détruit pas les anciennes expériences : chaque correction crée un nouveau répertoire de résultats.
+
+\section{Anti-triche}
+Le scanner statique du cœur retourne PASS. Les opérations du dataset sont converties en IDs opaques pour le world model. Le champ \code{answer} n’est pas transmis au RS. Les évaluations finales sont exécutées sans accès requis au dataset RS.
+
+\section{Interprétation et portée}
+Les résultats montrent une architecture généraliste effectivement exécutée, mais pas une preuve d’AGI universelle. La release finale désactive RS par défaut parce que sa campagne appariée ne démontre pas un avantage robuste. RS reste livré dans la branche expérimentale avec son entraînement et ses manifestes.
+
+\section{Artefacts}
+Le répertoire de travail contient les scripts, poids et résultats détaillés. Les releases compressées sont assemblées après gel des hashes et audit indépendant. Le présent rapport est la référence de reproduction pour les commandes et résultats O63.
+\end{document}

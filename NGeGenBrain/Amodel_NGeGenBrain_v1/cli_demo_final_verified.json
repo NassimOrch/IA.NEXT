@@ -1,0 +1,330 @@
+{
+  "database": "/mnt/data/NGeGenBrain_v1_work_1/cleanroom/diag_lifecycle.sqlite3",
+  "fact_a": {
+    "ok": true,
+    "status": "Success",
+    "action": "mesh.fact.add",
+    "result": {
+      "id": "fact_adfa92ee20e8d30c",
+      "predicate": "edge",
+      "type_subject": null,
+      "type_object": null,
+      "epistemic_status": "observed",
+      "active": 1,
+      "created_at": "2026-10-27T11:00:09.195+00:00",
+      "subject": "demo-A",
+      "object": "demo-B",
+      "context": {},
+      "provenance": {
+        "source": "demo-input"
+      },
+      "certificate": null
+    },
+    "at": "2026-10-27T11:00:09.204+00:00"
+  },
+  "fact_b": {
+    "ok": true,
+    "status": "Success",
+    "action": "mesh.fact.add",
+    "result": {
+      "id": "fact_0f7bd4cbd6857cd2",
+      "predicate": "edge",
+      "type_subject": null,
+      "type_object": null,
+      "epistemic_status": "observed",
+      "active": 1,
+      "created_at": "2026-10-27T11:00:09.204+00:00",
+      "subject": "demo-B",
+      "object": "demo-C",
+      "context": {},
+      "provenance": {
+        "source": "demo-input"
+      },
+      "certificate": null
+    },
+    "at": "2026-10-27T11:00:09.211+00:00"
+  },
+  "rule": {
+    "ok": true,
+    "status": "Success",
+    "action": "mesh.rule.add",
+    "result": {
+      "id": "demo-transitive-edge",
+      "version": "1.0.0",
+      "premises": [
+        {
+          "subject": {
+            "var": "x"
+          },
+          "predicate": "edge",
+          "object": {
+            "var": "y"
+          }
+        },
+        {
+          "subject": {
+            "var": "y"
+          },
+          "predicate": "edge",
+          "object": {
+            "var": "z"
+          }
+        }
+      ],
+      "conclusions": [
+        {
+          "subject": {
+            "var": "x"
+          },
+          "predicate": "edge",
+          "object": {
+            "var": "z"
+          }
+        }
+      ]
+    },
+    "at": "2026-10-27T11:00:09.217+00:00"
+  },
+  "inference": {
+    "ok": true,
+    "status": "Success",
+    "action": "mesh.infer",
+    "result": {
+      "status": "FIXPOINT_REACHED",
+      "rounds": 2,
+      "rule_match_attempts": 2,
+      "rule_match_explorations": 18,
+      "new_facts": [
+        {
+          "id": "fact_e92cbffe17a774ab",
+          "predicate": "edge",
+          "type_subject": null,
+          "type_object": null,
+          "epistemic_status": "derived",
+          "active": 1,
+          "created_at": "2026-10-27T11:00:09.219+00:00",
+          "subject": "demo-A",
+          "object": "demo-C",
+          "context": {},
+          "provenance": {
+            "premises": [
+              "fact_adfa92ee20e8d30c",
+              "fact_0f7bd4cbd6857cd2"
+            ],
+            "rule_id": "demo-transitive-edge",
+            "source": "rule_inference"
+          },
+          "certificate": {
+            "assumptions": [],
+            "bindings": {
+              "x": "demo-A",
+              "y": "demo-B",
+              "z": "demo-C"
+            },
+            "conclusion": {
+              "context": {},
+              "object": "demo-C",
+              "predicate": "edge",
+              "status": "derived",
+              "subject": "demo-A",
+              "type_object": null,
+              "type_subject": null
+            },
+            "conclusion_hash": "ca7e70953256be4d6de68a5d4d484dd67f314d0c8dda13fac814ac2512b0eaa3",
+            "operator_steps": [],
+            "premise_fact_ids": [
+              "fact_adfa92ee20e8d30c",
+              "fact_0f7bd4cbd6857cd2"
+            ],
+            "premise_hashes": [
+              "d1aaf7433aa595dca07f7c12c4241ee73602284b62e630b396deb511e35077c9",
+              "903c7dbe1902b28042b8120e551972baf654fc1635a4e8c2ba4396b4144948a0"
+            ],
+            "rule_id": "demo-transitive-edge",
+            "rule_version": "1.0.0",
+            "schema": "NGeGenBrain.DerivationCertificate/1",
+            "verifier": "ngegenbrain.mesh.verify_certificate/1"
+          }
+        }
+      ],
+      "new_fact_count": 1,
+      "existing_fact_count": 2,
+      "rules_count": 1,
+      "rejected_applications": [],
+      "rejected_application_count": 0,
+      "budgets": {
+        "max_rounds": 32,
+        "max_new_facts": 5000,
+        "rule_match_cap": 20000
+      },
+      "note": "FIXPOINT_REACHED denotes closure under the installed finite rule set and these bounded matching semantics. BUDGET_EXHAUSTED is not claimed resumable unless a matching frontier checkpoint is present; rerunning performs a fresh bounded pass over persisted facts."
+    },
+    "at": "2026-10-27T11:00:09.231+00:00"
+  },
+  "derived_query": {
+    "ok": true,
+    "status": "Success",
+    "action": "mesh.fact.query",
+    "result": [
+      {
+        "id": "fact_e92cbffe17a774ab",
+        "predicate": "edge",
+        "type_subject": null,
+        "type_object": null,
+        "epistemic_status": "derived",
+        "active": 1,
+        "created_at": "2026-10-27T11:00:09.219+00:00",
+        "subject": "demo-A",
+        "object": "demo-C",
+        "context": {},
+        "provenance": {
+          "premises": [
+            "fact_adfa92ee20e8d30c",
+            "fact_0f7bd4cbd6857cd2"
+          ],
+          "rule_id": "demo-transitive-edge",
+          "source": "rule_inference"
+        },
+        "certificate": {
+          "assumptions": [],
+          "bindings": {
+            "x": "demo-A",
+            "y": "demo-B",
+            "z": "demo-C"
+          },
+          "conclusion": {
+            "context": {},
+            "object": "demo-C",
+            "predicate": "edge",
+            "status": "derived",
+            "subject": "demo-A",
+            "type_object": null,
+            "type_subject": null
+          },
+          "conclusion_hash": "ca7e70953256be4d6de68a5d4d484dd67f314d0c8dda13fac814ac2512b0eaa3",
+          "operator_steps": [],
+          "premise_fact_ids": [
+            "fact_adfa92ee20e8d30c",
+            "fact_0f7bd4cbd6857cd2"
+          ],
+          "premise_hashes": [
+            "d1aaf7433aa595dca07f7c12c4241ee73602284b62e630b396deb511e35077c9",
+            "903c7dbe1902b28042b8120e551972baf654fc1635a4e8c2ba4396b4144948a0"
+          ],
+          "rule_id": "demo-transitive-edge",
+          "rule_version": "1.0.0",
+          "schema": "NGeGenBrain.DerivationCertificate/1",
+          "verifier": "ngegenbrain.mesh.verify_certificate/1"
+        }
+      }
+    ],
+    "at": "2026-10-27T11:00:09.232+00:00"
+  },
+  "calculation": {
+    "ok": true,
+    "status": "Success",
+    "action": "chat.submit",
+    "result": {
+      "kind": "calculation",
+      "source_expression": "3 * (4 + 2)",
+      "program": {
+        "op": "Call",
+        "component": "identity",
+        "args": [
+          {
+            "op": "multiply",
+            "args": [
+              3,
+              {
+                "op": "add",
+                "args": [
+                  4,
+                  2
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "result": {
+        "status": "Success",
+        "value": 18,
+        "reason": null,
+        "trace_id": "run_221656c1f3dfc8ed",
+        "provenance": {
+          "trace_event_seq": 45,
+          "event_hash": "19f4f4e0107e2c2d2f6e53ad35ba800028529b9eafd989d9ba8e041cac64bc6a",
+          "program_hash": "870da98a65d1e77bccb9471a28dd24a820640ebb97289e04ceaea273bfa58591",
+          "input_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        },
+        "details": {
+          "steps": 3,
+          "budget": 10000,
+          "duration_seconds": 0.001211,
+          "trace": [
+            {
+              "index": 1,
+              "at": "2026-10-27T11:00:09.234+00:00",
+              "node": "Call",
+              "node_hash": "870da98a65d1e77bccb9471a28dd24a820640ebb97289e04ceaea273bfa58591"
+            },
+            {
+              "index": 2,
+              "at": "2026-10-27T11:00:09.234+00:00",
+              "node": "expression_operator",
+              "operator": "add",
+              "args_hash": "044d15dbf5c3b7e70206179fce34d75eb5ad3d40bca2ba915e9cc6f75293a9a7",
+              "result_hash": "e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683"
+            },
+            {
+              "index": 3,
+              "at": "2026-10-27T11:00:09.234+00:00",
+              "node": "expression_operator",
+              "operator": "multiply",
+              "args_hash": "e334e67e6b2ad44b3a47e07b840aec7d089508cbf6871417c81d50b177f1b43c",
+              "result_hash": "4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a"
+            }
+          ],
+          "resource_usage": {
+            "cpu": 3.0,
+            "memory": 118.0,
+            "time": 0.0,
+            "io": 0.0,
+            "external": 0.0
+          },
+          "resource_limits": {
+            "steps": 10000,
+            "cpu": 10000,
+            "memory": 268435456,
+            "time": 60.0,
+            "io": 1000000,
+            "external": 0
+          },
+          "serialized_working_set_peak_estimate_bytes": 118,
+          "memory_measurement": "serialized working-set estimate; not operating-system RSS"
+        }
+      },
+      "statement": "The result was computed using registered exact arithmetic operators; it was not retrieved as a target answer."
+    },
+    "at": "2026-10-27T11:00:09.238+00:00"
+  },
+  "database_verify": {
+    "ok": true,
+    "status": "Success",
+    "action": "database.verify",
+    "result": {
+      "sqlite_integrity_check": [
+        "ok"
+      ],
+      "foreign_key_violations": [],
+      "trace": {
+        "valid": true,
+        "count": 45,
+        "problems": [],
+        "head_hash": "19f4f4e0107e2c2d2f6e53ad35ba800028529b9eafd989d9ba8e041cac64bc6a"
+      },
+      "valid": true
+    },
+    "at": "2026-10-27T11:00:09.242+00:00"
+  }
+}

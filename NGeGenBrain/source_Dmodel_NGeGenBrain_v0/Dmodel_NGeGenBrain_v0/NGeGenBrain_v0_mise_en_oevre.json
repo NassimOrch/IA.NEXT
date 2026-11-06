@@ -1,0 +1,2603 @@
+{
+  "schema_version": "1.0",
+  "project_id": "NGeGenBrain_v0",
+  "implementation_version": "0.3.0",
+  "created_at": "2026-10-27T11:19:36+01:00",
+  "canonical_work_environment": "/mnt/data/NGeGenBrain_v0_work_1",
+  "checkpoint": "/mnt/data/NGeGenBrain_v0_work_1/sav_NGeGenBrain_v0",
+  "primary_formalism": {
+    "path": "formalism/theorie_programation_compositionnelle_NG_0.tex",
+    "sha256": "f6fe67ce15e12c915321ec014751d705733f77610d41870b392fa8cff48a3611",
+    "role": "original normative NG_0 source; copied unchanged"
+  },
+  "developed_formalism": {
+    "path": "theorie_programation_compositionnelle_3.tex",
+    "sha256": "0413330ce0b07512cd47460fcda60211c0103af63dcc94d5c370c86fca76f629",
+    "role": "NG_0 retained and extended with transactional, world-model, intents and provenance/implementation clauses"
+  },
+  "cross_reference_formalism": {
+    "path": "formalism/formalime_eGenBrain_v4.tex",
+    "sha256": "b61a6927518170979a2704e43b63f92f3b4dc2d2d327142d875e3df478a313c3",
+    "role": "typed mesh/hyperrule/certificate design source"
+  },
+  "implementation_and_test_policy": {
+    "implemented_status_means": "The source path/symbol exists and at least one named regression test exercises the declared contract, or the row is explicitly marked as chapter coverage or theoretical obligation.",
+    "not_claimed": "No claim of universal correctness, machine-checked whole-runtime proof, full compiler for every legacy language, historical ASCR equivalence or distributed exactly-once effects.",
+    "security": "No dynamic Python eval/exec in user-program path; declarative AST and registered operators only; local web server loopback only.",
+    "action_registry": "The UI, API and CLI action command use src/ngegenbrain/actions.py::ACTION_DESCRIPTORS and ActionService."
+  },
+  "action_registry": [
+    {
+      "id": "system.initialize",
+      "title": "Initialiser le runtime",
+      "group": "Système",
+      "description": "Initialise le registre natif et le schéma persistant de manière idempotente."
+    },
+    {
+      "id": "system.actions",
+      "title": "Catalogue d'actions",
+      "group": "Système",
+      "description": "Retourne le registre canonique partagé entre CLI, API et interface web."
+    },
+    {
+      "id": "system.health",
+      "title": "Santé du runtime",
+      "group": "Système",
+      "description": "Statut, versions, base active et intégrité de chaîne."
+    },
+    {
+      "id": "system.selftest",
+      "title": "Exécuter les tests du dépôt",
+      "group": "Système",
+      "description": "Lance uniquement la suite unittest locale du dépôt avec timeout fixe; aucune commande utilisateur n'est exécutée."
+    },
+    {
+      "id": "system.demo",
+      "title": "Démonstration isolée",
+      "group": "Système",
+      "description": "Exécute le scénario de démonstration dans sa base dédiée, jamais dans la base principale si l'action n'est pas configurée explicitement."
+    },
+    {
+      "id": "system.stats",
+      "title": "Statistiques du maillage",
+      "group": "Système",
+      "description": "Comptages persistants, schéma SQLite et intégrité de trace."
+    },
+    {
+      "id": "database.verify",
+      "title": "Vérifier la base",
+      "group": "Système",
+      "description": "SQLite integrity_check, clés étrangères et chaîne d'événements."
+    },
+    {
+      "id": "components.list",
+      "title": "Lister les composants",
+      "group": "Composants",
+      "description": "Catalogue des signatures et versions enregistrées."
+    },
+    {
+      "id": "components.register",
+      "title": "Enregistrer un composant",
+      "group": "Composants",
+      "description": "Enregistre une définition déclarative ou un opérateur natif autorisé."
+    },
+    {
+      "id": "compositions.list",
+      "title": "Lister les compositions",
+      "group": "Programmes",
+      "description": "Liste les AST déclaratifs persistés."
+    },
+    {
+      "id": "compositions.register",
+      "title": "Enregistrer une composition",
+      "group": "Programmes",
+      "description": "Persiste une composition versionnée et non exécutable comme texte arbitraire."
+    },
+    {
+      "id": "compositions.run",
+      "title": "Exécuter une composition",
+      "group": "Programmes",
+      "description": "Exécute l'AST d'une composition via le moteur partagé."
+    },
+    {
+      "id": "program.run",
+      "title": "Exécuter un programme",
+      "group": "Programmes",
+      "description": "Exécute un AST compositionnel avec trace, budget et capacités."
+    },
+    {
+      "id": "program.transform",
+      "title": "Transformer un programme",
+      "group": "Programmes",
+      "description": "Applique les réécritures structurelles certifiées du moteur."
+    },
+    {
+      "id": "mesh.fact.add",
+      "title": "Ajouter un fait",
+      "group": "Maillage",
+      "description": "Ajoute un fait typé avec contexte, statut et provenance."
+    },
+    {
+      "id": "mesh.fact.query",
+      "title": "Interroger les faits",
+      "group": "Maillage",
+      "description": "Recherche exacte par champs; un résultat n'est pas automatiquement une preuve."
+    },
+    {
+      "id": "mesh.rules.list",
+      "title": "Lister les règles",
+      "group": "Maillage",
+      "description": "Liste les hyperrègles actives avec leur version."
+    },
+    {
+      "id": "mesh.rule.add",
+      "title": "Ajouter une règle",
+      "group": "Maillage",
+      "description": "Ajoute une règle à prémisses multiples avec contraintes déclaratives."
+    },
+    {
+      "id": "mesh.infer",
+      "title": "Inférence bornée",
+      "group": "Maillage",
+      "description": "Exécute la clôture déterministe sur les règles actives, avec budget."
+    },
+    {
+      "id": "mesh.certificate.verify",
+      "title": "Vérifier un certificat",
+      "group": "Maillage",
+      "description": "Vérifie cohérence des hashes, prémisses, version de règle et étapes d'opérateur."
+    },
+    {
+      "id": "trace.list",
+      "title": "Journal des événements",
+      "group": "Preuves",
+      "description": "Affiche les événements append-only et leurs hashes."
+    },
+    {
+      "id": "trace.get",
+      "title": "Inspecter un événement",
+      "group": "Preuves",
+      "description": "Charge un événement par numéro de séquence."
+    },
+    {
+      "id": "trace.verify",
+      "title": "Vérifier la chaîne de trace",
+      "group": "Preuves",
+      "description": "Recalcule la chaîne SHA-256 des événements."
+    },
+    {
+      "id": "memory.put",
+      "title": "Mémoriser un objet",
+      "group": "Mémoire",
+      "description": "Persiste un payload JSON canonique, compressé sans perte et haché."
+    },
+    {
+      "id": "memory.get",
+      "title": "Lire/réveiller la mémoire",
+      "group": "Mémoire",
+      "description": "Lit et vérifie l'intégrité d'un payload exact."
+    },
+    {
+      "id": "memory.list",
+      "title": "Lister la mémoire",
+      "group": "Mémoire",
+      "description": "Liste les métadonnées de tous les objets mémoire."
+    },
+    {
+      "id": "memory.state",
+      "title": "Changer le cycle de vie",
+      "group": "Mémoire",
+      "description": "Déclare un état de cycle de vie valide; les restrictions de réveil sont contrôlées par le moteur."
+    },
+    {
+      "id": "memory.hibernate",
+      "title": "Mettre en veille",
+      "group": "Mémoire",
+      "description": "Checkpoint, contrôle protections et transition SLEEPING."
+    },
+    {
+      "id": "memory.wake",
+      "title": "Réveiller la mémoire",
+      "group": "Mémoire",
+      "description": "Vérifie payload et dépendances avant de repasser ACTIVE."
+    },
+    {
+      "id": "checkpoint.create",
+      "title": "Créer un checkpoint",
+      "group": "Mémoire",
+      "description": "Persiste un instantané JSON avec hash canonique."
+    },
+    {
+      "id": "checkpoint.get",
+      "title": "Vérifier/restaurer un checkpoint",
+      "group": "Mémoire",
+      "description": "Restaure le payload si le hash reste valide."
+    },
+    {
+      "id": "memory.revoke",
+      "title": "Révoquer une dépendance",
+      "group": "Mémoire",
+      "description": "Enregistre une révocation et marque les dépendants connus STALE."
+    },
+    {
+      "id": "wave.emit",
+      "title": "Émettre une vague",
+      "group": "Événements",
+      "description": "Persiste un événement typé avec TTL et provenance."
+    },
+    {
+      "id": "wave.receive",
+      "title": "Recevoir une vague",
+      "group": "Événements",
+      "description": "Déduplique les événements reçus par identifiant."
+    },
+    {
+      "id": "ascr.search",
+      "title": "Retrieval ASCR-NG",
+      "group": "Recherche",
+      "description": "Classe des candidats par recouvrement lexical et bonus canonique; ce score n'est pas une preuve."
+    },
+    {
+      "id": "ascrc.evaluate",
+      "title": "Régulation ASCRC",
+      "group": "Recherche",
+      "description": "Évalue l'admission opérationnelle sous contraintes dures sans modifier le statut épistémique."
+    },
+    {
+      "id": "ascrc.order",
+      "title": "Classer des candidats",
+      "group": "Recherche",
+      "description": "Ordonne un ensemble de descripteurs admissibles; les scores restent heuristiques."
+    },
+    {
+      "id": "ascrc.schedule",
+      "title": "Ordonnancement persistant ASCRC",
+      "group": "Recherche",
+      "description": "Enregistre les candidats et effectue un tour d'allocation avec vieillissement anti-famine; ne certifie pas les candidats."
+    },
+    {
+      "id": "ascrc.candidates.list",
+      "title": "Candidats ASCRC persistés",
+      "group": "Recherche",
+      "description": "Inspecte candidats, âges d'attente et compteur de services persistés."
+    },
+    {
+      "id": "leases.list",
+      "title": "Lister les baux",
+      "group": "Système",
+      "description": "Inspecte les baux actifs/expirés sans accorder de droits implicites."
+    },
+    {
+      "id": "leases.release",
+      "title": "Libérer un bail",
+      "group": "Système",
+      "description": "Libère un bail en vérifiant propriétaire ou capacité administrateur."
+    },
+    {
+      "id": "deployments.list",
+      "title": "Registre de déploiement",
+      "group": "Programmes",
+      "description": "Liste les ASTs staged dans le registre local; ce n'est pas un déploiement distant."
+    },
+    {
+      "id": "synthesis.run",
+      "title": "Synthétiser un candidat",
+      "group": "Synthèse",
+      "description": "Recherche des programmes dans la grammaire déclarative; l'adéquation aux exemples n'est pas une preuve universelle."
+    },
+    {
+      "id": "synthesis.resume",
+      "title": "Reprendre la synthèse",
+      "group": "Synthèse",
+      "description": "Reprend un front persisté sans supprimer les candidats non examinés."
+    },
+    {
+      "id": "world_model.register",
+      "title": "Enregistrer un modèle du monde",
+      "group": "Modèles du monde",
+      "description": "Enregistre une transition pure et versionnée. Les prédictions restent SIMULATED, jamais OBSERVED ou CERTIFIED."
+    },
+    {
+      "id": "world_model.list",
+      "title": "Lister les modèles du monde",
+      "group": "Modèles du monde",
+      "description": "Liste modèles, versions et état d’activation opérationnelle conditionnelle."
+    },
+    {
+      "id": "world_model.predict",
+      "title": "Simuler une transition",
+      "group": "Modèles du monde",
+      "description": "Simule un état suivant sans le promouvoir au rang d'observation ni de preuve."
+    },
+    {
+      "id": "world_model.evaluate",
+      "title": "Évaluer un modèle sur holdout",
+      "group": "Modèles du monde",
+      "description": "Compare les prédictions à des observations séparées après prédiction; l'activation exige un gain apparié supérieur au seuil versionné."
+    },
+    {
+      "id": "intents.register",
+      "title": "Enregistrer une intention déclarative",
+      "group": "Intentions & langage",
+      "description": "Relie un motif textuel à des slots typés et à un AST. Motifs ambigus soumis à clarification; aucune capacité n'est accordée automatiquement."
+    },
+    {
+      "id": "intents.list",
+      "title": "Lister les intentions",
+      "group": "Intentions & langage",
+      "description": "Liste les motifs d'intention versionnés actifs qui peuvent être résolus par le chat."
+    },
+    {
+      "id": "chat.submit",
+      "title": "Envoyer un message",
+      "group": "Chat",
+      "description": "Résout une intention déclarative non ambiguë, calcule une expression arithmétique reconnue, ou présente les candidats de retrieval sans les convertir en faits."
+    }
+  ],
+  "items": [
+    {
+      "id": "NG0-01",
+      "requirement": "Mandat général : programmation compositionnelle comme méthode de définition et d’exécution de programmes",
+      "formal_source": "NG_0 § Mandat et exigences non négociables",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "Engine",
+          "line_hint": 64
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "ActionService",
+          "line_hint": 92
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_pure_exact_arithmetic"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_cli_actions_and_web_actions_share_registry"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": "Le noyau exécute les AST JSON enregistrés. La traduction de tout langage hôte existant n’est pas fournie comme compilateur universel pratique ; expressivité relative et compilation source→IR sont deux revendications différentes."
+    },
+    {
+      "id": "NG0-02",
+      "requirement": "Composants versionnés, contrats d’entrée/sortie, pré/postconditions, effets, capacités et coûts",
+      "formal_source": "NG_0 § Le composant ; § Types, contrats et règles",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/contracts.py",
+          "symbol_or_anchor": "validate_component_definition",
+          "line_hint": 11
+        },
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_check_contract_clauses",
+          "line_hint": 394
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_typed_component_input_contract"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_custom_precondition_and_postcondition"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_no_dynamic_code_component_registration"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-03",
+      "requirement": "Résultats distinguant succès, partiel, non résolu, rejeté, échoué et annulé",
+      "formal_source": "NG_0 § Univers de base ; § Résultats partiels et abstention",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/results.py",
+          "symbol_or_anchor": "Result",
+          "line_hint": 8
+        },
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "run",
+          "line_hint": 6
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_match_without_default_is_unresolved"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_map_collect_is_partial_not_success"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_sequence_does_not_promote_or_continue_after_rejection"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-04",
+      "requirement": "État exécutable, compteurs de ressources, événements et provenance",
+      "formal_source": "NG_0 § Sémantique opérationnelle de bout en bout",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "ExecutionContext",
+          "line_hint": 16
+        },
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "append_event",
+          "line_hint": 138
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_memory_budget_is_checked_against_serialized_working_set"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_event_chain_detects_event_body_tampering"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": "La mémoire est contrôlée au moyen d’une estimation du working set sérialisé JSON, pas de la mémoire RSS physique ; cette différence est indiquée dans le résultat."
+    },
+    {
+      "id": "NG0-05",
+      "requirement": "Trace append-only à hash chain et vérification d’intégrité",
+      "formal_source": "NG_0 § Provenance ; formalisme eGenBrain v4 § Certificat de dérivation",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "append_event",
+          "line_hint": 138
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "verify_event_chain",
+          "line_hint": 128
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_event_chain_detects_event_body_tampering"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_bootstrap_registry_and_database_integrity"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-06",
+      "requirement": "Maillage de programme stratifié séparant exécution, données, connaissances, preuves et provenance",
+      "formal_source": "NG_0 § Maillage de programme stratifié ; eGenBrain v4 § Définition opérationnelle du maillage",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "mesh_facts",
+          "line_hint": 79
+        },
+        {
+          "path": "src/ngegenbrain/mesh.py",
+          "symbol_or_anchor": "infer_mesh",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transitive_revocation_deactivates_derived_descendants"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-07",
+      "requirement": "Faits typés, contextes, unités et statuts observed/derived/assumed distincts",
+      "formal_source": "eGenBrain v4 § Faits, valeurs et types",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "add_fact",
+          "line_hint": 198
+        },
+        {
+          "path": "src/ngegenbrain/operators.py",
+          "symbol_or_anchor": "_quantity_value",
+          "line_hint": 44
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_dimensioned_quantities_require_explicit_conversion"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-08",
+      "requirement": "Hyperrègles à prémisses multiples avec contraintes explicites et provenance",
+      "formal_source": "eGenBrain v4 § Règles et hyperrelations",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/mesh.py",
+          "symbol_or_anchor": "validate_rule",
+          "line_hint": 84
+        },
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "put_rule",
+          "line_hint": null
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_no_implicit_inverse_rule"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-09",
+      "requirement": "Certificats vérifiés par ré-exécution des contraintes et rapprochement des prémisses actives",
+      "formal_source": "eGenBrain v4 § Certificat de dérivation",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/mesh.py",
+          "symbol_or_anchor": "verify_certificate",
+          "line_hint": 120
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "mesh.certificate.verify",
+          "line_hint": 57
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-10",
+      "requirement": "Registre d’opérateurs purs, calcul exact et unités explicites",
+      "formal_source": "NG_0 § Types ; eGenBrain v4 § Opérateurs et composition",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/operators.py",
+          "symbol_or_anchor": "OPERATORS",
+          "line_hint": 114
+        },
+        {
+          "path": "src/ngegenbrain/contracts.py",
+          "symbol_or_anchor": "builtin_catalog",
+          "line_hint": 52
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_pure_exact_arithmetic"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_dimensioned_quantities_require_explicit_conversion"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_map_collect_turns_operator_domain_error_into_typed_item_error"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "NG0-11",
+      "requirement": "Sûreté de la frontière code/données, registre fermé et absence de eval/exec arbitraire",
+      "formal_source": "NG_0 § Capacités et sécurité de l’exécution",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/contracts.py",
+          "symbol_or_anchor": "validate_component_definition",
+          "line_hint": 11
+        },
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_no_dynamic_code_component_registration"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_static_server_rejects_non_loopback_and_invalid_paths"
+        }
+      ],
+      "status": "implemented_and_tested_with_declared_scope",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-01",
+      "requirement": "Constructeur Id: identity node",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_program_transformation_is_reported_as_structural_not_universal_proof"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-02",
+      "requirement": "Constructeur Const: constant JSON value",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-03",
+      "requirement": "Constructeur Let: local lexical binding",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-04",
+      "requirement": "Constructeur Call: versioned component invocation and contracts",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_pure_exact_arithmetic"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_typed_component_input_contract"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-05",
+      "requirement": "Constructeur Seq: ordered sequential composition",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_sequence_does_not_promote_or_continue_after_rejection"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-06",
+      "requirement": "Constructeur Par: checked independent branches, deterministically serialized",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": "Par is intentionally serialized after a conservative independence check; no real concurrent execution is claimed. "
+    },
+    {
+      "id": "AST-07",
+      "requirement": "Constructeur If: typed guard and explicit branches",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-08",
+      "requirement": "Constructeur Match: explicit case matching and unresolved miss",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_match_without_default_is_unresolved"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-09",
+      "requirement": "Constructeur Pair: product construction",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-10",
+      "requirement": "Constructeur Record: named field construction",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-11",
+      "requirement": "Constructeur Project: field/list projection",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-12",
+      "requirement": "Constructeur Map: finite collection application and explicit error policy",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_map_collect_is_partial_not_success"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_map_collect_turns_operator_domain_error_into_typed_item_error"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-13",
+      "requirement": "Constructeur Fold: ordered reduction with explicit accumulator",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-14",
+      "requirement": "Constructeur While: bounded loop, optional invariant and decreasing rank",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_loop_rank_must_decrease_and_iteration_is_bounded"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-15",
+      "requirement": "Constructeur Fix: bounded fixed-point iteration",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-16",
+      "requirement": "Constructeur Choose: expose candidates without silent selection",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_choose_exposes_candidates_without_auto_selection"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-17",
+      "requirement": "Constructeur Select: explicit stable heuristic selection, not proof",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-18",
+      "requirement": "Constructeur Verify: declared verifier with VALID/INVALID/UNKNOWN distinction",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": "The supplied verifier language is a declared set, not a general theorem prover. "
+    },
+    {
+      "id": "AST-19",
+      "requirement": "Constructeur Observe: query persisted observations",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_observe_probe_derive_and_revoke_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-20",
+      "requirement": "Constructeur Probe: bounded query probe, no truth claim",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_observe_probe_derive_and_revoke_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-21",
+      "requirement": "Constructeur Recover: fallback with explicit compensation for effects",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_effectful_recovery_requires_compensation"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-22",
+      "requirement": "Constructeur Handle: status-specific handler",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_handle_compose_and_select_no_promotion"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-23",
+      "requirement": "Constructeur Txn: atomic transaction in local SQLite domain only",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transaction_rolls_back_local_mesh_effects_atomically"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transaction_commits_local_mesh_effects_atomically"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transaction_rejects_non_sqlite_effects_before_execution"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": "Atomicity is local to the same SQLite store and does not cover network/device effects. "
+    },
+    {
+      "id": "AST-24",
+      "requirement": "Constructeur Checkpoint: persisted state snapshot and hash",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_checkpoint_resume_preserves_value_without_automatic_replay"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-25",
+      "requirement": "Constructeur Resume: validated checkpoint restoration without blind external replay",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_checkpoint_resume_preserves_value_without_automatic_replay"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-26",
+      "requirement": "Constructeur Revoke: explicit revocation with descendant invalidation",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_observe_probe_derive_and_revoke_constructors"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transitive_revocation_deactivates_derived_descendants"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-27",
+      "requirement": "Constructeur Compose: versioned composition registration",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_handle_compose_and_select_no_promotion"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-28",
+      "requirement": "Constructeur Transform: safe structural rewrites with a limited certificate",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_program_transformation_is_reported_as_structural_not_universal_proof"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-29",
+      "requirement": "Constructeur Synthesize: lazy typed candidate search over registered pure operators",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_synthesis_budget_resume_and_no_solution_promoted_to_proof"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_synthesis_constructor_and_search_resume_constructor"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": "The output is a candidate consistent with finite examples, not a universal proof. "
+    },
+    {
+      "id": "AST-30",
+      "requirement": "Constructeur Derive: bounded mesh inference",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_observe_probe_derive_and_revoke_constructors"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": "The certificate proves the supported rule application only, not arbitrary logic. "
+    },
+    {
+      "id": "AST-31",
+      "requirement": "Constructeur Assert: boolean guard assertion with explicit rejection",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_all_new_core_constructors"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_sequence_does_not_promote_or_continue_after_rejection"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-32",
+      "requirement": "Constructeur Hibernate: checkpoint, protection checks and memory sleep",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_memory_round_trip_hibernate_wake_and_dependency_revocation"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-33",
+      "requirement": "Constructeur Wake: payload integrity and dependency freshness checks",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_memory_round_trip_hibernate_wake_and_dependency_revocation"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-34",
+      "requirement": "Constructeur Compress: canonical JSON persistence with no-loss mode",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_compress_restore_emit_and_receive_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-35",
+      "requirement": "Constructeur Summarize: loss-marked derived view pointing to exact source",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_approximate_summary_retains_source_reference"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-36",
+      "requirement": "Constructeur Restore: restore checkpoint/memory with integrity/freshness checks",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_compress_restore_emit_and_receive_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-37",
+      "requirement": "Constructeur Emit: typed event wave; explicit capability",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_compress_restore_emit_and_receive_constructors"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-38",
+      "requirement": "Constructeur EmitWave: typed event wave; explicit capability",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_wave_queue_ttl_and_deduplication"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transaction_commits_local_mesh_effects_atomically"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-39",
+      "requirement": "Constructeur ReceiveWave: deduplicated durable event receive",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_compress_restore_emit_and_receive_constructors"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_wave_queue_ttl_and_deduplication"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-40",
+      "requirement": "Constructeur ResumeSearch: resume validated synthesis cursor",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_synthesis_constructor_and_search_resume_constructor"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-41",
+      "requirement": "Constructeur Await: bounded wait with Unresolved on timeout",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_await_timeout_is_unresolved_not_fabricated"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-42",
+      "requirement": "Constructeur Acquire: lease acquisition with capability and owner",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_lease_requires_capability_and_is_released"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_persistent_lease_requires_explicit_capability"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-43",
+      "requirement": "Constructeur Release: lease release with owner/admin guard",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_lease_requires_capability_and_is_released"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-44",
+      "requirement": "Constructeur Deploy: local staging only; explicit deploy capability and review",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_deploy_requires_capability_and_is_local_staging_only"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-45",
+      "requirement": "Constructeur Capability: narrow only, no privilege elevation",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_capability_scope_cannot_elevate"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "AST-46",
+      "requirement": "Constructeur Sandbox: narrow only, no budget/capability widening",
+      "formal_source": "NG_0 § Algèbre et syntaxe du noyau universel; théorie 3 § Catalogue exhaustif des constructeurs du runtime",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_sandbox_cannot_expand_resource_budget"
+        }
+      ],
+      "status": "implemented_and_regression_tested",
+      "scope_note": ""
+    },
+    {
+      "id": "SEM-01",
+      "requirement": "Correction séquentielle sous raccord de contrats",
+      "formal_source": "NG_0 § Lois de composition et preuves de correction",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_typed_component_input_contract"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_custom_precondition_and_postcondition"
+        }
+      ],
+      "status": "conditional_implementation_tested",
+      "scope_note": "Theorem hypotheses are documented; no machine-checked proof of the full Python interpreter is claimed."
+    },
+    {
+      "id": "SEM-02",
+      "requirement": "Conservation de l’ordre d’effets et absence de parallélisation non prouvée",
+      "formal_source": "NG_0 § Lois de composition",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_independent",
+          "line_hint": 151
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_remaining_pure_control_constructors"
+        }
+      ],
+      "status": "implemented_with_serialization",
+      "scope_note": "The Par operator is not concurrent in this version."
+    },
+    {
+      "id": "SEC-01",
+      "requirement": "Capacité minimale, sandbox non-expansive et appels enregistrés",
+      "formal_source": "NG_0 § Capacités et sécurité de l’exécution",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_effectful_core_constructors_require_capabilities"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_capability_scope_cannot_elevate"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_sandbox_cannot_expand_resource_budget"
+        }
+      ],
+      "status": "implemented_and_tested",
+      "scope_note": "No arbitrary native-code loader is included."
+    },
+    {
+      "id": "TXN-01",
+      "requirement": "Idempotence, checkpoint, rollback et réconciliation des effets externes",
+      "formal_source": "NG_0 § Transactions, reprise et sémantique des effets externes; théorie 3 § Atomicité locale",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "transaction",
+          "line_hint": 11
+        },
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "transaction",
+          "line_hint": 526
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_checkpoint_resume_preserves_value_without_automatic_replay"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transaction_rolls_back_local_mesh_effects_atomically"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_transaction_rejects_non_sqlite_effects_before_execution"
+        }
+      ],
+      "status": "implemented_local_scope",
+      "scope_note": "The transaction is atomic only within one SQLite database. Distributed exactly-once delivery is not claimed."
+    },
+    {
+      "id": "MEM-01",
+      "requirement": "Cycle de vie, veille/réveil, hash et dépendances",
+      "formal_source": "NG_0 § Provenance, mémoire vivante et activation réversible",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "store_memory",
+          "line_hint": 250
+        },
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "hibernate",
+          "line_hint": 116
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_memory_round_trip_hibernate_wake_and_dependency_revocation"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_approximate_summary_retains_source_reference"
+        }
+      ],
+      "status": "implemented_and_tested",
+      "scope_note": "The dependency graph must include all semantically relevant dependencies to make transitive invalidation complete."
+    },
+    {
+      "id": "WAVE-01",
+      "requirement": "Événements typés, TTL, déduplication et trace",
+      "formal_source": "NG_0 § Événements et vagues d’information",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "queue_wave",
+          "line_hint": 312
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_wave_queue_ttl_and_deduplication"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_compress_restore_emit_and_receive_constructors"
+        }
+      ],
+      "status": "implemented_and_tested",
+      "scope_note": "Delivery is durable within local SQLite; no distributed broker QoS is claimed."
+    },
+    {
+      "id": "SYN-01",
+      "requirement": "Synthèse paresseuse/reprenable et conservation du statut candidat",
+      "formal_source": "NG_0 § Recherche et synthèse de programmes",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/synthesis.py",
+          "symbol_or_anchor": "SynthesisManager",
+          "line_hint": 23
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_synthesis_budget_resume_and_no_solution_promoted_to_proof"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_synthesis_constructor_and_search_resume_constructor"
+        }
+      ],
+      "status": "implemented_with_bounded_grammar",
+      "scope_note": "The implemented search grammar is a finite expression grammar over registered pure operators and declared constants/inputs, not a complete synthesizer for every Turing-complete program."
+    },
+    {
+      "id": "ASCR-01",
+      "requirement": "Récupération de candidats, score heuristique séparé de vérité",
+      "formal_source": "NG_0 § ASCRC et compatibilité eGenBrain; eGenBrain v4 § Correspondance héritée",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/ascr.py",
+          "symbol_or_anchor": "ASCRRetriever",
+          "line_hint": 10
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "ascr.search",
+          "line_hint": 72
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_action_catalog_is_single_source_and_web_assets_load"
+        }
+      ],
+      "status": "documented_reconstruction",
+      "scope_note": "Historical ASCR source was unavailable; output ranks candidates only. No claim of exact historical equivalence."
+    },
+    {
+      "id": "ASCRC-01",
+      "requirement": "Contraintes dures avant score et conservation du statut épistémique",
+      "formal_source": "NG_0 § ASCRC et compatibilité eGenBrain",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/ascrc.py",
+          "symbol_or_anchor": "ASCRC",
+          "line_hint": 1
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "ascrc.evaluate",
+          "line_hint": 73
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_ascrc_admission_and_epistemic_invariance"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_ascrc_persistent_waiting_age_prevents_fixed_score_starvation"
+        }
+      ],
+      "status": "implemented_and_tested",
+      "scope_note": "Resource numbers are declared allocation units; physical OS consumption is not measured by the scheduler."
+    },
+    {
+      "id": "WORLD-01",
+      "requirement": "Simulation, évaluation appariée sur holdout et porte d’activation conditionnelle",
+      "formal_source": "Théorie 3 § Modèle du monde : simulation, évaluation et activation conditionnelle",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/world_model.py",
+          "symbol_or_anchor": "WorldModelManager",
+          "line_hint": 15
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "world_model.evaluate",
+          "line_hint": 85
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_world_model_prediction_is_simulated_not_observed"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_world_model_activation_uses_separate_holdout_and_baseline"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_world_model_does_not_activate_on_small_holdout"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_world_model_refuses_effectful_transition"
+        }
+      ],
+      "status": "implemented_with_statistical_assumptions",
+      "scope_note": "The normal-approximation LCB is a policy estimate; validity depends on independent representative holdout cases and is not a theorem."
+    },
+    {
+      "id": "INTENT-01",
+      "requirement": "Intentions déclaratives, slots typés, égalité résolue/ambiguë et capacités",
+      "formal_source": "Théorie 3 § Intentions déclaratives",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/intents.py",
+          "symbol_or_anchor": "IntentManager",
+          "line_hint": 18
+        },
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "_chat",
+          "line_hint": 281
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_declarative_chat_intent_binds_typed_slots_and_runs_composition"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_ambiguous_chat_intents_do_not_execute"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_chat_intent_does_not_grant_capabilities"
+        }
+      ],
+      "status": "implemented_declarative_scope",
+      "scope_note": "This extends the ordinary-language UI by explicit patterns; not a claim of universal unconstrained NLP comprehension."
+    },
+    {
+      "id": "UI-01",
+      "requirement": "CLI/API/web share one action registry",
+      "formal_source": "NG_0 § Un noyau, plusieurs interfaces; théorie 3 § Rôle de cette révision",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/actions.py",
+          "symbol_or_anchor": "ACTION_DESCRIPTORS",
+          "line_hint": 37
+        },
+        {
+          "path": "src/ngegenbrain/web.py",
+          "symbol_or_anchor": "make_handler",
+          "line_hint": 15
+        },
+        {
+          "path": "web/static/app.js",
+          "symbol_or_anchor": "/api/actions",
+          "line_hint": 73
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_action_catalog_is_single_source_and_web_assets_load"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_cli_actions_and_web_actions_share_registry"
+        }
+      ],
+      "status": "implemented_and_tested",
+      "scope_note": "The loopback server is designed for local use, not direct public Internet exposure."
+    },
+    {
+      "id": "VAL-01",
+      "requirement": "Tests positifs/négatifs, receipts, audit source-to-code",
+      "formal_source": "NG_0 § Validation, preuves et expérimentation; théorie 3 § Mesures de validation",
+      "implementation": [
+        {
+          "path": "tests/test_runtime.py",
+          "symbol_or_anchor": "RuntimeTests",
+          "line_hint": 25
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_no_dynamic_code_component_registration"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_event_chain_detects_event_body_tampering"
+        }
+      ],
+      "status": "implemented_and_tested_with_scope",
+      "scope_note": "Finite tests do not establish all-input correctness; unresolved mathematical proofs are explicitly identified."
+    },
+    {
+      "id": "UNIV-01",
+      "requirement": "Expression d’un noyau universel et rapport à la programmation classique",
+      "formal_source": "NG_0 § Universalité et rapport classique",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/engine.py",
+          "symbol_or_anchor": "_execute",
+          "line_hint": 93
+        },
+        {
+          "path": "formalism/theorie_programation_compositionnelle_3.tex",
+          "symbol_or_anchor": "Théorème d’expressivité relative",
+          "line_hint": null
+        }
+      ],
+      "tests": [],
+      "status": "formalization_and_runtime_core",
+      "scope_note": "The abstract expressivity argument assumes a faithful encoding of the counter-machine steps; a machine-checked proof and compilers for existing programming languages are not supplied."
+    },
+    {
+      "id": "PROV-01",
+      "requirement": "Provenance de sources, versions, hypothèses et limites explicites",
+      "formal_source": "Théorie 3 § Statuts de provenance",
+      "implementation": [
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        },
+        {
+          "path": "docs/REPORT_AUDIT_NGeGenBrain_v0.md",
+          "symbol_or_anchor": "statut du modèle",
+          "line_hint": 104
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_event_chain_detects_event_body_tampering"
+        }
+      ],
+      "status": "documented_and_hash_linked",
+      "scope_note": "Hash integrity binds recorded bytes; it does not establish truth or source authorship."
+    },
+    {
+      "id": "PROV-02",
+      "requirement": "Registre vérifiable des preuves, reçus, empreintes et correspondances source-code-test",
+      "formal_source": "NG_0 § Validation/provenance; consigne utilisateur de registre de mise en œuvre",
+      "implementation": [
+        {
+          "path": "scripts/generate_proof_registry.py",
+          "symbol_or_anchor": "main",
+          "line_hint": 15
+        }
+      ],
+      "tests": [],
+      "status": "documented_and_hash_linked",
+      "scope_note": "La présence d’une entrée atteste une liaison vérifiable aux artefacts; elle ne transforme pas un test fini en preuve de correction universelle."
+    },
+    {
+      "id": "SRC-EGEN-01",
+      "requirement": "eGenBrain : faits, hyperrègles, opérateurs, statuts épistémiques, certificats",
+      "formal_source": "eGenBrain v4 § Définition opérationnelle du maillage; § Plan de validation",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/mesh.py",
+          "symbol_or_anchor": "infer_mesh",
+          "line_hint": 93
+        },
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "verify_certificate",
+          "line_hint": null
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_mesh_rule_derivation_certificate_and_tamper_rejection"
+        },
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_no_implicit_inverse_rule"
+        }
+      ],
+      "status": "implemented_with_explicit_rules",
+      "scope_note": "AAM is not an external dependency; the mesh and inference functions are implemented in this project. AAM itself is not required."
+    },
+    {
+      "id": "PORT-01",
+      "requirement": "Persistance et installation propre avec stdlib only",
+      "formal_source": "Théorie 3 § Rôle de cette révision",
+      "implementation": [
+        {
+          "path": "src/ngegenbrain/store.py",
+          "symbol_or_anchor": "Store",
+          "line_hint": 10
+        },
+        {
+          "path": "ngbrain.py",
+          "symbol_or_anchor": "main",
+          "line_hint": 7
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_bootstrap_registry_and_database_integrity"
+        }
+      ],
+      "status": "implemented_and_tested",
+      "scope_note": "The deliverable requires an installed Python 3.11+ interpreter; no PyPI package dependencies are needed."
+    },
+    {
+      "id": "PORT-02",
+      "requirement": "Sélection contrôlée de l’interpréteur Windows et bootstrapper de runtime embeddable avec vérification SHA-256 avant extraction",
+      "formal_source": "Théorie 3 § Portabilité, environnement hôte et reproductibilité des livraisons",
+      "implementation": [
+        {
+          "path": "tools/bootstrap_python_windows.ps1",
+          "symbol_or_anchor": "ExpectedSha256 / Get-FileHash / staging rollback",
+          "line_hint": null
+        },
+        {
+          "path": "tools/select_python_windows.bat",
+          "symbol_or_anchor": "runtime selection and Python version check",
+          "line_hint": null
+        },
+        {
+          "path": "launch_NGeGenBrain_v0.bat",
+          "symbol_or_anchor": "HTTP readiness poll before opening browser",
+          "line_hint": null
+        }
+      ],
+      "tests": [
+        {
+          "file": "tests/test_runtime.py",
+          "test_id": "test_windows_bootstrapper_and_selectors_are_pinned_and_version_checked"
+        }
+      ],
+      "status": "static_contract_tested_native_windows_execution_not_available",
+      "scope_note": "Le test statique vérifie l’URL officielle exacte et son SHA-256 publié. Le binaire n’a pas pu être téléchargé en raison du DNS indisponible et cmd.exe/PowerShell ne sont pas disponibles ici."
+    },
+    {
+      "id": "SEC-CH-01",
+      "requirement": "Mandat/exigences; critères de sans-sacrifice",
+      "formal_source": "NG_0 chapters 1–2",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. Engine; contracts; result types"
+    },
+    {
+      "id": "SEC-CH-02",
+      "requirement": "Univers de base; types, effets, capacités, ressources",
+      "formal_source": "NG_0 chapter 3",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. contracts.py; engine.py"
+    },
+    {
+      "id": "SEC-CH-03",
+      "requirement": "Composant contractuel",
+      "formal_source": "NG_0 chapter 4",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. contracts.py"
+    },
+    {
+      "id": "SEC-CH-04",
+      "requirement": "Maillage stratifié",
+      "formal_source": "NG_0 chapter 5; eGenBrain v4 chapters 2–5",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. store.py; mesh.py"
+    },
+    {
+      "id": "SEC-CH-05",
+      "requirement": "Syntaxe/algèbre noyau universel",
+      "formal_source": "NG_0 chapter 6",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. engine.py; AST rows above"
+    },
+    {
+      "id": "SEC-CH-06",
+      "requirement": "Typage/contrats/règles de jugement",
+      "formal_source": "NG_0 chapter 7",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. contracts.py; engine.py"
+    },
+    {
+      "id": "SEC-CH-07",
+      "requirement": "Sémantique opérationnelle",
+      "formal_source": "NG_0 chapter 8",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. engine.py; results.py"
+    },
+    {
+      "id": "SEC-CH-08",
+      "requirement": "Lois et preuves de correction",
+      "formal_source": "NG_0 chapter 9",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. theorie_programation_compositionnelle_3.tex; test rows above"
+    },
+    {
+      "id": "SEC-CH-09",
+      "requirement": "Universalité et traduction classique",
+      "formal_source": "NG_0 chapter 10",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. theorie_programation_compositionnelle_3.tex"
+    },
+    {
+      "id": "SEC-CH-10",
+      "requirement": "Maillage de connaissances et dérivation vérifiable",
+      "formal_source": "NG_0 chapter 11; eGenBrain v4 inference sections",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. mesh.py; store.py"
+    },
+    {
+      "id": "SEC-CH-11",
+      "requirement": "Capacités et sécurité",
+      "formal_source": "NG_0 chapter 12",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. engine.py; web.py"
+    },
+    {
+      "id": "SEC-CH-12",
+      "requirement": "Transactions/reprise/effets externes",
+      "formal_source": "NG_0 chapter 13; theory3 transaction chapter",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. store.py; engine.py"
+    },
+    {
+      "id": "SEC-CH-13",
+      "requirement": "Provenance/mémoire/vagues",
+      "formal_source": "NG_0 chapter 14",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. store.py; engine.py"
+    },
+    {
+      "id": "SEC-CH-14",
+      "requirement": "Recherche/synthèse",
+      "formal_source": "NG_0 chapter 15",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. synthesis.py"
+    },
+    {
+      "id": "SEC-CH-15",
+      "requirement": "ASCRC/compatibilité eGenBrain",
+      "formal_source": "NG_0 chapter 16",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. ascrc.py; ascr.py"
+    },
+    {
+      "id": "SEC-CH-16",
+      "requirement": "Transformations/équivalence observable",
+      "formal_source": "NG_0 chapter 17",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. engine.py Transform; test_program_transformation..."
+    },
+    {
+      "id": "SEC-CH-17",
+      "requirement": "Un noyau plusieurs interfaces / langage naturel",
+      "formal_source": "NG_0 chapter 18; theory3 intents chapter",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. cli.py; web.py; intents.py"
+    },
+    {
+      "id": "SEC-CH-18",
+      "requirement": "Validation/expérimentation",
+      "formal_source": "NG_0 chapter 19; eGenBrain v4 validation matrix",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. tests/test_runtime.py; audit report"
+    },
+    {
+      "id": "SEC-CH-19",
+      "requirement": "Limites et obligations de clôture",
+      "formal_source": "NG_0 chapter 20; theory3 status section",
+      "implementation": [
+        {
+          "path": "docs/FORMALISM_AUDIT.md",
+          "symbol_or_anchor": "formalism_matrix",
+          "line_hint": null
+        },
+        {
+          "path": "NGeGenBrain_v0_mise_en_oevre.json",
+          "symbol_or_anchor": "items",
+          "line_hint": 337
+        }
+      ],
+      "tests": [],
+      "status": "covered_by_requirement_matrix",
+      "scope_note": "Couverture de chapitre par les lignes détaillées de la matrice ; la référence complète et les limites restent explicites. NGeGenBrain_v0_mise_en_oevre.json; audit report"
+    }
+  ],
+  "coverage_summary": {
+    "item_count": 95,
+    "constructors_explicitly_mapped": [
+      "Id",
+      "Const",
+      "Let",
+      "Call",
+      "Seq",
+      "Par",
+      "If",
+      "Match",
+      "Pair",
+      "Record",
+      "Project",
+      "Map",
+      "Fold",
+      "While",
+      "Fix",
+      "Choose",
+      "Select",
+      "Verify",
+      "Observe",
+      "Probe",
+      "Recover",
+      "Handle",
+      "Txn",
+      "Checkpoint",
+      "Resume",
+      "Revoke",
+      "Compose",
+      "Transform",
+      "Synthesize",
+      "Derive",
+      "Assert",
+      "Hibernate",
+      "Wake",
+      "Compress",
+      "Summarize",
+      "Restore",
+      "Emit",
+      "EmitWave",
+      "ReceiveWave",
+      "ResumeSearch",
+      "Await",
+      "Acquire",
+      "Release",
+      "Deploy",
+      "Capability",
+      "Sandbox"
+    ],
+    "runtime_test_count_claimed_in_last_receipt": 54,
+    "latest_test_receipt": "logs/test_run_20261027_final_54.log",
+    "statuses": {
+      "conditional_implementation_tested": 1,
+      "covered_by_requirement_matrix": 19,
+      "documented_and_hash_linked": 2,
+      "documented_reconstruction": 1,
+      "formalization_and_runtime_core": 1,
+      "implemented_and_regression_tested": 46,
+      "implemented_and_tested": 6,
+      "implemented_and_tested_with_declared_scope": 11,
+      "implemented_and_tested_with_scope": 1,
+      "implemented_declarative_scope": 1,
+      "implemented_local_scope": 1,
+      "implemented_with_bounded_grammar": 1,
+      "implemented_with_explicit_rules": 1,
+      "implemented_with_serialization": 1,
+      "implemented_with_statistical_assumptions": 1,
+      "static_contract_tested_native_windows_execution_not_available": 1
+    },
+    "interpretation": "Coverage is explicit and auditable, not a proof that every possible program is bug-free."
+  }
+}

@@ -1,0 +1,144 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\geometry{margin=2.2cm}
+\title{Laboratoire incrémental de validation \ AAM O94.4}
+\author{Dossier expérimental O94.4, enfant d'O94.3}
+\date{20 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Description}
+Ce laboratoire documente l'audit reproductible de la livraison O94.3, l'identification d'une sous-couverture silencieuse dans l'entraînement du modèle de langue local, puis les corrections et les essais d'O94.4. Il ne réécrit pas les essais de l'ancienne version comme s'ils étaient nouveaux : les preuves parents sont identifiées comme telles, et les preuves O94.4 sont enregistrées séparément dans \texttt{receipts/O94\_4/}.
+
+La question ciblée est simple et mesurable : quand les séquences disponibles dépassent 5000 fenêtres d'entraînement ou 1000 fenêtres de validation, le code parent n'utilisait qu'une partie d'entre elles sans exposer de budget dans le CLI. Pour le corpus d'exemple testé avant correction, 8707 fenêtres d'entraînement et 1708 de validation étaient disponibles; seules 5000 et 1000 étaient effectivement utilisées. Cela représente respectivement environ 57,43\% et 58,55\% des fenêtres.
+
+\section{Architecture}
+Le chemin de données examiné est : documents de corpus $\rightarrow$ partition par document train/validation/test $\rightarrow$ tokenisation et fenêtrage $\rightarrow$ modèle de langage local à attention compacte $\rightarrow$ métriques de perte entropique croisée $\rightarrow$ capsule sérialisée et sélectionnable dans le chat. Le correctif agit sur la politique des budgets de fenêtres, pas sur les représentations, les objectifs d'apprentissage ni la logique du RAG.
+
+L'architecture du modèle local examiné est un modèle neuronal d'attention à une tête écrit en Python avec embeddings appris, projections Q/K/V, attention scaled-dot-product et projection vers les logits du token suivant. C'est un modèle entraînable à partir de corpus locaux; ce n'est pas un LLM préentraîné de grande taille. Des adaptateurs distincts existent pour charger des modèles externes, mais un fournisseur externe en direct n'est pas réputé testé dans cette session.
+
+\section{Pipeline complet}
+\begin{enumerate}
+\item Inventorier les ZIP O94.3 et vérifier le CRC de l'archive source intégrée \texttt{sources\_AAM\_17.zip}; calculer son SHA-256.
+\item Lire la théorie des empreintes, surtout \texttt{DDD\_Base\_theorie\_des\_empreintes\_complete\_order\_5.tex}, les formalismes historiques et les guides O94.3.
+\item Exécuter le préflight et les tests O94.3; séparer défaut du modèle, besoin d'affichage virtuel et interruption de commande.
+\item Rejouer des cas concrets d'observation filesystem, de boîte noire, de composition/compilation/exécution et d'entraînement local.
+\item Comparer le nombre de fenêtres disponibles avec le nombre de fenêtres réellement consommées dans la trace de l'entraînement.
+\item Retirer les plafonds implicites; introduire deux arguments facultatifs explicites et propager leur valeur du CLI au runtime puis au cœur d'entraînement.
+\item Tester la politique sans budget et avec budget explicite, tester les budgets invalides, puis exécuter les tests d'intégration et la suite complète.
+\item Conserver chaque sortie de commande, code de sortie, erreur et hash dans les reçus O94.4, mettre à jour les registres d'erreurs et avancer les phases seulement lorsque leurs critères et preuves sont vérifiés.
+\end{enumerate}
+
+\section{Commandes d'exécution}
+Depuis le dossier modèle O94.4, avec l'environnement Python et les dépendances optionnelles adaptées :
+\begin{verbatim}
+python -m compileall -q aam_o92 aam_o93 tests
+python -m aam_o93 preflight
+python -m pytest -q tests/test_o944_language_window_policy.py
+python -m pytest -q tests/test_o931_language_model_training_surface.py
+xvfb-run -a env PYTHONUNBUFFERED=1 python -m pytest -q --disable-warnings --maxfail=20
+python -m aam_o93 train-language-model examples/training_corpus \
+  --epochs 1 --max-vocab 48 --dim 8 --context-size 4 --seed 94
+python -m aam_o93 train-language-model examples/training_corpus \
+  --epochs 1 --max-vocab 48 --dim 8 --context-size 4 --seed 94 \
+  --max-steps-per-epoch 5000 --max-validation-windows 1000
+python -m aam_o93 ui
+\end{verbatim}
+La première commande d'entraînement utilise toutes les fenêtres disponibles. La seconde illustre des budgets explicites; il ne faut pas confondre ces deux politiques. Pour les tests UI, utiliser un serveur X ou Xvfb sous environnement Linux sans affichage physique.
+
+\section{Résultats observés sur O94.3 avant correction}
+\subsection{Tests automatisés parents}
+La suite complète lancée sous Xvfb a terminé avec le code retour 0 : 368 tests réussis, 5 avertissements et 21 sous-tests réussis en 184,72 secondes. Les sorties sont dans le reçu de construction et sont reprises dans \texttt{receipts/O94\_4/P0\_baseline.json}. Le premier démarrage sans environnement d'affichage virtuel échouait sur la connexion à l'affichage; ce résultat environnemental n'a pas été comptabilisé comme défaut fonctionnel du modèle puisque le rejeu complet sous Xvfb a réussi.
+
+\subsection{Observation vivante}
+Une session filesystem a créé une trace JSONL à partir d'un répertoire observé en cours d'exécution. La trace montre les événements de démarrage, d'état de base, d'ajout et de modification d'un fichier; la chaîne de hachage a été validée. Ce test ne démontre pas une capture physique réseau, une caméra ou un capteur matériel.
+
+\subsection{Boîte noire et généralisation}
+Une cible de démonstration autorisée a été échantillonnée. La capsule reproduit exactement la sortie d'une entrée enregistrée, mais une entrée inconnue demeure \texttt{UNRESOLVED}. L'évaluation du holdout n'a pas établi de généralisation. Une reproduction exacte d'exemples connus n'est donc pas présentée comme preuve d'une compétence générale.
+
+\subsection{Composition}
+Un graphe composé a été enregistré, contrôlé et exécuté. La condition a choisi la branche correspondant à l'entrée; celle-ci a appelé une compétence de création d'empreinte et produit un rapport multivue. L'essai valide la voie de composition testée, pas l'exhaustivité universelle du compilateur.
+
+\subsection{RAG}
+Les tests de récupération historiques et le test sur un échantillon de 300 messages SMS du corpus livré sont couverts dans la suite automatisée. L'archive comprend un corpus SMS plus grand; l'essai manuel séparé sur le corpus total a dépassé la fenêtre d'exécution disponible dans cette session, mais la suite complète a terminé et est passée. Aucune affirmation de test exhaustif sur tout corpus multimodal ni de service Web à distance n'est faite.
+
+\subsection{Modèle de langue local}
+Sur le corpus d'exemple de 421 documents après extraction/segmentation, les comptages du run témoin indiquaient 294 documents train, 63 validation et 64 test. Les traces exposaient 8707 fenêtres train, 1708 validation, 2940 test; l'entraînement ne consommait que 5000 fenêtres train et la validation que 1000 fenêtres. Le texte généré contenait plusieurs marqueurs \texttt{<unk>} et n'était pas une réponse conversationnelle de bonne qualité. L'entraînement/sérialisation fonctionnels sont donc distingués de la qualité de génération.
+
+\section{Correction O94.4 et résultats attendus vérifiables}
+La classe de modèle et la fonction objectif ne changent pas. \texttt{FingerprintTokenAttentionLM.fit} accepte désormais \texttt{max\_steps\_per\_epoch} et \texttt{max\_validation\_windows}; les valeurs par défaut sont \texttt{None}, c'est-à-dire toutes les fenêtres disponibles. Si un budget est précisé, il est appliqué explicitement et repris dans \texttt{window\_policy}. Le CLI expose les deux options; une valeur invalide doit être rejetée plutôt que silencieusement ignorée.
+
+Pour l'échantillon historique, une exécution sans budget doit tracer 8707 fenêtres d'entraînement et 1708 fenêtres de validation. L'exécution avec \texttt{--max-steps-per-epoch 5000 --max-validation-windows 1000} doit tracer 5000 et 1000, en gardant dans les comptages le nombre de fenêtres disponibles. Cette comparaison rend visible le compromis ressources/couverture au lieu de l'enfouir dans le code.
+
+\section{Interprétation des résultats}
+La limitation corrigée est une limitation de politique d'exécution, non une preuve d'impossibilité du modèle. Utiliser toutes les fenêtres augmente le travail par époque; un budget explicite reste légitime lorsqu'il est choisi en connaissance de cause. La métrique est plus interprétable quand le nombre de fenêtres effectivement évaluées est rapporté avec les totaux disponibles. La baisse ou la hausse de la perte de validation ne doit pas être prédite a priori : elle sera déterminée par les exécutions qui conservent leurs journaux.
+
+Les idées de la théorie des empreintes concernant les sondes distinctives, les signatures, les invariants/variants et les classes d'indistinguabilité restent pertinentes pour observer et comparer des comportements. Toutefois, une capture finie borne l'observation à la gamme d'entrées, d'états et de sondes effectivement testés; elle ne prouve pas à elle seule une reproduction universelle ni une compétence générale.
+
+\section{Conséquences théoriques, conceptuelles et opérationnelles}
+\textbf{Théoriques :} la traçabilité doit expliciter le support observé et le budget d'évaluation, pour que les conclusions sur des invariants ne dépassent pas les données disponibles.\\
+\textbf{Conceptuelles :} un budget choisi par l'utilisateur est une décision opérationnelle explicite, alors qu'un plafond caché déforme la notion de « données observées / apprises ».\\
+\textbf{Opérationnelles :} les CLI et traces rendent compte des totaux et des quantités utilisées; l'utilisateur peut choisir couverture complète ou budget explicite et comparer les deux expériences.
+
+\section{Campagne finale O94.4 : résultats observés}
+\subsection{Description et architecture testée}
+La campagne finale porte sur le paquet descendant complet : cœur attention compact, pipeline de fenêtres, CLI/runtime, index sémantique RAG, sélection extractive de réponse, capture filesystem, capsule boîte noire, DSL de composition, interface testée sous serveur X virtuel, règles de version et contrôles d'intégrité. La correction de fenêtre est propagée du modèle au moteur, au runtime, à la CLI et à l'interface. Le correctif RAG applique un seuil au rang des chunks puis un classement d'intention sur les phrases source.
+
+\subsection{Pipeline et commandes d'exécution}
+La commande complète de non-régression est :
+\begin{verbatim}
+xvfb-run -a env PYTHONUNBUFFERED=1 python -m pytest -q --disable-warnings --maxfail=20
+\end{verbatim}
+Le journal final est \texttt{logs/O94\_4/pytest\_full\_xvfb\_final.txt}; son reçu signé par SHA-256 est \texttt{receipts/O94\_4/P3\_regression\_suite.json}. Les essais contrôlés de couverture utilisent les commandes CLI \texttt{train-language-model} documentées dans le guide. Les tests du correctif RAG sont \texttt{tests/test\_o944\_rag\_answer\_intent.py}; ceux de couverture sont \texttt{tests/test\_o944\_language\_window\_policy.py}.
+
+\subsection{Résultats}
+La suite complète finale termine en code 0 : \textbf{374 réussites, zéro échec, 5 avertissements, 21 sous-tests réussis en 183,52 secondes}. Le passage immédiatement précédent avait 4 échecs dans les attentes de version/titre héritées, non dans le comportement RAG ni le calcul des fenêtres. Les quatre attentes ont été mises à jour vers la version O94.4; 15 tests ciblés sur ces quatre surfaces puis la suite complète passent ensuite. L'option \texttt{--disable-warnings} a supprimé le détail des avertissements : leur nombre est conservé, mais leur cause individuelle n'est pas certifiée ici.
+
+Sur le corpus d'exemple, le chemin sans budget utilise 8707/8707 fenêtres d'entraînement et 1708/1708 fenêtres de validation. Le chemin explicitement budgeté utilise 5000/8707 et 1000/1708, tout en conservant les totaux disponibles dans les traces. Les métriques mesurées pour l'exécution complète rapportée sont une entropie croisée de validation d'environ 1,8598; l'exécution budgetée rapporte environ 1,8784. Une époque par exécution ne permet pas de conclure à la supériorité universelle d'une politique.
+
+Le test RAG initial avait retenu une source météo éloignée avec un score positif alors qu'une source batterie était plus pertinente, et sélectionnait une phrase d'identification à une question de fréquence. Après correction, le meilleur score 6,75286 entraîne un cutoff explicite 5,75286; un candidat sur deux est filtré. La réponse de fréquence est ancrée dans la source batterie : \emph{The maintenance procedure inspects separator condition every 200 operating hours.} Les deux sources du scénario ont été contrôlées inchangées.
+
+La capture filesystem en direct a produit une baseline et les événements d'ajout/modification attendus, la chaîne de hashes est valide. La boîte noire reproduit exactement une entrée connue mais renvoie \texttt{UNRESOLVED} sur l'entrée inconnue; le résultat ne prouve donc pas une généralisation de la compétence. La composition passe sauvegarde, compilation déclarative et exécution, avec traces des règles/nœuds. Le modèle compact est entraîné et sérialisé, mais la sortie échantillon contient des \texttt{<unk>} et est écartée par le contrôle qualité conversationnel.
+
+\subsection{Interprétation et conséquences}
+\textbf{Théoriques :} les invariants, signatures et relations de proximité issues des empreintes doivent rester attachés aux sondes et à la gamme d'entrées observées; aucune capture finie n'établit une équivalence pour toutes les entrées. Le RAG expose maintenant une règle de pertinence testable, mais le cutoff corpus-relatif reste une heuristique, pas une garantie universelle.
+
+\textbf{Conceptuelles :} l'absence de plafond caché rend plus fidèle la relation entre le corpus produit et le corpus réellement traité. Le budget explicite devient un choix de ressources. La sélection de phrase par fréquence améliore l'alignement sur l'intention, mais ne transforme pas la récupération extractive en raisonnement général.
+
+\textbf{Opérationnelles :} le CLI montre les fenêtres disponibles/utilisées; le RAG logge scores et filtres; les incidents de release et les preuves sont versionnés. Les avertissements Pytest, l'usage de recherche lexicale classique et la performance générative restent des points d'attention.
+
+\subsection{Limites de couverture et statut}
+Aucun endpoint distant Ollama/OpenAI-compatible, caméra/capteur physique ou capture NIC physique n'a été réellement validé. Le test sur le corpus SMS entier a dépassé la limite de durée de la session; le test plafonné aux 300 premiers messages est passé. La recherche sémantique du RAG a été exercée; la recherche lexicale classique peut retourner \texttt{NO\_MATCH} lorsqu'aucun index lexical n'est construit explicitement. Ces éléments sont \textbf{non certifiés dans cette campagne}, et non déclarés impossibles.
+
+\section{Conclusion et état du modèle}
+O94.3 dispose de tests automatisés nombreux et de démonstrations concrètes de plusieurs chemins fonctionnels. Un défaut vérifiable de couverture silencieuse dans le chemin du modèle de langue local a justifié une correction additive O94.4. L'état final de chaque phase dépend des reçus exécutés et des tests de livraison : un plan ou un test défini n'est pas une preuve de réussite. Les états actuels et les hashes documentaires sont tenus dans \texttt{checklist\_de\_travail\_O94\_4.json}; les registres d'erreurs distinguent incident corrigé, incident environnemental et capacité qui n'a pas encore été testée.
+
+Les capacités de fournisseurs distants, d'interfaces réseau physiques, de caméras, de capteurs et le niveau de qualité d'un modèle linguistique à grande échelle ne sont pas certifiés par ce laboratoire. Leur absence de test n'est ni une preuve de succès ni une conclusion d'impossibilité : elle est une limite explicite de portée expérimentale.
+\section{Campagne additionnelle P5--P7 : adaptateur générique et régression complète}
+\subsection{Description, architecture et pipeline}
+Après P4, un besoin de l'objectif intégral a motivé l'ajout du backend \texttt{python\_adapter}. Le registre l'intègre à la liste blanche des backends; l'interface permet de le sélectionner et de créer un gabarit. Le pipeline vérifié est : inscription locale $\to$ confirmation explicite de confiance $\to$ épinglage SHA-256 $\to$ import de module $\to$ génération $\to$ (optionnellement) délégation de l'entraînement à un hook propre au runtime. Le modèle de démonstration est volontairement non productif.
+
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python -m pytest -q tests/test_o944_python_adapter.py tests/test_o943_model_adapter_contracts.py --disable-warnings
+xvfb-run -a env PYTHONUNBUFFERED=1 python -m pytest -q --maxfail=20
+python -m aam_o93 preflight
+\end{verbatim}
+
+\subsection{Résultats et interprétation}
+Les tests ciblés finaux donnent 8 réussites. La suite complète donne 377 tests réussis, aucun échec, 5 avertissements et 21 sous-tests réussis en 190,01 s. Les avertissements sont visibles et se rapportent aux API TorchScript dépréciées \texttt{torch.jit.trace}, \texttt{torch.jit.trace\_method} et \texttt{torch.jit.load}. Le préflight postérieur au rafraîchissement du savepoint a retourné \texttt{PASS\_BOUNDED}. Une première assertion du harnais ciblé a utilisé un nom de champ erroné pour le compte de holdout; le registre garde cet incident et son retest réussi.
+
+\subsection{Conséquences et statut}
+\textbf{Théoriques :} l'adaptateur sépare le contrat AAM des détails propres au runtime. \textbf{Conceptuelles :} un adaptateur personnalisé est une extension contrôlée, non une importation universelle sans configuration. \textbf{Opérationnelles :} un module approuvé peut connecter un protocole/runtimes différent, mais son code s'exécute avec les permissions du processus et doit être inspecté/isoler par l'OS si nécessaire. Le P5 est \texttt{PASS\_BOUNDED}; les cinq avertissements restent à suivre. Cette campagne ne prouve pas l'accomplissement de tous les cas d'usage du système AAM intégral.
+
+\input{matrice_validation_cible_O94_4.tex}
+
+\end{document}

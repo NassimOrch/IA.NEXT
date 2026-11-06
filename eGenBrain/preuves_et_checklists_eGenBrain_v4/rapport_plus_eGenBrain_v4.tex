@@ -1,0 +1,476 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2.2cm}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{seqsplit}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\usepackage{microtype}
+\newcommand{\idcell}[1]{\texttt{\seqsplit{#1}}}
+\setlength{\emergencystretch}{2em}
+\tolerance=1600
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\title{Rapport expérimental approfondi sur eGenBrain v4\\\large Protocole préenregistré, résultats, anomalies et limites de validité}
+\author{Dossier expérimental reproductible}
+\date{24 octobre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Ce rapport documente l’examen de l’implémentation eGenBrain v4 par une campagne de tests numériques, relationnels, sémantiques, linguistiques et de contrôle des preuves. Le moteur d’inférence a été gelé pendant la campagne confirmatoire. Les réponses de référence ont été tenues à l’écart des runners, et les résultats — y compris abstentions, exceptions, sorties erronées et limites d’intégrité — sont conservés dans les fichiers bruts. La campagne primaire comprend deux jeux indépendants de 477 cas, cinq ablations appariées, quatre familles de suites auxiliaires et 6 678 enregistrements confirmatoires. Une extension indépendante ajoute 400 cas et 1 280 inférences. Le rapport décrit ce que ces expériences établissent sur le logiciel et les configurations mesurées; elles ne suffisent pas, à elles seules, à conclure à l’impossibilité ou à la possibilité d’une théorie générale de géométrie de maillage.
+\end{abstract}
+\tableofcontents
+\newpage
+
+\section{Résumé exécutif}
+\textbf{Objet.} Tester un moteur déjà existant sans injecter de réponses cibles, en distinguant application d’opérateurs intégrés, induction à partir d’exemples, composition relationnelle, révision, validation de certificats et comportement linguistico-sémantique.
+
+Le dossier d’audit confirme 6,678 lignes de la campagne confirmatoire primaire avant construction des vues effectives et 1,280 lignes de l’extension. Le certificat de fermeture et de correction de la vue de scoring porte sur 6,678 lignes immuables ou dérivées, sans ouverture de référence dans cette étape. L’extension a passé l’audit de fermeture avant son scoring. Les scores de la campagne primaire ont été calculés sur des vues appariées où seul le bloc de cinq lignes du cas DEPTH\_64\_1 par graine est remplacé par son rejeu préenregistré.
+
+\subsection{Principaux constats empiriques}
+\begin{itemize}[leftmargin=*]
+\item La configuration confirmatoire comporte cinq bras appariés : observations seules, fermeture de règles seule, opérateurs seuls, eGenBrain v4 complet, et opérateurs sans chargement de preuves de cas. Toutes les configurations traitent les mêmes requêtes de chaque graine.
+\item Dans l’expérience d’induction numérique, la désactivation réelle de l’opérateur conduit à des exceptions dans le moteur gelé; les exemples fournis ne changent pas cette sortie. Les résultats à opérateur actif valident le chemin de calcul déjà disponible, non l’apprentissage de cette opération.
+\item Les unités et entités opaques sont générées après gel du moteur. Les conversions uniques peuvent être transférées; les contradictions de facteur doivent être analysées séparément des cas où une primitive manque.
+\item Les tests de révision observent l’abstention après retrait de support, mais aussi la persistance de lignes dérivées obsolètes dans la base. Le test de conflit booléen rencontre une exception de parseur d’activation structurée.
+\item Le vérificateur indépendant détecte une altération de dimensions que le vérificateur intégré accepte. Les tests de certificat de composition qui n’obtiennent pas de certificat sont non évaluables, pas réussis.
+\item Les expériences linguistiques séparent les preuves du maillage, la réponse textuelle et le fallback de récupération. Un résultat textuel plausible ne vaut pas, à lui seul, une preuve certifiée.
+\end{itemize}
+\textbf{Prudence d’interprétation.} Ces observations portent sur la version, les interfaces, les jeux, les règles et les ressources explicitement testés. Elles ne déterminent pas le potentiel maximal de la théorie.
+
+\section{Question de recherche et critères épistémiques}
+Le but n’était pas de démontrer d’avance le succès ou l’échec. Chaque capacité a été associée à un comportement observable, à un contrôle négatif et à un critère de scoring distinct. En particulier : (i) une opération utilisée n’est pas une opération apprise; (ii) un nouveau nom n’est pas une nouvelle structure; (iii) appliquer une règle fournie n’est pas induire une règle; (iv) une chaîne de dérivation correcte n’implique pas une bonne révision; (v) un certificat produit par le moteur ne constitue pas une vérification indépendante; (vi) un texte de réponse correct n’est pas la même mesure qu’une conséquence logique établie.
+
+Les abstentions sont scorées selon leur cible lorsqu’un cas est non identifiable, qu’une primitive manque ou qu’un monde ouvert ne fournit pas d’élément suffisant. Les exceptions sont conservées telles quelles et ne sont pas converties en abstentions.
+
+\section{Provenance des artefacts et gel de version}
+\subsection{Identités et empreintes}
+\small\setlength{\tabcolsep}{3pt}
+\begin{longtable}{p{0.34\textwidth}p{0.56\textwidth}}
+\toprule Artefact & Identité / empreinte SHA-256 \\
+\midrule
+
+Moteur Mesh v4 & \texttt{\seqsplit{adff00309cfbd31dc3b5c2690ced54a0f8b854873a8a1ee65a09dc97dea9e103}} \\
+Entrée eGenBrain v4 & \texttt{\seqsplit{c9ef196f1ba74c9042185ce9a02906e372935477794456609de4ec78b0c520c0}} \\
+Base de runtime restaurée & \texttt{\seqsplit{736a953b0350f1212bf87c2e46dceba1a68b0ff9797d5ec07214bb87526842ea}} \\
+Protocole confirmatoire primaire & \texttt{\seqsplit{7db515998086faa061a8a3535d6f0aa9514ff0fef527972fde335bd03fa08e8b}} \\
+Protocole extension & \texttt{\seqsplit{263051635206a5ae971344e4d4802453d9b4194cd869c91ac61aa0a8776df1b8}} \\
+Vue effective appariée v2 & \texttt{\seqsplit{5f6945f6611d87773fe8611f2819904e44ce656d017e04c1f2362636e09ce815}} \\
+Vue effective appariée v3 & \texttt{\seqsplit{721d526f101098d829b7799e30a45f3c281e54d8ad2dc2e722d8cf55db38211a}} \\
+Audit de fermeture extension & \texttt{\seqsplit{38d3a16978e95a5fe733d5c8b6a5fc5822bef070060d8711e67a0330aebcea21}} \\
+Certificat de fermeture de scoring primaire & \texttt{\seqsplit{523a352179b86072cb226649d442fc9d3cc40bf5229591a4111637c39ca53568}} \\
+Audit indépendant SQLite final & \texttt{\seqsplit{29a42f2b9513d7eef9f55937149a4ae1aac1a3cd3224baf82c8abc9265c144dc}} \\
+Reçu de vérification de l’archive SQLite & \texttt{\seqsplit{9b30045747c8bc4c2563604e2b497a7740e6338624e775bea3faf478d60ce559}} \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+La base runtime contient 1 648 779 264 octets. Les archives originales ont été conservées; le code exécuté pour les expériences utilise le moteur gelé dont l’empreinte est reportée ci-dessus. Aucun changement du moteur de base n’a été introduit pendant les mesures confirmatoires. Les replays de correction n’ont changé ni les requêtes, ni les cibles, ni le moteur : ils ont remplacé dans la seule vue analytique les cinq sorties d’un même cas par graine, suivant un protocole horodaté et hashé avant scoring.
+
+\subsection{Restauration et tests de régression}
+
+Le réassemblage du runtime correspond au hash attendu. La suite restaurée a découvert 136 tests : 133 réussis et 3 ignorés; les tests ignorés nécessitent la base MG héritée absente du bundle de source. Ce résultat n’est donc pas présenté comme un passage complet de tous les tests. Le contrôle SQLite de la nouvelle copie avait dépassé la limite de temps lors de P0; le reçu d’installation antérieur au hash identique indique \texttt{integrity\_check=ok} et zéro violation de clé étrangère.
+
+\section{Plan expérimental et protocole de séparation des données}
+\subsection{Campagne confirmatoire primaire}
+Le protocole primaire fixe deux graines/jeux indépendants (v2 et v3), 477 cas par jeu, neuf familles de cas et cinq modes appariés. Cela donne 2 385 inférences appariées par graine. Les suites auxiliaires comprennent, pour chaque graine, 480 essais d’induction numérique, 300 essais de transfert d’unités, cinq tests de révision, 17 tests de certificats et 152 lignes d’intégration linguistique. Au total : 3 339 lignes par graine, soit 6 678 enregistrements confirmatoires.
+
+\small\setlength{\tabcolsep}{2pt}
+\begin{longtable}{p{0.22\textwidth}r p{0.60\textwidth}}
+\toprule Suite & Lignes / graine & Finalité \\
+\midrule
+
+Ablation appariée & 2385 & Même cas et même requête dans les cinq bras. \\
+Induction arithmétique & 480 & Addition et multiplication : opérateur activé/désactivé, avec/sans exemples. \\
+Nouvelles unités & 300 & Noms générés après gel : facteur unique, facteur manquant, conflit. \\
+Révision du maillage & 5 & Suppression, modification, contradictions booléennes et d’unités. \\
+Certificats & 17 & Cas valides, cas limites, mutations adversariales, vérificateur distinct. \\
+Intégration linguistique & 152 & Sémantique relationnelle et questions de quantité en deux modes. \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+\subsection{Extension de couverture préenregistrée}
+Après l’audit de fermeture de la campagne primaire, une extension indépendante couvre 80 cas structurels par graine et 120 cas linguistiques par graine. Les cas structurels ont cinq modes (400 lignes par graine); les cas linguistiques ont deux modes (240 lignes par graine). L’extension totalise 400 cas publics et 1 280 inférences. Les cibles de l’extension demeuraient scellées pendant l’inférence et n’ont été ouvertes qu’après son audit propre. Cette extension est rapportée séparément, car elle a été préparée plus tard pour améliorer la couverture d’induction structurelle, de négation, de paraphrase et de monde ouvert.
+
+\subsection{Fermeture des réponses de référence}
+Les fichiers de cas publics ne contiennent pas de champ de cible. Les générateurs et runners n’ont pas de chemin vers les références scellées et enregistrent explicitement qu’aucune référence n’a été chargée ni consultée par l’inférence. Les auditeurs vérifient les empreintes de cas, les questions, les lignes de résultats, les modes appariés et les bases SQLite avant le scoring. Les références ne sont ouvertes que dans le scorer après passage de l’audit correspondant. Les empreintes et permissions des fichiers scellés sont archivées.
+
+\subsection{Déviation pilote à ne pas masquer}
+Dans la phase pilote, le scorer de P2 a ouvert le fichier de référence avant que toutes les autres familles pilotes soient terminées. Le moteur et les cas étaient gelés; aucune cible n’a été transmise au modèle, et les scripts n’ont pas été modifiés à partir des valeurs ouvertes. Il s’agit néanmoins d’une déviation de procédure (PDEV-001). Les scores P2/P3 sont présentés comme résultats pilotes exploratoires, et non comme le seul socle confirmatoire. Le protocole confirmatoire v2/v3 et l’extension ont conservé leurs références fermées jusqu’à leur fermeture complète des bruts.
+
+\section{Méthodes de scoring et analyses statistiques}
+Les résultats numériques sont comparés comme valeurs décimales exactes lorsque la sortie est structurée; les statuts de sortie sont pris en compte. Les cas positifs attendent un résultat dérivé/matché de la bonne classe; les cas de primitive manquante, de conflit ou de monde ouvert attendent l’abstention ou un conflit explicitement exposé selon la cible. L’heuristique d’extraction de texte est rapportée distinctement de la preuve Mesh.
+
+Pour les scores binaires, les intervalles de Wilson à 95\% sont calculés sur le nombre de cas et la proportion observée. Les ablations utilisent exactement les mêmes identifiants et hashes de requête. Le test exact de McNemar est reporté pour les paires où eGenBrain v4 complet est comparé à chaque ablation; les égalités sont conservées. Ces tests sont descriptifs de ces jeux synthétiques, non une garantie de validité externe. Les temps de profondeur incluent la fermeture de règles dans l’implémentation gelée, et sont rapportés en durées mesurées plutôt qu’en complexité asymptotique estimée.
+
+\section{Expérience A — apprentissage d’opérations depuis des exemples}
+\subsection{Question et facteurs manipulés}
+Pour addition puis multiplication, le moteur reçoit les primitives numériques, des équations d’apprentissage et des requêtes portant sur des combinaisons de test. Quatre bras sont comparés : opérateur désactivé avec exemples, désactivé sans exemples, activé avec exemples, activé sans exemples. Le contrôle à opérateur actif mesure l’application de l’opérateur existant; les deux bras désactivés constituent le test d’induction demandé.
+
+\subsection{Pilote P2}
+Le pilote comporte 480 lignes. Les deux opérations sont correctes dans 60/60 cas avec l’opérateur actif, avec comme sans exemples. Lorsque l’opérateur est désactivé, les 120 cas par opération terminent en exception \texttt{ValueError: operator\_not\_registered\_or\_disabled}, y compris lorsque les équations d’entraînement sont présentes. Les exemples n’ont donc modifié aucun résultat observable dans cette configuration. Il s’agit d’un constat du chemin d’exécution v4 gelé; ce n’est pas une démonstration que l’induction d’opérateurs serait théoriquement impossible.
+
+\subsection{Confirmation sur deux jeux indépendants}
+\scriptsize\setlength{\tabcolsep}{2pt}
+\begin{longtable}{p{0.08\textwidth}p{0.27\textwidth}rrrrr}
+\toprule Opération & Bras & $n$ & Exact & Taux & Exceptions & Abstentions \\
+\midrule
+
+add & disabled\_with\_examples & 120 & 0 & 0.0\% & 120 & 0 \\
+add & disabled\_without\_examples & 120 & 0 & 0.0\% & 120 & 0 \\
+add & enabled\_with\_examples & 120 & 120 & 100.0\% & 0 & 0 \\
+add & enabled\_without\_examples & 120 & 120 & 100.0\% & 0 & 0 \\
+multiply & disabled\_with\_examples & 120 & 0 & 0.0\% & 120 & 0 \\
+multiply & disabled\_without\_examples & 120 & 0 & 0.0\% & 120 & 0 \\
+multiply & enabled\_with\_examples & 120 & 120 & 100.0\% & 0 & 0 \\
+multiply & enabled\_without\_examples & 120 & 120 & 100.0\% & 0 & 0 \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+Le contraste entre opérateur actif/inactif identifie une différence d’implémentation mesurable. Le résultat de l’opérateur actif ne doit pas être interprété comme preuve d’apprentissage : le bras avec et sans exemples donne les mêmes sorties. Le modèle de base n’a pas construit de procédure générale observable à partir des seules équations sous désactivation.
+
+\section{Expérience B — transfert à des primitives inédites}
+
+Les noms d’unité et d’entité sont opaques et sont générés après le gel du moteur. Trois conditions sont distinctes : une conversion unique disponible, primitive de conversion manquante, facteurs de conversion contradictoires. Le cas positif mesure si la relation de conversion, non le nom, est utilisée; le cas manquant vérifie l’abstention; le cas contradictoire vérifie que la cohérence des prémisses est contrôlée.
+
+\scriptsize\setlength{\tabcolsep}{1.5pt}
+\begin{longtable}{p{0.18\textwidth}p{0.20\textwidth}rrrrr}
+\toprule Classe cible & Bras & $n$ & Exact & Taux & Abstentions & Faux acceptés \\
+\midrule
+
+Valeur numérique & Observations seules & 60 & 0 & 0.0\% & 60 & 0 \\
+Valeur numérique & Fermeture seule & 60 & 0 & 0.0\% & 60 & 0 \\
+Valeur numérique & Opérateurs seuls & 60 & 60 & 100.0\% & 0 & 0 \\
+Valeur numérique & V4 complet & 60 & 60 & 100.0\% & 0 & 0 \\
+Valeur numérique & Sans faits de cas & 60 & 0 & 0.0\% & 60 & 0 \\
+Primitive absente & Observations seules & 30 & 30 & 100.0\% & 30 & 0 \\
+Primitive absente & Fermeture seule & 30 & 30 & 100.0\% & 30 & 0 \\
+Primitive absente & Opérateurs seuls & 30 & 30 & 100.0\% & 30 & 0 \\
+Primitive absente & V4 complet & 30 & 30 & 100.0\% & 30 & 0 \\
+Primitive absente & Sans faits de cas & 30 & 30 & 100.0\% & 30 & 0 \\
+Facteurs en conflit & Observations seules & 30 & 30 & 100.0\% & 30 & 0 \\
+Facteurs en conflit & Fermeture seule & 30 & 30 & 100.0\% & 30 & 0 \\
+Facteurs en conflit & Opérateurs seuls & 30 & 0 & 0.0\% & 0 & 30 \\
+Facteurs en conflit & V4 complet & 30 & 0 & 0.0\% & 0 & 30 \\
+Facteurs en conflit & Sans faits de cas & 30 & 30 & 100.0\% & 30 & 0 \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+Le pilote P3 avait déjà observé un transfert exact sur les conversions uniques et les abstentions sur conversion manquante, mais une acceptation numérique dans les cas de facteurs contradictoires par les bras \texttt{operators\_only} et \texttt{full\_v4}. La confirmation utilise deux graines et plusieurs noms indépendants; les résultats précis figurent ci-dessus. Un nouveau nom à valeur/échelle fournie ne démontre pas l’induction de la relation d’échelle : il mesure l’application/transfert de la primitive explicitement fournie.
+
+\section{Expérience C — provenance, cibles scellées et intégrité}
+
+Le protocole primaire possède deux fichiers publics de 477 et 477 cas. Le contrôle de complétude a fermé 6678 enregistrements bruts avant scoring. Le rapport de fermeture initial a relevé un seul problème d’artefact : \texttt{v2:paired:database\_hash\_mismatch\_line\_249}, correspondant à ENVEXP-010. Le hash du résultat JSON et ses champs d’inférence restaient valides, mais la base pointée avait été écrasée par une collision d’orchestration. Le rejeu préenregistré a recalculé les cinq modes de DEPTH\_64\_1 pour v2 et v3 dans des bases isolées, sans changer la référence, les requêtes ou le moteur.
+La vue analytique v2 comporte 2385 lignes et la vue v3 2385; les empreintes sont \texttt{\seqsplit{5f6945f6611d87773fe8611f2819904e44ce656d017e04c1f2362636e09ce815}} et \texttt{\seqsplit{721d526f101098d829b7799e30a45f3c281e54d8ad2dc2e722d8cf55db38211a}}. L’audit effectif est PASS; les originaux restent immuables et leur anomalie figure toujours dans l’audit initial. Le scorer a revalidé le certificat de fermeture avant d’ouvrir les références.
+
+\subsection{Audit indépendant final et archivage SQLite}
+Le dernier audit indépendant a le statut \texttt{PASS\_WITH\_DOCUMENTED\_HISTORICAL\_ANOMALIES}. Il vérifie les empreintes des sources exécutées, les hashes des JSONL bruts et des vues de scoring, l’unicité de chaque couple (cas, mode), ainsi que les contrôles SQLite des contenus référencés. Le registre indépendant documente chaque contenu SQLite distinct et son résultat de contrôle.
+
+Les 4476 contenus SQLite représentent 1\,326\,637\,056 octets et 4476 hashes distincts. 4475 ont été vérifiés en lecture seule sur l’original; 1 a nécessité une copie temporaire isolée avec son journal de rollback, sans modifier l’original. Les 4476 contrôles ont renvoyé \texttt{integrity\_check=ok} et zéro violation de clé étrangère
+
+L’archive \texttt{/mnt/data/bases\_sqlite\_eGenBrain\_v4\_exp.tar.zst} contient 4478 fichiers (bases et sidecars), soit 1\,326\,695\,536 octets non compressés. Elle passe \texttt{zstd -t} et la comparaison octet à octet tar/source; taille compressée 111\,123\,760 octets, SHA-256 \texttt{\seqsplit{e652a6166012d35cda3fcf750a1fb5397e8e6b5ed1f0ed563bcb85bc15175abd}}. Les reçus sont \texttt{logs/database\_archive\_verification.json} et \texttt{database\_archive\_manifest.json}. Un succès de contrôle d’intégrité des fichiers ne constitue pas une preuve de justesse du raisonnement
+
+Empreintes des reçus indépendants : audit SQLite \texttt{\seqsplit{29a42f2b9513d7eef9f55937149a4ae1aac1a3cd3224baf82c8abc9265c144dc}}; reçu d’archive \texttt{\seqsplit{9b30045747c8bc4c2563604e2b497a7740e6338624e775bea3faf478d60ce559}}.
+
+\subsection{Métadonnée de révision v3}
+L’audit a émis un avertissement pour la ligne 4 du fichier de révision v3 : le format brut de ce test ne sérialise pas un champ d’intégrité identique aux autres suites. La base existe, son empreinte correspond à celle de la ligne, \texttt{PRAGMA integrity\_check} renvoie \texttt{ok} et \texttt{foreign\_key\_check} ne trouve aucune violation. L’événement est donc classé comme lacune de métadonnée, pas comme corruption SQLite. Il est conservé dans les checklists.
+
+\subsection{Provenance des entrées}
+Les cas publics représentent les faits/règles à fournir et portent des empreintes d’entrée. Les cibles restent dans des fichiers séparés et en permission restreinte. Le code d’inférence ne contient pas de chargement des cibles. Les audits statiques vérifient aussi que les réponses à tester ne sont pas déjà un triplet factuel direct dans les jeux structurels. Ces contrôles établissent une séparation logicielle et traçable des fichiers; ils ne prouvent pas l’absence absolue de toute corrélation accidentelle dans des données synthétiques, raison pour laquelle les audits sémantiques post-scoring restent nécessaires.
+
+\section{Expérience D — ablation appariée et comparaison de modes}
+Chaque requête est exécutée dans les cinq configurations ci-dessous; l’ordre et les données publiques sont identiques à l’intérieur d’un cas. Les cas appartiennent à neuf familles : composition de profondeur, induction opératoire, transfert d’unités, composition relationnelle, composition de relations sémantiques, taxonomie sémantique, sémantique linguistique, questions de quantité en langue naturelle et faits contradictoires.
+
+\scriptsize\setlength{\tabcolsep}{1.5pt}
+\begin{longtable}{p{0.16\textwidth}rrrp{0.13\textwidth}rrr}
+\toprule Mode & $n$ & Corr. & Taux & IC 95\% & Exc. & Abst. & Faux + \\
+\midrule
+
+Observations seules & 954 & 224 & 23.5\% & [20.9\%, 26.3\%] & 60 & 894 & 0 \\
+Fermeture seule & 954 & 466 & 48.8\% & [45.7\%, 52.0\%] & 60 & 652 & 0 \\
+Opérateurs seuls & 954 & 533 & 55.9\% & [52.7\%, 59.0\%] & 60 & 525 & 30 \\
+V4 complet & 954 & 775 & 81.2\% & [78.6\%, 83.6\%] & 60 & 283 & 30 \\
+Sans faits de cas & 954 & 464 & 48.6\% & [45.5\%, 51.8\%] & 60 & 654 & 0 \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+\subsection{Scores par famille}
+Le tableau suivant affiche la proportion exacte sur le même ensemble de cibles pour les cinq modes. Le dénominateur de chaque case compte les deux graines combinées; les exceptions restent des réponses incorrectes, sauf si le protocole de la cible attendait explicitement l’abstention, auquel cas elles restent tout de même distinctes et non considérées comme abstention.
+\scriptsize\setlength{\tabcolsep}{1.5pt}
+\begin{longtable}{p{0.18\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}}
+\toprule Famille & Obs. & Fermeture & Opérateurs & V4 complet & Sans faits \\
+\midrule
+
+Faits contradictoires & 0/60 (0.0\%) & 0/60 (0.0\%) & 0/60 (0.0\%) & 0/60 (0.0\%) & 0/60 (0.0\%) \\
+Composition profonde & 0/42 (0.0\%) & 42/42 (100.0\%) & 0/42 (0.0\%) & 42/42 (100.0\%) & 0/42 (0.0\%) \\
+Induction opératoire & 0/240 (0.0\%) & 0/240 (0.0\%) & 240/240 (100.0\%) & 240/240 (100.0\%) & 240/240 (100.0\%) \\
+Relations sémantiques & 0/60 (0.0\%) & 60/60 (100.0\%) & 0/60 (0.0\%) & 60/60 (100.0\%) & 0/60 (0.0\%) \\
+Quantités en langue naturelle & 0/80 (0.0\%) & 0/80 (0.0\%) & 39/80 (48.8\%) & 39/80 (48.8\%) & 0/80 (0.0\%) \\
+Sémantique linguistique & 24/72 (33.3\%) & 24/72 (33.3\%) & 24/72 (33.3\%) & 24/72 (33.3\%) & 24/72 (33.3\%) \\
+Composition relationnelle & 80/160 (50.0\%) & 160/160 (100.0\%) & 80/160 (50.0\%) & 160/160 (100.0\%) & 80/160 (50.0\%) \\
+Taxonomie sémantique & 60/120 (50.0\%) & 120/120 (100.0\%) & 60/120 (50.0\%) & 120/120 (100.0\%) & 60/120 (50.0\%) \\
+Transfert d’unités inédites & 60/120 (50.0\%) & 60/120 (50.0\%) & 90/120 (75.0\%) & 90/120 (75.0\%) & 60/120 (50.0\%) \\
+TOTAL & 224/954 (23.5\%) & 466/954 (48.8\%) & 533/954 (55.9\%) & 775/954 (81.2\%) & 464/954 (48.6\%) \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+\subsection{Comparaison appariée de eGenBrain v4 complet}
+\scriptsize\setlength{\tabcolsep}{1.5pt}
+\begin{longtable}{p{0.15\textwidth}rrrrp{0.13\textwidth}p{0.26\textwidth}}
+\toprule Comparaison & $n$ & V4 + & Autre + & Égal. & Taux V4 & McNemar exact \\
+\midrule
+
+Observations seules & 954 & 581 & 30 & 343 & 60.9\% & v2: <0,001; v3: <0,001 \\
+Fermeture seule & 954 & 339 & 30 & 585 & 35.5\% & v2: <0,001; v3: <0,001 \\
+Opérateurs seuls & 954 & 242 & 0 & 712 & 25.4\% & v2: <0,001; v3: <0,001 \\
+Sans faits de cas & 954 & 341 & 30 & 583 & 35.7\% & v2: <0,001; v3: <0,001 \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+L’ablation mesure une contribution de composants dans ce protocole particulier. Elle ne démontre pas que le maillage pris isolément est supérieur ou inférieur dans toutes les tâches : les familles varient fortement et certaines requêtes exigent un opérateur, une règle, une absence de connaissance, ou la capacité de traiter une contradiction. Les résultats par famille sont donc plus informatifs qu’une seule moyenne globale.
+
+\section{Expérience E — conflits, retrait et révision}
+
+Les cinq tests de comportement couvrent : retrait d’un soutien unique, retrait de tous les soutiens, modification d’une prémisse, contradiction booléenne, contradiction entre échelles d’unité. Ils sont réalisés séparément sur deux graines. Les lignes de données montrent que, après retrait, le statut de requête post-retrait devient \texttt{ABSTAIN}; en même temps \texttt{derived\_fact\_persisted=true} demeure dans la base. Ainsi, la réponse active est devenue prudente, mais la base contient encore un dérivé périmé qui n’a pas été physiquement invalidé. Pour la modification de prémisse, les réponses anciennes/nouvelles et les dépendances sont gardées dans le brut plutôt que réduites à un unique verdict.
+
+\scriptsize\setlength{\tabcolsep}{1.5pt}
+\begin{longtable}{p{0.06\textwidth}p{0.29\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}}
+\toprule Graine & Test & Statut avant & Statut après & Dérivé périmé signalé \\
+\midrule
+
+v2 & Retrait d’un soutien & MESH\_DERIVED & ABSTAIN & True \\
+v2 & Retrait de tous soutiens & MESH\_DERIVED & ABSTAIN & True \\
+v2 & Modification prémisse & ABSTAIN & MESH\_DERIVED & n/a \\
+v2 & Conflit booléen & n/a & n/a & n/a \\
+v2 & Conflit d’échelle & n/a & ABSTAIN & n/a \\
+v3 & Retrait d’un soutien & MESH\_DERIVED & ABSTAIN & True \\
+v3 & Retrait de tous soutiens & MESH\_DERIVED & ABSTAIN & True \\
+v3 & Modification prémisse & ABSTAIN & MESH\_DERIVED & n/a \\
+v3 & Conflit booléen & n/a & n/a & n/a \\
+v3 & Conflit d’échelle & n/a & ABSTAIN & n/a \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+Le test structuré de conflit booléen lève une exception d’activation avant la résolution du conflit; le code exact est disponible dans les sorties brutes. Cette ligne ne doit pas être interprétée comme une incapacité à résoudre la contradiction sémantique : la requête a échoué dans la couche de parseur/activation avant que la résolution du conflit puisse être observée. Le conflit d’échelle unitaires produit une abstention dans le test comportemental; la suite d’unités en confirme les acceptations erronées sous certains prompts de coût. Les deux modes d’essai interrogent des chemins d’entrée distincts et doivent être analysés conjointement.
+
+\section{Expérience F — composition profonde et découverte structurelle}
+\subsection{Profondeur des chaînes de dérivation}
+Les cas sont répétés aux profondeurs 32 et 64 avec trois variantes par niveau de profondeur et deux jeux indépendants. La profondeur 64 génère, dans la base observée en fermeture, 2 080 faits relationnels sur 65 nœuds et 43 680 dérivations enregistrées, pour une base d’environ 67 MiB. Les durées incluent l’exécution du chemin de fermeture et de requête, pas seulement le test final.
+
+\begin{longtable}{lrrrr}
+\toprule Mode & $n$ & Médiane & Minimum & Maximum \\
+\midrule
+
+observations\_only & 42 & 3.9 ms & 1.9 ms & 8.1 ms \\
+closure\_only & 42 & 431.5 ms & 7.2 ms & 7.95 min \\
+operators\_only & 42 & 3.8 ms & 1.9 ms & 18.1 ms \\
+full\_v4 & 42 & 393.5 ms & 6.5 ms & 4.97 min \\
+no\_case\_evidence & 42 & 2.9 ms & 0.8 ms & 7.8 ms \\
+\bottomrule
+\end{longtable}
+
+Les requêtes de profondeur 64 peuvent prendre plusieurs minutes; cette lenteur est un résultat mesuré de l’implémentation et de la structure de test, pas une preuve d’échec théorique. La campagne n’a pas réduit la profondeur pour contourner ce coût. Le rejeu correctif a lui-même pris environ 255 à 258 secondes pour \texttt{closure\_only} et \texttt{full\_v4} selon les graines, et ces durées ont été conservées.
+
+\subsection{Extension structurelle : règle donnée vs induction sans règle}
+L’extension structurelle préenregistre quatre sous-familles : composition de relation sans règle intermédiaire, contrôle positif avec une règle explicite, induction de transitivité sans règle, et motif non identifiable. Les lignes suivantes sont scorées sur les mêmes cas à travers cinq bras.
+\scriptsize\setlength{\tabcolsep}{1.5pt}
+\begin{longtable}{p{0.20\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}}
+\toprule Famille & Obs. & Fermeture & Opérateurs & Complet & Sans preuves \\
+\midrule
+
+Composition sans règle & 0/50 (0.0\%) & 0/50 (0.0\%) & 0/50 (0.0\%) & 0/50 (0.0\%) & 0/50 (0.0\%) \\
+Règle explicite (contrôle) & 0/30 (0.0\%) & 30/30 (100.0\%) & 0/30 (0.0\%) & 30/30 (100.0\%) & 0/30 (0.0\%) \\
+Transitivité sans règle & 0/50 (0.0\%) & 0/50 (0.0\%) & 0/50 (0.0\%) & 0/50 (0.0\%) & 0/50 (0.0\%) \\
+Motif non identifiable & 30/30 (100.0\%) & 30/30 (100.0\%) & 30/30 (100.0\%) & 30/30 (100.0\%) & 30/30 (100.0\%) \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+Le contrôle positif mesure l’application de la règle présente. Les familles « sans règle » constituent le test distinct d’induction structurelle. Un score correct sur le contrôle explicite ne suffit pas à montrer que le moteur construit la règle à partir d’exemples. Le cas non identifiable vérifie si l’abstention est préférable à une extrapolation non justifiée.
+
+\section{Expérience G — validation indépendante des certificats}
+
+Chaque graine contient 17 tests de certificats : valeurs décimales, grands nombres, zéro, nombre négatif, division, division par zéro, non-fini, incompatibilité dimensionnelle, altération de valeur, d’opérateur, de dimensions, hash invalide et tests de certificat composé par quantité. Les deux vérificateurs sont reportés séparément.
+
+\scriptsize\setlength{\tabcolsep}{1.4pt}
+\begin{longtable}{p{0.07\textwidth}p{0.17\textwidth}p{0.08\textwidth}p{0.09\textwidth}p{0.07\textwidth}p{0.21\textwidth}}
+\toprule Graine & Test & Intégr. & Indép. & Cible & Diagnostic \\
+\midrule
+
+v2 & Décimal valide & PASS & PASS & True & n/a \\
+v2 & Grand nombre & PASS & PASS & True & n/a \\
+v2 & Zéro & PASS & PASS & True & n/a \\
+v2 & Négatif & PASS & PASS & True & n/a \\
+v2 & Division valide & PASS & PASS & True & n/a \\
+v2 & Division par zéro & n/a & n/a & True & division par zéro \\
+v2 & Entrée non finie & n/a & n/a & True & n/a \\
+v2 & Dimensions incompatibles & n/a & n/a & True & incompatibilité : longueur vs temps \\
+v2 & Valeur altérée & FAIL & FAIL & True & n/a \\
+v2 & Opérateur altéré & FAIL & FAIL & True & n/a \\
+v2 & Dimensions altérées & PASS & FAIL & True & n/a \\
+v2 & Hash altéré & FAIL & FAIL & True & n/a \\
+v2 & Quantité composée valide & n/a & n/a & False & n/a \\
+v2 & Réponse composée altérée & n/a & n/a & False & n/a \\
+v2 & Dimensions composées altérées & n/a & n/a & False & n/a \\
+v2 & Échelles contradictoires & n/a & n/a & False & n/a \\
+v2 & Source falsifiée & n/a & n/a & False & n/a \\
+v3 & Décimal valide & PASS & PASS & True & n/a \\
+v3 & Grand nombre & PASS & PASS & True & n/a \\
+v3 & Zéro & PASS & PASS & True & n/a \\
+v3 & Négatif & PASS & PASS & True & n/a \\
+v3 & Division valide & PASS & PASS & True & n/a \\
+v3 & Division par zéro & n/a & n/a & True & division par zéro \\
+v3 & Entrée non finie & n/a & n/a & True & n/a \\
+v3 & Dimensions incompatibles & n/a & n/a & True & incompatibilité : longueur vs temps \\
+v3 & Valeur altérée & FAIL & FAIL & True & n/a \\
+v3 & Opérateur altéré & FAIL & FAIL & True & n/a \\
+v3 & Dimensions altérées & PASS & FAIL & True & n/a \\
+v3 & Hash altéré & FAIL & FAIL & True & n/a \\
+v3 & Quantité composée valide & n/a & n/a & False & n/a \\
+v3 & Réponse composée altérée & n/a & n/a & False & n/a \\
+v3 & Dimensions composées altérées & n/a & n/a & False & n/a \\
+v3 & Échelles contradictoires & n/a & n/a & False & n/a \\
+v3 & Source falsifiée & n/a & n/a & False & n/a \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+Résultat critique : pour \texttt{typed\_tampered\_dims}, le vérificateur intégré dit \texttt{PASS} alors que le vérificateur indépendant renvoie \texttt{FAIL: output\_dimensions\_mismatch}. Il ne faut pas considérer l’existence du vérificateur intégré comme suffisante pour assurer la correction des certificats. Les tests de quantité qui n’émettent pas de certificat consommable sont marqués non évaluables pour la vérification — ni réussite ni preuve contre la théorie. Les erreurs de division par zéro et d’addition de dimensions incompatibles produisent des exceptions visibles et sont conservées. La duplication de la classe de vérification à l’intérieur du moteur ne remplace donc pas un vérificateur indépendant, qui doit avoir des règles et tests autonomes.
+
+\section{Expérience H — compétence linguistique et sémantique}
+\subsection{Intégration principale}
+Les familles principales comprennent la sémantique relationnelle, les questions de quantité en langue naturelle, les conflits, l’abstention dans le monde ouvert et la paraphrase/implication telle que présentée dans les cas publics. Les scores de texte, la preuve du maillage et le fallback de récupération sont séparés dans le scoring.
+
+\small\setlength{\tabcolsep}{2.5pt}
+\begin{longtable}{p{0.20\textwidth}p{0.15\textwidth}rrrrrr}
+\toprule Famille & Mode & $n$ & Preuves & Taux & Texte exact & Taux & Fallback / exc. \\
+\midrule
+
+Sémantique NL & Avec faits & 72 & 0 & 0.0\% & 0 & 0.0\% & 72 / 0 \\
+Sémantique NL & Sans faits & 72 & 0 & 0.0\% & 0 & 0.0\% & 72 / 0 \\
+Quantités NL & Avec faits & 80 & 39 & 48.8\% & 39 & 48.8\% & 41 / 0 \\
+Quantités NL & Sans faits & 80 & 0 & 0.0\% & 0 & 0.0\% & 80 / 0 \\
+\bottomrule
+\end{longtable}
+\normalsize\setlength{\tabcolsep}{6pt}
+
+\subsection{Extension linguistico-sémantique}
+L’extension comprend des cas linguistiques de conflit, portée de négation, implication par paraphrase, et questions à réponse inconnue en monde ouvert. Deux bras sont comparés : avec les faits/règles de cas et sans ces preuves. Les résultats du scoring textuel ne sont pas fusionnés avec ceux d’une preuve Mesh.
+\small\setlength{\tabcolsep}{3pt}
+\begin{longtable}{p{0.24\textwidth}p{0.28\textwidth}p{0.28\textwidth}}
+\toprule Famille & Avec preuves de cas & Sans preuves de cas \\
+\midrule
+
+Conflit en langue & 0/40 (0.0\%) & 0/40 (0.0\%) \\
+Portée de négation & 0/40 (0.0\%) & 0/40 (0.0\%) \\
+Paraphrase / implication & 0/80 (0.0\%) & 0/80 (0.0\%) \\
+Inconnu en monde ouvert & 0/80 (0.0\%) & 0/80 (0.0\%) \\
+\bottomrule
+\end{longtable}
+
+Dans le détail, les 480 sorties de cette extension (deux graines, les quatre familles et les deux modes) sont toutes enregistrées comme \texttt{NO\_ASCR\_RESULTS}; le fallback est exécuté dans 480/480 cas, tandis que le nombre d’exceptions et le nombre de statuts d’abstention explicite sont tous deux 0. Aucun texte candidat n’est reconnu comme réponse correcte par le critère préenregistré (0/480). Il est important de ne pas transformer une réponse absente en abstention réussie, même pour les cas de monde ouvert : l’absence d’un résultat explicite est mesurée séparément et n’est pas assimilée à une réponse sémantique ou à un refus correctement formulé.
+
+Le test linguistique a donc un périmètre observable précis : la façon dont les règles structurées et les faits explicités pilotent l’inférence, les réponses textuelles générées par le système complet, les abstentions, et la récupération v3. Il ne s’agit pas encore d’une évaluation générale de compréhension libre de textes arbitraires; toute généralisation doit être limitée à la grammaire, aux constructions et aux distributions testées. Les audits pré-inférence et post-inférence ont vérifié que les réponses cibles ne figuraient pas dans les cas publics et que les références n’étaient pas ouvertes par les runners.
+
+\section{Anomalies et limites d’exécution consignées}
+Les anomalies suivantes restent explicites dans les registres et ne sont pas supprimées par le rapport :
+\begin{enumerate}[leftmargin=*]
+\item \textbf{PDEV-001 — unblinding pilote précoce.} Exclu de la lecture confirmatoire principale; détail conservé.
+\item \textbf{ENVEXP-010 — collision de runner et base v2 historique écrasée.} Un seul hash de base de la ligne 249 diverge. La ligne originale est conservée; cinq modes par graine sont rejoués dans un espace isolé; la vue dérivée et sa règle de remplacement sont auditées.
+\item \textbf{AUDIT-002 — métadonnée d’intégrité manquante sur une ligne de révision v3.} La base a réussi les contrôles SQLite effectifs, mais le format de la ligne ne contient pas le champ d’intégrité homologue. L’avertissement reste visible.
+\item \textbf{Parseur de conflit booléen.} Le joker structuré produit une exception avant résolution.
+\item \textbf{Dérivés persistants après retrait.} L’abstention post-retrait ne signifie pas que toutes les lignes dérivées anciennes ont été invalidées.
+\item \textbf{Vérification des dimensions des certificats.} Une altération de dimensions échappe au vérificateur intégré et est rejetée par le vérificateur indépendant.
+\item \textbf{Grammaire linguistique bornée.} La prise en charge de certaines questions de quantité dépend d’un patron regex limité et ne constitue pas une compréhension en langage libre.
+\item \textbf{Temps de fermeture profonde.} Les requêtes à profondeur 64 coûtent plusieurs minutes dans certains bras.
+\item \textbf{Tests de régression ignorés.} Trois tests attendent la mémoire MG héritée absente du bundle source; ils ne sont pas crédités comme réussis.
+\item \textbf{ENVEXP-013 — copie persistante SQLite avec journal chaud.} L’audit exhaustif en lecture seule a contrôlé 4\,476 fichiers SQLite : 4\,475 passent \texttt{integrity\_check=ok} et \texttt{foreign\_key\_check} sans violation. Une copie de sauvegarde profonde conserve un journal nécessitant une récupération; l’ouverture strictement en lecture seule refuse cette copie. La base et son journal originaux n’ont pas été modifiés. Une copie de travail isolée, récupérée selon le mécanisme SQLite, passe \texttt{integrity\_check=ok} avec zéro violation de clé étrangère. Cette copie d’archive n’est pas la source des scores effectifs, qui utilisent la base de rejeu séparée.
+\item \textbf{ENVEXP-012 — discordance temporaire entre source et rendu du rapport.} La clôture a détecté que le PDF précédemment compilé précédait une modification du source LaTeX. Le générateur a été corrigé, le PDF recompilé à partir du source courant, puis rendu page par page par PDFium; les livrables externes et les empreintes sont synchronisés. Aucun résultat ni fichier du moteur n’a été modifié.
+\end{enumerate}
+
+\section{Émergence et intérêt technique : portée de la nouveauté}
+La contribution d’ingénierie observable est l’assemblage d’un maillage relationnel persistant, d’une fermeture par règles explicites, d’opérateurs typés avec algèbre des dimensions, de provenance, de certificats vérifiables, d’abstention en monde ouvert et d’une intégration avec un système de récupération antérieur. La combinaison dans un système local exécutable et auditable peut être utile comme architecture expérimentale.
+
+En revanche, la composition de graphes, la généralisation structurelle, l’induction de règles logiques et la sémantique compositionnelle sont déjà des domaines de recherche établis. COGS et SLOG, par exemple, distinguent les combinaisons structurelles vues/non vues; les travaux sur l’induction de clauses de Horn traitent l’induction de règles comme une tâche distincte de leur application \cite{kimlinzen2020cogs,lislog2023,buntine1987}. La révision des croyances et la cohérence après changement de prémisses constituent aussi un champ séparé \cite{delgrande2003}. L’existence de composants assemblés dans eGenBrain v4 n’établit donc pas, à elle seule, une nouveauté scientifique globale. Pour conclure à une innovation scientifique distincte, il faudrait une revue systématique, une définition formelle comparative et des benchmarks publics répliqués par des équipes indépendantes.
+
+\section{Validité, menaces et interprétation}
+\subsection{Validité interne}
+Les hashes, références scellées, modes appariés, empreintes de requête, fichiers bruts non réécrits et vérifications SQLite constituent des contrôles internes. La déviation de pilote et le remplacement d’un bloc de cinq lignes sont documentés. Le score primaire utilise une vue dérivée, non l’altération silencieuse du journal historique. L’audit post-expérience a contrôlé les 4\,476 bases sous le répertoire de données : 4\,475 sont directement vérifiables en lecture seule; la seule copie nécessitant récupération a été conservée intacte et testée sur une copie séparée, sans réécrire les données originales.
+
+\subsection{Validité de construit}
+Des cas de maillage synthétiques et de profondeur contrôlée mesurent précisément certaines capacités algorithmiques mais ne représentent pas toute la diversité du langage ni toute la théorie. Le test d’opérateur désactivé ne mesure l’induction que si le moteur possède une voie effective de construction de procédure; ici, le résultat observé est une exception de résolution d’opérateur, et non une preuve conceptuelle d’impossibilité. Les noms d’unité inédits testent surtout le transfert de facteurs déclarés, pas l’invention de la conversion sans donnée.
+
+\subsection{Validité externe}
+Deux graines améliorent la reproductibilité mais ne remplacent pas un jeu de données réel et indépendant. Les données sont synthétiques et générées par un même protocole; les familles ne sont pas indépendantes au sens d’un grand corpus naturel annoté par plusieurs juges. Les conclusions linguistiques sont bornées aux patrons et classes de cible préenregistrés.
+
+\subsection{Interprétation théorique}
+Aucun résultat de cette campagne ne justifie de conclure que la théorie ne peut pas réussir, ni qu’elle a réussi au sens général. Les observations mettent en évidence les capacités atteintes par le moteur gelé, les problèmes d’interface et d’intégrité, ainsi que les capacités non démontrées par les tests actuels. Les mesures servent de base pour une version candidate corrigée, qui devra être évaluée sur un nouveau jeu d’essai non réutilisé.
+
+\section{Recommandations issues des mesures}
+\begin{enumerate}[leftmargin=*]
+\item Formaliser un appreneur de procédures général fondé sur les équations d’exemple et les primitives autorisées, puis tester sur des combinaisons et tailles numériques tenues à l’écart; conserver la version v4 gelée comme baseline.
+\item Ajouter une règle de cohérence pour plusieurs facteurs unitaires qui entrent en conflit, sans supposer qu’un facteur trouvé en premier est correct.
+\item Introduire une gestion de dépendances pour rétracter ou marquer périmées les conclusions dérivées quand une prémisse disparaît ou change, et ajouter des invariants de recalcul.
+\item Utiliser un vérificateur de certificat indépendant comme autorité de validation, avec cohérence des dimensions et tests adversariaux complets pour les certificats de quantité.
+\item Définir une grammaire sémantique explicite pour négation, portée, paraphrase, questions inconnues et conflits, puis la comparer à l’intégration avec récupération v3. Mesurer séparément compréhension de la langue, extraction structurée, déduction et génération textuelle.
+\item Optimiser la fermeture profonde après avoir conservé la mesure de base : profilage des jointures, index adaptés et instrumentation du nombre de faits/dérivations. Toute version optimisée doit être comparée avec le même corpus gelé et une réplique indépendante.
+\item Faire répliquer ces tests par une implémentation ou une équipe distincte et ajouter un corpus naturel en aveugle; une synthèse automatique de cas n’élimine pas le risque de biais du générateur.
+\end{enumerate}
+
+Ces recommandations indiquent la suite méthodologique sans préjuger du potentiel de la théorie. Toute correction du moteur doit vivre dans un artefact versionné différent; elle ne remplace pas les résultats v4 conservés ici.
+
+\section{Références méthodologiques}
+\begin{thebibliography}{9}
+\bibitem{kimlinzen2020cogs} N. Kim et T. Linzen. \emph{COGS: A Compositional Generalization Challenge Based on Semantic Interpretation}. EMNLP, 2020. \url{https://aclanthology.org/2020.emnlp-main.731/}.
+\bibitem{lislog2023} B. Li, L. Donatelli, A. Koller, T. Linzen, Y. Yao et N. Kim. \emph{SLOG: A Structural Generalization Benchmark for Semantic Parsing}. EMNLP, 2023. \url{https://aclanthology.org/2023.emnlp-main.194/}.
+\bibitem{buntine1987} W. Buntine. \emph{Induction of Horn clauses: methods and the plausible generalization algorithm}. International Journal of Man-Machine Studies, 26, 1987, p. 499--519. doi:10.1016/S0020-7373(87)80084-6.
+\bibitem{delgrande2003} J. P. Delgrande et T. Schaub. \emph{A consistency-based approach to belief change}. Artificial Intelligence, 151(1--2), 2003. doi:10.1016/S0004-3702(03)00111-5.
+\bibitem{song2025} J. Song, Z. Xu et Y. Zhong. \emph{Out-of-distribution generalization via composition: A lens through induction heads in Transformers}. PNAS, 122(6), 2025. doi:10.1073/PNAS.2417182122.
+\end{thebibliography}
+
+\clearpage
+\appendix
+\section{Fichiers de preuve et reproductibilité}
+Le dossier d’accompagnement comprend : les deux protocoles verrouillés et leurs reçus, scripts de génération et d’inférence, sorties brutes complètes, vues effectives, références scellées, rapports d’audit, résultats scorés au niveau des lignes, bases SQLite utilisées, checklists, journaux, manifestes et checkpoints. \texttt{chemins\_exp\_v4.json} pointe vers la racine de travail et \texttt{sav\_exp\_v4}. Les sommes SHA-256 de l’archive finale sont fournies à côté de cette source LaTeX.
+
+Les fichiers JSONL bruts sont la source de vérité des sorties de chaque run. Les fichiers JSON de scoring sont des dérivés calculés à partir de ces sorties et des références seulement après passage de l’audit. Les snapshots \texttt{sav\_exp\_v4} ne remplacent pas les fichiers originaux : ils constituent des points de reprise et des reçus de vérification.
+
+\subsection{Inventaire et statut des livrables}
+\begin{itemize}[leftmargin=*]
+\item Rapport source : \texttt{rapport\_plus\_eGenBrain\_v4.tex}.\newline Rendu final : \texttt{rapport\_plus\_eGenBrain\_v4.pdf}.
+\item Protocoles primaires : \idcell{experiments/confirmatory\_v2/protocol\_confirmatory\_v2.json} et le protocole d’extension \idcell{experiments/confirmatory\_extension\_v1/extension\_protocol\_v1.json}.
+\item Sorties : \texttt{results/raw/}, y compris les journaux originaux immuables, les replays préenregistrés et les vues effectives séparées; \texttt{results/scored/} contient les résumés et scores au niveau de chaque ligne. Le contrôle exhaustif SQLite est archivé dans \texttt{logs/sqlite\_full\_integrity\_audit.json} et son détail ligne par ligne dans \texttt{logs/sqlite\_full\_integrity\_audit.jsonl}; la récupération en copie isolée est décrite dans \texttt{logs/sqlite\_hot\_journal\_recovery\_audit.json}.
+\item Audit : \texttt{logs/}, les bases SQLite sous \texttt{results/databases/}, les scripts d’expérience et le manifeste d’intégrité de l’archive accompagnante.
+\item Checklists : \texttt{checklist\_de\_travail\_exp\_v4.json}, \texttt{checklist\_de\_travail\_geo\_maillage\_0.json}, \texttt{checklist\_erreurs\_model.json}, \texttt{checklist\_erreurs\_no\_model.json} et \texttt{chemins\_exp\_v4.json}.
+\end{itemize}
+
+\subsection{Reproduction minimale}
+Depuis la racine de travail, les deux commandes reproductibles sont :
+{\footnotesize
+\begin{verbatim}
+python experiments/generate_report_plus_eGenBrain_v4.py
+latexmk -pdf -outdir=report_build rapport_plus_eGenBrain_v4.tex
+\end{verbatim}
+}
+Les scripts de scoring et leurs protocoles sont archivés à côté des sorties brutes. Les empreintes et les comptes de lignes publiés dans le rapport doivent être comparés aux JSON d’audit avant toute nouvelle analyse.
+
+\subsection{État de la base évaluée}
+Aucun fichier du moteur eGenBrain v4 n’a été modifié. Les anomalies observées sur l’induction des opérateurs, la cohérence d’unités, la révision, le parseur booléen, les certificats et l’intégration linguistique restent ouvertes dans le registre d’erreurs du modèle. Une version candidate corrigée éventuelle doit conserver v4 comme baseline et être testée sur un jeu indépendant nouvellement scellé.
+
+\end{document}
+

@@ -1,0 +1,124 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,microtype}
+\usepackage[margin=2.35cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,tabularx}
+\usepackage{xcolor,hyperref}
+\definecolor{blueNG}{HTML}{174A70}
+\hypersetup{colorlinks=true,linkcolor=blueNG,urlcolor=blueNG,pdftitle={Formalisation expérimentale d'une sonde adaptative NGeGenBrain}}
+\newtheorem{definition}{Définition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Théorème}
+\newtheorem{remark}{Remarque}
+\title{\textbf{Formalisation d'une sonde adaptative}\\[.3em]\large Extension expérimentale compatible avec le formalisme observationnel NGeGenBrain}
+\author{Dossier expérimental NGeGenBrain}
+\date{28 octobre 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Ce document définit une extension expérimentale d'une sonde d'observation vers un opérateur paramétré et apprenant. Il distingue la définition observationnelle de la sonde, le mécanisme qui adapte ses paramètres, l'apprentissage d'une règle d'adaptation, et l'imitation des entrées-sorties d'un neurone. L'extension est une définition opérationnelle testable ; elle ne prétend pas que la définition initiale de NGeGenBrain implique déjà l'apprentissage, ni qu'une sonde est mathématiquement identique à tout neurone.
+\end{abstract}
+
+\section{Point de départ : la sonde observationnelle}
+Dans \texttt{NGeGenBrain\_observation\_formalisme\_full\_0.tex}, une sonde est un opérateur d'observation spécifié par un identifiant/version, un domaine d'entrée, un codomaine, une procédure d'acquisition, des préconditions, un coût ou budget, un niveau d'intrusion, une règle de sérialisation et des contrôles. Une application d'observation, dans un contexte $p$, peut s'écrire
+\[
+  \Phi(p,x,f)\in Y_f.
+\]
+Cette définition précise les conditions d'observation ; elle n'impose pas à elle seule une famille de fonctions, une règle d'optimisation ou une capacité d'apprentissage.
+
+\section{Extension paramétrée et adaptative}
+\begin{definition}[Sonde paramétrée]
+Une sonde paramétrée est un opérateur
+\[
+ P_{\theta,v}:\mathcal X\times\mathcal P\longrightarrow\mathcal Y\cup\{\bot\},
+\]
+où $v$ est une version déclarée, $\theta\in\Theta$ est un état paramétrique, $p\in\mathcal P$ est le contexte et $\bot$ désigne un état d'échec/non-disponibilité plutôt qu'une valeur numérique inventée. Le registre de sonde conserve le domaine, le codomaine, l'acquisition, les préconditions, le budget, la sérialisation et la procédure de contrôle.
+\end{definition}
+
+\begin{definition}[Sonde adaptative supervisée]
+Soit un flux autorisé de données d'apprentissage $\mathcal D_t=\{(x_i,y_i,p_i)\}_{i\leq t}$. Une sonde est adaptative si son état évolue par une règle déclarée
+\[
+ \theta_{t+1}=U_\phi(\theta_t,\mathcal D_t,s_t),
+\]
+où $s_t$ est l'état disponible à l'instant $t$ et $\phi$ paramètre la règle d'adaptation. En apprentissage supervisé, les $y_i$ peuvent être des cibles de tâche ; en imitation, les $y_i$ peuvent être les observations entrées-sorties d'un système cible. Ces deux signaux ne doivent pas être confondus.
+\end{definition}
+
+L'adaptation des paramètres $\theta$ n'implique pas l'apprentissage du mécanisme $U_\phi$. L'apprentissage du mécanisme exige que des paramètres de la règle elle-même soient estimés à partir d'un objectif autorisé. Dans l'expérience présente, l'extension est volontairement limitée : $U_\phi$ conserve un schéma de mise à jour par gradient et $\phi$ code les taux par groupe de paramètres. Nous n'affirmons pas qu'un optimiseur général soit découvert automatiquement.
+
+\begin{definition}[Sonde imitatrice d'un composant]
+Soit une fonction cible $N:\mathcal X\to\mathcal Y$. Une sonde $P_\theta$ est entraînée par imitation à partir des seules observations autorisées $\mathcal D_{\mathrm{obs}}=\{(x_i,N(x_i))\}$. Sa fidélité sur un domaine d'évaluation indépendant $\mathcal T$ peut être mesurée par
+\[
+ \widehat{\mathcal E}_{\mathcal T}(P_\theta,N)
+ =\frac{1}{|\mathcal T|}\sum_{x\in\mathcal T}d(P_\theta(x),N(x)),
+\]
+avec une distance $d$ fixée à l'avance. Les paramètres, états cachés et réponses de test de $N$ ne sont pas fournis à l'entraîneur de sonde.
+\end{definition}
+
+\section{Sonde et neurone : relation à tester}
+Un neurone artificiel standard peut être représenté sur son domaine par une fonction, par exemple
+\[
+ N_{w,b,\sigma}(x)=\sigma(w^\top x+b).
+\]
+Une sonde dont la sortie dépend de l'entrée est elle aussi un opérateur fonctionnel. Si le registre de sonde contient les métadonnées et contrôles requis, un neurone peut donc être \emph{observé} au moyen d'une sonde ; il ne s'ensuit pas que tous les neurones soient identiques à toutes les sondes ni que toute sonde puisse représenter exactement tout neurone avec un budget borné.
+
+La phrase « un neurone est un cas particulier de sonde » admet au moins deux interprétations différentes :
+\begin{enumerate}
+ \item \textbf{Interprétation opérationnelle :} un calcul neuronal peut être traité comme composant observable dans un protocole de sondage.
+ \item \textbf{Interprétation expressive :} la classe de fonctions des sondes contient une classe de neurones ou peut l'approximer sous un budget donné.
+\end{enumerate}
+L'expérience teste surtout la seconde, sur des familles et domaines spécifiés. Elle ne peut démontrer une proposition universelle à partir d'un nombre fini de tâches.
+
+\section{Objectif d'apprentissage et séparation des données}
+Pour une tâche, une sonde apprend un objectif empirique autorisé
+\[
+ \hat\theta=\arg\min_{\theta}\frac{1}{|\mathcal D_{\mathrm{train}}|}
+ \sum_{(x,y)\in\mathcal D_{\mathrm{train}}}\ell(P_\theta(x),y).
+\]
+Pour l'imitation d'un neurone, la cible $y$ est une sortie observée de $N$, et non une étiquette sémantique indépendante. Les ensembles sont séparés avant entraînement :
+\[
+ \mathcal D_{\mathrm{train}}\cap\mathcal D_{\mathrm{val}}=
+ \mathcal D_{\mathrm{train}}\cap\mathcal D_{\mathrm{test}}=
+ \mathcal D_{\mathrm{val}}\cap\mathcal D_{\mathrm{test}}=\varnothing,
+\]
+au sens des identifiants d'exemples. Le test est utilisé après gel des paramètres. Des empreintes de lignes servent à auditer la séparation, sans constituer à elles seules une preuve contre tout canal caché.
+
+\section{Composition de composants}
+Soit une composition $F=F_m\circ\cdots\circ F_1$ et ses approximants $\widehat F_j$. On remplace un ou plusieurs composants tout en conservant des interfaces compatibles.
+
+\begin{proposition}[Borne conditionnelle de propagation des erreurs]
+Supposons que pour chaque $j$, $\|\widehat F_j(z)-F_j(z)\|\leq\varepsilon_j$ sur les états rencontrés par la composition, et que chaque $F_k$ aval soit lipschitzien sur les domaines concernés avec constante $L_k$. Alors, sous ces hypothèses de domaine et de compatibilité,
+\[
+ \|\widehat F_m\circ\cdots\circ\widehat F_1(x)-F_m\circ\cdots\circ F_1(x)\|
+ \leq \sum_{j=1}^{m}\varepsilon_j\prod_{k=j+1}^{m}L_k.
+\]
+\end{proposition}
+\begin{proof}
+On insère successivement chaque approximant puis on applique l'inégalité triangulaire. Chaque erreur locale est propagée par les fonctions aval ; l'hypothèse lipschitzienne multiplie cette erreur par le produit des constantes en aval. Le résultat suppose que les bornes restent valides sur les états effectivement produits, condition qui peut échouer si l'approximation fait sortir la composition du domaine calibré.
+\end{proof}
+
+La borne explique pourquoi une fidélité locale élevée ne garantit pas la fidélité d'une composition profonde. Dans l'expérience, le lecteur aval du MLP enseignant est conservé : cette intervention permet de mesurer la propagation d'erreurs des composants, mais ne prouve pas qu'un assemblage de sondes puisse reconstruire de façon autonome le système entier.
+
+\section{Identifiabilité et limites de l'observation}
+\begin{proposition}[Les observations finies ne déterminent pas en général une fonction unique]
+Pour un domaine d'entrée infini et une classe de fonctions non restreinte, il existe généralement plusieurs fonctions distinctes qui coïncident sur tout ensemble fini d'observations. L'identification exacte requiert des hypothèses sur la classe de fonctions, un domaine fini exhaustivement testé, ou d'autres contraintes.
+\end{proposition}
+\begin{proof}[Esquisse]
+Pour un ensemble fini de points observés, il est possible de construire une fonction non nulle qui s'annule sur tous ces points et de l'ajouter à une fonction compatible avec les observations. Les observations seules ne distinguent alors pas les deux fonctions hors des points interrogés.
+\end{proof}
+
+Par conséquent, un $R^2$ élevé sur un test indépendant soutient une approximation dans le domaine échantillonné ; il ne démontre pas une identité fonctionnelle pour tout $x$. La fidélité en distribution, l'extrapolation, les interventions, le bruit et le budget de requêtes sont des dimensions distinctes qui doivent être évaluées séparément.
+
+\section{Définition appliquée dans le présent banc d'essai}
+L'ensemble RBF utilisé comme sonde adaptative est
+\[
+ P_{\theta}(x)=b+\sum_{j=1}^{K}w_j\exp\!\left(-\frac{\|x-c_j\|^2}{2\exp(\lambda_j)^2}\right),
+\]
+avec $\theta=\{c_j,\lambda_j,w_j,b\}$. En classification, une sigmoïde appliquée au logit donne une probabilité. En imitation scalaire, la sortie RBF est ajustée par erreur quadratique aux seules sorties observées.
+
+Les quatre conditions de classification sont : RBF adaptative, RBF avec taux d'adaptation méta-appris, RBF à centres/largeurs fixes et MLP de référence. En plus, l'expérience interroge 9 neurones artificiels de boîte noire, sur 3 budgets d'observations, et remplace 1, 4 ou 16 unités cachées dans deux compositions.
+
+\section{Ce que les résultats peuvent et ne peuvent pas établir}
+Les résultats peuvent établir une capacité empirique, une fidélité mesurée, une sensibilité au budget ou une dégradation de composition dans le domaine choisi. Ils ne peuvent pas, sans preuve supplémentaire, établir que toute fonction neuronale appartient à la classe des sondes, qu'une sonde apprend son mécanisme sans biais architectural, ou qu'un modèle autonome complet a été reconstruit. Le verdict est donc spécifique aux familles, budgets, tâches et distributions testés.
+\end{document}

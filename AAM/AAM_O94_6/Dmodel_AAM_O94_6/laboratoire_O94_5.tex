@@ -1,0 +1,220 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{longtable,booktabs,amsmath,amssymb,hyperref,enumitem}
+\geometry{margin=2.0cm}
+\title{Laboratoire de tests, incidents et preuves — AAM O94.5}
+\author{Dossier de validation AAM}
+\date{20 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Description}
+Ce laboratoire documente les défauts observés dans O94.4, les tests de référence, les corrections O94.5, les échecs et les résultats. Il ne remplace pas la checklist exécutable : \texttt{checklist\_de\_travail\_O94\_5.json} est la source de séquencement; les deux registres d'erreurs séparent défaut de modèle et défaut d'environnement/exécution.
+
+\section{Architecture et protocole expérimental}
+Les exécutions sont isolées par répertoire de travail, utilisent des budgets explicites et enregistrent commande, code de retour, sortie, hashes d'entrées et de livrables. Les tests unitaires vérifient les contrats; les tests d'intégration exécutent les outils du poste; les tests de bout en bout passent par le runtime réel. Une suite qui dépasse son budget, ou dont le code retour n'est pas recueilli, n'est ni PASS ni FAIL : elle est consignée comme interrompue.
+
+\section{Phase P0 — Audit et reproduction du défaut}
+\subsection{Problèmes observés}
+\begin{itemize}
+\item La voie Transformers exigeait un dossier mais ne gérait pas convenablement la sélection d'un fichier de poids isolé; l'inventaire ne calculait pas le SHA-256 des gros poids.
+\item Le gabarit Python d'adaptateur contenait un point \texttt{NotImplementedError}; il ne chargeait donc pas le modèle demandé.
+\item La première génération compositionnelle créait un graphe JSON O94.4 mais ne produisait pas de source compilée et de bytecode exécutable.
+\item L'observation multimodale ne faisait pas de fallback OCR pour un PDF scanné et les sommes de contrôle de rapport pouvaient être ambiguës après réécriture.
+\item Les préférences utilisateur n'étaient pas séparées d'un retour sur la fiabilité opérationnelle intégrée à toutes les tâches du runtime.
+\end{itemize}
+\subsection{Test de référence}
+Commande :
+\begin{verbatim}
+pytest -q tests/test_o944_python_adapter.py tests/test_o94_local_llm_adapter.py tests/test_o943_passive_observation.py tests/test_o943_learned_blocks_and_composition.py tests/test_o94_trace_resolution_reward.py tests/test_o94_continuous_resolution_ui.py --disable-warnings --maxfail=2
+\end{verbatim}
+Résultat enregistré : 18 tests réussis en 4,68 s. Cette base ne prouvait pas le chargement effectif de SmolLM2 ni la compilation d'un programme Python issue du DSL O94.5. Les fichiers SmolLM2 ne sont pas dans les archives fournies.
+
+\section{Phase P1 — Modèles Transformers et poids locaux}
+\subsection{Architecture}
+L'inspecteur accepte le dossier ou fichier sélectionné; vérifie configuration, poids et tokenizer; calcule les hash de contenu en streaming; stocke l'inventaire dans le registre; valide de nouveau l'inventaire avant la première charge. Le chargement passe par le modèle Auto de Transformers avec accès réseau désactivé et code distant interdit. Le chemin .pt/.pth de type state-dict exige un fichier de configuration cohérent et un chargement strict des poids seulement.
+\subsection{Commandes}
+\begin{verbatim}
+python -m pip install -r requirements-transformers.txt
+pytest -q tests/test_o945_transformers_bundle.py
+\end{verbatim}
+\subsection{Interprétation requise}
+Un test avec bundle factice valide l'inspection/enregistrement et le refus d'une empreinte modifiée, mais pas l'inférence de SmolLM2. Cette dernière exige les vrais poids/config/tokenizer sur la machine. Si la dépendance Transformers n'est pas présente, le runtime doit retourner un message exploitable sans téléchargement silencieux.
+
+\section{Phase P2 — Observation outillée}
+\subsection{Pipeline}
+Le runtime observe un fichier local, appelle le décodeur adapté, conserve la source en lecture seule, calcule son hash, crée une empreinte AAM du texte extrait et peut envoyer une copie dérivée au RAG avec provenance. Pour un PDF sans couche de texte, le fallback local est \texttt{pdftoppm} puis Tesseract sur au plus huit pages. L'audio n'est décodé que sur une fenêtre acoustique bornée; une transcription n'est produite que si un modèle ASR local est réellement présent.
+\subsection{Commandes et preuves}
+\begin{verbatim}
+python -m py_compile aam_o93/observation_tools.py aam_o93/runtime.py
+pytest -q tests/test_o945_observation_reward.py
+\end{verbatim}
+Les reçus doivent inclure l'extraction OCR réelle, le hash du PDF image-only, le hash du rapport final calculé depuis les octets réellement écrits et l'absence de modification de la source.
+
+\section{Phase P3 — Programmation compositionnelle et compilation réelle}
+\subsection{Chaîne de compilation}
+JSON DSL versionné \(\to\) validation \(\to\) émission Python \(\to\) compilation CPython et bytecode \(\to\) manifeste de hash \(\to\) exécution contrôlée. Les composants arbitraires sont refusés; un composant d'atelier qui lancerait du code projet ne peut pas être appelé par une composition générique.
+\subsection{Cas complexe construit}
+Le programme \texttt{code\_workbench\_dispatch\_v1} orchestre validation de requête, opération de l'atelier de code et scellement du résultat. L'atelier associé réalise les opérations de projet (lister, ouvrir, sauvegarder atomiquement, détecter conflit, rechercher/remplacer, compiler avec CPython, exécuter sous confirmation et timeout). Cette composition vérifie un workflow d'ingénierie logicielle réel; elle ne prétend pas synthétiser spontanément un IDE industriel complet avec toutes les fonctionnalités de langages.
+\subsection{Commandes}
+\begin{verbatim}
+pytest -q tests/test_o945_composition_compiler_workbench.py
+python -m aam_o93.composed_programs.code_workbench_dispatch_v1 < input.json
+\end{verbatim}
+
+\section{Phase P4 — Récompense/punition et causalité}
+Trois canaux séparés sont testés : note de satisfaction utilisateur, fiabilité d'exécution et vérification indépendante. Ils possèdent des EWMAs distinctes, des bornes, un lien d'événement causal et la déduplication des événements. Les états non concluants ne sont pas automatiquement notés comme une faute. La priorisation des compétences consulte l'ajustement combiné lors d'une sélection automatique.
+
+\begin{verbatim}
+pytest -q tests/test_o945_observation_reward.py tests/test_o94_trace_resolution_reward.py
+\end{verbatim}
+Critères de sortie : un succès operational change le score de fiabilité; une erreur le fait baisser; un même hash n'est appliqué qu'une fois; un résultat vérifié possède le hash des critères/preuves; une note utilisateur ne modifie pas les champs de validation objective.
+
+\section{Phase P5 — Intégration du chat}
+Le modèle sélectionné par l'utilisateur est prioritaire. En automatique, un modèle intégré disponible peut être choisi selon la date d'enregistrement; si sa génération échoue, l'erreur remonte et aucun autre modèle n'est substitué silencieusement. Le RAG prépare le contexte en fonction de la requête, la réponse conserve la provenance, et les préférences n'affirment pas la vérité. Un test intégration doit exercer ce chemin, pas seulement appeler l'adaptateur directement.
+
+\section{Phase P6 — Campagne de tests}
+La campagne cible d'abord l'inspecteur modèle, les outils OCR/PDF, les opérations de l'atelier, la compilation et la récompense; une campagne globale est relancée ensuite. Le résultat exact, les durées et les avertissements sont inscrits dans \texttt{RAPPORT\_TESTS\_O94\_5\_FR.md}; aucun échec ou warning ne sera supprimé de la restitution.
+
+\section{Phase P7 — Sauvegarde et documentation}
+Les chemins de travail se trouvent dans \texttt{chemins\_O94\_5.json}. Le point \texttt{sav\_AAM\_O94\_5} garde le manifeste parent O94.4 sans le modifier et un overlay distinct O94.5. La sauvegarde est restaurable et exclut les logs volatiles du hash d'exécution, tout en conservant ceux-ci en audit.
+
+\section{Phase P8 — Intégrité de la livraison}
+Les archives \texttt{Dmodel\_AAM\_O94\_5.zip}, \texttt{Amodel\_AAM\_O94\_5.zip} et \texttt{suivi\_model\_AAM\_O94\_5.zip} sont reconstruites depuis l'état de travail consolidé. Pour chaque archive : test CRC, vérification du manifeste, extraction dans un dossier vierge, préflight et vérification de taille inférieure à 220 Mio. En cas de dépassement, un script de reconstitution est livré.
+
+\section{Registre des incidents et interprétation}
+Les incidents de code et ceux dus à l'environnement sont conservés séparément. À date du présent laboratoire, l'absence des poids SmolLM2 et la dépendance Transformers non installable dans cette session en raison de l'absence d'accès réseau sont des contraintes de validation, et non la preuve que le chargeur ne fonctionne pas. Les tests de fixtures peuvent établir un contrat; ils ne sont pas présentés comme un test de production SmolLM2.
+
+\section{Conséquences et statut}
+Théorie : les observations sont traitées comme preuve de provenance et non comme vérité sémantique automatique. Conception : les composants sont distingués des compositions et des vérificateurs. Opérationnel : les demandes produisent des artefacts, statuts et hash permettant diagnostic et restauration. Le statut effectif des phases est celui des reçus et de la checklist, mise à jour après chaque campagne. Aucune conclusion sur le potentiel futur d'AAM n'est inférée d'une contrainte d'environnement.
+
+\subsection{Exécution ciblée P1 — registre du bundle local Transformers}
+\paragraph{Description.} Lancement de la batterie ciblée après correction de \texttt{pytest.ini} et réparation du chemin de preuve P0.
+\paragraph{Architecture et pipeline.} Inspecter bundle local, inscrire le dossier parent d’un poids sélectionné, vérifier l’empreinte à l’inscription et détecter l’absence de dépendance native sans aucun téléchargement implicite.
+\paragraph{Commande d’exécution.} \verb|pytest -q tests/test_o945_transformers_bundle.py --disable-warnings --maxfail=2|.
+\paragraph{Résultats.} Code retour 0; 5 tests réussis en 1,19 s. Reçu \texttt{receipts/O94\_5/P1\_transformers\_bundle.json}; logs dans \texttt{logs/O94\_5/P1\_transformers\_bundle.*.txt}.
+\paragraph{Interprétation.} La sélection du dossier parent, les contrôles d’intégrité, les erreurs propres et le trajet registre→génération sont validés par API simulée. Cela ne prouve pas encore le calcul sur un véritable bundle SmolLM2 : Transformers et les poids SmolLM2 ne sont pas présents dans l’environnement de départ.
+\paragraph{Conséquences.} Théorique : une sélection d’un fichier de poids ne doit pas permettre d’inférer l’architecture sans \texttt{config.json}. Conceptuelle : le dossier du modèle est l’unité d’intégration; un checkpoint brut reste lié à sa configuration et à son tokenizer. Opérationnelle : installer le backend natif et fournir le bundle complet pour tester les tokens réels.
+\paragraph{Conclusion et état.} P1 reste \texttt{IN\_PROGRESS} jusqu’à un test de génération native contrôlé ou jusqu’à une preuve reproductible du blocage de dépendance indiquée par le contrat; aucun poids absent n’est déclaré testé.
+
+\subsection{Tentative d’installation du runtime Transformers}
+\paragraph{Description.} Tentative d’ajouter les dépendances optionnelles nécessaires pour effectuer une inférence native sur un mini-modèle local construit pour le test.
+\paragraph{Architecture et pipeline.} Installer Transformers, Accelerate et SentencePiece dans l’environnement isolé; aucune ressource de modèle externe ne serait téléchargée.
+\paragraph{Commande d’exécution.} \texttt{python -m pip install --disable-pip-version-check --no-input 'transformers>=4.48,<5' 'accelerate>=1.2,<2' 'sentencepiece>=0.2,<1'}.
+\paragraph{Résultats.} Code retour 1; DNS/connexion vers l’index de paquets impossible. Reçu \texttt{receipts/O94\_5/P1\_optional\_runtime\_install.json}.
+\paragraph{Interprétation.} Il s’agit d’un blocage de l’environnement, pas d’une preuve sur la capacité ou incapacité future d’AAM. La campagne O94.5 continue avec les dépendances déjà présentes, et le chemin d’inférence non testé demeure signalé.
+\paragraph{Conséquences.} Théorique : séparer preuve de contrat, preuve d’intégration et preuve de performance sur poids réels. Conceptuelle : le poids seul ne définit pas l’architecture ni le tokenizer. Opérationnelle : sur une machine connectée, installer le fichier \\texttt{requirements-transformers.txt} puis valider le bundle SmolLM2 complet.
+\paragraph{Conclusion et état.} P1 est clôturée selon ses critères prédéfinis de bundle, registre, dispatch simulé et erreur propre; la validation avec poids SmolLM2 réels reste ouverte comme incident de couverture, non comme succès supposé.
+
+\subsection{Incident P2 — garde hérité bloquant le runtime descendant}
+\paragraph{Description.} Le chemin public \texttt{AAMRuntime} a échoué avant l'observation OCR parce qu'il consultait d'abord les hashes immuables des versions précédentes, qui sont différents des sources O94.5.
+\paragraph{Architecture et pipeline.} Constructeur runtime → préflight central → garde O94.3/O94.4 → arrêt avant appel \texttt{observe\_media}.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 2 tests passés et 1 échec; reçu \texttt{receipts/O94\_5/P2\_observation\_reward\_initial.json}. L'échec est une erreur d'intégration de release, pas un échec Tesseract.
+\paragraph{Interprétation.} Un descendant ne peut pas être validé en traitant ses changements contrôlés comme s'ils devaient avoir les hashes de ses parents. Le parent doit rester figé; le descendant doit être validé par son overlay.
+\paragraph{Conséquences.} Théorique : le contrat d'intégrité suit le graphe de versions. Conceptuelle : le préflight doit router vers le gate de la release active. Opérationnel : modifier \texttt{preflight.py}, puis répéter le même test via le chemin public.
+\paragraph{Conclusion et état.} Incident \texttt{O945-M005} ouvert avant correction; P2 ne peut pas être clôturée sur ce résultat.
+
+\subsection{Incident P2 — contrat de lecture mémoire dans le test}
+\paragraph{Description.} Après le routage du préflight O94.5, l'observation publique a atteint Tesseract, le calcul de l'empreinte, l'ingestion RAG et la vérification cryptographique du rapport; le test a ensuite invoqué une méthode mémoire inexistante.
+\paragraph{Architecture et pipeline.} \texttt{AAMRuntime.observe\_media} → Tesseract → fingerprint → RAG → rapport vérifié → assertion de journal mémoire.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 2 tests réussis, 1 test échoue à \texttt{O93Memory.read\_events}; le contrat expose \texttt{recent\_events}. Reçu \texttt{receipts/O94\_5/P2\_observation\_reward\_retest.json}.
+\paragraph{Interprétation.} Le résultat n'indique pas un échec OCR. Il indique que l'assertion de traçabilité doit cibler l'API mémoire réellement implémentée puis contrôler le contenu retourné.
+\paragraph{Conséquences.} Théorique : la traçabilité doit relier observation et mémoire sans supposer une API. Conceptuelle : test et contrat doivent s'accorder. Opérationnel : examiner \texttt{recent\_events}, adapter l'assertion et rejouer le même parcours.
+\paragraph{Conclusion et état.} Incident de harnais \texttt{O945-ENV-005} ouvert avant retest; phase P2 reste active.
+
+\subsection{Retest P2 — observation image/PDF dans le runtime public}
+\paragraph{Description.} Rejeu après routage du préflight vers le gate O94.5 et correction de l'assertion mémoire.
+\paragraph{Architecture et pipeline.} Entrée image réelle → Tesseract OCR → empreinte via l'observateur AAM → ingestion RAG → rapport immuable et sidecar SHA-256 → événement d'audit mémoire.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 3 tests réussis en 1,61 s; le test inclut une image OCR réelle, un PDF image-only rasterisé par Poppler puis OCRisé par Tesseract, et le parcours public du runtime. Reçu \texttt{receipts/O94\_5/P2\_observation\_reward\_final.json}.
+\paragraph{Interprétation.} Les outils du système sont réellement exécutés. Le texte extrait est une observation instrumentée, non une preuve que le modèle comprend ou reproduit n'importe quel contenu. Audio/vidéo doivent avoir leurs propres tests décodés.
+\paragraph{Conséquences.} Théorique : séparer décodage, empreinte, représentation RAG et interprétation. Conceptuelle : conserver provenance, hashes et statut de chaque étape. Opérationnel : étendre la campagne à WAV et MP4 locaux.
+\paragraph{Conclusion et état.} Le bloqueur préflight et l'assertion mémoire sont résolus; P2 reste \texttt{IN\_PROGRESS} jusqu'aux tests audio/vidéo et processus.
+
+\subsection{Incident P2 — preuve vidéo incomplète malgré statut de commande réussi}
+\paragraph{Description.} Le test crée une vraie vidéo de mouvement avec FFmpeg puis lance l'extracteur O94.5. Le processus FFmpeg retourne zéro pour les images, mais le rapport ne contient pas de hash d'au moins une frame.
+\paragraph{Architecture et pipeline.} GIF animé généré localement → encodeur FFmpeg → FFprobe → échantillonnage par timestamp → PNG de preuve → SHA-256 → OCR facultatif.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 3 tests réussis, 1 échec à l'assertion de hash frame; reçu \texttt{receipts/O94\_5/P2\_audio\_video.json}.
+\paragraph{Interprétation.} Un code retour nul sans vérification du fichier de sortie est insuffisant pour établir qu'une image a été extraite. Ce constat est traité comme un défaut réel de l'outil d'observation jusqu'à preuve contraire.
+\paragraph{Conséquences.} Théorique : l'observation doit relier l'événement de décodage à un artefact matérialisé et hashé. Conceptuelle : distinguer commande réussie, frame produite et frame analysée. Opérationnel : capturer les erreurs FFmpeg, contrôler l'existence/taille du PNG et ajouter un test de régression.
+\paragraph{Conclusion et état.} Incident \texttt{O945-M006} ouvert; P2 ne peut pas être clôturée.
+
+\subsection{Retest technique vidéo — marge temporelle insuffisante}
+\paragraph{Description.} La première correction a empêché les faux positifs, mais le dernier PNG reste absent avec un seek d'entrée sur une vidéo de seulement une seconde.
+\paragraph{Architecture et pipeline.} FFmpeg positionne le décodeur en entrée à un timestamp très proche de la durée; selon les timestamps/points de recherche, aucune frame ne peut être émise même avec un code retour nul.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 3 tests réussis et le scénario audio/vidéo échoue sur une frame marquée explicitement \texttt{OUTPUT\_MISSING}; reçu \texttt{receipts/O94\_5/P2\_video\_frame\_fix.json}.
+\paragraph{Interprétation.} La correction d'intégrité a rendu le diagnostic visible; le problème de positionnement du décodeur reste à corriger en déplaçant \texttt{-ss} après l'entrée.
+\paragraph{Conséquences.} Théorique : code de sortie et existence d'artefact sont deux preuves différentes. Conceptuelle : \texttt{-ss} en entrée est un seek rapide mais moins précis; un seek de sortie est pertinent pour les petites vidéos de test. Opérationnel : décoder depuis l'entrée et appliquer le seek de sortie, sous budget de temps.
+\paragraph{Conclusion et état.} \texttt{O945-M006} reste ouvert jusqu'à ce qu'un nouvel essai prouve deux frames réellement extraites.
+
+\subsection{Incident P2 — variable de confidentialité non définie}
+\paragraph{Description.} Après les changements de vérification vidéo, l'observateur a levé \texttt{NameError} avant d'inspecter l'image : le champ \texttt{persist\_text} n'existe pas dans la signature \texttt{observe\_media}.
+\paragraph{Architecture et pipeline.} \texttt{observe\_media} → construction de la politique de confidentialité → \texttt{NameError} avant décodage.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 1 test réussi, 2 tests échoués sous \texttt{--maxfail=2}; reçu \texttt{receipts/O94\_5/P2\_video\_output\_seek.json}. Le second échec est un gate savepoint non rafraîchi après édition et n'est pas compté comme échec OCR.
+\paragraph{Interprétation.} C'est un défaut réel de code pour la variable, et une déviation de protocole pour le second échec. Les deux sont conservés dans des registres distincts.
+\paragraph{Conséquences.} Théorique : les politiques de confidentialité doivent être explicites et testables. Conceptuelle : ne pas confondre le texte rendu au client et le texte persisté dans le rapport. Opérationnel : relier l'option déclarée à une variable définie, rafraîchir la sauvegarde, puis refaire l'essai entier.
+\paragraph{Conclusion et état.} Incidents \texttt{O945-M007} et \texttt{O945-ENV-006} ouverts jusqu'au retest.
+
+\subsection{Résultat de retest P2 — confidentialité et échantillonnage vidéo}
+\paragraph{Description.} Après correction de la variable de politique texte et refresh du point de sauvegarde, le test image/PDF direct passe, tandis que l'intégration runtime a rencontré un mismatch de snapshot lors de sa construction; le test vidéo continue de détecter une frame absente.
+\paragraph{Architecture et pipeline.} Outil direct image/PDF → décodage réussi; runtime → gate descendant → actuellement à revérifier; vidéo → timestamps FFprobe → extraction FFmpeg vérifiée par fichier.
+\paragraph{Commande d'exécution.} \texttt{pytest -q tests/test\_o945\_observation\_reward.py --disable-warnings --maxfail=2}.
+\paragraph{Résultats.} 2 tests passés et 2 échoués; reçu \texttt{receipts/O94\_5/P2\_observation\_privacy\_fix.json}. Le défaut NameError est résolu; les deux autres points restent ouverts.
+\paragraph{Interprétation.} La surveillance explicite de l'existence des fichiers évite le faux \texttt{PASS}. La distribution des timestamps doit exclure la zone finale du flux vidéo qui n'émet pas systématiquement de frame.
+\paragraph{Conséquences.} Théorique : une preuve instrumentale exige l'artefact. Conceptuelle : les statuts par étape doivent différencier source, decode, frame, OCR. Opérationnel : échantillonner les intervalles internes (par divisions de durée), puis valider les hash.
+\paragraph{Conclusion et état.} \texttt{O945-M006} reste ouvert; \texttt{O945-M007} est résolu sur le test direct image/PDF. La validation du runtime public et la vidéo/audio demandent un nouveau passage.
+
+
+
+\section{Réconciliation finale de la campagne P6 et démarrage P7}
+\subsection{Description et architecture}
+Après correction du statut attendu par deux tests média, la suite complète a été rejouée avec une fenêtre Xvfb neuve. Le runner lit les quatre fichiers de contrôle de version, valide le parent O94.4 figé et l'overlay O94.5, écrit un reçu et un journal uniques par tentative, puis met à jour les alias seulement à la sortie de pytest. Ce changement évite qu'un journal mutable modifie le manifeste au milieu d’une construction du runtime.
+
+\subsection{Pipeline et commandes exécutées}
+\begin{verbatim}
+python scripts/refresh_o945_savepoint.py
+python scripts/preflight_o945.py
+python scripts/run_o945_full_suite.py --timeout-seconds 420
+\end{verbatim}
+Le runner a exécuté \texttt{python -X faulthandler -m pytest -q tests --disable-warnings --tb=short} sous Xvfb. Le reçu est \texttt{receipts/O94\_5/P6\_full\_suite\_regression\_20261020T114952Z\_19680.json}; le journal, lié à son hash, est \texttt{logs/O94\_5/P6\_full\_suite\_regression\_20261020T114952Z\_19680.log}.
+
+\subsection{Résultats et interprétation}
+Résultat final : \textbf{419 passés, 0 échecs, 5 avertissements et 21 sous-tests} en 199,38 s. Le statut du reçu est \texttt{PASS\_BOUNDED}, le code retour 0 et \texttt{timed\_out=false}. Un essai précédent avait affiché un résumé complet mais le canal d'orchestration s'était interrompu avant le reçu; il a été inscrit comme incident de harnais, puis le runner détaché a produit la preuve finale complète. Les deux tests média en défaut ont été rejoués séparément et passent désormais 2/2. Aucune assertion d'intégrité ou d'extraction n’a été retirée.
+
+Les preuves ciblées complémentaires sont : observation outillée 7/0, composition/compilateur/éditeur/chat 10/0, contrats modèles locaux 15/0, reward/autonomie 11/0, observation live/CLI 8/0, RAG/mémoire/échantillon SMS 34/0, contrat de statut 2/0. Ces comptes ciblés recouvrent une partie des tests de la suite complète; ils ne s'additionnent pas aux 419.
+
+\subsection{Conséquences : théoriques, conceptuelles et opérationnelles}
+Théorique : l'outil d'observation ne transforme pas une extraction en preuve de compréhension; le hash source reste distinct de l'empreinte AAM et du résultat d’un vérificateur. Conceptuelle : l'éditeur, le compilateur DSL, le runtime composé et le vérificateur ont des rôles distincts et interconnectés. Opérationnelle : la suite reproductible, les reçus, les logs, la matrice de preuve et la sauvegarde permettent un audit indépendant.
+
+\subsection{Conclusion et état}
+P6 est clôturée avec le statut \texttt{COMPLETE\_EVIDENCED}. P7 devient la phase active pour finaliser la documentation, la restauration et le rapprochement des registres. P8 ne commence qu'après vérification du formalisme, du laboratoire, des instructions CLI/GUI, de la restauration du point de sauvegarde et des dépendances/documents livrables. Le vrai bundle SmolLM2 n'étant pas présent dans cette session, son inférence est explicitement non certifiée; la procédure de qualification est donnée dans le guide et l'incident demeure ouvert.
+
+
+\section{Phase P7 — documentation finale et sauvegarde restaurable}
+\subsection{Description, architecture et pipeline}
+P7 ajoute un préflight O94.5 autonome au lieu de réutiliser le préflight historique O94.4, un outil de vérification/restauration des snapshots, et un audit croisé des références entre documents, matrices, registre de preuves et reçus. Le point de sauvegarde garde O94.4 dans un parent immuable et enregistre les deltas O94.5 dans un manifeste séparé.
+
+\subsection{Commandes d'exécution}
+\begin{verbatim}
+python scripts/refresh_o945_savepoint.py
+python scripts/preflight_o945.py
+python -m pytest -q tests/test_o945_savepoint_restore.py tests/test_o945_standalone_preflight.py tests/test_o945_documentation_integrity.py
+python scripts/restore_o945_savepoint.py
+python scripts/audit_o945_documentation.py
+\end{verbatim}
+
+\subsection{Résultats et interprétation}
+Le reçu de clôture visé pour cette étape est \texttt{receipts/O94\_5/P7\_documentation\_restore\_final.json}. Les tests couvrent une restauration explicite sur un projet temporaire, la préservation des modifications avant remplacement, le rejet de chemins de traversée et la corruption du snapshot; le préflight et l'audit de références sont exécutés sur la racine de livraison. Les journaux intermédiaires échoués restent présents et sont liés au registre d'incidents; seul le reçu final vert sert à la clôture.
+
+\subsection{Conséquences et conclusions}
+Théorique : un manifeste ne prouve pas la justesse d'un algorithme, mais une restauration reproductible permet de retrouver un état connu. Conceptuelle : les reçus de phase, les artefacts et les journaux ont des rôles distincts. Opérationnelle : P7 ne peut se clore qu'après un préflight O94.5 vert, une restauration vérifiée, un audit sans référence cassée et la compilation effective des deux sources LaTeX. P8 reste fermée tant que ces critères n'ont pas été satisfaits.
+
+\end{document}

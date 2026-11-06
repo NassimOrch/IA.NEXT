@@ -1,0 +1,87 @@
+from pathlib import Path
+p=Path('tests/test_p05_interpreter.py')
+s=p.read_text()
+marker='\n\nif __name__=="__main__": unittest.main(verbosity=2)'
+assert marker in s
+add=r'''
+
+    def test_seq_continue_preserves_partial_status(self):
+        node={"op":"Seq","on_partial":"continue","items":[
+            {"op":"Map","over":{"$ref":"input.items"},"body":{"op":"Id"},"max_items":1},
+            {"op":"Id"}]}
+        r=self.run_node(node,{"items":[1,2]})
+        self.assertEqual(r.status,RunStatus.PARTIAL,msg=r.to_dict())
+        self.assertTrue(r.metadata["continued_after_partial"])
+
+    def test_map_collect_does_not_erase_failure(self):
+        node={"op":"Map","over":{"$ref":"input.items"},"item_var":"item","on_error":"collect",
+              "body":{"op":"Call","component":"math.divide","args":{"left":{"$var":"item"},"right":0}}}
+        r=self.run_node(node,{"items":[1,2]})
+        self.assertEqual(r.status,RunStatus.PARTIAL,msg=r.to_dict())
+        self.assertEqual(len(r.value),2)
+        self.assertTrue(all(row["status"]=="FAILED" for row in r.value))
+
+    def test_loop_invariant_is_checked_and_refutation_is_explicit(self):
+        node={"op":"Loop","condition":True,"invariant":False,"body":{"op":"Id"},"max_iterations":2}
+        r=self.run_node(node,3)
+        self.assertEqual(r.status,RunStatus.FAILED,msg=r.to_dict())
+        self.assertEqual(r.epistemic_status.value,"REFUTED")
+        self.assertEqual(r.diagnostics[0]["code"],"LOOP_INVARIANT_VIOLATED")
+        unknown=self.run_node({**node,"invariant":{"$var":"unbound"}},3)
+        self.assertEqual(unknown.status,RunStatus.INVALID)
+
+    def test_verify_schema_mismatch_is_reported_as_refutation(self):
+        node={"op":"Verify","verifier":"json.schema","value":{"$ref":"input"},"expected":{"type":"string"}}
+        r=self.run_node(node,123)
+        self.assertEqual(r.status,RunStatus.FAILED,msg=r.to_dict())
+        self.assertFalse(r.value["verified"])
+        self.assertEqual(r.epistemic_status.value,"REFUTED")
+
+    def test_transform_keeps_original_when_candidate_differs(self):
+        old=self.rt.transformers["identity"]
+        try:
+            self.rt.transformers["identity"]=lambda body,params:{"op":"Call","component":"core.identity","args":{"value":999}}
+            r=self.run_node({"op":"Transform","body":{"op":"Id"},"transformer":"identity"},5)
+        finally:
+            self.rt.transformers["identity"]=old
+        self.assertEqual(r.value,5,msg=r.to_dict())
+        self.assertEqual(r.metadata["transform_equivalence"],"REJECTED_CANDIDATE")
+        self.assertTrue(any(d["code"]=="TRANSFORM_EQUIVALENCE_MISMATCH" for d in r.diagnostics))
+
+    def test_select_first_success_is_lazy(self):
+        node={"op":"Select","policy":"first_success","alternatives":[
+            {"op":"Id"},{"op":"Call","component":"math.divide","args":{"left":1,"right":0}}]}
+        r=self.run_node(node,42)
+        self.assert_success(r)
+        self.assertEqual(r.value["selected_index"],0)
+        self.assertEqual(r.value["evaluations_performed"],1)
+        self.assertEqual(len(r.value["alternatives"]),1)
+
+    def test_synthesis_goal_can_access_candidate_fields_and_filters_candidates(self):
+        grammar=[{"op":"Id"},{"op":"Id"}]
+        goal={"$op":"eq","args":[{"$var":"candidate.index"},1]}
+        node={"op":"Synthesize","grammar":grammar,"examples":[{"input":7,"expected":7,"split":"train"}],"goal":goal,"search_id":"search-goal-p05","max_candidates":2}
+        r=self.run_node(node,0)
+        self.assert_success(r)
+        self.assertEqual(r.value["selected_index"],1,msg=r.to_dict())
+        self.assertEqual(r.value["selection_basis"],"training_examples_and_explicit_goal")
+
+    def test_synthesis_without_examples_or_goal_is_unresolved(self):
+        r=self.run_node({"op":"Synthesize","grammar":[{"op":"Id"}],"search_id":"search-no-objective-p05"},7)
+        self.assertEqual(r.status,RunStatus.UNRESOLVED,msg=r.to_dict())
+        self.assertIsNone(r.value["selected"])
+        self.assertTrue(any(d["code"]=="SYNTHESIS_OBJECTIVE_MISSING" for d in r.diagnostics))
+
+    def test_synthesis_candidate_work_is_charged_to_parent_budget(self):
+        from fullegenbrain.types import Budget
+        rt=FulleGenBrainRuntime(services=self.services,budget=Budget(max_steps=4,max_depth=32,max_iterations=100,max_items=100,max_candidates=100,max_output_bytes=100000,max_input_bytes=100000,timeout_seconds=2,max_wave_fanout=100))
+        grammar=[{"op":"Seq","items":[{"op":"Id"},{"op":"Id"},{"op":"Id"}]} for _ in range(8)]
+        node={"op":"Synthesize","grammar":grammar,"examples":[{"input":1,"expected":1,"split":"train"}],"search_id":"search-budget-p05","max_candidates":8}
+        r=self.run_node(node,0,runtime=rt)
+        self.assertLessEqual(r.steps_used,4,msg=r.to_dict())
+        self.assertEqual(r.status,RunStatus.PARTIAL,msg=r.to_dict())
+        self.assertTrue(r.metadata.get("resume_available"))
+'''
+s=s.replace(marker,add+marker)
+p.write_text(s)
+print('added 8 edge tests to P05 operator suite')

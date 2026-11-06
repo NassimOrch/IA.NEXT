@@ -1,0 +1,1 @@
+Le cœur applicatif de V2 se trouve dans `src/nggegenbrain_v3/` (`engine.py`, `models.py`, `registry.py`, `composition.py`). Ce dossier documente l’emplacement prévu pour les formalismes transversaux, sans dupliquer l’implémentation.

@@ -1,0 +1,91 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,booktabs,longtable,geometry,hyperref}
+\geometry{margin=2.2cm}
+\title{ORDER72 -- Architecture émergente v1\newline\large Conception durcie après campagne adversariale et contrôle WM aléatoire}
+\author{Dossier de conception scientifique}
+\date{24 septembre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+La v1 de ORDER72 est dérivée de la campagne expérimentale menée contre O72 e0. Les tests ont conduit à renforcer la frontière de vérité, l'exactitude numérique, l'invariance de l'exploration bornée, la largeur adaptative de recherche et la réutilisation conditionnelle de plans. Le World Model (WM) reste un prédicteur : représentation, prédiction, incertitude et priorisation sont permis ; vérité et certification restent hors du WM. Un contrôle important avec un WM aléatoire non entraîné montre cependant que les familles de recherche actuelles ne nécessitent pas encore la qualité prédictive apprise pour réussir. Cette limitation est explicitement conservée dans l'architecture et devient une exigence expérimentale pour la suite.
+\end{abstract}
+\tableofcontents
+\section{Statut scientifique}
+ORDER72 e1 est un prototype expérimental durci. Les tests réalisés établissent des propriétés sur les familles énumérées dans le rapport associé ; ils ne constituent pas une preuve d'intelligence générale universelle. Une prétention de généralité forte doit être traitée comme une hypothèse de développement qui reste falsifiable.
+\section{Principe issu de la théorie des empreintes}
+On note $I_P(x)$ l'empreinte d'un état $x$ au niveau de résolution $P$. Le système distingue :
+\begin{itemize}
+\item ce qui est observé publiquement ;
+\item ce qui est inféré ou prédit ;
+\item ce qui est produit par une expérience ;
+\item ce qui est vérifié indépendamment.
+\end{itemize}
+Aucune transformation ne doit déplacer une distinction non observée vers une prétendue certitude. Le déficit reste décomposé en ambiguïté, déficit de sondes, ressources et transfert.
+\section{Contrat de vérité}
+Le mode CERTIFY exige un objectif public explicite, une couverture complète de l'espace légal et un certificat de publicité exécutable. La valeur objective est lue uniquement dans un champ public de la conséquence validée. Si $A$ est l'ensemble fini légal :
+\[
+\forall a\in A,\quad S(a)\text{ est évalué},
+\]
+puis, pour une maximisation,
+\[
+a^*\in\arg\max_{a\in A}J(S(a)).
+\]
+Une prédiction de WM n'est jamais substituée à $J$. Les entiers arbitrairement grands sont conservés exactement et ne passent jamais implicitement par une conversion flottante.
+\section{Barrière publique renforcée}
+L'audit statique examine les frontières \texttt{observe}, \texttt{legal\_actions}, \texttt{simulate}, \texttt{public\_objective}, \texttt{decision\_contract}, \texttt{public\_certificate} et \texttt{verifier}. Il rejette notamment : attributs cachés, accès dynamiques, variables globales externes et fermetures libres. Cette barrière est une garantie contractuelle et statique ; elle ne prétend pas résoudre arbitrairement la sémantique de tout programme Python malveillant.
+\section{Recherche bornée}
+En mode SEARCH, l'ensemble d'actions est canonisé par une fonction de hash stable afin que la position de l'action dans une liste hôte ne fournisse pas une information algorithmique non déclarée. La largeur de faisceau est adaptative :
+\[
+w_d=\min\left(32,\max\left(1,b^{\min(d,2)},P\right)\right),
+\]
+où $b$ est la ramification racine et $P$ la taille déclarée du portefeuille. La règle est bornée par budget et n'est pas un oracle.
+
+Les conséquences publiques sémantiquement typées (récompense, score, coût, distance, etc.) servent de preuve d'évidence pour le classement ouvert, mais restent explicitement non certifiées. La valeur heuristique ne peut devenir une preuve finale par simple renommage.
+\section{Réutilisation de plans}
+Un plan multi-étapes peut être réutilisé uniquement si l'environnement déclare explicitement \texttt{declared\_deterministic\_markov=True}. Toute action est revérifiée avant la transition réelle. Toute divergence de l'état prévu ou absence du contrat invalide le plan. Ainsi :
+\[
+\text{plan prédictif}\neq\text{autorisation d'exécuter sans contrôle}.
+\]
+Pour un environnement non déterministe, le système repart en recherche.
+\section{Portefeuille WM}
+Le portefeuille de base comprend O65 et O70-att1. Chaque WM reste gelé et son hash est vérifié avant et après l'épisode. Le routeur peut utiliser un petit pilote public :
+\[
+R_k(P)=\frac1{|P|}\sum_{a\in P}|\hat r_k(a)-r(a)|,
+\]
+si et seulement si $r(a)$ est une conséquence publique. Le coût du pilote est comptabilisé. En l'absence de feedback public, le routeur ne fabrique pas de vérité.
+\section{Contrôle WM aléatoire}
+Trois WM attentionnels identiques architecturalement à la variante att1 mais initialisés aléatoirement et jamais entraînés constituent le contrôle négatif. Leur succès sur les familles actuelles n'est pas interprété comme une qualité du WM aléatoire : au contraire, il montre que la résolution de ces tâches dépend surtout de la structure de recherche, des conséquences publiques et du vérificateur. Il constitue donc un test d'insuffisance causale du benchmark pour différencier les WM.
+\section{Nouveautés par rapport à e0}
+\begin{longtable}{p{0.24\textwidth}p{0.67\textwidth}}
+\toprule
+Anomalie observée & Correction v1 \\
+\midrule
+Accès à un attribut caché dans la simulation & Rejet statique des dépendances d'attribut hors allowlist. \\
+Accès dynamique de type \texttt{getattr} & Rejet des accès dynamiques sur la frontière publique. \\
+Oracle dans une variable globale & Rejet des \texttt{LOAD\_GLOBAL} externes non autorisés. \\
+Oracle dans une fermeture lexicale & Rejet des variables libres. \\
+Callback de feedback pouvant fermer sur une vérité cachée & API du routeur simplifiée sans callback de feedback. \\
+Perte de précision au-delà de $2^{53}$ & Conservation exacte des entiers. \\
+Dépendance à l'ordre hôte des actions & Canonisation stable avant expansion bornée. \\
+Faisceau trop étroit pour récompense retardée & Largeur adaptative bornée. \\
+Reclassement ambigu d'un plan correct & Priorité à la conséquence publique et tie-break racine. \\
+Recherche répétée pour les mêmes plans & Cache de plan conditionné par le contrat déterministe-Markov. \\
+\bottomrule
+\end{longtable}
+\section{Critère d'autonomie}
+Le critère plus exigeant retenu pour la suite est causal : un WM doit améliorer une décision ou réduire le coût expérimental sur des tâches où cette prédiction est réellement nécessaire. Réussir avec un WM aléatoire, ou avec un prédicteur volontairement inversé, indique que la tâche ne teste pas encore cette propriété. La mesure prioritaire devient donc
+\[
+\eta=\frac{\Delta U_{\text{décision}}}{\Delta C_{\text{compute}}},
+\]
+à protocole de vérification identique.
+\section{Architecture complète}
+\[
+X\rightarrow I_P\rightarrow\mathcal K\rightarrow\mathcal P_{WM}\rightarrow\mathcal A\rightarrow\mathcal E\rightarrow\mathcal V\rightarrow\mathcal M\rightarrow\mathcal R.
+\]
+$\mathcal P_{WM}$ produit représentation, prédiction, incertitude et ordre expérimental. $\mathcal E$ réalise ou simule. $\mathcal V$ décide de la certification. $\mathcal M$ conserve la provenance. $\mathcal R$ ajuste les représentations et sondes. La théorie fini/inifini est traitée comme cadre de fermeture : ce qui est fermé peut être exhaustivement vérifié ; le résidu doit rester explicite comme déficit.
+\section{Développement futur obligatoire}
+Les prochaines expériences doivent casser le lien entre simulation complète et WM : mondes à observations partielles, simulateurs coûteux, conséquences retardées hors profondeur de faisceau, actions dont la valeur dépend d'un modèle non trivial et tâches où la sélection d'expériences réduit réellement le nombre d'interactions. Toute prétention de généralité doit survivre à des contrôles WM nul, WM aléatoire et WM adversarial.
+\section{Conclusion}
+O72 e1 devient une architecture plus nette : le WM est un instrument probabiliste et adaptatif ; le modèle principal est un orchestrateur d'empreintes, expériences, recherche et vérification. L'expérience actuelle augmente la robustesse et la capacité de planification, mais le contrôle WM aléatoire révèle que le banc ne mesure pas encore la dépendance causale au WM. Cette limite est une information scientifique à résoudre, pas une faiblesse à masquer.
+\end{document}

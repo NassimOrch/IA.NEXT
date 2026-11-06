@@ -1,0 +1,283 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.25cm,headheight=15pt]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{amsmath,amssymb}
+\usepackage{parskip}
+
+\definecolor{AAMBlue}{HTML}{173B63}
+\definecolor{AAMTeal}{HTML}{147D83}
+\definecolor{AAMLight}{HTML}{EEF5F8}
+\definecolor{AAMGray}{HTML}{4A5560}
+\definecolor{CodeBg}{HTML}{F4F6F8}
+\hypersetup{colorlinks=true,linkcolor=AAMBlue,urlcolor=AAMTeal,pdftitle={Lettre aux lycéennes et lycéens : comprendre AAM O91 v3},pdfauthor={Équipe de conception AAM}}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{AAM O91 v3}
+\rhead{Lettre aux lycéennes et lycéens}
+\cfoot{\thepage}
+\setlength{\parskip}{3pt}
+\setlist[itemize]{leftmargin=1.4em,itemsep=1pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=2pt,topsep=2pt}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{CodeBg},frame=single,rulecolor=\color{AAMLight},breaklines=true,columns=fullflexible,showstringspaces=false,aboveskip=5pt,belowskip=5pt}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries\color{AAMBlue} Lettre ouverte aux lycéennes et lycéens}\\[3pt]
+{\LARGE\bfseries Comprendre AAM O91 v3 : apprendre, observer, utiliser des outils et vérifier}\\[7pt]
+{\normalsize 11 octobre 2026}
+\end{center}
+
+\vspace{4pt}
+\noindent\textbf{Chères lycéennes, chers lycéens,}
+
+Quand on entend parler d'intelligence artificielle, on pense souvent à un chatbot qui écrit un texte, répond à une question ou crée une image. Mais il existe une autre façon de concevoir une IA : lui donner un mécanisme pour observer une situation, apprendre une compétence à partir d'exemples, rechercher des informations, utiliser des outils, décomposer un objectif en sous-problèmes et vérifier ce qu'elle a produit. C'est l'ambition qui guide AAM O91.
+
+Je voudrais vous présenter ce que représente réellement \textbf{AAM O91 v3}, ce qu'il sait déjà faire dans les essais réalisés, ce que ces essais ne démontrent pas encore, et pourquoi la théorie des empreintes joue un rôle important dans son architecture. Le but n'est ni de vendre une promesse ni de sous-estimer le projet : c'est de comprendre précisément ce qui a été construit et comment on peut le faire progresser.
+
+\begin{center}
+\fcolorbox{AAMTeal}{AAMLight}{\begin{minipage}{0.91\linewidth}
+\textbf{L'idée centrale :} AAM O91 v3 est une architecture expérimentale d'IA autonome et hybride. Elle relie observation, acquisition de compétences, mémoire, planification, recherche documentaire, outils spécialisés et vérification. Ce n'est pas, à elle seule, un grand modèle de langage préentraîné, et les résultats disponibles ne suffisent pas à établir qu'elle possède déjà une intelligence générale au sens fort.
+\end{minipage}}
+\end{center}
+
+\section*{1. Quelle est la catégorie d'AAM O91 v3 ?}
+
+On peut classer O91 v3 parmi les \textbf{systèmes d'IA agentiques hybrides orientés vers l'acquisition de compétences et l'usage d'outils}. Le mot \emph{hybride} est important : le système ne repose pas sur un seul mécanisme. Il combine plusieurs composants qui remplissent des fonctions différentes :
+
+\begin{itemize}
+\item \textbf{Observation :} examiner une entrée, produire plusieurs vues d'une même donnée et repérer ce qui mérite une observation supplémentaire.
+\item \textbf{Acquisition :} proposer une compétence candidate à partir d'exemples d'entraînement, puis mesurer sur quels cas elle fonctionne.
+\item \textbf{Planification hiérarchique :} diviser un objectif en sous-objectifs, respecter les dépendances, garder une trace des essais et revenir au problème principal lorsqu'une nouvelle observation arrive.
+\item \textbf{Mémoire et RAG :} retrouver des documents, conserver des expériences et relier les résultats à leur provenance.
+\item \textbf{Outils spécialisés :} appeler, selon la tâche et la configuration, un moteur OCR, un moteur de reconnaissance vocale, un calculateur symbolique ou un modèle local de langage, de vision ou d'audio.
+\item \textbf{Audit :} conserver les entrées, les versions, les empreintes, les résultats, les erreurs et les raisons d'accepter, de refuser ou de différer une prédiction.
+\end{itemize}
+
+Le numéro « v3 » désigne ici une révision de livraison auditée. Le runtime testé porte la version logicielle 0.5.1. Il ne faut pas confondre cette numérotation avec un niveau universel d'intelligence : une version est un ensemble précis de code, de paramètres, de dépendances et de preuves d'essai.
+
+\section*{2. Comment fonctionne la boucle d'AAM ?}
+
+Imaginez un élève qui doit apprendre à reconnaître une famille de problèmes. Il ne mémorise pas seulement trois réponses : il regarde les données, cherche une régularité, formule une règle, l'essaie sur des exemples qu'il n'a pas vus, note les erreurs et revient à la question initiale quand il découvre une nouvelle information. O91 cherche à structurer un cycle analogue, avec des procédures mesurables.
+
+Le pipeline peut être résumé ainsi :
+
+\begin{enumerate}
+\item \textbf{Recevoir un but ou une donnée.} Il peut s'agir de texte, de JSON, d'un document, d'une image ou d'un signal audio supporté.
+\item \textbf{Construire des observations.} Le système garde les octets d'origine et peut en dériver plusieurs vues : structure, relations, contexte, qualité ou caractéristiques propres à une modalité.
+\item \textbf{Consulter les compétences et les sources.} Il cherche ce qu'il sait déjà faire, quelles procédures sont disponibles et quels documents pertinents peuvent être retrouvés par RAG.
+\item \textbf{Proposer ou acquérir une compétence.} Les exemples TRAIN servent à construire un candidat. La sélection de paramètres se fait sur VALID ; HOLDOUT et OOD doivent rester séparés pour vérifier le transfert.
+\item \textbf{Planifier et essayer.} Le contrôleur décompose le travail, exécute les étapes compatibles avec leurs préconditions et conserve des checkpoints pour la reprise.
+\item \textbf{Vérifier et apprendre de l'issue.} Une réussite vérifiée, une erreur, un outil indisponible ou une répétition sans progrès modifient le choix des prochaines observations. Une sortie candidate n'est pas automatiquement une vérité certifiée.
+\end{enumerate}
+
+Cette boucle n'est pas une garantie que la bonne solution sera toujours trouvée. Elle constitue une méthode pour chercher, conserver des preuves, reconnaître la non-couverture et éviter de présenter chaque résultat comme certain. Le système possède un budget de travail et des règles de sécurité ; ceux-ci servent à rendre les essais observables et reproductibles, pas à déclarer qu'une tâche est impossible.
+
+\subsection*{Récompense et punition : que signifient ces mots ?}
+
+O91 v3 possède un registre de récompenses et de pénalités associé aux événements d'observation et d'usage d'outils. La récompense peut tenir compte d'une information nouvelle ou de l'exécution correcte d'une procédure ; une pénalité peut signaler un outil en échec, une vérification négative ou un cycle qui ne progresse pas. Une part d'exploration reste disponible afin qu'une erreur ponctuelle ne ferme pas définitivement une piste.
+
+Dans la campagne auditée, le résumé rapporte 17 événements de récompense/punition : 11 récompenses et 6 pénalités, avec un plancher d'exploration de 0,08. Ces nombres décrivent ce journal et cette campagne, non une mesure de « motivation » humaine. Le système n'éprouve pas nécessairement le désir ou la déception comme une personne : la récompense est un signal algorithmique qui oriente les choix futurs. Elle ne prouve jamais qu'une réponse est vraie. Pour cela, il faut une validation indépendante.
+
+\section*{3. Dataset et RAG : deux choses différentes}
+
+Ces deux mécanismes sont souvent confondus, mais ils n'ont pas le même rôle.
+
+\textbf{Un dataset} est un ensemble structuré d'exemples. Pour acquérir une compétence, chaque exemple peut associer une entrée à la sortie attendue. Par exemple, on peut montrer plusieurs chaînes de texte et leur version transformée. Le système cherche alors une règle qui explique les exemples et la teste sur des entrées séparées. Dans O91, cette procédure apprend d'abord depuis TRAIN ; elle ne doit pas lire les réponses de HOLDOUT ou OOD pour fabriquer sa règle.
+
+\textbf{Le RAG} (\emph{Retrieval-Augmented Generation}, ou génération augmentée par recherche) sert à retrouver des passages dans un corpus documentaire au moment où une question est posée. On charge des manuels, des articles ou les notes d'un projet ; le système indexe les documents, récupère des passages utiles et peut les citer. Le RAG ajoute des informations récupérées à la réponse, mais ne signifie pas, à lui seul, que les paramètres du modèle ont été entraînés ou que les documents sont devenus une compétence générale.
+
+Une comparaison simple : le dataset ressemble à des exercices corrigés qui aident à apprendre une méthode ; le RAG ressemble à une bibliothèque que l'on consulte pendant le travail. Les deux peuvent être combinés.
+
+\subsection*{Comment entraîner ou adapter O91 ?}
+
+Pour une tâche locale, on peut commencer avec un petit dataset ou des compétences déjà disponibles :
+
+\begin{enumerate}
+\item préparer et sauvegarder le dataset d'origine ;
+\item séparer clairement TRAIN, VALID, HOLDOUT et OOD ;
+\item vérifier que les mêmes exemples, ou presque, ne se retrouvent pas à la fois dans l'entraînement et dans les tests ;
+\item charger le dataset dans l'onglet \textbf{Dataset}, puis lancer l'acquisition ;
+\item examiner les compétences candidates, leurs préconditions, leurs erreurs et les cas qu'elles ne couvrent pas ;
+\item sélectionner sur VALID et utiliser HOLDOUT/OOD pour une vérification distincte ;
+\item conserver le rapport, les versions et les empreintes avec la compétence.
+\end{enumerate}
+
+Il est important de préciser ce que « entraîner » veut dire dans O91 v3. Le runtime apprend des règles et des compétences structurées, choisit des procédures et enregistre des capsules réutilisables. Cette livraison \textbf{n'inclut pas un pipeline autonome d'entraînement neural massif ni les poids d'un grand modèle généraliste}. L'entraînement global de grands réseaux est un chantier séparé, avec des données, du calcul, des poids, des méthodes d'évaluation et une infrastructure qui ne sont pas fournis par ce paquet.
+
+\section*{4. Intelligence locale et intelligence globale}
+
+Dans la vision d'AAM, l'\textbf{intelligence locale} signifie qu'un système peut résoudre certaines tâches dans un domaine précis sans un énorme entraînement préalable : une petite collection d'exemples, des compétences génériques, de l'observation, de la planification et un RAG local peuvent suffire à construire une solution utile. Il s'agit d'une généralisation dans un cadre mesuré, et non de la preuve d'une intelligence universelle.
+
+L'\textbf{intelligence globale} désigne l'ambition de transférer des compétences entre des domaines nombreux, de composer des capacités apprises et, éventuellement, de combiner l'architecture AAM à de grands modèles entraînés sur de vastes données. Pour obtenir et mesurer cela, il faudrait un pipeline de formation global, des modèles ou poids appropriés et des évaluations très diverses. O91 v3 ne livre pas encore ce pipeline à grande échelle ni un modèle généraliste préentraîné.
+
+Cette distinction permet de travailler utilement à petite échelle sans faire croire qu'une démonstration locale suffit à résoudre tous les domaines.
+
+\section*{5. O91 v3 comparé aux LLM}
+
+Un \textbf{LLM} (grand modèle de langage) est généralement un réseau neuronal entraîné sur un très vaste corpus pour traiter et produire du langage. Ses connaissances et ses habitudes linguistiques sont distribuées dans ses poids. Il peut écrire avec fluidité, expliquer, résumer ou programmer ; il peut aussi se tromper, inventer des détails ou affirmer quelque chose sans preuve suffisante.
+
+O91 v3 n'est pas le même objet : c'est surtout une architecture d'orchestration, d'acquisition de compétences, de mémoire, de planification et de vérification, capable d'appeler des outils ou un modèle externe lorsqu'ils sont installés et configurés. Elle tente de rendre visible ce qui a été observé, quelle compétence a été utilisée, d'où viennent les données et si le résultat a été vérifié.
+
+Sans backend LLM local configuré, le chat d'O91 n'est pas équivalent à un assistant génératif moderne : il combine contexte, informations récupérées et surfaces de réponse apprises, et peut s'abstenir si les éléments disponibles ne suffisent pas. Un LLM peut compléter O91 ; cela ne transforme pas automatiquement tous les outputs du système en réponses certifiées.
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.22\linewidth} >{\raggedright\arraybackslash}p{0.33\linewidth} >{\raggedright\arraybackslash}p{0.33\linewidth}}
+\toprule
+\textbf{Aspect} & \textbf{LLM classique} & \textbf{AAM O91 v3} \\
+\midrule
+Centre de gravité & Réseau neuronal et génération de tokens & Boucle d'observation, compétences, outils, mémoire et audit \\
+Apprentissage & Souvent préentraînement et ajustement des poids & Acquisition de compétences bornées depuis des exemples, plus outils externes \\
+Données documentaires & Souvent intégrées aux poids ou ajoutées par RAG & RAG local explicite et provenance des passages \\
+Vérification & Peut être ajoutée autour du modèle & Les sorties candidates et les certifications sont séparées explicitement \\
+Conversation libre & Généralement fluide si le modèle est adapté & Dépend d'un backend génératif configuré ; pas de LLM général fourni dans le paquet \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Il ne s'agit donc pas de déclarer qu'une catégorie est toujours meilleure que l'autre. Elles peuvent être complémentaires : un LLM peut comprendre et formuler une requête, tandis qu'AAM gère la provenance, l'acquisition, le choix d'outils, les essais, les checkpoints et la vérification.
+
+\section*{6. Le mérite de la théorie des empreintes}
+
+Une empreinte est une représentation compacte construite à partir d'une observation. Mais il existe plusieurs sortes d'empreintes, et il faut éviter de les confondre.
+
+\begin{itemize}
+\item Un \textbf{hash cryptographique} comme SHA-256 est utile pour l'intégrité : si un fichier change, son hash change généralement. Il ne mesure pas la ressemblance sémantique. Deux photos du même objet, enregistrées différemment, peuvent avoir des hash entièrement différents.
+\item Une \textbf{empreinte structurelle} décrit des éléments tels que des champs, des limites, des relations ou l'organisation d'une donnée.
+\item Une \textbf{empreinte multi-échelle} rassemble plusieurs vues ou niveaux : détails, structure, relations et contexte. Elle peut aider à comparer des observations qui ne sont pas identiques octet par octet, mais qui partagent des traits pertinents pour une tâche.
+\item Une \textbf{empreinte sémantique} exige une représentation capable de refléter le sens d'une entrée ; un hash ou un simple résumé de pixels ne suffit pas à la produire.
+\end{itemize}
+
+Le mérite théorique de cette approche est de traiter l'observation elle-même comme une compétence potentielle : le système peut apprendre quelle vue examiner, à quel niveau, et quand une vue supplémentaire est utile. Plusieurs micro-observations peuvent être menées en parallèle, puis leurs résultats sont comparés. L'empreinte versionnée relie les données à la compétence qui en a été tirée et permet de détecter une modification du support expérimental.
+
+Les sources O88 contiennent un essai comparatif de familles F0 à F5. Dans le protocole et le corpus archivés, la variante F4 multi-échelle a obtenu une moyenne OOD naturelle de 0,95639, contre 0,94493 pour F0, 0,94802 pour F2, 0,94890 pour F5, 0,94229 pour F1 et 0,91938 pour F3. C'est un résultat empirique intéressant : F4 a été retenue comme représentation par défaut à tester dans O91. Mais le chiffre vient d'un corpus, d'une tâche et d'un protocole précis ; il ne prouve pas que F4 est la meilleure empreinte pour toute donnée, ni que l'empreinte comprend le sens d'une image ou d'une phrase.
+
+\textbf{Le mérite de la théorie des empreintes dans AAM} est donc de donner une méthode pour organiser l'observation, comparer ses niveaux, détecter des collisions, choisir la prochaine micro-observation et conserver la provenance. Elle peut soutenir l'acquisition et la généralisation ; elle ne remplace ni l'apprentissage, ni le raisonnement, ni les moteurs perceptifs réels, ni l'évaluation indépendante.
+
+\section*{7. O91 a-t-il vraiment résolu les problèmes mathématiques ?}
+
+La campagne v3 a soumis neuf tâches au calcul formel SymPy par un adaptateur borné. Les résultats ont ensuite été vérifiés par des méthodes indépendantes, comme la substitution symbolique, la quadrature numérique, les différences finies ou des identités algébriques. Le bilan enregistré est de \textbf{9 résultats sur 9 vérifiés indépendamment}. Parmi les tâches figuraient :
+
+\begin{itemize}
+\item résoudre l'équation de degré six
+\(x^6-5x^4+5x^2-1=0\) et vérifier six racines exactes ;
+\item calculer \(\int_0^1 \frac{x^4}{x^2+1}\,dx=\frac{\pi}{4}-\frac{2}{3}\), soit environ \(0{,}1187315\) ;
+\item dériver \(e^{x^2}\sin(3x)\) et comparer la dérivée à des différences finies ;
+\item calculer \(\lim_{x\to0}\frac{\sin x}{x}=1\) ;
+\item calculer un développement limité à l'ordre 10 ;
+\item résoudre un système non linéaire, un système linéaire, calculer des valeurs propres et sommer les cubes de 1 à 100.
+\end{itemize}
+
+\textbf{La réponse honnête à la question « O91 a-t-il tout résolu tout seul ? » est : pas dans le sens fort que ce test permettrait de prouver.} Les requêtes mathématiques de cette campagne étaient déjà structurées (opération, expression, bornes, variables ou matrice) et le moteur SymPy a effectivement effectué les calculs. Le runtime AAM a servi de couche d'orchestration : il a transmis une requête bornée à l'outil, a enregistré le résultat comme observation candidate, a conservé la provenance et les événements de récompense, puis le banc d'audit a vérifié la réponse indépendamment.
+
+C'est le mérite réel de l'intégration : un système ne doit pas réimplémenter chaque algorithme spécialisé s'il peut choisir un outil fiable, l'appeler de façon contrôlée, apprendre la procédure d'utilisation, enregistrer ses préconditions, détecter les erreurs et vérifier les sorties. Un robot peut, de la même manière, utiliser un planificateur, un solveur de contraintes ou une bibliothèque de vision au lieu de réinventer tous ces composants.
+
+Mais cette campagne ne démontre pas encore qu'AAM transforme seul un énoncé mathématique compliqué en langage naturel en représentation symbolique, invente la stratégie mathématique sans outil, ni qu'il résout tous les problèmes nouveaux. Dans les journaux du runtime, les sorties SymPy restent d'abord \texttt{NOT\_CERTIFIED} ; ce sont les vérifications indépendantes du banc de test qui ont ensuite réussi. Cette séparation est une force méthodologique, pas un détail à cacher.
+
+\section*{8. Que montrent réellement les essais multimodaux ?}
+
+Le mot \emph{multimodal} veut dire que le système peut traiter plusieurs types de données, mais cela ne signifie pas automatiquement qu'il comprend parfaitement tous les médias. Les résultats v3 sont volontairement séparés par fonction.
+
+\subsection*{Images et OCR}
+
+Un vrai moteur OCR, Tesseract, a été appelé sur les octets de véritables images raster. Il a retrouvé exactement le texte attendu sur \textbf{6 cartes de contrôle sur 6}. Une page historique a également été soumise à l'OCR et le texte extrait a été conservé, mais cette page n'avait pas de transcription de référence pour mesurer l'exactitude. Par ailleurs, une petite tâche de classification de formes synthétiques a obtenu 2/2 sur HOLDOUT et 1/1 sur OOD ; ces trois cas ne sont pas une évaluation générale de la compréhension visuelle.
+
+L'OCR répond à « quel texte est visible dans cette image ? ». Comprendre qu'une scène représente un passage piéton, qu'une personne est en danger ou qu'un objet sert à telle fonction exige d'autres capacités, en particulier un modèle de vision sémantique réel. Aucun poids VLM sémantique n'était chargé dans cette campagne.
+
+\subsection*{Audio et parole}
+
+Un véritable décodeur ASR, PocketSphinx, a exécuté une inférence sur dix fichiers WAV anglais produits par synthèse vocale eSpeak. L'erreur moyenne de mots (WER) était de \textbf{1,0388}, la médiane de 1,0833, et aucun des dix fichiers n'atteignait le seuil de qualité préenregistré de 20\,\%. Ces fichiers n'étaient pas des enregistrements naturels de personnes. Une tentative d'utiliser Whisper.cpp n'a pas abouti, car l'exécutable ou les poids nécessaires n'étaient pas disponibles ; aucune performance Whisper ne doit donc être revendiquée.
+
+Une petite classification de signaux audio a correctement classé deux niveaux simples sur HOLDOUT, mais a refusé l'exemple OOD représentant un signal mélangé. Ce refus est informatif : le système a reconnu que ce cas sortait de ce qu'il avait couvert. Ce n'est pas de la transcription de parole ni une compréhension audio générale.
+
+En résumé, l'OCR de contrôle est démontré ; l'acquisition de certaines caractéristiques image/audio est démontrée sur de petits jeux déclarés ; la reconnaissance vocale de qualité et la compréhension générale d'images restent des objectifs de validation ouverts.
+
+\section*{9. Comment utiliser O91 v3 ?}
+
+Le paquet fournit une interface de travail avec huit vues : Chat, Dataset, RAG, Compétences, Médias appris, Laboratoire, Autonomie et Audit/Historique. Sur Windows, le guide fourni décrit l'installation avec Python 3.11 ou plus récent et le lancement de l'interface. Les commandes ci-dessous sont données à titre pratique et supposent que les chemins indiqués existent dans le dossier extrait.
+
+\begin{lstlisting}[language=bash,caption={Créer l'environnement et installer les composants locaux fournis}]
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --no-index --no-deps `
+  .\wheels\mpmath-1.3.0-py3-none-any.whl `
+  .\wheels\sympy-1.14.0-py3-none-any.whl
+.\.venv\Scripts\python.exe -m pip install --no-index --no-deps `
+  .\wheels\aam_o91-0.5.1-py3-none-any.whl
+\end{lstlisting}
+
+Lance ensuite l'interface :
+
+\begin{lstlisting}[language=bash,caption={Démarrer le Workbench local}]
+.\.venv\Scripts\python.exe -m aam_o91.ui `
+  --workspace "$env:LOCALAPPDATA\AAM_O91" --ui auto
+\end{lstlisting}
+
+Dans Chat, on peut choisir une sortie texte, JSON ou les deux. Dans Dataset, on charge les exemples puis on lance l'acquisition sur TRAIN. Dans RAG, on importe un dossier documentaire et on inspecte les passages récupérés avant de s'appuyer sur eux. Dans Compétences et Audit, on regarde le statut, les conditions d'application, les erreurs et les preuves associées. Dans Autonomie, on fixe un objectif et un budget de travail ; la boucle est active dans le fonctionnement normal, mais ses cycles restent bornés pour permettre une reprise et un audit.
+
+Pour une opération mathématique structurée, le CLI du calculateur peut être appelé ainsi :
+
+\begin{lstlisting}[language=bash,caption={Exemple : intégrer x au carré sur l'intervalle [0,3]}]
+$job = '{"operation":"integrate","expression":"x**2","variable":"x","lower":0,"upper":3}'
+.\.venv\Scripts\python.exe -m aam_o91.math_cli --job $job
+\end{lstlisting}
+
+Le résultat attendu de cet outil est 9. Il doit être traité comme une observation candidate jusqu'à ce qu'un contrôle indépendant approprié soit effectué. Pour les médias, il faut installer et configurer les moteurs et leurs modèles de langue ou poids nécessaires ; le paquet AAM ne contient pas automatiquement tous les modèles de vision ou de reconnaissance de parole.
+
+\section*{10. Pourquoi cela compte pour la robotique et les systèmes autonomes}
+
+Un robot autonome a besoin de plus que d'une bonne réponse écrite. Il doit observer son environnement, estimer ce qu'il sait et ignore, planifier plusieurs étapes, agir, mesurer le résultat, se corriger et s'arrêter en sécurité si les conditions ne sont pas réunies. L'architecture AAM vise à organiser certains de ces mécanismes : plusieurs vues des capteurs, des compétences réutilisables, une mémoire des procédures, un plan hiérarchique, une boucle de feedback et une trace de ce qui s'est passé.
+
+Imaginons un robot qui doit déplacer une boîte. Il pourrait recevoir une image, utiliser un moteur de vision pour repérer la boîte, consulter une compétence de localisation, planifier un trajet, demander une observation supplémentaire si un obstacle est ambigu, puis vérifier sa position après l'action. Une récompense pourrait signaler qu'une étape vérifiée a progressé ; une pénalité pourrait signaler une collision simulée, une action rejetée ou l'absence de progrès. La décision de commander un moteur doit néanmoins rester soumise à des contrôles de sécurité dédiés.
+
+Pour passer de cette architecture à un robot réellement utilisable, il faudra notamment des essais sur simulateur puis sur matériel, des capteurs représentatifs, des délais contrôlés, des arrêts d'urgence, des limites physiques, une analyse des erreurs, et des tests en conditions variées. Les essais de cette version sont des essais logiciels ; ils ne prouvent pas qu'un robot physique peut être déployé directement sans ce travail.
+
+\section*{11. Quelles conséquences pour le monde d'aujourd'hui ?}
+
+L'intérêt d'une architecture comme AAM est de rendre l'apprentissage et l'action plus inspectables. Au lieu de retenir uniquement la réponse finale, on cherche à conserver les observations, la procédure choisie, la version de la compétence, les documents utilisés, les coûts, les erreurs et les contrôles de vérité. Cela peut servir à l'éducation, à l'analyse documentaire, à l'assistance technique, à la recherche scientifique, aux robots de laboratoire ou à des systèmes industriels où la traçabilité compte.
+
+La même exigence crée une responsabilité : une récompense positive ne doit pas pousser à masquer les erreurs ; une statistique sur trois exemples ne doit pas être transformée en promesse générale ; une donnée personnelle ne doit pas être envoyée à un service distant sans autorisation ; un outil ne doit pas exécuter du code arbitraire provenant d'un document récupéré. La sécurité, la vie privée et l'audit sont des composantes opérationnelles du modèle, pas des accessoires.
+
+\section*{12. Comment imaginer la prochaine version ?}
+
+Une prochaine version utile devrait d'abord fermer les écarts mesurables avant d'élargir les promesses :
+
+\begin{enumerate}
+\item évaluer l'ASR sur des voix humaines représentatives, avec un moteur et des poids réellement chargés ;
+\item charger un vrai modèle de vision sémantique puis mesurer sa performance sur des images variées et des questions dont les réponses de référence sont indépendantes ;
+\item comparer les empreintes F0--F5 sur plusieurs familles de données, avec ablations, répétitions, coûts, collisions et jeux de test séparés ;
+\item tester la transformation d'énoncés en langage naturel vers des plans ou des jobs structurés, avant l'appel au calculateur, et mesurer cette étape séparément du calcul CAS ;
+\item étendre l'apprentissage de compétences à des tâches plus diverses et vérifier la réutilisation de procédures sur des données réellement nouvelles ;
+\item exécuter une recette Windows native complète, puis un pipeline de robotique en simulation avec des contrôleurs et garde-fous adaptés ;
+\item étudier un entraînement global seulement avec des datasets, des ressources de calcul et des évaluations clairement documentés.
+\end{enumerate}
+
+Ces pistes décrivent un programme de travail, pas une promesse que tous les jalons seront atteints. Le potentiel d'une architecture doit être exploré par des expériences, et non déclaré gagné ou perdu à l'avance.
+
+\section*{13. Le bilan à retenir}
+
+AAM O91 v3 est une architecture expérimentale de système autonome hybride : elle relie acquisition de compétences, planification, observation multi-vues, mémoire, RAG, outils spécialisés, récompenses/pénalités et audit. La suite de référence de la révision a réussi \textbf{178 tests sur 178} dans l'environnement Linux/Python documenté. L'essai mathématique a produit neuf résultats SymPy vérifiés indépendamment ; l'OCR Tesseract de contrôle a retrouvé six textes sur six ; l'essai ASR a échoué au seuil qualité ; la compréhension sémantique générale des images, les modèles neuraux audio/vision non chargés, la recette Windows native et l'entraînement global restent non validés.
+
+Ces faits dessinent une image équilibrée. Le mérite d'AAM n'est pas de prétendre avoir déjà remplacé tous les LLM ou tous les solveurs. Il est de chercher une manière de transformer l'observation en compétences traçables, de choisir et d'utiliser des outils, d'organiser la recherche, de conserver les erreurs, et de vérifier ce qu'il annonce. Son ambition de généralisation et d'intelligence au sens fort reste une question de recherche : les preuves doivent s'accumuler tâche après tâche.
+
+Je vous encourage à aborder l'intelligence artificielle avec curiosité et esprit critique. Demandez toujours : quelles données ont été vues ? Qui a produit la réponse ? Le système l'a-t-il apprise, calculée avec un outil ou récupérée dans un document ? Quelle expérience indépendante confirme le résultat ? Quels cas n'ont pas été testés ? Ce sont ces questions qui transforment une démonstration impressionnante en travail scientifique sérieux.
+
+\vspace{10pt}
+\noindent Avec confiance dans la recherche patiente, et avec l'exigence de distinguer les résultats des promesses,\\[7pt]
+\noindent\textbf{Lettre de présentation d'AAM O91 v3}\\
+\textit{Document pédagogique fondé sur les rapports et journaux de la campagne d'essais v3 datée du 11 octobre 2026.}
+
+\end{document}

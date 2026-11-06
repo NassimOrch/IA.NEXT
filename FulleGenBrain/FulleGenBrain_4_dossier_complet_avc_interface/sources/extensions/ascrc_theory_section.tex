@@ -1,0 +1,75 @@
+\section{ASCRC : régulation réversible de l'activation compositionnelle}
+\subsection{Séparation inviolable avec ASCR d'eGenBrain v4}
+ASCR d'eGenBrain v4 conserve exactement son rôle, ses interfaces et sa sémantique propres dans le périmètre décrit par ses sources. La présente théorie ne redéfinit pas ASCR, ne remplace aucune de ses fonctions, ne change pas ses données internes et ne lui ajoute aucun effet implicite. Le mécanisme nouveau est nommé \textbf{ASCRC} et constitue un régulateur architectural distinct. ASCRC peut recevoir des descripteurs de candidats provenant d'ASCR ou d'autres catalogues via une interface d'adaptation non destructive; il ne modifie ni ne supplante le composant source.
+
+\subsection{Les dimensions qu'il ne faut jamais confondre}
+Pour une composition $c$, on distingue au moins les variables suivantes :
+\[
+E(c)\in\{0,1\},\quad K(c)\in\mathcal{K},\quad L(c)\in\mathcal{L},\quad A(c)\in\{0,1\},\quad X(c)\in\{0,1\}.
+\]
+$E$ indique l'existence dans le catalogue; $K$ le statut épistémique (hypothèse, testée, certifiée, réfutée, etc.); $L$ le cycle de vie de résidence (actif, dormant, archivé, périmé, révoqué); $A$ l'admission opérationnelle à une politique/context; et $X$ l'activation computationnelle en cours. L'exécution est un événement distinct qui exige $X=1$, des droits, un contrat admissible et des ressources. Aucune transition d'activation, suspension, allocation ou réveil ne modifie $K(c)$ par elle-même.
+
+\begin{definition}[Descripteur ASCRC]
+Un descripteur est un tuple versionné
+\[
+ d_c=(id,ver,\sigma,\Gamma,Deps,Scope,Cost,Risk,U,N,I,Age,Pin,Lease,WakeOn,K,Prov),
+\]
+où $\sigma$ est la signature canonique, $\Gamma$ le contrat, $Deps$ les dépendances, $Scope$ le domaine et contexte, $Cost$ le coût estimé, $Risk$ les risques, $U$ l'utilité contextuelle estimée, $N$ la nouveauté, $I$ l'information discriminante attendue, $Age$ le temps depuis la dernière activation, $Pin/Lease$ les protections contre l'éviction, $WakeOn$ les déclencheurs de réveil, $K$ le statut épistémique préexistant et $Prov$ la provenance. Les estimations sont des métadonnées décisionnelles, non des certificats.
+\end{definition}
+
+\subsection{Contrat fonctionnel et états de sortie}
+ASCRC prend en entrée un objectif versionné $G$, le contexte $x$, un flux ou catalogue de descripteurs, un vecteur de ressources disponibles $B$, l'état persistant de recherche et les événements récents. Il rend une décision traçable : ensemble admissible, priorités, allocations, compositions à activer, compositions à mettre en veille, réveils déclenchés, raisons de report, état de continuation et compteurs de ressource. Les états opérationnels distinguent au minimum $\mathsf{CATALOGUED}$, $\mathsf{ELIGIBLE}$, $\mathsf{ACTIVE}$, $\mathsf{DORMANT}$, $\mathsf{STALE}$, $\mathsf{BLOCKED}$ et $\mathsf{REVOKED}$. $\mathsf{BLOCKED}$ et $\mathsf{DORMANT}$ ne signifient pas réfuté; $\mathsf{REVOKED}$ requiert un événement de révocation distinct, motivé et traçable.
+
+\subsection{Budget et politique d'activation : complémentarité, pas substitution}
+Un budget est un plafond dur de ressource physique; ASCRC est une politique d'allocation de ce plafond. Pour un vecteur $B=(B_{cpu},B_{mem},B_{time},B_{io},B_{external})$ et des allocations $b_i$ :
+\[
+ \sum_{i\in A_t} b_i^{(r)}\leq B_t^{(r)}\qquad\text{pour chaque ressource }r.
+\]
+ASCRC ne supprime donc pas le besoin de budgets, de limites de concurrence ou de contrôle d'effets. Une commande peut être « activée par ASCRC » sans spécifier un budget local ad hoc, mais le runtime conserve toujours des limites globales et des garde-fous de capacité. Le budget définit ce qui peut être dépensé; ASCRC choisit sur quoi le dépenser et quand différer le travail.
+
+\subsection{Allocation multi-critère et exploration protégée}
+Une priorité indicative peut prendre la forme
+\[
+ S(c\mid G,x)=w_uU+w_nN+w_iI+w_a\phi(Age)+w_dDiversity-w_cC-w_rR,
+\]
+avec paramètres versionnés et normalisation déclarée. Les poids ne sont pas universels; ils sont calibrés par protocole et comparés à des politiques de référence. Le score ne signifie ni vérité ni validité. Les contraintes dures (type, contrat, permissions, dépendances, sécurité et statut stale) ne peuvent être compensées par un score élevé.
+
+L'allocation réserve selon la tâche des parts distinctes pour exploitation, exploration, vérification et maintenance :
+\[
+ B_t=B_t^{exploit}+B_t^{explore}+B_t^{verify}+B_t^{maint},
+\]
+avec somme composante par composante au plus égale à $B_t$. Tant que des alternatives pertinentes restent non résolues, le contrôleur peut imposer un quota d'exploration positif ou une politique de couverture stratifiée. Le quota peut être désactivé seulement si une raison formelle liée à l'objectif le justifie et est inscrite dans la trace; il ne peut pas supprimer une porte obligatoire de sûreté.
+
+\subsection{Filtrage hiérarchique pour ne pas déplacer l'explosion vers ASCRC}
+Le calcul de priorité de tous les candidats peut lui-même devenir coûteux. ASCRC ne doit donc pas matérialiser ni scorer intégralement un espace potentiellement immense. La politique cible est hiérarchique : (0) génération paresseuse et vérification syntaxique/type/contrat; (1) indexation par signature, dépendance, domaine et cache; (2) score léger sur les seuls candidats qui entrent dans le front admissible; (3) test, probe ou simulation plus coûteuse pour un sous-ensemble discriminant; (4) activation/exécution réelle; (5) mise à jour de la politique à partir des résultats et contre-exemples. Chaque étage donne un résultat typé et son coût est mesuré. Un candidat non matérialisé reste représenté par l'état du générateur et son checkpoint, afin de rendre la recherche reprenable.
+
+\subsection{Veille, réveil et non-destruction}
+La transition $\mathsf{ACTIVE}\to\mathsf{DORMANT}$ décharge la représentation résidente après checkpoint et persistance du descripteur, du payload récupérable, des versions, des dépendances, de la trace et de l'état de recherche. Elle ne supprime ni la composition ni son statut épistémique. La transition $\mathsf{DORMANT}\to\mathsf{ACTIVE}$ exige demande ou événement, intégrité du payload, compatibilité du schéma, contrôle des versions et des permissions, revalidation des dépendances et réservation effective des ressources. Une dépendance modifiée produit $\mathsf{STALE}$ jusqu'à résolution explicite.
+
+Les déclencheurs incluent notamment nouvelle observation, changement d'objectif ou de contexte, contre-exemple, échec d'une composition active, disponibilité d'une dépendance, requête explicite, nouvelle preuve, expiration d'un bail et alarme de maintenance. Une composition épinglée, louée, en transaction ouverte, indispensable à une révocation ou portant un état non sauvegardé n'est pas endormie par éviction ordinaire.
+
+\subsection{Anti-famine, diversité et limites de la garantie}
+ASCRC combine vieillissement borné, priorité aux tâches anciennes, quota d'exploration, rotation par familles et budgets de vérification. Pour un ensemble fini de candidats admissibles, si chaque candidat a un coût inférieur ou égal à la part de ressource disponible à terme, si l'ordonnanceur est appelé indéfiniment, si le quota de maintenance/exploration reste positif et si les checkpoints reprennent sans perte, un candidat admissible ne peut être reporté indéfiniment. Cette garantie ne s'étend pas sans hypothèse à un espace infini alimenté plus vite que le service, à un candidat dont le coût dépasse toute capacité disponible ou à des objectifs qui changent à chaque pas; ces situations requièrent une politique de classes, de fractionnement, de coût maximal ou de réponse explicite de non-admissibilité actuelle.
+
+\begin{proposition}[Absence de famine sur un ensemble fini]
+Soit $S$ un ensemble fini de candidats continuellement admissibles. Supposons que chaque candidat ait un coût inférieur ou égal à la capacité allouable lors d'une ronde de service, qu'aucune protection (pin, lease, transaction) ne l'exclue, que le contrôleur soit exécuté indéfiniment, qu'une part positive des rondes serve la classe concernée, et que l'ordonnancement sélectionne en priorité les candidats de cette classe par âge décroissant avec remise à zéro de l'âge servi. Alors aucun candidat de $S$ ne peut être différé indéfiniment; à partir du moment où la classe est continuellement éligible, chaque candidat finit par être activé.
+\end{proposition}
+\begin{proof}
+À chaque ronde de service, un candidat sélectionné voit son âge remis à zéro; chaque candidat continuellement admissible et non sélectionné vieillit. L'ensemble $S$ étant fini, il existe à chaque ronde un candidat d'âge maximal. La règle de priorité empêche un candidat récemment servi de passer indéfiniment devant un candidat plus ancien. Si un candidat restait indéfiniment sans service, son âge finirait par dépasser celui de tout candidat sélectionné dans la classe; l'ordonnanceur devrait alors le sélectionner, contradiction. La conclusion dépend des hypothèses de coût, d'admissibilité continue et de rondes de service; elle ne couvre pas un espace infini ni un flot d'arrivées non borné.
+\end{proof}
+\begin{proposition}[Invariance épistémique sous régulation ASCRC]
+Si une transition ASCRC se limite à l'admission, à l'allocation, à l'activation, au report, à la veille ou au réveil et conserve les objets épistémiques et leurs dépendances, alors elle préserve le statut épistémique $K(c)$ de chaque composition. En particulier, ni une priorité nulle ni la mise en veille ne peuvent produire $\mathsf{REFUTED}$ ou $\mathsf{CERTIFIED}$.
+\end{proposition}
+\begin{proof}
+Par définition, ces transitions modifient seulement les champs opérationnels $A,L,X$ et les allocations. Le champ $K$ est en lecture seule dans le contrat ASCRC; toute modification de $K$ exige un événement séparé émis par un processus d'observation, d'évaluation, de réfutation, de preuve ou de révocation et portant sa propre provenance. Donc une transition ASCRC seule ne peut changer $K(c)$.
+\end{proof}
+
+\begin{invariant}[Non-déstruction par régulation]
+Pour tout candidat découvert et durablement enregistré, le report ou la veille ASCRC conserve au minimum son identifiant, sa version, sa signature, son statut épistémique, sa provenance, ses dépendances et son pointeur vers son payload ou son checkpoint, sauf politique de conservation destructive explicitement autorisée, distincte d'ASCRC, auditée et compatible avec les obligations légales/de sûreté applicables.
+\end{invariant}
+
+\subsection{Métriques et protocole expérimental ASCRC}
+Évaluer à tâche, graines et budget physique appariés : nombre de candidats générés, matérialisés, scorés, activés et exécutés; taux de candidats dormants réveillés utiles; taux de réveils superflus; coût ASCRC par activation; taille du front; débit de candidats validés; diversité des familles visitées; âge maximum en attente; taux de famine; consommation CPU/mémoire/I/O; qualité finale et erreurs de sûreté. Comparer au moins : ordonnanceur FIFO, best-first seul, ASCRC sans quota exploration, ASCRC avec quota, politique aléatoire stratifiée et ASCRC sans veille. Mesurer les interactions : ASCRC peut réduire les activations simultanées, mais son surcoût de scoring et le coût de vérification doivent être comptés. Aucun nombre de réduction n'est affirmé avant l'expérience.
+
+\subsection{Relation formelle avec la programmation compositionnelle}
+ASCRC n'est pas un privilège extérieur au langage : ses étapes de filtrage, classement, allocation, veille, réveil et vérification sont des compositions de composants typés, soumises aux mêmes contrats, versions, effets et traces. Le contrôleur ASCRC est méta-niveau : il sélectionne un petit ensemble d'opérations à activer sans changer la sémantique des programmes sélectionnés. Sa propre politique est versionnée, testée contre une politique de référence et peut être révisée avec retour arrière.

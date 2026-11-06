@@ -1,0 +1,237 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\setlength{\emergencystretch}{3em}
+\usepackage{geometry}
+\geometry{margin=2.35cm}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,array,enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{xurl}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!55!black,citecolor=blue!50!black,pdftitle={Réseaux de sondes adaptatives — formalisme global},pdfauthor={Dossier de recherche NG-ADAPT}}
+\setlist{nosep}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Théorème conditionnel}
+\newtheorem{remark}[definition]{Remarque}
+\newtheorem{counterexample}[definition]{Contre-exemple}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\title{Réseaux de sondes adaptatives : formalisme de l'adaptation globale, de l'activation et de la boucle d'observation}
+\author{Dossier de recherche NG-ADAPT --- version formelle révisée}
+\date{29 octobre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Ce document prolonge le formalisme du projet, qui représente une sonde par $P=(\mathcal F,U,\eta_0)$, sans lui attribuer de propriétés empiriques non démontrées. Il définit l'état local et partagé, les objectifs, la synchronisation, les droits d'accès aux observations, une activation optionnelle, une empreinte typée et une boucle causale. Des propositions avec hypothèses et preuves établissent des réductions et des limites d'identifiabilité, de reconstruction et de stabilité. Le document distingue l'architecture mise en œuvre dans le benchmark (quatre sondes RBF avec coordinateur) d'une classe générale de réseaux adaptatifs. Aucune garantie de convergence n'est revendiquée pour les architectures non convexes entraînées par Adam dans les expériences.
+\end{abstract}
+\tableofcontents
+\section{Périmètre et statut épistémique}
+
+Le formalisme des sources décrit une sonde par un triplet $(\mathcal F,U,\eta_0)$ : une famille de fonctions candidates, une règle d'actualisation et un état initial. Cette notation est une \emph{définition du projet}; elle n'est pas en soi une découverte ni un théorème. Le but ici est de rendre les états, les signaux observables, les objectifs et l'ordre causal vérifiables.
+
+Les références externes citées concernent des résultats précis : approximation universelle dans des classes et domaines sous hypothèses [1,2], méta-apprentissage [3], optimisation bi-niveau [4], agrégation de modèles locaux [5], approximation stochastique à deux échelles de temps [6], réutilisation du jeu de test sous analyses adaptatives [7], identifiabilité de certaines familles minimales [8] et prédiction performative [9]. Elles ne prouvent pas automatiquement la validité d'une architecture spécifique de ce projet.
+
+\section{Définitions de base}
+\begin{definition}[Sonde individuelle]
+Une sonde $i$ est le système typé
+\[
+P_i=(\mathcal F_i,U_i,\eta_{i,0}),\qquad
+\eta_{i,t}=(\theta_{i,t},\omega_{i,t},m_{i,t}),
+\]
+où $\theta_{i,t}$ contient les paramètres du prédicteur, $\omega_{i,t}$ l'état de l'optimiseur (moments Adam inclus s'ils sont conservés), et $m_{i,t}$ toute mémoire persistante réellement consultée. Pour une observation $x_{i,t}$, la sortie est $\hat y_{i,t}=f_i(x_{i,t};\theta_{i,t})$. Une mise à jour n'est définie qu'après désignation des données auxquelles $U_i$ a le droit d'accéder.
+\end{definition}
+\begin{definition}[Réseau de sondes]
+Pour $N$ sondes, le réseau est
+\[
+R=(P_1,\ldots,P_N,C,U_R,\eta_{R,0}),\qquad
+\eta_{R,t}=(\theta_{1,t},\ldots,\theta_{N,t},\phi_t,s_t).
+\]
+$C$ est le graphe de communication et de composition; $\phi_t$ est l'état du coordinateur partagé; $s_t$ regroupe uniquement les états supplémentaires utilisés (buffers, version des données, état d'aléa et compteurs). Un état d'optimiseur persistant ne peut être omis de $s_t$ lorsqu'il modifie une mise à jour.
+\end{definition}
+\begin{definition}[Adaptation individuelle]
+L'adaptation est individuelle si l'état de chaque sonde est mis à jour avec les seules observations et informations de contexte qu'elle est autorisée à consulter, selon $\theta_{i,t+1}=U_i(\theta_{i,t},o_{i,t},c_{i,t})$, sans signal de coordination partagé qui modifie sa décision ou sa dynamique d'actualisation.
+\end{definition}
+\begin{definition}[Adaptation globale]
+L'adaptation est globale si au moins un état partagé $\phi_t$ est effectivement actualisé à partir d'un objectif ou d'un résumé explicitement défini, puis influence une décision ultérieure de plusieurs sondes. La simple journalisation centrale, la concaténation de métriques ou un paramètre partagé qui reste constant ne suffit pas.
+\end{definition}
+\begin{remark}
+Trois notions ne doivent pas être confondues : (i) paramètres partagés $\phi$ dans une même optimisation; (ii) coordination d'objets locaux distincts; (iii) entraînement distribué où les données ou calculs sont répartis et les mises à jour agrégées. Le benchmark présent utilise des états locaux distincts et un coordinateur entraîné de façon centralisée sur les sorties des sondes sur le train complet; il ne prétend pas être un protocole fédéré décentralisé.
+\end{remark}
+
+\section{Objectifs et mises à jour explicites}
+Soit une partition d'entraînement $\cD_{\rm tr}=\bigcup_{i=1}^N\cD_i$, où les shards $\cD_i$ sont disjoints en exemples pour le benchmark. Un objectif local possible est
+\[
+\cL_i(\theta_i)=\frac{1}{|\cD_i|}\sum_{(x,y)\in\cD_i}\ell(y,f_i(x;\theta_i))+\lambda_i\Omega_i(\theta_i).
+\]
+L'objectif global est une autre fonction, définie sur les sorties autorisées :
+\[
+\cL_R(\phi;\theta_{1:N})=\frac{1}{|\cD_{\rm tr}|}\sum_{(x,y)\in\cD_{\rm tr}}
+\ell\!\left(y,\Gamma_\phi(f_1(x;\theta_1),\ldots,f_N(x;\theta_N))\right)+\lambda_R\Omega_R(\phi).
+\]
+La fonction \(\Gamma_\phi\), les données, les labels et la possibilité de rétropropager vers les sondes doivent être déclarés. Dans le benchmark, les sorties locales utilisées pour l'update du coordinateur sont détachées du graphe de calcul : le gradient global met donc à jour $\phi$, mais pas $\theta_i$ via ce chemin.
+
+Une forme générique d'actualisation est
+\begin{align}
+\theta_{i,t+1}&=U_i(\theta_{i,t},o_{i,t},c_{i,t},\phi_t,\mathcal F_t),\\
+\phi_{t+1}&=U_R(\phi_t,z_t,\cL_{R,t},q_t,\mathcal F_t),
+\end{align}
+Ici, $o_{i,t}$ est l'observation accessible. $z_t$ résume les sorties ou états autorisés, $q_t$ représente le contexte ou les contraintes admises, et $\mathcal F_t$ est l'empreinte dérivée. Ces équations ne déterminent pas à elles seules l'architecture. Il faut également déclarer $U_i$, $U_R$, $\Gamma$, les temps d'actualisation et les contrôles d'accès.
+
+\subsection{Instantiation testée dans le benchmark}
+Chaque sonde est une fonction RBF gaussienne
+\[
+f_i(x)=\sum_{j=1}^{4}w_{ij}\exp\!\left(-\frac{\norm{x-c_{ij}}^2}{2\sigma_{ij}^2}\right)+b_i,
+\]
+avec centres et largeurs apprenables. La sortie locale $q_i$ vaut $f_i(x)$ dans les variantes sans activation optionnelle, et $\tanh(f_i(x))$ dans les variantes avec option. L'agrégation locale utilise $\hat z=N^{-1}\sum_i q_i$. Pour le modèle coordonné,
+\[
+\pi_i(\phi)=\frac{e^{\phi_i}}{\sum_j e^{\phi_j}},\quad
+\hat z=\sum_i\pi_i(\phi)q_i,\quad
+\eta_i=\eta_0\bigl(0.5+2\pi_i(\phi)\bigr).
+\]
+Initialement $\phi=0$, donc $\pi_i=1/N$ et $\eta_i=\eta_0$ lorsque $N=4$. Le coordinateur est mis à jour toutes les cinq époques sur la perte globale déclarée; durant la boucle en ligne, il reçoit une mise à jour après chaque observation admise. Ce choix d'horloge n'est pas une loi universelle : il fait partie du protocole et peut affecter la stabilité.
+
+\subsection{Ordre d'une étape et droits d'accès}
+L'ordre causal retenu est :
+\begin{enumerate}
+\item choisir le prochain exemple dans le flux d'adaptation préenregistré, qui est disjoint du train et du test;
+\item produire et enregistrer la prédiction $\hat y_t^-$ avant de révéler la cible;
+\item révéler une mesure réelle $y_t$ si elle est disponible; en cas de donnée manquante, garder un masque $m_t=0$ et ne pas remplacer $y_t$ par $\hat y_t^-$;
+\item former l'empreinte à partir de la prédiction antérieure, de la mesure disponible, de son résidu, de sa provenance et de son horodatage;
+\item décider si la mise à jour est admise et quelle sonde reçoit l'événement, à partir des champs explicitement autorisés;
+\item mettre à jour les états autorisés, persister les journaux et prendre l'exemple suivant.
+\end{enumerate}
+Le jeu de test final n'est utilisé que pour l'évaluation après gel de la boucle. Les labels du test ne sont jamais transmis aux fonctions d'ajustement ou de mise à jour.
+
+\section{Activation, empreinte et boucle complète}
+\begin{definition}[Activation de modèle et activation de mise à jour]
+Une \emph{fonction d'activation de modèle} $\sigma$ transforme un pré-état, par exemple $q_i=\tanh(f_i(x))$. Une \emph{activation de sonde} $a_{i,t}\in[0,1]$ est une porte de mise à jour ou de routage dérivée de l'état et des empreintes. Ce sont deux opérations distinctes et elles doivent être ablatées séparément.
+\end{definition}
+\begin{definition}[Observation et empreinte typées]
+Une observation est le tuple acquis $o_t=(x_t,\tilde y_t,m_t,\pi_t)$, où $\tilde y_t$ est absent si $m_t=0$ et $\pi_t$ décrit la provenance. Une prédiction $\hat y_t^-$ est produite par le modèle. Pour une classification binaire et une cible observée, le résidu est $e_t=\tilde y_t-\hat p_t^-$ et la surprise logistique $s_t=-\tilde y_t\log\hat p_t^--(1-\tilde y_t)\log(1-\hat p_t^-)$. Une empreinte versionnée peut être
+\[
+\mathcal F_t=H(v,\operatorname{hash}(x_t),\hat p_t^-,m_t,e_t,s_t,\pi_t,t),
+\]
+où $H$ encode et conserve ces champs de façon reproductible. Une empreinte est une dérivation de données, pas une observation mesurée ni une prédiction reconstruite.
+\end{definition}
+
+Dans le supplément de boucle FBR-1, le seuil $\tau$ est le quantile 0,90 des résidus absolus sur la validation propre seulement. Si une cible est disponible, $a_t=\mathbf1\{|e_t|\leq\tau\}$. Pour les sondes RBF, la variante ciblée choisit $r_t=\arg\max_i|\tilde y_t-\hat p_{i,t}^-|$ et met à jour cette sonde; en l'absence d'une mesure réelle, la mise à jour est nulle. Le contrôleur aléatoire supprime 10\% des updates selon une graine indépendante, sans lire le résidu. Ce design est une politique de quarantaine d'observations atypiques, pas une affirmation que toute erreur élevée est erronée. Contrairement au cadre de prédiction performative de Perdomo et al. [9], le flux synthétique ici n'implémente pas un mécanisme endogène où les prédictions changent elles-mêmes la distribution réelle $D(\theta)$; il étudie seulement une règle contrôlée de mise à jour sur des observations/labels simulés.
+
+\begin{remark}[Limite de l'ancien benchmark A--J]
+Dans les artefacts A--J déjà calculés, le résidu et l'empreinte étaient enregistrés mais le seuil n'affectait ni la décision de mise à jour ni le routage : les variantes F--J doivent donc être décrites comme « mise à jour en ligne avec journalisation d'empreintes », non comme une boucle où l'empreinte contrôle la politique. FBR-1 est un supplément distinct qui teste cette causalité et ne réécrit pas les résultats précédents.
+\end{remark}
+
+\section{Propositions et preuves vérifiables}
+\begin{proposition}[Réduction lorsque la coordination est inactive]
+Si $\phi_t=\phi_0$ pour tout $t$, si chaque règle locale n'utilise que $(\theta_i,o_i,c_i)$ et si l'agrégateur ne transmet aucun retour vers une sonde, alors l'évolution de chaque sonde se factorise comme un système local indépendant conditionnellement à ses données assignées.
+\end{proposition}
+\begin{proof}
+Par hypothèse, la mise à jour de $\theta_i$ ne contient aucun terme dépendant d'un état d'une autre sonde ou de $\phi$; l'état partagé est constant et ne transmet pas d'information. Par récurrence sur $t$, $\theta_{i,t}$ ne dépend que de l'initialisation et des observations accessibles à $i$. C'est une conséquence de la définition, non une nouvelle garantie empirique.
+\end{proof}
+
+\paragraph{Réduction exacte à une sonde et à un réseau feed-forward standard.}
+Pour $N=1$, sans coordonnateur actif, l'agrégation est identiquement la sortie de la sonde unique; le réseau se réduit donc à $P_1$ par substitution. Plus précisément, si chaque sonde du benchmark est une expansion RBF scalaire sans activation post-RBF,
+\[
+f_i(x)=\sum_{j=1}^{m_i} w_{ij}\,\exp\!\left(-\frac{\|x-c_{ij}\|^2}{2\sigma_{ij}^2}\right)+b_i,
+\]
+et si le poids d'agrégation $\pi_i$ reste fixe pendant l'évaluation, alors
+\[
+\sum_{i=1}^N\pi_i f_i(x)=\sum_{i=1}^N\sum_{j=1}^{m_i}(\pi_iw_{ij})\,\varphi_{ij}(x)+\sum_{i=1}^N\pi_i b_i,
+\]
+qui est une seule expansion RBF ayant l'union des centres et des largeurs $(c_{ij},\sigma_{ij})$. C'est une équivalence entrée-sortie, non une équivalence de dynamique d'apprentissage : les sharding, les optimiseurs locaux et le gradient sur $\pi$ peuvent donner des trajectoires distinctes. Avec $\tanh$ appliqué séparément à chaque sortie avant l'agrégation, cette réduction linéaire exacte ne s'applique pas en général. De même, un MLP à nombre fini de couches est déjà un réseau feed-forward standard; le formalisme de réseau de sondes ne constitue pas, à lui seul, une nouvelle classe de fonctions.
+
+\begin{proposition}[Non-identifiabilité du code latent à partir de la reconstruction]
+Soient $f:X\to Z$ et $g:Z\to X$ avec composition $g\circ f$. Pour tout bijection $T:Z\to Z$, poser $f'=T\circ f$ et $g'=g\circ T^{-1}$. Alors $g'\circ f'=g\circ f$. Par conséquent, les seules paires $(x,g(f(x)))$ ne déterminent en général pas un code latent unique.
+\end{proposition}
+\begin{proof}
+Pour chaque $x$, $g'(f'(x))=g(T^{-1}(T(f(x))))=g(f(x))$. Des représentations latentes différentes produisent exactement les mêmes sorties observables. L'identifiabilité exige donc des contraintes supplémentaires ou des interventions qui distinguent les transformations $T$. Les résultats de Sussmann [8] donnent un exemple d'identifiabilité de poids sous une famille tanh minimale et irréductible, avec symétries résiduelles explicites; ils ne permettent pas de conclure à l'identifiabilité générale de ce code latent ou de ces sondes RBF.
+\end{proof}
+
+\begin{proposition}[Condition nécessaire d'inversibilité sur les entrées testées]
+Si $f(x_1)=f(x_2)$ pour deux entrées distinctes $x_1\ne x_2$, aucune fonction $g$ déterministe ne peut reconstruire exactement les deux entrées. Plus généralement, pour toute norme,
+\[
+\max\left\{\norm{g(f(x_1))-x_1},\norm{g(f(x_2))-x_2}\right\}\geq\frac12\norm{x_1-x_2}.
+\]
+\end{proposition}
+\begin{proof}
+Les deux sorties de la composition sont identiques, notées $z$. L'inégalité triangulaire donne $\norm{x_1-x_2}\leq\norm{x_1-z}+\norm{z-x_2}$; au moins un des deux termes est donc au moins la moitié de la distance entre les entrées.
+\end{proof}
+
+\begin{proposition}[Borne d'erreur de composition]
+Supposons $\hat g$ $L$-lipschitzienne sur le domaine concerné et que $\norm{\hat g(f^*(x))-g^*(f^*(x))}\leq\varepsilon_g$. Alors
+\[
+\norm{\hat g(\hat f(x))-g^*(f^*(x))}\leq L\norm{\hat f(x)-f^*(x)}+\varepsilon_g.
+\]
+\end{proposition}
+\begin{proof}
+Insérer le terme intermédiaire $\hat g(f^*(x))$ et appliquer l'inégalité triangulaire, puis la propriété lipschitzienne de $\hat g$. La borne s'applique seulement sur un domaine où la constante $L$ est valide; elle ne découle pas d'un score moyen sur le test.
+\end{proof}
+
+\begin{theorem}[Stabilité locale conditionnelle pour un objectif quadratique]
+Soit $L(\theta)=\tfrac12(\theta-\theta^*)^T H(\theta-\theta^*)+c$, avec $H$ symétrique définie positive et valeurs propres dans $[\mu,L]$, $0<\mu\leq L$. La descente de gradient $\theta_{t+1}=\theta_t-\eta\nabla L(\theta_t)$ converge linéairement vers $\theta^*$ si $0<\eta<2/L$, avec
+\[
+\norm{\theta_{t+1}-\theta^*}\leq\rho\norm{\theta_t-\theta^*},\quad
+\rho=\max_{\lambda\in[\mu,L]}|1-\eta\lambda|<1.
+\]
+\end{theorem}
+\begin{proof}
+L'erreur suit $e_{t+1}=(I-\eta H)e_t$. Pour une matrice symétrique, la norme opérateur de $I-\eta H$ est le maximum de $|1-\eta\lambda_j(H)|$. Les valeurs propres sont dans $[\mu,L]$ et $0<\eta<2/L$, d'où $\rho<1$.\end{proof}
+\begin{remark}
+Cette preuve ne s'applique pas automatiquement aux réseaux MLP/RBF non convexes, à Adam, à des labels bruités, à un coordinateur qui change l'objectif, ni à la boucle en ligne de ce projet. La convergence nécessite des hypothèses spécifiques sur les gradients, les pas, le bruit et la dynamique couplée. Pour des échelles de mise à jour différentes, la théorie d'approximation stochastique à deux temps fournit un cadre pertinent, avec ses conditions propres [6].
+\end{remark}
+
+\begin{counterexample}[Une boucle en ligne peut amplifier un biais]
+Considérons la mise à jour scalaire $\theta_{t+1}=\theta_t+\eta(y_t-\theta_t)$, avec $0<\eta<1$ et observation $y_t=\mu+b+\epsilon_t$, où $\mathbb E[\epsilon_t]=0$. Alors $\mathbb E[\theta_{t+1}\mid\theta_t]=(1-\eta)\theta_t+\eta(\mu+b)$ et le point fixe en espérance est $\mu+b$, pas $\mu$ lorsque $b\ne0$. Une boucle n'élimine donc pas le biais par son seul caractère récursif.
+\end{counterexample}
+
+\section{Comparaison avec les formalismes publiés}
+\begin{longtable}{p{0.18\textwidth}p{0.30\textwidth}p{0.39\textwidth}}
+\toprule
+\textbf{Famille} & \textbf{Mécanisme central} & \textbf{Différence avec l'instanciation étudiée}\\
+\midrule
+\endhead
+Méta-apprentissage MAML [3] & Optimise une initialisation pour obtenir de bonnes performances après quelques mises à jour sur une nouvelle tâche. & Ici $\phi$ est un poids de composition et un modulateur du taux local; aucune méta-optimisation inter-tâches MAML n'est exécutée.\\
+Optimisation bi-niveau [4] & Variables externes optimisent un objectif dépendant du résultat d'un problème interne. & Le benchmark possède une séparation de règles locales et globales, mais ne résout pas un problème bi-niveau général avec dérivée hypergradient.\\
+Apprentissage fédéré/FedAvg [5] & Les clients calculent localement des mises à jour, puis un serveur agrège des paramètres. & Ici le coordinateur voit les sorties et labels du train complet pour entraîner $\phi$; aucun protocole de confidentialité ou client décentralisé n'est revendiqué.\\
+Approximation stochastique à deux échelles [6] & Analyse de dynamique couplée avec pas différents et hypothèses de stabilité. & Le pas global et le pas local sont configurés, mais les hypothèses asymptotiques ne sont pas vérifiées par les seules expériences finies.\\
+Réseaux RBF classiques [2] & Résultats de densité/universal approximation sous hypothèses sur la famille de fonctions. & Ne prouve ni convergence d'Adam, ni qualité sur un échantillon fini, ni supériorité par rapport au MLP, ni identifiabilité.\\
+Analyse adaptative du jeu de test [7] & La réutilisation adaptative des scores de test peut invalider l'inférence sans contrôle. & Motive le gel du test et la consignation des variantes; trois graines de modèle restent un échantillon descriptif faible.\\
+\bottomrule
+\end{longtable}
+
+\section{Compte des paramètres, données et communication}
+Pour chaque architecture, le nombre de paramètres entraînables doit être distinct du nombre de paramètres stockés, du nombre de paramètres partagés et de l'état de l'optimiseur. Dans le benchmark de classification, A--E ont des comptes entraînables qui dépendent du nombre d'entrées; sur \texttt{two\_moons}, A=65, B=68, C=72, D=68, E=72. K est un contrôle RBF à centres/largeurs fixes avec lecture entraînable. Ces différences sont modestes sur les tâches 2D mais s'élargissent sur Wine et digits; une comparaison ne doit donc pas reposer sur le seul nom de l'architecture.
+
+Le coût de communication globale rapporté par le code est une estimation analytique de flottants transmis/actualisés par synchronisation. Il ne représente ni des octets réellement envoyés sur un réseau, ni une mesure de latence de système distribué. Le benchmark tourne sur CPU local.
+
+\section{Limites, hypothèses non établies et critères de réfutation}
+\begin{itemize}
+\item La classe de quatre sondes RBF et la coordination softmax ne sont pas démontrées universelles pour des tâches arbitraires. Les théorèmes RBF existants établissent des propriétés de représentation sous des hypothèses [2], pas de réussite de ce pipeline d'optimisation.
+\item L'identité d'une composition $g\circ f$ ne permet pas d'identifier les mécanismes internes sans contraintes supplémentaires.
+\item Une activation tanh sur le score de chaque sonde change la fonction de prédiction et la calibration; un gain d'accuracy peut coexister avec une log-loss plus mauvaise.
+\item La mise à jour globale peut aider ou nuire selon la tâche, le poids des objectifs et les erreurs des sondes; aucune supériorité universelle ne suit des équations.
+\item L'empreinte n'est utile que si ses champs ont une sémantique définie, une provenance et une décision causale auditables. Les seuils de résidu détectent des écarts au modèle, pas la vérité d'une observation.
+\item Les rapports du benchmark utilisent trois initialisations de modèle par tâche. Les intervalles t associés sont fragiles avec $n=3$ et ne sont pas des tests confirmatoires; les tâches ne constituent pas un échantillon représentatif de toutes les applications.
+\end{itemize}
+
+\section{Références}
+\begin{enumerate}[label={\arabic*.}]
+\item G. Cybenko, ``Approximation by superpositions of a sigmoidal function'', \emph{Mathematics of Control, Signals, and Systems}, 2, 303--314 (1989). \url{https://doi.org/10.1007/BF02551274}.
+\item J. Park et I. W. Sandberg, ``Universal Approximation Using Radial-Basis-Function Networks'', \emph{Neural Computation}, 3(2), 246--257 (1991). \url{https://doi.org/10.1162/neco.1991.3.2.246}.
+\item C. Finn, P. Abbeel et S. Levine, ``Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks'', ICML/PMLR 70, 1126--1135 (2017). \url{https://proceedings.mlr.press/v70/finn17a.html}.
+\item L. Franceschi, P. Frasconi, S. Salzo, R. Grazzi et M. Pontil, ``Bilevel Programming for Hyperparameter Optimization and Meta-Learning'', ICML/PMLR 80, 1568--1577 (2018). \url{https://proceedings.mlr.press/v80/franceschi18a.html}.
+\item B. McMahan, E. Moore, D. Ramage, S. Hampson et B. Aguera y Arcas, ``Communication-Efficient Learning of Deep Networks from Decentralized Data'', AISTATS/PMLR 54, 1273--1282 (2017). \url{https://proceedings.mlr.press/v54/mcmahan17a.html}.
+\item V. S. Borkar, ``Stochastic approximation with two time scales'', \emph{Systems \& Control Letters}, 29(5), 291--294 (1997). \url{https://doi.org/10.1016/S0167-6911(97)90015-3}.
+\item C. Dwork, V. Feldman, M. Hardt, T. Pitassi, O. Reingold et A. Roth, ``The reusable holdout: Preserving validity in adaptive data analysis'', \emph{Science}, 349(6248), 636--638 (2015). \url{https://doi.org/10.1126/science.aaa9375}.
+\item H. J. Sussmann, ``Uniqueness of the weights for minimal feedforward nets with a given input-output map'', \emph{Neural Networks}, 5(4), 589--593 (1992). \url{https://doi.org/10.1016/S0893-6080(05)80037-1}.
+\item J. Perdomo, T. Zrnic, C. Mendler-Dünner et M. Hardt, ``Performative Prediction'', ICML/PMLR 119, 7599--7609 (2020). \url{https://proceedings.mlr.press/v119/perdomo20a.html}.
+\end{enumerate}
+\end{document}

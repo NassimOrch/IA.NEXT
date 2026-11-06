@@ -1,0 +1,2823 @@
+{
+  "schema": "aam-o92-laboratory-v2",
+  "title": "Laboratoire O92 — audit du corpus, essais comparatifs et formalisation de conception",
+  "date_local": "2026-10-12",
+  "language": "fr",
+  "status": "DESIGN_AND_BOUNDED_LABS_COMPLETE_IMPLEMENTATION_NOT_REQUESTED",
+  "red_rules_operationalization": [
+    "Aucune conclusion préalable sur la capacité ou l’incapacité ultime d’AAM; seuls les résultats limités d’un protocole donné sont rapportés.",
+    "PASS, FAIL_QUALITY_GATE, NOT_RUN, INVALID_INPUT, ENVIRONMENT_ERROR et INCONCLUSIVE restent des statuts distincts.",
+    "Les ensembles IID de validation choisissent les variantes; les HOLDOUT/OOD sont gelés et ne servent pas au choix du modèle.",
+    "Les copies exactes sont liées par SHA-256, mais leurs occurrences et chemins restent présents dans le carnet.",
+    "Toute promotion de compétence exige une inférence sans oracle/source, un contrat explicite, un test indépendant et un état réversible.",
+    "Limites de budget/plateforme sont documentées comme telles et ne sont jamais réécrites comme impossibilités mathématiques."
+  ],
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "native_windows": "NOT_RUN",
+    "no_implementation_claim": "O92 n’a pas été implémenté, conformément au périmètre demandé."
+  },
+  "archive_audit": {
+    "uploaded_archive": {
+      "uploaded_file": "sources_16.zip",
+      "uploaded_path": "/mnt/data/sources_16.zip",
+      "root_extracted_path": "/mnt/data/work_O92/sources_16",
+      "root_zip_bytes": 198738174,
+      "root_zip_sha256": "15042320c27907e37fec406156968c3d567b9eda47dfc4d9a0f615c9eb28112c"
+    },
+    "counts": {
+      "path_occurrences": 9886,
+      "unique_byte_contents": 5250,
+      "duplicate_content_groups": 2152,
+      "direct_root_path_occurrences": 222,
+      "unique_nested_archive_path_occurrences": 9664,
+      "direct_roles": {
+        "nested_source_or_audit_archive": 8,
+        "version_model_or_laboratory_report": 4,
+        "empreinte_theory_and_observation_formalism": 11,
+        "historical_report_audit_or_guide": 111,
+        "historical_formalism_or_model_specification": 82,
+        "supporting_artifact_or_unclassified": 1,
+        "dataset_or_benchmark_input": 5
+      },
+      "all_roles": {
+        "nested_source_or_audit_archive": 33,
+        "version_model_or_laboratory_report": 23,
+        "empreinte_theory_and_observation_formalism": 31,
+        "historical_report_audit_or_guide": 411,
+        "historical_formalism_or_model_specification": 374,
+        "supporting_artifact_or_unclassified": 1615,
+        "dataset_or_benchmark_input": 1568,
+        "implementation_documentation_or_config": 384,
+        "result_record_or_machine_readable_state": 3571,
+        "automated_tests": 440,
+        "checkpoint_or_model_weight_artifact": 155,
+        "implementation_or_research_script": 1281
+      },
+      "archive_container_occurrences": 79,
+      "nested_archive_unique_dirs": 55
+    },
+    "methodology": {
+      "coverage": "Per-path records cover all unpacked root occurrences plus every file inside each distinct recursively extracted nested archive content. Byte-identical files are parsed once per hash and each occurrence links to the shared result.",
+      "text_and_code": "Text is fully read; structure, headings, keyword evidence and format-specific parse/schema/count checks are produced. Python AST is inspected where syntax permits. Key theory/formalism/model/report claims receive explicit synthesis reviews.",
+      "binary": "Binary assets get hash, exact size, signature and available metadata. Arbitrary pickle/torch weights are not deserialized. Parquet is signature-checked but not semantically decoded.",
+      "reasoning_note": "These are source-grounded audit notes, candidate mechanisms and risk flags, not private step-by-step internal reasoning.",
+      "limits": "Automated parsing of every textual file is not the same as a human interpretation of every possible semantic implication in all binary data; any undecoded or unexecuted item remains explicitly open."
+    },
+    "carnet_reference": {
+      "file": "carnet_note_O92.json",
+      "bytes": 29143540,
+      "sha256": "632733a5dc6c14800f0f0864feb8b82fe4a3014b3528ecb7d17a6aa0d76360eb"
+    },
+    "precision_note": "Les fichiers textuels et scripts sont structurés/analysés par contenu unique; chaque occurrence de chemin est enregistrée. Les checkpoints binaires ne sont ni désérialisés ni prétendus compris sémantiquement. 0000.parquet n’a pas été décodé faute de moteur adapté."
+  },
+  "source_synthesis": [
+    {
+      "topic": "Base theory: observation/fingerprint",
+      "source": "DDD_Base_theorie_des_empreintes_complete_order_5.tex and byte-identical theorie_emp copy",
+      "finding": "Fingerprint is a tuple of typed probe responses. Its equivalence classes/fibers depend on declared probe family; a new coordinate only refines the partition when it separates prior collisions.",
+      "O92_decision": "Versioned typed probe signatures with schema, calibration, references, uncertainty and data provenance; separate observation/representation/prediction/action/certification.",
+      "caveat": "A finite signature is not complete semantics absent a stated domain and separating-probe argument."
+    },
+    {
+      "topic": "Mirror/composite probes",
+      "source": "formalismes/th_emp_suite_formalisme_order_69.tex and earlier observation formalismi",
+      "finding": "Mirror means a relation to a declared reference, not a special semantic primitive. The corpus formalizes ordering: reuse existing probes, compose them, try relational/mirror probes, then introduce a new primitive only to resolve an evidenced collision.",
+      "O92_decision": "Probe search records partition refinement, expected value, cost, invariants and side effects.",
+      "caveat": "Result depends on reference choice, typed relation and normalization."
+    },
+    {
+      "topic": "Meta-observation",
+      "source": "DDD base theory and observation formalisms",
+      "finding": "Observing an observer, stored representation or previous observation may reveal a relation; it does not guarantee new information or behavior.",
+      "O92_decision": "Meta-loop must produce a falsifiable hypothesis, probe, prediction, observation, update and ablation; reward alone cannot certify progress.",
+      "caveat": "Self-description, recursion and score gain do not establish strong meaning/intelligence."
+    },
+    {
+      "topic": "Promotion of competencies",
+      "source": "DDD base theory, O91 skills/certification code",
+      "finding": "Hash/AST similarity/program signature cannot alone establish acquisition. Competence requires independent behavioral tests and clear support/domain.",
+      "O92_decision": "Statuses candidate -> executed -> held-out passed -> source-disconnected -> independent-certified -> deployed; capsule provenance and rollback retained.",
+      "caveat": "Each certificate is only for declared tasks/domain and test protocol."
+    },
+    {
+      "topic": "O91 evidence/status",
+      "source": "Dmodel_AAM_O91_final_v3 runtime and Amodel_AAM_O91_final_v3 audit/report",
+      "finding": "O91 provides 178/178 audit suite tests in this environment, offline installation report, bounded text skills, CAS tests, controlled OCR/image and signal tests. Tested PocketSphinx ASR gate failed on 10 synthetic English samples; native Windows acceptance and real-weight semantic VLM/global neural foundation training were not run per report.",
+      "O92_decision": "Retain local-first modular runtime, trace ledgers, capsule verification and abstention; label integration plumbing separately from real model weights/capability.",
+      "caveat": "Only exact executed environment and commands are evidenced."
+    },
+    {
+      "topic": "Historical orders and duplicates",
+      "source": "formalismes/, rapports/, nested O65–O91 and ORDER 8 archives",
+      "finding": "The corpus contains many versions, corrected builds and copied audit artifacts; version numbers do not rank general intelligence, and duplicate reports are not independent replications.",
+      "O92_decision": "Content-addressed manifest and per-trial code/config/data/split/command hashes; compare mechanisms and tests by capability.",
+      "caveat": "Deduplicate by hash for analysis only; retain every file path/occurrence in the manifest."
+    },
+    {
+      "topic": "Multimodal variants",
+      "source": "O91 media modules plus O92 controlled synthetic image ablation",
+      "finding": "Global/quadrant/mirror/inverse views add information only when normalized/fused appropriately. On controlled shapes, generic geometry fingerprint reached balanced accuracy 1.0 on IID, shifted position/scale and inverse-palette sets; naive concatenation of all raw views also reached 1.0 IID/shifted but only 0.5 inverse palette despite 2208 dimensions.",
+      "O92_decision": "Contrast/polarity canonicalization, shared/per-view weights, view-level reliability gates, consensus/disagreement and robust abstention; raw views remain optional evidence.",
+      "caveat": "Synthetic single centered contrast object, one seed and one linear classifier; not evidence for natural image/video/audio semantics."
+    },
+    {
+      "topic": "Weighted fingerprint neurons on weather",
+      "source": "weather_prediction_dataset.csv + weather_prediction_pecnic_label.csv and O92 script",
+      "finding": "Temporal single-target task: validation selected fingerprint-weight MLP (F1 .9873) by fixed rule; on frozen 2009-through-2010-01-01 test it reached F1 .9727, while per-view ensemble reached .9834 and threshold+raw fingerprint model .9780. Shows selection uncertainty, with large lift over majority baseline.",
+      "O92_decision": "Keep separate typed views/heads and test-only freeze, calibration and target-proxy/leak audit; optimize multiple independent tasks.",
+      "caveat": "One target and seven Basel weather fields; high predictability can reflect label definition, not intelligence or causality."
+    },
+    {
+      "topic": "Skill extraction from black box",
+      "source": "O92_skill_acquisition_lab.py/JSON",
+      "finding": "Four synthetic numeric teachers provided only frozen examples/ground truth; polynomial fingerprint neurons learned affine, quadratic and cubic exactly, while compact MLP won validation for hinge-like piecewise function. Prediction functions had no teacher call at inference.",
+      "O92_decision": "Export source-disconnected skill capsules; evaluate exact/holdout/OOD and choose on validation only.",
+      "caveat": "Four low-dimensional functions and single seed; cannot imply arbitrary adapter/program acquisition."
+    },
+    {
+      "topic": "Dataset integrity",
+      "source": "root dataset files",
+      "finding": "Screenplay JSONL 4,000 valid; batch JSONL 783 valid and one malformed line. Weather and label CSV each 3,654 rows with unique matching DATE; selected Basel inputs have no missing values. Parquet signature captured but schema/content not decoded.",
+      "O92_decision": "Transactional loaders preserve rejected rows and rationale, split manifests and input hashes.",
+      "caveat": "No semantic claims about Parquet rows in this audit."
+    },
+    {
+      "topic": "Windows-first UI/runtime",
+      "source": "O91 docs/windows_validation.md, UI source and status reports",
+      "finding": "O91 documents Linux/Xvfb UI evidence and planned PowerShell checks; that is not native Windows acceptance.",
+      "O92_decision": "Windows desktop (PySide6 primary, Tk fallback), local service, chat/RAG/dataset loader, skill catalogue, experiment monitor and offline operation; native Windows has its own acceptance gate.",
+      "caveat": "No native Windows execution evidence in this Linux session."
+    }
+  ],
+  "architecture_decisions_from_source": [
+    {
+      "decision": "Neurons are learned weights over structured fingerprints, not mere memories.",
+      "design": "Fingerprint Neuron (FPN): typed per-view encoder, raw/derived probe coordinates, learnable sparse/dense weights, uncertainty, reliability, task-conditioned output, evidence reference. Exemplar/prototype/RAG is a separate channel."
+    },
+    {
+      "decision": "Existing probe closure before new primitive.",
+      "design": "Planner searches reuse, parallel/sequential composition, relational/mirror against explicit reference, then new probes only if a documented collision remains and expected discrimination exceeds cost."
+    },
+    {
+      "decision": "Image/audio/video multiview is normalized and audited.",
+      "design": "Whole observation, four quadrants/regions, mirrored views and contrast/polarity-normalized inverse; retain each signature separately, share/tie weights for symmetry, reliability-gated fusion, time windows for audio/video, preserve disagreement and abstain if critical view unavailable."
+    },
+    {
+      "decision": "Meta-observation is a measured closed loop.",
+      "design": "Observe state/weights/observer -> create hypothesis -> predict probe output -> execute under budget -> compare -> update policy/weights/uncertainty -> test on held-out behavior -> promote or roll back."
+    },
+    {
+      "decision": "Black-box skill acquisition has source-off acceptance.",
+      "design": "Collect examples -> infer candidate contract/invariants -> fit FPN/rule/MLP -> package standalone state and versioned feature schema -> disable oracle/adapter -> exact/heldout/OOD/safety tests -> independent verifier -> append-only skill library and rollback."
+    },
+    {
+      "decision": "Autonomy is an obligation of design, not a verdict.",
+      "design": "Persistent scheduler, self-originated goal queue from declared objectives/curiosity/reward, plan/decomposition, tool and local resource discovery, memory/RAG, experiments, execution, verification, reflection and policy updates. High-impact external actions and security boundary crossings follow explicit permission policy; missing dependency is surfaced honestly."
+    },
+    {
+      "decision": "No hard-coded ceiling or prediction about ultimate success.",
+      "design": "Capability hypotheses are tested by named protocols; status labels distinguish NOT_RUN/INCONCLUSIVE/FAIL/PASS. Self-improvement remains iterative and open-ended, bounded only by transparent compute, safety and provenance controls rather than arbitrary architecture caps."
+    }
+  ],
+  "test_runs": [
+    {
+      "id": "TEST-O91-AUDIT",
+      "scope": "O91 final_v3 audit snapshot",
+      "status": "PASS_BOUNDED",
+      "command": "cd /mnt/data/O92_unique_archives/44f520f56de227bb && PYTHONPATH=\"$PWD/src\" python -W error::ResourceWarning -m unittest discover -s tests -t . -v",
+      "result": "178 tests passed in 19.577 s",
+      "evidence": {
+        "file": "O92_O91_fullsuite.txt",
+        "bytes": 32718,
+        "sha256": "023999f3f1f50d31be9db9d215533ab3629719c3a5c251ef34783db7b13568d9"
+      },
+      "interpretation": "Suite d’audit passée dans le snapshot précis et avec la racine d’import appropriée. Ne prouve pas les capacités absentes du jeu de tests, les poids non chargés, ni le fonctionnement Windows."
+    },
+    {
+      "id": "TEST-O90-UNIT",
+      "scope": "O90 v5 runtime",
+      "status": "PASS_BOUNDED",
+      "command": "cd /mnt/data/O92_unique_archives/1bbb3a96fa1019d1 && PYTHONPATH=src python -W error::ResourceWarning -m unittest discover -s tests -v",
+      "result": "168 tests passed in 20.048 s",
+      "evidence": {
+        "file": "O92_O90_test_run2.txt",
+        "bytes": 28374,
+        "sha256": "d4510cb2232bcfb20bf07a0d65da41c79ec739cbf5d689b9041e4ca055e1fe8f"
+      },
+      "interpretation": "La première tentative sans PYTHONPATH était un échec du harnais/import; la relance avec la racine déclarée passe."
+    },
+    {
+      "id": "TEST-O82-2",
+      "scope": "O82.2 FINAL_AUDIT_O82_2/model_snapshot",
+      "status": "PASS_BOUNDED",
+      "command": "cd /mnt/data/O92_unique_archives/1978f61351c4648d/FINAL_AUDIT_O82_2/model_snapshot && AAM_O82_INDEPENDENT_CHECKLIST_DIR=/mnt/data/O92_unique_archives/1978f61351c4648d/FINAL_AUDIT_O82_2/governance PYTHONPATH=src pytest -q tests",
+      "result": "125 passed in 10.14 s",
+      "initial_condition": "Sans AAM_O82_INDEPENDENT_CHECKLIST_DIR : 50 failed / 75 passed, principalement parce que les checklists étaient cherchées dans le home externe /home/oai/.aam_o82/checklists; avec les checklists archivées, 125/125 passent.",
+      "interpretation": "Dépendance d’installation/bootstrap à supprimer ou déclarer; ne confondre ni la panne d’environnement ni les sorties CLI secondaires avec un verdict sur la logique du modèle."
+    },
+    {
+      "id": "TEST-ORDER-8.0.2.0",
+      "scope": "ORDER 8.0.2.0 model",
+      "status": "PASS_BOUNDED",
+      "command": "cd /mnt/data/O92_unique_archives/e6d0603f2ef0ceac/model && PYTHONPATH=src pytest -q tests",
+      "result": "11 passed in 1.17 s",
+      "interpretation": "unittest discover avait trouvé 0 test; le runner pytest du projet est requis. 0 tests découverts ne valent pas un passage."
+    },
+    {
+      "id": "TEST-ORDER-8.0.2.2",
+      "scope": "ORDER 8.0.2.2 CORRIGE HIERARCHICAL STRICT",
+      "status": "PASS_BOUNDED",
+      "command": "cd /mnt/data/O92_unique_archives/486ba3ac1e6c5a5f/model && PYTHONPATH=. pytest -q tests",
+      "result": "11 passed in 1.34 s",
+      "interpretation": "Tests ciblés de cette version passent avec son runner déclaré."
+    },
+    {
+      "id": "TEST-O91-COMPILE",
+      "scope": "O91 runtime source tree",
+      "status": "PASS_BOUNDED",
+      "command": "cd /mnt/data/O92_unique_archives/f07665945e4445be && python -m compileall -q src tools",
+      "result": "Compilation Python réussie",
+      "interpretation": "La compilation vérifie la syntaxe, pas la compétence à l’exécution; la suite d’audit est séparée."
+    },
+    {
+      "id": "TEST-O91-CAS",
+      "scope": "O91 SymPy CAS subprocess checks",
+      "status": "PASS_BOUNDED",
+      "result": "9/9 tâches CAS sélectionnées vérifiées indépendamment",
+      "interpretation": "Acquis borné par les tâches et certificats testés."
+    },
+    {
+      "id": "TEST-O91-OCR",
+      "scope": "O91 controlled raster-card OCR",
+      "status": "PASS_BOUNDED",
+      "result": "6/6 cartes raster contrôlées lues exactement par Tesseract",
+      "interpretation": "OCR contrôlé n’équivaut pas à une VLM sémantique générale."
+    },
+    {
+      "id": "TEST-O91-ASR",
+      "scope": "O91 PocketSphinx on 10 eSpeak synthetic English WAVs",
+      "status": "FAIL_QUALITY_GATE",
+      "result": "WER moyenne 1.0387820513; médiane 1.0833333; 0/10 échantillons avec WER <= 0.20. Whisper.cpp non exécuté (binaire/poids absents; téléchargement bloqué par DNS).",
+      "interpretation": "Le seuil qualité ASR échoue pour ce montage d’essai précis. Ce n’est ni une affirmation universelle contre ASR ni une acceptation de l’audio."
+    },
+    {
+      "id": "TEST-DATA-PARQUET",
+      "scope": "root dataset 0000.parquet",
+      "status": "NOT_RUN_SEMANTIC_DECODE",
+      "result": "Signature PAR1 présente; fichier 2 306 545 octets; aucun moteur PyArrow/Fastparquet/DuckDB/Polars disponible pour décode sémantique dans cet environnement.",
+      "interpretation": "Conserver comme entrée non vérifiée; ne pas entraîner ni affirmer de schéma avant une lecture réelle."
+    },
+    {
+      "id": "TEST-NATIVE-WINDOWS",
+      "scope": "Windows 10/11 desktop acceptance",
+      "status": "NOT_RUN",
+      "result": "Audit exécuté sur Linux; aucune acceptation native Windows revendiquée.",
+      "interpretation": "À exécuter sur PC Windows propre avec chemin hors ligne/online, PowerShell, chemins UTF-8, permissions et gestion CPU/GPU."
+    },
+    {
+      "id": "TEST-REAL-WEIGHT-VLM",
+      "scope": "O91 real-weight vision-language semantics",
+      "status": "NOT_RUN",
+      "result": "Les poids et l’acceptation VLM réelle ne sont pas démontrés dans les rapports examinés.",
+      "interpretation": "Les résultats formes synthétiques et OCR n’autorisent aucune extrapolation sémantique générale."
+    }
+  ],
+  "experiment_01_probe_composition_and_mirror": {
+    "status": "EXECUTED_FINITE_ENUMERATION",
+    "composition": {
+      "domain": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "probe_A_classes": 2,
+      "probe_B_classes": 2,
+      "A_tensor_B_classes": 4,
+      "colliding_pairs_after_composition": 0,
+      "interpretation": "parallel composition refines the partition on this declared finite domain"
+    },
+    "mirror_probe": {
+      "objects": [
+        1,
+        2,
+        3
+      ],
+      "unary_class_count": 1,
+      "reference": 2,
+      "relation_values": [
+        -1,
+        0,
+        1
+      ],
+      "mirror_class_count": 3,
+      "interpretation": "separation comes from the additional legal relation to reference z, not from a mirror label alone"
+    },
+    "scope": "finite constructive check only; no universal or semantic claim"
+  },
+  "experiment_02_image_first_protocol_superseded": {
+    "status": "SUPERSEDED_INVALID_FOR_MODEL_SELECTION",
+    "protocol_issue": "La première validation avait des positions/échelles de type shift, pas la distribution IID annoncée; elle produisait une prédiction presque toujours positive.",
+    "treatment": "Conservée comme erreur méthodologique, exclue de sélection/comparaison et remplacée par l’expérience v2 puis une réplication à trois graines.",
+    "lesson": "Préenregistrer train/validation/holdout/OOD; ne pas utiliser les tests de transfert pour ajuster ou choisir."
+  },
+  "experiment_02_image_multiview_ablation_v2": {
+    "status": "EXECUTED_SYNTHETIC_IMAGE_ABLATION_V2",
+    "seed": 9202026,
+    "data": {
+      "image_size_px": [
+        32,
+        32
+      ],
+      "labels": {
+        "0": "circle",
+        "1": "square"
+      },
+      "train_n": 1000,
+      "iid_validation_n": 400,
+      "spatial_scale_holdout_n": 500,
+      "contrast_inverted_ood_n": 500,
+      "train_sampling": "centers x/y integer [10,22], radius integer [5,9]",
+      "iid_validation_sampling": "same distribution, independent seeds; used for model selection",
+      "spatial_scale_holdout_sampling": "centers near margins [5,7] or [24,26], radius [4,10,11]; never used for selection",
+      "contrast_inverted_ood": "inverted black/white polarity plus shifted position/scale; never used for selection",
+      "synthetic_only": true,
+      "single_shape_center_contrast_object": true
+    },
+    "feature_dimensions": {
+      "V0_global_raw": 256,
+      "V1_global_quadrants": 512,
+      "V2_user_multiview_raw": 1536,
+      "V3_geometry_invariant": 336,
+      "V4_hybrid_multiview_fingerprint": 2208
+    },
+    "results": {
+      "V0_global_raw": {
+        "iid_validation": {
+          "n": 400,
+          "positive_rate": 0.5,
+          "accuracy": 0.86,
+          "balanced_accuracy": 0.8600000000000001,
+          "precision": 0.9090909090909091,
+          "recall": 0.8,
+          "f1": 0.851063829787234,
+          "brier": 0.10708086965461859,
+          "log_loss": 0.36916368028720725,
+          "roc_auc": 0.92905,
+          "average_precision": 0.9477855219977249
+        },
+        "spatial_scale_holdout": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "brier": 0.49623012166460684,
+          "log_loss": 7.933836808725293,
+          "roc_auc": 0.603392,
+          "average_precision": 0.5590894893798424
+        },
+        "contrast_inverted_ood": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "brier": 0.49999999,
+          "log_loss": 9.210340374463806,
+          "roc_auc": 0.5,
+          "average_precision": 0.5
+        },
+        "train_diagnostic": {
+          "n": 1000,
+          "positive_rate": 0.5,
+          "accuracy": 0.865,
+          "balanced_accuracy": 0.865,
+          "precision": 0.9046563192904656,
+          "recall": 0.816,
+          "f1": 0.8580441640378549,
+          "brier": 0.10607866328289059,
+          "log_loss": 0.3575457177600769,
+          "roc_auc": 0.932276,
+          "average_precision": 0.9466893610545751
+        }
+      },
+      "V1_global_quadrants": {
+        "iid_validation": {
+          "n": 400,
+          "positive_rate": 0.5,
+          "accuracy": 0.8775,
+          "balanced_accuracy": 0.8775,
+          "precision": 0.9265536723163842,
+          "recall": 0.82,
+          "f1": 0.870026525198939,
+          "brier": 0.0990607325700647,
+          "log_loss": 0.3512730751722703,
+          "roc_auc": 0.9356500000000001,
+          "average_precision": 0.9527606270002242
+        },
+        "spatial_scale_holdout": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "brier": 0.4957759487958662,
+          "log_loss": 8.21203793387888,
+          "roc_auc": 0.6117120000000001,
+          "average_precision": 0.565219267471419
+        },
+        "contrast_inverted_ood": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "brier": 0.49999999,
+          "log_loss": 9.210340374463806,
+          "roc_auc": 0.5,
+          "average_precision": 0.5
+        },
+        "train_diagnostic": {
+          "n": 1000,
+          "positive_rate": 0.5,
+          "accuracy": 0.88,
+          "balanced_accuracy": 0.88,
+          "precision": 0.9148471615720524,
+          "recall": 0.838,
+          "f1": 0.8747390396659708,
+          "brier": 0.09705259050613439,
+          "log_loss": 0.3345998541027085,
+          "roc_auc": 0.9416599999999999,
+          "average_precision": 0.9535439089032418
+        }
+      },
+      "V2_user_multiview_raw": {
+        "iid_validation": {
+          "n": 400,
+          "positive_rate": 0.5,
+          "accuracy": 0.895,
+          "balanced_accuracy": 0.895,
+          "precision": 0.9340659340659341,
+          "recall": 0.85,
+          "f1": 0.8900523560209425,
+          "brier": 0.08971579770229951,
+          "log_loss": 0.32926845678728894,
+          "roc_auc": 0.9440999999999999,
+          "average_precision": 0.9592044597491839
+        },
+        "spatial_scale_holdout": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.506,
+          "balanced_accuracy": 0.506,
+          "precision": 0.5030181086519114,
+          "recall": 1.0,
+          "f1": 0.6693440428380187,
+          "brier": 0.49516720108084145,
+          "log_loss": 8.600497594892792,
+          "roc_auc": 0.570688,
+          "average_precision": 0.5390471786273079
+        },
+        "contrast_inverted_ood": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "brier": 0.49999999,
+          "log_loss": 9.210340374463806,
+          "roc_auc": 0.5,
+          "average_precision": 0.5
+        },
+        "train_diagnostic": {
+          "n": 1000,
+          "positive_rate": 0.5,
+          "accuracy": 0.901,
+          "balanced_accuracy": 0.901,
+          "precision": 0.9256900212314225,
+          "recall": 0.872,
+          "f1": 0.898043254376931,
+          "brier": 0.08557551101590855,
+          "log_loss": 0.30495506289029506,
+          "roc_auc": 0.9536439999999999,
+          "average_precision": 0.961941760570509
+        }
+      },
+      "V3_geometry_invariant": {
+        "iid_validation": {
+          "n": 400,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 8.596175688099262e-08,
+          "log_loss": 0.0002116525538455185,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        },
+        "spatial_scale_holdout": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 2.0025735130784473e-08,
+          "log_loss": 0.00010943447263638962,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        },
+        "contrast_inverted_ood": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 3.865105045260346e-08,
+          "log_loss": 0.00014414835010712472,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        },
+        "train_diagnostic": {
+          "n": 1000,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 7.985560741302346e-08,
+          "log_loss": 0.00020465934825930523,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        }
+      },
+      "V4_hybrid_multiview_fingerprint": {
+        "iid_validation": {
+          "n": 400,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 2.6970794530698856e-08,
+          "log_loss": 7.3422896068335e-05,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        },
+        "spatial_scale_holdout": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 0.003340885516170021,
+          "log_loss": 0.01632382438332836,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        },
+        "contrast_inverted_ood": {
+          "n": 500,
+          "positive_rate": 0.5,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "brier": 0.49999999,
+          "log_loss": 9.210340374463806,
+          "roc_auc": 0.5,
+          "average_precision": 0.5
+        },
+        "train_diagnostic": {
+          "n": 1000,
+          "positive_rate": 0.5,
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "brier": 2.6171800074460026e-08,
+          "log_loss": 7.330662303612789e-05,
+          "roc_auc": 1.0,
+          "average_precision": 1.0
+        }
+      }
+    },
+    "model_fit_diagnostics": {
+      "V0_global_raw": {
+        "convergence_warnings": [],
+        "model_type": "StandardScaler + LogisticRegression(C=1.0)"
+      },
+      "V1_global_quadrants": {
+        "convergence_warnings": [],
+        "model_type": "StandardScaler + LogisticRegression(C=1.0)"
+      },
+      "V2_user_multiview_raw": {
+        "convergence_warnings": [],
+        "model_type": "StandardScaler + LogisticRegression(C=1.0)"
+      },
+      "V3_geometry_invariant": {
+        "convergence_warnings": [],
+        "model_type": "StandardScaler + LogisticRegression(C=1.0)"
+      },
+      "V4_hybrid_multiview_fingerprint": {
+        "convergence_warnings": [],
+        "model_type": "StandardScaler + LogisticRegression(C=1.0)"
+      }
+    },
+    "elapsed_seconds_per_variant": {
+      "V0_global_raw": 0.1065,
+      "V1_global_quadrants": 3.833,
+      "V2_user_multiview_raw": 6.2272,
+      "V3_geometry_invariant": 0.4589,
+      "V4_hybrid_multiview_fingerprint": 1.6017
+    },
+    "selected_by_iid_validation": "V3_geometry_invariant",
+    "selection_rule": "validation F1, then balanced accuracy, then lower feature dimension as a predeclared parsimony tie-break, then lower log loss; shift sets remain post-selection diagnostics",
+    "interpretation": "Tests whether raw multi-view concatenation and generic geometry/canonical crop probes transfer on a controlled binary morphology task; no claim for natural image semantics or full multimodality.",
+    "limitations": [
+      "synthetic single-object images; not a natural-scene benchmark",
+      "background estimated from border; object may be clipped at border",
+      "the canonical crop is a data-dependent probe, not a learned semantic representation",
+      "one seed and one model family; requires replication and comparison with non-linear baselines"
+    ]
+  },
+  "experiment_02b_image_three_seed_replication": {
+    "protocol": "3 seeds; n_train_per_class=300; n_validation_per_class=100; n_shift_and_ood_per_class=125; V0/V3/V4 only; replication exploratory and not used to select the primary model",
+    "results": [
+      {
+        "seed": 9202026,
+        "train_n": 600,
+        "variants": {
+          "V0_global_raw": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 0.915,
+              "balanced_accuracy": 0.915,
+              "precision": 0.9560439560439561,
+              "recall": 0.87,
+              "f1": 0.9109947643979057,
+              "brier": 0.08939053943642193,
+              "log_loss": 0.3327722948067261,
+              "roc_auc": 0.9496999999999999,
+              "average_precision": 0.9670856077548567
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.46,
+              "balanced_accuracy": 0.46,
+              "precision": 0.47844827586206895,
+              "recall": 0.888,
+              "f1": 0.6218487394957983,
+              "brier": 0.5312531079734046,
+              "log_loss": 7.285920502996381,
+              "roc_auc": 0.5494079999999999,
+              "average_precision": 0.5363134446665367
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.5,
+              "balanced_accuracy": 0.5,
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "brier": 0.49999999,
+              "log_loss": 9.210340374463804,
+              "roc_auc": 0.5,
+              "average_precision": 0.5
+            },
+            "dimension": 256,
+            "seconds": 0.057
+          },
+          "V3_geometry_invariant": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 1.4435132398934745e-07,
+              "log_loss": 0.00028464973371531717,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 3.495031876744757e-08,
+              "log_loss": 0.00014861522285718933,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 6.86220262922479e-08,
+              "log_loss": 0.0001944048522495907,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "dimension": 336,
+            "seconds": 0.305
+          },
+          "V4_hybrid_multiview_fingerprint": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 2.7945362274633062e-08,
+              "log_loss": 7.575073669244045e-05,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.984,
+              "balanced_accuracy": 0.984,
+              "precision": 0.9689922480620154,
+              "recall": 1.0,
+              "f1": 0.984251968503937,
+              "brier": 0.008801205412359682,
+              "log_loss": 0.03253431961926397,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.5,
+              "balanced_accuracy": 0.5,
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "brier": 0.49999999,
+              "log_loss": 9.210340374463804,
+              "roc_auc": 0.5,
+              "average_precision": 0.5
+            },
+            "dimension": 2208,
+            "seconds": 0.951
+          }
+        }
+      },
+      {
+        "seed": 9202027,
+        "train_n": 600,
+        "variants": {
+          "V0_global_raw": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 0.915,
+              "balanced_accuracy": 0.915,
+              "precision": 0.9560439560439561,
+              "recall": 0.87,
+              "f1": 0.9109947643979057,
+              "brier": 0.08953091937550253,
+              "log_loss": 0.3334999917362,
+              "roc_auc": 0.9496999999999999,
+              "average_precision": 0.967167734895425
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.456,
+              "balanced_accuracy": 0.45599999999999996,
+              "precision": 0.4751131221719457,
+              "recall": 0.84,
+              "f1": 0.6069364161849711,
+              "brier": 0.5415005441388987,
+              "log_loss": 7.321790053474846,
+              "roc_auc": 0.57664,
+              "average_precision": 0.5640909344004548
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.5,
+              "balanced_accuracy": 0.5,
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "brier": 0.49999999,
+              "log_loss": 9.210340374463806,
+              "roc_auc": 0.5,
+              "average_precision": 0.5
+            },
+            "dimension": 256,
+            "seconds": 0.087
+          },
+          "V3_geometry_invariant": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 1.4402862550925968e-07,
+              "log_loss": 0.0002857882754269462,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 3.5110407412494155e-08,
+              "log_loss": 0.00014864930430870998,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 6.83710699811792e-08,
+              "log_loss": 0.00019423028450763586,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "dimension": 336,
+            "seconds": 0.296
+          },
+          "V4_hybrid_multiview_fingerprint": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 2.696973290924883e-08,
+              "log_loss": 7.453680100277471e-05,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.992,
+              "balanced_accuracy": 0.992,
+              "precision": 0.984251968503937,
+              "recall": 1.0,
+              "f1": 0.9920634920634921,
+              "brier": 0.006077770769272053,
+              "log_loss": 0.024034924585321242,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.5,
+              "balanced_accuracy": 0.5,
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "brier": 0.49999999,
+              "log_loss": 9.210340374463806,
+              "roc_auc": 0.5,
+              "average_precision": 0.5
+            },
+            "dimension": 2208,
+            "seconds": 1.024
+          }
+        }
+      },
+      {
+        "seed": 9202028,
+        "train_n": 600,
+        "variants": {
+          "V0_global_raw": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 0.915,
+              "balanced_accuracy": 0.915,
+              "precision": 0.9560439560439561,
+              "recall": 0.87,
+              "f1": 0.9109947643979057,
+              "brier": 0.09006001108516898,
+              "log_loss": 0.3348928506433029,
+              "roc_auc": 0.9492,
+              "average_precision": 0.9668441114720563
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.448,
+              "balanced_accuracy": 0.448,
+              "precision": 0.47085201793721976,
+              "recall": 0.84,
+              "f1": 0.603448275862069,
+              "brier": 0.5409161851409517,
+              "log_loss": 7.348522318403093,
+              "roc_auc": 0.567168,
+              "average_precision": 0.5558096665886352
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.5,
+              "balanced_accuracy": 0.5,
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "brier": 0.49999999,
+              "log_loss": 9.210340374463806,
+              "roc_auc": 0.5,
+              "average_precision": 0.5
+            },
+            "dimension": 256,
+            "seconds": 0.125
+          },
+          "V3_geometry_invariant": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 1.464431216158891e-07,
+              "log_loss": 0.0002891190061822951,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 3.5754746142916623e-08,
+              "log_loss": 0.00014995808726293278,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 6.931703260501694e-08,
+              "log_loss": 0.00019639656821944485,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "dimension": 336,
+            "seconds": 0.298
+          },
+          "V4_hybrid_multiview_fingerprint": {
+            "iid_validation": {
+              "n": 200,
+              "positive_rate": 0.5,
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "brier": 2.582319217859628e-08,
+              "log_loss": 7.302487156467048e-05,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "spatial_scale_holdout": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.996,
+              "balanced_accuracy": 0.996,
+              "precision": 0.9920634920634921,
+              "recall": 1.0,
+              "f1": 0.9960159362549801,
+              "brier": 0.005053627723718759,
+              "log_loss": 0.021216311510943775,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "contrast_inverted_ood": {
+              "n": 250,
+              "positive_rate": 0.5,
+              "accuracy": 0.5,
+              "balanced_accuracy": 0.5,
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "brier": 0.49999999,
+              "log_loss": 9.210340374463806,
+              "roc_auc": 0.5,
+              "average_precision": 0.5
+            },
+            "dimension": 2208,
+            "seconds": 0.942
+          }
+        }
+      }
+    ]
+  },
+  "experiment_03_weather_fingerprint_neuron_comparison": {
+    "status": "EXECUTED_TEMPORAL_HOLDOUT",
+    "dataset": {
+      "weather_path": "weather_prediction_dataset.csv",
+      "weather_sha256": "296220187f8eb8f1b3d0138dfd121683b1daa36983fed5e547f59e0d93c3d004",
+      "labels_path": "weather_prediction_pecnic_label.csv",
+      "labels_sha256": "b51e03e227e2d83970b390ca73358a363ad0a75191bfc113af45aaa2a3413eab",
+      "rows": 3654,
+      "weather_columns": 165,
+      "label_columns": 18,
+      "date_min": 20000101,
+      "date_max": 20100101,
+      "selected_features": [
+        "BASEL_cloud_cover",
+        "BASEL_humidity",
+        "BASEL_precipitation",
+        "BASEL_sunshine",
+        "BASEL_temp_mean",
+        "BASEL_temp_min",
+        "BASEL_temp_max"
+      ],
+      "missing_values_in_selected_features": 0,
+      "label_positive_rate": 0.25643130815544607
+    },
+    "split": {
+      "train": "DATE < 20080101",
+      "validation": "20080101 <= DATE < 20090101",
+      "test": "DATE >= 20090101",
+      "train_n": 2922,
+      "validation_n": 366,
+      "test_n": 366,
+      "all_transform_fit_on_train_only": true,
+      "model_selection_partition": "validation only"
+    },
+    "views": {
+      "raw_features": 7,
+      "threshold_probes": 28,
+      "relation_probes": 16,
+      "quantile_threshold_count": 28
+    },
+    "validation_results": {
+      "V0_majority": {
+        "n": 366,
+        "positive_rate": 0.2185792349726776,
+        "accuracy": 0.7814207650273224,
+        "balanced_accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "brier": 0.21857923060109297,
+        "log_loss": 4.02637831250325,
+        "roc_auc": 0.5,
+        "average_precision": 0.2185792349726776
+      },
+      "V1_dense_weight_neuron": {
+        "n": 366,
+        "positive_rate": 0.2185792349726776,
+        "accuracy": 0.9508196721311475,
+        "balanced_accuracy": 0.9280157342657342,
+        "precision": 0.8875,
+        "recall": 0.8875,
+        "f1": 0.8875,
+        "brier": 0.03841432387186506,
+        "log_loss": 0.1474360833479953,
+        "roc_auc": 0.9826486013986014,
+        "average_precision": 0.8935679849730066
+      },
+      "V2_multiscale_fingerprint_neuron": {
+        "n": 366,
+        "positive_rate": 0.2185792349726776,
+        "accuracy": 0.9918032786885246,
+        "balanced_accuracy": 0.98125,
+        "precision": 1.0,
+        "recall": 0.9625,
+        "f1": 0.9808917197452229,
+        "brier": 0.006640451450295258,
+        "log_loss": 0.023288719038597232,
+        "roc_auc": 0.9995192307692308,
+        "average_precision": 0.9983580899035734
+      },
+      "V3_hierarchical_view_ensemble": {
+        "n": 366,
+        "positive_rate": 0.2185792349726776,
+        "accuracy": 0.9890710382513661,
+        "balanced_accuracy": 0.975,
+        "precision": 1.0,
+        "recall": 0.95,
+        "f1": 0.9743589743589743,
+        "brier": 0.018741413506431024,
+        "log_loss": 0.08524199873214791,
+        "roc_auc": 0.9983391608391609,
+        "average_precision": 0.994879132705176
+      },
+      "V4_fingerprint_weight_MLP": {
+        "n": 366,
+        "positive_rate": 0.2185792349726776,
+        "accuracy": 0.994535519125683,
+        "balanced_accuracy": 0.9875,
+        "precision": 1.0,
+        "recall": 0.975,
+        "f1": 0.9873417721518988,
+        "brier": 0.0051761047079033375,
+        "log_loss": 0.016779655088769843,
+        "roc_auc": 0.9997814685314685,
+        "average_precision": 0.9992395507957754
+      },
+      "V5_fingerprint_prototype_memory": {
+        "n": 366,
+        "positive_rate": 0.2185792349726776,
+        "accuracy": 0.9836065573770492,
+        "balanced_accuracy": 0.9715034965034965,
+        "precision": 0.9743589743589743,
+        "recall": 0.95,
+        "f1": 0.9620253164556962,
+        "brier": 0.013593170514221046,
+        "log_loss": 0.045006816625939486,
+        "roc_auc": 0.9976398601398602,
+        "average_precision": 0.9930378416135223
+      }
+    },
+    "frozen_test_results": {
+      "V0_majority": {
+        "n": 366,
+        "positive_rate": 0.25136612021857924,
+        "accuracy": 0.7486338797814208,
+        "balanced_accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "brier": 0.2513661151912569,
+        "log_loss": 4.630335057878738,
+        "roc_auc": 0.5,
+        "average_precision": 0.25136612021857924
+      },
+      "V1_dense_weight_neuron": {
+        "n": 366,
+        "positive_rate": 0.25136612021857924,
+        "accuracy": 0.9207650273224044,
+        "balanced_accuracy": 0.9001507457949858,
+        "precision": 0.8315789473684211,
+        "recall": 0.8586956521739131,
+        "f1": 0.8449197860962567,
+        "brier": 0.057942933414972204,
+        "log_loss": 0.18741184931240382,
+        "roc_auc": 0.9720326880355443,
+        "average_precision": 0.9067887754857302
+      },
+      "V2_multiscale_fingerprint_neuron": {
+        "n": 366,
+        "positive_rate": 0.25136612021857924,
+        "accuracy": 0.9890710382513661,
+        "balanced_accuracy": 0.9818708346556648,
+        "precision": 0.9888888888888889,
+        "recall": 0.967391304347826,
+        "f1": 0.978021978021978,
+        "brier": 0.010113154614698526,
+        "log_loss": 0.03981785930127553,
+        "roc_auc": 0.998135512535703,
+        "average_precision": 0.9953698664466091
+      },
+      "V3_hierarchical_view_ensemble": {
+        "n": 366,
+        "positive_rate": 0.25136612021857924,
+        "accuracy": 0.9918032786885246,
+        "balanced_accuracy": 0.9836956521739131,
+        "precision": 1.0,
+        "recall": 0.967391304347826,
+        "f1": 0.9834254143646409,
+        "brier": 0.020312682736845392,
+        "log_loss": 0.08937258643700016,
+        "roc_auc": 0.9982148524278007,
+        "average_precision": 0.995535308154711
+      },
+      "V4_fingerprint_weight_MLP": {
+        "n": 366,
+        "positive_rate": 0.25136612021857924,
+        "accuracy": 0.9863387978142076,
+        "balanced_accuracy": 0.9800460171374167,
+        "precision": 0.978021978021978,
+        "recall": 0.967391304347826,
+        "f1": 0.9726775956284153,
+        "brier": 0.012208272616305579,
+        "log_loss": 0.05711575876024957,
+        "roc_auc": 0.9993256109171691,
+        "average_precision": 0.9980799028542147
+      },
+      "V5_fingerprint_prototype_memory": {
+        "n": 366,
+        "positive_rate": 0.25136612021857924,
+        "accuracy": 0.9808743169398907,
+        "balanced_accuracy": 0.9763963821009203,
+        "precision": 0.956989247311828,
+        "recall": 0.967391304347826,
+        "f1": 0.9621621621621622,
+        "brier": 0.019847527862517665,
+        "log_loss": 0.15324082364288003,
+        "roc_auc": 0.9850444303395747,
+        "average_precision": 0.9776701980803022
+      }
+    },
+    "selected_by_validation": "V4_fingerprint_weight_MLP",
+    "elapsed_seconds_per_variant": {
+      "V0_majority": 0.0141,
+      "V1_dense_weight_neuron": 0.0192,
+      "V2_multiscale_fingerprint_neuron": 0.0473,
+      "V3_hierarchical_view_ensemble": 0.0812,
+      "V4_fingerprint_weight_MLP": 0.6203,
+      "V5_fingerprint_prototype_memory": 0.0442
+    },
+    "interpretation": "bounded binary prediction study on one weather-derived target; this evaluates a weighted fingerprint representation, not general intelligence or causal understanding",
+    "wall_seconds": 0.915
+  },
+  "experiment_04_blackbox_skill_acquisition_source_off": {
+    "schema": "aam-o92-blackbox-skill-acquisition-v1",
+    "status": "EXECUTED",
+    "seed": 9202026,
+    "environment": {
+      "python": "3.13.5",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "numpy": "2.3.5"
+    },
+    "protocol": {
+      "oracle_queries": 3968,
+      "oracle_labels_frozen_before_fit": true,
+      "oracle_disconnected_for_predictions": true,
+      "split_train": "96 random points in [-4,4]",
+      "validation": "128 independent points in [-4,4]; model selection only",
+      "iid_test": "512 independent points in [-4,4]; frozen once",
+      "ood_test": "256 points in [-8,-6] or [6,8]; frozen once",
+      "no training/test overlap by seeded independent sampling": "True",
+      "skill_capsule_output": "JSON coefficients for polynomial cells and metadata; MLP retained in in-memory experiment only"
+    },
+    "tasks": {
+      "affine": {
+        "target_definition_for_evaluator_only": "affine",
+        "observations": {
+          "train": 96,
+          "validation": 128,
+          "frozen_iid_test": 512,
+          "frozen_ood_test": 256
+        },
+        "validation_rmse_by_variant": {
+          "M0_exemplar_knn": 0.07525310457088563,
+          "M1_fingerprint_polynomial_neuron": 6.689288067156843e-16,
+          "M2_fingerprint_polynomial_neuron": 1.6212417932481631e-15,
+          "M3_fingerprint_polynomial_neuron": 4.4912684275054266e-15,
+          "M4_compact_mlp": 0.002006422156484844
+        },
+        "selected_on_validation_only": "M1_fingerprint_polynomial_neuron",
+        "results": {
+          "M0_exemplar_knn": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.08257880691877101,
+              "mae": 0.052020258447209214,
+              "r2": 0.9995356539881718,
+              "max_abs_error": 0.3938787278560059
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 5.302214942931998,
+              "mae": 5.2124628128539285,
+              "r2": 0.8008784428581709,
+              "max_abs_error": 6.956226225661855
+            }
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 6.605470749056924e-16,
+              "mae": 5.430768681979892e-16,
+              "r2": 1.0,
+              "max_abs_error": 1.3322676295501878e-15
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 1.6354606405429e-15,
+              "mae": 1.5057399771478686e-15,
+              "r2": 1.0,
+              "max_abs_error": 1.7763568394002505e-15
+            }
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 1.6702663416405584e-15,
+              "mae": 1.1730084948074343e-15,
+              "r2": 1.0,
+              "max_abs_error": 4.440892098500626e-15
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 1.0990086449174245e-14,
+              "mae": 1.0734468869344482e-14,
+              "r2": 1.0,
+              "max_abs_error": 1.5987211554602254e-14
+            }
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 3.974844130152362e-15,
+              "mae": 2.8998613406383544e-15,
+              "r2": 1.0,
+              "max_abs_error": 1.3322676295501878e-14
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 3.927099112265228e-14,
+              "mae": 2.93723378952393e-14,
+              "r2": 1.0,
+              "max_abs_error": 7.638334409421077e-14
+            }
+          },
+          "M4_compact_mlp": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.0018296699850809835,
+              "mae": 0.0013769236875125785,
+              "r2": 0.9999997720445188,
+              "max_abs_error": 0.008162323471850641
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 1.1091651433425742,
+              "mae": 1.0281365976882468,
+              "r2": 0.9912864315513602,
+              "max_abs_error": 1.911869334526921
+            }
+          }
+        },
+        "capsules": {
+          "M0_exemplar_knn": {
+            "kind": "nearest-neighbour-exemplar-memory",
+            "n_examples": 96,
+            "oracle_reference_stored": false
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 1,
+            "coefficients": [
+              -0.40000000000000047,
+              1.6999999999999997
+            ],
+            "input_domain_seen": [
+              -3.932731281839591,
+              3.974895726923026
+            ],
+            "oracle_reference_stored": false
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 2,
+            "coefficients": [
+              -0.4,
+              1.7000000000000002,
+              2.1914702509109092e-16
+            ],
+            "input_domain_seen": [
+              -3.932731281839591,
+              3.974895726923026
+            ],
+            "oracle_reference_stored": false
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 3,
+            "coefficients": [
+              -0.39999999999999747,
+              1.7000000000000006,
+              -5.621700840606756e-16,
+              7.120039854652896e-17
+            ],
+            "input_domain_seen": [
+              -3.932731281839591,
+              3.974895726923026
+            ],
+            "oracle_reference_stored": false
+          },
+          "M4_compact_mlp": {
+            "kind": "compact-mlp-skill-capsule",
+            "hidden_layers": [
+              16,
+              16
+            ],
+            "oracle_reference_stored": false,
+            "warnings": []
+          }
+        },
+        "inference_source_access": "None: prediction functions consume x and fitted state only; oracle call occurs only to create this lab's labels.",
+        "selected_capsule_serialization": {
+          "kind": "polynomial_fingerprint_neuron",
+          "degree": 1,
+          "coefficients": [
+            -0.40000000000000047,
+            1.6999999999999997
+          ],
+          "input_domain_seen": [
+            -3.932731281839591,
+            3.974895726923026
+          ],
+          "oracle_reference_stored": false
+        }
+      },
+      "quadratic": {
+        "target_definition_for_evaluator_only": "quadratic",
+        "observations": {
+          "train": 96,
+          "validation": 128,
+          "frozen_iid_test": 512,
+          "frozen_ood_test": 256
+        },
+        "validation_rmse_by_variant": {
+          "M0_exemplar_knn": 0.06500511831087132,
+          "M1_fingerprint_polynomial_neuron": 1.7375400787201156,
+          "M2_fingerprint_polynomial_neuron": 1.376580569661905e-15,
+          "M3_fingerprint_polynomial_neuron": 1.467710321311828e-14,
+          "M4_compact_mlp": 0.005208519167277063
+        },
+        "selected_on_validation_only": "M2_fingerprint_polynomial_neuron",
+        "results": {
+          "M0_exemplar_knn": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.054191646927736946,
+              "mae": 0.03635502606367101,
+              "r2": 0.9997178756496798,
+              "max_abs_error": 0.3343423518234623
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 13.5008976235378,
+              "mae": 12.535148645458248,
+              "r2": -1.26426033774472,
+              "max_abs_error": 22.418687128996382
+            }
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 1.646301089422117,
+              "mae": 1.3961679309243489,
+              "r2": 0.7396279253326625,
+              "max_abs_error": 4.14103159200687
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 16.03395699564918,
+              "mae": 15.757851585394608,
+              "r2": -2.193614563237096,
+              "max_abs_error": 21.31246765693627
+            }
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 1.4498161572920928e-15,
+              "mae": 1.318991235134924e-15,
+              "r2": 1.0,
+              "max_abs_error": 3.552713678800501e-15
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 3.2038158860343726e-15,
+              "mae": 2.5222879340702775e-15,
+              "r2": 1.0,
+              "max_abs_error": 7.105427357601002e-15
+            }
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 1.4483096906349046e-14,
+              "mae": 1.179677015794578e-14,
+              "r2": 1.0,
+              "max_abs_error": 3.8413716652030416e-14
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 1.6408417423841672e-13,
+              "mae": 1.5601062108849817e-13,
+              "r2": 1.0,
+              "max_abs_error": 2.6645352591003757e-13
+            }
+          },
+          "M4_compact_mlp": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.005065901760602683,
+              "mae": 0.004176923787298603,
+              "r2": 0.9999975345886013,
+              "max_abs_error": 0.026191689944232266
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 7.4427269994082295,
+              "mae": 6.534234953283553,
+              "r2": 0.3118783061530217,
+              "max_abs_error": 14.747465259807399
+            }
+          }
+        },
+        "capsules": {
+          "M0_exemplar_knn": {
+            "kind": "nearest-neighbour-exemplar-memory",
+            "n_examples": 96,
+            "oracle_reference_stored": false
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 1,
+            "coefficients": [
+              2.639346542452397,
+              -1.0938364273800738
+            ],
+            "input_domain_seen": [
+              -3.9780388707762127,
+              3.9789606429759345
+            ],
+            "oracle_reference_stored": false
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 2,
+            "coefficients": [
+              0.7999999999999988,
+              -1.2000000000000002,
+              0.35
+            ],
+            "input_domain_seen": [
+              -3.9780388707762127,
+              3.9789606429759345
+            ],
+            "oracle_reference_stored": false
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 3,
+            "coefficients": [
+              0.8000000000000066,
+              -1.2000000000000017,
+              0.34999999999999915,
+              -3.982981169707348e-16
+            ],
+            "input_domain_seen": [
+              -3.9780388707762127,
+              3.9789606429759345
+            ],
+            "oracle_reference_stored": false
+          },
+          "M4_compact_mlp": {
+            "kind": "compact-mlp-skill-capsule",
+            "hidden_layers": [
+              16,
+              16
+            ],
+            "oracle_reference_stored": false,
+            "warnings": []
+          }
+        },
+        "inference_source_access": "None: prediction functions consume x and fitted state only; oracle call occurs only to create this lab's labels.",
+        "selected_capsule_serialization": {
+          "kind": "polynomial_fingerprint_neuron",
+          "degree": 2,
+          "coefficients": [
+            0.7999999999999988,
+            -1.2000000000000002,
+            0.35
+          ],
+          "input_domain_seen": [
+            -3.9780388707762127,
+            3.9789606429759345
+          ],
+          "oracle_reference_stored": false
+        }
+      },
+      "cubic": {
+        "target_definition_for_evaluator_only": "cubic",
+        "observations": {
+          "train": 96,
+          "validation": 128,
+          "frozen_iid_test": 512,
+          "frozen_ood_test": 256
+        },
+        "validation_rmse_by_variant": {
+          "M0_exemplar_knn": 0.08071850740999857,
+          "M1_fingerprint_polynomial_neuron": 2.1806144936548195,
+          "M2_fingerprint_polynomial_neuron": 0.8055936247707045,
+          "M3_fingerprint_polynomial_neuron": 2.4855385289928933e-15,
+          "M4_compact_mlp": 0.004586490708377036
+        },
+        "selected_on_validation_only": "M3_fingerprint_polynomial_neuron",
+        "results": {
+          "M0_exemplar_knn": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.07488121028277402,
+              "mae": 0.03927878032033796,
+              "r2": 0.9995994995562192,
+              "max_abs_error": 0.5538702730141427
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 30.046390372724133,
+              "mae": 25.635560467449604,
+              "r2": 0.21256790720439434,
+              "max_abs_error": 57.43177479161331
+            }
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 2.089787782536511,
+              "mae": 1.768136472441458,
+              "r2": 0.6880667550945005,
+              "max_abs_error": 6.1125002607409336
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 30.289123566921198,
+              "mae": 23.64214466452252,
+              "r2": 0.19979379614891934,
+              "max_abs_error": 58.14289919351394
+            }
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.8020441052466717,
+              "mae": 0.7064094243474449,
+              "r2": 0.9540533561738722,
+              "max_abs_error": 1.79539139996864
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 23.621112443982458,
+              "mae": 22.747271822659407,
+              "r2": 0.5133360304966679,
+              "max_abs_error": 34.10963866799763
+            }
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 2.234049065823445e-15,
+              "mae": 1.626953780031748e-15,
+              "r2": 1.0,
+              "max_abs_error": 7.105427357601002e-15
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 7.769974977610645e-15,
+              "mae": 6.106226635438361e-15,
+              "r2": 1.0,
+              "max_abs_error": 2.1316282072803006e-14
+            }
+          },
+          "M4_compact_mlp": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.004962542367550719,
+              "mae": 0.004184348206139299,
+              "r2": 0.9999982410003767,
+              "max_abs_error": 0.012660192802656844
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 24.92781311250761,
+              "mae": 20.50904126155684,
+              "r2": 0.45800302804098225,
+              "max_abs_error": 50.60887398656412
+            }
+          }
+        },
+        "capsules": {
+          "M0_exemplar_knn": {
+            "kind": "nearest-neighbour-exemplar-memory",
+            "n_examples": 96,
+            "oracle_reference_stored": false
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 1,
+            "coefficients": [
+              -1.3913348300778972,
+              1.3207828187357955
+            ],
+            "input_domain_seen": [
+              -3.9976468229403945,
+              3.9605908480587377
+            ],
+            "oracle_reference_stored": false
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 2,
+            "coefficients": [
+              1.1547829146214796,
+              1.455047802130203,
+              -0.399779047259815
+            ],
+            "input_domain_seen": [
+              -3.9976468229403945,
+              3.9605908480587377
+            ],
+            "oracle_reference_stored": false
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 3,
+            "coefficients": [
+              1.0000000000000009,
+              0.5999999999999992,
+              -0.3999999999999999,
+              0.08000000000000002
+            ],
+            "input_domain_seen": [
+              -3.9976468229403945,
+              3.9605908480587377
+            ],
+            "oracle_reference_stored": false
+          },
+          "M4_compact_mlp": {
+            "kind": "compact-mlp-skill-capsule",
+            "hidden_layers": [
+              16,
+              16
+            ],
+            "oracle_reference_stored": false,
+            "warnings": []
+          }
+        },
+        "inference_source_access": "None: prediction functions consume x and fitted state only; oracle call occurs only to create this lab's labels.",
+        "selected_capsule_serialization": {
+          "kind": "polynomial_fingerprint_neuron",
+          "degree": 3,
+          "coefficients": [
+            1.0000000000000009,
+            0.5999999999999992,
+            -0.3999999999999999,
+            0.08000000000000002
+          ],
+          "input_domain_seen": [
+            -3.9976468229403945,
+            3.9605908480587377
+          ],
+          "oracle_reference_stored": false
+        }
+      },
+      "hinge": {
+        "target_definition_for_evaluator_only": "hinge",
+        "observations": {
+          "train": 96,
+          "validation": 128,
+          "frozen_iid_test": 512,
+          "frozen_ood_test": 256
+        },
+        "validation_rmse_by_variant": {
+          "M0_exemplar_knn": 0.05514809150629069,
+          "M1_fingerprint_polynomial_neuron": 0.8259666016994593,
+          "M2_fingerprint_polynomial_neuron": 0.22116970562973237,
+          "M3_fingerprint_polynomial_neuron": 0.1677500418929442,
+          "M4_compact_mlp": 0.015739411428524693
+        },
+        "selected_on_validation_only": "M4_compact_mlp",
+        "results": {
+          "M0_exemplar_knn": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.054638761972281624,
+              "mae": 0.03717803298441679,
+              "r2": 0.9996857998713502,
+              "max_abs_error": 0.23835406358620492
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 5.454689142625923,
+              "mae": 4.819191265819837,
+              "r2": 0.7094670505617025,
+              "max_abs_error": 9.076796931177505
+            }
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.7740297872980724,
+              "mae": 0.6513942013718372,
+              "r2": 0.9369449308831737,
+              "max_abs_error": 1.5886563100459972
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 3.5798874574044275,
+              "mae": 3.3705570990895026,
+              "r2": 0.8748605824526592,
+              "max_abs_error": 5.295278377403209
+            }
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.24464758631563074,
+              "mae": 0.19919482402851996,
+              "r2": 0.9937007835936276,
+              "max_abs_error": 0.6037008367907016
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 3.1755498798713258,
+              "mae": 3.014049110926484,
+              "r2": 0.9015324211769894,
+              "max_abs_error": 5.299047198857404
+            }
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.1756219047414664,
+              "mae": 0.13619850129349786,
+              "r2": 0.99675389903368,
+              "max_abs_error": 0.47672362608796603
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 5.492311099396471,
+              "mae": 4.068141515539825,
+              "r2": 0.7054455152214802,
+              "max_abs_error": 10.75582316314096
+            }
+          },
+          "M4_compact_mlp": {
+            "iid_test": {
+              "n": 512,
+              "rmse": 0.016415282910014293,
+              "mae": 0.009167508528892664,
+              "r2": 0.9999716403150579,
+              "max_abs_error": 0.09700924843130088
+            },
+            "ood_extrapolation": {
+              "n": 256,
+              "rmse": 1.953535688728201,
+              "mae": 1.536486404794175,
+              "r2": 0.9627352612314513,
+              "max_abs_error": 3.8978817328383766
+            }
+          }
+        },
+        "capsules": {
+          "M0_exemplar_knn": {
+            "kind": "nearest-neighbour-exemplar-memory",
+            "n_examples": 96,
+            "oracle_reference_stored": false
+          },
+          "M1_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 1,
+            "coefficients": [
+              1.0434317939202615,
+              1.2722184942257784
+            ],
+            "input_domain_seen": [
+              -3.9543510149565106,
+              3.91051288334471
+            ],
+            "oracle_reference_stored": false
+          },
+          "M2_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 2,
+            "coefficients": [
+              0.13008468466948217,
+              1.3228016643326217,
+              0.14652444766929756
+            ],
+            "input_domain_seen": [
+              -3.9543510149565106,
+              3.91051288334471
+            ],
+            "oracle_reference_stored": false
+          },
+          "M3_fingerprint_polynomial_neuron": {
+            "kind": "polynomial_fingerprint_neuron",
+            "degree": 3,
+            "coefficients": [
+              0.12254143878904124,
+              1.1514286398956308,
+              0.15058205294903085,
+              0.016598228371669972
+            ],
+            "input_domain_seen": [
+              -3.9543510149565106,
+              3.91051288334471
+            ],
+            "oracle_reference_stored": false
+          },
+          "M4_compact_mlp": {
+            "kind": "compact-mlp-skill-capsule",
+            "hidden_layers": [
+              16,
+              16
+            ],
+            "oracle_reference_stored": false,
+            "warnings": []
+          }
+        },
+        "inference_source_access": "None: prediction functions consume x and fitted state only; oracle call occurs only to create this lab's labels.",
+        "selected_capsule_serialization": {
+          "kind": "compact-mlp-skill-capsule",
+          "hidden_layers": [
+            16,
+            16
+          ],
+          "oracle_reference_stored": false,
+          "warnings": []
+        }
+      }
+    },
+    "selected_variants": {
+      "affine": "M1_fingerprint_polynomial_neuron",
+      "quadratic": "M2_fingerprint_polynomial_neuron",
+      "cubic": "M3_fingerprint_polynomial_neuron",
+      "hinge": "M4_compact_mlp"
+    },
+    "interpretation": "Directly tests whether input/output observations can create a deployable surrogate skill that predicts without querying the teacher. Polynomial tasks are deliberately bounded synthetic mechanisms; OOD polynomial extrapolation does not generalize to arbitrary mechanisms.",
+    "limitations": [
+      "four low-dimensional synthetic mechanisms only",
+      "input-output behavior is learned, not internal mechanism identity",
+      "no claim of universal source-independent acquisition",
+      "single fixed seed; should repeat over seeds/noise and richer modalities"
+    ]
+  },
+  "experiment_05_theory_derived_design_trials": {
+    "probe_search_order": [
+      "réutiliser les sondes typées existantes",
+      "composition parallèle/séquentielle",
+      "sondes relationnelles/miroir avec référence explicitement définie",
+      "nouvelles sondes primitives uniquement si collision observée et valeur attendue supérieure au coût"
+    ],
+    "multiview_hypothesis_comparison": [
+      {
+        "variant": "V0 global raw",
+        "result": "position/échelle et palette inversée provoquent BA proche de 0.5; faible coût/dimension."
+      },
+      {
+        "variant": "V1 global + quatre quadrants",
+        "result": "léger gain IID, pas de robustesse démontrée face aux shifts."
+      },
+      {
+        "variant": "V2 global/quadrants/mirror/negative, concaténation brute",
+        "result": "plus de coordonnées mais pas de robustesse au contraste inversé."
+      },
+      {
+        "variant": "V3 géométrie canonique générique",
+        "result": "BA=1 dans les sets synthétiques déclarés; 336 caractéristiques; forte adéquation à la tâche forme simple."
+      },
+      {
+        "variant": "V4 hybride brute + géométrie",
+        "result": "IID=1 et shift spatial/échelle très haut; BA=0.5 sur palette inversée dans l’essai principal et sur les trois graines."
+      }
+    ],
+    "decision": "Aucune concaténation universelle obligatoire. Conserver les vues typées séparées, partager les poids lorsque l’invariance est justifiée, normaliser chaque canal, et fusionner avec portes de fiabilité calibrées; géométrie V3 seule reste un inductive bias spécialisé, non le noyau multimodal complet."
+  },
+  "variant_comparison": {
+    "A0_rule_probe_baseline": {
+      "keep": "référence pour tests de correction, coût bas",
+      "not_sufficient": "ne remplace pas l’apprentissage généralisant"
+    },
+    "A1_RAG_exemplar_memory": {
+      "keep": "recherche traçable, exemples, ancrage",
+      "not_sufficient": "récupération d’exemples != compétence apprise indépendante"
+    },
+    "A2_dense_raw_weight_neuron": {
+      "keep": "ablation et solution de repli rapide",
+      "result": "weather test F1 0.8449",
+      "risk": "invariants non explicites et transfert moins robuste dans ces tests"
+    },
+    "A3_flat_multiview_concat": {
+      "keep": "branche d’ablation / preuves additionnelles optionnelles",
+      "result": "BA OOD contrast inverti = 0.5 (trois graines) malgré 2208 caractéristiques pour hybride",
+      "risk": "augmenter la dimension n’assure ni invariance ni robustesse"
+    },
+    "A4_prototype_memory": {
+      "keep": "canal de mémoire/replay combinable",
+      "result": "weather frozen test F1 0.9622; en dessous des meilleures variantes neurales testées",
+      "risk": "biais de distance et extrapolation fragile"
+    },
+    "A5_hierarchical_fingerprint_neurons": {
+      "keep": "architecture retenue pour conception O92",
+      "definition": "poids appris sur coordonnées d’empreintes typées et relations; têtes spécialisées; fusion calibrée; capsule de compétence sans oracle; mémoire et RAG séparés",
+      "status": "CHOIX DE CONCEPTION, NON IMPLÉMENTÉ ET PAS ENCORE CERTIFIÉ END-TO-END"
+    }
+  },
+  "emergent_architecture": {
+    "name": "O92-HFPN",
+    "expanded_name": "Hierarchical Fingerprint Neuron Architecture",
+    "decision_type": "sélection multicritère et théorie-guidée; pas maximum d’un unique score",
+    "core": [
+      "portefeuille de sondes typées et provenance",
+      "moteur de composition + sondes miroir/relations",
+      "neurones-empreintes à poids entraînables sur coordonnées d’empreinte",
+      "normalisation et partage de poids pour transformations autorisées",
+      "fusion hiérarchique gated par fiabilité, incertitude et désaccord",
+      "apprentissage d’une compétence et capsule indépendante de sa source",
+      "mémoire épisodique/semantic RAG distincte des poids",
+      "raisonneur/décomposeur, planificateur d’expériences et contrôleur budget",
+      "auto-observation causale, récompense/curiosité mais certification indépendante",
+      "orchestrateur autonome persistant et UI Windows-first"
+    ]
+  },
+  "triple_reanalysis": [
+    {
+      "pass": 1,
+      "name": "Contrôle détaillé",
+      "checks": [
+        "cohérence des signatures et partitions",
+        "traçabilité/hash/chemins",
+        "commandes et environnement",
+        "séparation train/validation/test",
+        "format des datasets",
+        "distinction OCR et VLM, synthétique et réel"
+      ],
+      "changes": [
+        "rendre visibles les prérequis d’environnement",
+        "ne pas sélectionner par holdout/OOD",
+        "quarantainer la ligne JSONL invalide"
+      ]
+    },
+    {
+      "pass": 2,
+      "name": "Contre-audit critique et consolidation",
+      "checks": [
+        "contre-exemples aux hypothèses de vue",
+        "biais de sélection et corrélation de cible météo",
+        "tests de source-off",
+        "versions et duplicates",
+        "états NOT_RUN vs FAIL"
+      ],
+      "changes": [
+        "rejeter la concaténation naïve comme noyau invariant obligatoire",
+        "choisir sur la validation uniquement",
+        "ajouter une dépendance explicite de checklists O82 et l’acceptation Windows native comme ouverte"
+      ]
+    },
+    {
+      "pass": 3,
+      "name": "Synthèse globale",
+      "checks": [
+        "cohérence entre théorie, neurones, compétences, autonomie et interface",
+        "couverture multimodale par contrats séparés",
+        "compatibilité local-first Windows et évolution ultérieure"
+      ],
+      "decision": "O92-HFPN hybride : neurones à poids sur empreintes typées, fusion par fiabilité, mémoire distincte, acquisition de compétence source-off et boucle autonome vérifiable. Les performances générales restent une question expérimentale ouverte, sans prédiction positive ou négative."
+    }
+  ],
+  "data_integrity_anomalies": [
+    {
+      "type": "invalid_jsonl_records",
+      "sha256": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "bytes": 3986317,
+      "occurrences": [
+        {
+          "path": "dataset/batch_dataset.jsonl",
+          "scope": "direct_unpacked_root",
+          "bytes": 3986317,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "valid_records": 783,
+      "invalid_records": 1,
+      "examples": [
+        {
+          "line": 784,
+          "error": "Unterminated string starting at: line 1 column 980 (char 979)",
+          "excerpt": "{\"id\": \"7cc80448-51bc-403f-80f6-b067f70a8260\", \"category\": \"character_creation\", \"difficulty\": \"hard\", \"genre\": \"adventu"
+        }
+      ]
+    },
+    {
+      "type": "parquet_not_semantically_decoded",
+      "sha256": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+      "bytes": 2306545,
+      "occurrences": [
+        {
+          "path": "dataset/0000.parquet",
+          "scope": "direct_unpacked_root",
+          "bytes": 2306545,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "signature": {
+        "head_PAR1": true,
+        "tail_PAR1": true,
+        "semantic_decode": "NOT_RUN: pyarrow/fastparquet/duckdb/polars absent in tested environment"
+      }
+    },
+    {
+      "type": "invalid_strict_json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "occurrences": [
+        {
+          "path": "b374899be43a1aca/l1_verify_ood.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "13894efa592fee27/audit_release_8022/tests/compileall.log",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/tests/__init__.py",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised_acquire.stdout.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "excerpt": ""
+    },
+    {
+      "type": "zero_byte_content_group",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "occurrences": [
+        {
+          "path": "b374899be43a1aca/l1_verify_ood.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "13894efa592fee27/audit_release_8022/tests/compileall.log",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/tests/__init__.py",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "automated_tests"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised_acquire.stdout.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "result_record_or_machine_readable_state"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/p23_rejected_skill/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l1_sms/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/raw_observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/observation/observations.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/l2_sms_multilingual_supervised/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/insights.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/skills.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/traces.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/warm.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/memory_events.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/hot.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/certificates.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        },
+        {
+          "path": "b374899be43a1aca/runs/rag_engine_integration/memory/cold.jsonl",
+          "scope": "unique_nested_archive_content",
+          "bytes": 0,
+          "content_role": "dataset_or_benchmark_input"
+        }
+      ],
+      "interpretation": "Un fichier vide peut être intentionnel (JSONL store vide, __init__.py, stdout/stderr silencieux); vérifier selon le contrat plutôt que déclarer tous les fichiers vides défectueux."
+    },
+    {
+      "type": "invalid_strict_json",
+      "sha256": "f866ffe7d37f33c212aade743652e1664b3066f9379dcb7ac4c8e0e76322b2fc",
+      "bytes": 739,
+      "occurrences": [
+        {
+          "path": "44f520f56de227bb/logs/reassembly_v3_validation.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 739,
+          "content_role": "result_record_or_machine_readable_state"
+        }
+      ],
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "excerpt": "/mnt/data/reconstruire_suivi_model_AAM_O91_final_v3.py:5: SyntaxWarning: invalid escape sequence '\\s'\n  py -3.11 .\\reconstruire_suivi_model_AAM_O91_final_v3.py --parts-dir . --output .\\suivi_model_AAM_O91_final_v3.zip\n{\n  \"status\": \"PASS\",\n"
+    },
+    {
+      "type": "invalid_strict_json",
+      "sha256": "ed4c7af5a015f795bfc6ab3b2ece1834d16e7aeb6d9ab74cdaae9e481acf7af3",
+      "bytes": 1072,
+      "occurrences": [
+        {
+          "path": "1978f61351c4648d/FINAL_AUDIT_O82_2/experiment_raw/p03_selection_compare.json",
+          "scope": "unique_nested_archive_content",
+          "bytes": 1072,
+          "content_role": "result_record_or_machine_readable_state"
+        }
+      ],
+      "error": "Extra data: line 2 column 1 (char 666)",
+      "excerpt": "{\"candidate\": \"iter_050\", \"fit_s\": 20.981812670999716, \"valid\": {\"accuracy\": 0.9586776859504132, \"coverage\": 0.9586776859504132, \"selective_accuracy\": 1.0}, \"stability\": {\"case\": 1.0, \"space\": 1.0}, \"threshold\": 0.7, \"validation_record\": {\""
+    }
+  ],
+  "other_integrity_findings": [
+    {
+      "file": "batch_dataset.jsonl",
+      "status": "INVALID_INPUT_ROW",
+      "finding": "783 lignes JSON valides sur 784; ligne finale 784 invalide (chaîne non terminée).",
+      "action": "quarantainer avec numéro de ligne, octets bruts et erreur; garder le fichier original; réparer/régénérer après décision explicite."
+    },
+    {
+      "file": "Screenplay_dataset.jsonl",
+      "status": "PASS_FORMAT_ONLY",
+      "finding": "4000 enregistrements JSON valides; formats/turns/messages présents.",
+      "action": "évaluer qualité sémantique séparément du parse."
+    },
+    {
+      "file": "weather_prediction_dataset.csv + weather_prediction_pecnic_label.csv",
+      "status": "PASS_SCHEMA_CHECK_BOUNDED",
+      "finding": "3654 lignes chacun, DATE unique et jointure 1:1; 7 variables Basel sélectionnées sans valeurs manquantes; prévalence positive 0.25643.",
+      "action": "auditer la définition/fabrication de BASEL_picnic_weather pour fuite d’étiquette avant usage comme benchmark de référence."
+    },
+    {
+      "file": "JSON parse anomalies",
+      "status": "REVIEW_REQUIRED",
+      "finding": "Un fichier strictement JSON vide, un journal avec texte de warning avant un objet JSON et un fichier avec deux objets JSON concaténés détectés par groupe de hash.",
+      "action": "renommer les journaux en .log; utiliser tableau JSON ou JSONL quand plusieurs enregistrements."
+    },
+    {
+      "file": "zero-byte groups",
+      "status": "TRIAGE_BY_CONTRACT",
+      "finding": "264 occurrences à zéro octet dont plusieurs sont intentionnelles (magasins JSONL vides, __init__.py, stdout/stderr silencieux).",
+      "action": "distinguer absence de payload fautive d’un fichier sentinelle attendu."
+    }
+  ],
+  "windows_acceptance_plan": {
+    "platform_current": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "native_windows": "NOT_RUN",
+    "required_acceptance": [
+      "Windows 10/11 profil utilisateur vierge; install/upgrade/uninstall via PowerShell",
+      "mode hors-ligne local complet et mode en ligne seulement si activé explicitement",
+      "chat avec fichiers texte/JSON/image/audio/vidéo, état de refus/erreur lisible",
+      "chargement CSV/JSON/JSONL/Parquet, détection de schéma, quarantaine sans perte des lignes invalides",
+      "RAG index/rebuild, provenance par chunk et références à la source",
+      "création/export/import des capsules et tests source-off",
+      "CPU seul, GPU facultatif, limite mémoire configurable et checkpoint/reprise",
+      "chemins Unicode/espaces, absence de chemins Linux codés en dur, permissions utilisateur",
+      "journaux configurables, export/suppression de données, secrets protégés",
+      "tests d’autonomie dans sandbox avec actions réseau/externe sous permission explicite"
+    ]
+  },
+  "commands_and_artifacts": {
+    "source_archive_sha256": "15042320c27907e37fec406156968c3d567b9eda47dfc4d9a0f615c9eb28112c",
+    "main_experiment_script": {
+      "file": "O92_experiment_variants.py",
+      "bytes": 18059,
+      "sha256": "00b50ba3dde41f7691bd3a3debac32175a9486225ea08aec6946da5b1dcf92f5"
+    },
+    "image_ablation_script": {
+      "file": "O92_image_experiment_v2.py",
+      "bytes": 9705,
+      "sha256": "a5b32b9079a4d7f79fb870c4c8e4c4ffdf026f96b131fd8983b7fc7920fbe101"
+    },
+    "image_replication_script": {
+      "file": "O92_image_replication_compact.py",
+      "bytes": 1654,
+      "sha256": "f80a6140d08a9342a8b566180825352c0c85bab314f43f0aa6eabaeeddd525f4"
+    },
+    "skill_lab_script": {
+      "file": "O92_skill_acquisition_lab.py",
+      "bytes": 6807,
+      "sha256": "788c90b03ddc79563391710c35b0606194b8f23984f4c220dc9434c5eaf883a3"
+    },
+    "raw_image_results": {
+      "file": "O92_image_experiment_v2.json",
+      "bytes": 10536,
+      "sha256": "609f39d9d0ec0589cf42e28d2c2cefa53101f99ba957d2e69534655effb0d6cd"
+    },
+    "raw_replication_results": {
+      "file": "O92_image_replication_compact.json",
+      "bytes": 12841,
+      "sha256": "f93831d360f5d9a24c4dcdf6fac1b6b6b6c3ffde30529d981ade0e488b473887"
+    },
+    "raw_skill_results": {
+      "file": "O92_skill_acquisition_lab.json",
+      "bytes": 23028,
+      "sha256": "b10cff5227a16d6370bcfa0ddcd62d4d768cd29b26abce42996e3da21f4bd2ba"
+    },
+    "source_note": {
+      "file": "carnet_note_O92.json",
+      "bytes": 29143540,
+      "sha256": "632733a5dc6c14800f0f0864feb8b82fe4a3014b3528ecb7d17a6aa0d76360eb"
+    }
+  },
+  "status_summary": {
+    "source_inventory": "COMPLETED WITH HASH-BASED CONTENT REVIEW; binaries/Parquet explicitly not semantically decoded",
+    "bounded_tests": "MULTIPLE HISTORICAL SUITES PASS WHEN RUN IN THEIR DECLARED ENVIRONMENT",
+    "lab_experiments": "COMPLETED ON FINITE PROBE DOMAIN, SYNTHETIC SHAPES, WEATHER CLASSIFICATION, BLACK-BOX FUNCTION LEARNING",
+    "ASR_quality": "FAIL_QUALITY_GATE FOR TESTED CONFIGURATION",
+    "real_weight_VLM": "NOT_RUN",
+    "native_Windows": "NOT_RUN",
+    "O92_implementation": "NOT_REQUESTED / NOT CREATED",
+    "ultimate_AAM_potential": "NOT_RATED; no prior success/failure conclusion"
+  },
+  "follow_on_acceptance_gates": [
+    "decode Parquet and examine schema/data",
+    "audit weather target for label construction leakage",
+    "multiseed/noise experiments for numeric source-off skill acquisition",
+    "representative natural image/audio/video/multilingual/program black-box tasks",
+    "calibration of view gates and uncertainty",
+    "independent adversarial safety evaluation",
+    "native Windows clean-profile acceptance",
+    "long-running autonomous goal lifecycle and recovery/restart tests"
+  ]
+}

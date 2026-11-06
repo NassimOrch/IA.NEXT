@@ -1,0 +1,1091 @@
+%bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% =========================================================
+% PACKAGES
+% =========================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,tabularx}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta,
+  positioning,
+  fit,
+  calc,
+  shapes.geometric,
+  backgrounds
+}
+
+\geometry{
+  left=2.2cm,
+  right=2.2cm,
+  top=2.2cm,
+  bottom=2.2cm
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!55!black
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist{nosep,leftmargin=1.5em}
+
+% =========================================================
+% COLORS AND TIKZ STYLES
+% =========================================================
+\definecolor{probeBlue}{RGB}{220,235,250}
+\definecolor{matrixGreen}{RGB}{220,242,228}
+\definecolor{rbfPurple}{RGB}{235,225,248}
+\definecolor{coordOrange}{RGB}{250,232,210}
+\definecolor{neutralGray}{RGB}{240,240,240}
+
+\tikzset{
+  block/.style={
+    draw,
+    rounded corners=2pt,
+    thick,
+    align=center,
+    minimum height=0.85cm,
+    text width=3.1cm,
+    inner sep=5pt,
+    font=\small
+  },
+  inputblock/.style={
+    block,
+    fill=neutralGray,
+    text width=2.7cm
+  },
+  matrixblock/.style={
+    block,
+    fill=matrixGreen
+  },
+  rbfblock/.style={
+    block,
+    fill=rbfPurple
+  },
+  coordblock/.style={
+    block,
+    fill=coordOrange
+  },
+  arrow/.style={
+    -{Latex[length=2mm]},
+    thick
+  },
+  dashedarrow/.style={
+    -{Latex[length=2mm]},
+    thick,
+    dashed
+  }
+}
+
+% =========================================================
+% DOCUMENT
+% =========================================================
+\title{
+  \textbf{Formalisation des architectures EX7}\\
+  \large Sondes RBF, sondes matricielles et coordination hybride
+}
+
+\author{Note technique de recherche}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Cette note formalise quatre variantes d'une architecture composée
+de sept sondes indépendantes et d'un mécanisme de coordination global :
+
+\begin{enumerate}
+  \item EX7-RBF : architecture de référence V003 ;
+  \item EX7-Matrix : sondes locales matricielles ;
+  \item EX7-Matrix-Vector : même architecture, avec calculs vectorisés ;
+  \item EX7-Hybrid : sondes matricielles locales et coordinateur global RBF.
+\end{enumerate}
+
+L'objectif est de distinguer les effets de la représentation locale,
+du mécanisme de coordination et de l'implémentation numérique.
+
+Les architectures matricielles et hybrides présentées ici sont des
+propositions expérimentales. Elles ne doivent pas être confondues
+avec les résultats effectivement obtenus par EX7 V003.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% =========================================================
+\section{Notations générales}
+% =========================================================
+
+On considère un exemple d'entrée :
+
+\[
+  \bm{x}\in\mathbb{R}^{D}.
+\]
+
+Le système contient \(M\) sondes, avec ici :
+
+\[
+  M=7.
+\]
+
+Chaque sonde produit une représentation locale :
+
+\[
+  \bm{h}_i\in\mathbb{R}^{d_h},
+  \qquad i\in\{1,\ldots,M\}.
+\]
+
+La concaténation des représentations est :
+
+\[
+  \bm{H}
+  =
+  \begin{bmatrix}
+  \bm{h}_1\\
+  \bm{h}_2\\
+  \vdots\\
+  \bm{h}_M
+  \end{bmatrix}
+  \in\mathbb{R}^{Md_h}.
+\]
+
+On note \(C\) le nombre de classes.
+
+Pour EX7 V003, le problème expérimental possède :
+
+\[
+D=30,\qquad C=2,\qquad M=7.
+\]
+
+Les dimensions \(d_h\) des futures sondes matricielles seront
+des hyperparamètres à définir et à comparer.
+
+% =========================================================
+\section{Architecture 1 : EX7-RBF de référence}
+% =========================================================
+
+\subsection{Organisation générale}
+
+EX7 V003, également désigné
+\textit{OuterCoord-Lite-7x1}, contient sept sondes
+\texttt{AdaptiveRBF} indépendantes et un coordinateur global.
+
+Chaque sonde reçoit le même vecteur d'entrée standardisé.
+Les partitions d'entraînement sont disjointes, mais les sondes
+ne reçoivent pas des sous-ensembles différents des dimensions.
+
+Le schéma est le suivant :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.45cm]
+  \node[inputblock] (x) {Entrée standardisée\\
+    \(\bm{x}\in\mathbb{R}^{30}\)};
+
+  \node[matrixblock,below=0.7cm of x,
+    text width=10.5cm] (probes) {
+    Sept sondes indépendantes\\[2pt]
+    \(\operatorname{RBF}_1(\bm{x}),\ldots,
+      \operatorname{RBF}_7(\bm{x})\)
+  };
+
+  \node[coordblock,below=0.7cm of probes] (rho) {
+    Coordinateur global\\
+    \(\bm{\rho}=\operatorname{softmax}(\bm{a})\)
+  };
+
+  \node[inputblock,below=0.7cm of rho] (out) {
+    Logits et prédiction\\
+    \(\bm{y}\in\mathbb{R}^{2}\)
+  };
+
+  \draw[arrow] (x) -- (probes);
+  \draw[arrow] (probes) -- (rho);
+  \draw[arrow] (rho) -- (out);
+\end{tikzpicture}
+\caption{Organisation conceptuelle d'EX7 V003.}
+\end{figure}
+
+\subsection{Fonction d'une sonde RBF}
+
+Chaque sonde possède un encodeur appris :
+
+\[
+  \bm{z}_i
+  =
+  \tanh(W_i\bm{x}+\bm{b}_i),
+\]
+
+avec :
+
+\[
+  W_i\in\mathbb{R}^{d\times D},
+  \qquad
+  \bm{z}_i\in\mathbb{R}^{d}.
+\]
+
+Dans la configuration V003 :
+
+\[
+  d=4,\qquad K=8.
+\]
+
+La sonde possède \(K\) centres :
+
+\[
+  \bm{c}_{i,k}\in\mathbb{R}^{d}.
+\]
+
+La distance quadratique entre l'encodage et le centre \(k\) est :
+
+\[
+  \delta_{i,k}(\bm{x})
+  =
+  \left\|
+    \bm{z}_i-\bm{c}_{i,k}
+  \right\|_2^2.
+\]
+
+La largeur de chaque fonction est :
+
+\[
+  s_{i,k}=\exp(\ell_{i,k}).
+\]
+
+L'activation radiale est alors :
+
+\[
+  \phi_{i,k}(\bm{x})
+  =
+  \exp\left(
+    -\frac{
+      \delta_{i,k}(\bm{x})
+    }{
+      2s_{i,k}^{\,2}
+    }
+  \right).
+\]
+
+En regroupant les activations :
+
+\[
+  \bm{\phi}_i(\bm{x})
+  \in\mathbb{R}^{K}.
+\]
+
+La sortie de la sonde est :
+
+\[
+  \bm{q}_i(\bm{x})
+  =
+  \bm{A}_i^\top\bm{\phi}_i(\bm{x})
+  +\bm{c}_i^{\,out},
+\]
+
+où :
+
+\[
+  \bm{A}_i\in\mathbb{R}^{K\times C}.
+\]
+
+\subsection{Coordination globale}
+
+Le coordinateur apprend un vecteur de poids :
+
+\[
+  \bm{\rho}
+  =
+  \operatorname{softmax}(\bm{a}),
+  \qquad
+  \bm{\rho}\in\mathbb{R}^{M}.
+\]
+
+Les sorties sont combinées par :
+
+\[
+  \boxed{
+  \bm{y}(\bm{x})
+  =
+  \sum_{i=1}^{M}
+  \rho_i\bm{q}_i(\bm{x})
+  }
+\]
+
+Dans V003, \(\bm{\rho}\) est global et indépendant de l'entrée.
+Il ne s'agit donc pas d'un mécanisme de sélection dynamique
+des sondes.
+
+\subsection{Propriété importante}
+
+Les sondes sont entraînées sur des partitions stratifiées
+disjointes des exemples. À l'inférence, les sept sondes
+sont néanmoins toutes exécutées.
+
+Il n'y a donc ni routage conditionnel, ni réduction du nombre
+de sondes exécutées selon l'entrée.
+
+% =========================================================
+\section{Architecture 2 : EX7-Matrix}
+% =========================================================
+
+\subsection{Principe}
+
+Cette variante conserve les sept unités locales indépendantes,
+mais remplace les calculs RBF par des transformations matricielles.
+
+Chaque sonde reçoit l'entrée complète :
+
+\[
+  \bm{x}\in\mathbb{R}^{D}.
+\]
+
+Elle calcule une représentation locale :
+
+\[
+  \boxed{
+  \bm{h}_i
+  =
+  \sigma(W_i\bm{x}+\bm{b}_i)
+  }
+\]
+
+avec :
+
+\[
+  W_i\in\mathbb{R}^{d_h\times D},
+  \qquad
+  \bm{b}_i\in\mathbb{R}^{d_h}.
+\]
+
+Une projection de sortie peut être ajoutée :
+
+\[
+  \bm{q}_i
+  =
+  V_i\bm{h}_i+\bm{c}_i,
+\]
+
+où :
+
+\[
+  V_i\in\mathbb{R}^{C\times d_h}.
+\]
+
+\subsection{Schéma}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.55cm]
+  \node[inputblock] (x) {Entrée \(\bm{x}\)};
+
+  \node[matrixblock,below left=1cm and 0.1cm of x] (p1) {
+    Sonde 1\\
+    \(W_1\bm{x}+\bm{b}_1\)\\
+    \(\sigma(\cdot)\)
+  };
+
+  \node[matrixblock,below=1cm of x] (p2) {
+    Sonde 2\\
+    \(W_2\bm{x}+\bm{b}_2\)\\
+    \(\sigma(\cdot)\)
+  };
+
+  \node[matrixblock,below right=1cm and 0.1cm of x] (p3) {
+    Sonde 7\\
+    \(W_7\bm{x}+\bm{b}_7\)\\
+    \(\sigma(\cdot)\)
+  };
+
+  \node[coordblock,below=1.0cm of p2,
+    text width=5.4cm] (coord) {
+    Coordinateur matriciel\\
+    \(\bm{y}=\sum_i\rho_i\bm{q}_i\)
+  };
+
+  \draw[arrow] (x) -- (p1);
+  \draw[arrow] (x) -- (p2);
+  \draw[arrow] (x) -- (p3);
+  \draw[arrow] (p1) -- (coord);
+  \draw[arrow] (p2) -- (coord);
+  \draw[arrow] (p3) -- (coord);
+\end{tikzpicture}
+\caption{EX7-Matrix : calcul local matriciel et coordination.}
+\end{figure}
+
+Les sondes 3 à 6 ne sont pas dessinées pour conserver
+la lisibilité du schéma.
+
+\subsection{Coordination}
+
+Une première possibilité consiste à conserver le coordinateur
+pondéré d'EX7 :
+
+\[
+  \bm{\rho}
+  =
+  \operatorname{softmax}(\bm{a}).
+\]
+
+La sortie devient :
+
+\[
+  \boxed{
+  \bm{y}
+  =
+  \sum_{i=1}^{M}
+  \rho_i
+  \left(
+    V_i\sigma(W_i\bm{x}+\bm{b}_i)
+    +\bm{c}_i
+  \right)
+  }
+\]
+
+Cette variante permet d'étudier l'organisation modulaire
+sans conserver les fonctions radiales.
+
+\subsection{Non-linéarité}
+
+Si toutes les opérations sont uniquement affines,
+leur composition reste affine.
+
+En effet :
+
+\[
+  W_2(W_1\bm{x}+\bm{b}_1)+\bm{b}_2
+  =
+  W'\bm{x}+\bm{b}'.
+\]
+
+Une non-linéarité telle que ReLU, GELU ou tanh est donc
+nécessaire pour obtenir une fonction globale non affine.
+
+Pour un premier benchmark, ReLU constitue un choix simple :
+
+\[
+  \sigma(u)=\max(0,u).
+\]
+
+% =========================================================
+\section{Architecture 3 : EX7-Matrix-Vector}
+% =========================================================
+
+\subsection{Différence avec EX7-Matrix}
+
+EX7-Matrix-Vector ne change pas la fonction mathématique
+des sondes. Il modifie la manière de calculer les sept branches.
+
+On regroupe les matrices locales dans un tenseur :
+
+\[
+  \mathcal{W}
+  \in
+  \mathbb{R}^{M\times d_h\times D}.
+\]
+
+Pour un batch de \(B\) exemples :
+
+\[
+  X\in\mathbb{R}^{B\times D}.
+\]
+
+Le calcul des sondes peut être réalisé par une opération
+batchée :
+
+\[
+  H
+  =
+  \sigma\left(
+    \mathcal{W}\star X+\mathcal{B}
+  \right),
+\]
+
+où \(\star\) désigne ici une multiplication matricielle
+batchée, et :
+
+\[
+  H\in\mathbb{R}^{B\times M\times d_h}.
+\]
+
+\subsection{Schéma conceptuel}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.6cm]
+  \node[inputblock] (x) {Batch d'entrée\\\(B\times D\)};
+
+  \node[matrixblock,below=of x,
+    text width=7cm] (tensor) {
+    Tenseur des poids\\
+    \(\mathcal{W}:M\times d_h\times D\)
+  };
+
+  \node[coordblock,below=of tensor,
+    text width=7cm] (batch) {
+    Multiplications matricielles batchées\\
+    \(H:B\times M\times d_h\)
+  };
+
+  \node[inputblock,below=of batch] (out) {
+    Fusion des sorties et prédiction
+  };
+
+  \draw[arrow] (x) -- (tensor);
+  \draw[arrow] (tensor) -- (batch);
+  \draw[arrow] (batch) -- (out);
+\end{tikzpicture}
+\caption{Calcul vectorisé des sondes.}
+\end{figure}
+
+La vectorisation peut réduire le coût des appels successifs
+aux opérateurs numériques. Elle ne garantit toutefois pas
+une accélération : le résultat dépend du matériel, de la
+taille des batchs et de l'implémentation.
+
+Il faut donc comparer les latences mesurées, et non déduire
+la vitesse du seul nombre d'opérations.
+
+% =========================================================
+\section{Architecture 4 : EX7-Hybrid}
+% =========================================================
+
+\subsection{Hypothèse centrale}
+
+Cette architecture correspond à la proposition hybride :
+
+\begin{itemize}
+  \item les sondes locales utilisent des transformations
+  matricielles ;
+  \item leurs représentations sont fusionnées ;
+  \item le coordinateur global utilise une fonction RBF.
+\end{itemize}
+
+L'objectif est de séparer l'extraction locale des représentations
+et la modélisation non linéaire de leurs configurations globales.
+
+\subsection{Étape locale}
+
+Pour chaque sonde :
+
+\[
+  \bm{h}_i
+  =
+  \sigma(W_i\bm{x}+\bm{b}_i).
+\]
+
+La fusion des représentations est :
+
+\[
+  \bm{H}
+  =
+  \operatorname{concat}
+  (\bm{h}_1,\ldots,\bm{h}_M).
+\]
+
+Ainsi :
+
+\[
+  \bm{H}\in\mathbb{R}^{Md_h}.
+\]
+
+Une projection optionnelle peut être introduite :
+
+\[
+  \bm{u}=P\bm{H}+\bm{b}_P,
+\]
+
+avec :
+
+\[
+  P\in\mathbb{R}^{d_g\times Md_h}.
+\]
+
+Cette projection est facultative. Elle permet de contrôler
+la dimension de l'espace dans lequel le coordinateur RBF
+effectue ses calculs.
+
+\subsection{Étape globale RBF}
+
+Le coordinateur possède \(K_g\) centres :
+
+\[
+  \bm{\mu}_k\in\mathbb{R}^{d_g}.
+\]
+
+Les activations globales sont :
+
+\[
+  \psi_k(\bm{u})
+  =
+  \exp\left(
+    -\frac{
+      \|\bm{u}-\bm{\mu}_k\|_2^2
+    }{
+      2\tau_k^2
+    }
+  \right).
+\]
+
+On définit :
+
+\[
+  \bm{\psi}(\bm{u})
+  =
+  \begin{bmatrix}
+  \psi_1(\bm{u})&
+  \cdots&
+  \psi_{K_g}(\bm{u})
+  \end{bmatrix}^{\top}.
+\]
+
+La prédiction finale est :
+
+\[
+  \boxed{
+  \bm{y}
+  =
+  A_g^\top\bm{\psi}(\bm{u})
+  +\bm{b}_g
+  }
+\]
+
+avec :
+
+\[
+  A_g\in\mathbb{R}^{K_g\times C}.
+\]
+
+\subsection{Schéma complet}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+  \node[inputblock] (x) {
+    Entrée\\
+    \(\bm{x}\in\mathbb{R}^{D}\)
+  };
+
+  \node[matrixblock,below=of x,
+    text width=8.2cm] (local) {
+    Sept sondes matricielles\\
+    \(\bm{h}_i=\sigma(W_i\bm{x}+\bm{b}_i)\)
+  };
+
+  \node[matrixblock,below=of local,
+    text width=8.2cm] (fusion) {
+    Fusion des représentations\\
+    \(\bm{H}=\operatorname{concat}(\bm{h}_1,\ldots,\bm{h}_7)\)
+  };
+
+  \node[rbfblock,below=of fusion,
+    text width=8.2cm] (rbf) {
+    Coordinateur global RBF\\
+    Distances, largeurs et activations radiales
+  };
+
+  \node[inputblock,below=of rbf] (out) {
+    Projection finale\\
+    \(\bm{y}\in\mathbb{R}^{C}\)
+  };
+
+  \draw[arrow] (x) -- (local);
+  \draw[arrow] (local) -- (fusion);
+  \draw[arrow] (fusion) -- (rbf);
+  \draw[arrow] (rbf) -- (out);
+\end{tikzpicture}
+\caption{Architecture EX7-Hybrid proposée.}
+\end{figure}
+
+\subsection{Pourquoi cette séparation est intéressante}
+
+Les transformations locales reposent sur des opérations
+matricielles, tandis que le coordinateur RBF modélise
+des configurations dans l'espace des représentations.
+
+Cette organisation pourrait permettre :
+
+\begin{enumerate}
+  \item de conserver une partie du comportement non linéaire
+  des RBF ;
+  \item de simplifier les calculs des sondes ;
+  \item de concentrer les calculs radiaux dans un seul module ;
+  \item de comparer directement la coordination RBF
+  et la coordination matricielle.
+\end{enumerate}
+
+Il ne s'agit cependant pas d'une garantie de gain de vitesse.
+Le coordinateur global peut devenir un goulot d'étranglement,
+en particulier si \(d_g\) ou \(K_g\) sont élevés.
+
+% =========================================================
+\section{Comparaison formelle des variantes}
+% =========================================================
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{2.4cm}
+  X
+  >{\centering\arraybackslash}p{2.2cm}
+}
+\toprule
+Architecture & Calcul local & Coordination\\
+\midrule
+EX7-RBF
+&
+Encodeur, distances aux centres, exponentielles RBF
+&
+Pondération globale fixe\\
+
+EX7-Matrix
+&
+Transformations matricielles et activation
+&
+Pondération globale\\
+
+EX7-Matrix-Vector
+&
+Même fonction que Matrix, calculs batchés
+&
+Pondération globale\\
+
+EX7-Hybrid
+&
+Transformations matricielles et activation
+&
+Coordinateur RBF global\\
+\bottomrule
+\end{tabularx}
+\caption{Comparaison structurelle des quatre variantes.}
+\end{table}
+
+\subsection{Comptage des paramètres}
+
+Pour EX7-Matrix, avec une couche cachée de dimension \(d_h\)
+et une sortie de dimension \(C\), chaque sonde possède :
+
+\[
+  P_{\mathrm{sonde}}
+  =
+  d_hD+d_h+Cd_h+C.
+\]
+
+Pour \(M\) sondes et un coordinateur de \(M\) poids :
+
+\[
+  P_{\mathrm{Matrix}}
+  =
+  M P_{\mathrm{sonde}}+M.
+\]
+
+Pour EX7-Hybrid, si la projection globale est utilisée :
+
+\[
+  P_{\mathrm{Hybrid}}
+  =
+  M(d_hD+d_h)
+  +d_g(Md_h+1)
+  +K_gd_g
+  +K_g
+  +K_gC+C.
+\]
+
+Cette formule inclut :
+\begin{itemize}
+  \item les paramètres des sondes locales ;
+  \item la projection globale ;
+  \item les centres RBF ;
+  \item les largeurs RBF ;
+  \item la lecture finale et son biais.
+\end{itemize}
+
+Le comptage exact devra être adapté si certaines matrices
+ou certains biais sont partagés.
+
+Pour une comparaison équitable, il faudra compter également
+le préprocesseur, les paramètres persistants et les éventuels
+états nécessaires à l'inférence.
+
+% =========================================================
+\section{Relations entre les sondes et limites de la séparation}
+% =========================================================
+
+Dans les variantes précédentes, chaque sonde reçoit encore
+l'entrée complète :
+
+\[
+  \bm{x}_i=\bm{x}.
+\]
+
+Cette propriété est volontaire pour la première comparaison :
+elle permet de tester les mécanismes de calcul sans introduire
+simultanément un découpage des dimensions.
+
+Une évolution possible consisterait à distribuer les dimensions :
+
+\[
+  \bm{x}
+  =
+  \begin{bmatrix}
+  \bm{x}_1\\
+  \vdots\\
+  \bm{x}_M
+  \end{bmatrix}.
+\]
+
+Chaque sonde ne recevrait alors qu'un sous-espace :
+
+\[
+  \bm{h}_i
+  =
+  \sigma(W_i\bm{x}_i+\bm{b}_i).
+\]
+
+Cette variante peut réduire le coût local, mais un découpage
+strict peut supprimer des interactions entre dimensions.
+
+Il faudrait alors introduire une communication entre sondes,
+des projections partagées ou des connexions croisées.
+
+Le coordinateur RBF proposé précédemment ne doit pas être
+considéré automatiquement comme une solution complète
+à ce problème : il ne peut exploiter que les informations
+qui lui sont transmises.
+
+% =========================================================
+\section{Protocole expérimental recommandé}
+% =========================================================
+
+\subsection{Comparaisons nécessaires}
+
+Les quatre variantes doivent être entraînées et évaluées
+dans des conditions identiques.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{3.0cm}
+  X
+}
+\toprule
+Mesure & Objectif\\
+\midrule
+Accuracy
+&
+Mesurer la proportion de prédictions correctes.\\
+
+Log-loss
+&
+Évaluer la qualité probabiliste des prédictions.\\
+
+Brier score
+&
+Mesurer l'erreur quadratique des probabilités.\\
+
+Latence p50, p95, p99
+&
+Comparer le coût réel d'inférence.\\
+
+Débit
+&
+Mesurer le nombre d'exemples traités par unité de temps.\\
+
+Paramètres
+&
+Comparer la capacité paramétrique persistante.\\
+
+Mémoire
+&
+Mesurer le coût mémoire du modèle et de son exécution.\\
+
+Temps d'entraînement
+&
+Mesurer le coût de construction et d'optimisation.\\
+\bottomrule
+\end{tabularx}
+\caption{Mesures à collecter.}
+\end{table}
+
+\subsection{Contrôle expérimental}
+
+Les comparaisons devront conserver :
+
+\begin{itemize}
+  \item les mêmes partitions train et validation ;
+  \item les mêmes graines aléatoires ;
+  \item le même prétraitement ;
+  \item les mêmes critères d'arrêt ;
+  \item un budget de paramètres comparable ;
+  \item le même matériel et les mêmes conditions de mesure.
+\end{itemize}
+
+Les résultats obtenus sur le jeu Wisconsin historique
+ne constituent pas une validation externe indépendante.
+Les différences entre graines sur un split fixe doivent
+être interprétées comme des mesures descriptives.
+
+Une validation sur des données indépendantes sera nécessaire
+avant toute conclusion sur la généralisation.
+
+% =========================================================
+\section{Hypothèses scientifiques à tester}
+% =========================================================
+
+Les propositions peuvent être formulées sous forme
+d'hypothèses réfutables.
+
+\subsection*{H1 : efficacité des sondes matricielles}
+
+À budget paramétrique comparable, EX7-Matrix pourrait
+réduire la latence par rapport à EX7-RBF.
+
+Cette hypothèse sera évaluée par les latences mesurées,
+et non par le seul nombre de multiplications.
+
+\subsection*{H2 : intérêt de la vectorisation}
+
+EX7-Matrix-Vector pourrait réduire le surcoût d'exécution
+des sept branches indépendantes.
+
+Il faut mesurer séparément les batchs de taille 1 et les
+batchs plus grands, car les gains peuvent varier selon
+la taille des entrées.
+
+\subsection*{H3 : intérêt de la coordination RBF globale}
+
+EX7-Hybrid pourrait obtenir une meilleure modélisation
+des interactions entre représentations locales qu'un
+coordinateur linéaire.
+
+Cette hypothèse exige une comparaison avec EX7-Matrix
+à capacité paramétrique comparable.
+
+\subsection*{H4 : spécialisation effective des sondes}
+
+La séparation en sept sondes n'implique pas automatiquement
+une spécialisation fonctionnelle.
+
+Il faudra mesurer cette spécialisation à l'aide d'ablations,
+de perturbations contrôlées des entrées et de comparaisons
+des contributions individuelles des sondes.
+
+% =========================================================
+\section{Conclusion}
+% =========================================================
+
+La proposition EX7-Hybrid constitue une évolution cohérente
+de l'architecture initiale.
+
+Elle sépare deux responsabilités :
+
+\begin{enumerate}
+  \item l'extraction de représentations locales par des
+  transformations matricielles ;
+  \item la coordination globale par une fonction RBF.
+\end{enumerate}
+
+Cette séparation permet de tester si les fonctions RBF sont
+plus utiles dans la coordination globale que dans chaque
+sonde locale.
+
+Il ne faut toutefois pas conclure à l'avance que cette
+architecture sera plus rapide ou plus précise. Le coordinateur
+RBF peut introduire un coût important, et la capacité du
+système dépendra de la dimension des représentations,
+du nombre de centres et de la qualité de la coordination.
+
+L'expérience la plus informative consiste donc à comparer
+EX7-RBF, EX7-Matrix, EX7-Matrix-Vector et EX7-Hybrid,
+avec un protocole identique et des budgets paramétriques
+contrôlés.
+
+% =========================================================
+\section*{Sources techniques}
+% =========================================================
+
+Les éléments décrivant l'implémentation de référence
+proviennent de l'archive EX7 V003 :
+
+\begin{enumerate}
+  \item \texttt{reports/ARCHITECTURE\_V003.md} :
+  organisation des sept sondes, shards d'entraînement,
+  coordinateur global et protocole d'inférence.
+
+  \item \texttt{inputs/reference\_v002/src/ex6\_common.py} :
+  définition de la classe \texttt{AdaptiveRBF},
+  encodeur latent, centres, largeurs et lecture RBF.
+
+  \item \texttt{configs/PRE\_REGISTRATION\_V003.md} :
+  hypothèses, protocole expérimental, comparateurs,
+  mesures et limites méthodologiques.
+\end{enumerate}
+
+Les architectures Matrix, Matrix-Vector et Hybrid sont
+des propositions formalisées dans cette note. Elles ne
+sont pas des résultats expérimentaux déjà validés.
+
+\end{document}

@@ -1,0 +1,214 @@
+{
+  "schema": "aam-o94-4-change-register-v1",
+  "version": "O94_4",
+  "parent_version": "O94_3",
+  "created_utc": "2026-10-20T08:23:18.750012+00:00",
+  "parent_archives": {
+    "Dmodel_AAM_O94_3.zip": "429237838dffe6bf4e4aedfa559c232ae656d3624e913ba04a0625525563365f",
+    "Amodel_AAM_O94_3 - Copie.zip": "ee913eac24bc29b54534340309e015a9ae403e756602ae9a23a47448bb01d7dc"
+  },
+  "changes": [
+    {
+      "id": "TRAIN-COVERAGE",
+      "summary": "Suppression des plafonds implicites sur les fenêtres train/validation; budgets facultatifs explicites; tous les comptes sont tracés.",
+      "status": "PASS_BOUNDED",
+      "evidence": "receipts/O94_4/P1_coverage_patch.json"
+    },
+    {
+      "id": "RAG-RELEVANCE",
+      "summary": "Seuil relatif des chunks et sélection de phrase alignée sur l’intention de fréquence.",
+      "status": "PASS_BOUNDED",
+      "evidence": "receipts/O94_4/P2_runtime_cli.json"
+    },
+    {
+      "id": "CUSTOM-MODEL-ADAPTER",
+      "summary": "Backend python_adapter avec contrat explicite, approval, hash épinglé et hook d’entraînement facultatif.",
+      "status": "PASS_BOUNDED_TEST_RUNTIME",
+      "evidence": "receipts/O94_4/P5_python_adapter.json"
+    },
+    {
+      "id": "TARGET-ARCHITECTURE",
+      "summary": "Formalisation de la finalité système, des briques de base et des critères de qualification des cas métier.",
+      "status": "COMPLETE_EVIDENCED_FORMALIZATION_ONLY",
+      "evidence": "receipts/O94_4/P6_capability_formalization.json"
+    }
+  ],
+  "source_delta_files": [
+    {
+      "path": "aam_o92/engine.py",
+      "status": "MODIFIED",
+      "old_sha256": "1ce50a5b41eb01096ff29f43f242694184fae24039d9cc2764377818a3589a24",
+      "new_sha256": "d502ee7fef1bed713f6dea986ad336f73bd3607a8eef45ec45d10a3e13e48df9",
+      "size_bytes": 42233
+    },
+    {
+      "path": "aam_o92/language.py",
+      "status": "MODIFIED",
+      "old_sha256": "7a3e871ed99950a82e284e5e252605ce0a88fdff354ff2d69a2eb18d0db211a4",
+      "new_sha256": "85257a443ef252244719e96535274d9523500e8883e70545c597e70fde382138",
+      "size_bytes": 26650
+    },
+    {
+      "path": "aam_o93/__init__.py",
+      "status": "MODIFIED",
+      "old_sha256": "f5e042da096f49142107586ca7194ed26034ac85d34bd532cffb01c323ab7991",
+      "new_sha256": "04faa9c484dccb2778c54a71e341ed5a8903253d07867c3303141d076645157c",
+      "size_bytes": 187
+    },
+    {
+      "path": "aam_o93/cli.py",
+      "status": "MODIFIED",
+      "old_sha256": "72b9d5f9c020a878c83c302c7519e39b26d8f9744d93728b154abd8735af7c0e",
+      "new_sha256": "58d60c9865dda334efe24fb4f94e7fa28f3d884bf99b2d2d443efb794a063fc0",
+      "size_bytes": 36599
+    },
+    {
+      "path": "aam_o93/model_integration.py",
+      "status": "MODIFIED",
+      "old_sha256": "a615c54c32d93459147fe375ce5fcabca6e62e5937ff1fa2a6f97ebb4ab4e0e9",
+      "new_sha256": "d3f8ca7173bb45f2b04499738742a7ff21c50870089db7a4646f412c547565fa",
+      "size_bytes": 41852
+    },
+    {
+      "path": "aam_o93/o943_phase_gate.py",
+      "status": "MODIFIED",
+      "old_sha256": "f6cddfcdcdd286042fd16bbbfbc3e98f04c6bfcc65a288818278016a803979f7",
+      "new_sha256": "4743b3954f4a26671fddbc4e88100bf137cff5654b897e7a386c1b0d4200de66",
+      "size_bytes": 9201
+    },
+    {
+      "path": "aam_o93/o944_phase_gate.py",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "1753dbe819019d2c7b411114bcbf7f069d4060c448c30258ed1e53554492da1f",
+      "size_bytes": 7287
+    },
+    {
+      "path": "aam_o93/preflight.py",
+      "status": "MODIFIED",
+      "old_sha256": "d2f402aacdb2bd972056e153c9187594756fb9350d92a595198908c075a86c4f",
+      "new_sha256": "2c3d45f2bdecac77dafaf3ba666c3f5a4ba7489d920e7a88e0517ff9b11ddb00",
+      "size_bytes": 8125
+    },
+    {
+      "path": "aam_o93/resolution_tree.py",
+      "status": "MODIFIED",
+      "old_sha256": "bafc16ff345ce1d5e140b92d46d426facf3edab5a7d86b864be95e9b6252d3aa",
+      "new_sha256": "cc83c8fa047e90b6a8f795e5e6aac716d91c5667d159c8defd63178060f0e405",
+      "size_bytes": 11747
+    },
+    {
+      "path": "aam_o93/runtime.py",
+      "status": "MODIFIED",
+      "old_sha256": "96c7d1f7858011769f7223b0fe2fb54b5874a8c29a3d5a4ada32fd4cf6ea9f30",
+      "new_sha256": "e6b15ebd7ef47de4b0eca28d3d8fc6214309fc4a75033bc7f13993915877fa87",
+      "size_bytes": 223708
+    },
+    {
+      "path": "aam_o93/semantic_rag.py",
+      "status": "MODIFIED",
+      "old_sha256": "c68d764274b60e111f48c61068403aa98fd1d3b6f17f6120f13640707e0ae53a",
+      "new_sha256": "eba3a1e7b71cfe778f4a209e83c6eb0469d0d21f52bb8f32902629cc63521cc2",
+      "size_bytes": 86567
+    },
+    {
+      "path": "aam_o93/ui.py",
+      "status": "MODIFIED",
+      "old_sha256": "5e70cc5b5d8325879e2902c6c9d4f3013389f45ca4d23aceaeede7a4f09b9a62",
+      "new_sha256": "721dc05638c00370608dea19349e3a1aa4dc489fa9f55e492a3e819eebb1d7ae",
+      "size_bytes": 203225
+    },
+    {
+      "path": "tests/test_o931_release_identity.py",
+      "status": "MODIFIED",
+      "old_sha256": "3a55b9f5c05efe4421c80c665d3e57edb1cf52548355d5c08dea7c6be32e69d6",
+      "new_sha256": "59b07f0a641ddf78b3162c8b203079e8d5ea8c1b107f756f97f826dc0dafb91c",
+      "size_bytes": 1207
+    },
+    {
+      "path": "tests/test_o940_ui_resolution_details.py",
+      "status": "MODIFIED",
+      "old_sha256": "faf12f7d46549e4c730c7654af8bfffa8685361496dffd1144567bad9b3e9674",
+      "new_sha256": "f9b434a79e217348a5b07244207148a16eb4c58123f2b5ecb77e60dbbf8b5c00",
+      "size_bytes": 4795
+    },
+    {
+      "path": "tests/test_o941_standalone_startup.py",
+      "status": "MODIFIED",
+      "old_sha256": "919371c884c2a999fe4f984cb35196f571cc92d65d01e8b18ed636ce63802746",
+      "new_sha256": "f92342ccd051c7394cb5d38a85c8caed59366b37748beab06c3d7c7060fde7c8",
+      "size_bytes": 4061
+    },
+    {
+      "path": "tests/test_o943_model_adapter_contracts.py",
+      "status": "MODIFIED",
+      "old_sha256": "2c4a5f845c05013874918a1a84c8da687d15133f23afd53bcccedf616a28511a",
+      "new_sha256": "24b2f971ddf45f31e02c7b06e3172a2e3d0c8bfa7d6e99a7cec4f378557ebe05",
+      "size_bytes": 4354
+    },
+    {
+      "path": "tests/test_o944_language_window_policy.py",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "4e16bef44c62ab1724d001b702e449eb17be51e3c543653d88cd8f0986da895c",
+      "size_bytes": 2874
+    },
+    {
+      "path": "tests/test_o944_python_adapter.py",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "3be1dc99aa711cbf273a376b0fd3ef643a745e8e22baa818ee3f9fc4994e4ef9",
+      "size_bytes": 3628
+    },
+    {
+      "path": "tests/test_o944_rag_answer_intent.py",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "9cbdcfbd8fefee8dc0aa4c253aaa64b6567e516fd07f54ac9b1a861f606e5592",
+      "size_bytes": 2991
+    },
+    {
+      "path": "tests/test_p0_foundation.py",
+      "status": "MODIFIED",
+      "old_sha256": "f123ca9511bafb4e46312f0e254e7de62e377f9d252f89e7d23c860238b210ee",
+      "new_sha256": "3d748d4ad00bd343a5cf505242d6a632f4ea6e91f60c34ae013f1a77948fcfa2",
+      "size_bytes": 3866
+    },
+    {
+      "path": "examples/model_adapters/README_O94_4_FR.md",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "aec6dacff8281ab71c7ca47b650c496e3f0f81da224acb08528066599983a797",
+      "size_bytes": 3313
+    },
+    {
+      "path": "examples/model_adapters/catalog.json",
+      "status": "MODIFIED",
+      "old_sha256": "88ba64f2d2ecd269309f461b78747f0414640b344f010ccbe8134c13a27d72fd",
+      "new_sha256": "3e7768f76eeabf9df94ba86da37a8b2122b6af917829d69ea3e511f7d2a588f0",
+      "size_bytes": 2329
+    },
+    {
+      "path": "examples/model_adapters/python_model_adapter_template.py",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "0c452142d2f5396b68bb2d2a2f80e21e8b9ef0a62f4065a25c4e34b500a6037b",
+      "size_bytes": 1650
+    },
+    {
+      "path": "scripts/refresh_o944_savepoint.py",
+      "status": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "7c32e53f8e3a6f5366940ffcb4b12f2f6f573bac841dd8dfe745f189732f677c",
+      "size_bytes": 3009
+    }
+  ],
+  "source_delta_count": 24,
+  "test_summary": {
+    "full_suite": "377 passed, 0 failed, 5 warnings, 21 subtests, 190.01 s",
+    "adapter_targeted": "8 passed",
+    "latex_sources": "both exit 0",
+    "preflight": "PASS_BOUNDED"
+  },
+  "interpretation": "Ce registre distingue une capacité formalisée d’une capacité qui a été testée de bout en bout. Il ne déduit pas le potentiel futur de AAM."
+}

@@ -1,0 +1,179 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry,booktabs,longtable,array,hyperref}
+\geometry{margin=2.1cm}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+\newcommand{\Proven}{\texttt{PROVEN}}
+\newcommand{\Unresolved}{\texttt{UNRESOLVED}}
+\title{Rapport complet du test décisif du modèle mathématique O76}
+\author{Campagne externe O76 -- comparaison O76-1.0 / O76-1.1}
+\date{30 septembre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Résumé exécutif}
+Le test a été conçu pour distinguer trois propriétés que l'on confond facilement : (i) capacité à produire une démonstration exacte sur un problème difficile ; (ii) capacité à résister aux faux positifs sur des problèmes célèbres mais ouverts ; (iii) capacité à rejouer indépendamment un certificat falsifié ou muté. La version O76-1.0 a rencontré une saturation importante de son portefeuille Gröbner sur une famille polynomiale triangulaire de profondeur 11--12. Cette faiblesse a conduit à une correction générale, nommée \texttt{TRIANGULAR\_TOWER\_EXACT}, ainsi qu'à une correction du diagnostic et de la validation complète des entrées textuelles non supportées, nommée \texttt{UNSUPPORTED\_FORM}.
+
+La même instance profondeur 12 est ensuite passée de « aucun certificat avant le watchdog externe » avec O76-1.0 à \Proven{} avec un certificat polynomial exact et son rejeu indépendant sous O76-1.1. Des variantes avec ordre des équations mélangé, exposant $k=3$ et cible arbitraire ont également été vérifiées. Une instance de tour cohérente, construite avec la même forme, est restée \Unresolved{} sans certificat de contradiction. Enfin, les mutations de certificats ont toutes été rejetées.
+
+Les affirmations correspondant à la conjecture de Collatz et à l'hypothèse de Riemann n'ont pas été transformées en pseudo-preuves. Elles ont été classées hors contrat formel et renvoyées vers \Unresolved{}/\texttt{UNSUPPORTED\_FORM}. Ce comportement est important : l'état actuel des connaissances ne fournit pas de preuve universelle reconnue pour ces problèmes, et l'outil ne doit pas inventer une conclusion. Le Clay Mathematics Institute marque encore l'hypothèse de Riemann comme « Unsolved », et MathWorld liste la conjecture de Collatz parmi les problèmes non résolus.\footnote{Clay Mathematics Institute, Riemann Hypothesis: \url{https://www.claymath.org/millennium/Riemann-Hypothesis/}. Wolfram MathWorld, Collatz Conjecture: \url{https://mathworld.wolfram.com/CollatzConjecture.html}.}
+
+\section{Environnement expérimental}
+\begin{longtable}{p{0.36\textwidth}p{0.50\textwidth}}
+\toprule
+Paramètre & Valeur\\
+\midrule
+Système & Linux x86\_64, noyau 6.18.44\\
+Python & 3.13.5\\
+CPU logique disponible & 3\\
+Mémoire totale observée & environ 5.8 GiB\\
+Entrée du modèle & archive locale \texttt{model\_math\_order\_O76.zip} puis copie de travail indépendante\\
+Autorité de preuve & \texttt{src/o76/verifier.py}\\
+Dépendances externes & aucune dans le runtime mathématique\\
+\bottomrule
+\end{longtable}
+
+\section{Problèmes testés}
+\subsection{Porte ouverte : Riemann et Collatz}
+La première porte est volontairement située à la frontière des capacités déclarées. Deux affirmations universelles sont données sous forme de prose naturelle, sans les transformer en axiomes ou lemmes cachés :
+\begin{verbatim}
+for every positive integer n, the Collatz iteration ... eventually reaches 1
+\end{verbatim}
+et
+\begin{verbatim}
+every nontrivial zero of the Riemann zeta function has real part 1/2
+\end{verbatim}
+Le résultat attendu n'est pas « résoudre le problème à tout prix », mais vérifier que l'absence de sémantique formelle ne peut pas produire une preuve artificielle. O76-1.1 répond \Unresolved{} avec la stratégie \texttt{UNSUPPORTED\_FORM}. Une régression intermédiaire a aussi révélé que le signe \texttt{=} présent au milieu de la prose Collatz ne devait jamais suffire à constituer une relation ; la validation polynomial complète a été ajoutée avant le retest final.
+
+\subsection{Stress algébrique exact}
+La difficulté calculatoire centrale est la tour
+\[
+x_1^2-2=0,
+\quad x_{i+1}^2-x_i=0\; (1\le i<12),
+\quad x_{12}-1=0,
+\]
+et la cible $1=0$. Mathématiquement, les contraintes entraînent
+\[
+x_{12}=1\Rightarrow x_{11}=1\Rightarrow\cdots\Rightarrow x_1=1,
+\]
+puis $x_1^2-2=-1=0$, donc le système est contradictoire et $1$ appartient à l'idéal engendré par les contraintes.
+
+L'intérêt du test vient de la trajectoire computationnelle : la même preuve peut être obtenue par une stratégie générique de type Gröbner ou par une élimination triangulaire spécialisée mais générale. Le test mesure si le portefeuille sait reconnaître la seconde structure sans perdre la garantie de certificat.
+
+\section{Passage O76-1.0}
+La version originale a été exécutée sur les profondeurs 6, 8, 10, 11 et 12.
+\begin{longtable}{p{0.18\textwidth}p{0.22\textwidth}p{0.24\textwidth}p{0.25\textwidth}}
+\toprule
+Profondeur & Statut O76-1.0 & Temps observé & Commentaire\\
+\midrule
+6 & \Proven{} & 0.106 s & certificat Gröbner\\
+8 & \Proven{} & 0.977 s & certificat Gröbner\\
+10 & \Proven{} & 14.236 s & certificat Gröbner\\
+11 & aucun résultat terminal avant watchdog & $>$240 s dans la campagne & saturation calculatoire\\
+12 & aucun résultat terminal avant watchdog & $>$300 s dans la campagne longue & saturation calculatoire\\
+\bottomrule
+\end{longtable}
+
+Il faut être précis sur ce résultat. Il ne s'agit pas d'un contre-exemple mathématique : la proposition est vraie. C'est un contre-exemple à l'efficacité du portefeuille O76-1.0 sur cette représentation. De plus, le test a montré que la limite temporelle interne n'était pas toujours matérialisée par un JSON terminal avant le watchdog externe lorsque des opérations de très grande taille consommaient l'essentiel du temps.
+
+Une attaque d'intégrité a simultanément été réalisée sur le certificat profondeur 10. Le certificat original a été accepté par le vérificateur. Une mutation d'un coefficient d'un multiplicateur a été refusée avec \texttt{certificate\_replay\_failed}.
+
+\section{Correction 1 : TRIANGULAR\_TOWER\_EXACT}
+La correction est générale par structure, et non par nom de benchmark. Le détecteur reconstruit les polynômes à partir du parseur puis cherche la forme
+\[
+f_0=x_1^k-c,\quad f_i=x_{i+1}^k-x_i,\quad f_n=x_n-r,
+\qquad k\ge2.
+\]
+Il dérive les constantes $R_n=r$, $R_i=R_{i+1}^k$ et les contraintes intermédiaires $h_i=x_i-R_i$. La factorisation
+\[
+a^k-b^k=(a-b)\sum_{j=0}^{k-1}a^{k-1-j}b^j
+\]
+permet de construire les représentations exactes des $h_i$ dans l'idéal initial. Au premier niveau,
+\[
+f_0-S_0h_1=R_1^k-c=\Delta.
+\]
+Si $\Delta\ne0$, le moteur obtient explicitement
+\[
+1=\frac{1}{\Delta}(f_0-S_0h_1).
+\]
+La cible $g$ est ensuite représentée par les multiplicateurs $gq_i$.
+
+Le certificat final contient les multiplicateurs de $1$, ceux de la cible, $\Delta$, les constantes intermédiaires et la structure déclarée de la tour. Le vérificateur ne fait pas confiance au générateur : il recalcule l'identité polynomiale.
+
+\section{Correction 2 : UNSUPPORTED\_FORM et diagnostic de portefeuille}
+La première version classait parfois une absence de relations polynomiales comme une forme de problème trop générique. Une entrée en prose non parsable pouvait ainsi finir avec un nom de stratégie propositionnelle sans rapport avec son contenu. O76-1.1 distingue maintenant explicitement :
+\begin{itemize}
+\item forme mathématique parsable et couverte ;
+\item forme propositionnelle explicitement demandée ;
+\item forme hors contrat, classée \texttt{UNSUPPORTED\_FORM}.
+\end{itemize}
+Une sortie \Unresolved{} issue d'une vraie exploration contient désormais \texttt{attempted\_strategies} et, lorsque le portefeuille s'épuise, \texttt{reason=portfolio\_exhausted}.
+
+\section{Passage O76-1.1}
+\begin{longtable}{p{0.29\textwidth}p{0.23\textwidth}p{0.31\textwidth}p{0.09\textwidth}}
+\toprule
+Test & Statut & Stratégie & Vérif.\\
+\midrule
+Tour 12, ordre initial & \Proven{} & stratégie triangulaire exacte & PASS\\
+Tour 12, équations mélangées & \Proven{} & stratégie triangulaire exacte & PASS\\
+Tour 12, cible arbitraire & \Proven{} & stratégie triangulaire exacte & PASS\\
+Tour $k=3$ contradictoire & \Proven{} & stratégie triangulaire exacte & PASS\\
+Tour cohérente & \Unresolved{} & portefeuille exact & attendu\\
+Collatz prose & \Unresolved{} & forme non supportée & PASS\\
+Riemann prose & \Unresolved{} & forme non supportée & PASS\\
+Certificat valide & accepté & vérificateur indépendant & PASS\\
+Coefficient muté & rejeté & vérificateur indépendant & PASS\\
+Delta muté & rejeté & vérificateur indépendant & PASS\\
+Multiplicateur cible muté & rejeté & vérificateur indépendant & PASS\\
+Selfcheck & PASS & portefeuille complet & PASS\\
+\bottomrule\end{longtable}
+
+\section{Analyse bou par bou : chaîne de décision}
+\begin{enumerate}
+\item \textbf{Chargement propre.} L'archive est extraite dans un nouveau répertoire. Aucun résultat précédent n'est supposé autoritaire.
+\item \textbf{Inventaire.} Le runtime, son manifest, le parseur, le moteur, le solveur, le vérificateur et les autotests sont relus avant l'expérience.
+\item \textbf{Référence.} Le selfcheck O76-1.0 passe avant l'attaque externe.
+\item \textbf{Porte ouverte.} Collatz et Riemann ne sont pas artificiellement interprétés comme logique propositionnelle.
+\item \textbf{Stress.} Les tours 6, 8, 10, 11 et 12 sont exécutées avec la stratégie générique.
+\item \textbf{Observation critique.} La profondeur 11--12 dépasse le régime pratique du Gröbner générique dans la campagne.
+\item \textbf{Conception de correction.} Une élimination triangulaire exacte est ajoutée sans connaître le nom de l'instance.
+\item \textbf{Première correction testée.} L'implémentation contient un défaut d'API et le rejeu du certificat échoue ; elle est corrigée avant tout comptage de succès.
+\item \textbf{Deuxième correction testée.} Le vérificateur du nouveau certificat exige l'import manquant ; nouveau test positif.
+\item \textbf{Régression de fingerprint.} Une correction de forme non supportée avait classé une identité sans hypothèses comme non polynomiale ; ce défaut est réparé et le selfcheck redevient PASS.
+\item \textbf{Vérification structurelle.} La tour 12 est passée dans un ordre d'équations mélangé et avec un autre exposant.
+\item \textbf{Contre-épreuve cohérente.} Une tour cohérente ne reçoit pas de certificat de contradiction.
+\item \textbf{Mutation.} Des champs du certificat sont altérés ; les trois falsifications sont rejetées.
+\item \textbf{Régression finale.} Le texte Collatz, qui contient un signe \texttt{=} interne dans une phrase, est rejeté comme forme non supportée après validation complète de la relation.
+\item \textbf{Condition finale.} Le paquet corrigé est re-testé depuis une extraction propre, avec documentation, manifest et version \texttt{O76-1.1} synchronisés.
+\end{enumerate}
+
+\section{Ce que le test prouve réellement}
+Il prouve les points suivants, et pas davantage :
+\begin{enumerate}
+\item O76-1.1 sait produire et faire accepter un certificat exact pour une classe supplémentaire de problèmes polynomiaux qui saturait O76-1.0.
+\item Le vérificateur O76-1.1 refuse des mutations simples d'un certificat valide.
+\item Une structure mathématique cohérente n'est pas déclarée contradictoire par la nouvelle règle lorsque $\Delta=0$ ; elle retombe sur le portefeuille général et peut rester \Unresolved{}.
+\item Les affirmations ouvertes fournies en prose ne sont pas converties en pseudo-preuves.
+\end{enumerate}
+
+Le test ne prouve pas qu'O76-1.1 est complet pour toutes les mathématiques, ni qu'il peut résoudre l'hypothèse de Riemann ou Collatz. Il ne prouve pas non plus que le code Python est formellement vérifié dans Lean, Coq ou Isabelle. La base de confiance reste le runtime Python, le parseur exact et le vérificateur indépendant.
+
+\section{Décision finale de l'expérience}
+La correction est retenue et versionnée sous le nom \textbf{O76-1.1}. Les deux briques incriminées dans la campagne sont :
+\begin{enumerate}
+\item \textbf{\texttt{TRIANGULAR\_TOWER\_EXACT}} : nouvelle trajectoire de preuve exacte ;
+\item \textbf{\texttt{UNSUPPORTED\_FORM}} + \textbf{\texttt{portfolio\_exhausted}} : garde de sémantique et diagnostic de fin de portefeuille.
+\end{enumerate}
+
+Le modèle corrigé doit être considéré comme la version expérimentale autoritative de cette campagne. Les fichiers de documentation, le registre d'erreurs, le manifest de suppressions et les hashes sont mis à jour avec la même version.
+
+\section*{Références externes de statut}
+\begin{itemize}
+\item Clay Mathematics Institute, Riemann Hypothesis'', page active indiquant le statut Unsolved'' : \url{https://www.claymath.org/millennium/Riemann-Hypothesis/}.
+\item Wolfram MathWorld, Collatz Conjecture'', page répertoriant la conjecture parmi les problèmes non résolus : \url{https://mathworld.wolfram.com/CollatzConjecture.html}.
+\end{itemize}
+\end{document}

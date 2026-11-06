@@ -1,0 +1,183 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,booktabs,longtable,geometry,hyperref,array,verbatim}
+\geometry{margin=2.0cm}
+\title{Rapport complet d'expérience -- ORDER72 e1\newline\large Campagne de tests durs, adversariaux, multi-familles et contrôle WM aléatoire}
+\author{Rapport de laboratoire reproductible}
+\date{24 septembre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Ce rapport documente de bout en bout la campagne menée contre ORDER72 e0, les anomalies observées, leurs reproductions, les corrections intégrées dans e1, puis la revalidation de la version corrigée. Le protocole sépare strictement certification, recherche bornée, prédiction WM, vérification, budget et provenance. Les essais couvrent huit familles exactes, trois familles de recherche ouverte, invariance aux choix explicites, permutation des actions, nombres entiers géants, attaques contre la frontière publique, mutations du WM, comportement sous non-déterminisme, montée en charge et un WM aléatoire non entraîné. Les résultats sont positifs sur toutes les familles testées, mais le contrôle aléatoire et un prédicteur volontairement inversé réussissent eux aussi les tâches ouvertes actuelles. Cette observation est interprétée comme une limite du banc pour démontrer une nécessité causale du WM, et non comme une preuve que le WM est inutile en général.
+\end{abstract}
+\tableofcontents
+\section{Objet, parent et reproductibilité}
+Le parent exact utilisé est \texttt{model\_O72\_e\_0.zip}. Hash SHA-256 du parent : \texttt{e6d90c4a624a1248dad998591071b75bf69167caea9555cc8182e2aea0364fa6}. Le présent rapport décrit les modifications apportées uniquement après campagne de falsification. Les sorties finales sont accompagnées d'un manifeste de hashes et des traces JSON des tests.
+
+Le protocole interdit quatre raccourcis : (1) utiliser une vérité cachée, (2) transformer une prédiction WM en certification, (3) confondre un échec dû au budget avec une incapacité sémantique, (4) attribuer au WM une performance qui persiste avec un WM aléatoire ou adversarial.
+\section{Pipeline complet}
+Le pipeline exécutable est :
+\[
+\text{observation publique}
+\rightarrow I_P\rightarrow\text{contrats/contraintes}
+\rightarrow\text{détection CERTIFY/SEARCH}
+\rightarrow\text{routeur WM}
+\rightarrow\text{pilote public}
+\rightarrow\text{recherche bornée}
+\rightarrow\text{expérience}
+\rightarrow\text{vérification}
+\rightarrow\text{transition réelle}
+\rightarrow\text{mémoire et provenance}.
+\]
+En CERTIFY, le WM n'est pas la source de la réponse. En SEARCH, le WM influence l'ordre d'exploration mais le résultat reste non certifié tant que le contrat externe n'est pas satisfait.
+\section{Architecture e1}
+\subsection{World Models}
+O65 est un ensemble de trois checkpoints de transition de dimension latente 96. O70-att1 est un ensemble attentionnel de trois checkpoints de même contrat latent. Trois nouveaux checkpoints aléatoires, utilisés uniquement comme contrôle, ont également une latence 96 mais aucune phase d'entraînement.
+
+Le WM peut exécuter quatre fonctions : représentation, prédiction, incertitude, priorisation. Il ne peut pas certifier.
+\subsection{Routeur}
+Le routeur choisit le WM à partir d'un petit pilote dont les conséquences sont publiques. Si une conséquence numérique $r(a)$ est disponible, l'erreur absolue moyenne est :
+\[
+\operatorname{MAE}_k=\frac{1}{m}\sum_{j=1}^{m}|\hat r_{k,j}-r_j|.
+\]
+Si aucune conséquence publique exploitable n'existe, le routeur utilise uniquement un critère d'incertitude et le résultat ne devient pas certifié.
+\subsection{Recherche}
+La recherche canonise l'ordre des actions par hash stable. La largeur de faisceau est adaptative et bornée. Les conséquences sémantiques publiques peuvent influer sur le classement ouvert, mais sont marquées comme évidence non certifiée. Un cache de plan est permis uniquement sous contrat déterministe-Markov.
+\subsection{Vérificateur}
+L'action est soumise à une pré-vérification externe avant chaque transition réelle. Les hashes du WM sont contrôlés avant/après usage.
+\section{Anomalies de e0 et corrections}
+\begin{longtable}{p{0.18\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\toprule
+Étape & Observation/reproduction & Correction e1 \\
+\midrule
+A1 & La simulation peut lire un attribut caché tel que \texttt{self.s7}. & Audit des attributs de frontière. \\
+A2 & \texttt{getattr(self,'s7')} échappe à une simple recherche textuelle. & Détection des accès dynamiques par source et bytecode. \\
+A3 & Une variable globale peut porter l'objectif secret sans apparaître dans \texttt{self}. & Fermeture de la frontière globale : seuls builtins purs et math sont autorisés. \\
+A4 & Une fermeture lexicale peut capturer une réponse cachée. & Toute variable libre est refusée. \\
+A5 & Le routeur recevait un callback de feedback injectable. & Suppression de l'argument callback. \\
+A6 & Conversion entier-vers-float au-delà de $2^{53}$. & Conservation exacte des entiers arbitraires. \\
+A7 & Ordre hôte des actions influençait la recherche sous budget. & Canonisation stable avant expansion. \\
+A8 & Récompenses tardives sous-pondérées par la largeur initiale. & Faisceau adaptatif borné. \\
+A9 & Plans corrects replanifiés à chaque transition déterministe. & Cache de plan avec contrat explicite et vérification à chaque étape. \\
+A10 & Un banc d'essai TreeBandit omettait le root choisi dans la simulation et le banc DelayedBandit ne reportait pas toute l'histoire. & Correction du laboratoire avant d'interpréter les performances. \\
+\bottomrule
+\end{longtable}
+\section{Familles de tests}
+\subsection{A. Certification exacte}
+Huit familles indépendantes : arithmétique, logique booléenne, séquences, graphes/relations, ordonnancement, contraintes, spatial et causal. Douze graines par famille donnent 96 instances.\
+\textbf{Résultat : 96/96.}
+
+Un contrôle séparé avec uniquement les trois WM aléatoires donne 24/24 sur trois graines par famille. Cela teste la robustesse de la certification, pas une supériorité du WM aléatoire.
+\subsection{B. Surface des choix}
+Vingt paires identiques sémantiquement sont présentées : une version expose explicitement \texttt{choices}, l'autre ne le fait pas.\
+\textbf{Résultat : 20/20 sorties identiques.}
+
+La même propriété est testée sous permutation d'actions dans la recherche ouverte : les contrôles réalisés donnent des trajectoires sémantiquement équivalentes et des succès identiques dans les cas prévus.
+\subsection{C. Nombres géants}
+Six cas de $k=2^{53}$, $10^{18}$, $10^{30}$, $10^{60}$, $10^{100}$ et $2^{200}$ sont testés.\
+\textbf{Résultat : 6/6.}
+
+Le cas $2^{53}+1$ est le seuil classique où une conversion flottante naïve perd une distinction entière ; la valeur est désormais conservée exactement.
+\subsection{D. Attaques de frontière}
+Les attaques suivantes sont tentées : attribut caché, accès dynamique, variable globale cachée, fermeture capturée, champ \texttt{correct} imbriqué, callback de feedback et mutation du WM.\
+\textbf{Résultat : toutes les attaques sont rejetées ou l'état gelé reste inchangé.}
+
+Les rejets observés sont :
+\begin{verbatim}
+hidden_attr        -> REJECTED_SUSPICIOUS_PUBLIC_CONTRACT
+getattr            -> REJECTED_SUSPICIOUS_PUBLIC_CONTRACT
+global hidden      -> REJECTED_SUSPICIOUS_PUBLIC_CONTRACT
+closure hidden     -> REJECTED_SUSPICIOUS_PUBLIC_CONTRACT
+nested correct     -> PASS (rejet)
+feedback callback  -> PASS (API absente)
+WM update          -> PASS (hash inchangé)
+\end{verbatim}
+\subsection{E. Recherche ouverte et planification}
+Trois familles sont utilisées : grille spatiale profonde, bandit à récompense retardée et arbre à branchement retardé. Quatre graines par famille.
+
+\begin{longtable}{p{0.23\textwidth}rrr}
+\toprule
+Famille & succès & nœuds moyens & temps moyen (s) \\
+\midrule
+Spatial profond & 4/4 & 172 & 0,986 \\
+Récompense retardée & 4/4 & 246 & 1,381 \\
+Branchement retardé & 4/4 & 114 & 0,587 \\
+\bottomrule
+\end{longtable}
+
+Le cache de plan est utilisé dans les cas déterministes déclarés. Un banc non déterministe sans contrat donne zéro réutilisation et deux invalidations sur trois étapes : le plan n'est donc pas réutilisé abusivement.
+\subsection{F. Contrôle WM aléatoire}
+Avec uniquement un WM aléatoire non entraîné, les trois familles ouvertes donnent également : 4/4, 4/4 et 4/4. Les temps moyens sont respectivement environ 0,358 s, 0,445 s et 0,269 s, avec le même nombre de nœuds.
+
+\textbf{Interprétation :} le banc actuel mesure principalement la recherche/les conséquences publiques ; il ne suffit pas à démontrer que la qualité apprise d'un WM est nécessaire.
+\subsection{G. WM volontairement adversarial}
+Un wrapper inversant la prédiction de récompense et neutralisant l'incertitude a été utilisé comme témoin d'échec du prédicteur. Les trois familles donnent encore 4/4, 4/4 et 4/4.
+
+C'est une preuve expérimentale de non-dépendance forte sur ce banc : même une prédiction activement mauvaise peut être tolérée par le contrôleur tant que la structure observable et la recherche suffisent.
+\subsection{H. Montée en charge}
+Une certification exacte est menée sur 1 000, 10 000, 100 000 et 500 000 candidats.
+\begin{longtable}{rrr}
+\toprule
+Candidats & Temps (s) & nœuds \\
+\midrule
+1 000 & 0,0566 & 1 000 \\
+10 000 & 0,1516 & 10 000 \\
+100 000 & 1,4071 & 100 000 \\
+500 000 & 7,6134 & 500 000 \\
+\bottomrule
+\end{longtable}
+
+Une mesure externe avec \texttt{/usr/bin/time -v} sur 500 000 candidats donne environ 10,15 s de temps mur et un pic RSS de 905 540 kB, soit environ 884 MiB. Ce pic inclut le chargement des WM et des structures de données de Python ; il ne doit pas être attribué entièrement au seul espace des candidats.
+\section{Mesures de performance}
+Sur 20 répétitions par famille exacte, les moyennes sont :
+\begin{longtable}{p{0.25\textwidth}rrr}
+\toprule
+Famille & moyenne (s) & médiane (s) & p95 (s) \\
+\midrule
+Arithmétique & 0,0621 & 0,0540 & 0,0661 \\
+Séquence & 0,0559 & 0,0556 & 0,0599 \\
+Graphes & 0,0526 & 0,0518 & 0,0578 \\
+Spatial & 0,0582 & 0,0566 & 0,0658 \\
+Causal & 0,0549 & 0,0540 & 0,0620 \\
+\bottomrule
+\end{longtable}
+
+Les temps ouverts plus grands reflètent les expansions de recherche et les évaluations de sondes. Le contrôle aléatoire est plus rapide parce que ses calculs WM sont plus simples ; cela ne constitue pas un gain cognitif.
+\section{Commandes d'exécution}
+Depuis la racine du modèle :
+\begin{verbatim}
+PYTHONPATH=src python tests/test_o72.py
+bash validate_order72.sh
+PYTHONPATH=src python run_order72.py --mode smoke
+PYTHONPATH=src python run_order72.py --mode smoke --only-random-wm
+PYTHONPATH=src python tests/o72_e1_final_campaign.py --stage core
+PYTHONPATH=src python tests/o72_e1_final_campaign.py --stage open
+PYTHONPATH=src python tests/o72_e1_final_campaign.py --stage perf
+\end{verbatim}
+Le protocole est volontairement par étapes car la campagne complète peut être coûteuse. Les résultats JSON sont conservés dans \texttt{tests/}.
+\section{Audit des choix et des absences de choix}
+L'architecture ne traite pas \texttt{choices} comme une source de vérité. Les mêmes problèmes sont présentés avec et sans ce champ. Une permutation des actions est aussi appliquée. Le résultat attendu n'est pas une égalité de chaînes, mais une égalité sémantique du résultat et, lorsque la tâche le permet, une convergence vers la même conséquence vérifiée.
+\section{Interprétation globale}
+Trois niveaux doivent être séparés.
+
+\textbf{Niveau 1 : robustesse.} e1 est plus strict que e0 contre plusieurs canaux d'oracle caché et contre des erreurs numériques ou d'ordonnancement.\
+\textbf{Niveau 2 : capacité de recherche.} la planification profonde, les récompenses retardées et le branchement sont désormais correctement pris en charge dans les environnements testés.\
+\textbf{Niveau 3 : nécessité du WM.} elle n'est pas démontrée par ce banc. Le WM aléatoire et le WM volontairement mauvais réussissent les tâches ouvertes actuelles. La conclusion raisonnable est que le contrôleur dispose encore de suffisamment d'information publique et de puissance de recherche pour compenser un mauvais prédicteur.
+\section{Conséquences pour la conception}
+Le prochain saut ne doit pas être formulé comme « ajouter davantage de paramètres au WM ». Il faut construire des tâches où :
+\begin{enumerate}
+\item les conséquences locales sont insuffisantes ;
+\item la simulation exhaustive est interdite ou trop coûteuse ;
+\item la valeur d'une action apparaît après plusieurs transitions ;
+\item un bon modèle prédictif permet de sélectionner moins d'expériences réelles ;
+\item un WM aléatoire ou adversarial échoue alors que le WM entraîné réussit.
+\end{enumerate}
+Le critère de réussite est une amélioration causale du coût ou du regret, avec le même vérificateur.
+\section{Usages réels et pratiques}
+Sur les problèmes fermés et vérifiables, le chemin CERTIFY donne une réponse exacte et traçable. Sur les problèmes ouverts, le système peut planifier et explorer sous budget, mais doit exposer clairement le statut non certifié si le contrat de vérité n'est pas satisfait. Le système est donc adapté aux laboratoires de recherche, à l'exploration de petits mondes simulés, à la génération d'expériences et à l'étude de méthodes de raisonnement vérifiable ; il ne doit pas présenter une heuristique ouverte comme une preuve.
+\section{Conclusion}
+ORDER72 e1 passe le banc dur défini ici et corrige les anomalies découvertes. Le résultat le plus instructif est cependant négatif : la performance sur les tâches ouvertes reste presque indépendante de la qualité du WM. Le système est donc plus robuste et plus capable en planification que e0 sur ces tâches, mais la capacité du WM à apporter une contribution causale indispensable reste un problème ouvert. C'est cette question, et non la seule augmentation de taille du WM, qui doit guider la prochaine génération.
+\appendix
+\section{Fichiers de preuve}
+Les traces sont dans : \texttt{tests/O72\_E1\_FINAL\_CORE.json}, \texttt{tests/O72\_E1\_FINAL\_OPEN.json}, \texttt{tests/O72\_E1\_FINAL\_PERF.json}, ainsi que dans les tests historiques e1 conservés. Les trois checkpoints aléatoires sont hashés individuellement dans le rapport du contrôle aléatoire.
+\end{document}

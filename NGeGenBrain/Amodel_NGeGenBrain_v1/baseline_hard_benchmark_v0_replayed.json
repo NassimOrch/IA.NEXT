@@ -1,0 +1,269 @@
+{
+  "schema": "NGeGenBrain.IndependentHardBenchmark/1",
+  "benchmark_id": "NG0-INDEP-HARD-20261027-01",
+  "model_id": "NGeGenBrain_v0",
+  "model_version": "0.3.0",
+  "model_root": "/mnt/data/NGeGenBrain_v1_work_1/cleanroom/v0/Dmodel_NGeGenBrain_v0",
+  "source_archive": "/mnt/data/Dmodel_NGeGenBrain_v0.zip",
+  "source_sha256": "6ffcc921732a9c58bda5d2aa1461bfa5d9dfad99cc5ef6e3b9331d85b078fe8d",
+  "harness_sha256": "9325f55cf7e8694fd88c6f6df928e5b4a9f568f447fd41e6b80014659749b816",
+  "seed": 20261027,
+  "run_started": "2026-10-27T10:49:36+00:00",
+  "run_ended": "2026-10-27T10:49:38+00:00",
+  "database_path": "/tmp/ngegenbrain_independent_hard_u_gjc9y0/bench.sqlite3",
+  "test_count": 15,
+  "passed": 8,
+  "failed": 7,
+  "tests": [
+    {
+      "id": "ARITH-001",
+      "category": "property-based exact arithmetic",
+      "expected": "2400 exact matches",
+      "observed": "2400 matches; 0 mismatches",
+      "verdict": "PASS",
+      "details": {
+        "seed": 20261027,
+        "generated_pairs": 600,
+        "failures": []
+      },
+      "duration_seconds": 0.018014502999903925
+    },
+    {
+      "id": "MESH-001",
+      "category": "independent graph-closure oracle",
+      "expected": "all 35 reachable pairs; no extra pairs",
+      "observed": "35 pairs; missing=0 extra=0",
+      "verdict": "PASS",
+      "details": {
+        "nodes": 12,
+        "input_edges": 16,
+        "closure_pairs": 35,
+        "new_facts": 23,
+        "status": "FIXPOINT_REACHED",
+        "missing": [],
+        "extra": []
+      },
+      "duration_seconds": 0.1891824969998197
+    },
+    {
+      "id": "MESH-002",
+      "category": "typed identity collision",
+      "expected": "typed derived fact with object type Int",
+      "observed": {
+        "new_facts": 0,
+        "q_fact_types": [
+          "String"
+        ]
+      },
+      "verdict": "FAIL",
+      "details": {
+        "rule": "same SPO but target type differs",
+        "reproduced_defect": true
+      },
+      "duration_seconds": 0.026016951000201516
+    },
+    {
+      "id": "WM-001",
+      "category": "world-model output contract",
+      "expected": "reject output type violation and prevent activation",
+      "observed": {
+        "activation": {
+          "enabled": true,
+          "reason": "measured_holdout_gain_exceeds_threshold"
+        },
+        "model_exact_match_rate": 1.0,
+        "record_keys": [
+          "id",
+          "model_id",
+          "model_version",
+          "evaluation",
+          "created_at",
+          "activation_state"
+        ]
+      },
+      "verdict": "FAIL",
+      "details": {
+        "model_output_type": "Int",
+        "actual_transition_output": "String",
+        "reproduced_defect": true
+      },
+      "duration_seconds": 0.24896707000061724
+    },
+    {
+      "id": "BUDGET-001",
+      "category": "non-finite budget validation",
+      "expected": "non-finite limits rejected or treated conservatively; 200KB value cannot pass 1KB memory cap",
+      "observed": {
+        "finite_status": "Partial",
+        "nonfinite_status": "Success",
+        "nonfinite_reason": null
+      },
+      "verdict": "FAIL",
+      "details": {
+        "reproduced_defect": true
+      },
+      "duration_seconds": 0.010661359000550874
+    },
+    {
+      "id": "BUDGET-002",
+      "category": "component resource_cost validation",
+      "expected": "NaN resource cost rejected",
+      "observed": {
+        "accepted": true,
+        "error": null
+      },
+      "verdict": "FAIL",
+      "details": {
+        "reproduced_defect": true
+      },
+      "duration_seconds": 2.5819000256888103e-05
+    },
+    {
+      "id": "TRACE-001",
+      "category": "concurrent event append/hash chain",
+      "expected": "200 events and valid hash chain",
+      "observed": {
+        "visible_events": 200,
+        "chain": {
+          "valid": true,
+          "count": 200,
+          "problems": [],
+          "head_hash": "c0f24cb1adb5ca6133492f9de75f855f91a9c05887470fd11c47d3d92895ed8d"
+        },
+        "errors": []
+      },
+      "verdict": "PASS",
+      "details": {
+        "workers": 8,
+        "events_each": 25
+      },
+      "duration_seconds": 0.40516443800061097
+    },
+    {
+      "id": "MEM-001",
+      "category": "memory corruption detection",
+      "expected": "payload_error present and no payload trusted",
+      "observed": {
+        "payload_error": "CRC check failed",
+        "payload_returned": true
+      },
+      "verdict": "PASS",
+      "details": {
+        "payload_error": "CRC check failed"
+      },
+      "duration_seconds": 0.015091365999978734
+    },
+    {
+      "id": "MESH-003",
+      "category": "invalid rule admission",
+      "expected": "all three structurally invalid rules rejected",
+      "observed": {
+        "accepted_indices": [],
+        "persisted_count": 0
+      },
+      "verdict": "PASS",
+      "details": {
+        "reproduced_defect": false
+      },
+      "duration_seconds": 0.011102421000032336
+    },
+    {
+      "id": "CERT-001",
+      "category": "certificate re-derivation",
+      "expected": "valid cert accepted; altered conclusion rejected even with recalculated hash",
+      "observed": {
+        "valid_certificate": {
+          "valid": true,
+          "problems": [],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        },
+        "forged_certificate": {
+          "valid": false,
+          "problems": [
+            "conclusion_not_entailed_by_rule_and_premises"
+          ],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        }
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.02475986500030558
+    },
+    {
+      "id": "TYPE-001",
+      "category": "mixed JSON values and typed identity",
+      "expected": "all 10 JSON-shaped input forms supported by Any identity",
+      "observed": {
+        "checks": 10,
+        "errors": []
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.023709448999397864
+    },
+    {
+      "id": "SEC-001",
+      "category": "source-in-data boundary",
+      "expected": "string remains inert data and process does not execute it",
+      "observed": {
+        "status": "Success",
+        "value_equals_payload": true,
+        "value": "__import__(\"os\").system(\"echo SHOULD_NOT_RUN\")"
+      },
+      "verdict": "PASS",
+      "details": {},
+      "duration_seconds": 0.0017704359997878782
+    },
+    {
+      "id": "ROBUST-001",
+      "category": "deeply nested AST",
+      "expected": "bounded typed rejection/failure instead of uncaught runtime exception",
+      "observed": {
+        "returned": false,
+        "exception": "RecursionError",
+        "message": "maximum recursion depth exceeded"
+      },
+      "verdict": "FAIL",
+      "details": {},
+      "duration_seconds": 0.700039156999992
+    },
+    {
+      "id": "MESH-005",
+      "category": "context-scoped fact queries",
+      "expected": "only the fact in the requested context is returned",
+      "observed": {
+        "subjects": [
+          "alice",
+          "bob"
+        ],
+        "count": 2
+      },
+      "verdict": "FAIL",
+      "details": {
+        "reproduced_defect": true
+      },
+      "duration_seconds": 0.019127192000269133
+    },
+    {
+      "id": "MESH-006",
+      "category": "bounded unsuccessful join exploration",
+      "expected": "no more than one fact-match attempt when cap=1",
+      "observed": {
+        "observed_match_calls": 33330,
+        "reported_status": "FIXPOINT_REACHED",
+        "rule_match_attempts": 0
+      },
+      "verdict": "FAIL",
+      "details": {
+        "reproduced_defect": true
+      },
+      "duration_seconds": 0.14132965899989358
+    }
+  ],
+  "environment": {
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "python_implementation": "CPython",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "system": "linux"
+  }
+}

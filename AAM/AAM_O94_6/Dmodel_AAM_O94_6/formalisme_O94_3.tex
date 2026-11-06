@@ -1,0 +1,125 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{longtable,booktabs,array,hyperref,xcolor}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Formalisme AAM O94\_3 : observation passive en direct, apprentissage de briques et intégration locale}
+\author{Dossier technique AAM}
+\date{Version 0.94.3 — 19 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Objet, portée et obligations}
+O94\_3 est une incrémentation corrective de O94\_2. L'objectif opérationnel est que la commande \emph{Observer} démarre une source vivante sélectionnée, collecte elle-même les événements observables, écrit la trace au fil de l'eau, conserve la provenance, puis rend cette trace utilisable pour analyse et apprentissage de briques. La trace JSONL est un résultat de l'observation, jamais un prérequis du mode passif.
+
+Le système distingue les états \texttt{PASS\_BOUNDED}, \texttt{PARTIAL}, \texttt{UNRESOLVED}, \texttt{DEPENDENCY\_MISSING} et \texttt{ERROR}. L'exécution locale, une concordance sur les données vues ou une compilation de graphe ne constituent pas en elles-mêmes une preuve de généralisation. Aucun résultat universel n'est postulé a priori.
+
+\section{Architecture générale}
+\begin{longtable}{p{0.23\linewidth}p{0.7\linewidth}}
+\toprule
+Composant & Responsabilité \tabularnewline
+\midrule
+\texttt{PassiveObservationSession} & Session asynchrone bornée, démarrée avec autorisation explicite, qui observe une source sélectionnée et crée sa trace append-only. \tabularnewline
+\texttt{observation\_live.py} & Adaptateurs filesystem, PID/processus et interface réseau via \texttt{tshark}; budget et rapport d'arrêt. \tabularnewline
+\texttt{AAMRuntime} & Orchestre les sessions, inscrit les événements de cycle de vie dans la mémoire et fournit l'accès au catalogue des briques apprises. \tabularnewline
+Interface Observer & Choix du niveau, des sources, budgets, sortie automatique de trace, état et arrêt; les onglets denses sont enveloppés dans un canvas avec barre verticale. \tabularnewline
+\texttt{LearnedBlockStore} & Analyse bornée des traces; crée des correspondances exactes à support fini seulement si les entrées/sorties train sont non ambiguës; extrait également des candidats de schéma et de séquence soumis à examen. \tabularnewline
+\texttt{compile\_composition} & Compile le DSL déclaratif vers un graphe de compétences/règles connu et écrit un artefact JSON versionné. Aucun code arbitraire n'est lancé par le compilateur de composition. \tabularnewline
+\texttt{IntegratedModelRegistry} & Intégration des Transformers locaux, TorchScript PyTorch tensoriel, adaptateurs PyTorch explicites pour state\_dict, endpoints Ollama et API compatibles OpenAI, et autre workspace AAM. La politique d'entraînement est propre au backend. \tabularnewline
+\texttt{SemanticRAG} / moteur O92 & Espaces sémantiques, poids, classement, retrieval, mémoire et résolution historiques préservés byte-à-byte dans les modules RAG indiqués au registre d'intégrité. \tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{Définition normative de l'observation en direct}
+\subsection{Niveau filesystem}
+L'utilisateur sélectionne un répertoire concret. Le collecteur observe de façon répétée les fichiers ordinaires ajoutés, modifiés ou supprimés sous ce périmètre, sans suivre les liens symboliques. Il enregistre chemin relatif, taille, horodatage de modification, mode et, si choisi, hash de contenu. Le contenu brut est désactivé par défaut. S'il est activé, la capture est limitée à 65\,536 octets par fichier par défaut et à un budget total explicite. Le fichier de trace, son rapport et ses métadonnées sont exclus de l'arbre surveillé afin d'éviter une boucle d'auto-capture.
+
+\subsection{Niveau processus}
+L'utilisateur sélectionne un PID. Lorsque \texttt{psutil} est disponible et que les droits système l'autorisent, la session échantillonne nom, statut, création, usage CPU, threads, mémoire résidente, fichiers ouverts et métadonnées des sockets associés au processus. Un accès refusé est rapporté comme tel. Cette voie ne lit pas arbitrairement la mémoire privée du processus, ne reconstitue pas son exécution interne et ne contourne pas les permissions du système.
+
+\subsection{Niveau réseau}
+L'utilisateur sélectionne une interface réseau (répertoriée via \texttt{tshark}) et un filtre BPF facultatif. La capture requiert Wireshark/TShark installé ainsi que les droits système/capture adaptés. Par défaut, la trace contient métadonnées de trame, adresses visibles, ports et drapeaux. Les charges utiles sont désactivées par défaut et exigent un opt-in. Les contenus TLS restent chiffrés; aucune décryption ni collecte totale implicite n'est revendiquée.
+
+\subsection{Protocole actif JSONL distinct}
+L'ancien canal de boîte noire qui démarre un processus persistant et lui envoie des valeurs JSON Lines reste disponible comme mode séparé. Il observe les couples entrée/réponse produits par ce protocole. Il ne doit pas être présenté comme observation passive d'une application arbitraire. Le chargement d'un dataset prêt à l'emploi demeure un troisième parcours: import/réexécution, non capture live.
+
+\section{Trace créée par AAM}
+Chaque session crée un nouveau fichier JSONL dans le dossier de captures du workspace ou dans le dossier explicitement choisi. Chaque ligne comprend le schéma, l'ID de session, un numéro de séquence strictement croissant, les horodatages, la source, le type d'événement, les données et une chaîne d'intégrité \texttt{prev\_hash}/\texttt{event\_sha256}. Après arrêt, AAM écrit un rapport JSON et des métadonnées latérales contenant les hashes, les budgets utilisés, la cause d'arrêt, le nombre d'événements et les erreurs observées.
+
+Budgets exposés: durée maximale, nombre d'événements, intervalle de polling, budget total en octets, taille maximale d'événement et opt-in payload. Des plafonds durs protègent l'exécution contre une valeur de configuration démesurée. Dépasser un budget produit un état explicite et préserve ce qui a déjà été observé.
+
+\section{Apprentissage et promotion de briques}
+Les traces se distinguent par leur sémantique:
+\begin{itemize}
+\item Une trace instrumentée comportant explicitement \texttt{input} et \texttt{target}/\texttt{output} peut produire une compétence de lookup exact sur les entrées non ambiguës du split train. Les lignes test, validation, holdout et dev sont exclues. Une entrée absente renvoie \texttt{UNRESOLVED}; une correspondance sur support fini ne prouve pas la généralisation.
+\item Une trace filesystem/process/network passive décrit des événements observés, pas une vérité entrée-sortie d'un algorithme. Elle produit des candidats de méthode (séquence observée) et de règle (profil de schéma) marqués \texttt{MANUAL\_REVIEW\_REQUIRED}. Ils ne deviennent pas des compétences exécutables sans validation et contrat supplémentaires.
+\item Une compétence de base est un mécanisme réutilisable; une méthode est un enchaînement opératoire; une règle est une contrainte ou condition déclarative. Les composants existants et acquis sont visibles dans le catalogue intégré.
+\end{itemize}
+La promotion d'une brique suit au minimum: provenance vérifiée, schéma analysé, périmètre de validité explicite, entrées ambiguës exclues, test de reproduction hors source et cas tenue à l'écart indépendant. Les critères d'acceptation peuvent être déclarés par l'utilisateur; le processus ne doit pas injecter la réponse attendue au modèle durant l'apprentissage.
+
+\section{Programmation par composition et compilation}
+Le programme déclaratif décrit un graphe de nœuds typés, construits avec des ID de compétences présents au catalogue, des méthodes comme \texttt{M-SEQUENCE}, et des règles du langage autorisé. Le bouton de compilation écrit un artefact JSON versionné dans \texttt{workspace/programs/compiled}. La validation rejette les références inconnues et les opérations arbitraires. L'artefact compilé est ensuite testable et exécutable via le moteur de composition AAM.
+
+Les briques apprises depuis observation sont intégrées au catalogue, mais les candidats passifs gardent un statut explicite non exécutable. Le compilateur ne fait pas comme si un schéma ou une séquence d'événements suffisait à reconstruire une application entière.
+
+\section{Modèles locaux et endpoints}
+\begin{longtable}{p{0.21\linewidth}p{0.72\linewidth}}
+\toprule Backend & Contrat et limite \tabularnewline
+\midrule
+\texttt{transformers\_local} & Dossier complet de modèle/tokenizer/poids déjà présent; chargement local, \texttt{trust\_remote\_code=False}. Convient aux dossiers Transformers. \tabularnewline
+\texttt{pytorch\_torchscript} & Charge un module local exporté TorchScript par \texttt{torch.jit.load}; le prompt d'inférence est un JSON tensoriel \texttt{input}, \texttt{inputs} ou \texttt{kwargs}. La sortie tensorielle est sérialisée en JSON. CPU par défaut, CUDA seulement si explicitement demandé et disponible; aucun fallback vers un pickle arbitraire. \tabularnewline
+\texttt{pytorch\_adapter} & Adaptateur Python local choisi explicitement; contrat \texttt{load\_model(context)} et \texttt{generate(model,prompt,options)}. Un state\_dict brut ne décrit ni l'architecture ni le tokenizer; l'adaptateur doit déclarer l'architecture du propriétaire. \tabularnewline
+\texttt{ollama} & Appel HTTP au serveur Ollama déjà installé et démarré; l'URL et le modèle sont renseignés; test explicite pour confirmer que le serveur répond. \tabularnewline
+\texttt{openai\_compatible} & Endpoint explicitement indiqué; les secrets sont lus depuis une variable d'environnement et ne sont pas conservés dans la configuration en clair. \tabularnewline
+\texttt{aam workspace peer} & Référence vers un workspace AAM local existant; ne transforme pas magiquement un ZIP en modèle exécutable. \tabularnewline
+\bottomrule
+\end{longtable}
+Les politiques diffèrent: inférence seule, export de paires supervisées, entraînement LoRA pour Transformers compatibles ou hook d'entraînement d'un adaptateur spécifique. La présence d'une politique dans le registre n'est pas la preuve que les poids ont été entraînés; la sortie et l'évaluation doivent être vérifiées séparément. Les dépendances optionnelles restent explicites.
+
+\section{Ergonomie}
+Les onglets Observer, RAG, Sondes, Compétences, Autonomie, Entraînement, Internet/API, Modèles locaux, Programmation et Réglages utilisent un conteneur canvas avec barre verticale et gestion du défilement à la molette. Les éditeurs de texte structurés conservent leur propre barre. Des sélecteurs permettent de choisir un PID depuis les processus visibles et d'énumérer les interfaces si TShark est installé.
+
+\section{Préservation du RAG historique}
+Le fichier \texttt{aam\_o93/semantic\_rag.py}, le retrieval O92 et les tests RAG historiques listés dans \texttt{rapport\_O94\_3/rag\_parity\_O94\_0\_O94\_1\_O94\_2.json} ont des empreintes SHA-256 identiques dans les archives Dmodel O94\_0, O94\_1 et O94\_2. O94\_3 les conserve sans changement; les tests de RAG seront rejoués et le manifeste final prouvera leur présence. Cette vérification de contenu n'est pas à elle seule une preuve de qualité de retrieval, qui est évaluée par les tests et jeux dédiés.
+
+\section{Commandes d'exécution}
+\begin{verbatim}
+# Windows: extraire entièrement l'archive, puis lancer
+run_AAM_O94_3.bat
+
+# Linux/macOS
+./run_AAM_O94_3.sh
+
+# Préflight et interface
+python -m aam_o93 preflight
+python -m aam_o93 ui
+
+# Observer passivement un dossier, trace créée par AAM
+python -m aam_o93 observe-live --source-kind filesystem \\
+  --root ./dossier_que_vous_etes_autorise_a_observer \\
+  --authorize-source --seconds 30 --interval 0.25 --max-events 2000
+
+# Observer le PID de ce Python si psutil est disponible
+python -m aam_o93 observe-live --source-kind process --pid 1234 \\
+  --authorize-source --seconds 15 --interval 0.5
+
+# Lister les compétences et briques disponibles
+python -m aam_o93 base-blocks
+\end{verbatim}
+Pour le réseau, installez TShark, choisissez une interface et ajoutez \texttt{--source-kind network --interface <id> --authorize-source}. Les droits de capture restent nécessaires.
+
+\section{Protocole de validation et interprétation}
+Les tests unitaires vérifient la génération automatique de JSONL, la modification de fichiers en cours de session, les événements PID lorsque psutil est disponible, l'exigence d'autorisation, l'intégrité de la chaîne de hashes, le rapport final et l'apprentissage excluant les holdouts. Les tests existants d'interface, de modèles, de composition, de RAG et de corpus sont rejoués par lots. Chaque exécution enregistre commande, code de retour, sorties, résultat et éventuel incident. Un test non exécuté ou interrompu n'est jamais compté comme réussi.
+
+\section{Conséquences}
+\textbf{Théoriques.} O94\_3 explicite la distinction entre observation passive de sources OS visibles, sondage actif d'une interface connue, import de datasets et inférence d'une compétence. Il rend aussi distincts le support exact d'apprentissage et la généralisation.
+
+\textbf{Conceptuelles.} Une composition reste un graphe déclaratif de briques typées. Une observation passive peut révéler un schéma de comportement; elle ne détermine pas automatiquement toutes les règles internes ou l'algorithme latent d'un logiciel.
+
+\textbf{Opérationnelles.} L'utilisateur peut faire démarrer une collecte sans créer le JSONL à la main, sélectionner un périmètre, observer budgets et erreurs, consulter la trace auto-produite, apprendre des candidats et compiler une composition. Certains niveaux demandent des dépendances système explicites.
+
+\section{État et limites de preuve}
+La livraison déclarera chaque élément selon ses preuves. L'observation filesystem et PID est bornée par ce que le système d'exploitation expose; l'observation réseau demande TShark et les droits système. Aucune garantie de capture de la mémoire d'un processus arbitraire, d'un déchiffrement TLS, de reproduction exacte de tout logiciel ou de généralisation universelle n'est affirmée. Le RAG est conservé et ses tests doivent rester exécutables.
+\end{document}

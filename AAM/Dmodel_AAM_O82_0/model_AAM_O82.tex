@@ -1,0 +1,683 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs,longtable,array,tabularx,enumitem,geometry,hyperref}
+\geometry{margin=2.4cm}
+\setlist{nosep}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,hypertexnames=false}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Obs}{\operatorname{Obs}}
+\newcommand{\Fp}{\operatorname{Fp}}
+\newcommand{\View}{\operatorname{View}}
+\newcommand{\Cand}{\operatorname{Cand}}
+\newcommand{\ARef}{\operatorname{Ref}}
+\newcommand{\Cert}{\operatorname{Cert}}
+\newcommand{\Cost}{\operatorname{Cost}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\Dec}{\operatorname{Dec}}
+\newcommand{\Safe}{\operatorname{Safe}}
+\newcommand{\Suff}{\operatorname{Sufficient}}
+\title{AAM O82\\ROCA-D\\Spécification formelle et contrat d'implémentation}
+\author{Spécification de laboratoire issue du corpus AAM O81/O82}
+\date{6 octobre 2026}
+\begin{document}
+\setlength{\emergencystretch}{2em}
+\maketitle
+\tableofcontents
+
+\chapter*{Statut, portée et règle de non-triche}
+Le présent document est le contrat normatif de l'architecture AAM O82, retenue par le laboratoire sous le nom ROCA-D (\emph{Recursive Observation-Correction Architecture with Degraded Observation}). Il formalise les objets, interfaces, invariants, transitions, protocoles d'acquisition et critères de release nécessaires à une implémentation exécutable sur PC.
+
+Le noyau ne contient aucune réponse métier, aucune règle de domaine cachée, aucun label de tâche futur et aucun paramètre copié d'un modèle externe. Une compétence n'est admissible qu'après acquisition, validation, provenance et vérification selon les contrats de ce document. Les teacher, micro-modèles, RAG ou verificateurs externes sont des adaptateurs facultatifs d'acquisition ou de vérification et ne deviennent jamais une vérité implicite.
+
+Une affirmation d'impossibilité globale est interdite par le modèle. Un état UNRESOLVED signifie uniquement que, sous le contrat, la visibilité, les ressources et les verificateurs effectivement disponibles à cet instant, aucune fermeture certifiable n'a été obtenue. Cette distinction est normative.
+
+\chapter{Principes directeurs}
+\begin{enumerate}
+\item \textbf{Aucune impossibilité pré-déclarée.} Toute limite rapportée est un fait local lié à un budget, une visibilité, un verifier, un support de données ou une expérience explicitement enregistrée.
+\item \textbf{Observation comme ressource.} Une observation possède un contrat, un coût, une provenance, une visibilité et une sémantique de vue.
+\item \textbf{Observation dégradée.} L'effort minimal admissible est tenté en premier. L'effort augmente uniquement lorsqu'une preuve de suffisance manque, qu'une correction est requise ou qu'une exploration est justifiée.
+\item \textbf{Mémoire après observation.} Après chaque observation réussie, le retrieval de mémoire est obligatoire avant toute observation supplémentaire, sauf impossibilité d'intégrité explicitement journaliée.
+\item \textbf{Erreur exploitable mais non certifiante.} Une erreur est une trace de contre-exemple et peut guider l'action suivante; elle ne peut pas certifier une réponse.
+\item \textbf{Suffisance décisionnelle.} Le modèle vise la fermeture du contrat de décision courant, et non l'identification exhaustive du monde.
+\item \textbf{Vérification séparée.} Hypothèse, learner, politique et verifier sont des rôles distincts; une politique ne s'auto-certifie pas.
+\item \textbf{Gouvernance lexicographique.} Sécurité et intégrité sont des filtres durs; aucune optimisation d'efficacité ne peut les racheter. Les utilités numériques ne sont utilisées qu'à l'intérieur d'une priorité déjà admissible.
+\item \textbf{Autonomie runtime.} Le runtime FINAL doit fonctionner sans teacher si aucune dépendance de vérification externe n'est déclarée et requise par le contrat; dans ce dernier cas l'état de sortie doit le signaler.
+\item \textbf{Auto-observation causale.} L'auto-observation est une intervention mesurée, pas seulement une journalisation.
+\end{enumerate}
+
+\chapter{Univers formel et contrats}
+\section{Contrat de décision}
+Un contrat est
+\[
+\begin{aligned}
+g=(id,version,objective,scope,decision\_space,required\_level,\\
+\quad budget\_policy,probe\_allowlist,security\_policy,\\
+\quad termination\_policy,visibility\_policy).
+\end{aligned}
+\]
+$objective$ est une description observable de la tâche; $decision\_space$ est l'ensemble des formes d'actions/réponses admissibles; $required\_level$ est le niveau minimal de vérification; les autres champs limitent explicitement le contexte d'exécution.
+Par convention, $scope_g$, $decision\_space_g$ et $required\_level_g$ désignent respectivement les champs $scope$, $decision\_space$ et $required\_level$ du contrat $g$. Cette projection est normative et supprime toute ambiguïté d'implémentation.
+
+\section{Contexte d'observation}
+Le terme $c_t$, absent de certaines versions précédentes, est désormais défini par
+\[
+\begin{aligned}
+c_t=(episode\_id,step,phase,contract\_id,authorized\_probes,\\
+\quad resource\_snapshot,memory\_epoch,seed,visibility\_class).
+\end{aligned}
+\]
+Aucune probe ne peut lire un champ hors de $authorized\_probes$ et de son propre contrat. Le contexte est journalisé avec l'observation et garantit la relecture déterministe lorsque les sources externes sont déterministes.
+
+\section{Épisode et état}
+Une épisode est
+\[
+\mathcal E=(g,E_0,s_0,m_0,c_0,\tau,B,V),
+\]
+où $E_t$ est l'environnement observable, $s_t$ l'état interne autorisé, $m_t$ la mémoire active, $c_t$ le contexte courant, $\tau$ la trajectoire, $B$ le budget vectoriel et $V$ la famille de verificateurs autorisés.
+
+L'état opérationnel est
+\[
+s_t=(F_t,C_t,H_t,A_t,K_t,R_t,Q_t,\Lambda_t),
+\]
+où $F_t$ est la fingerprint partielle, $C_t$ l'ensemble de candidats, $H_t$ l'historique compact, $A_t$ les actions admissibles, $K_t$ les certificats connus, $R_t$ les ressources restantes, $Q_t$ l'état machine et $\Lambda_t$ le ledger causal.
+
+\section{Sondes et résultat d'observation}
+Une sonde est
+\[
+\begin{aligned}
+p=(id,version,scope,input\_contract,operation,level,\\
+\quad cost,latency,preconditions,security,output\_schema,\\
+\quad provenance\_schema).
+\end{aligned}
+\]
+Son exécution produit
+\[
+\begin{aligned}
+o_p=(raw\_ref,value,view\_id,view\_version,Prov,\\
+\quad predicted\_use,resource\_delta,status).
+\end{aligned}
+\]
+$Prov$ identifie au minimum sonde, version, contexte, épisode, instant logique et références de source. Une erreur de probe ne devient jamais une observation valide par convention.
+
+\section{Empreinte partielle}
+Pour une vue $v$ :
+\[
+\Fp_v(E)=H(\operatorname{canon}(\View_v(E))),
+\]
+où $H$ est un hash d'intégrité et non une preuve sémantique. L'empreinte courante est un ensemble ordonné de faits
+\[
+F_t=\{(v_i,hash_i,raw_i,witness_i)\}_{i=1}^{k}.
+\]
+Les raws restent conservés; aucune compression active ne peut supprimer sa source probatoire.
+
+\section{Poset des vues et témoins de raffinement}
+Les vues forment $(\mathcal V,\preceq)$. Une relation $v_i\preceq v_j$ est admissible seulement si un témoin enregistré $W_{ij}$ démontre sur un scope déclaré au moins une des propriétés suivantes : projection fonctionnelle exacte, implication contractuelle prouvée, ou relation empirique validée sur un jeu séparé. Un hash différent ne suffit pas à établir un raffinement.
+
+\section{Équivalence décisionnelle}
+Pour un état candidat $x$, le résultat d'un verificateur est un objet $VR$ défini ci-dessous. On introduit la prédicat explicite
+\[
+\begin{aligned}
+\operatorname{Accept}(VR,g,a)\iff{}& VR.status=PASS \land VR.level\ge required\_level_g \\
+&\land VR.decision\_key=a \land VR.scope\supseteq scope_g.
+\end{aligned}
+\]
+La décision certifiable est alors
+\[
+\Dec_g(x;V)=\{a\in decision\_space_g : \exists\,c,VR=Verifier_V(c,x,g),\;\operatorname{Accept}(VR,g,a)\}.
+\]
+Pour un ensemble $X$ d'états compatibles avec $F_t$ :
+\[
+X\approx_g a^*\iff \forall x\in X,\;\Dec_g(x;V)\subseteq\{a^*\}\ \land\ a^*\in\Dec_g(x;V).
+\]
+Cette définition rend explicite que l'équivalence est relative au contrat et à la famille de verificateurs disponible. Elle ne prétend pas distinguer le monde entier.
+
+\chapter{Résultats de vérification et frontière de vérité}
+\section{Interface de vérification}
+Un verificateur implémente conceptuellement
+\[
+Verify:(candidate,g,context)\to VR,
+\]
+avec
+\[
+\begin{aligned}
+VR=(status,level,decision\_key,certificate\_id,scope,verifier\_id,\\
+\quad verifier\_version,evidence\_refs,soundness\_claim,\\
+\quad external\_truth\_verified,deterministic\_replay\_ok).
+\end{aligned}
+\]
+Les statuts minimum sont PASS, FAIL, INCONCLUSIVE, UNAVAILABLE. Un certificat doit indiquer sa portée et la revendication de son verificateur; une vérification n'est jamais exportée hors de son scope déclaré.
+
+\section{Statuts de compétence et résultat}
+\[
+\begin{aligned}
+DOCUMENTED\_INSIGHT &\to CANDIDATE\_SKILL \\
+&\to VERIFIED\_SKILL \\ 
+&\to EXECUTION\_CONTRACT\_CLOSED.
+\end{aligned}
+\]
+$EXTERNAL\_TRUTH\_VERIFIED$ est un attribut indépendant pouvant accompagner la fermeture uniquement lorsqu'un verifier externe approprié le fournit. Sinon, DONE signifie fermeture du contrat d'exécution, jamais vérité universelle.
+
+\section{Suffisance décisionnelle}
+Soit $C_t$ l'ensemble des candidats actuellement compatibles. La fermeture est vraie lorsque
+\[
+\exists a^*\quad\forall c\in C_t^{compatible},\quad
+\Dec_g(c;V)=\{a^*\}
+\]
+et qu'au moins un certificat terminal satisfait le niveau requis. Si $C_t$ est vide, la boucle ne peut pas conclure par vérité; elle doit soit reconstruire des candidats, soit raffiner l'observation, soit rester UNRESOLVED.
+
+\chapter{Architecture ROCA-D}
+\section{Vue d'ensemble}
+\[
+\begin{aligned}
+Input &\to State \to Observe_{min} \to Retrieve \to Sufficiency \\
+&\to \{Probe,Bundle,Infer,Decompose,Discover\} \to Verify \\
+&\to \{Act,Correct,Learn\} \to Consolidate \to SelfObserve \\
+&\to Done/Unresolved.
+\end{aligned}
+\]
+\section{Noyaux autoritaires}
+\begin{enumerate}
+\item Observation Kernel et Probe Registry;
+\item Partial Fingerprint Engine et View-Poset Witness Registry;
+\item Memory Quotient Graph et Correction Graph;
+\item Decision Sufficiency Engine;
+\item Adaptive Probe/Bundle Policy;
+\item Candidate/Composition/Decomposition Engine;
+\item Acquisition, CEGIS et Skill Registry;
+\item Independent Verification Layer;
+\item Causal Self-Observation et Meta-Acquisition;
+\item Resource Manager, Replay Ledger et Recovery Manager;
+\item External Adaptors optionnels sous contrats explicites.
+\end{enumerate}
+
+\chapter{Observation dégradée}
+\section{Principe de moindre effort observable}
+À chaque étape, le contrôleur cherche d'abord une décision certifiable à partir de l'état d'observation courant. Une sonde, un bundle ou une re-observation supplémentaire n'est autorisée que si la suffisance ou la valeur marginale attendue justifie le coût. L'observation minimale n'est jamais confondue avec une vérité globale : une vue pauvre peut être suffisante pour une décision et insuffisante pour une autre.
+
+\section{Boucle de raffinement}
+La boucle normative est
+\[
+\begin{aligned}
+V_t &\rightarrow Retrieve(M,V_t) \rightarrow Sufficiency(g,C_t)\\
+&\rightarrow \begin{cases}
+\text{Decision/Verify}, & \text{si suffisant},\\
+\text{Policy}(Probe/Bundle/Reobserve), & \text{sinon}.
+\end{cases}
+\end{aligned}
+\]
+Après chaque observation, l'empreinte partielle et les témoins sont reconstruits ou complétés, puis la mémoire est consultée avant la dépense suivante. Le processus peut revenir à une vue déjà acquise lorsqu'une nouvelle condition ou un contre-exemple la rend informative.
+
+\section{Dégradation et continuité}
+Le comportement doit rester défini pour un budget faible comme pour un budget élevé : sous faible budget, le modèle s'abstient proprement lorsqu'aucune décision certifiable n'est disponible; sous budget supérieur, il peut augmenter progressivement l'effort d'observation, paralléliser des sondes admissibles, apprendre une correction ou découvrir une nouvelle sonde. Cette continuité est une propriété du pipeline, pas une promesse de succès universel.
+
+\chapter{Compatibilité et extension du socle O81}
+O82\_0 ne retire pas les surfaces générales acquises par O81. Toute capacité conservée doit rester subordonnée aux contrats O82 de sécurité, intégrité, budget, mémoire, vérification et provenance.
+
+\section{État runtime canonique}
+L'état exécutable est exposé sous forme d'un objet immuable
+\[
+\begin{aligned}
+R_t=(&problem,context,node,observation,deficit,memory,skills,\\
+&self,budget,policy,random,control).
+\end{aligned}
+\]
+dont la sérialisation canonique et le fingerprint sont déterministes. Le champ \texttt{control} porte les réservations, l'auto-observation en attente et la trajectoire de contrôle sans recevoir de vérité cible.
+
+\section{Enveloppe d'action compatible}
+Toute action est représentée par une enveloppe
+\[
+A=(kind,payload,preconditions,EU,provenance),
+\]
+où $EU$ contient au minimum le coût prévu. L'autorité de l'action est déterminée par $Q_t$; l'action peut être refusée par le vérificateur de contrat avant ou après exécution instrumentale, sans mutation silencieuse de l'état scientifique. Le hash d'action couvre uniquement les champs sémantiques et n'est jamais auto-référent.
+
+\section{Instruments spécialistes à interface variable}
+O82 accepte un portfolio d'instruments de la forme
+\[
+z_i=(h_i,\sigma_i,u_i,c_i,\pi_i),
+\]
+avec diagnostics de stabilité et de désaccord. Le portfolio est extensible à l'exécution; aucun spécialiste fixe n'est requis universellement. Une décision issue d'un instrument reste soumise aux mêmes preuves de suffisance et de vérification que toute autre observation.
+
+\section{Self-health}
+L'auto-santé est une vue dérivée du runtime et de son historique d'actions. Elle calcule au minimum taux d'échec, incertitude et pertinence de contrôle. Elle n'a accès à aucun champ cible/label/gold/answer et ne peut seule produire une fermeture certifiante.
+
+\section{Lifecycle des compétences}
+Toute évolution de compétence possède identité, version sémantique, contrat, provenance et fingerprint. Les remplacements silencieux sont refusés. Les transitions sont classées INITIAL, PATCH, MINOR ou MAJOR selon la progression de version, et un root retest est requis lorsqu'une nouvelle capacité modifie la décision parent.
+
+\section{Observation progressive et re-observation}
+Une observation peut être réémise comme \texttt{reobserve} lorsqu'une vue déjà connue doit être confrontée à une nouvelle condition, et un \texttt{zoom} peut sélectionner une vue de résolution supérieure lorsqu'elle est déclarée admissible. Ces opérations n'annulent pas l'obligation de retrieval ni les budgets; elles produisent une nouvelle preuve contextualisée.
+
+\section{Non-régression de potentiel}
+La migration O81\(\rightarrow\)O82 est considérée comme une amélioration seulement si les capacités générales suivantes sont au minimum conservées : machine d'état et contrôleur autoritaires, action contracts, état runtime canonique, instruments variables, diagnostics de désaccord, auto-santé sans fuite, lifecycle/versionnement des skills, re-observation/zoom, décomposition/root retest, replay/recovery et teacher cutover. La surface CLI générale d'O81 0.3 est aussi conservée par les commandes de compatibilité \texttt{experiment}, \texttt{verify-skill}, \texttt{transfer}, \texttt{compose} et \texttt{memory-verify}. Ces commandes restent soumises aux contrats O82, à la vérification, au budget, à la provenance et au ledger. Les nouvelles capacités ROCA-D doivent pouvoir s'ajouter à cette base sans verrouiller l'espace des futures actions ou compétences.
+
+\section{Règle de contrôle}
+À chaque cycle, le contrôleur forme l'ensemble $\mathcal Q_t$ des probes, bundles, re-observations et découvertes sûres admissibles. Les opérations d'observation sont ordonnées par gouvernance :
+\[
+\begin{aligned}
+Safe &\succ Integrity \succ VerificationGain \succ SufficiencyGain \\
+&\succ ResourceEfficiency \succ Exploration \succ Novelty.
+\end{aligned}
+\]
+$Safe$ et $Integrity$ sont des filtres; aucune action rejetée sur ces niveaux ne peut être rachetée par une utilité plus élevée ailleurs.
+
+\section{Valeur marginale normative}
+Il est interdit de prendre une décision de politique à partir d'une unique somme pondérée qui permettrait à un grand gain d'exploration de compenser un défaut de sécurité ou de vérification. Pour chaque $q$, on calcule le tuple
+\[
+K(q)=(VG_q,SG_q,RE_q,EX_q,NV_q,ST_q),
+\]
+seulement après passage des filtres sûrs et intègres. $VG$ est le gain attendu de progression de vérification; $SG$ le gain attendu de fermeture décisionnelle; $RE$ une efficience de ressources conforme à $B$; $EX$ le gain de couverture/exploration; $NV$ la nouveauté; $ST$ est un tie-break stable et déterministe. Une dominance de Pareto peut supprimer les options dominées sur $(gain,cost,risk,latency,uncertainty)$ avant comparaison lexicographique.
+
+\section{Budget vectoriel}
+\[
+B_t=(time,compute,memory,energy,parallelism,external\_quota).
+\]
+Chaque probe expose $\Delta B$. Un bundle sérialisé consomme la somme des coûts; un bundle parallèle conserve le même coût total mais sa latence murale idéale est
+\[
+latency_{parallel}=\max_i latency_i
+\]
+si et seulement si les prerequis et la politique de sécurité autorisent l'exécution concurrente. Le contrôleur doit toujours enregistrer les deux métriques.
+
+\section{Arrêt minimal}
+La boucle s'arrête si et seulement si une condition de fermeture autorisée est certifiée : (i) compétence vérifiée applicable; (ii) tous les candidats compatibles convergent vers une même décision certifiée; (iii) verifier externe satisfait directement le contrat; ou (iv) une action de compromis explicitement autorisée est elle-même certifiée optimale sous le budget.
+
+\section{Mémoire consultée à chaque pas}
+Après toute nouvelle empreinte valide $F_{t+1}$, le contrôleur exécute
+\[
+\begin{aligned}
+Retrieve(F_{t+1},g,m)\to candidates,skills,\\
+\quad corrections,probe\_continuations
+\end{aligned}
+\]
+avant de demander une nouvelle probe. L'exception est limitée à un échec d'intégrité du store; cet échec déclenche RECOVERY et est journalisé.
+
+\chapter{Mémoire comme géométrie de l'empreinte}
+\section{Noeud de quotient}
+Un noeud mémoire est
+\[
+\begin{aligned}
+N=(fingerprint\_set,scope,contract\_key,candidates,skills,\\
+\quad corrections,probes,certificates,costs,coverage,\\
+\quad provenance,status,version).
+\end{aligned}
+\]
+Le lookup exige une compatibilité de scope, contract key, visibilité et statut; un match approximatif ne devient jamais un certificat.
+
+\section{Correction}
+Une correction est
+\[
+\begin{aligned}
+C=(F_{fail},g,attempt,error\_kind,action\_taken,\\
+\quad probe\_delta,revision,F_{corr},verification,provenance,status).
+\end{aligned}
+\]
+Le statut d'une correction est au minimum CANDIDATE ou VERIFIED. Une correction candidate peut influencer la prochaine action; seule sa réutilisation avec un certificat valide peut produire une fermeture.
+
+\section{Deux tempos et compression}
+La mémoire rapide contient épisodes, erreurs, contextes récents et propositions. La mémoire lente contient patterns consolidés, capsules vérifiées, témoins de raffinement et statistiques de politique. La consolidation est non destructive; une vue compacte pointe vers les raws et peut être invalidée/reconstruite.
+
+\section{Invalider et oublier}
+ACTIVE, CANDIDATE, REVIEW\_REQUIRED et REVOKED sont des statuts de mémoire. Toute modification de dépendance peut provoquer une revue et un root retest. L'oubli runtime est une éviction d'index ou de cache, jamais une suppression silencieuse d'un raw ou d'un certificat historique sous politique de rétention.
+
+\chapter{Moteur de candidats et de suffisance}
+\section{Schéma d'un candidat}
+Un candidat est
+\[
+\begin{aligned}
+c=(id,version,decision,scope,input\_fingerprint,provenance,\\
+\quad dependencies,status).
+\end{aligned}
+\]
+La décision stockée dans $c$ est une proposition; seule la prédicat $\operatorname{Accept}$ produite par un verificateur autorisé peut l'élever au statut certifiable.
+
+\section{Génération de candidats}
+Les candidats proviennent uniquement de sources autorisées : retrieval mémoire, learner interne, composition de compétences, hypothèse générée, observation d'adaptateurs déclarés. Chaque candidat conserve une provenance complète et ne reçoit aucune crédibilité de vérité par son origine seule.
+\[
+C_{t+1}=Filter(Generate(F_t,m_t,g_t),Obs_t,g_t,m_t).
+\]
+
+\section{Compatibilité}
+Un candidat $c$ est compatible si ses vues d'entrée sont disponibles, son scope couvre la situation, sa version est active et ses dépendances sont satisfaites. Un candidat hors scope est exclu avant comparaison de décision.
+
+\section{Fermeture et abstention}
+Si plusieurs décisions certifiables restent possibles, le moteur refuse l'arrêt. Si aucun candidat certifiable n'existe, il préfère l'observation/refinement ou la décomposition. En dernier ressort il produit UNRESOLVED scoped, sans déclaration d'impossibilité globale.
+
+\chapter{Apprentissage par erreur et correction}
+\section{Cycle fondamental}
+\[
+Observe_{min}\to F_1\to Retrieve\to Candidate\to Verify\to
+\begin{cases}
+Act,&\text{suffisant et certifié},\\
+Correct,&\text{échec vérifié},\\
+Refine,&\text{insuffisant},\\
+Explore,&\text{couverture inconnue}.
+\end{cases}
+\]
+\section{CEGIS}
+La boucle de correction suit
+\[
+Hyp\to Test\to Counterexample\to Correction\to ReTest\to Holdout/OOD\to Consolidate.
+\]
+Un contre-exemple doit rester associé à la tentative qui l'a produit. Une nouvelle preuve ne remplace pas rétroactivement la preuve précédente; elle crée une nouvelle version de compétence/correction.
+
+\section{Primitives et composition}
+Les primitives sont favorisées lorsqu'elles ont un faible coût de vérification, une portée claire et une bonne réutilisabilité, mais aucun ordre fixe de complexité n'est imposé. Une compétence complexe peut être acquise directement si sa validation est suffisante; la capsule expose alors des dépendances plus riches et une couverture plus étroite si nécessaire.
+
+\chapter{Capsules de compétence et acquisition}
+\section{Schema de capsule}
+\[
+\begin{aligned}
+S=(id,version,contract,scope,input\_views,goal,fingerprint,program,\\
+\quad tests,holdout,OOD,dependencies,corrections,coverage,\\
+\quad resource\_curve,provenance,status).
+\end{aligned}
+\]
+$program$ est un artefact acquis ou généré par le learner, jamais une table de réponses codée dans le noyau.
+
+\section{Cycle d'admission}
+\[
+\begin{aligned}
+inspect &\to observe_{min} \to induce \to internal\_validate \to holdout \\
+&\to OOD \to verify \to admit \to consolidate.
+\end{aligned}
+\]
+Le runtime FINAL ne voit que les capsules VERIFIED\_SKILL compatibles avec le contrat; les capsules expérimentales restent hors du chemin certifiant.
+
+\section{Teacher cutover}
+Un teacher externe peut fournir des observations autorisées pendant l'acquisition. Chaque expérience porte une politique de visibilité. Avant le cutover runtime, le système vérifie l'absence de dépendance active au teacher lorsque le mode FINAL l'interdit. Cette vérification est testée dynamiquement et statiquement.
+
+\chapter{Auto-observation et apprentissage de l'apprentissage}
+\section{État auto-observable}
+Les champs autorisés sont action, probe, bundle, coût, budget, taille mémoire, duplication, profondeur, erreur, incertitude, désaccord instrument, variation de score, résultat de verification, gain mesuré et événement causal. Les champs de supervision interdite incluent label, gold, answer cachée, ground truth ou toute sérialisation équivalente.
+
+\section{Déclencheurs causaux}
+Un événement self-observation est prioritaire lorsqu'il y a stagnation, correction répétitive, désaccord significatif, surprise OOD, échec de vérification, changement de politique, admission d'une compétence, hausse inattendue du coût ou dérive de mémoire. La périodicité n'est qu'un filet de sécurité.
+
+\section{Intervention causale}
+Une intervention compare au minimum une trajectoire baseline et une trajectoire où seule la décision de politique ciblée change, avec les mêmes cas appariés et des ressources comparables. Le gain causal enregistré est la différence de métriques vérifiées sur les deux bras. Une méta-policy ne peut être promue qu'après ce protocole.
+
+\section{Prediction précoce}
+Le modèle peut prédire la prochaine observation utile, précharger une source ou réserver une ressource. Cette prédiction ne peut pas produire une certification ni supprimer une vérification nécessaire.
+
+\chapter{Instruments à interface variable}
+\section{Contrat spécialiste}
+Un instrument peut retourner une vue variable
+\[
+\begin{aligned}
+s_i:(F_t,context)\to(h_i,uncertainty,utility\_estimate,\\
+\quad provenance,View_i).
+\end{aligned}
+\]
+Le master ne dépend pas d'un paquet fixe universel. Les champs peuvent être approfondis lorsqu'ils ont une valeur décisionnelle démontrée.
+
+\section{Désaccord}
+En cas de désaccord, le contrôleur compare la couverture, la stabilité, l'incertitude, la valeur marginale et le coût. Il peut demander une observation indépendante, une résolution plus fine ou une re-observation. Aucune préférence permanente pour un specialist n'est intégrée par convention.
+
+\section{Loss, attention, optimiseur}
+Loss, attention, optimiser, RAG et mécanismes de raisonnement sont des objets observables. O82 ne les interdit ni ne les érige en noyau. Leur adoption comme compétence dépend de preuves de gain sous le contrat et le budget correspondants.
+
+\chapter{Interfaces externes, sécurité et protocoles}
+\section{RAG comme observateur externe}
+Une source documentaire est un observateur déclaré. Le résultat minimal est
+\[
+D=(document\_id,source\_id,text,metadata,source\_fingerprint,stale).
+\]
+La récupération conserve provenance, coût, couverture et nouveauté. Une source devenue obsolète peut être marquée \texttt{STALE}; cette invalidation peut déclencher la révision des dépendances mémoire, mais ne transforme jamais le texte récupéré en vérité implicite.
+
+\section{Frontière d'accès}
+Toute lecture externe passe par un contrat de type
+\[
+A=(module\_id,object\_ids,object\_types,phases,visibility)
+\]
+et une référence de données
+\[
+R=(object\_id,dataset\_id,split,lineage\_hash,visibility).
+\]
+Le refus produit une preuve d'accès refusé dans le ledger. Le firewall est indépendant de la policy de recherche et ne peut être acheté par un meilleur score d'utilité.
+
+\section{Adaptateurs black-box}
+Un adaptateur externe implémente
+\[
+Query:q\to(response,request\_hash,response\_hash,elapsed,provenance)
+\]
+et doit déclarer au minimum timeout, protocole d'échange, allowlist d'environnement et identification de l'adaptateur. Les réponses externes sont des observations; elles ne contournent ni le verifier ni le contrat de décision. Un adaptateur subprocess doit utiliser un protocole borné et ne pas exposer arbitrairement son environnement au modèle.
+
+\section{Mesure vectorielle de puissance}
+La puissance ne se réduit pas à l'accuracy. On conserve au minimum
+\[
+\begin{aligned}
+P=(&skills,coverage,transfer,OOD,cost^{-1},verification,\\
+&observation\_utility,self\_improvement).
+\end{aligned}
+\]
+Deux versions ne sont déclarées dominantes que lorsqu'aucune dimension prioritaire ne régresse sur le même protocole et qu'au moins une dimension progresse. Une régression est explicitement publiée au lieu d'être masquée par une moyenne scalaire.
+
+\section{Protocoles expérimentaux P1-P10}
+Les contrôles P1-P10 d'O81 sont conservés comme protocoles expérimentaux génériques : observation-only, acquisition+intervention, self-observation appariée, transfer après cutover, OOD structurel et mécaniste, contre-observateur, ablations mémoire/fingerprint/hiérarchie. Chaque protocole impose des cas appariés, une identité de cas persistante et, lorsqu'une validation externe est requise, une provenance indépendante explicitement attestée. Les protocoles mesurent les effets; ils ne codent pas la réponse attendue.
+
+\chapter{Découverte de sondes}
+\section{Probe candidate}
+Une nouvelle sonde est un artefact
+\[
+\begin{aligned}
+P_c=(id,version,operation,inputs,view\_schema,cost,latency,scope,\\
+\quad security,provenance,induction\_refs,validation\_refs,\\
+\quad anti\_leak,status).
+\end{aligned}
+\]
+Une composition candidate peut être
+\[
+p_{new}=Compose(p_{i_1},...,p_{i_k})
+\]
+mais sa promotion exige contrat valide, déterminisme déclaré, provenance, coût exact, sécurité, absence de redondance triviale, validation décisionnelle sur un split séparé et audit anti-target-hardcode. Une nouveauté de hash seule n'est jamais suffisante.
+
+\chapter{Décomposition, composition et root retest}
+\section{Décomposition}
+Une décision ouverte peut être décomposée en sous-contrats $g_1,...,g_n$ lorsque le decomposer produit une preuve de couverture des sous-objectifs et un lien parent-enfants. Pour des objets structurés, une décomposition de premier niveau peut être générée mécaniquement sans introduire de règle de domaine.
+
+\section{Root retest}
+Toute correction VERIFIED, nouvelle compétence admise, invalidation de dépendance ou découverte de probe pertinente peut déclencher un root retest. Le parent est rejoué avec ses nouvelles capacités; le résultat remplace l'ancien uniquement après nouvelle vérification.
+
+\section{Composition de compétences}
+La composition exige compatibilité de contrat, scope, vues d'entrée, dépendances, fingerprints, verificateurs et ressources. La nouvelle capsule référence toutes les capsules sources et possède sa propre validation.
+
+\chapter{État machine autoritaire}
+\[
+\begin{aligned}
+Q=\{INIT,OBSERVE,RETRIEVE,REFINE,INFER,TEST,VERIFY,ACT,\\
+\quad CORRECT,LEARN,MEMORIZE,SELF\_OBSERVE,DISCOVER\_PROBE,\\
+\quad DECOMPOSE,RECOVER,DONE,UNRESOLVED\}.
+\end{aligned}
+\]
+Les transitions minimales sont :
+\small\begin{longtable}{L{0.22\textwidth}L{0.24\textwidth}L{0.44\textwidth}}
+\toprule État & Condition & Transition \\ \midrule
+INIT & contexte valide & OBSERVE \\
+OBSERVE & observation valide & RETRIEVE \\
+OBSERVE & erreur/intégrité douteuse & RECOVER \\
+RETRIEVE & suffisance certifiée & VERIFY \\
+RETRIEVE & compétence compatible vérifiée & INFER \\
+RETRIEVE & insuffisance avec probe admissible & REFINE \\
+RETRIEVE & couverture inconnue & DISCOVER\_PROBE ou DECOMPOSE \\
+INFER & candidat produit & TEST \\
+TEST & contre-exemple & CORRECT \\
+TEST & validation locale OK & VERIFY \\
+VERIFY & PASS requis & ACT ou LEARN \\
+VERIFY & FAIL vérifié & CORRECT \\
+CORRECT & correction produite & RETRIEVE \\
+LEARN & capsule candidate & HOLDOUT/OOD implicites puis VERIFY \\
+SELF\_OBSERVE & intervention autorisée & retour vers l'état appelant avec trace causale \\
+DISCOVER\_PROBE & probe candidate validée & OBSERVE \\
+DECOMPOSE & sous-contrats créés & OBSERVE sur enfant puis root retest \\
+RECOVER & ledger/index réparé et cohérent & RETRIEVE ou OBSERVE \\
+RECOVER & incohérence non réparée & UNRESOLVED scoped \\
+RETRIEVE/VERIFY & aucune fermeture mais budget encore positif & REFINE/DECOMPOSE/UNRESOLVED selon preuve locale \\
+ACT & contrat exécuté et enregistré & DONE \\
+\bottomrule
+\end{longtable}
+Aucun chemin ne permet OBSERVE$\to$DONE direct. UNRESOLVED exige un certificat scoped contenant contrat, ressources restantes, probes autorisées non exécutées, raisons d'échec/inconclusives, dernier état de preuve et absence explicite de toute revendication d'impossibilité globale.
+
+\chapter{Invariants d'implémentation}
+\begin{enumerate}
+\item Toute observation valide possède un raw\_ref et une provenance.
+\item Toute fingerprint active est re-dérivable du raw.
+\item Toute relation de raffinement possède un witness et un scope.
+\item Tout retrieval est enregistré avant la prochaine observation, hors recovery.
+\item Toute réponse certifiée possède un verifier et un certificat vérifiables.
+\item Toute correction est distinguée d'une vérité et versionnée.
+\item Toute compétence active possède contrat, scope, dépendances, tests et provenance.
+\item Le ledger peut reconstruire le chemin décisionnel et les coûts.
+\item FINAL n'active aucune compétence CANDIDATE/REVIEW\_REQUIRED/REVOKED.
+\item Aucun side-channel de supervision interdite ne traverse observation, metadata, hash, self-state ou logger.
+\end{enumerate}
+
+\chapter{Protocoles de validation obligatoires}
+\begin{longtable}{p{0.08\textwidth}p{0.27\textwidth}p{0.52\textwidth}}
+\toprule ID & Protocole & Gate \\ \midrule
+P01 & Observation contractuelle & scope/provenance/cout/latence/schema/sécurité \\
+P02 & Observation dégradée & première action minimale ou bundle empiriquement justifié \\
+P03 & Retrieval-after-observe & lookup mémoire avant nouvelle probe \\
+P04 & Decision sufficiency & fermeture certifiée relative au contrat \\
+P05 & Holdout & split indépendant et visibilité contrôlée \\
+P06 & OOD & transformation structurale déclarée \\
+P07 & Causal self-observation & effet mesuré par intervention appariée \\
+P08 & Counter-observer & comparaison random/adversarial \\
+P09 & Memory ablation & même dataset/skills, mémoire active variée \\
+P10 & Fingerprint ablation & quotient/witness vs contrôle sans quotient \\
+P11 & Hierarchy ablation & récursif vs plat sur cas/budgets identiques \\
+P12 & Error-correction & erreur et correction séparées, correction re-vérifiée \\
+P13 & Probe discovery & induction et validation disjoints \\
+P14 & Bundle equivalence & même contrat d'information, coûts exacts \\
+P15 & Scarce probes & exécution avec sous-ensemble autorisé \\
+P16 & Teacher cutover & absence effective du teacher en FINAL \\
+P17 & Skill identity & compatibilité de fingerprint/version/provenance \\
+P18 & Resource ledger & coût/latence/mémoire reconstruisibles \\
+P19 & Replay & transitions et décisions rejouables \\
+P20 & No target hardcode & audit statique + sandbox dynamique \\
+P21 & Recovery & corruption simulée et restauration cohérente \\
+P22 & CLI/README & chaque commande documentée est exécutable et testée \\
+\bottomrule
+\end{longtable}
+
+\chapter{Contrat CLI et guide PC}
+\section{Installation normative}
+Le runtime cible Python 3.10 à 3.13, Windows 10/11, Linux x86\_64 et macOS, avec le noyau en bibliothèque standard uniquement. L'installation doit permettre : création d'un environnement virtuel optionnel, installation locale, exécution directe depuis le dépôt et création d'un store mémoire local sans service externe obligatoire.
+
+\section{Commandes normatives}
+\begin{verbatim}
+o82 doctor
+o82 run \\
+  --problem <path> --contract <path> --budget <json> \\
+  --mode EXPERIMENT --workdir <dir>
+o82 observe \\
+  --episode <id> --probe <id> --workdir <dir>
+o82 acquire \\
+  --dataset <path> --contract <path> --mode EXPERIMENT
+o82 evaluate \\
+  --skill <id> --split holdout \\
+  --dataset <path> --contract <path>
+o82 evaluate \\
+  --skill <id> --split ood \\
+  --dataset <path> --contract <path>
+o82 replay --episode <id>
+o82 memory search --fingerprint <hash>
+o82 memory review
+o82 probe list
+o82 probe test <id>
+o82 experiment --problem <path> --contract <path> --config <path>
+o82 verify-skill --skill <path> --dataset <path> --split holdout --contract <path>
+o82 transfer --skill <path> --input <path> --contract <path>
+o82 compose --skills <skill-a> <skill-b> --contract <path>
+o82 memory-verify --memory <dir>
+o82 audit\end{verbatim}
+Les arguments et noms ci-dessus sont normatifs; toute variation doit être annoncée comme changement de version et couverte par tests/documentation.
+
+\section{Configuration}
+La configuration doit déclarer budget, politique de ressources, probes autorisées, mémoire, verificateurs, adaptateurs externes, seuils self-observation, seed, mode FINAL/EXPERIMENT et politique de rétention. Les chemins externes sont résolus depuis une allowlist.
+
+\section{Mode FINAL}
+FINAL active uniquement les compétences VERIFIED compatibles avec les contrats, interdit les teacher/adaptateurs non déclarés, conserve provenance et résultats et expose explicitement le niveau de vérité atteint.
+
+\section{Mode EXPERIMENT}
+EXPERIMENT autorise l'acquisition et l'évaluation de compétences candidates sans promotion automatique. Aucun artefact candidate ne peut contaminer le chemin certifiant de FINAL.
+
+\section{Recovery}
+Après panne, le runtime valide ledger, hash de chaîne, index mémoire, versions de capsules et certificats. Une incohérence entraîne RECOVER puis, si elle persiste, UNRESOLVED scoped; jamais une activation optimiste.
+
+\chapter{Rapports et journalisation}
+Tout rapport de version doit conserver le template suivant :
+\begin{enumerate}
+\item Description;
+\item Architecture;
+\item Pipeline complet;
+\item Commandes d'exécution;
+\item Résultats;
+\item Interprétation des résultats;
+\item Conséquences théorique, conceptuelle et opérationnelle;
+\item Conclusions;
+\item Statut du modèle.
+\end{enumerate}
+Chaque exécution de test et d'expérience possède un identifiant, une date logique, un seed, une commande, une configuration, un statut, des métriques, des erreurs et des hashes d'artefacts.
+
+\chapter{Erreurs à éviter absolument}
+\begin{enumerate}
+\item Revenir à l'observation exhaustive comme contrôleur par défaut.
+\item Confondre hash différent et raffinement sémantique.
+\item Utiliser la nouveauté d'une empreinte comme preuve de pertinence.
+\item Laisser la mémoire certifier directement une réponse non vérifiée.
+\item Confondre prediction de probe et certification.
+\item Remplacer une auto-observation causale par une simple télémétrie périodique.
+\item Utiliser une somme pondérée capable de sacrifier sécurité/intégrité/vérification.
+\item Réintroduire un paquet specialist fixe comme interface universelle.
+\item Copier les paramètres d'un teacher comme substitut à l'acquisition comportementale.
+\item Déclarer l'impossibilité parce qu'une ressource ou un verifier manque.
+\item Supprimer les erreurs lors de la consolidation.
+\item Activer une compétence sans version, provenance, scope, dépendances et tests.
+\item Exposer label/gold/answer/ground truth par side-channel.
+\item Composer des compétences sans vérifier leur compatibilité.
+\item Faire dériver README et commandes de l'implémentation après coup; la documentation est un contrat testé.
+\end{enumerate}
+
+\chapter{Optimisation rigoureuse}
+\section{Mesure coût-capacité}
+Toute optimisation compare au minimum exactitude/fermeture, coût, latence, probes, mémoire et couverture sur le même protocole. Un gain de vitesse qui perd la vérification n'est pas retenu comme amélioration.
+\section{Allocation adaptative}
+Les statistiques de valeur marginale sont recalibrées lorsque la distribution de travail ou le portefeuille de probes change. Une policy n'est promue que sur plusieurs budgets et splits.
+\section{Portfolios}
+Plusieurs politiques peuvent coexister. La domination est toujours annoncée par rapport à un contrat, un support de test et un budget précis, jamais comme vérité universelle.
+\section{Pruning}
+Les probes/skills dominés peuvent sortir du cache actif; preuves et raws restent récupérables.
+
+\chapter{Extensions}
+Observateur de l'observateur, apprentissage de l'optimiseur, découverte recursive de primitives, verificateurs appris, portfolios de stratégies et transfert black-box peuvent être ajoutés à condition d'utiliser les mêmes contrats, holds, OOD, intervention causale et gouvernance.
+
+\chapter{Checklist de release normative}
+\begin{longtable}{p{0.06\textwidth}p{0.66\textwidth}p{0.18\textwidth}}
+\toprule ID & Contrôle & Gate \\ \midrule
+G01 & provenance/dépendances & PASS/FAIL \\
+G02 & observation minimale mesurable & PASS/FAIL \\
+G03 & retrieval après observation & PASS/FAIL \\
+G04 & certificat de suffisance relative & PASS/FAIL \\
+G05 & correction memory/invalidation & PASS/FAIL \\
+G06 & holdout/OOD & PASS/FAIL \\
+G07 & auto-observation causale & PASS/FAIL \\
+G08 & teacher cutover & PASS/FAIL \\
+G09 & random/adversarial & PASS/FAIL \\
+G10 & replay déterministe & PASS/FAIL \\
+G11 & budget serial/bundle & PASS/FAIL \\
+G12 & scarce/rich modes & PASS/FAIL \\
+G13 & anti-target-hardcode & PASS/FAIL \\
+G14 & README/CLI & PASS/FAIL \\
+G15 & recovery corruption & PASS/FAIL \\
+G16 & skill version/provenance & PASS/FAIL \\
+G17 & rapports template & PASS/FAIL \\
+\bottomrule
+\end{longtable}
+
+\chapter{Conclusion formelle}
+AAM O82 ROCA-D est une architecture de contrôle recursive où l'observation dégradée, la mémoire quotient des empreintes partielles, la correction d'erreurs et l'auto-observation causale sont couplées autour d'une condition de suffisance décisionnelle explicite. La politique ne choisit jamais une observation parce qu'elle est simplement «nouvelle» : elle cherche d'abord une progression de vérification et de fermeture du contrat, dans les limites de sécurité et d'intégrité, puis optimise les ressources et l'exploration.
+
+L'ambition de généralisation est ouverte et expérimentale. Loss, attention, optimiseur, RAG, décomposition, transfert et nouvelles sondes peuvent devenir des compétences; aucune n'est déclarée universelle avant preuve. Le modèle est donc conçu pour apprendre, corriger, vérifier, mémoriser, réutiliser et apprendre à améliorer sa propre stratégie, sans que les solutions cibles soient pré-insérées dans le noyau.
+
+\end{document}

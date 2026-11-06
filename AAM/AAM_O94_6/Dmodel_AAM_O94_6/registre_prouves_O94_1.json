@@ -1,0 +1,262 @@
+{
+  "schema": "aam-o94-1-proof-registry-v1",
+  "version": "O94_1",
+  "created_utc": "2026-10-19T09:02:30Z",
+  "evidence_policy": "Chaque statut est borné aux fichiers, commandes et essais cités. NOT_TESTED/NOT_DEMONSTRATED ne signifie pas impossible; ne pas déduire une impossibilité ou un succès général.",
+  "validation_summary": {
+    "regression_receipt": "logs/O94_1/P5_regression_matrix.json",
+    "test_modules_covered": 57,
+    "test_modules_total": 57,
+    "reported_passed_tests_across_receipts": 331,
+    "reported_passed_subtests_across_receipts": 21,
+    "scope_audit": "logs/O94_1/P5_scope_audit.json",
+    "integrity_audit": "logs/O94_1/P5_integrity_compare.json",
+    "implementation_complete_claimed": false
+  },
+  "capabilities": [
+    {
+      "id": "BASE_BLOCKS",
+      "status": "PASS_BOUNDED",
+      "scope": "Catalogue declaratif de compétences, méthodes et règles de base; composition typée en surface.",
+      "source_files": [
+        "aam_o93/base_blocks.py",
+        "aam_o93/competence.py",
+        "aam_o93/competence_graph.py"
+      ],
+      "tests": [
+        "tests/test_o94_base_blocks.py",
+        "tests/test_p4_competence_graph.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P4_runtime_cli_baseblocks_retest2.json",
+        "logs/O94_1/P5_regression_o941_runtime_blackbox.json"
+      ]
+    },
+    {
+      "id": "BLACKBOX_CAPTURE",
+      "status": "PASS_BOUNDED",
+      "scope": "Capture active de commandes cibles autorisées via argv contrôlé et cas JSON; génération d’une trace I/O horodatée. Ce n’est pas une capture universelle de processus opaques.",
+      "source_files": [
+        "aam_o93/blackbox.py",
+        "aam_o93/cli.py"
+      ],
+      "tests": [
+        "tests/test_o941_blackbox.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P2_blackbox_tests.json",
+        "logs/O94_1/P5_regression_o941_runtime_blackbox.json"
+      ]
+    },
+    {
+      "id": "BLACKBOX_REPLICA",
+      "status": "PASS_BOUNDED",
+      "scope": "Capsule autonome hors source qui restitue des sorties exactes sur entrées d’entraînement connues; rejette les entrées inconnues avec UNRESOLVED; le résultat holdout mesuré sur ce jeu n’est pas preuve d’une méthode générale.",
+      "source_files": [
+        "aam_o93/blackbox.py",
+        "aam_o93/cli.py"
+      ],
+      "tests": [
+        "tests/test_o941_blackbox.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P2_blackbox_tests.json",
+        "logs/O94_1/P5_regression_o941_runtime_blackbox.json"
+      ]
+    },
+    {
+      "id": "MULTI_BACKEND_MODEL_REGISTRY",
+      "status": "PASS_BOUNDED",
+      "scope": "Manifests et adaptateurs structurés OpenAI-compatible/Ollama/local Transformers; essais réalisés avec fixture simulée, aucun endpoint réel ni poids fournis.",
+      "source_files": [
+        "aam_o93/model_integration.py",
+        "examples/model_integration/"
+      ],
+      "tests": [
+        "tests/test_o941_model_integration.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P3_model_integration_tests_retest.json",
+        "logs/O94_1/P5_regression_atomic_llm_reward.json",
+        "logs/O94_1/P5_regression_o941_runtime_blackbox.json"
+      ]
+    },
+    {
+      "id": "TRAINING_POLICY",
+      "status": "PARTIAL_BOUNDED",
+      "scope": "Contrat politique / orchestration de préparation d’entraînement et validation des paires; aucune modification effective de poids externes n’est prouvée dans cette session.",
+      "source_files": [
+        "aam_o93/model_integration.py",
+        "aam_o93/cli.py",
+        "examples/model_integration/train_pairs.jsonl"
+      ],
+      "tests": [
+        "tests/test_o941_model_integration.py",
+        "tests/test_p7_integrated.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P3_model_integration_tests_retest.json",
+        "logs/O94_1/P5_regression_p7_dataset_training.json"
+      ],
+      "open_limits": [
+        "O941-M003",
+        "O941-E001",
+        "O941-E002"
+      ]
+    },
+    {
+      "id": "SEMANTIC_RAG_AND_MICRO_RAG",
+      "status": "PASS_BOUNDED_WITH_SCOPE_LIMITS",
+      "scope": "RAG sémantique hiérarchique et adaptatif hérité, mémoire/résolution et évaluation sur tests et corpus échantillonné; le parcours intégral de tous les corpus multimodaux et une supériorité générale ne sont pas prouvés.",
+      "source_files": [
+        "aam_o93/semantic_rag.py",
+        "aam_o93/memory.py",
+        "aam_o93/memory_resolution.py",
+        "aam_o93/resolution_tree.py"
+      ],
+      "tests": [
+        "tests/test_o94_rag_adaptive.py",
+        "tests/test_o940_rag_resolution.py",
+        "tests/test_o940_real_sms_retrieval.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_regression_rag_adaptive.json",
+        "logs/O94_1/P5_regression_sms_retrieval.json",
+        "logs/O94_1/P5_regression_memory_rag_resolution.json"
+      ],
+      "open_limits": [
+        "Le nombre de sources et les formats multimodaux n’ont pas tous été testés à l’échelle."
+      ]
+    },
+    {
+      "id": "AUTONOMY_AND_CONTINUOUS_RESOLUTION",
+      "status": "PASS_BOUNDED_WITH_RESOURCE_BUDGET",
+      "scope": "Orchestration autonome et arbre de résolution sous budgets/conditions d’arrêt explicites; ce n’est pas une exécution infinie sans contraintes ni preuve d’une recherche scientifique continue générale.",
+      "source_files": [
+        "aam_o93/autonomy.py",
+        "aam_o93/runtime.py",
+        "aam_o93/resolution_tree.py",
+        "aam_o93/reward_policy.py"
+      ],
+      "tests": [
+        "tests/test_p6_autonomy.py",
+        "tests/test_o94_trace_resolution_reward.py",
+        "tests/test_o94_continuous_resolution_ui.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_regression_autonomy_knowledge_preflight.json",
+        "logs/O94_1/P5_regression_ui_resolution_continuous.json",
+        "logs/O94_1/P5_regression_atomic_llm_reward.json"
+      ]
+    },
+    {
+      "id": "REWARD_PUNISHMENT_AND_CAUSAL_AUDIT",
+      "status": "PASS_BOUNDED",
+      "scope": "Préférences de récompense/punition et journaux causaux couverts par tests ciblés; cela n’établit pas un apprentissage neuronal universel de l’orchestrateur.",
+      "source_files": [
+        "aam_o93/reward_policy.py",
+        "aam_o93/memory_resolution.py",
+        "aam_o93/autonomy.py"
+      ],
+      "tests": [
+        "tests/test_o94_trace_resolution_reward.py",
+        "tests/test_p6_memory_causal_graph_view.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_regression_atomic_llm_reward.json",
+        "logs/O94_1/P4_integrated_contract_regression.json"
+      ]
+    },
+    {
+      "id": "DESKTOP_UI",
+      "status": "PASS_BOUNDED_WITH_SCOPE_LIMITS",
+      "scope": "UI desktop Tkinter et smoke tests; l’application web promise comme option n’a pas été créée ou validée dans cet incrément.",
+      "source_files": [
+        "aam_o93/ui.py"
+      ],
+      "tests": [
+        "tests/test_o931_ui_smoke.py",
+        "tests/test_p4_ui_integration.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P4_ui_smoke.json",
+        "logs/O94_1/P5_regression_release_identity_ui.json",
+        "logs/O94_1/P5_regression_p6_ui_matrix.json"
+      ]
+    },
+    {
+      "id": "GENERIC_MULTIMODAL_BLACKBOX",
+      "status": "NOT_TESTED_OR_NOT_IMPLEMENTED_IN_THIS_INCREMENT",
+      "scope": "La capture camera/audio/video/OCR/GUI/capteur physique générique et l’apprentissage puis réutilisation d’une compétence OCR observée ne sont pas validés ici. Ce statut n’est pas une conclusion d’impossibilité.",
+      "source_files": [
+        "aam_o93/media_readers.py",
+        "aam_o93/observer.py"
+      ],
+      "tests": [
+        "tests/test_p6_source_inspector.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_scope_audit.json"
+      ],
+      "open_limits": [
+        "O941-M002",
+        "O941-E004"
+      ]
+    },
+    {
+      "id": "PDF_TEMPLATE_REPLICATION",
+      "status": "NOT_DEMONSTRATED",
+      "scope": "La production en série de PDF dans un style arbitraire à partir d’exemples externes n’a pas été testée comme composition end-to-end dans O94.1.",
+      "source_files": [
+        "aam_o93/competence_graph.py",
+        "aam_o93/base_blocks.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_scope_audit.json"
+      ],
+      "next_validation": "Créer un cas source PDF autorisé, une mesure de rendu indépendante et un jeu de documents tenus à l’écart."
+    },
+    {
+      "id": "SQL_MIGRATION_AND_NETWORK_DEPLOYMENT",
+      "status": "NOT_DEMONSTRATED",
+      "scope": "Capture boîte noire de base de données réelle, traduction entre dialectes SQL et déploiement sur serveur distant non exécutés.",
+      "source_files": [
+        "aam_o93/blackbox.py",
+        "aam_o93/model_integration.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_scope_audit.json"
+      ],
+      "next_validation": "Tester sur une base jetable, avec snapshots, vérificateur de schéma/données et endpoint réseau explicitement autorisé."
+    },
+    {
+      "id": "LEGACY_PROGRAM_RECONSTRUCTION",
+      "status": "NOT_DEMONSTRATED",
+      "scope": "La reproduction intégrale d’un programme interne par observations arbitraires ne résulte pas de la capsule I/O exacte actuelle.",
+      "source_files": [
+        "aam_o93/blackbox.py",
+        "aam_o93/base_blocks.py",
+        "aam_o93/competence_graph.py"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_scope_audit.json"
+      ],
+      "open_limits": [
+        "O941-M001",
+        "O941-M002"
+      ]
+    },
+    {
+      "id": "SOURCE_AND_THEORY_INTEGRITY",
+      "status": "PASS_BOUNDED",
+      "scope": "Les deux archives de départ, archive sources_AAM_17.zip et fichier principal de théorie des empreintes restent inchangés d’après SHA-256/CRC et comparaison de membres.",
+      "source_files": [
+        "logs/O94_1/P0_input_integrity.json",
+        "logs/O94_1/P5_integrity_compare.json"
+      ],
+      "phase_evidence": [
+        "logs/O94_1/P5_integrity_compare_final.json"
+      ]
+    }
+  ]
+}

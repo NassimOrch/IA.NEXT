@@ -1,0 +1,149 @@
+{
+  "experiment": "EX12_NEXT_0",
+  "phase": "P1",
+  "status": "PASS",
+  "completed_at_utc": "2026-11-04T11:25:00+00:00",
+  "prompt_sha256": "ebb4d770a638434854b5b941a0634d4c1cd2661cab49fb8e39e1b69a9cb544a0",
+  "governing_report_sha256": "98a8fdec7100b1847f8510aff1a721fb3b7787d267589572fdcb2b8ca54e2375",
+  "checks_passed": 21,
+  "checks_total": 21,
+  "checks": [
+    {
+      "name": "P0_gate_passed",
+      "status": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "name": "raw_to_summary_recomputation",
+      "status": "PASS",
+      "detail": "1200 groups; 0 differences"
+    },
+    {
+      "name": "P1_RUN_003_pass",
+      "status": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "name": "P1_RUN_003_rows_and_samples",
+      "status": "PASS",
+      "detail": "600 summary rows; 24000 raw samples"
+    },
+    {
+      "name": "P1_RUN_003_all_numerical_tests",
+      "status": "PASS",
+      "detail": "126 tests; 0 failed"
+    },
+    {
+      "name": "P1_RUN_003_output_gradient_tolerance",
+      "status": "PASS",
+      "detail": "output=0.0; gradient=2.9802322387695312e-08; tolerance=1e-6"
+    },
+    {
+      "name": "P1_RUN_004_pass",
+      "status": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "name": "P1_RUN_004_rows_and_samples",
+      "status": "PASS",
+      "detail": "600 summary rows; 24000 raw samples"
+    },
+    {
+      "name": "P1_RUN_004_all_numerical_tests",
+      "status": "PASS",
+      "detail": "126 tests; 0 failed"
+    },
+    {
+      "name": "P1_RUN_004_output_gradient_tolerance",
+      "status": "PASS",
+      "detail": "output=0.0; gradient=2.9802322387695312e-08; tolerance=1e-6"
+    },
+    {
+      "name": "independent_pytest_suite",
+      "status": "PASS",
+      "detail": "...................                                                      [100%]\n19 passed in 1.33s"
+    },
+    {
+      "name": "paired_comparison_artifact",
+      "status": "PASS",
+      "detail": "run003/run004 same shape pairs"
+    },
+    {
+      "name": "center_initialization_artifact",
+      "status": "PASS",
+      "detail": "27 train-only configuration summaries per run"
+    },
+    {
+      "name": "repeatability_artifact",
+      "status": "PASS",
+      "detail": "18 kernel families compared across independent seeds"
+    },
+    {
+      "name": "script_hash_manifest",
+      "status": "PASS",
+      "detail": "exact scripts for canonical runs hashed"
+    },
+    {
+      "name": "run_registry",
+      "status": "PASS",
+      "detail": "4 attempts retained append-only"
+    },
+    {
+      "name": "failure_run_preserved",
+      "status": "PASS",
+      "detail": "failed attempt retained"
+    },
+    {
+      "name": "run002_limit_declared",
+      "status": "PASS",
+      "detail": "non-equivalent top-q comparison excluded"
+    },
+    {
+      "name": "p1_report",
+      "status": "PASS",
+      "detail": "phase report present"
+    },
+    {
+      "name": "no_training_before_gate",
+      "status": "PASS",
+      "detail": "P1 execution was kernel-only"
+    },
+    {
+      "name": "topq_deferred_by_measured_full_pipeline_cost",
+      "status": "PASS",
+      "detail": "8 paired run/q comparisons all slower at median p50; zero faster shapes"
+    }
+  ],
+  "non_blocking_gaps": [
+    {
+      "item": "Exact source scripts for P1_RUN_001 and P1_RUN_002",
+      "status": "NOT_RECOVERED_AFTER_WORKSPACE_SEARCH",
+      "handling": "Both result sets and logs are retained, RUN001 is a failed numeric prototype and RUN002 is excluded from matched top-q claims. Canonical PASS runs 003/004 have exact scripts and hashes."
+    }
+  ],
+  "platform_limits": [
+    "CPU-only; no CUDA/VRAM",
+    "3 visible logical CPUs; 1 thread during benchmarks",
+    "No reliable energy meter",
+    "RSS is process-level, not per-model peak memory",
+    "No model-quality or training results were generated in P1"
+  ],
+  "decisions": [
+    "Direct broadcast distance kernel selected for HC-RBF base",
+    "Top-q sparse kernel deferred: end-to-end p50 slower in every matched shape on both canonical runs",
+    "Low-rank modulation and three-round message passing deferred from the base path pending end-to-end justification",
+    "Sobol/farthest-point train-only centre initialization retained as candidates; KMeans retained as a comparator"
+  ],
+  "evidence": [
+    "10_reports/P1_BENCHMARK_REPORT.md",
+    "00_governance/P1_RUN_REGISTRY.jsonl",
+    "08_benchmarks/P1/P1_RECOMPUTATION_AUDIT.json",
+    "08_benchmarks/P1/P1_PAIRED_KERNEL_COMPARISONS.csv",
+    "08_benchmarks/P1/P1_CENTER_INIT_COMPARISON.csv",
+    "08_benchmarks/P1/P1_CROSS_RUN_REPEATABILITY.csv",
+    "08_benchmarks/P1/P1_SOURCE_HASHES.json",
+    "08_benchmarks/P1/P1_RUN_003/P1_PYTEST_FINAL.log",
+    "00_governance/P1_DECISIONS.json"
+  ],
+  "statement": "P1 PASS authorizes P2 only. It validates reference equivalence and the CPU microbenchmark harness; it does not validate predictive quality, generalization, or superiority over an MLP."
+}

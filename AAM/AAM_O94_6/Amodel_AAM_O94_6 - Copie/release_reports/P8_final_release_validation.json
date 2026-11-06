@@ -1,0 +1,103 @@
+{
+  "schema": "aam-o946-final-release-validation-v1",
+  "version": "O94_6",
+  "status": "PASS_BOUNDED",
+  "archive": "Dmodel_AAM_O94_6.zip",
+  "archive_sha256": "8acad36d21ff26688032dcbce1e81a41dae1bc80b1ad8c59cc2f83cd56338b87",
+  "archive_bytes": 175381016,
+  "archive_mib": 167.256,
+  "archive_entries": 9547,
+  "crc": "PASS",
+  "unsafe_paths": [],
+  "duplicate_paths": false,
+  "under_220_mib": true,
+  "manifest_verification": {
+    "status": "PASS",
+    "root": "/mnt/data/work_O94_6/final_verify/model_release_extract",
+    "manifests": [
+      {
+        "manifest": "MANIFEST_SHA256.json",
+        "checked": 2781
+      },
+      {
+        "manifest": "PACKAGE_MANIFEST_SHA256.json",
+        "checked": 2781
+      }
+    ],
+    "manifested_file_count": 2781,
+    "bad_count": 0,
+    "bad": []
+  },
+  "preflight": {
+    "status": "PASS_BOUNDED",
+    "operation": "standalone:preflight_o946",
+    "current_phase": "COMPLETE",
+    "phase_status": {
+      "P0": "COMPLETE_EVIDENCED",
+      "P1": "COMPLETE_EVIDENCED",
+      "P2": "COMPLETE_EVIDENCED",
+      "P3": "COMPLETE_EVIDENCED",
+      "P4": "COMPLETE_EVIDENCED",
+      "P5": "COMPLETE_EVIDENCED",
+      "P6": "COMPLETE_EVIDENCED",
+      "P7": "COMPLETE_EVIDENCED",
+      "P8": "COMPLETE_EVIDENCED"
+    },
+    "phase_count": 9,
+    "parent_O94_5_files_verified": 188,
+    "o946_overlay_files_verified": 728,
+    "model_error_records": 13,
+    "environment_error_records": 71,
+    "manifest_sha256": "72cf88b0b8151a0e4acb936bdd774abe6119766b884e5ece4fbb6107563c5684",
+    "policy": "sequential-phases; immutable O94.5 parent; O94.6 source snapshot; mutable evidence outside source snapshot"
+  },
+  "compileall": {
+    "status": "PASS_BOUNDED",
+    "stdout_bytes": 0,
+    "stderr_bytes": 0
+  },
+  "tested_candidate_matrix": {
+    "status": "PASS_BOUNDED",
+    "receipt": "Dmodel_AAM_O94_6.zip contents: receipts/O94_6/P8_fresh_extract_full_matrix.json",
+    "sha256": "c4d43f904d876cfbbc6aa8b2b08297e9faab90160a2555a3690633501257a7b6",
+    "test_files": 92,
+    "unique_test_files": 92,
+    "groups": 12,
+    "passed_sum_across_groups": 449,
+    "failed_sum_across_groups": 0,
+    "timeouts": 0,
+    "elapsed_seconds": 377.789
+  },
+  "executable_test_code_parity": {
+    "status": "PASS",
+    "python_files_compared": 381,
+    "changed": [],
+    "missing": [],
+    "extra": [],
+    "pytest_ini_same": true,
+    "note": "les 381 fichiers Python de aam_o93/, scripts/ et tests/ sont identiques par SHA-256 entre le candidat ayant passé la matrice et la release reconstruite après clôture de phase"
+  },
+  "targeted_smoke": {
+    "schema": "aam-o946-final-release-targeted-smoke-v1",
+    "status": "PASS_ASSERTIONS_SUMMARY_ONLY_WRAPPER_TIMEOUT",
+    "command": "xvfb-run -a python scripts/o946_pytest_exit_safe.py -q [9 targeted test modules: RAG, multi-question, long generation UI, real FFmpeg, composition compiler/workbench, reward integration, unified chat, continuous resolution, savepoint restore]",
+    "pytest_summary_present": true,
+    "pytest_reported_passed": 23,
+    "pytest_reported_failed": 0,
+    "pytest_reported_duration_seconds": 33.78,
+    "summary_lines": [
+      "23 passed in 33.78s"
+    ],
+    "outer_orchestration_returncode": "UNKNOWN; container execution timed out after pytest emitted its complete summary",
+    "log": "P8_final_release_targeted_smoke_safe.log",
+    "log_sha256": "801dbc8f3d0a6e903ec9d542855678c323c62b235e836efd74fd858a907a39e5",
+    "interpretation": "All 23 selected pytest assertions reported PASSED in the raw pytest summary; the surrounding command did not return a confirmed shell exit code before its execution window expired, so this receipt does not claim a clean wrapper shutdown. The 92-file, 12-batch fresh-extraction matrix has a separately confirmed PASS_BOUNDED runner receipt.",
+    "recorded_utc": "2026-10-20T18:53:51Z"
+  },
+  "known_environment_qualifications": [
+    "Le poids réel SmolLM2-360M de l’utilisateur était absent et Transformers n’a pas pu être installé à cause de l’indisponibilité DNS; son inférence n’est pas certifiée par ce run.",
+    "La capture et reproduction du processus de facturation réussit sur 6 entrées observées; les deux entrées de validation sont explicitement UNRESOLVED.",
+    "Le smoke test ciblé a écrit 23 passed / 0 failed en 33,78 s, mais l’enveloppe d’orchestration n’a pas confirmé son code retour avant son timeout; la matrice complète segmentée de 449 réussites reste la preuve exhaustive principale."
+  ],
+  "created_utc": "2026-10-20T18:55:33Z"
+}

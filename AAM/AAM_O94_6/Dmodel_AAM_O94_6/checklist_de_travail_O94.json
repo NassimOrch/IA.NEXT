@@ -1,0 +1,956 @@
+{
+  "schema": "aam-o94-work-checklist-v1",
+  "title": "Checklist séquentielle de travail O94",
+  "created_utc": "2026-10-18T09:18:57Z",
+  "reference_formalism": "formalisme_O94.tex",
+  "reference_laboratory": "laboratoire_O94.tex",
+  "reference_error_model": "checklist_erreurs_model.json",
+  "reference_error_environment": "checklist_erreurs_no_model.json",
+  "current_phase": "P7",
+  "global_status": "P6_COMPLETE_EVIDENCED_P7_IN_PROGRESS",
+  "phase_order": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7"
+  ],
+  "rule": "Aucune phase suivante ne commence avant COMPLETE_EVIDENCED de la phase précédente. Les écarts de protocole et limites d'environnement sont conservés en registre.",
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Inventaire source et intégrité des entrées",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "Deux archives d'entrée lisibles"
+      ],
+      "exit_criteria": [
+        "testzip sur les deux ZIP sans erreur",
+        "hashes initiaux enregistrés",
+        "sources imbriquées inventoriées",
+        "écarts O93 notés"
+      ],
+      "evidence": [
+        "source_inventory.json",
+        "logs/O94_baseline_integrity.json",
+        "logs/O94_baseline_integrity.json"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "P1",
+      "name": "Formalisation et validation des briques fondamentales",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P0 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "compétences/méthodes/règles normalisées",
+        "toutes références de composition valides",
+        "test catalogue réussi"
+      ],
+      "evidence": [
+        "formalisme_O94.tex",
+        "aam_o93/base_blocks.py",
+        "tests/test_o94_base_blocks.py",
+        "logs/O94_P1_20261018T092205Z.json"
+      ],
+      "depends_on": [
+        "P0"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Persistance atomique et reprise WinError32",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P1 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "test de reprise simulée réussi",
+        "erreur permanente remontée",
+        "aucune permission contournée",
+        "tests hérités de persistance réussis"
+      ],
+      "evidence": [
+        "aam_atomic_io.py",
+        "tests/test_o94_atomic_replace_retry.py",
+        "logs/O94_P2_20261018T092301Z.json"
+      ],
+      "depends_on": [
+        "P1"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Traces d'observation, RAG adaptatif et résolution continue",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P2 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "traces marquées non causales sans preuve",
+        "RAG adaptatif testé et override vérifié",
+        "sans vérificateur résolution reste non vérifiée",
+        "tests RAG hérités passés"
+      ],
+      "evidence": [
+        "aam_o93/observer.py",
+        "aam_o93/semantic_rag.py",
+        "aam_o93/runtime.py",
+        "tests/test_o94_rag_adaptive.py",
+        "tests/test_o94_trace_resolution_reward.py",
+        "logs/O94_P3_20261018T092415Z.json",
+        "logs/O94_P3_20261018T092444Z.json"
+      ],
+      "depends_on": [
+        "P2"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Backend LLM, graphe causal et ergonomie UI",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P3 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "protocoles OpenAI-compatible et Ollama parsés",
+        "secret jamais persisté",
+        "profondeur causale complète dans vue",
+        "UI syntaxiquement valide et tests graphe passés"
+      ],
+      "evidence": [
+        "aam_o92/engine.py",
+        "aam_o93/ui.py",
+        "tests/test_o94_local_llm_adapter.py",
+        "tests/test_p6_memory_causal_graph_view.py",
+        "logs/O94_P4_20261018T092544Z.json",
+        "logs/O94_P4_20261018T092841Z.json",
+        "logs/O94_P4_20261018T092917Z.json",
+        "tests/test_o94_continuous_resolution_ui.py"
+      ],
+      "depends_on": [
+        "P3"
+      ],
+      "closure_note": "Tests ciblés passent y compris résolution continue UI et changement effectif de politique de récupération; tests Windows/serveurs LLM externes réels non exécutés et explicitement hors du périmètre validé."
+    },
+    {
+      "id": "P5",
+      "name": "Tests de non-régression et analyse des écarts",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P4 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "tests ciblés passés",
+        "suite de tests exécutée",
+        "tous échecs conservés et interprétés",
+        "corpus SMS complet marqué selon preuve effective"
+      ],
+      "evidence": [
+        "logs/O94_test_results.json",
+        "logs/O94_P5_20261018T095427Z.json",
+        "logs/O94_P5_20261018T095437Z.json",
+        "checklist_erreurs_model.json",
+        "checklist_erreurs_no_model.json",
+        "evidence/O94_P5_closure.json"
+      ],
+      "depends_on": [
+        "P4"
+      ],
+      "closure_note": "PASS_BOUNDED_SEGMENTED: 274/274 cas collectés et 47/47 modules couverts par reçus réussis; compileall PASS. SMS intégral (5 574 lignes) NOT_VALIDATED; intégrations matérielles/externes NOT_RUN. Les tentatives initiales en échec/timeout sont conservées puis reliées à leurs retests."
+    },
+    {
+      "id": "P6",
+      "name": "Rapports, registre de preuves et sauvegarde",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P5 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "deux documents LaTeX mis à jour",
+        "registre relie exigence/code/UI/tests/limites",
+        "snapshot synchronisé",
+        "fichiers JSON valides"
+      ],
+      "evidence": [
+        "laboratoire_O94.tex",
+        "formalisme_O94.tex",
+        "registre_prouves_O94.json",
+        "sav_AAM_O94",
+        "evidence/O94_P6_json_validation.json",
+        "logs/O94_P6_20261018T100637Z.json",
+        "logs/O94_P6_20261018T100719Z.json",
+        "sav_AAM_O94/savepoint.json",
+        "sav_AAM_O94/current/SAVEPOINT_MANIFEST.json",
+        "evidence/O94_P6_closure.json",
+        "logs/O94_P6_closure_execution.json",
+        "logs/O94_P6_close_import_failure.json",
+        "logs/O94_P6_close_hashfield_failure.json",
+        "logs/O94_P6_incident_reconciliation.json"
+      ],
+      "depends_on": [
+        "P5"
+      ],
+      "closure_note": "Registre 13 exigences validé sans référence manquante; rapports mis à jour; JSON/TeX et hashes d’entrées vérifiés; snapshot pré-clôture valide. Snapshot rafraîchi après cette écriture pour synchroniser le point de reprise."
+    },
+    {
+      "id": "P7",
+      "name": "Manifests et livraison vérifiable",
+      "status": "COMPLETE_EVIDENCED",
+      "entry_criteria": [
+        "P6 COMPLETE_EVIDENCED"
+      ],
+      "exit_criteria": [
+        "manifests SHA-256 vérifiés",
+        "archives testées en CRC et ré-extraction",
+        "chaque archive sous 220 MiB ou découpée avec script",
+        "chemins de travail et sauvegarde livrés"
+      ],
+      "evidence": [
+        "MANIFEST_SHA256.json",
+        "logs/O94_package_verification.json",
+        "chemins_O94.json",
+        "evidence/O94_P7_manifest_preinspection.json",
+        "logs/O94_P7_manifest_schema_inspection_failure.json",
+        "logs/O94_P7_model_candidate_receipt.json",
+        "logs/O94_P7_candidate_archives_receipt.json",
+        "logs/O94_P7_zip_unicode_tooling_incident.json",
+        "logs/O94_P7_delivery_smoke.json",
+        "logs/O94_P7_portable_verifier_schema_failure.json",
+        "logs/O94_P7_portable_verifier_candidate.json",
+        "logs/O94_P7_package_builder_timeout.json",
+        "tests/test_o94_delivery_common_manifest.py",
+        "logs/O94_P7_tool_hardening.json",
+        "logs/O94_P7_finalize_archive_drift.json",
+        "O94_livraison_manifest.json",
+        "package_reports/O94_Dmodel_package_verification.json",
+        "package_reports/O94_followup_package_verification.json",
+        "package_reports/O94_audit_package_verification.json",
+        "evidence/O94_P7_closure.json",
+        "sav_AAM_O94/savepoint.json",
+        "sav_AAM_O94/current/SAVEPOINT_MANIFEST.json",
+        "logs/O94_P7_snapshot_manifest_mock_artifact.json",
+        "tests/test_o94_snapshot_portability.py"
+      ],
+      "depends_on": [
+        "P6"
+      ],
+      "open_issues": [
+        "O94-P7-ARCHIVE-DRIFT-BETWEEN-VERIFY-AND-FINALIZE-001",
+        "O94-P7-SNAPSHOT-MANIFEST-MAGICMOCK-001"
+      ],
+      "closure_note": "Les trois archives finales ont passé CRC, extraction fraîche, contrôle de manifeste, chemin sûr et seuil de taille. Les SHA-256 sont recensés dans O94_livraison_manifest.json, sidecar externe qui évite la référence circulaire."
+    }
+  ],
+  "history": [
+    {
+      "timestamp_utc": "2026-10-18T09:18:57Z",
+      "event": "P0 baseline établi depuis l'inventaire des archives; la préparation des correctifs avait débuté avant l'initialisation formelle de cette checklist et est enregistrée comme écart de protocole."
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:21:53Z",
+      "event": "phase_runner_blocked_before_model_test",
+      "phase": "P1",
+      "incident_id": "O94-P1-RUNNER-IMPORT-001"
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:22:05.786349+00:00",
+      "event": "phase_command_executed",
+      "phase": "P1",
+      "receipt": "logs/O94_P1_20261018T092205Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:22:31Z",
+      "event": "phase_completed",
+      "phase": "P1",
+      "evidence": [
+        "tests/test_o94_base_blocks.py",
+        "logs/O94_P1_20261018T092205Z.json"
+      ],
+      "interpretation": "Catalogue/dépendances et exposition runtime passés en tests locaux bornés; pas de preuve de composition intégrale de tous les sous-systèmes historiques."
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:23:01.581740+00:00",
+      "event": "phase_command_executed",
+      "phase": "P2",
+      "receipt": "logs/O94_P2_20261018T092301Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:23:14Z",
+      "event": "phase_completed",
+      "phase": "P2",
+      "evidence": [
+        "tests/test_o94_atomic_replace_retry.py",
+        "logs/O94_P2_20261018T092301Z.json"
+      ],
+      "interpretation": "La reprise bornée winerror32 et la préservation de la cible sont testées par simulation; le système Windows réel reste non testé."
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:23:36.989124+00:00",
+      "event": "phase_command_executed",
+      "phase": "P3",
+      "receipt": "logs/O94_P3_20261018T092336Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:24:15.826530+00:00",
+      "event": "phase_command_executed",
+      "phase": "P3",
+      "receipt": "logs/O94_P3_20261018T092415Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:24:44.060318+00:00",
+      "event": "phase_command_executed",
+      "phase": "P3",
+      "receipt": "logs/O94_P3_20261018T092444Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:25:03Z",
+      "event": "phase_completed",
+      "phase": "P3",
+      "evidence": [
+        "tests/test_o94_rag_adaptive.py",
+        "tests/test_o94_trace_resolution_reward.py",
+        "tests/test_p3_semantic_rag.py",
+        "tests/test_p1_o930_observer_upgrade.py",
+        "tests/test_p1_observer.py"
+      ],
+      "interpretation": "Les tests locaux et hérités de RAG/observation passent après correction d’une erreur de portée. Le comportement sémantique en corpus complet et généralisation restent à évaluer séparément."
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:25:19.138885+00:00",
+      "event": "phase_command_executed",
+      "phase": "P4",
+      "receipt": "logs/O94_P4_20261018T092519Z.json",
+      "status": "FAIL",
+      "exit_code": 4
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:25:44.746910+00:00",
+      "event": "phase_command_executed",
+      "phase": "P4",
+      "receipt": "logs/O94_P4_20261018T092544Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:28:41.183206+00:00",
+      "event": "phase_command_executed",
+      "phase": "P4",
+      "receipt": "logs/O94_P4_20261018T092841Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:29:17.460790+00:00",
+      "event": "phase_command_executed",
+      "phase": "P4",
+      "receipt": "logs/O94_P4_20261018T092917Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:29:30Z",
+      "event": "phase_closed_and_next_opened",
+      "closed_phase": "P4",
+      "closed_status": "COMPLETE_EVIDENCED",
+      "opened_phase": "P5",
+      "evidence": "logs/O94_P4_20261018T092917Z.json"
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:29:53.167165+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T092953Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:31:13.829311+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093113Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:31:43.147848+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093143Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:32:32.785246+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093232Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:32:56.352489+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093256Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:33:29.864233+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093329Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:34:05.354208+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093405Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:34:57.233440+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093457Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:35:18.989531+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093518Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:35:55.012015+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093555Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:36:29.006027+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093629Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:37:44.338819+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093744Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:37:58.515736+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093758Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:38:28.383482+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093828Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:38:56.368222+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093856Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:39:37.363287+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093937Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:39:48.081295+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T093948Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:40:03.868334+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094003Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:40:19.438582+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094019Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:40:34.879849+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094034Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:40:49.075911+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094049Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:41:11.232680+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094111Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:42:03.316978+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094203Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:42:42.622870+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094242Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:43:16.578942+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094316Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:43:58.097133+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094358Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:49:11.927333+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094911Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:49:50.468481+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T094950Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:50:29.616919+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095029Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:51:52.434095+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095152Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:52:10.503527+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095210Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:52:38.872491+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095238Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:52:57.842973+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095257Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:53:19.047201+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095319Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:53:30.544030+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095330Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:53:46.579933+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095346Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:54:09.113971+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095409Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:54:27.717269+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095427Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:54:37.119944+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095437Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:56:41.992580+00:00",
+      "event": "phase_command_executed",
+      "phase": "P5",
+      "receipt": "logs/O94_P5_20261018T095641Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:58:55.950550+00:00",
+      "event": "phase_completed",
+      "phase": "P5",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "logs/O94_test_results.json",
+        "logs/O94_P5_20261018T095427Z.json",
+        "logs/O94_P5_20261018T095437Z.json"
+      ],
+      "interpretation": "Tous les 274 cas collectés/47 modules ont des reçus de retest réussis; les essais externes et le corpus SMS complet restent non validés."
+    },
+    {
+      "timestamp_utc": "2026-10-18T09:58:55.950550+00:00",
+      "event": "phase_started",
+      "phase": "P6",
+      "status": "IN_PROGRESS",
+      "reason": "P5 satisfait ses critères locaux avec les limites externes explicitement conservées."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:00:45.464943+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100045Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:01:11.673474+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100111Z.json",
+      "status": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:04:46.529882+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100446Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:06:27.012451+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100627Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:06:37.580115+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100637Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:07:19.900790+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100719Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:09:00.668094+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100900Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:09:41.197815+00:00",
+      "event": "phase_command_executed",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_20261018T100941Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:09:56Z",
+      "event": "phase_completed",
+      "phase": "P6",
+      "status": "COMPLETE_EVIDENCED",
+      "evidence": [
+        "laboratoire_O94.tex",
+        "formalisme_O94.tex",
+        "registre_prouves_O94.json",
+        "evidence/O94_P6_json_validation.json",
+        "logs/O94_P6_20261018T100637Z.json",
+        "logs/O94_P6_20261018T100719Z.json",
+        "sav_AAM_O94/savepoint.json",
+        "sav_AAM_O94/current/SAVEPOINT_MANIFEST.json",
+        "evidence/O94_P6_closure.json"
+      ],
+      "interpretation": "Documentation, traceability, JSON/source integrity and pre-closure savepoint validated; external limits stay explicit."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:09:56Z",
+      "event": "direct_phase_close_receipt_written",
+      "phase": "P6",
+      "receipt": "logs/O94_P6_closure_execution.json",
+      "status": "PASS"
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:10:32Z",
+      "event": "tooling_incidents_reconciled_after_phase_close",
+      "phase": "P6",
+      "status": "RESOLVED_TOOLING_RETEST_PASS",
+      "evidence": [
+        "logs/O94_P6_closure_execution.json",
+        "logs/O94_P6_close_import_failure.json",
+        "logs/O94_P6_close_hashfield_failure.json",
+        "logs/O94_P6_incident_reconciliation.json"
+      ]
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:13:51Z",
+      "event": "phase_started",
+      "phase": "P7",
+      "status": "IN_PROGRESS",
+      "reason": "P6 closed and synchronized savepoint manifest verified; beginning O94 manifests, package builds and extraction/CRC checks."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:13:51Z",
+      "event": "prior_tooling_error_reconciled",
+      "phase": "P7",
+      "status": "RESOLVED_TOOLING_INSPECTION_ERROR",
+      "evidence": "evidence/O94_P7_manifest_preinspection.json"
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:14:20.701167+00:00",
+      "event": "phase_command_executed",
+      "phase": "P7",
+      "receipt": "logs/O94_P7_20261018T101420Z.json",
+      "status": "FAIL",
+      "exit_code": 2
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:14:51.137674+00:00",
+      "event": "phase_command_executed",
+      "phase": "P7",
+      "receipt": "logs/O94_P7_20261018T101451Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:30:43Z",
+      "event": "candidate_archives_crc_extract_manifest_pass",
+      "phase": "P7",
+      "status": "PASS_CANDIDATES",
+      "evidence": [
+        "logs/O94_P7_model_candidate_receipt.json",
+        "logs/O94_P7_candidate_archives_receipt.json"
+      ]
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:30:43Z",
+      "event": "InfoZIP_unicode_path_incident_reconciled",
+      "phase": "P7",
+      "status": "RESOLVED_TOOLING_RETEST_PASS",
+      "evidence": "logs/O94_P7_zip_unicode_tooling_incident.json"
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:31:11Z",
+      "event": "packaging_timeout_recorded_and_split_recovery_started",
+      "phase": "P7",
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "logs/O94_P7_package_builder_timeout.json",
+        "scripts/o94_package_delivery.py"
+      ],
+      "interpretation": "Timeout of orchestration is not a model verdict; independent archive checks passed for the candidate only."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:34:11Z",
+      "event": "second_package_build_timeout_recorded",
+      "phase": "P7",
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "logs/O94_P7_package_rebuild_timeout.json"
+      ],
+      "interpretation": "CRC-only candidate not accepted because the interrupted extraction was partial; recover using the prior complete extraction."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:35:33Z",
+      "event": "portable_delivery_verifier_schema_failure_preserved",
+      "phase": "P7",
+      "status": "RESOLVED_TOOLING_RETEST_PASS",
+      "evidence": "logs/O94_P7_portable_verifier_candidate.json"
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:35:33Z",
+      "event": "combined_archive_builder_timeout_preserved_and_retested",
+      "phase": "P7",
+      "status": "RESOLVED_TOOLING_RETEST_PASS",
+      "evidence": "logs/O94_P7_package_builder_timeout.json"
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:43:20Z",
+      "event": "p7_delivery_verifier_hardened",
+      "phase": "P7",
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "tests/test_o94_delivery_common_manifest.py",
+        "logs/O94_P7_tool_hardening.json"
+      ],
+      "note": "7 targeted delivery-manifest/path tests passed; final archives still pending."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:43:47.086343+00:00",
+      "event": "phase_command_executed",
+      "phase": "P7",
+      "receipt": "logs/O94_P7_20261018T104347Z.json",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:52:37Z",
+      "event": "finalization_blocked_due_to_archive_drift",
+      "phase": "P7",
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "logs/O94_P7_finalize_archive_drift.json"
+      ],
+      "note": "No final delivery sidecar emitted; rebuild is required."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:56:35Z",
+      "event": "phase_completed",
+      "phase": "P7",
+      "status": "COMPLETE_EVIDENCED",
+      "receipt": "evidence/O94_P7_closure.json",
+      "next_phase": null,
+      "interpretation": "Les trois archives sont vérifiées indépendamment; les limites non validées restent explicites."
+    },
+    {
+      "timestamp_utc": "2026-10-18T10:57:39Z",
+      "event": "snapshot_manifest_magicmock_mismatch_found_and_fix_added",
+      "phase": "P7",
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "logs/O94_P7_snapshot_manifest_mock_artifact.json",
+        "tests/test_o94_snapshot_portability.py"
+      ]
+    }
+  ],
+  "last_execution": "o94_close_p7_package_gate",
+  "last_closure": {
+    "phase": "P7",
+    "status": "COMPLETE_EVIDENCED",
+    "timestamp_utc": "2026-10-18T10:56:35Z",
+    "receipt": "evidence/O94_P7_closure.json",
+    "implementation_complete_claimed": false
+  },
+  "reference_formalism_sha256_current": "abc8e75d22a9f45429de9147e0bf514c8d84b81f1d4f7244bc692f190f3065d0",
+  "reference_laboratory_sha256_current": "eb5652b373b1b4e9061cf926aa8ab79a1c1d9d44fb28868017ab1b506c189ab1",
+  "updated_utc": "2026-10-18T10:57:39Z"
+}

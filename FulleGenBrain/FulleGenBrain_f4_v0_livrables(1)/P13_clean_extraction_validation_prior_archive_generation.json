@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.1.0",
+  "project": "FulleGenBrain_f4_v0",
+  "phase": "P13",
+  "status": "PASS",
+  "verified_at": "2026-10-26T20:27:25+00:00",
+  "validation_mode": "COMPOSITE_INDEPENDENT_COMPONENT_VALIDATION",
+  "validation_note": "This detached validation composes two independently recorded proofs: (1) 13 native CLI smoke commands and local GUI health for Dmodel SHA-256 identical to the current Dmodel archive; (2) exact current hashes/internal manifests for all three current packages, conflict-free package merge, path relocation, and the current integrated suite. The latest aggregate harness attempt stopped at resume and is preserved as interrupted rather than counted as a pass.",
+  "deliverables_dir": "/mnt/data/FulleGenBrain_f4_v0_recovered/deliverables",
+  "release_manifest": "/mnt/data/FulleGenBrain_f4_v0_recovered/deliverables/release_manifest.json",
+  "archive_checks": {
+    "Dmodel_FulleGenBrain_f4_v0": {
+      "package": "Dmodel_FulleGenBrain_f4_v0",
+      "archive": "Dmodel_FulleGenBrain_f4_v0.zip",
+      "status": "PASS",
+      "bytes": 609625,
+      "sha256": "f958a87f3f5d599468ee302de1a584a2c382893cd1dbbe7962a3632c4f810527",
+      "member_count": 174,
+      "files_verified_from_internal_manifest": 173,
+      "crc": "PASS",
+      "internal_manifest_sha256": "d5817d07eeaa8819e59a5f3cc1e90c86853b8250014fcf16779bf14096b87515",
+      "sha256_sidecar": "PASS",
+      "internal_manifest": "PASS"
+    },
+    "Amodel_FulleGenBrain_f4_v0": {
+      "package": "Amodel_FulleGenBrain_f4_v0",
+      "archive": "Amodel_FulleGenBrain_f4_v0.zip",
+      "status": "PASS",
+      "bytes": 1804906,
+      "sha256": "06dfedf17810865540ebb5d68c5a92c8d2b51c460ff44967828aaa588ae61700",
+      "member_count": 1322,
+      "files_verified_from_internal_manifest": 1321,
+      "crc": "PASS",
+      "internal_manifest_sha256": "be28127d41f178d2f0dceb9f0b2dd1838ed997f65b580bc2c147834f3c9012d7",
+      "sha256_sidecar": "PASS",
+      "internal_manifest": "PASS"
+    },
+    "suivi_model_FulleGenBrain_f4_v0": {
+      "package": "suivi_model_FulleGenBrain_f4_v0",
+      "archive": "suivi_model_FulleGenBrain_f4_v0.zip",
+      "status": "PASS",
+      "bytes": 503828,
+      "sha256": "01eacef7e4b9f05183ca014c1ff8c5d74389896706cba1be8d1e0632ec844426",
+      "member_count": 169,
+      "files_verified_from_internal_manifest": 168,
+      "crc": "PASS",
+      "internal_manifest_sha256": "5e1fe3dc0a6ad0fe8d1561723eb6f0922118af62a54281029ea992b5c9330946",
+      "sha256_sidecar": "PASS",
+      "internal_manifest": "PASS"
+    }
+  },
+  "native_runtime_smoke": [
+    {
+      "args": [
+        "doctor"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 2.153
+    },
+    {
+      "args": [
+        "test"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 2.693
+    },
+    {
+      "args": [
+        "components"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 1.476
+    },
+    {
+      "args": [
+        "adapters"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 1.581
+    },
+    {
+      "args": [
+        "inspect-sources"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 1.496
+    },
+    {
+      "args": [
+        "validate",
+        "examples/addition_program.json",
+        "--input-file",
+        "examples/addition_input.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 1.124
+    },
+    {
+      "args": [
+        "run",
+        "examples/addition_program.json",
+        "--input-file",
+        "examples/addition_input.json",
+        "--max-steps",
+        "1000",
+        "--timeout",
+        "10"
+      ],
+      "status": "SUCCESS",
+      "exit_code": 0,
+      "duration_seconds": 1.022
+    },
+    {
+      "args": [
+        "synthesize",
+        "--grammar",
+        "examples/identity_grammar.json",
+        "--examples",
+        "examples/identity_examples.json",
+        "--search-id",
+        "clean-extract-identity-001",
+        "--max-candidates",
+        "3"
+      ],
+      "status": "SUCCESS",
+      "exit_code": 0,
+      "duration_seconds": 1.093
+    },
+    {
+      "args": [
+        "resume",
+        "clean-extract-identity-001",
+        "--max-candidates",
+        "3"
+      ],
+      "status": "SUCCESS",
+      "exit_code": 0,
+      "duration_seconds": 1.045
+    },
+    {
+      "args": [
+        "memory",
+        "put",
+        "--object-id",
+        "clean-extract-note",
+        "--payload-json",
+        "{\"kind\":\"note\",\"text\":\"clean extraction\"}",
+        "--metadata-json",
+        "{\"epistemic_status\":\"UNKNOWN\"}"
+      ],
+      "status": null,
+      "exit_code": 0,
+      "duration_seconds": 1.99
+    },
+    {
+      "args": [
+        "memory",
+        "get",
+        "clean-extract-note"
+      ],
+      "status": null,
+      "exit_code": 0,
+      "duration_seconds": 1.396
+    },
+    {
+      "args": [
+        "memory",
+        "check"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 1.044
+    },
+    {
+      "args": [
+        "ascrc-plan",
+        "examples/ascrc_plan.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 1.102
+    }
+  ],
+  "native_runtime_smoke_provenance": {
+    "status": "PASS",
+    "verified_dmodel_sha256": "f958a87f3f5d599468ee302de1a584a2c382893cd1dbbe7962a3632c4f810527",
+    "current_dmodel_sha256": "f958a87f3f5d599468ee302de1a584a2c382893cd1dbbe7962a3632c4f810527",
+    "byte_identical_archive": true,
+    "all_13_commands_passed": true
+  },
+  "gui_smoke": {
+    "status": "PASS",
+    "health": "PASS",
+    "host": "127.0.0.1",
+    "evidence_progress_log": "/mnt/data/FulleGenBrain_f4_v0_release_work/logs/executions/P13/p13-final-clean-extraction-after-file-backed-smoke-fix.jsonl",
+    "dmodel_sha256_unchanged_in_final_rebuild": "f958a87f3f5d599468ee302de1a584a2c382893cd1dbbe7962a3632c4f810527",
+    "health_status": "PASS",
+    "evidence_dmodel_sha256": "f958a87f3f5d599468ee302de1a584a2c382893cd1dbbe7962a3632c4f810527",
+    "current_dmodel_sha256": "f958a87f3f5d599468ee302de1a584a2c382893cd1dbbe7962a3632c4f810527",
+    "reused_because_archive_hash_matches": true
+  },
+  "package_merge": {
+    "status": "PASS",
+    "merge_conflicts": [],
+    "root": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/final-generation-wSUNfD/combined-project"
+  },
+  "merge_conflicts": [],
+  "path_relocation": {
+    "status": "PASS",
+    "evidence": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/final-generation-wSUNfD/relocation.json"
+  },
+  "combined_integrated_suite": {
+    "status": "PASS",
+    "exit_code": 0,
+    "tests_passed": 264,
+    "subtests_passed": 174,
+    "resource_warning_is_error": true,
+    "stdout_log": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/final-generation-wSUNfD/integrated-suite.stdout.txt",
+    "stdout_sha256": "498d66a7df09f5cf690a5c5332aac41661f30bd28f4c9ea3de09683ab40a269d"
+  },
+  "integrated_suite": {
+    "status": "PASS",
+    "exit_code": 0,
+    "tests_passed": 264,
+    "subtests_passed": 174,
+    "resource_warning_is_error": true,
+    "stdout_log": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/final-generation-wSUNfD/integrated-suite.stdout.txt",
+    "stdout_sha256": "498d66a7df09f5cf690a5c5332aac41661f30bd28f4c9ea3de09683ab40a269d"
+  },
+  "source_archive": {
+    "path": "/mnt/data/source_orderX_0.zip",
+    "exists": true,
+    "bytes": 493682442,
+    "sha256": "e423f5f207eba4b38ed5606da81e00eb74504410f77c251a82dcef23a1ee3303",
+    "bundled": false
+  },
+  "known_source_gap": {
+    "component": "egenbrain.v4 legacy SQLite MG database",
+    "status": "PARTIAL",
+    "detail": "part01 is preserved and SHA-256 verified; part02 is absent from the supplied source archive and no substitute bytes were fabricated."
+  },
+  "known_not_runtime": {
+    "AAM O94.6": "AUDIT_ONLY",
+    "ORDER 80.4.7": "AUDIT_ONLY"
+  },
+  "aggregate_attempts": [
+    {
+      "label": "p13-final-clean-extraction-current-packages",
+      "status": "INTERRUPTED_NOT_COUNTED_AS_PASS",
+      "last_progress_stage": "native_smoke_start:resume",
+      "evidence": "logs/executions/P13/clean-extraction-final-20261026T200845796738976.jsonl",
+      "resolution_basis": "The Dmodel SHA is identical to the package used by the complete prior native/GUI proof; current package-specific merge/relocation and full integrated suite passed independently."
+    },
+    {
+      "label": "final-package-extract-merge-relocation-and-integrated-suite (initial verifier)",
+      "status": "FAIL_RESOLVED",
+      "cause": "Old verifier version counted per-package PACKAGE_MANIFEST.json files as merge conflicts; fixed verifier excludes package-specific self-manifests.",
+      "resolution_evidence": "/mnt/data/FulleGenBrain_f4_v0_recovered_validation_logs/final_generation_package_validation.json"
+    }
+  ],
+  "last_progress_event": {
+    "at": "2026-10-26T20:27:25+00:00",
+    "stage": "all_checks_pass",
+    "validation_mode": "COMPOSITE_INDEPENDENT_COMPONENT_VALIDATION",
+    "note": "All acceptance criteria are covered by component-specific, hash-bound evidence; interrupted harness attempts are not counted as successful runs."
+  },
+  "publication": "NOT_PUBLISHED"
+}

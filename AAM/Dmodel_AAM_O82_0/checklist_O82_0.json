@@ -1,0 +1,399 @@
+{
+  "version": "AAM O82_0 completeness-and-repair checklist",
+  "status": "COMPLETE",
+  "rule": "Aucune phase suivante ne peut démarrer tant que la phase précédente n'est pas PASS avec preuves et zéro défaut bloquant connu.",
+  "basis": {
+    "primary_spec": "model_AAM_O82.zip:model_AAM_O82.tex",
+    "current_spec": "Dmodel_AAM_O82.zip:Dmodel_AAM_O82/model_AAM_O82.tex",
+    "O81_base_spec": "Dmodel_AAM_O81_0_0.zip:docs/model_AAM_O81.tex",
+    "O81_latest_spec": "Dmodel_AAM_O81_0_3.zip:docs/model_AAM_O81.tex",
+    "O81_spec_sha256": "7cb3b1b0c95249d21b5eddfd7d3979aa43257ac3dda263c427d59a4ddcac6894",
+    "analysis_passes_O82": 5,
+    "decision": "INCOMPLETE__IMPLEMENT_O82_0"
+  },
+  "phases": [
+    {
+      "id": "P00",
+      "title": "Preflight/gouvernance et conservation du corpus",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "requirements": [
+        "consult independent error registries",
+        "preserve primary/current/O81 references"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "P01",
+      "title": "Écart exhaustif spec → implementation",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "findings": [
+        {
+          "id": "GAP-01",
+          "severity": "critical",
+          "area": "authoritative_state_machine",
+          "spec": "Q includes INFER, TEST, VERIFY, ACT, CORRECT, LEARN, MEMORIZE, SELF_OBSERVE, DISCOVER_PROBE, DECOMPOSE, RECOVER, DONE, UNRESOLVED.",
+          "implementation": "Engine.run implements only INIT/OBSERVE/RETRIEVE/REFINE/VERIFY/ACT/DISCOVER_PROBE/DECOMPOSE/RECOVER/UNRESOLVED.",
+          "impact": "Runtime cannot execute the complete normative pipeline described by the specification."
+        },
+        {
+          "id": "GAP-02",
+          "severity": "critical",
+          "area": "candidate_inference_correction_learning",
+          "spec": "Candidate -> Verify -> Correct/Refine/Explore and CEGIS Hyp->Test->Counterexample->Correction->ReTest->Holdout/OOD->Consolidate.",
+          "implementation": "Learning exists as an external acquisition service; Engine runtime has no generic infer/test/correct/learn/consolidate cycle.",
+          "impact": "The core learning-by-error loop is not an integrated runtime capability."
+        },
+        {
+          "id": "GAP-03",
+          "severity": "critical",
+          "area": "observation_contract",
+          "spec": "Observation includes raw_ref, value, view_id/version, provenance, predicted_use, resource_delta and status; context c_t includes step/phase/resource snapshot/memory epoch/seed/visibility.",
+          "implementation": "Observation omits predicted_use/resource_delta; probe run lacks context and schema validation; runtime provenance does not materialize the full c_t tuple.",
+          "impact": "Formal observation contract is only partially realized."
+        },
+        {
+          "id": "GAP-04",
+          "severity": "high",
+          "area": "fingerprint_witness",
+          "spec": "F_t facts carry witness; refinement requires registered witness with declared scope/evidence.",
+          "implementation": "FingerprintAtom has witness_id but observation path does not create/verify witnesses or connect poset refinement to retrieval.",
+          "impact": "Partial fingerprint geometry is present structurally but not operationally authoritative."
+        },
+        {
+          "id": "GAP-05",
+          "severity": "critical",
+          "area": "decision_sufficiency",
+          "spec": "All compatible states must converge to one certifiable decision relative to the verifier family.",
+          "implementation": "DecisionSufficiencyEngine only checks that verified candidates observed in the current runtime reduce to one repr(decision); it does not model candidate-state sets or require externally existing evidence references.",
+          "impact": "Sufficiency is an approximation of the formal predicate."
+        },
+        {
+          "id": "GAP-06",
+          "severity": "high",
+          "area": "verification",
+          "spec": "Verifier result is typed and a terminal certificate must be independently verifiable.",
+          "implementation": "RuntimeSkillVerifier validates certificate shape/digest but no independent verifier registry or evidence existence check backs runtime closure.",
+          "impact": "Verification layer is thinner than the normative contract."
+        },
+        {
+          "id": "GAP-07",
+          "severity": "high",
+          "area": "policy",
+          "spec": "VG/SG/RE/EX/NV tuple, hard Safe/Integrity filters, empirical marginal gain and Pareto action set.",
+          "implementation": "Policy uses global gaps and generic memory-hit counts; Safe/Integrity are approximated by allowlist/scope/budget and not separately represented; bundles are not selected by Engine.run.",
+          "impact": "The normative action valuation is not fully realized."
+        },
+        {
+          "id": "GAP-08",
+          "severity": "critical",
+          "area": "bundle_execution",
+          "spec": "Bundles are a first-class action in the control set.",
+          "implementation": "observe_bundle exists as an API, but run() never considers/selects/records bundle policy decisions.",
+          "impact": "Parallel observation is not part of the autonomous runtime loop."
+        },
+        {
+          "id": "GAP-09",
+          "severity": "high",
+          "area": "memory_tempos_and_dependency_invalidation",
+          "spec": "fast/slow memory, invalidation/review/root retest, coverage graph and non-destructive consolidation.",
+          "implementation": "Single SQLite/log store; consolidation logs refs, invalidate revokes direct entity only; no dependency propagation or coverage graph.",
+          "impact": "Memory semantics are incomplete."
+        },
+        {
+          "id": "GAP-10",
+          "severity": "critical",
+          "area": "discovery_and_hierarchy_runtime",
+          "spec": "Validated DISCOVER_PROBE/DECOMPOSE paths feed back into OBSERVE; root retest follows new capabilities.",
+          "implementation": "Runtime discovery falls through to DECOMPOSE with NO_RUNTIME_SEARCH_DATA; decompose returns children but does not execute child contracts; root_retest is exposed as a service but not automatic in the runtime loop.",
+          "impact": "Recursive discovery/decomposition is largely non-operative in autonomous run."
+        },
+        {
+          "id": "GAP-11",
+          "severity": "high",
+          "area": "skill_composition",
+          "spec": "Composed capsule references sources and has its own validation.",
+          "implementation": "Engine.compose_skills only creates a candidate; validation is a separate service and not integrated into admission/root-retest.",
+          "impact": "Composition cannot become a verified runtime capability through the complete pipeline."
+        },
+        {
+          "id": "GAP-12",
+          "severity": "high",
+          "area": "prediction_early",
+          "spec": "Prediction can reserve resource/preload/anticipate next observation without certifying.",
+          "implementation": "No first-class prediction object or resource reservation path in O82 runtime.",
+          "impact": "Predictive control described in the specification is not implemented."
+        },
+        {
+          "id": "GAP-13",
+          "severity": "medium",
+          "area": "config_runtime",
+          "spec": "Configuration declares budget/policy/probes/memory/verifiers/adapters/self thresholds/seed/retention.",
+          "implementation": "config files exist, but CLI loads explicit arguments and does not provide a complete config-driven runtime contract.",
+          "impact": "PC configuration contract is incomplete."
+        },
+        {
+          "id": "GAP-14",
+          "severity": "high",
+          "area": "reports",
+          "spec/user_requirement": "Reports must use description/architecture/pipeline/commands/results/interpretations/consequences/conclusions/status.",
+          "implementation": "O82 phase reports have the earlier five-field template and do not consistently include the expanded interpretation/consequence/conclusion/status structure.",
+          "impact": "Audit trace is incomplete relative to the current user-level reporting rule."
+        },
+        {
+          "id": "GAP-15",
+          "severity": "critical",
+          "area": "O81_non_regression",
+          "spec/comparison": "O81 0.3 already integrates StateMachine, AdaptiveController, richer runtime state, Action transitions, instruments, self-health and replay alignment.",
+          "implementation": "O82 currently has no equivalent authoritative controller/state machine layer and fewer runtime source modules (25 vs 37 in O81).",
+          "impact": "O82_0 must recover these orchestration capabilities or demonstrate an objectively stronger replacement."
+        }
+      ],
+      "decision": "INCOMPLETE"
+    },
+    {
+      "id": "P02",
+      "title": "Runtime state machine and observation context",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P01"
+      ],
+      "tasks": [
+        "Implement authoritative State/Transition model including all normative Q states.",
+        "Integrate controller with Engine.run; no bypass transition path.",
+        "Implement typed c_t/GovernanceContext runtime object with seed/visibility/resource/memory epoch.",
+        "Expand Observation/Probe execution result to normative fields and schema validation.",
+        "Guarantee retrieval-after-observe as a state-machine invariant.",
+        "Add positive/negative transition tests and replay tests."
+      ],
+      "evidence": [
+        "10 targeted P02 tests PASS",
+        "StateMachine transition coverage and illegal-transition rejection PASS",
+        "ObservationContext/raw_ref/predicted_use/resource_delta persistence PASS",
+        "Engine.run state transitions are ledger-authoritative PASS"
+      ]
+    },
+    {
+      "id": "P03",
+      "title": "Formal sufficiency, verification, policy and bundles",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P02"
+      ],
+      "tasks": [
+        "Implement candidate-state compatible-set semantics.",
+        "Require verifiable evidence references for terminal certificates.",
+        "Introduce explicit hard safety/integrity filters and typed policy tuple.",
+        "Compute action-specific marginal verification/sufficiency/resource/exploration value.",
+        "Integrate single-probe and bundle actions into the autonomous controller.",
+        "Make parallel bundle semantics visible in the ledger/replay."
+      ],
+      "evidence": [
+        "16 P02/core/P03 targeted tests PASS",
+        "Strict compatible-state convergence and missing-certificate rejection PASS",
+        "Safe/Integrity hard filters PASS",
+        "Action-specific policy score persisted in ledger PASS",
+        "Verified memory path closes with OBSERVE->RETRIEVE->VERIFY->MEMORIZE->ACT->DONE PASS",
+        "Bundle selection and budget semantics PASS"
+      ]
+    },
+    {
+      "id": "P04",
+      "title": "Memory geometry, witnesses, correction graph and lifecycle",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P03"
+      ],
+      "tasks": [
+        "Attach and verify refinement witnesses to fingerprints where applicable.",
+        "Implement dependency graph/review propagation and root-retest triggers.",
+        "Implement active/fast vs consolidated/slow views without deleting raw evidence.",
+        "Implement coverage relations and non-destructive pruning/eviction.",
+        "Ensure certificate/evidence existence is checked during memory retrieval."
+      ],
+      "evidence": [
+        "5 P04 tests PASS",
+        "fast/slow selector and non-destructive consolidation PASS",
+        "dependency/coverage graph recovery PASS",
+        "invalidation propagation and root-retest trigger PASS",
+        "witness attachment/recovery and invalid-witness retrieval block PASS",
+        "raw preservation and evidence integrity PASS"
+      ]
+    },
+    {
+      "id": "P05",
+      "title": "Integrated CEGIS/error-correction/learning runtime",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P04"
+      ],
+      "tasks": [
+        "Add runtime hypothesis generation from learned/memory/compositional evidence without target hardcode.",
+        "Implement TEST and counterexample capture.",
+        "Implement CORRECT -> RETRIEVE -> re-test loop.",
+        "Integrate LEARN/MEMORIZE states with holdout/OOD and capsule admission.",
+        "Keep EXPERIMENT candidates out of FINAL."
+      ],
+      "gate_result": "PASS",
+      "evidence": [
+        "18 targeted P05/P02/core tests passed with ResourceWarning fatal",
+        "CEGIS corrections persisted",
+        "EXPERIMENT produced CANDIDATE_SKILL",
+        "FINAL promoted only after holdout/OOD and teacher absence",
+        "Engine LEARN path ledgered and re-retrieved learned skill",
+        "Skill retrieval reaches MEMORIZE/ACT/DONE with sufficient authoritative-cycle horizon"
+      ],
+      "completed_date": "2026-10-06"
+    },
+    {
+      "id": "P06",
+      "title": "Self-observation, causal intervention and early prediction",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P05"
+      ],
+      "tasks": [
+        "Make SELF_OBSERVE a runtime state, not only an event emitter.",
+        "Persist paired causal intervention evidence and meta-policy promotion.",
+        "Implement non-certifying next-observation prediction/reservation artifact.",
+        "Ensure self-observation never exposes target truth or hidden labels."
+      ],
+      "gate_result": "PASS",
+      "completed_date": "2026-10-06",
+      "evidence": [
+        "17 P06/P02 tests pass after final cleanup with ResourceWarning fatal",
+        "SELF_OBSERVE is authoritative and resumes to declared nonterminal state",
+        "paired causal intervention persisted and recovered",
+        "meta-policy promotion requires positive paired causal effect in FINAL",
+        "prediction reservation is non-certifying and budget reservation is consumed exactly once",
+        "forbidden self-state fields rejected"
+      ]
+    },
+    {
+      "id": "P07",
+      "title": "Discovery, decomposition, composition and root-retest integration",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P06"
+      ],
+      "tasks": [
+        "Make validated probe discovery a runtime-returning branch.",
+        "Execute decomposed child contracts and aggregate child evidence.",
+        "Run root retest when child/correction/capability changes affect parent.",
+        "Validate and admit composed skills through the same verification path."
+      ],
+      "evidence": [
+        "10/10 P07 tests PASS with ResourceWarning treated as error.",
+        "Discovery-success end-to-end: ProbeDiscovered -> dynamic authorization -> discovered probe observation -> RootRetest -> RootRetestIntegrated.",
+        "Decomposition: child contracts execute and parent evidence is aggregated.",
+        "Composition: VERIFIED_SKILL admission uses disjoint numeric/behavioral views and schedules root retest.",
+        "RootRetester inherits probe registry/dynamic authorization and suppresses recursive parent retest in child engines."
+      ]
+    },
+    {
+      "id": "P08",
+      "title": "Configuration, CLI and complete PC documentation",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P07"
+      ],
+      "tasks": [
+        "Make config files consumable by runtime.",
+        "Synchronize normative commands with actual parser signatures.",
+        "Update README with exact clean-PC workflow for no-install and optional install.",
+        "Normalize all reports to expanded mandatory template."
+      ],
+      "evidence": [
+        "6 configuration tests PASS with ResourceWarning treated as error.",
+        "Both normative configs contain budget/resource policy/probe allowlist/memory/verifiers/adapters/self-observation/seed/mode/retention/path allowlist.",
+        "Config controls are applied to Engine/ProbeRegistry/Policy/SelfObserver/Memory and propagated to child/root-retest engines.",
+        "Clean-PC extraction from a fresh directory bootstraps independent checklists and executes doctor, probe list/test, run, observe, replay, acquire, evaluate holdout/OOD, memory review and audit.",
+        "15/15 release reports satisfy the expanded nine-section report template; README fence/path sanity PASS."
+      ]
+    },
+    {
+      "id": "P09",
+      "title": "O81 non-regression and adversarial validation",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P08"
+      ],
+      "tasks": [
+        "Compare O81 0.3 state/control/action contracts with O82_0 and classify retained/strengthened/missing.",
+        "Restore/strengthen enriched ActionEnvelope and runtime action contract validation.",
+        "Add canonical RuntimeState snapshot/fingerprint and extended O81-compatible runtime action surfaces.",
+        "Add variable-interface specialist InstrumentPortfolio, diagnostics and evidence-driven disagreement escalation.",
+        "Add SelfHealthConfig/SelfHealthMonitor and integrate health into self-observation without target leakage.",
+        "Add SkillVersionManager/lifecycle compatibility and admission checks.",
+        "Compare observation/reobserve/zoom, recovery, depth, replay, teacher-cutover and protocol capabilities.",
+        "Run adversarial non-regression suite and O81/O82 capability ablations.",
+        "Update model_AAM_O82.tex where O82_0 strengthens the normative contract beyond the prior text.",
+        "Port O81 RAGObserver as a declared external observation adapter with stale-source invalidation.",
+        "Port O81 AccessController/ModuleAccessContract/DataRef security boundary and integrate with external verification/adapters.",
+        "Port O81 PowerVector/PowerRecorder and comparison metrics for explicit capability non-regression evidence.",
+        "Port O81 experimental protocol suite P1-P10 and preserve its anti-leak/paired-case semantics.",
+        "Port O81 BlackBoxAdapter/SubprocessAdapter with explicit provenance, timeout and environment allowlist.",
+        "Add O82 tests proving these surfaces remain optional, extensible and subordinate to O82 authority/budget/verification.",
+        "Compare and preserve the complete O81 0.3 CLI command surface: experiment, verify-skill, transfer, compose, memory-verify.",
+        "Preserve O81 0.3 run --skill capability with verified/candidate lifecycle enforcement."
+      ],
+      "evidence": [
+        "104/104 tests PASS with ResourceWarning fatal, including O81 compatibility and CLI command surface.",
+        "O81 general CLI commands experiment/verify-skill/transfer/compose/memory-verify restored and functionally tested.",
+        "O81 peripheral surfaces RAG, firewall, power, protocols and external adapters restored and tested.",
+        "State/control/action/runtime/instrument/self-health/lifecycle/reobserve capabilities preserve or strengthen O81 0.3 behavior.",
+        "Adversarial validation, benchmark and static anti-hardcode audit PASS; no target-solution code introduced.",
+        "105 tests PASS after restoring O81 CLI run --skill and SkillImported provenance; adverse validation, benchmark and audit PASS."
+      ]
+    },
+    {
+      "id": "P10",
+      "title": "Release, archive integrity and clean extraction",
+      "status": "PASS",
+      "gate": "BLOCKING",
+      "depends_on": [
+        "P09"
+      ],
+      "tasks": [
+        "Final normative document structure and no-empty-chapter audit.",
+        "README complete command/API audit.",
+        "All report-template lint and PDF compile/render checks.",
+        "Fresh-archive executable matrix and integrity checks.",
+        "Final manifests and audit package reproducibility."
+      ],
+      "evidence": [
+        "All normative spec passes compile cleanly; final PDF is 35 pages and critical pages were visually inspected.",
+        "All 17 reports satisfy the nine-section template; final report lint PASS.",
+        "README/module/CLI command matrix is synchronized; 5 O81 CLI commands plus run --skill are executable and tested.",
+        "Fresh archive extraction executed doctor, probes, run, resume-observe, replay, FINAL acquire, verify-skill, transfer, run --skill, memory-verify, experiment and audit; all contract-valid commands PASS.",
+        "Fresh extracted archive benchmark PASS and 105/105 tests PASS with ResourceWarning fatal.",
+        "Final archive integrity gate will freeze SHA-256 manifest and ZIP CRC after this checklist update."
+      ]
+    }
+  ],
+  "completion_date": "2026-10-06",
+  "final_gate": {
+    "status": "PASS",
+    "tests": "105/105 tests passed with ResourceWarning treated as fatal, both on source tree and exact extracted release archive.",
+    "validation": "PASS",
+    "benchmark": "PASS",
+    "audit": "PASS",
+    "report_lint": "PASS",
+    "pdf_spec": "PASS (35 pages; two-pass/three-pass clean; no Warning/Overfull/Underfull/Fatal)",
+    "archive_crc": "PASS (ZipFile.testzip() == None)",
+    "manifest": "PASS (all manifest entries match SHA-256)",
+    "clean_pc": "PASS (doctor, probes, run, observe, replay, acquire, evaluate, O81-compatible CLI surfaces)",
+    "absolute_paths": "PASS",
+    "open_errors": "0",
+    "pending_errors": "0"
+  }
+}

@@ -1,0 +1,126 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.2cm}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\sloppy
+\setlist{nosep}
+\title{ORDER 59 --- ULTIME 0 : consolidation mathematique, preuves et conditions de validite}
+\author{Reconstruction experimentale ORDER 59}
+\date{20 septembre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\begin{abstract}
+ULTIME rassemble la couche mathematique la plus complete utilisee par O59. Il distingue les identites exactes, les propositions conditionnelles et les implementations experimentales. Il ne se substitue pas au document principal et ne narre pas la campagne comme un journal.
+\end{abstract}
+
+\section{Observation et empreinte}
+Soit $X$ un ensemble d'etats et $P=(p_i)_{i\in K}$ une famille finie de sondes. L'empreinte est l'application :
+\[
+I_P:X\to Y_P,\qquad I_P(x)=(p_i(x))_{i\in K}.
+\]
+La relation $x\sim_Py\Leftrightarrow I_P(x)=I_P(y)$ est une relation d'equivalence ; ses classes sont les fibres.
+
+\section{Theoreme de factorisation}
+Soit $A:X\to Z$. Si :
+\[
+I_P(x)=I_P(y)\Rightarrow A(x)=A(y),
+\]
+alors il existe une unique application $\bar A:I_P(X)\to Z$ telle que :
+\[
+A=\bar A\circ I_P.
+\]
+Pour l'existence, pour $u\in I_P(X)$ choisir $x$ tel que $I_P(x)=u$ et poser $\bar A(u)=A(x)$. La condition de suffisance rend ce choix independant. Pour l'unicite, deux fonctions ayant la meme composition avec $I_P$ coïncident sur $I_P(X)$.
+
+\section{Insuffisance : preuve par collision}
+S'il existe $x,y$ avec $I_P(x)=I_P(y)$ et $A(x)\neq A(y)$, une fonction de la seule empreinte ne peut produire deux valeurs distinctes sur le meme argument. La collision est donc une obstruction informationnelle.
+
+\section{Raffinement}
+Pour une nouvelle sonde $g$, $I_{P+g}(x)=(I_P(x),g(x))$. Donc :
+\[
+I_{P+g}(x)=I_{P+g}(y)\Rightarrow I_P(x)=I_P(y),
+\]
+ce qui implique :
+\[
+[x]_{P+g}\subseteq[x]_P.
+\]
+Le raffinement ne peut donc pas fusionner des distinctions deja accessibles.
+
+\section{Fermeture}
+Pour un support fini d'observations et une famille de probes candidates :
+\[
+\operatorname{cl}(P)=\{g\mid \Pi_{P+g}=\Pi_P\}.
+\]
+L'egalite est experimentale : elle signifie egalite des groupes de la partition sur le support observe.
+
+\section{Seuil de paire et minimum-double}
+Pour une suite ordonnee de descriptions, definissons $\Theta(x,y)$ comme le plus grand niveau jusqu'auquel la paire reste dans la meme fibre. Le minimum-double est :
+\[
+\Theta(x,z)\ge\min\{\Theta(x,y),\Theta(y,z)\}.
+\]
+La preuve repose sur le fait que si $x$ et $y$ sont indistinguables jusqu'au niveau $r$, et si $y$ et $z$ le sont aussi, alors leurs signatures jusqu'au niveau $r$ sont egales et donc $x$ et $z$ le sont.
+
+\section{Ultrametrique}
+On pose :
+\[
+d(x,y)=0\;\text{si }x=y,\qquad d(x,y)=e^{-\Theta(x,y)}\;\text{sinon}.
+\]
+Comme $e^{-t}$ est decroissante, l'inegalite du minimum-double donne :
+\[
+d(x,z)\le\max(d(x,y),d(y,z)).
+\]
+Ainsi, la distance est ultrametrique lorsque la definition de $\Theta$ s'appuie sur des partitions emboitees.
+
+\section{Mesure empirique de resolution}
+Sur un support fini de taille $n$, une mesure empirique de maintien d'indistinguabilite au niveau $r$ peut etre definie par :
+\[
+\mu(r)=\frac{1}{n(n-1)}\#\{(x,y):x\neq y,\Theta(x,y)\ge r\}.
+\]
+Cette quantite decrit la resolution effectivement obtenue sur le support et non une loi universelle hors echantillon.
+
+\section{Generalisation observationnelle}
+Une application cible est stable si elle est constante sur les fibres de la representation. Une generalisation observationnelle necessite donc une representation suffisante pour la propriete demandee. Une generalisation semantique ajoute une relation entre deux domaines ; O59 tente cette relation par signatures et certification de consequences.
+
+\section{Prediction conditionnelle}
+Sur des transitions observees, le support empirique est :
+\[
+\widehat P(s'\mid s,a)=\frac{N(s,a,s')}{\sum_u N(s,a,u)}.
+\]
+Le raffinage d'une empreinte subdivise les classes et conserve la masse totale sur les descendants lorsqu'on reutilise les comptages conditionnes. La partie extrapolative de O59 est un modele auxiliaire et non une preuve de cette propriete hors support.
+
+\section{Imagination}
+Une hypothese est un objet $H$ avec type, payload, statut et provenance. L'intervention imaginaire est :
+\[
+H\xrightarrow{W}\hat o_H\xrightarrow{Q}\Delta_H.
+\]
+Le monde $W$ est interne ; l'experience reelle n'est pas consultée pendant le calcul de $\hat o_H$. La selection peut ensuite utiliser $\Delta_H$ pour modifier la politique d'action.
+
+\section{Synthese de programmes}
+Soit une grammaire finie $G$ et un verificateur $V$. L'enumeration exhaustive de $G$ est complete relativement a $G$ si un programme cible $p^*\in G$ existe et si l'enumeration dispose d'un budget suffisant. Cette proposition ne porte pas sur tous les programmes possibles.
+
+O59 manipule un AST compose et une VM. Chaque candidat est execute dans des contextes reels de transition. Un programme ne peut donc pas etre certifie uniquement par sa presence textuelle dans le registry.
+
+\section{Capacite et promotion causale}
+Une capacite candidate contient programme, domaine abstrait et evidence. La promotion est une decision contrefactuelle : comparer le comportement sans la capacite et avec la capacite, a protocole identique. Si le gain mesure est nul ou defavorable, la capacite reste non promue.
+
+\section{Transfert}
+Un transport structurel est une application entre descriptions dont certaines signatures sont alignees. La decouverte O59 cherche des correspondances par egalite de signatures abstraites. La certification ne se contente pas du mapping : elle exécute des cas cibles et demande que les verifications independantes passent.
+
+\section{Contraintes computationnelles}
+Tous les algorithmes O59 sont soumis a des limites finies de temps, pas, branches, memoire et enumeration. Un timeout ou \texttt{RESOURCE\_BOUND} est un etat d'execution. Il ne fournit aucune preuve de non-faisabilite theorique.
+
+\section{Lien avec l'architecture}
+Le resultat structurel de la theorie peut se resumer par :
+\[\begin{aligned}
+&\text{observation}	o I_P	o\text{fibre}	o\text{collision}	o D_{obs}	o\text{sonde}\to I_{P+g}\to\text{prediction}\to\text{imagination},\\
+&\text{programme}	o\text{action}	o\text{nouvelle observation}.\end{aligned}\]
+Cette boucle est l'objet d'execution central de O59. Les composants avances n'ont pas le droit d'etre consideres comme preuves de capacite generale sans experience causale correspondante.
+
+\end{document}

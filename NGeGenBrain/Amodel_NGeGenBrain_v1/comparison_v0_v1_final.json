@@ -1,0 +1,413 @@
+{
+  "schema_version": "1.0",
+  "report_id": "NGeGenBrain_v0_vs_v1_independent_hard_test_20261027",
+  "created_at": "2026-10-27T11:01:04+00:00",
+  "baseline": {
+    "model_id": "NGeGenBrain_v0",
+    "version": "0.3.0",
+    "archive": "Dmodel_NGeGenBrain_v0.zip",
+    "sha256": "6ffcc921732a9c58bda5d2aa1461bfa5d9dfad99cc5ef6e3b9331d85b078fe8d",
+    "result": {
+      "passed": 8,
+      "failed": 7,
+      "cases": 15
+    }
+  },
+  "candidate": {
+    "model_id": "NGeGenBrain_v1",
+    "version": "1.0.0",
+    "archive": "Dmodel_NGeGenBrain_v1.zip",
+    "sha256": "71534f98ff590e5c1a103888f0e553e9e8966d34d7f0364429eac8eae238b5c8",
+    "cleanroom_root": "/mnt/data/NGeGenBrain_v1_work_1/cleanroom/final_verified/Dmodel_NGeGenBrain_v1",
+    "result": {
+      "passed": 15,
+      "failed": 0,
+      "cases": 15
+    }
+  },
+  "benchmark": {
+    "script": "independent_hard_bench_v1.py",
+    "sha256": "9325f55cf7e8694fd88c6f6df928e5b4a9f568f447fd41e6b80014659749b816",
+    "seed": 20261027,
+    "same_test_ids": [
+      "ARITH-001",
+      "MESH-001",
+      "MESH-002",
+      "WM-001",
+      "BUDGET-001",
+      "BUDGET-002",
+      "TRACE-001",
+      "MEM-001",
+      "MESH-003",
+      "CERT-001",
+      "TYPE-001",
+      "SEC-001",
+      "ROBUST-001",
+      "MESH-005",
+      "MESH-006"
+    ],
+    "same_seed": true,
+    "same_harness_sha256": true,
+    "baseline_started": "2026-10-27T10:49:36+00:00",
+    "baseline_ended": "2026-10-27T10:49:38+00:00",
+    "candidate_started": "2026-10-27T11:00:17+00:00",
+    "candidate_ended": "2026-10-27T11:00:18+00:00"
+  },
+  "paired_cases": [
+    {
+      "id": "ARITH-001",
+      "category": "property-based exact arithmetic",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": "2400 matches; 0 mismatches",
+      "v1_observed": "2400 matches; 0 mismatches",
+      "v0_expected": "2400 exact matches",
+      "v1_expected": "2400 exact matches"
+    },
+    {
+      "id": "MESH-001",
+      "category": "independent graph-closure oracle",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": "35 pairs; missing=0 extra=0",
+      "v1_observed": "35 pairs; missing=0 extra=0",
+      "v0_expected": "all 35 reachable pairs; no extra pairs",
+      "v1_expected": "all 35 reachable pairs; no extra pairs"
+    },
+    {
+      "id": "MESH-002",
+      "category": "typed identity collision",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "new_facts": 0,
+        "q_fact_types": [
+          "String"
+        ]
+      },
+      "v1_observed": {
+        "new_facts": 1,
+        "q_fact_types": [
+          "String",
+          "Int"
+        ]
+      },
+      "v0_expected": "typed derived fact with object type Int",
+      "v1_expected": "typed derived fact with object type Int"
+    },
+    {
+      "id": "WM-001",
+      "category": "world-model output contract",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "activation": {
+          "enabled": true,
+          "reason": "measured_holdout_gain_exceeds_threshold"
+        },
+        "model_exact_match_rate": 1.0,
+        "record_keys": [
+          "id",
+          "model_id",
+          "model_version",
+          "evaluation",
+          "created_at",
+          "activation_state"
+        ]
+      },
+      "v1_observed": {
+        "activation": {
+          "enabled": false,
+          "reason": "incomplete_holdout_predictions"
+        },
+        "model_exact_match_rate": null,
+        "record_keys": [
+          "id",
+          "model_id",
+          "model_version",
+          "evaluation",
+          "created_at",
+          "activation_state"
+        ]
+      },
+      "v0_expected": "reject output type violation and prevent activation",
+      "v1_expected": "reject output type violation and prevent activation"
+    },
+    {
+      "id": "BUDGET-001",
+      "category": "non-finite budget validation",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "finite_status": "Partial",
+        "nonfinite_status": "Success",
+        "nonfinite_reason": null
+      },
+      "v1_observed": {
+        "finite_status": "Partial",
+        "nonfinite_status": "Rejected",
+        "nonfinite_reason": "budget.cpu must be a finite, non-negative number"
+      },
+      "v0_expected": "non-finite limits rejected or treated conservatively; 200KB value cannot pass 1KB memory cap",
+      "v1_expected": "non-finite limits rejected or treated conservatively; 200KB value cannot pass 1KB memory cap"
+    },
+    {
+      "id": "BUDGET-002",
+      "category": "component resource_cost validation",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "accepted": true,
+        "error": null
+      },
+      "v1_observed": {
+        "accepted": false,
+        "error": "ValueError: resource_cost must use known dimensions and finite, non-negative numbers"
+      },
+      "v0_expected": "NaN resource cost rejected",
+      "v1_expected": "NaN resource cost rejected"
+    },
+    {
+      "id": "TRACE-001",
+      "category": "concurrent event append/hash chain",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "visible_events": 200,
+        "chain": {
+          "valid": true,
+          "count": 200,
+          "problems": [],
+          "head_hash": "c0f24cb1adb5ca6133492f9de75f855f91a9c05887470fd11c47d3d92895ed8d"
+        },
+        "errors": []
+      },
+      "v1_observed": {
+        "visible_events": 200,
+        "chain": {
+          "valid": true,
+          "count": 200,
+          "problems": [],
+          "head_hash": "c97c5557557daab57831089122bd6a7d4d17cae9407c0e4fe25493fca9f92cbb"
+        },
+        "errors": []
+      },
+      "v0_expected": "200 events and valid hash chain",
+      "v1_expected": "200 events and valid hash chain"
+    },
+    {
+      "id": "MEM-001",
+      "category": "memory corruption detection",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "payload_error": "CRC check failed",
+        "payload_returned": true
+      },
+      "v1_observed": {
+        "payload_error": "CRC check failed",
+        "payload_returned": true
+      },
+      "v0_expected": "payload_error present and no payload trusted",
+      "v1_expected": "payload_error present and no payload trusted"
+    },
+    {
+      "id": "MESH-003",
+      "category": "invalid rule admission",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "accepted_indices": [],
+        "persisted_count": 0
+      },
+      "v1_observed": {
+        "accepted_indices": [],
+        "persisted_count": 0
+      },
+      "v0_expected": "all three structurally invalid rules rejected",
+      "v1_expected": "all three structurally invalid rules rejected"
+    },
+    {
+      "id": "CERT-001",
+      "category": "certificate re-derivation",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "valid_certificate": {
+          "valid": true,
+          "problems": [],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        },
+        "forged_certificate": {
+          "valid": false,
+          "problems": [
+            "conclusion_not_entailed_by_rule_and_premises"
+          ],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        }
+      },
+      "v1_observed": {
+        "valid_certificate": {
+          "valid": true,
+          "problems": [],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        },
+        "forged_certificate": {
+          "valid": false,
+          "problems": [
+            "conclusion_not_entailed_by_rule_and_premises"
+          ],
+          "scope": "integrity plus re-derivation in supported declarative rule subset; not a general proof checker"
+        }
+      },
+      "v0_expected": "valid cert accepted; altered conclusion rejected even with recalculated hash",
+      "v1_expected": "valid cert accepted; altered conclusion rejected even with recalculated hash"
+    },
+    {
+      "id": "TYPE-001",
+      "category": "mixed JSON values and typed identity",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "checks": 10,
+        "errors": []
+      },
+      "v1_observed": {
+        "checks": 10,
+        "errors": []
+      },
+      "v0_expected": "all 10 JSON-shaped input forms supported by Any identity",
+      "v1_expected": "all 10 JSON-shaped input forms supported by Any identity"
+    },
+    {
+      "id": "SEC-001",
+      "category": "source-in-data boundary",
+      "v0_verdict": "PASS",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "status": "Success",
+        "value_equals_payload": true,
+        "value": "__import__(\"os\").system(\"echo SHOULD_NOT_RUN\")"
+      },
+      "v1_observed": {
+        "status": "Success",
+        "value_equals_payload": true,
+        "value": "__import__(\"os\").system(\"echo SHOULD_NOT_RUN\")"
+      },
+      "v0_expected": "string remains inert data and process does not execute it",
+      "v1_expected": "string remains inert data and process does not execute it"
+    },
+    {
+      "id": "ROBUST-001",
+      "category": "deeply nested AST",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "returned": false,
+        "exception": "RecursionError",
+        "message": "maximum recursion depth exceeded"
+      },
+      "v1_observed": {
+        "returned": true,
+        "status": "Rejected",
+        "reason": "maximum JSON/AST nesting depth exceeded",
+        "details": {
+          "preflight": {
+            "valid": false,
+            "reason": "maximum JSON/AST nesting depth exceeded",
+            "path": "$.steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0]",
+            "max_depth": 128,
+            "observed_depth_at_least": 129,
+            "node_count": 128
+          },
+          "program_shape": {
+            "valid": false,
+            "reason": "maximum JSON/AST nesting depth exceeded",
+            "path": "$.steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0].steps[0]",
+            "max_depth": 128,
+            "observed_depth_at_least": 129,
+            "node_count": 128
+          },
+          "input_shape": {
+            "valid": true,
+            "max_depth": 1,
+            "node_count": 0
+          },
+          "environment_shape": {
+            "valid": true,
+            "max_depth": 2,
+            "node_count": 1
+          }
+        }
+      },
+      "v0_expected": "bounded typed rejection/failure instead of uncaught runtime exception",
+      "v1_expected": "bounded typed rejection/failure instead of uncaught runtime exception"
+    },
+    {
+      "id": "MESH-005",
+      "category": "context-scoped fact queries",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "subjects": [
+          "alice",
+          "bob"
+        ],
+        "count": 2
+      },
+      "v1_observed": {
+        "subjects": [
+          "alice"
+        ],
+        "count": 1
+      },
+      "v0_expected": "only the fact in the requested context is returned",
+      "v1_expected": "only the fact in the requested context is returned"
+    },
+    {
+      "id": "MESH-006",
+      "category": "bounded unsuccessful join exploration",
+      "v0_verdict": "FAIL",
+      "v1_verdict": "PASS",
+      "v0_observed": {
+        "observed_match_calls": 33330,
+        "reported_status": "FIXPOINT_REACHED",
+        "rule_match_attempts": 0
+      },
+      "v1_observed": {
+        "observed_match_calls": 1,
+        "reported_status": "BUDGET_EXHAUSTED",
+        "rule_match_attempts": 0
+      },
+      "v0_expected": "no more than one fact-match attempt when cap=1",
+      "v1_expected": "no more than one fact-match attempt when cap=1"
+    }
+  ],
+  "regression": {
+    "unit_tests": 65,
+    "passed": 65,
+    "failed": 0,
+    "errors": 0,
+    "release_validator_checks": 31,
+    "release_validator_passed": 31,
+    "cli_smoke_checks": 6,
+    "cli_smoke_passed": 6,
+    "web_smoke_checks": 6,
+    "web_smoke_passed": 6,
+    "lifecycle_commands": {
+      "init": "exit 0",
+      "status": "exit 0",
+      "verify": "exit 0",
+      "demo": "exit 0"
+    },
+    "sqlite_integrity": "ok",
+    "foreign_key_violations": 0
+  },
+  "interpretation": "The same 15 scenario IDs, benchmark script hash, and seed were applied to the exact V0 and final V1 archives. The V0 archive reproduced 7 concrete defect classes; the exact final V1 archive passed all 15 cases. This is a finite independent stress benchmark, not a proof of universal correctness or complete security.",
+  "limits": [
+    "Native Windows .bat/PowerShell execution was not performed in this Linux environment.",
+    "No official portable Python runtime binary is embedded; Python 3.11+ is required or the pinned bootstrapper must run on a network-enabled Windows host.",
+    "Historical equivalence with unavailable ASCR/AAM executable source is not established; ASCR-NG is a documented reconstruction.",
+    "The 65 unit/regression tests and 15 independent scenarios are finite coverage and do not prove absence of all defects."
+  ]
+}

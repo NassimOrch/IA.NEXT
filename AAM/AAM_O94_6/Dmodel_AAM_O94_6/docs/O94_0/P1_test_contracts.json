@@ -1,0 +1,17 @@
+{
+  "schema": "aam-o94-0-r1-r3-test-contracts-v1",
+  "contracts": [
+    {"id":"R1-01","title":"One visible answer from JSONL record","setup":"JSONL dataset with one matching prompt/response and at least 20 distractor records in different domains","assertions":["visible answer is the response field of the best-supported record","visible answer contains neither citations nor other records","metadata retains all selected citations and scores"]},
+    {"id":"R1-02","title":"No foreign result leakage","setup":"Ranked evidence includes a Pythagoras record, a Lake Geneva record, a vitamin D record, and a programming record","assertions":["answer is derived from the most relevant record","answer does not include the foreign records","no answer is certified as true solely by provenance"]},
+    {"id":"R1-03","title":"Details are separated from the chat body","setup":"Synthetic TaskResult with answer, status, prompt hash, generation details, and sources","assertions":["format_chat_result returns the answer text only","details formatter returns technical metadata without changing answer text"]},
+    {"id":"R2-01","title":"RAG evidence is injected into generation","setup":"Known record with a distinctive answer and a test double generator","assertions":["selected record content is present in generation context","generation is called after retrieval","rejected candidate leaves a readable structured-record fallback"]},
+    {"id":"R2-02","title":"No-evidence path is explicit","setup":"Empty semantic corpus and no configured generation endpoint","assertions":["no unrelated corpus record is returned","unresolved reason is visible and machine-traceable"]},
+    {"id":"R2-03","title":"Compatible AAM delegation","setup":"A separate compatible workspace and a stubbed peer runtime","assertions":["delegated prompt includes selected RAG records","delegation uses retrieval_policy=off in peer to prevent double retrieval","recursive delegation is rejected","peer runtime is closed after use"]},
+    {"id":"R3-01","title":"JSONL record preservation","setup":"More than 30 JSONL records including a record larger than the micro-RAG text budget","assertions":["records appear exactly once in source-derived chunks","long records are never cut","source file SHA-256 remains unchanged"]},
+    {"id":"R3-02","title":"Master→micro-RAG routing","setup":"At least 25 micro-RAGs with one distinctive target record","assertions":["tree contains master and micro nodes","search returns target record","only selected micro-RAG text files are loaded","read metrics report hierarchy levels and counts"]},
+    {"id":"R3-03","title":"Content integrity at read time","setup":"Rebuilt index then one selected micro-RAG content file is altered","assertions":["search rejects the modified content file","no modified text is returned as evidence"]},
+    {"id":"R3-04","title":"Context refinement depth","setup":"Two related records, one coarse and one contextual variant","assertions":["default depth returns the directly relevant response","detail depth can return additional context from child records","retrieved path explains which level was expanded"]}
+  ],
+  "no_answer_hardcoding": true,
+  "truth_policy": "Tests verify retrieval, selection, formatting, provenance and refusal semantics; the expected factual answer exists only in synthetic test data, never in runtime branching."
+}

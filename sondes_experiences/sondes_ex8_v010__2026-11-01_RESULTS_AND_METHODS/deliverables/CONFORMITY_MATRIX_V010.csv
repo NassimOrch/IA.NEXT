@@ -1,0 +1,19 @@
+exigence,statut,preuve_limite
+Prompt EX8 base récupéré et hashé,PASS,Prompt source original conservé ; copie active hashée ; scope A/B explicitement rattaché à EX8.
+Inventaire EX3–EX7 / EX8 v001 / v009 et RETRO,PASS,"Sources sources immuables ; 10 ZIP imbriqués CRC pass ; RETRO V007, EX5 et EX6 distingués."
+Reprise v001 sans rerun,PASS,60 runs historiques (PCA/V004) vérifiés depuis checkpoints/prédictions/métriques.
+Piste A — PCA repère commun,PASS,PCA unique fit sur Xtr ; projection identique train/validation ; global RBF train OOF.
+Piste A — réduction RBF / projection,PASS,A1/A2 mesurent 56→16 évaluations RBF ; A2 PCA4 ; A0 qualité supérieure aux variantes allégées.
+Piste A — RETRO progressif,PASS PARTIEL,"A3 déclenche 2/5, A4 0/5 ; pas d’avantage moyen sur MLP ; calendrier/monitoring à revoir."
+Piste A — second domaine,PASS — SIGNAL NÉGATIF,"SMS A0 LL .10682 vs MLP .07268 ; second domaine historiquement exposé, pas holdout vierge."
+Piste B — V004 OOF-0/1/2/3 références,PASS,"Ancres historiques v001 vérifiées, non réentraînées."
+Piste B — sans OOF greedy et joint,PASS,B1/B2 x5 chacun ; qualité dégradée vs MLP.
+Piste B — petites couches/profondeur/K,PASS,"B3/B4/B5 comparent 15 probes, 5 vs 3 niveaux et k=8 vs4."
+Piste B — OOF correcteurs sélectifs,PASS,"B6 couches 2, 4, 2+4 ; coût OOF reste requis pour contexte non corrigé."
+Piste B — poids par variance,PASS,B7 exécuté ; meilleur ECE potentiel mais LL/coût défavorables.
+Piste B — langage d’actions,PASS EXPLORATOIRE,"B8/B10/B11 ; B10 table floue 9×5 ; bénéfice vs B11 directionnel, non établi après multiplicité, latence accrue."
+Piste B — RETRO global,PASS — NON ACTIVÉ,B9 exécuté x5 ; alpha au meilleur checkpoint reste zéro x5.
+Paires MLP et mêmes partitions/seed,PASS,"90 candidats x5 graines, MLP appariés/ge4x, mêmes labels validation."
+Tests d’intégrité / corruption,PASS,"90 candidates, 160 MLP, 60 SMS result JSONs, 10 archives CRC, 1177 JSON stricts +155 JSONL."
+"FLOPs/MAC complets, énergie, RAM processus complète",NON MESURÉ,Centres RBF et latences mesurés ; MAC total/énergie/mémoire processus exhaustive non établis.
+Validation confirmatoire totalement indépendante,NON ÉTABLIE,Wisconsin développement exposé ; SMS historiquement exposé ; test fermé.

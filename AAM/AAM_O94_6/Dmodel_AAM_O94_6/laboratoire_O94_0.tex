@@ -1,0 +1,120 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\geometry{margin=2.2cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\setlist{nosep}
+\sloppy
+\title{Laboratoire de vérification et d'évolution du modèle AAM O94\_0}
+\author{Dossier de laboratoire O94\_0}
+\date{18 octobre 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Description}
+Le laboratoire O94\_0 étudie et corrige trois anomalies observées dans O94 : réponses RAG contenant des enregistrements distracteurs et des diagnostics (R1), génération n'utilisant pas toujours les preuves sélectionnées selon un contrat distinct (R2), et accès mémoire global au lieu d'un raffinement progressif (R3). Le travail est incrémental : la base O94 et les changements précédemment testés sont conservés ; une phase n'est clôturée qu'avec des critères vérifiables, des reçus et une trace des incidents.
+
+\subsection{Sources examinées}
+\begin{itemize}
+\item \path{source_material/theorie_emp/DDD_Base_theorie_des_empreintes_complete_order_5.tex}, source théorique principale ;
+\item \path{source_material/source_archive/sources_AAM_17.zip}, archive source embarquée ;
+\item \texttt{formalisme\_O94.tex}, \texttt{laboratoire\_O94.tex}, historique O94 ;
+\item code actuel de \texttt{aam\_o93/runtime.py}, \texttt{semantic\_rag.py}, \texttt{resolution\_tree.py}, \texttt{memory\_resolution.py}, \texttt{observer.py} et \texttt{ui.py} ;
+\item datasets embarqués, dont \texttt{SMSSpamCollection} et \texttt{Screenplay\_dataset.jsonl}.
+\end{itemize}
+
+\subsection{Méthode}
+Le travail suit P0–P7. Avant les exécutions de preuve, le runner consulte les chemins, la checklist active et les deux registres d'erreurs (incident attribuable au modèle vs incident d'environnement/outillage). Après chaque run, il enregistre code de sortie, compteurs, durée, commande et empreinte des sources. Les échecs ne sont pas supprimés après retest ; leur statut est mis à jour et relié au reçu résolvant.
+
+\section{Architecture}
+L'architecture opérationnelle comporte (1) observateur et segmentation atomique, (2) sondes et espaces sémantiques, (3) index maître et micro-RAG, (4) sélection de preuves, (5) générateur local ou AAM expressément sélectionné, (6) contrôleur de candidate et fallback extractif, (7) formateur réponse/détails, (8) arbre de résolution mémoire, (9) journaux d'événements et graphe causal, (10) sauvegarde et registres de preuve.
+
+L'index maître guide l'accès, il ne remplace pas les sources. Les micro-RAG contiennent ou référencent des enregistrements atomiques. Le texte brut est relu lorsque la recherche descend dans les feuilles et que la vérification d'intégrité réussit. Pour la mémoire, un index dérivé du journal append-only permet de sélectionner des plages sans charger tout le journal à chaque requête.
+
+\section{Pipeline complet}
+\subsection{Pipeline de chat normal}
+\begin{enumerate}
+\item Recevoir la demande.
+\item Exécuter la recherche RAG et produire une trace même si l'index est vide.
+\item Router au niveau maître, choisir les micro-RAG et charger les preuves sélectionnées.
+\item Passer au générateur la demande originale et les preuves dans des champs distincts.
+\item Appliquer le contrôle structurel/ancrage au candidat.
+\item En cas de candidate inutilisable, extraire le champ réponse d'un seul enregistrement retenu ou afficher un message d'absence de preuve ; aucun changement silencieux de moteur.
+\item Afficher seulement le texte réponse ; garder les sources, scores et empreintes dans « Détails ».
+\end{enumerate}
+
+\subsection{Pipeline de résolution mémoire}
+La requête interroge d'abord des tokens/résumés hachés du maître. Le routage choisit ensuite les micro-branches ; la profondeur détermine si la réponse est résumée ou si le runtime lit les événements sources. Les feuilles sont vérifiées par SHA-256 avant usage. Les liens temporels ou parent causaux sont examinés uniquement s'ils sont présents dans les métadonnées ; le hash de chaîne du journal n'est pas interprété automatiquement comme une relation causale.
+
+\section{Commandes d'exécution}
+Toutes les commandes officielles doivent être lancées depuis \texttt{Dmodel\_AAM\_O94\_0}. Lire d'abord les 4 documents de contrôle : \texttt{chemins\_O94\_0.json}, \texttt{checklist\_de\_travail\_O94\_0.json}, \texttt{checklist\_erreurs\_no\_model.json} et \texttt{checklist\_erreurs\_model.json}.
+
+\begin{verbatim}
+python scripts/o940_phase_test_runner.py --help
+python -m pytest -q tests/test_o940_rag_resolution.py
+python -m pytest -q tests/test_o931_chat_pipeline.py
+python -m pytest -q tests/test_o940_memory_resolution.py
+python -m pytest -q tests/test_o940_ui_resolution_details.py
+python -m pytest -q tests/test_o940_real_sms_corpus_sample.py
+python -m pytest -q tests/test_o940_real_sms_retrieval.py
+python scripts/o940_validate_p6_documents.py
+python scripts/o940_snapshot.py
+python scripts/o940_verify_savepoint.py
+python scripts/o940_close_p6.py
+\end{verbatim}
+Pour l'interface Tk sur un hôte Linux sans écran, utiliser le runner approuvé via Xvfb. Les commandes directes ci-dessus illustrent les modules ; un run réglementaire doit recevoir un reçu produit par les scripts de phase.
+
+\section{Résultats}
+\subsection{Tests de non-régression et tests ciblés}
+La matrice P5 consolidée recense 54/54 modules avec reçus PASS, 316 tests et 21 sous-tests. La revalidation ciblée ultérieure ajoute notamment P4 mémoire 11/11, panneau Détails 2/2 sous Xvfb, inspection événements mémoire 7/7, graphe causal 4/4, régression réponse/chat 30/30 et récompense/traçabilité 3/3; ces reçus ne sont pas interprétés comme une extension rétroactive du décompte de la matrice P5. La compilation et la suite de tests s'exécutent dans l'environnement local de laboratoire. Les résultats détaillés sont dans \texttt{logs/O94\_0/P5\_matrix\_consolidated\_001.json} et la clôture dans \texttt{logs/O94\_0/P5\_closure\_001.json}.
+
+\subsection{Corpus réel SMS}
+Le ZIP fourni du SMS Spam Collection a passé son contrôle CRC. Le sous-échantillon de 300 lignes a été ingéré avec conservation exactement une fois des lignes, indexation et récupération. L'essai end-to-end est un échantillon ; il ne prétend pas être une évaluation sortie complète de chaque message des 5\,574 lignes. La correction du parseur traite le TSV comme une ligne par enregistrement, avec le premier séparateur tabulation séparant le champ de classe du texte libre.
+
+\subsection{Corpus Screenplay}
+Le reçu \path{corpus_eval/P3_bounded_corpus_eval_002.json} rapporte 10/10 correspondances exactes post-hoc sur 32 enregistrements. Les réponses attendues ont servi à mesurer le résultat après exécution ; elles n'ont pas été injectées dans le runtime. Ce nombre décrit ce petit test borné et ne prouve pas la précision générale.
+
+\subsection{R1 : réponse et détails}
+Les tests de contrat chat vérifient qu'une seule chaîne est rendue dans le corps principal, tandis que les preuves, scores, hashes et diagnostics restent séparés. Le fallback utilise un champ réponse sélectionné au lieu du contenu de plusieurs enregistrements JSONL concaténés.
+
+\subsection{R2 : pipeline RAG puis génération}
+Les tests vérifient que la récupération précède la génération, que l'absence d'index ou de correspondance est distincte de l'absence d'exécution du RAG, et que la demande et les preuves sont passées séparément au générateur. Les adaptateurs sont couverts par tests, mais aucun endpoint LLM tiers en direct n'est revendiqué comme validé dans ces reçus.
+
+\subsection{R3 : mémoire à raffinement progressif}
+Les tests de mémoire contrôlent la profondeur, les budgets, le routage maître/micro, la lecture des feuilles après sélection, la vérification SHA-256, les voisinages temporels et les liens causaux explicites. Les vues maître ne stockent pas l'intégralité des charges utiles en clair.
+
+\section{Historique d'incidents et résultat des retests}
+Les journaux conservent les erreurs rencontrées : imports erronés dans les scripts de clôture, incohérences de schémas de manifestes, anciens tests d'affichage incompatibles avec R1, courses de pause/reprise, détection initiale manquante de l'UI d'entraînement, timeouts de groupes, décodeur TSV strict inadapté aux textes libres, assertion initiale trop forte sur le moteur local, et tests de vérificateur de chemins. Ils ont des statuts distincts dans les checklists d'incidents. Les incidents qui disposent d'un retest probant sont marqués résolus avec référence ; les timeouts qui n'ont pas de retest ne sont pas comptés PASS. Les erreurs historiques ne sont pas effacées.
+
+La matrice P5 a été relancée par modules indépendants lorsque des groupes dépassaient le plafond de commande. Le statut PASS d'un module repose sur son reçu séparé, pas sur le retour du groupe interrompu. Les archives de référence O93/O94 restent les entrées historiques ; leurs hashes sont conservés dans \texttt{chemins\_O94\_0.json}.
+
+\section{Interprétation des résultats}
+La preuve actuelle est cohérente avec une amélioration du contrôle de réponse, de la sélection structurée et du chargement incrémental. Le résultat ne démontre pas que toute formulation inconnue recevra toujours une réponse correcte, que chaque LLM arbitraire coopère, que chaque fichier multimodal est lisible dans tous les environnements ou que le modèle peut traiter du matériel physique non présent au laboratoire. L'intégrité SHA démontre l'identité des octets avec un état attendu, pas leur exactitude factuelle.
+
+\section{Conséquences}
+\subsection{Théoriques}
+L'arbre de résolution est une filtration des classes issues des observations ; la profondeur ajoute de la distinction contextuelle sans faire de l'empreinte un oracle sémantique. Les poids itoken/vtoken restent relatifs aux sondes, au corpus et à la version.
+
+\subsection{Conceptuelles}
+RAG, mémoire, génération et présentation deviennent quatre responsabilités distinctes. Les preuves demeurent liées à leur source, la réponse visible n'embarque pas la provenance technique et la sélection du moteur est explicite.
+
+\subsection{Opérationnelles}
+Le contrôle de phase, les reçus, les hashes, la sauvegarde externe et les manifestes réduisent les risques de répétition inutile et de livraison corrompue. L'index doit être rafraîchi après une mutation de source ; un snapshot doit être reconstruit après les derniers changements documentaires.
+
+\section{Conclusion}
+La matrice P5 et les validations ciblées documentent les fonctions R1--R3 dans leurs périmètres. La clôture de P6 exige que les documents LaTeX compilent, que les références code/tests/reçus du registre soient toutes présentes et que le snapshot soit vérifié par manifeste. La phase P7 reste indépendante : elle ne peut être déclarée terminée qu'après CRC, extraction indépendante et vérification SHA des paquets livrés.
+
+\section{Complément de traçabilité P6}
+Le registre machine-readable associe chaque exigence R1--R3 à des références de code, des modules de tests, des reçus et des limites. Le rapport d'incidents complet se trouve dans \path{docs/O94_0/P6_rapport_incidents_limites.md}. Les documents de phase, checklists d'erreurs et le savepoint sont livrés dans l'archive de suivi. Les manifests finaux ne sont pas auto-référentiels : le SHA-256 de chaque ZIP est conservé dans le sidecar externe \path{livrables_O94_0_SHA256.json}.
+
+\section{Statut du modèle}
+Statut actuel : \textbf{implémentation locale testée dans un périmètre borné}. La base fournit RAG hiérarchique, génération contrôlée, délégation AAM explicitement sélectionnée et lecture mémoire progressive. Les intégrations externes vivantes, les essais exhaustifs sur tout le SMS dataset, l'utilisation de chaque architecture LLM possible et le matériel de capteurs/Windows réel ne sont pas considérés comme validés sans reçus correspondants.
+
+\end{document}

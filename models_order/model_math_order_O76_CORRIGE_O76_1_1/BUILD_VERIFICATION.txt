@@ -1,0 +1,55 @@
+MODEL MATH ORDER O76-1.1 — BUILD VERIFICATION
+==========================================
+Date: 2026-09-30
+
+SOURCE ARCHIVE SHA-256
+- model_O72_e_1.zip: 7e1874173e824a9ed5480882573f94ebd61010edd7362f94a2dfd8aeb11d9aaa
+- model_s(1).zip: 87ac29533923e4e7101980637920622de2af764a29c78f990e6afb399197010b
+
+CORPUS AUDIT
+- recursive files: 732
+- unique content hashes: 455
+- Python compile: 139/139 PASS
+- JSON valid: 304; invalid empty harness artifacts: 6 (E38)
+- JSONL: 2/2 PASS
+- gzip validation: 32/32 PASS
+- PDF text extraction: 16/16 PASS
+- PDF render audit: 16/16 PASS
+
+REFERENCE MODEL CHECK
+- O75 reference selfcheck: 12/12 cases PROVEN + checkpoint PASS
+
+O76 SELF-CHECK
+- ring identity: PROVEN
+- ideal/Groebner identity certificate: PROVEN
+- linear Gaussian: PROVEN
+- Sturm roots: PROVEN
+- propositional tautology: PROVEN
+- propositional countermodel: REFUTED
+- finite exhaustive proof: PROVEN
+- finite exhaustive counterexample: REFUTED
+- CRT: PROVEN
+- Diophantine EGCD: PROVEN
+- Pell: PROVEN
+- matrix exact RREF: PROVEN
+- checkpoint pause/resume: UNRESOLVED -> PROVEN
+- runtime integrity scan: PASS
+- selfcheck: PASS
+- pytest regression: 13/13 PASS
+
+O76 DECISIVE TEST
+- Open-problem gate: Collatz -> UNRESOLVED/UNSUPPORTED_FORM; Riemann -> UNRESOLVED/UNSUPPORTED_FORM. No false proof. Full-relation validation rejects internal prose `=` as mathematical evidence.
+- Original O76-1.0 triangular depth 12: no certified result before external watchdog termination; same family depth 10: PROVEN in 14.24 s.
+- Corrected O76-1.1 triangular depth 12: PROVEN via TRIANGULAR_TOWER_EXACT in ~1.0 s, independent verifier PASS.
+- Shuffled equations: PROVEN; arbitrary target under contradiction: PROVEN; k=3 tower: PROVEN.
+- Consistent tower: UNRESOLVED, no contradiction certificate.
+- Certificate tampering: original PASS; one-coefficient mutation REJECTED; target-multiplier mutation REJECTED; contradiction-constant mutation REJECTED.
+
+DOCUMENTATION
+- model_math_order_O76.tex compiles to PDF: PASS
+- reflexion_O76.tex compiles to PDF: PASS
+
+TRUST BOUNDARY
+- PROVEN/REFUTED always require certificate replay.
+- No external symbolic/numeric solver is in the runtime proof path.
+- The runtime is not itself formally verified in Lean/Coq/Isabelle; Python and verifier code are part of the computational trust base.
