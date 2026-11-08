@@ -1,0 +1,394 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=22mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,tabularx,array,graphicx,float}
+\usepackage{xcolor,enumitem,fancyhdr,hyperref,listings,caption}
+\graphicspath{{rapport_testes_assets/}}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black,pdftitle={Rapport des tests eSonde v0},pdfauthor={ChatGPT — rapport expérimental}}
+\setlength{\parskip}{5pt}\setlength{\parindent}{0pt}\renewcommand{\arraystretch}{1.16}
+\pagestyle{fancy}\fancyhf{}\lhead{eSonde\_v0 — Rapport d'essais}\rhead{08 novembre 2026}\cfoot{\thepage}
+\setlist[itemize]{nosep,leftmargin=1.5em}\setlist[enumerate]{nosep,leftmargin=1.7em}
+\newcommand{\PASS}{\textcolor{green!45!black}{\textbf{PASS}}}
+\newcommand{\WARN}{\textcolor{orange!70!black}{\textbf{À INTERPRÉTER}}}
+\newcommand{\FAIL}{\textcolor{red!70!black}{\textbf{ÉCHEC}}}
+\newcommand{\esonde}{eSonde\_v0}
+\begin{document}
+\begin{titlepage}\centering\vspace*{18mm}
+{\Large RAPPORT SCIENTIFIQUE ET TECHNIQUE\par}\vspace{10mm}
+{\Huge\bfseries Campagne d'essais comparatifs\par}\vspace{4mm}
+{\LARGE\bfseries eSonde\_v0\par}\vspace{12mm}
+{\large Évaluation multi-jeux, multi-graines, comparaison aux références standards et stress d'extrapolation\par}
+\vfill
+\begin{tabular}{rl}
+Date du protocole : & 08 novembre 2026 (Africa/Algiers)\\
+Date du rapport : & 08 novembre 2026\\
+Campagne principale : & 5 jeux, 10 graines, 4 modèles, 200 ajustements\\
+Campagne hybride : & 5 jeux, 5 graines, 2 modèles, 50 ajustements\\
+Stress extrapolation : & 10 graines, 4 modèles, 2 régimes, 80 lignes de score\\
+Statut de l'audit : & \PASS\ — zéro incohérence détectée par l'audit indépendant\\
+\end{tabular}
+\vfill
+{\small Ce rapport décrit les expériences enregistrées et les résultats recalculés depuis les journaux bruts. Il ne constitue pas une preuve de supériorité universelle.\par}
+\end{titlepage}
+\tableofcontents\newpage
+
+\section{Résumé exécutif}
+La campagne principale comprend 200 ajustements sur 50 partitions communes (cinq jeux multipliés par dix graines) : eSonde local, MLP à une couche cachée apparié en nombre de paramètres entraînables, SVM/SVR à noyau RBF et ExtraTrees. La campagne multi-familles comprend 50 ajustements sur 25 partitions (cinq jeux multipliés par cinq graines) : eSonde hybride et MLP apparié à ce modèle hybride. Un stress dédié à l'extrapolation contient 80 lignes de mesures issues de 40 ajustements sur dix graines et deux régimes.
+
+Les résultats ne sont pas uniformes. eSonde local obtient le meilleur RMSE moyen sur Diabetes (55,287 contre 55,936 pour le MLP) et Friedman-1 (1,757 contre 2,102). Il obtient aussi le meilleur F1 macro moyen sur Two-Moons face au MLP (0,9283 contre 0,8996), mais ExtraTrees est très légèrement devant (0,9300). Sur Breast Cancer, le MLP est meilleur (0,9800 contre 0,9704). Sur la classification 40D bruitée, le SVM RBF est meilleur (0,9037 contre 0,8795).
+
+Les coûts d'exécution sont défavorables à eSonde dans cette version : le temps moyen d'entraînement est environ 5 à 66 fois celui du MLP apparié selon le jeu, et la latence batch mesurée est également supérieure. Le stress 1D confirme une excellente interpolation dans le régime testé, mais une dégradation importante hors du domaine d'entraînement. En extrapolation, le SVR RBF est légèrement meilleur que eSonde (RMSE 1,3543 contre 1,3732).
+
+Conclusion mesurée : eSonde v0 est compétitif et présente des avantages marqués sur certains problèmes non linéaires, mais ne domine pas les standards sur l'ensemble des tâches et son coût opérationnel est élevé. Les observations ne permettent ni d'affirmer un échec général, ni une supériorité générale.
+
+\section{Description et périmètre}
+\subsection{Objectif}
+Évaluer, sans sélectionner les conclusions à l'avance, les performances prédictives, la stabilité entre partitions, le coût d'apprentissage, la latence et le comportement en extrapolation d'eSonde v0 face à trois références indépendantes : un MLP compact, un modèle RBF (SVC/SVR) et ExtraTrees.
+
+\subsection{Artefacts évalués}
+Le moteur importé est le runtime livré dans \texttt{Dmodel\_eSond\_v0}. Les entraînements benchmark utilisent la classe Python \texttt{ESonde} du code livré ; les configurations de base comprennent 16 sondes locales. La variante hybride utilise les familles \texttt{local}, \texttt{coverage} et \texttt{interaction} dans une même instance. Les états entraînés et sauvegardés sont ceux qui ont effectivement produit les scores : 50 modèles locaux et 25 modèles hybrides, soit 75 fichiers JSON eSonde. Aucun de ces états n'a été réduit ou retouché après entraînement avant le contrôle d'empreinte et de rechargement.
+
+Les neuf snapshots de démonstration fournis séparément sont restés immuables. Ils ont passé les contrôles d'intégrité, \texttt{inspect} et l'inférence de fumée. Ils ne sont pas réutilisés comme modèles pré-entraînés pour les cinq jeux du benchmark : ces snapshots sont des exemples sur d'autres entrées, et les utiliser sur des jeux dont ils ne partagent ni les dimensions ni le domaine aurait été une comparaison invalide.
+
+\section{Architecture des modèles comparés}
+\subsection{eSonde local}
+\begin{itemize}
+\item Famille activée : \texttt{local} uniquement ; 16 sondes par instance.
+\item Apprentissage : taux d'apprentissage 0,025, taille de lot 32, maximum 100 époques, patience 15, graine égale à celle de la partition.
+\item Les statistiques de normalisation sont calculées sur le train uniquement. En régression, les cibles sont également centrées/réduites à partir du train puis remises à l'échelle pour calculer les métriques.
+\item Le meilleur état est sélectionné à partir de la validation, jamais du test.
+\end{itemize}
+
+\subsection{eSonde hybride}
+Même runtime et même nombre total de sondes (16), avec les familles \texttt{local}, \texttt{coverage} et \texttt{interaction}. Il est évalué sur cinq graines (11, 37, 71, 101, 151), sélectionnées à l'avance pour la campagne secondaire. La variante est comparée à un MLP apparié à sa propre capacité paramétrique, puis aux mêmes références SVM/ExtraTrees sur les mêmes graines et partitions.
+
+\subsection{Références standards}
+\begin{itemize}
+\item MLP : une couche cachée ReLU, optimiseur Adam, taux initial 0,001, régularisation $\alpha=10^{-4}$, taille de lot 32, au plus 100 époques, arrêt anticipé sur la validation. La largeur cachée minimise l'écart du nombre de paramètres entraînables avec eSonde.
+\item SVM/SVR RBF : régression SVR avec $C=10$, $\epsilon=0,1$, $\gamma=\mathrm{scale}$ ; classification SVC avec $C=2$, $\gamma=\mathrm{scale}$ et probabilités activées. Les entrées sont standardisées par un scaler ajusté sur le train seulement.
+\item ExtraTrees : 250 arbres, feuille minimale 2, une seule unité de travail (\texttt{n\_jobs=1}), \texttt{max\_features=1.0} en régression et \texttt{sqrt} en classification. Les arbres n'ont pas besoin du même scaler que les modèles à distance.
+\end{itemize}
+
+\subsection{Appariement paramétrique et limites de l'équivalence}
+Pour le MLP, le nombre de paramètres entraînables est calculé explicitement par $(d+1)h+(h+1)o$, avec largeur cachée $h$ choisie au plus proche du nombre d'eSonde. Sur les 50 partitions principales, l'écart relatif moyen est de 1,038\% et l'écart maximal de 1,586\%. Pour la campagne hybride, les écarts observés sont compris entre environ 0,98\% et 2,84\% selon le jeu.
+
+Cet appariement rend les capacités paramétriques comparables, mais ne rend pas identiques les inductive biases, les optimiseurs ou le coût de calcul. SVM et ExtraTrees sont non paramétriques au sens où un simple compte de paramètres entraînables comparable n'est pas pertinent ; leur complexité est représentée par le nombre de vecteurs de support ou le nombre total de nœuds d'arbres. Aucune égalité artificielle de coût n'est revendiquée.
+
+\section{Données et protocole}
+\subsection{Jeux de données}
+\begin{longtable}{p{4.0cm}p{2.1cm}r r p{4.2cm}}
+\toprule Jeu & Nature & $n$ & $d$ & Génération / source \\
+\midrule
+\endhead
+Diabetes & Réel & 442 & 10 & \texttt{sklearn.datasets.load\_diabetes}\\
+Friedman-1 & Synthétique & 1000 & 10 & \texttt{make\_friedman1}; bruit 1,5 ; seed 314159\\
+Breast Cancer Wisconsin & Réel & 569 & 30 & \texttt{load\_breast\_cancer}\\
+Two-Moons & Synthétique & 1200 & 2 & \texttt{make\_moons}; bruit 0,28 ; seed 271828\\
+Classification 40D & Synthétique & 1200 & 40 & 10 informatives, 8 redondantes, 22 bruit, bruit d'étiquettes 7\%, seed 161803\\
+\bottomrule
+\end{longtable}
+Les hachages SHA-256 des matrices $X$ et des cibles $y$ sont vérifiés dans \texttt{results/dataset\_manifest.json}. L'audit indépendant les a régénérés et retrouvés identiques pour les cinq jeux.
+
+\subsection{Partitions et prévention des fuites}
+Pour chaque jeu principal, les graines sont 11, 23, 37, 53, 71, 89, 101, 131, 151 et 173. Une séparation externe réserve 20\% au test ; les 80\% restants sont divisés à nouveau avec 25\% pour la validation. La distribution finale est donc 60\% train, 20\% validation et 20\% test. Les deux partitions sont stratifiées en classification. Le même split est utilisé pour tous les modèles du contraste correspondant.
+
+Les transformations statistiques sont ajustées uniquement sur le train. Le jeu test n'intervient pas dans l'entraînement, la sélection d'époque ou les réglages. Chaque modèle fait l'objet d'une seule évaluation finale des métriques sur la partition de test après ajustement. Pour la latence, le batch de test est réexécuté 25 fois après entraînement ; ces répétitions servent uniquement à mesurer le temps et ne modifient aucun modèle. En classification, les probabilités et les classes prédites sont extraites séparément pour les métriques probabilistes et de décision, sans réoptimisation.
+
+\subsection{Métriques}
+Régression : MAE, RMSE et $R^2$. Classification : accuracy, balanced accuracy, F1 macro, log-loss, ROC-AUC et score de Brier. Coût : secondes d'entraînement et latence p50/p95 du batch entier de test (25 répétitions). Les métriques sont agrégées par jeu et non fondues dans un score commun entre régression et classification.
+
+\subsection{Statistique descriptive}
+Les tableaux donnent moyenne et écart-type entre partitions ; les comparaisons appariées donnent la moyenne de la différence et son intervalle t à 95\%. Pour RMSE, une différence $eSonde - comparateur$ négative favorise eSonde. Pour F1 macro, une différence positive le favorise. Les graines produisent des partitions répétées d'un même jeu ; les intervalles sont descriptifs et ne doivent pas être interprétés comme des intervalles d'échantillons indépendants de la population. Il n'y a pas de correction de multiplicité pour les multiples jeux et comparateurs.
+
+\section{Pipeline complet d'exécution}
+\begin{enumerate}
+\item Vérifier le runtime livré et ses 15 tests unitaires.
+\item Recréer les cinq jeux à partir des fonctions et graines de génération gelées ; vérifier les SHA-256.
+\item Construire les partitions train/validation/test appariées par jeu et graine.
+\item Ajuster chaque prétraitement sur le train uniquement.
+\item Entraîner eSonde local ; choisir l'état sur validation et sauvegarder le JSON entraîné.
+\item Dimensionner le MLP par nombre de paramètres puis l'entraîner avec arrêt anticipé sur validation.
+\item Entraîner SVM/SVR RBF et ExtraTrees avec réglages prédéfinis.
+\item Calculer les métriques du test et 25 répétitions de latence batch ; ajouter chaque run complet au JSONL immédiatement.
+\item Refaire une campagne secondaire pour eSonde hybride sur cinq graines.
+\item Exécuter le stress contrôlé d'interpolation/extrapolation 1D.
+\item Recharger tous les modèles eSonde entraînés et recalculer les métriques ; comparer aux enregistrements originaux.
+\item Recalculer les agrégats depuis les journaux bruts et valider couvertures, doublons et hachages.
+\end{enumerate}
+
+\section{Commandes de reproduction}
+Les commandes ci-dessous supposent que le répertoire \texttt{esonde\_benchmark\_v0} est extrait et que le runtime Dmodel est disponible. Adapter uniquement le chemin \texttt{ESONDE\_RUNTIME} sans modifier les données ou les scripts.
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+export ESONDE_RUNTIME=/path/to/Dmodel_eSond_v0
+export PYTHONPATH="$ESONDE_RUNTIME/src"
+cd esonde_benchmark_v0
+
+# Campagne principale (200 fits)
+python scripts/run_benchmark.py --datasets all \
+  --seeds 11,23,37,53,71,89,101,131,151,173 \
+  --verify-snapshots
+
+# Campagne multi-familles (50 fits)
+python scripts/run_hybrid_benchmark.py --datasets all \
+  --seeds 11,37,71,101,151
+
+# Stress interpolation / extrapolation (40 fits, 80 scores)
+python scripts/run_extrapolation_stress.py \
+  --seeds 11,23,37,53,71,89,101,131,151,173
+
+# Resumes, controles des modeles et audit independant
+python scripts/summarize_results.py
+python scripts/verify_model_roundtrip.py
+python scripts/verify_hybrid_roundtrip.py
+python scripts/final_integrity_audit.py
+
+# Runtime unit tests
+cd "$ESONDE_RUNTIME"
+python -m unittest discover -s tests -v
+\end{lstlisting}
+Les commandes de réexécution recommencent les campagnes et écrasent par défaut les journaux principaux ; pour préserver les résultats livrés, les exécuter sur une copie de travail. Les artefacts actuels sont les résultats audités, pas une invitation à écraser la copie maîtresse.
+
+\section{Résultats — campagne principale}
+\subsection{Régression}
+\begin{longtable}{p{3.0cm}p{2.1cm}r r r r r}
+\toprule Jeu & Modèle & RMSE moy. & SD & MAE & $R^2$ & Temps (s)\\\midrule\endhead
+Diabetes (réel) & eSonde local & 55.287 & 3.139 & 44.094 & 0.506 & 2.29 \\
+Diabetes (réel) & MLP apparié & 55.936 & 2.288 & 44.708 & 0.496 & 0.09 \\
+Diabetes (réel) & SVM/SVR RBF & 65.581 & 4.938 & 51.120 & 0.305 & 0.01 \\
+Diabetes (réel) & ExtraTrees & 56.692 & 1.786 & 46.022 & 0.482 & 0.16 \\
+Friedman-1 (synthétique) & eSonde local & 1.757 & 0.078 & 1.408 & 0.884 & 7.94 \\
+Friedman-1 (synthétique) & MLP apparié & 2.102 & 0.154 & 1.661 & 0.834 & 0.30 \\
+Friedman-1 (synthétique) & SVM/SVR RBF & 2.125 & 0.107 & 1.696 & 0.831 & 0.03 \\
+Friedman-1 (synthétique) & ExtraTrees & 2.304 & 0.149 & 1.835 & 0.801 & 0.29 \\
+\bottomrule\end{longtable}
+
+\subsection{Classification}
+\begin{longtable}{p{2.45cm}p{1.55cm}r r r r r r r}
+\toprule Jeu & Modèle & Acc. & Bal. acc. & F1 macro & Log-loss & AUC & Brier & Temps s\\\midrule\endhead
+Breast Cancer Wisconsin (réel) & eSonde local & 0.9728 & 0.9666 & 0.9704 & 0.1000 & 0.9919 & 0.0223 & 8.43 \\
+Breast Cancer Wisconsin (réel) & MLP apparié & 0.9816 & 0.9765 & 0.9800 & 0.0743 & 0.9950 & 0.0180 & 0.30 \\
+Breast Cancer Wisconsin (réel) & SVM/SVR RBF & 0.9737 & 0.9688 & 0.9715 & 0.0969 & 0.9940 & 0.0225 & 0.01 \\
+Breast Cancer Wisconsin (réel) & ExtraTrees & 0.9675 & 0.9614 & 0.9646 & 0.1251 & 0.9929 & 0.0320 & 0.15 \\
+Two-Moons bruité (synthétique) & eSonde local & 0.9283 & 0.9283 & 0.9283 & 0.1838 & 0.9803 & 0.0541 & 2.53 \\
+Two-Moons bruité (synthétique) & MLP apparié & 0.8996 & 0.8996 & 0.8996 & 0.2347 & 0.9676 & 0.0705 & 0.51 \\
+Two-Moons bruité (synthétique) & SVM/SVR RBF & 0.9229 & 0.9229 & 0.9229 & 0.1921 & 0.9785 & 0.0557 & 0.01 \\
+Two-Moons bruité (synthétique) & ExtraTrees & 0.9300 & 0.9300 & 0.9300 & 0.2479 & 0.9765 & 0.0647 & 0.16 \\
+Classification 40D bruitée (synthétique) & eSonde local & 0.8796 & 0.8797 & 0.8795 & 0.3072 & 0.9428 & 0.0876 & 17.15 \\
+Classification 40D bruitée (synthétique) & MLP apparié & 0.8879 & 0.8880 & 0.8879 & 0.3122 & 0.9434 & 0.0882 & 0.26 \\
+Classification 40D bruitée (synthétique) & SVM/SVR RBF & 0.9037 & 0.9039 & 0.9037 & 0.2943 & 0.9513 & 0.0785 & 0.07 \\
+Classification 40D bruitée (synthétique) & ExtraTrees & 0.8950 & 0.8951 & 0.8950 & 0.4148 & 0.9518 & 0.1231 & 0.26 \\
+\bottomrule\end{longtable}
+
+\subsection{Comparaisons appariées : eSonde local}
+\begin{longtable}{p{3.2cm}p{2.1cm}r p{4.0cm}c}
+\toprule Jeu & Comparateur & $\Delta$ moy. & IC 95\% apparié & Victoires eSonde\\\midrule\endhead
+Breast Cancer Wisconsin (réel) & MLP & -0.0096 & [-0.0193; 0.0002] & 1/10 \\
+Breast Cancer Wisconsin (réel) & RBF-SVM & -0.0011 & [-0.0110; 0.0088] & 3/10 \\
+Breast Cancer Wisconsin (réel) & ExtraTrees & 0.0058 & [-0.0088; 0.0203] & 4/10 \\
+Diabetes (réel) & MLP & -0.6491 & [-3.1572; 1.8590] & 8/10 \\
+Diabetes (réel) & RBF-SVM & -10.2936 & [-13.5270; -7.0601] & 10/10 \\
+Diabetes (réel) & ExtraTrees & -1.4048 & [-3.8217; 1.0121] & 9/10 \\
+Friedman-1 (synthétique) & MLP & -0.3450 & [-0.4311; -0.2589] & 10/10 \\
+Friedman-1 (synthétique) & RBF-SVM & -0.3674 & [-0.4312; -0.3037] & 10/10 \\
+Friedman-1 (synthétique) & ExtraTrees & -0.5468 & [-0.6495; -0.4441] & 10/10 \\
+Classification 40D bruitée (synthétique) & MLP & -0.0084 & [-0.0288; 0.0121] & 3/10 \\
+Classification 40D bruitée (synthétique) & RBF-SVM & -0.0242 & [-0.0356; -0.0128] & 1/10 \\
+Classification 40D bruitée (synthétique) & ExtraTrees & -0.0155 & [-0.0297; -0.0013] & 3/10 \\
+Two-Moons bruité (synthétique) & MLP & 0.0288 & [0.0170; 0.0406] & 10/10 \\
+Two-Moons bruité (synthétique) & RBF-SVM & 0.0054 & [-0.0000; 0.0109] & 7/10 \\
+Two-Moons bruité (synthétique) & ExtraTrees & -0.0017 & [-0.0089; 0.0055] & 3/10 \\
+\bottomrule\end{longtable}
+Pour interpréter le tableau, le signe dépend de la métrique : négatif est meilleur pour RMSE ; positif est meilleur pour F1 macro. Les comptes de victoires sont descriptifs sur dix partitions, et non une probabilité de gagner sur un nouveau domaine.
+
+\subsection{Figures par jeu}
+\begin{figure}[H]\centering\includegraphics[width=.88\textwidth]{diabetes_real_regression_main.png}\caption{Diabetes : RMSE par modèle, barres d'écart-type entre les dix partitions.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.88\textwidth]{friedman1_nonlinear_regression_main.png}\caption{Friedman-1 : RMSE par modèle.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.88\textwidth]{breast_cancer_real_binary_main.png}\caption{Breast Cancer : F1 macro par modèle.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.88\textwidth]{moons_noisy_nonlinear_binary_main.png}\caption{Two-Moons : F1 macro par modèle.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.88\textwidth]{highdim_noisy_40d_binary_main.png}\caption{Classification 40D : F1 macro par modèle.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.95\textwidth]{paired_deltas_regression.png}\caption{Différences appariées pour la régression ; ligne verticale = égalité.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.95\textwidth]{paired_deltas_classification.png}\caption{Différences appariées pour la classification ; ligne verticale = égalité.}\end{figure}
+
+\section{Résultats — architecture hybride}
+La campagne hybride totalise 50 ajustements (25 partitions, deux modèles). Les cinq graines sont 11, 37, 71, 101 et 151. Le MLP est apparié à la capacité paramétrique de la variante hybride ; les références SVM et ExtraTrees sont reprises sur exactement ces mêmes graines et partitions dans la campagne principale.
+\begin{longtable}{p{3.2cm}p{2.65cm}r r r r}
+\toprule Jeu & Modèle & Métrique moy. & SD & Temps (s) & Paramètres moy.\\\midrule\endhead
+Diabetes (réel) & eSonde hybride & 54.7360 & 2.1420 & 1.86 & 223.0 \\
+Diabetes (réel) & MLP apparié hybride & 56.5309 & 1.7795 & 0.12 & 217.0 \\
+Friedman-1 (synthétique) & eSonde hybride & 1.7654 & 0.1820 & 7.81 & 223.0 \\
+Friedman-1 (synthétique) & MLP apparié hybride & 2.1977 & 0.1097 & 0.28 & 217.0 \\
+Breast Cancer Wisconsin (réel) & eSonde hybride & 0.9658 & 0.0128 & 7.44 & 579.0 \\
+Breast Cancer Wisconsin (réel) & MLP apparié hybride & 0.9774 & 0.0158 & 0.33 & 563.0 \\
+Two-Moons bruité (synthétique) & eSonde hybride & 0.9283 & 0.0163 & 2.57 & 103.0 \\
+Two-Moons bruité (synthétique) & MLP apparié hybride & 0.9067 & 0.0163 & 0.48 & 102.0 \\
+Classification 40D bruitée (synthétique) & eSonde hybride & 0.8775 & 0.0260 & 12.81 & 749.0 \\
+Classification 40D bruitée (synthétique) & MLP apparié hybride & 0.8783 & 0.0115 & 0.26 & 733.0 \\
+\bottomrule\end{longtable}
+
+\subsection{Différences appariées hybrides}
+\begin{longtable}{p{3.15cm}p{2.0cm}r p{4.0cm}c}
+\toprule Jeu & Comparateur & $\Delta$ moy. & IC 95\% & Victoires eSonde\\\midrule\endhead
+Breast Cancer Wisconsin (réel) & MLP apparié & -0.0116 & [-0.0288; 0.0057] & 1/5 \\
+Breast Cancer Wisconsin (réel) & RBF-SVM & -0.0094 & [-0.0343; 0.0154] & 2/5 \\
+Breast Cancer Wisconsin (réel) & ExtraTrees & 0.0020 & [-0.0134; 0.0173] & 3/5 \\
+Diabetes (réel) & MLP apparié & -1.7949 & [-3.8128; 0.2229] & 4/5 \\
+Diabetes (réel) & RBF-SVM & -8.2855 & [-14.2617; -2.3093] & 5/5 \\
+Diabetes (réel) & ExtraTrees & -1.1662 & [-2.8117; 0.4792] & 4/5 \\
+Friedman-1 (synthétique) & MLP apparié & -0.4323 & [-0.5751; -0.2895] & 5/5 \\
+Friedman-1 (synthétique) & RBF-SVM & -0.3212 & [-0.4952; -0.1473] & 5/5 \\
+Friedman-1 (synthétique) & ExtraTrees & -0.5417 & [-0.6555; -0.4280] & 5/5 \\
+Classification 40D bruitée (synthétique) & MLP apparié & -0.0008 & [-0.0362; 0.0346] & 3/5 \\
+Classification 40D bruitée (synthétique) & RBF-SVM & -0.0250 & [-0.0396; -0.0104] & 0/5 \\
+Classification 40D bruitée (synthétique) & ExtraTrees & -0.0167 & [-0.0288; -0.0045] & 0/5 \\
+Two-Moons bruité (synthétique) & MLP apparié & 0.0217 & [0.0064; 0.0369] & 5/5 \\
+Two-Moons bruité (synthétique) & RBF-SVM & 0.0017 & [-0.0114; 0.0147] & 4/5 \\
+Two-Moons bruité (synthétique) & ExtraTrees & -0.0092 & [-0.0261; 0.0078] & 1/5 \\
+\bottomrule\end{longtable}
+Les intervalles sont calculés sur cinq différences appariées ; ils sont donc plus larges et plus instables que ceux de la campagne principale. La variante hybride n'est pas systématiquement meilleure que le modèle local : par exemple, sur la classification 40D, les scores restent sous RBF-SVM et ExtraTrees ; sur Breast Cancer, le MLP apparié demeure devant. La configuration hybride montre un avantage notable sur Friedman-1 et Two-Moons face au MLP apparié, mais au prix d'un temps d'entraînement supérieur.
+\begin{figure}[H]\centering\includegraphics[width=.92\textwidth]{hybrid_regression.png}\caption{Comparaison hybride / MLP apparié en régression.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.92\textwidth]{hybrid_classification.png}\caption{Comparaison hybride / MLP apparié en classification.}\end{figure}
+
+\section{Stress dédié à l'extrapolation}
+La fonction cible est $f(x)=\sin(2.4x)+0.25x$. Pour chaque graine, 500 observations d'entraînement sont tirées uniformément dans $[-2,2]$, 150 observations de validation dans le même domaine, 300 observations d'interpolation dans $[-2,2]$, et 300 observations d'extrapolation dans $[-3.2,-2.2]\cup[2.2,3.2]$. La séparation interpolation/extrapolation est donc explicite ; le modèle n'est pas entraîné sur les régions extrapolées. Dix graines donnent 40 ajustements et 80 lignes de métriques.
+\begin{longtable}{p{2.7cm}p{2.0cm}r r p{3.4cm}r r r}
+\toprule Modèle & Régime & RMSE & SD & IC 95\% & MAE & $R^2$ & Temps s\\\midrule\endhead
+ExtraTrees & interpolation & 0.0240 & 0.0077 & [0.0185; 0.0295] & 0.0209 & 0.9988 & 0.11 \\
+ExtraTrees & extrapolation & 1.4727 & 0.0322 & [1.4496; 1.4957] & 1.3159 & -0.9390 & 0.11 \\
+MLP apparié & interpolation & 0.1040 & 0.0147 & [0.0935; 0.1145] & 0.0911 & 0.9787 & 0.25 \\
+MLP apparié & extrapolation & 2.6859 & 0.1806 & [2.5567; 2.8152] & 2.4686 & -5.4612 & 0.25 \\
+RBF\_SVR & interpolation & 0.0702 & 0.0016 & [0.0691; 0.0714] & 0.0631 & 0.9905 & 0.00 \\
+RBF\_SVR & extrapolation & 1.3543 & 0.0366 & [1.3281; 1.3804] & 1.2492 & -0.6409 & 0.00 \\
+eSonde local & interpolation & 0.0039 & 0.0015 & [0.0028; 0.0050] & 0.0027 & 1.0000 & 4.83 \\
+eSonde local & extrapolation & 1.3732 & 0.0613 & [1.3294; 1.4170] & 1.2288 & -0.6874 & 4.83 \\
+\bottomrule\end{longtable}
+
+Sur l'interpolation, eSonde local obtient RMSE 0,00392, devant les trois comparateurs de cette expérience contrôlée. En extrapolation, son RMSE augmente à 1,3732. Le SVR RBF obtient 1,3543, résultat légèrement meilleur ; l'écart est faible au regard des écarts-types, et aucun test de supériorité formel préenregistré n'a été défini. Le MLP apparié est à 2,6859 et ExtraTrees à 1,4727. Les $R^2$ hors domaine sont négatifs pour les quatre modèles, ce qui signifie que dans cette région les prédictions restent moins bonnes que la moyenne de la cible de référence.
+
+Le diagnostic interne \texttt{out\_of\_support} d'eSonde signale en moyenne 33,13\% des points d'interpolation et 79,90\% des points d'extrapolation. Ce signal est un diagnostic géométrique de support, pas une probabilité calibrée d'erreur et n'est pas utilisé pour modifier les prédictions.
+\begin{figure}[H]\centering\includegraphics[width=.92\textwidth]{extrapolation_stress_final.png}\caption{RMSE en interpolation et extrapolation ; les régimes sont présentés séparément.}\end{figure}
+
+\section{Coûts, capacité et empreintes}
+\subsection{Temps}
+Le temps moyen d'apprentissage d'eSonde local est de 2,29 s (Diabetes), 7,94 s (Friedman-1), 8,43 s (Breast Cancer), 2,53 s (Two-Moons) et 17,15 s (40D). Le MLP apparié requiert respectivement 0,092 s, 0,304 s, 0,300 s, 0,509 s et 0,260 s. Les rapports de temps eSonde/MLP issus des comparaisons appariées sont approximativement 24,9x, 26,1x, 28,0x, 5,0x et 65,9x.
+
+Le batch p50 de test est également plus lent sur eSonde que le MLP. Selon les jeux, le ratio de latence batch p50 est environ 51x à 283x. Le temps dépend du matériel, des tailles de batch, de l'implémentation et de l'environnement ; ces chiffres ne constituent pas une garantie portable. SVM RBF est souvent le plus rapide à l'ajustement sur ces petits jeux.
+
+\subsection{Capacité des modèles}
+\begin{longtable}{p{3.4cm}r r r r}
+\toprule Jeu & Paramètres eSonde & Paramètres MLP & Vecteurs support SVM & Nœuds ExtraTrees\\\midrule\endhead
+Diabetes (réel) & 353 & 349 & 237 & 56\,485 \\
+Friedman-1 (synthétique) & 353 & 349 & 489 & 128\,973 \\
+Breast Cancer Wisconsin (réel) & 1009 & 1025 & 79 & 18\,318 \\
+Two-Moons bruité (synthétique) & 113 & 112 & 156 & 31\,338 \\
+Classification 40D bruitée (synthétique) & 1329 & 1335 & 439 & 95\,084 \\
+\bottomrule\end{longtable}
+Les valeurs SVM et ExtraTrees sont des proxys de complexité propres à chaque famille ; elles ne sont pas des dénombrements de paramètres entraînables comparables à ceux des deux modèles paramétriques.
+
+\subsection{Poids et persistance}
+Les 50 modèles eSonde locaux et les 25 modèles hybrides sauvegardés correspondent tous au SHA-256 inscrit dans leur ligne de résultat. Les audits de rechargement ont réévalué les mêmes partitions et retrouvent les métriques enregistrées avec un écart absolu maximal de 0,0 sur les métriques comparées : 50/50 pour le local et 25/25 pour l'hybride. Les neuf snapshots distribués passent chacun le contrôle de SHA-256, \texttt{inspect} et un appel d'inférence de fumée. Les modèles MLP, SVM et ExtraTrees ont été ajustés et évalués depuis les objets réellement entraînés en mémoire ; leurs états binaires n'ont pas été sérialisés dans ce paquet de tests, mais leurs paramètres, réglages, métriques et temps sont consignés dans les JSONL.
+
+\section{Vérifications logicielles et intégrité}
+\begin{itemize}
+\item Tests du runtime : 15/15 réussis après extraction du ZIP livré.
+\item Audit statique de pureté architecturale : sept fichiers analysés, aucune violation détectée selon les règles configurées. Cet audit est statique et ne constitue pas une preuve mathématique complète de toute exécution.
+\item JSONL : 200 lignes principales, 50 hybrides, 80 extrapolation ; aucun doublon de clé (jeu, graine, modèle) dans les campagnes correspondantes.
+\item Données : cinq jeux régénérés ; les hachages des matrices et cibles correspondent au manifeste.
+\item Modèles eSonde : 75 fichiers présents et hachages conformes aux journaux ; 75/75 rechargements reproduisent les métriques.
+\item Snapshots : 9/9 empreintes, inspections et appels d'inférence passent.
+\item Audit indépendant final : \PASS\ ; zéro erreur détectée parmi les contrôles exécutés.
+\end{itemize}
+
+\section{Incidents d'exécution et corrections}
+\begin{enumerate}
+\item Une première tentative de benchmark principal a été interrompue après neuf partitions Diabetes (36 lignes, quatre modèles par partition), dans un lancement parallèle. Les lignes sont conservées dans \texttt{benchmark\_interrupted\_attempt1.jsonl} mais exclues des agrégats définitifs ; la campagne finale sérielle, complète et distincte est de 200 ajustements.
+\item Un générateur de résumé CSV a initialement supposé que toutes les tâches avaient le schéma de colonnes de la régression et a échoué après des lignes de classification. Les JSONL, écrits avant le résumé, ont été conservés ; le générateur a été corrigé et les agrégats recalculés.
+\item Les lots hybrides ont été exécutés par blocs et repris sur les graines manquantes ; l'état final compte cinq graines exactes par jeu, sans doublons, soit 50 lignes.
+\item La première génération de graphiques de synthèse a rencontré un décalage de noms de clés entre résumé principal et résumé hybride ; seul le script graphique a été corrigé. Les scores bruts n'ont pas été modifiés.
+\item Le fichier de métadonnées historique \texttt{benchmark\_environment.json} reflétait le dernier sous-lot (seed 173) plutôt que l'ensemble. Il a été remplacé par une fiche de campagne reconstruite des journaux ; l'ancienne valeur est conservée dans \texttt{benchmark\_environment\_last\_batch.json}.
+\end{enumerate}
+Aucun de ces incidents n'a nécessité de modifier les valeurs métriques du JSONL final. Les écarts et journaux partiels sont conservés dans l'archive de tests.
+
+\section{Interprétation des résultats}
+\subsection{Théorique}
+Le résultat Friedman-1 suggère que les sondes locales apprennent efficacement les interactions non linéaires présentes dans cette fonction et ce régime de dimension (10 variables, 16 sondes). L'avantage n'est pas extrapolable à toutes les fonctions non linéaires. Les écarts du jeu 40D montrent que la capacité de couverture ou de discrimination dans un espace fortement bruité reste un problème non résolu par la configuration locale testée.
+
+\subsection{Conceptuelle}
+Les résultats ne valident pas l'idée qu'une famille de sondes, seule ou hybride, serait universellement supérieure. La famille locale montre un profil intéressant sur interpolation et certaines relations non linéaires ; la famille hybride ne domine pas la famille locale sur toutes les tâches. L'extrapolation est distincte de l'interpolation et doit être traitée comme une dimension de conception et d'évaluation à part entière.
+
+\subsection{Opérationnelle}
+Le coût d'apprentissage et de prédiction actuel est beaucoup plus important que celui du MLP compact et du SVM sur les jeux considérés. Il s'agit d'un résultat concret du runtime livré, pas d'une limite théorique définitive. Une prochaine version devra mesurer les optimisations d'implémentation sans changer le calcul mathématique, contrôler la complexité en fonction de $d$ et du nombre de sondes, et développer des évaluations à plus grande échelle.
+
+\section{Limites de validité}
+\begin{itemize}
+\item Cinq jeux seulement, dont trois synthétiques : la généralisation à d'autres domaines n'est pas établie.
+\item Les graines correspondent à des partitions répétées d'un même jeu ; elles ne sont pas des réplications indépendantes d'une population.
+\item Pas de recherche hyperparamétrique imbriquée ni de budget HPO égalisé. Les valeurs ont été fixées avant l'exécution ; les résultats comparent ces configurations et non le meilleur modèle possible de chaque famille.
+\item La comparaison de paramètres n'est pertinente que pour le MLP. SVM et arbres ont des proxys spécifiques.
+\item Les temps sont propres à cette machine/logiciel et dépendent du runtime, de la charge et de la taille de batch.
+\item Le test d'extrapolation est une fonction 1D choisie ; il ne couvre pas toutes les formes de décalage de distribution ou dimension élevée.
+\item Les snapshots initiaux ont été vérifiés par inférence de fumée, mais ne représentent pas une évaluation de leur qualité sur les jeux du benchmark.
+\end{itemize}
+
+\section{Conséquences et décisions}
+\textbf{Décision empirique :} conserver eSonde local comme configuration de référence pour les prochains travaux sur les tâches où il a montré un avantage (notamment Friedman-1 et Two-Moons face au MLP), mais ne pas le déclarer gagnant universel. Sur classification 40D, les résultats actuels favorisent SVM RBF et ExtraTrees ; sur Breast Cancer, MLP est le meilleur des quatre selon F1 macro ; sur Two-Moons, ExtraTrees est légèrement en tête devant eSonde.
+
+\textbf{Architecture hybride :} maintenir la capacité d'utiliser les trois familles, mais ne pas activer le mode hybride par défaut sur la seule base de ces cinq partitions. Son bénéfice varie selon les tâches et son coût est élevé.
+
+\textbf{Priorités de recherche :} (1) augmenter les jeux réels indépendants ; (2) protocoles nested-CV/HPO identiques ; (3) stress de bruit d'entrée, covariate shift et extrapolation multidimensionnelle ; (4) analyse des erreurs par sous-groupe ; (5) optimisation de calcul profilée ; (6) calibration d'incertitude, séparée du diagnostic géométrique de support.
+
+\section{Conclusions}
+La campagne est complète au regard du protocole pré-enregistré et des fichiers d'exécution présents : 200 ajustements principaux, 50 hybrides, 40 ajustements de stress et 80 lignes de scores de stress. Les cinq hachages de jeux, les 75 empreintes de modèles entraînés, les audits de rechargement et les neuf snapshots passent leurs contrôles. Le benchmark montre des résultats favorables à eSonde sur certaines tâches et défavorables sur d'autres, accompagnés d'un coût opérationnel nettement plus élevé dans cette version. Les résultats sont suffisamment précis pour orienter une itération ciblée, mais insuffisants pour une revendication universelle de supériorité.
+
+\subsection*{Statut du modèle}
+\begin{tabularx}{\textwidth}{p{4.1cm}X}
+\toprule Axe & Statut\\\midrule
+Implémentation exécutée & \PASS\ — runtime livré, tests 15/15\\
+Évaluation principale & \PASS\ — 200/200 ajustements\\
+Évaluation multi-familles & \PASS\ — 50/50 ajustements\\
+Stress extrapolation & \PASS\ — 80/80 lignes de scores\\
+Intégrité des modèles eSonde & \PASS\ — 75/75 hachages et roundtrips\\
+Comparaison multi-domaines universelle & \WARN\ — non établie\\
+Parité compute / HPO & \WARN\ — non établie ; coûts reportés séparément\\
+Supériorité générale sur standards & \WARN\ — aucune revendication\\
+\bottomrule
+\end{tabularx}
+
+\appendix
+\section{Liste des données et empreintes}
+Les empreintes intégrales figurent dans \texttt{results/dataset\_manifest.json} et ont été revalidées par le script \texttt{final\_integrity\_audit.py}. Les préfixes suivants facilitent le repérage :
+\begin{longtable}{p{3.0cm}p{1.5cm}p{4.4cm}p{4.4cm}}
+\toprule Jeu & Dimension & SHA-256 $X$ (préfixe) & SHA-256 $y$ (préfixe)\\\midrule\endhead
+Diabetes (réel) & 442x10 & 3108d770fbdb92eb6386 & 4911e8747aff95aa1cd5 \\
+Friedman-1 (synth.) & 1000x10 & 91c6db69777022d819a1 & ebc951b0f945c1244501 \\
+Breast Cancer (réel) & 569x30 & 6b202a2072f9a0385f40 & 1763c0f8cd3f454b9eda \\
+Two-Moons (synth.) & 1200x2 & 3ba4527b95617b6290f7 & a6bb634b74f754a02e66 \\
+Classification 40D & 1200x40 & 9981719481f7f1109c13 & d6a91fdc5d572bf3e016 \\
+\bottomrule\end{longtable}
+
+\section{Inventaire des artefacts de test}
+\begin{itemize}
+\item \texttt{results/benchmark\_runs.jsonl} : résultats bruts 200 lignes.
+\item \texttt{results/hybrid\_benchmark\_runs.jsonl} : résultats bruts 50 lignes.
+\item \texttt{results/extrapolation\_stress\_runs.jsonl} : résultats bruts 80 lignes.
+\item \texttt{results/benchmark\_summary.json/.csv} : agrégats principaux.
+\item \texttt{results/paired\_comparisons.json/.csv} : 15 comparaisons appariées locales.
+\item \texttt{results/hybrid\_paired\_comparisons.json/.csv} : 15 comparaisons hybrides.
+\item \texttt{results/model\_roundtrip\_audit.json} et \texttt{hybrid\_model\_roundtrip\_audit.json} : vérification des 75 modèles eSonde.
+\item \texttt{results/snapshot\_integrity\_and\_inference.json} : neuf snapshots.
+\item \texttt{results/final\_integrity\_audit.json/.txt} : contrôles indépendants finaux.
+\item \texttt{models/} : 50 modèles locaux et 25 hybrides entraînés et hachés.
+\end{itemize}
+
+\section{Références méthodologiques}
+\begin{itemize}
+\item Pedregosa et al., ``Scikit-learn: Machine Learning in Python'', JMLR 12, 2011.
+\item Friedman, ``Multivariate Adaptive Regression Splines'', Annals of Statistics 19(1), 1991 (référence pour le jeu Friedman-1, non pas pour un ajustement MARS dans ce benchmark).
+\item Cortes et Vapnik, ``Support-Vector Networks'', Machine Learning 20, 1995.
+\item Geurts, Ernst et Wehenkel, ``Extremely randomized trees'', Machine Learning 63, 2006.
+\end{itemize}
+
+\vfill\small\textbf{Fin du rapport.} Les données brutes et scripts accompagnant ce rapport font partie intégrante de l'audit ; les tableaux sont des agrégations calculées depuis ces journaux.\
+\end{document}
