@@ -1,0 +1,18 @@
+eSonde v3 — installation et lancement
+
+Version du runtime : 0.3.0
+Prérequis CLI : CPython 3.10 ou supérieur. Le moteur n'a pas de dépendance pip tierce : il utilise la bibliothèque standard Python.
+Prérequis GUI : Tkinter/Tcl-Tk doit être disponible dans l'installation Python. La CLI fonctionne sans Tkinter.
+
+Depuis la racine de ce dossier :
+  python run_esonde.py --version
+  python run_esonde.py --help
+  python run_esonde.py info --model models/esonde_v3_demo_checkpoint.json
+  python run_esonde_gui.py
+
+Windows : run_esonde_cli.bat et run_esonde_gui.bat.
+Linux/macOS : ./run_esonde_cli.sh et ./run_esonde_gui.sh.
+
+Le paquet contient l'application, ses sources, les exemples, les schémas, la documentation et les checkpoints. Il n'embarque pas un interpréteur CPython universel ni les bibliothèques GUI système : la mise en route nécessite un Python compatible déjà installé. Pour une distribution en exécutable natif, construire et vérifier séparément un bundle pour chaque système et architecture.
+
+Le checkpoint actif esonde_v3_demo_checkpoint.json est un état de démonstration (8 documents / 415 tokens de train, 2 documents / 80 cibles de validation), pas un pré-entraîné généraliste. Les trois checkpoints originaux v2 sont conservés dans models/original_v2/ sans modification.

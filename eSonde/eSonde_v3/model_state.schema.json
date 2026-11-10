@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://esond.local/schemas/model_state.schema.json",
+  "title": "eSonde sparse probe model state",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "model_id",
+    "created_at",
+    "tokenizer",
+    "corpus_manifest",
+    "vocabulary",
+    "base_counts",
+    "probes",
+    "coordinator",
+    "memory",
+    "training_config",
+    "validation",
+    "provenance",
+    "diagnostics",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.0\\.0$"
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tokenizer": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "normalization",
+        "pattern"
+      ],
+      "properties": {
+        "name": {
+          "const": "unicode_category_scanner"
+        },
+        "version": {
+          "enum": [
+            "2",
+            "3"
+          ]
+        },
+        "normalization": {
+          "const": "NFC"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "case_policy": {
+          "type": "string"
+        },
+        "boundary_tokens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "corpus_manifest": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "document_id",
+          "sha256",
+          "token_count",
+          "split"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string"
+          },
+          "path_label": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "token_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "split": {
+            "enum": [
+              "train",
+              "validation",
+              "test",
+              "demo",
+              "unknown"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "vocabulary": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "base_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "probes": {
+      "type": "object",
+      "required": [
+        "seq",
+        "skip_rel",
+        "morph",
+        "sem",
+        "disc",
+        "retr",
+        "byte"
+      ],
+      "properties": {
+        "seq": {
+          "$ref": "#/$defs/probeFamilyState"
+        },
+        "skip_rel": {
+          "$ref": "#/$defs/probeFamilyState"
+        },
+        "morph": {
+          "$ref": "#/$defs/probeFamilyState"
+        },
+        "sem": {
+          "$ref": "#/$defs/probeFamilyState"
+        },
+        "disc": {
+          "$ref": "#/$defs/probeFamilyState"
+        },
+        "retr": {
+          "$ref": "#/$defs/probeFamilyState"
+        },
+        "byte": {
+          "$ref": "#/$defs/probeFamilyState"
+        }
+      },
+      "additionalProperties": false
+    },
+    "coordinator": {
+      "type": "object",
+      "required": [
+        "weights",
+        "calibration_status",
+        "calibration_trials"
+      ],
+      "properties": {
+        "weights": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "calibration_status": {
+          "enum": [
+            "CALIBRATED",
+            "NOT_CALIBRATED",
+            "STALE"
+          ]
+        },
+        "calibration_trials": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "fallback": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "training_config": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "tokenizer_version": {
+          "type": "integer",
+          "enum": [
+            2,
+            3
+          ]
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "integrity": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "payload_sha256"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "payload_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sidecar": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "probeFamilyState": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://esond.local/schemas/probe_family_state.schema.json",
+      "title": "Sparse probe family state",
+      "type": "object",
+      "required": [
+        "family",
+        "version",
+        "tables",
+        "support_count",
+        "diagnostics"
+      ],
+      "properties": {
+        "family": {
+          "enum": [
+            "SEQ",
+            "SKIP_REL",
+            "MORPH",
+            "SEM",
+            "DISC",
+            "RETR",
+            "BYTE"
+          ]
+        },
+        "version": {
+          "type": "string"
+        },
+        "tables": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "support_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "diagnostics": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "provenance_index": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "budget": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "object",
+              "additionalProperties": true
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,183 @@
+\documentclass[11pt,a4paper,oneside,openany]{book}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.35cm}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,longtable,array,enumitem,microtype,xcolor,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black,pdftitle={Formalisme eSonde v3},pdfauthor={eSonde_v3}}
+\setlength{\parskip}{4pt}\setlength{\parindent}{0pt}
+\setlist{nosep,leftmargin=1.5em}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theoreme}[definition]{Théorème}
+\newtheorem{lemme}[definition]{Lemme}
+\newtheorem{condition}[definition]{Condition}
+\newtheorem{remarque}[definition]{Remarque}
+\newcommand{\R}{\mathbb R}\newcommand{\N}{\mathbb N}\newcommand{\V}{\mathcal V}
+\newcommand{\F}{\mathcal F}\newcommand{\Q}{\mathsf Q}\newcommand{\Prob}{\mathbb P}
+\newcommand{\soft}{\operatorname{soft}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\Sha}{\operatorname{SHA256}}
+\begin{document}
+\frontmatter
+\begin{titlepage}\centering\vspace*{2cm}{\Large FORMALISATION TECHNIQUE ET OPÉRATIONNELLE\par}\vspace{1cm}{\Huge\bfseries eSonde v3\par}\vspace{0.6cm}{\Large Modèle de langage généraliste à unités de calcul exclusivement fondées sur des sondes\par}\vspace{1.2cm}{\large Version 3.0 — 10 novembre 2026\par}\vfill{\large Spécification mathématique, algorithmique, logicielle et expérimentale\par}\vspace{1cm}{\small Contrat de conception : zéro neurone, zéro MLP, aucun embedding neuronal dense.\par}\end{titlepage}
+\tableofcontents
+\mainmatter
+
+\part{Périmètre et invariants}
+\chapter{Objet, vocabulaire et règles de preuve}
+\section{Objectif}
+eSonde v3 est un modèle autorégressif de texte dont les unités internes apprenables et consultées sont des sondes explicites. Une sonde est un mécanisme déterministe ou stochastique, à état inspectable, qui extrait une relation entre un contexte observé et des continuations possibles. Les familles peuvent exploiter des contextes lexicaux, des positions relatives, des propriétés morphologiques, des cooccurrences sémantiques, des indices discursifs, des occurrences récupérables et des séquences UTF-8.
+
+L'objectif est un modèle généraliste au sens opérationnel : il doit pouvoir être entraîné sur plusieurs domaines et langues, estimer des continuations, produire du texte, être évalué sur un jeu indépendant, être mis à jour et audité. « Généraliste » décrit l'ambition et le protocole de validation ; il ne constitue pas une mesure de compétence acquise.
+
+\section{Invariants rouges}
+\begin{enumerate}
+\item Aucune couche neuronale, aucun neurone artificiel, aucun MLP, perceptron, embedding dense appris, bloc d'attention neuronal ou paramètre dense de réseau n'est admis dans le chemin d'inférence ou d'apprentissage.
+\item Les états appris sont des compteurs, tables creuses, occurrences, graphes relationnels, réservoirs traçables, statistiques lexicales et poids scalaires du mélange convexe des familles.
+\item Toute réponse doit être traçable à une famille, à une clé de contexte, à des occurrences ou à un mécanisme déclaré. Les réponses ne sont jamais injectées dans le texte cible comme raccourci.
+\item Le corpus de validation calibre seulement le coordonnateur. Le corpus test ne participe ni à l'entraînement, ni à la sélection, ni à la calibration.
+\item Une sauvegarde vérifiée précède toute exécution qui modifie un état de modèle. Chaque exécution produit commande, code retour, journal, résultats, incident éventuel et empreinte.
+\item Une phase n'est close que si ses critères de sortie sont contrôlés. Un résultat logiciel ne vaut pas preuve de compétence linguistique ; un résultat faible ne constitue pas une preuve d'impossibilité.
+\end{enumerate}
+
+\section{Domaine du modèle}
+Soit $\Sigma$ l'alphabet des chaînes Unicode valides et $\V\subset\Sigma$ l'ensemble des unités atomiques produites par le tokenizer Unicode du modèle. Un contexte est une séquence finie $h=(t_{n-k+1},\ldots,t_n)$ d'unités observées, éventuellement précédée du symbole spécial BOS. La limite de contexte peut être désactivée explicitement ; les fenêtres locales des familles demeurent des paramètres séparés et mesurés.
+
+\chapter{Architecture de bout en bout}
+\section{Pipeline fonctionnel}
+Le pipeline canonique est : texte UTF-8 $\to$ tokenisation Unicode NFC $\to$ état de contexte causal $\to$ réponses des familles de sondes $\to$ distributions conditionnelles par famille $\to$ mélange COORD sur un simplexe $\to$ classement/échantillonnage $\to$ reconstruction de surface. L'entraînement met à jour les tables explicites des familles ; la calibration ne modifie que les poids COORD ; la génération réutilise le même chemin de prédiction que le score.
+
+\section{Familles retenues}
+\begin{longtable}{p{0.15\textwidth}p{0.40\textwidth}p{0.36\textwidth}}
+\toprule Famille & Signal et état mémorisé & Rôle dans la prédiction\\\midrule
+SEQ & N-grammes/suffixes exacts, comptages pondérés par l'ordre et provenances & Continuité locale, syntaxe de surface et collocations.\\
+SKIP\_REL & Motifs de positions relatives déclarées avec frontière de phrase & Dépendances non contiguës et associations espacées.\\
+MORPH & Préfixes/suffixes/caractères Unicode de tokens récents et tables de continuation & Variantes flexionnelles, dérivation et robustesse aux formes proches.\\
+SEM & Fenêtres de termes, cooccurrences, document-frequency/IDF, graphes et motifs A--relation--B & Association thématique et candidats relationnels empiriques.\\
+DISC & Termes antérieurs au-delà du suffixe récent, mentions, alias et candidats d'antécédents & Continuité discursive et mémoire longue.\\
+RETR & Index creux de contextes, occurrences et provenance, avec budget déterministe & Rappel exact ou partiel de précédents observés.\\
+BYTE & Modèle de transitions conditionnelles sur octets UTF-8, BOS/EOS et backoff de suffixe & Support de surface ouvert, tokens OOV et génération sans vocabulaire fermé.\\
+COORD & Poids non négatifs sur le simplexe des familles actives & Fusion probabiliste explicite et calibrable.\\
+\bottomrule\end{longtable}
+Aucune famille n'est assimilée à une couche cachée. SEM et DISC produisent des indices et des candidats empiriques, non une analyse syntaxique parfaite ni une résolution garantie de coréférence.
+
+\section{Contrat d'une sonde}
+\begin{definition}[Sonde]
+Une famille $f$ est un tuple $(S_f,\mathcal H_f,\mathcal Y_f,R_f,U_f,\pi_f)$ : état explicite $S_f$, extracteur de clé de contexte $\mathcal H_f$, espace de réponse $\mathcal Y_f$, règle de réponse $R_f$, mise à jour $U_f$ et sérialiseur/version $\pi_f$. Une réponse expose au minimum la famille, son support, ses diagnostics, ses scores ou comptages et, lorsque disponible, la provenance.
+\end{definition}
+Une sonde est active dans un contexte si et seulement si son support est non nul et si elle dispose d'au moins un candidat de réponse. Le cas inactif est enregistré ; il ne doit pas être remplacé par une réponse fictive.
+
+\part{Probabilités conditionnelles et coordination}
+\chapter{Noyaux de réponse}
+\section{Noyaux linguistiques}
+Pour une famille $f$, un contexte $h$ et un état du modèle $M$, la réponse probabiliste est un noyau conditionnel
+\[
+  \Q_f^{\mathrm{LM}}(y\mid h,M),\qquad y\in\V\text{ (et, pour BYTE, toute chaîne UTF-8 admissible)}.
+\]
+Chaque noyau est positif et normalisé sur son espace de sortie déclaré. Les familles lexicales utilisent des distributions empiriques locales mélangées à un a priori unigramme issu exclusivement de train. BYTE factorise la probabilité d'une chaîne en transitions d'octets puis en arrêt EOS ; chaque transition est normalisée sur les octets autorisés par la validité UTF-8 et la règle d'arrêt déclarée. Les scores BYTE doivent employer exactement le même normalisateur que l'échantillonneur.
+
+Pour un historique byte $b_{1:j}$ et un contexte lexical réduit $c(h)$, BYTE calcule
+\[
+ p(b_{j+1}\mid b_{1:j},c(h),M)=
+ \frac{n(c(h),b_{1:j},b_{j+1})+\alpha}
+ {\sum_{a\in\mathcal A_j(h)}n(c(h),b_{1:j},a)+\alpha|\mathcal A_j(h)|},
+\]
+où $\mathcal A_j(h)$ est l'ensemble des symboles permis à l'étape $j$, incluant EOS seulement lorsqu'une sortie non vide valide peut se terminer. Le backoff descend du contexte au contexte global, puis aux suffixes d'historique plus courts. L'alphabet déclaré comprend les 256 octets, BOS et EOS ; aucune table de vecteurs d'embeddings n'est utilisée.
+
+\section{Mélange convexe COORD}
+Soit $A(h,M)$ l'ensemble des familles actives. Les poids sont soumis à
+\[
+ \lambda_f(h,M)\geq0,\quad \sum_{f\in A(h,M)}\lambda_f(h,M)=1,
+\]
+et la prédiction du modèle est
+\[
+ \boxed{\Q^{\mathrm{LM}}(y\mid h,M)=\sum_{f\in A(h,M)}\lambda_f(h,M)\Q_f^{\mathrm{LM}}(y\mid h,M).}
+\]
+\begin{proposition}[Normalisation du mélange]
+Si chaque $\Q_f^{\mathrm{LM}}$ est un noyau normalisé sur un espace de sortie commun et si $\lambda$ appartient au simplexe, alors $\Q^{\mathrm{LM}}$ est positif et normalisé.
+\end{proposition}
+\begin{proof}
+La positivité suit de $\lambda_f\geq0$. En sommant sur $y$, on obtient $\sum_yQ(y)=\sum_f\lambda_f\sum_yQ_f(y)=\sum_f\lambda_f=1$.
+\end{proof}
+Les familles lexicales peuvent être nulles hors de leur support observé ; BYTE élargit le support aux formes UTF-8 admissibles. Les listes top-k sont des extraits de la distribution, et leur somme n'est pas censée valoir un lorsque la masse non affichée est non nulle.
+
+\section{Calibration}
+La calibration choisit $\lambda$ sur validation seulement, en minimisant la log-loss conditionnelle observée
+\[
+ \mathcal L(\lambda)=-\sum_{(h_i,y_i)\in V}\log\bigl(\sum_f\lambda_f Q_f(y_i\mid h_i,M)\bigr),
+ \quad \lambda\in\Delta^{|F|-1}.
+\]
+L'implémentation doit publier la méthode d'optimisation, les essais, la perte initiale/finale, les poids, les familles actives, le nombre d'exemples et la provenance des données. Une optimisation de poids n'autorise pas de lire test. Après une mise à jour du train, la calibration est marquée STALE jusqu'à nouvelle validation.
+
+\section{Pont observationnel et séparation des domaines}
+Le formalisme général de l'observation peut utiliser un noyau $\Q_f^{\mathrm{obs}}(o\mid p,x)$ et un noyau mécaniste conjoint $L(o,x'\mid p,x)$, qui conserve la dépendance entre résultat et état suivant. Le modèle de langage utilise un autre objet, $\Q_f^{\mathrm{LM}}(y\mid h,M)$. La notation et les données sont séparées : les fréquences d'un instrument d'observation ne deviennent pas des prédictions de tokens sans définition de l'espace d'échantillonnage, de la préparation et du protocole.
+
+\chapter{Lien probabiliste avec les manuscrits sur les empreintes}
+Le résultat transférable est l'idée de noyaux conditionnels, de normalisation, de mélanges convexes et de transitions conjointes. Ces propriétés sont compatibles avec COORD et le noyau de génération. La loi conditionnelle de paires $\binom{|B_j|}{2}/\sum_r\binom{|B_r|}{2}$ porte sur l'espace des paires d'observations, pas sur l'espace des continuations linguistiques ; elle n'est donc pas utilisée comme poids prédictif.
+
+Les notions de phase, espace de Hilbert complexe, commutateurs de projections, POVM, règle de Born, amplitude ou interférence du manuscrit quantique restent hors du runtime. Le fait qu'un formalisme probabiliste puisse être utilisé dans deux domaines ne fournit pas une identification entre les domaines. Leur éventuel rapprochement exige une théorie et des données distinctes.
+
+\part{Entraînement, mémoire et génération}
+\chapter{Entraînement causal}
+\section{Données et séparation}
+Un document est décrit par un identifiant stable, un texte UTF-8, un split et son SHA-256. Les lots train, validation et test sont disjoints à la fois par identifiant et par empreinte du contenu. Train met à jour toutes les familles ; validation ne met à jour que les statistiques de calibration et son manifeste ; test est en lecture seule. Toute fuite de contenu invalide l'évaluation correspondante et doit être journalisée.
+
+\section{Mise à jour par token}
+Pour chaque document train, le tokenizer émet les tokens normalisés et leurs offsets de surface. Pour chaque position $i$, le contexte causal $h_i$ ne contient que BOS et les tokens $<i$. Le système applique à chaque famille la mise à jour $S_f\leftarrow U_f(S_f,h_i,y_i,\operatorname{source}_i)$. La provenance consigne document, position, empreinte, lot et offsets. Aucune information de futur n'est accessible à l'extracteur de contexte.
+
+\section{Lots et retrait exact}
+Les checkpoints récents conservent les textes des documents par lot afin de pouvoir reconstruire l'état par rejeu exact après retrait. Un checkpoint sans historique complet refuse le retrait exact ; il ne tente pas une soustraction approximative des compteurs ou du réservoir RETR. Les fichiers originaux de checkpoints ne sont jamais écrasés.
+
+\chapter{Prédiction et génération}
+La prédiction construit les réponses actives, réunit les candidats lexicaux et les propositions BYTE, calcule les probabilités COORD et renvoie top-k, diagnostics, poids et provenance. BYTE peut proposer des chaînes UTF-8 candidates par recherche de faisceau ; le caractère approximatif du faisceau et sa largeur sont consignés. L'échantillonnage top-k renormalise uniquement sur les candidats effectivement retenus pour l'étape de génération. La graine et la stratégie sont enregistrées pour rendre le parcours reproductible.
+
+La génération ne modifie pas l'état appris. Après chaque token, le contexte est mis à jour à partir du texte effectivement émis. Une sortie non UTF-8 est interdite ; les limites de longueur et motifs d'arrêt sont explicites. Un nombre de tokens demandé égal à zéro doit produire le prompt sans mutation.
+
+\chapter{Évaluation}
+Pour les cibles du jeu test, le score rapporte la log-loss moyenne, la perplexité, l'exactitude top-1/top-k, le nombre de cibles, le nombre d'OOV par rapport au vocabulaire train et les résultats par document/langue/domaine. Les valeurs inconnues ne sont pas supprimées du résultat principal : les diagnostics connus/OOV sont des vues complémentaires. La qualité d'une génération libre est évaluée séparément par protocole prédéfini (langue, cohérence, factualité, répétition, diversité et préférence humaine aveugle lorsque disponible). Un score numérique isolé ne démontre pas la généralité.
+
+\part{État logiciel et interfaces}
+\chapter{Sérialisation, schémas et sauvegardes}
+Un checkpoint est un JSON canonique versionné. Il contient tokenizer, manifeste du corpus, vocabulaire et compteurs, états de chaque famille (SEQ, SKIP_REL, MORPH, SEM, DISC, RETR, BYTE), coordonnateur, mémoire des lots, configuration, validation, provenance et diagnostics. Le payload et le fichier sont hachés par SHA-256 ; un sidecar porte l'empreinte exacte du fichier. Le chargement valide la structure et l'intégrité avant instanciation.
+
+La migration d'un checkpoint v2 conserve intégralement les six états de famille et les poids COORD existants. En l'absence d'un état BYTE historique, la sonde BYTE est initialisée vide et reçoit un poids nul : aucune modification silencieuse de la prédiction v2 ne doit survenir. L'entraînement explicite de BYTE et une calibration v3 indépendante sont nécessaires pour l'activer. Les originaux restent présents bit à bit dans le dossier de provenance.
+
+Avant toute modification ou exécution d'entraînement : vérifier les chemins canoniques, les checklists, les trois listes d'erreurs et le manifeste du dernier snapshot ; créer ou vérifier un savepoint ; après l'exécution, sauvegarder journaux, code retour, métriques et checksums, puis mettre à jour les documents.
+
+\chapter{CLI et interface graphique}
+Le CLI expose au minimum : `train`, `update`, `remove-batch`, `calibrate`, `generate`, `score`, `retrieve`, `relations`, `coref`, `inspect`, `audit`, `info` et `demo`. Chaque sous-commande doit documenter ses entrées, sorties, options, erreurs, codes de retour et effets sur l'état. `score` est read-only ; `generate` ne réentraîne pas ; `audit` est sans mutation.
+
+La GUI Tkinter présente les mêmes opérations : entraînement/mise à jour et calibration, génération, évaluation/récupération, inspection et audit. Les opérations longues sont exécutées hors du thread graphique, avec progression, journal et erreurs explicites. Les workflows CLI et GUI ne doivent pas diverger dans les règles métier.
+
+\chapter{Audit de pureté}
+Le contrôle statique examine tous les fichiers Python du runtime, les imports et les constructions. Il est complété par une recherche de dépendances, l'inspection des appels et des tests runtime. Les listes d'interdiction couvrent les frameworks neuronaux usuels et les constructions de couches denses. Le contrôle statique n'est pas présenté comme une preuve mathématique d'absence de toute forme neuronale ; les sources, dépendances et chemins d'exécution sont également audités.
+
+\part{Validation et portes de sortie}
+\chapter{Phases et critères objectifs}
+\begin{longtable}{p{0.1\textwidth}p{0.27\textwidth}p{0.55\textwidth}}
+\toprule Phase & But & Critère de fermeture\\\midrule
+P0 & Intégrité des sources & SHA-256, CRC, inventaires, checkpoints d'origine vérifiés.\\
+P1 & Audit documentaire et expérimental & Expériences classées par tâche, branche, protocole, résultat, limites et provenance ; aucune transposition indue.\\
+P2 & Formalisme & Le présent contrat est cohérent avec les schémas, le code et les tests.\\
+P3 & Runtime & Chaque famille intégrée de bout en bout, BYTE inclus, migration v2 et sérialisation vérifiées.\\
+P4 & Données/mesures & Splits audités, métriques reproductibles, OOV et performances par langue publiés.\\
+P5 & Interfaces & CLI et GUI exercés indépendamment avec journaux et codes retour.\\
+P6 & Tests & Tests unitaires, intégration, pureté, compilation, roundtrip et restauration réussis.\\
+P7 & Livraison & Trois archives séparées, CRC et SHA des membres vérifiés, taille conforme et recomposition documentée.\\
+\bottomrule\end{longtable}
+Une porte peut être PASS, PASS_WITH_LIMITATIONS, FAIL ou NOT_MEASURED ; le statut ne peut être modifié sans nouvelle preuve. Les rapports suivent toujours : description, architecture, pipeline complet, commandes d'exécution, résultats, interprétation, conséquences théoriques/conceptuelles/opérationnelles, conclusions et statut du modèle.
+
+\chapter{Risques et affirmations interdites}
+Il est interdit d'affirmer : (i) que les seules expériences de classification établissent la qualité d'un modèle de langage ; (ii) que la présence d'un fichier BYTE prouve son intégration ; (iii) que l'absence de MLP prouve la supériorité de l'architecture ; (iv) qu'un test logiciel démontre une compétence humaine ; (v) qu'une génération d'exemples prouve la généralité ; (vi) qu'une absence de résultat constitue une preuve d'impossibilité. Les résultats négatifs ou incomplets d'une branche sont rapportés comme faits localisés à cette branche et à ce protocole.
+
+\appendix
+\chapter{Contrats probabilistes minimaux}
+Pour chaque famille active, une réponse $Q_f(\cdot\mid h,M)$ est non négative et normalisée. Le coordonnateur produit une distribution par mélange convexe. La calibration estime uniquement ses poids sur un split séparé. La probabilité de l'état suivant n'est pas supposée indépendante de la sortie lorsqu'un mécanisme conjoint $L(y,h'\mid h,M)$ est nécessaire ; dans la génération autorégressive ordinaire, $h'=U(h,y)$ est déterministe une fois $y$ émis.
+
+\chapter{Statut du présent document}
+Ce document spécifie la cible eSonde v3 et ses conditions de test. Il ne préjuge ni d'une réussite ni d'un échec. La fermeture des phases est déterminée uniquement par les journaux, sorties, empreintes et tests effectivement produits dans l'environnement de travail. Toute différence entre la présente spécification et l'implémentation doit être consignée comme anomalie, puis corrigée ou explicitement reportée avec justification vérifiable.
+\end{document}

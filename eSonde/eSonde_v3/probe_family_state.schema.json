@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://esond.local/schemas/probe_family_state.schema.json",
+  "title": "Sparse probe family state",
+  "type": "object",
+  "required": [
+    "family",
+    "version",
+    "tables",
+    "support_count",
+    "diagnostics"
+  ],
+  "properties": {
+    "family": {
+      "enum": [
+        "SEQ",
+        "SKIP_REL",
+        "MORPH",
+        "SEM",
+        "DISC",
+        "RETR",
+        "BYTE"
+      ]
+    },
+    "version": {
+      "type": "string"
+    },
+    "tables": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "support_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "provenance_index": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "budget": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "object",
+          "additionalProperties": true
+        }
+      ]
+    }
+  },
+  "additionalProperties": true
+}
