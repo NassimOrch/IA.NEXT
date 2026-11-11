@@ -1,0 +1,849 @@
+% eSonde v5 — Formalisme de diffusion discrète multi-échelle pilotée par sondes
+% Version normative de conception — 11 novembre 2026
+% Architecture strictement non neuronale : aucun neurone, MLP, Transformer,
+% attention Q/K/V, embedding dense appris ou rétropropagation.
+\documentclass[11pt,a4paper,oneside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry,booktabs,longtable,array,enumitem,hyperref,xcolor,graphicx}
+\usepackage{listings}
+\geometry{margin=2.25cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\setlist{nosep,leftmargin=1.5em}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{invariant}[definition]{Invariant}
+\newtheorem{hypothesis}[definition]{Hypothèse}
+\newcommand{\Probe}{\mathsf{Probe}}
+\newcommand{\Coord}{\mathsf{COORD}}
+\newcommand{\Mask}{\mathtt{MASK}}
+\newcommand{\Gap}{\mathtt{GAP}}
+\newcommand{\Eos}{\mathtt{EOS}}
+\newcommand{\BOS}{\mathtt{BOS}}
+\newcommand{\Vocab}{\mathcal{V}}
+\newcommand{\Span}{\mathcal{B}}
+\newcommand{\State}{\mathcal{X}}
+\newcommand{\Mem}{\mathcal{M}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\KL}{\mathsf{KL}}
+\newcommand{\softmax}{\operatorname{softmax}}
+\title{\Huge eSonde v5\\[0.4em]\Large Formalisme d'une diffusion discrète multi-échelle pilotée exclusivement par des sondes\\[0.8em]\normalsize Denoising global, raffinement parallèle, édition structurée et coordination observationnelle}
+\author{Spécification scientifique, mathématique, algorithmique et opérationnelle}
+\date{11 novembre 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Ce document formalise eSonde v5 comme une architecture générative non autorégressive dans laquelle l'objet central n'est plus le prochain token, mais un état textuel global, éventuellement incomplet, bruité, segmenté en spans et relié par des contraintes. La génération procède par corruption discrète et débruitage inverse, raffinement parallèle de blocs non conflictuels, propositions d'éditions, réévaluation globale et convergence contrôlée. Les sondes explicites observent les contextes gauche, droit, morphologiques, sémantiques, relationnels, discursifs, documentaires et trajectoriels. Elles produisent des témoins, des supports, des scores et des incertitudes ; un coordinateur non neuronal les compose.
+
+Le formalisme retient la diffusion discrète masquée comme mécanisme principal, l'édition structurée et la propagation de contraintes comme mécanismes de correction, et la recherche multi-hypothèses comme mécanisme de diversité. Il n'utilise aucun espace d'embeddings dense appris, aucun neurone artificiel, aucun MLP, aucun Transformer, aucune attention Q/K/V et aucune rétropropagation. Les paramètres appris sont des compteurs, des tables clairsemées, des graphes, des index, des automates, des lois de corruption explicites et des coefficients scalaires de coordination calibrés sur validation.
+
+La spécification ne présume ni réussite ni échec. Elle définit les objets, les algorithmes, les invariants, les théorèmes conditionnels, les conditions de validité, les expériences et les critères de clôture nécessaires à une implémentation fidèle. La diffusion n'est pas présentée comme une garantie de supériorité : elle constitue un paradigme de génération alternatif dont les bénéfices et les coûts devront être mesurés sur des tâches complètes.
+\end{abstract}
+\tableofcontents
+
+% ============================================================================
+\part{Position scientifique, objectifs et contrat architectural}
+% ============================================================================
+\chapter{Motivation : sortir du next-token comme mécanisme génératif central}
+\section{Constat établi sur eSonde v4}
+Le runtime v4 contient dix familles de sondes explicites (SEQ, SKIP, MORPH, BYTE, SEM, REL, SLOT, DISC, RETR et TRACE), un coordinateur COORD, des mémoires clairsemées et un moteur de recherche/réponse. Son opération \texttt{generate} appelle toutefois \texttt{predict\_next} dans une boucle : à chaque tour, un token est choisi, ajouté au contexte, puis le tour suivant est calculé. La génération livrée est donc autorégressive, même si chaque décision combine plusieurs sondes.
+
+Cette distinction est importante. Une architecture interne multi-sondes ne devient pas non autorégressive simplement parce que plusieurs sondes participent à chaque prédiction. Tant que l'état généré s'allonge strictement d'un token avant le calcul suivant, le chemin de génération reste séquentiel et causal.
+
+Les expériences v4 fournissent un diagnostic et non un jugement définitif sur le principe des sondes. Le rapport P6 signale une NLL next-token MLQA de 17,3065 nats/token sur 4\,581 positions, 49,618\,\% de positions OOV, une baseline unigramme lissée à 5,0654 nats/token et un F1 extractif global de 3,084\,\% sur 2\,450 questions. Le corpus d'entraînement du checkpoint décrit dans ce même rapport ne contient que 13 documents et 1\,903 tokens. Ces mesures indiquent que le checkpoint et son usage next-token ne démontrent pas une compétence linguistique générale ; elles ne permettent pas de conclure sur le potentiel de mécanismes globaux qui n'étaient pas implémentés dans ce chemin.
+
+\section{Thèse de conception v5}
+La thèse centrale est la suivante : une phrase, une réponse ou un passage doit être construit et évalué comme un objet global qui peut être corrigé dans plusieurs régions simultanément. Les sondes doivent avoir accès, selon la tâche, au contexte gauche, au contexte droit, aux relations entre spans, à la structure du document et aux contraintes de la consigne. Le moteur ne doit pas être obligé de figer chaque token avant d'avoir vu les autres parties de la sortie.
+
+\begin{definition}[État textuel global]
+Un état textuel global est une structure finie $X$ comprenant une séquence ordonnée d'unités, une segmentation en spans, des frontières, des marqueurs de zones masquées ou supprimées, des liens relationnels et des annotations de provenance. L'état peut être incomplet et modifiable ; il n'est pas limité à une séquence déjà finalisée.
+\end{definition}
+
+\section{Objectif général}
+eSonde v5 vise un système généraliste capable de produire, compléter, réécrire, traduire, résumer, répondre, structurer et corriger des contenus par débruitage global. La génération de continuations strictement causales reste disponible comme fonction de compatibilité, mais elle ne définit plus le cœur de l'architecture. Les objectifs sont évalués séparément : adéquation à la consigne, exactitude, cohérence globale, composition sémantique, transfert multilingue, robustesse, diversité, latence, mémoire et qualité des preuves.
+
+\section{Ce que « diffusion » signifie ici}
+La diffusion v5 est une diffusion \emph{discrète et symbolique}. Elle définit une chaîne de corruption sur des unités, des spans et des frontières textuels, puis un mécanisme inverse qui restaure des hypothèses à partir des observations disponibles. Elle ne transforme pas les textes en vecteurs continus appris et ne demande pas un réseau de neurones pour estimer un score.
+
+Le modèle utilise des transitions stochastiques explicites, des comptes conditionnels, des graphes, des automates, des règles de composition vérifiables et une fonction d'énergie globale construite à partir des sondes. Il s'agit donc d'une architecture originale de diffusion discrète à sondes, inspirée par le principe général du débruitage itératif, et non de la reproduction d'un DLM neuronal conventionnel.
+
+\chapter{Contrat rouge et invariants non négociables}
+\section{Pureté non neuronale}
+\begin{invariant}[Zéro neurone]
+Aucun neurone artificiel, aucune couche neuronale, aucun MLP, aucun perceptron multicouche, aucun Transformer, aucune attention Q/K/V, aucun embedding dense appris, aucune projection dense apprise, aucun tenseur de poids neuronal et aucune rétropropagation n'existent dans l'entraînement, la calibration ou l'inférence du cœur v5.
+\end{invariant}
+
+\begin{invariant}[Apprentissage autorisé]
+L'apprentissage se limite à la mise à jour de compteurs, tables clairsemées, graphes, automates, index, profils, tables de transitions, statistiques, règles induites avec témoins, et paramètres scalaires de coordination/schedule calibrés selon une procédure publiée. L'optimisation numérique de scalaires ne constitue pas un réseau neuronal et ne doit pas être étendue en un modèle paramétrique dense caché.
+\end{invariant}
+
+\begin{invariant}[Génération non autorégressive par défaut]
+Le chemin de génération standard maintient un canevas ou un ensemble d'hypothèses de séquence complète. Une étape de débruitage peut modifier plusieurs spans en parallèle. Il est interdit d'implémenter la génération v5 comme une simple boucle qui choisit un token, l'ajoute définitivement au prompt et prédit le suivant.
+\end{invariant}
+
+\begin{invariant}[Accès bidirectionnel contrôlé]
+Pour les tâches de génération, d'infilling, de réécriture et de traduction, les sondes peuvent exploiter simultanément les indices à gauche et à droite d'un span, ainsi que les contraintes globales. Pour les tâches explicitement causales, les unités futures interdites par la tâche restent masquées. Le mode de tâche et son contrat d'information sont enregistrés.
+\end{invariant}
+
+\begin{invariant}[Provenance et vérité empirique]
+Toute observation issue d'un corpus, toute relation, toute règle, tout passage récupéré et toute décision de débruitage portent une provenance ou un statut d'inférence. Une association statistique n'est pas une vérité. Une règle dérivée doit garder ses prémisses, son support, son niveau de confiance, son budget de composition et son vérificateur.
+\end{invariant}
+
+\begin{invariant}[Séparation des données]
+Les corruptions d'entraînement sont tirées uniquement du split train. La validation règle les poids scalaires, températures, schedules et seuils publiés. Le split test reste intouché jusqu'à l'évaluation finale. Les réponses de référence ne servent jamais à proposer, corriger ou sélectionner les sorties du modèle.
+\end{invariant}
+
+\begin{invariant}[Absence de verdict préalable]
+Aucune propriété de succès, d'échec, de supériorité ou d'infériorité n'est supposée dans les algorithmes. Toute affirmation est attachée à un protocole, un domaine, un jeu de données, une version et des incertitudes mesurées.
+\end{invariant}
+
+\section{Limites de ressources et honnêteté opérationnelle}
+Les budgets de calcul, de mémoire, de longueur et de nombre d'itérations sont des paramètres explicites de l'exécution, pas des propriétés intrinsèques du modèle. Lorsqu'un budget est atteint sans convergence, le système retourne un statut \texttt{BUDGET\_EXHAUSTED} accompagné de l'état courant, des diagnostics et de la trajectoire. Il ne présente pas une sortie incomplète comme une sortie stabilisée. Aucun mécanisme ne contourne les permissions, limites de sécurité ou protections de l'environnement d'exécution.
+
+% ============================================================================
+\part{Espace d'états et représentation symbolique}
+% ============================================================================
+\chapter{Alphabet ouvert, segmentation et canevas}
+\section{Unités multi-résolution}
+L'alphabet de base est l'ensemble des séquences UTF-8 valides, mais le moteur travaille sur plusieurs vues synchronisées : octets, caractères Unicode, graphèmes lorsque la segmentation est disponible, unités lexicales, spans morphologiques, syntagmes candidats, phrases et segments documentaires. La segmentation est versionnée, réversible et liée à des offsets de surface. Aucune représentation dense apprise n'est requise.
+
+On note $\mathcal{U}$ l'ensemble des unités de surface admissibles. Il comprend les unités connues dans les corpus et toute unité Unicode générable par le mécanisme ouvert de caractères/octets, sous les règles de validité publiées. Le vocabulaire observé est un sous-ensemble fini de $\mathcal{U}$, non une fermeture définitive de l'espace de sortie.
+
+\section{Canevas et graphes de spans}
+Un canevas est un graphe ordonné $G=(V,E,\prec)$ où chaque nœud $b\in V$ représente un span ou un emplacement. Chaque nœud porte un état parmi :
+\begin{itemize}
+\item une chaîne de surface candidate $y_b\in\mathcal{U}^{+}$ ;
+\item $\Mask$ : span masqué à reconstruire ;
+\item $\Gap$ : emplacement d'insertion/suppression ou frontière vide ;
+\item un marqueur de frontière (début, fin, séparation, ponctuation) ;
+\item un indicateur verrouillé, copié, mutable ou dérivé.
+\end{itemize}
+L'ordre $\prec$ préserve la structure de surface. Les arêtes relient les spans adjacents et les spans reliés par une hypothèse syntaxique, sémantique, discursive ou documentaire. Une hypothèse d'arête est typée et accompagnée d'une provenance.
+
+\begin{definition}[État v5]
+Un état de diffusion est $Z_t=(G_t,Y_t,A_t,L_t,C)$ où $G_t$ est le graphe ordonné de spans, $Y_t$ ses contenus symboliques ou marqueurs, $A_t$ les alignements et frontières, $L_t$ les liens relationnels candidats, et $C$ la condition de tâche et les zones protégées. $t$ est le niveau de corruption, avec $t=0$ l'état propre et $t=T$ l'état fortement corrompu.
+\end{definition}
+
+\section{Longueur variable et segmentation}
+La longueur n'est pas fixée définitivement avant la génération. Un canal de longueur $\Probe_{LEN}$ propose des hypothèses de nombre de spans, de caractères, de mots ou de phrases, conditionnées par la tâche et le prompt. Les canevas peuvent subir des opérations \texttt{INSERT}, \texttt{DELETE}, \texttt{SPLIT}, \texttt{MERGE}, \texttt{RESEGMENT} et \texttt{REORDER} lorsqu'elles sont autorisées par le type de tâche. Chaque opération conserve un journal d'édition.
+
+Pour les tâches à sortie de longueur variable, le moteur maintient plusieurs hypothèses de longueur et compare leur énergie globale, plutôt que de prendre un seul nombre de tokens comme une vérité définitive. Les limites de longueur demandées par l'utilisateur sont des contraintes de tâche ; les limites de ressources sont des budgets configurables, toujours visibles.
+
+\section{Zones protégées et contraintes de tâche}
+Le prompt, les citations à copier exactement, les segments déclarés invariants, les chaînes de format et les passages contractuellement intangibles sont marqués \texttt{LOCKED}. Une sonde ne peut les modifier. Les tâches de continuation causale définissent un masque d'information qui interdit l'observation des positions futures ; les tâches bidirectionnelles explicitement demandées peuvent utiliser l'ensemble du contexte disponible.
+
+\chapter{État persistant et structures d'apprentissage}
+L'état mémoire est :
+\[
+\begin{aligned}
+\Mem_5=(&C_{noise},C_{span},C_{bi},G_{sem},G_{rel},G_{entity},G_{event},\\
+&C_{frame},C_{edit},C_{length},I_{retr},T_{trace},C_{byte},\Gamma_{coord},\Pi_{prov},\Lambda_{batch}).
+\end{aligned}
+\]
+Chaque structure est clairsemée, indexée ou représentée par automates/graphes. Les structures denses apprises sont exclues.
+
+\begin{longtable}{p{2.7cm}p{5.0cm}p{6.1cm}}
+\toprule
+Structure & Contenu & Usage \\
+\midrule
+$C_{noise}$ & Tables de corruptions et transitions discrètes par niveau & Définir le canal direct et les états observés.\\
+$C_{span}$ & Comptes de spans propres conditionnés par signatures multi-échelles & Restaurer un bloc masqué ou remplacé.\\
+$C_{bi}$ & Signatures de contexte gauche/droit et contexte global & Utiliser les deux côtés du trou lorsque la tâche l'autorise.\\
+$G_{sem}$ & Graphe clairsemé de co-contextes et profils distributionnels & Proposer des substituts/compléments sémantiques.\\
+$G_{rel}$ & Relations typées, cadres de rôles, compositions et témoins & Contrôler la cohérence entre entités, actions et arguments.\\
+$G_{entity}$ & Mentions, alias, chaînes candidates et indices & Maintenir la continuité des entités.\\
+$G_{event}$ & Événements, temps, lieux, participants et liens & Cohérence discursive et temporelle.\\
+$C_{frame}$ & Cadres morphosyntaxiques inductifs et gabarits de spans & Génération structurée sans parseur neuronal.\\
+$C_{edit}$ & Comptes de substitutions, insertions, suppressions, fusions, divisions & Apprendre les opérations de réparation.\\
+$C_{length}$ & Distributions de longueur et de segmentation par tâche/contexte & Proposer des canevas de taille variable.\\
+$I_{retr}$ & Index inversé, passages, offsets, provenance et scores sparse & Ancrage dans les documents et rappel de preuves.\\
+$T_{trace}$ & Signatures multi-sondes, trajectoires, changements d'états & Mesurer le raffinement et détecter les cycles.\\
+$C_{byte}$ & Trie/automate UTF-8 et transitions locales avec EOS & Ouvrir le support au-delà du vocabulaire observé.\\
+$\Gamma_{coord}$ & Coefficients scalaires, températures, schedules et calibrations & Composer les sondes par tâche et niveau de bruit.\\
+$\Pi_{prov}$ & Provenances de données et témoins des règles & Audit, retrait et justification.\\
+$\Lambda_{batch}$ & Registre des lots et empreintes de sources & Reproductibilité et apprentissage incrémental.\\
+\bottomrule
+\end{longtable}
+
+% ============================================================================
+\part{Diffusion discrète et apprentissage du débruitage}
+% ============================================================================
+\chapter{Canal direct : corruption d'un texte propre}
+\section{Chaîne de corruption}
+Pour un texte propre $X_0$, on construit une chaîne de Markov discrète :
+\[
+q(Z_{1:T}\mid X_0)=\prod_{t=1}^{T}q_t(Z_t\mid Z_{t-1}),\qquad Z_0=X_0.
+\]
+Le canal agit sur des spans et des frontières, pas uniquement sur des tokens indépendants. Chaque transition est documentée dans $C_{noise}$ et sa loi est normalisée.
+
+\section{Masquage absorbant}
+Pour un span $b$ non verrouillé, le canal masqué de base est :
+\[
+q_t(z_b\mid x_b)=
+\begin{cases}
+1-\beta_t,&z_b=x_b,\\
+\beta_t,&z_b=\Mask,\\
+0,&\text{sinon},
+\end{cases}
+\qquad q_t(\Mask\mid\Mask)=1.
+\]
+avec $0\leq\beta_t\leq1$. Le taux cumulé de conservation propre est
+\[
+\bar\alpha_t=\prod_{s=1}^{t}(1-\beta_s),\qquad
+\Prob(z_b=\Mask\mid x_b)=1-\bar\alpha_t.
+\]
+Un schedule valide est monotone en bruit : $\beta_t$ ou le taux cumulé de masquage est paramétré de sorte que les niveaux élevés perdent davantage d'information. Les schedules linéaire, cosinus, sigmoïde et empiriquement calibré sont des variantes comparées, non des constantes imposées.
+
+\section{Corruptions structurelles}
+Le canal v5 peut combiner, avec des taux explicites :
+\begin{enumerate}
+\item masquage de spans de tailles variables ;
+\item remplacement par une unité de même classe morphologique ou par un marqueur de corruption ;
+\item permutation locale d'un groupe lorsque l'ordre est l'objet de l'expérience ;
+\item suppression représentée par $\Gap$ afin de préserver un emplacement reconstructible ;
+\item fusion ou division de spans ;
+\item corruption de frontières et de segmentation ;
+\item masquage de liens relationnels ou d'attributs documentaires.
+\end{enumerate}
+Les corruptions de type remplacement/permutation sont facultatives et chaque canal garde sa propre matrice de transition clairsemée. Elles ne doivent pas être mélangées au canal masque de référence sans ablation.
+
+\section{Corruption multi-échelle}
+Les blocs corrompus sont tirés à plusieurs granularités : graphème, fragment d'octets, unité lexicale, expression, syntagme, phrase et segment documentaire. La distribution de taille des spans est issue des statistiques train et de la configuration de tâche. Elle est suffisamment diversifiée pour que l'apprentissage ne se limite pas à réparer un seul niveau de masque.
+
+\section{Conservation de la condition}
+La condition $C$ (prompt, tâche, document de référence, format exigé et zones verrouillées) est séparée du canal de corruption. Par défaut, les spans protégés ne sont pas corrompus. Si une expérience demande explicitement leur corruption, cette opération fait l'objet d'un mode distinct et ne s'applique jamais aux entrées déclarées intangibles.
+
+\chapter{Apprentissage des sondes de débruitage}
+\section{Exemples d'apprentissage}
+Pour chaque document $X_0$ du train, le moteur tire plusieurs niveaux $t$, plusieurs canaux et plusieurs spans masqués, puis produit des couples $(Z_t,X_0,C,t,B)$ où $B$ est le bloc à reconstruire. La cible est le span original observé dans le train. Validation et test ne produisent aucune mise à jour de compteurs.
+
+\section{Signatures conditionnelles bidirectionnelles}
+Une sonde extrait une signature à partir de :
+\[
+s_f(B,Z_t,C,t)=\bigl(s_f^{L},s_f^{R},s_f^{G},s_f^{D},s_f^{Rels},s_f^{Noise}\bigr),
+\]
+où les composantes représentent respectivement les voisins gauche, droit, global, documentaire, relationnel et le niveau/canal de bruit. Les champs disponibles dépendent de la tâche et de l'information autorisée.
+
+\section{Compte conditionnel de span}
+Pour chaque sonde $f$, signature $s$ et span propre $y$, on stocke :
+\[
+N_{f,t}(s,y)\in\N,\qquad N_{f,t}(s)=\sum_yN_{f,t}(s,y).
+\]
+Une loi conditionnelle lissée est :
+\[
+P_f(y\mid s,t)=
+\frac{N_{f,t}(s,y)+\alpha_f P_f^0(y\mid s,t)}
+{N_{f,t}(s)+\alpha_f},
+\]
+avec un prior $P_f^0$ explicite (cadre morphologique, distribution de spans, graphe lexical ou loi BYTE), jamais une réponse de benchmark injectée. Si $N_{f,t}(s)=0$ et qu'aucun prior admissible ne couvre le candidat, la sonde retourne \texttt{NO\_SUPPORT}.
+
+\section{Support ouvert et spans inconnus}
+Le support candidat est l'union contrôlée des propositions de toutes les sondes : spans observés, voisins du graphe sémantique, réalisations de cadres, passages récupérés, chaînes proposées par le trie BYTE et variantes morphologiques autorisées. Le trie UTF-8 émet uniquement des chaînes valides ; les propositions inconnues gardent leur score de chaîne complet et leur provenance. Le vocabulaire train n'est pas une frontière de génération.
+
+Le moteur peut étendre progressivement les propositions BYTE et morphologiques lorsque l'incertitude demeure élevée. Tout budget de largeur/profondeur est fourni par la configuration de la tâche et reporté dans le résultat. Un budget épuisé est un statut de calcul, jamais une preuve d'impossibilité linguistique.
+
+\section{Objectifs d'apprentissage non neuronaux}
+Le but principal est la restauration des spans et la cohérence de séquence :
+\[
+\mathcal L_{den}=-\sum_{(Z_t,X_0,C,t,B)}w_t\log P_{\Coord}(X_{0,B}\mid Z_t,C,t,B).
+\]
+Pour distinguer une séquence propre d'une corruption plausible, on peut construire des négatifs à partir de corruptions déclarées du train et utiliser :
+\[
+\mathcal L_{rank}=\sum_i\max\{0,\delta+E(X_i^+\mid C_i)-E(X_i^-\mid C_i)\}.
+\]
+Les scripts d'édition induits depuis les paires train corrompues/correctes donnent :
+\[
+\mathcal L_{edit}=-\sum_i\log P_{EDIT}(\Delta_i\mid Z_i,X_i^+,C_i).
+\]
+Une perte de cohérence relationnelle utilise uniquement des relations et témoins appris dans train :
+\[
+\mathcal L_{rel}=\sum_{r\in\mathcal R_{train}}\omega_r\,\ell_r(X_0,r),
+\]
+où $\ell_r$ est un vérificateur explicite. La fonction de pilotage d'apprentissage peut combiner ces termes avec des coefficients publiés :
+\[
+\mathcal L=\lambda_{den}\mathcal L_{den}+\lambda_{rank}\mathcal L_{rank}
++\lambda_{edit}\mathcal L_{edit}+\lambda_{rel}\mathcal L_{rel}.
+\]
+Ces coefficients sont des scalaires documentés. Aucune couche neuronale n'est utilisée pour approximer les pertes ou les gradients.
+
+\section{Calibration}
+La validation choisit les coefficients de coordination, les températures par niveau, les schedules candidats, la taille des spans, les règles de sélection et les seuils d'arrêt. Les méthodes admissibles incluent recherche de grille, recherche bayésienne sur scalaires, coordonnées, simplexe, gradients exacts de fonctions scalaires et estimation par paires. Le protocole est gelé avant le test. Les seuils dépendants d'une langue ou d'un domaine sont utilisés seulement avec effectif suffisant et régularisation hiérarchique déclarée.
+
+% ============================================================================
+\part{Sondes v5 et composition des preuves}
+% ============================================================================
+\chapter{Familles de sondes v5}
+\begin{longtable}{p{2.2cm}p{4.0cm}p{7.6cm}}
+\toprule Famille & Responsabilité & Structures et sortie attendue\\
+\midrule
+SEQ-BI & Ordre local bidirectionnel & Motifs gauche/droit, fenêtres autour du span, patrons de séquence et continuations internes au bloc.\\
+SKIP & Dépendances non contiguës & Signatures d'offsets des deux côtés, motifs distants et témoins de cooccurrence positionnelle.\\
+MORPH & Forme lexicale & Affixes, flexions, casse, graphèmes, patrons et familles de formes.\\
+BYTE & Couverture ouverte & Trie UTF-8, transitions de fragments, validité des chaînes, EOS et vraisemblance exacte.\\
+SEM & Relations distributionnelles & Graphe sparse, profils de co-contextes multi-échelles, proximité contextuelle avec preuve de corpus.\\
+REL & Composition relationnelle & Arêtes typées, patrons $A\!\xrightarrow{r}\!B$, chemins composés, règles induites et témoins.\\
+SLOT & Cadres inductifs & Cadres de spans, rôles syntaxiques candidats, contraintes d'accord et familles de réalisations.\\
+DISC & Cohérence discursive & Entités, alias, chaînes de coréférence candidates, événements, temps, lieux et récence.\\
+RETR & Récupération & Index inversé, passages, offsets, sources, scores et couverture de preuves.\\
+TRACE & Trajectoires & Empreintes multi-sondes, classes d'équivalence, raffinements, boucles et historique du débruitage.\\
+EDIT & Opérations de réparation & Substitution, insertion, suppression, permutation, fusion, division, resegmentation et coût empirique.\\
+LEN & Longueur et segmentation & Distributions de taille, frontières, nombre de spans, longueur conditionnelle par tâche.\\
+CONS & Contraintes explicites & Formats, syntaxe induite, compatibilité relationnelle, citations, typographie et invariants de tâche.\\
+COORD & Coordination multi-sondes & Fusion des preuves, poids par tâche/niveau, température, incertitude et décision de raffinement.\\
+\bottomrule
+\end{longtable}
+
+\section{SEQ-BI et SKIP : indices de part et d'autre}
+SEQ-BI observe des motifs à gauche et à droite du span à reconstruire. Contrairement à SEQ v4 qui exploite une histoire causale, il peut utiliser simultanément le préfixe et le suffixe non masqués, à condition que le contrat de tâche l'autorise. SKIP ajoute des relations à offsets variables et des signatures de positions distantes. Les deux sondes émettent des candidats et des scores, pas une décision définitive.
+
+\section{MORPH et BYTE : ouverture de l'espace lexical}
+MORPH propose des chaînes compatibles avec les formes observées, les affixes et les règles morphologiques apprises. BYTE propose des fragments puis des spans complets par un automate d'octets UTF-8. Une proposition peut être inconnue du vocabulaire train. Les scores BYTE conservent la vraisemblance de la chaîne entière et de EOS ; ils ne sont pas renormalisés artificiellement sur une liste de candidats tronquée.
+
+\section{SEM, REL et SLOT : composition}
+SEM propose des liens de co-contexte ; REL construit des relations typées et tente des compositions ; SLOT propose des cadres de surface/morphosyntaxe. Une composition est représentée comme une règle $r_1\circ r_2\Rightarrow r_3$ accompagnée de prémisses, de témoins, d'un nombre de corroborations, d'un budget de composition et d'un niveau épistémique. Un chemin plausible n'est jamais automatiquement converti en fait.
+
+\section{DISC : entités et événements}
+DISC conserve les mentions, alias, candidats de coréférence, états d'événement, participants et relations temporelles ou spatiales apprises. Les décisions ambiguës sont conservées comme alternatives pondérées. Les chaînes de coréférence ne sont pas résolues par simple égalité de tokens ni par une règle cachée spécifique à un benchmark.
+
+\section{RETR : preuves et mémoire documentaire}
+RETR recherche des passages complets avec source, offsets, provenance, date éventuelle et scores sparse. Les passages récupérés peuvent proposer des spans de sortie ou vérifier une assertion. Le texte récupéré ne peut pas contourner une consigne qui exige une réponse originale ; les modes de copie, paraphrase et synthèse sont déclarés distinctement.
+
+\section{TRACE : empreinte et dynamique}
+TRACE construit une empreinte multi-sondes :
+\[
+\Phi(X)=\bigl(\phi_{SEQ},\phi_{MORPH},\phi_{SEM},\phi_{REL},\phi_{DISC},\phi_{RETR},\phi_{CONS}\bigr).
+\]
+Deux états sont observationnellement équivalents relativement à un jeu de sondes $F$ si $\Phi_F(X)=\Phi_F(X')$. Ajouter une sonde peut raffiner les classes d'équivalence. TRACE journalise la trajectoire $X^{(0)},\ldots,X^{(k)}$ et les deltas de signatures, afin de détecter oscillations, stagnation, effondrement de diversité et incohérences introduites.
+
+\section{EDIT et LEN}
+EDIT propose des opérations atomiques ou composées sur les spans. Le coût d'édition est appris depuis des paires de corruption et restauration du train, puis calibré sur validation. LEN propose plusieurs longueurs/segmentations. Il peut introduire des spans dans un canevas, pas uniquement choisir une longueur unique avant la génération.
+
+\section{CONS : contraintes vérifiables}
+CONS calcule les contraintes explicites et leur satisfaction : format JSON, délimiteurs, citations, concordance de type, cohérence des identifiants, ordre des sections, contraintes grammaticales induites et autres invariants. Toute contrainte déterministe est séparée des préférences probabilistes. Un format de sortie exigé peut être vérifié mécaniquement ; une appréciation sémantique reste une mesure distincte.
+
+\chapter{COORD : score global et décision}
+\section{Score conditionnel par span}
+Pour un span candidat $y$ dans un bloc $b$, le coordinateur reçoit les log-scores $\ell_f(y\mid s_f,t)$ et la qualité de support $u_f$. Une famille sans preuve active est omise. Un score possible est :
+\[
+S_{b,t}(y)=b_{0}(y)+\sum_{f\in F_b}w_f(\tau,t,u_f)\,\ell_f(y\mid s_f,t)
+-\sum_j\eta_j\,V_j(y,b),
+\]
+où $V_j$ sont les pénalités de contraintes vérifiables et $b_0$ un prior explicite (longueur, segmentation ou BYTE). La distribution locale est :
+\[
+P_{\Coord}(y\mid Z_t,C,b)=\frac{\exp(S_{b,t}(y)/T_t)}
+{\sum_{y'\in\mathcal C_b}\exp(S_{b,t}(y')/T_t)}.
+\]
+Le support $\mathcal C_b$ est traçable et extensible. Si aucune proposition admissible n'existe, le système élargit la recherche ou signale l'absence de support.
+
+\section{Score global de séquence}
+La distribution sur un état complet est définie par une énergie de facteurs :
+\[
+E_t(X\mid Z_t,C)=
+-\sum_{b\in V(X)}\sum_{f\in F_b}w_{f,b,t}\,\ell_{f,b}(X_b)
+-\sum_{r\in\mathcal R(X)}\eta_r\,\ell_r(X)
++\lambda_{edit}D_{edit}(X,Z_t)
++\lambda_{viol}V_{hard}(X,C).
+\]
+Les facteurs comprennent les preuves de spans, relations, entités, cohérence discursive, récupération, segmentation, format et historique d'édition. $V_{hard}$ vaut $+\infty$ pour une contrainte inviolable (ex. zone LOCKED modifiée) et une pénalité finie pour une préférence souple.
+
+La loi cible au niveau $t$ est :
+\[
+\pi_t(X\mid Z_t,C)=\frac{\exp[-E_t(X\mid Z_t,C)/T_t]}
+{Z_t(Z_t,C)},
+\]
+avec $Z_t$ constante de normalisation sur l'espace admissible de la configuration considérée. En pratique, la normalisation globale peut être inaccessible ; les mises à jour utilisent des ratios d'énergie ou des distributions locales exactes sur leurs supports documentés.
+
+\section{Mélange contre produit de facteurs}
+Le v4 utilise un mélange convexe des distributions next-token. V5 privilégie un score de facteurs en log-espace, car une hypothèse doit satisfaire plusieurs contraintes simultanées plutôt que gagner seulement par une moyenne de signaux incompatibles. Un mélange convexe reste disponible pour les familles dont les sorties sont des alternatives concurrentes non composables. Le choix est fait par type de facteur et calibré sur validation ; il est inscrit dans le rapport.
+
+\section{Calibration scalaire et anti-redondance}
+Les poids $w_f$ sont non négatifs, normalisés par famille/groupe ou bornés selon une règle publiée. Les sondes corrélées sont regroupées ou pénalisées par un terme de redondance calculé sur leurs erreurs validation, afin d'éviter qu'une même observation soit comptée plusieurs fois. Les poids sont des scalaires/tableaux scalaires, jamais une matrice dense cachée. Les paramètres appris sont versionnés par tâche, langue si nécessaire, et niveau de bruit.
+
+% ============================================================================
+\part{Dénouement inverse : diffusion, raffinement et recherche}
+% ============================================================================
+\chapter{Noyau inverse de débruitage}
+\section{Proposition du span restauré}
+À chaque niveau $t$, le moteur identifie les spans masqués, incertains ou en désaccord entre sondes. Les sondes proposent des candidats pour chaque bloc. COORD calcule la distribution conditionnelle, conserve une liste diversifiée de propositions et émet le motif de décision, les familles contributrices et les témoins. Les blocs peuvent être restaurés dans un ordre non séquentiel.
+
+\section{Mises à jour parallèles et graphe de conflits}
+Deux blocs sont en conflit s'ils partagent un facteur de score, une contrainte, un alignement, une frontière ou un lien relationnel que leurs mises à jour pourraient modifier simultanément. On construit le graphe de conflits $H=(B,E_H)$. Une coloration de $H$ produit des classes indépendantes $I_1,\ldots,I_m$. Les blocs d'une même classe peuvent être mis à jour en parallèle conditionnellement aux autres blocs gelés.
+
+Pour un bloc $b$ dans une classe indépendante, la mise à jour de Gibbs est :
+\[
+X'_b\sim\pi_t(X_b\mid X_{-b},Z_t,C).
+\]
+Les blocs de la même classe ne partagent aucun facteur actif ; leur mise à jour simultanée est donc conditionnellement indépendante. Les mises à jour conflictuelles sont séquencées dans des classes différentes, mais aucune génération token-par-token n'est requise.
+
+\section{Propositions d'édition et correction Metropolis-Hastings}
+Une proposition $X'\sim r_t(\cdot\mid X,Z_t,C)$ peut modifier un ou plusieurs spans : substitution, insertion, suppression, fusion, division, permutation, déplacement de frontière ou resegmentation. Pour une cible stationnaire $\pi_t$, l'acceptation Metropolis-Hastings est :
+\[
+a(X,X')=\min\left(1,
+\frac{\pi_t(X'\mid Z_t,C)r_t(X\mid X',Z_t,C)}
+{\pi_t(X\mid Z_t,C)r_t(X'\mid X,Z_t,C)}\right).
+\]
+Lorsque les probabilités globales ne sont pas calculables, l'implémentation doit utiliser une version locale dont le ratio est démontré pour la factorisation active, ou signaler qu'elle applique une heuristique d'édition sans garantie de stationnarité. Aucune heuristique ne doit être qualifiée de Gibbs/MH si ses conditions mathématiques ne sont pas satisfaites.
+
+\section{Passage du niveau fortement bruité au niveau propre}
+La génération inverse utilise les niveaux $T,T-1,\ldots,0$. À chaque niveau :
+\begin{enumerate}
+\item déterminer les spans encore masqués et les hypothèses incertaines ;
+\item proposer des candidats par SEQ-BI, SKIP, MORPH, BYTE, SEM, REL, SLOT, DISC et RETR ;
+\item construire ou mettre à jour le graphe de conflits ;
+\item restaurer en parallèle les blocs indépendants ;
+\item effectuer des opérations d'édition globales sur les blocs non stabilisés ;
+\item réévaluer l'énergie de la séquence complète et les contraintes ;
+\item enregistrer les signatures TRACE, l'entropie, les désaccords et les témoins ;
+\item abaisser le niveau de bruit lorsque les critères d'étape sont atteints.
+\end{enumerate}
+Il est permis de conserver plusieurs particules/hypothèses à chaque niveau pour préserver la diversité et ne pas figer prématurément une décision locale.
+
+\section{Population d'hypothèses}
+Le moteur peut maintenir $K$ candidats complets $\mathcal P_t=\{X_t^{(1)},\ldots,X_t^{(K)}\}$. Leur poids est déterminé par l'énergie globale et leur diversité structurelle (distance d'édition, graphes relationnels ou signatures TRACE). Une population peut être resélectionnée par échantillonnage pondéré, mais la procédure de resampling et ses biais doivent être documentés. La largeur $K$ est un budget d'exécution visible, non une limite intrinsèque du modèle.
+
+\section{Construction initiale d'un canevas}
+Pour une génération conditionnelle, LEN propose plusieurs longueurs et segmentations. Le moteur peut initialiser des spans par des ancres sémantiques, des passages de récupération admissibles ou des propositions de structure, puis masquer les zones à compléter. Une initialisation entièrement masquée est aussi permise. La comparaison de ces initialisations est une ablation explicite. La condition utilisateur reste verrouillée et n'est pas réécrite.
+
+\section{Inpainting, infilling et réécriture}
+Pour l'infilling, les extrémités gauche et droite sont verrouillées et la zone centrale est initialisée par MASK/GAP. Pour la réécriture, une version altérée du passage est le niveau de bruit initial ; le moteur peut effectuer des substitutions, suppressions et insertions sans obligation de préserver l'alignement token initial. Pour la traduction, les segments source restent conditionnels/LOCKED et les spans cibles sont générés à partir des relations et exemples multilingues appris. Pour la synthèse, RETR construit un graphe de preuves et le canevas est raffiné sous contraintes de couverture et de provenance.
+
+\chapter{Arrêt, convergence et qualité de sortie}
+\section{Critères d'arrêt}
+La convergence n'est pas définie par le seul nombre d'itérations. Les critères incluent :
+\begin{itemize}
+\item aucun MASK/GAP non autorisé ;
+\item stabilité des spans et faible taux d'éditions sur une fenêtre de tours ;
+\item baisse de l'énergie globale ou absence de gain significatif ;
+\item contraintes dures satisfaites ;
+\item cohérence relationnelle et discursive au-dessus des seuils calibrés ;
+\item désaccord résiduel des sondes sous seuil ou explicitement communiqué ;
+\item stabilité de la diversité/population et absence d'oscillation détectée par TRACE.
+\end{itemize}
+Un arrêt par budget, un optimum local, un conflit non résolu ou une absence de support sont des statuts distincts d'une convergence confirmée.
+
+\section{Statuts de sortie}
+Les statuts de sortie sont normalisés et enregistrés avec chaque exécution :
+\begin{itemize}
+\item \texttt{CONVERGED-WITH-UNCERTAINTY} : critères de stabilité atteints, mais désaccord ou incertitude résiduelle.
+\item \texttt{PARTIAL-SUPPORT} : zones non résolues faute de support suffisant.
+\item \texttt{BUDGET-EXHAUSTED} : calcul interrompu par un budget déclaré.
+\item \texttt{CYCLE-DETECTED} : oscillation détectée par TRACE.
+\item \texttt{CONSTRAINT-CONFLICT} : contraintes incompatibles non résolues.
+\item \texttt{NO-SUPPORT} ou \texttt{ABSTAIN} : aucune proposition admissible ou preuve suffisante.
+\end{itemize}
+
+\section{Pourquoi le système ne doit pas masquer l'incertitude}
+Une sortie fluide n'est pas une preuve de correction. Un consensus de sondes peut être corrélé ou provenir du même document. COORD rapporte le nombre de familles indépendantes, leurs supports, les désaccords et la provenance. Les affirmations factuelles sensibles peuvent exiger une preuve documentaire et un statut de vérification séparé.
+
+% ============================================================================
+\part{Algorithmes de référence}
+% ============================================================================
+\chapter{Algorithmes normatifs}
+\section{Algorithme A : apprentissage des vues corrompues}
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,frame=single]
+ENTREE : corpus TRAIN, schedules Q, graines, configurations de sondes
+POUR chaque document X0 du split TRAIN :
+    segmenter X0 en unites, spans, graphes et offsets reversibles
+    enregistrer ses signatures propres et sa provenance
+    POUR chaque niveau t et canal de corruption declare :
+        tirer Zt ~ q_t(. | Z_{t-1})
+        choisir les spans cibles B et leurs vues gauche/droite/globales
+        POUR chaque sonde f :
+            calculer s_f(B, Zt, condition, t)
+            mettre a jour N_{f,t}(s_f, span_original)
+        aligner Zt et X0 par edition structuree
+        mettre a jour les tables EDIT, LEN, CONS et les temoins
+    mettre a jour SEM, REL, DISC, RETR et TRACE sans fuite de split
+SAUVEGARDER atomiquement et publier les empreintes du lot
+\end{lstlisting}
+
+\section{Algorithme B : génération par diffusion de sondes}
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,frame=single]
+ENTREE : condition C, memoire M, schedule, budget explicite
+CREER plusieurs canevas candidats via LEN / ancres / MASK / GAP
+POUR t = T, T-1, ..., 0 :
+    POUR chaque hypothese X :
+        identifier les spans MASK, GAP, incertains ou en conflit
+        proposer des spans par toutes les sondes actives
+        calculer les scores COORD et l'energie globale E_t(X | C)
+        construire le graphe de conflits entre blocs mutables
+        colorer le graphe ; pour chaque classe independante :
+            tirer ou choisir les mises a jour des blocs en parallele
+        proposer les editions globales et les verifier par CONS
+        accepter/rejeter par noyau exact ou journaliser l'heuristique
+        mettre a jour TRACE, incertitude, provenance et etat de convergence
+    comparer la population, preserver la diversite et resampler si configure
+    si criteres de niveau atteints : abaisser le bruit
+FINALISER seulement si contraintes dures et criteres d'arret satisfaits
+RETOURNER texte, alternatives, preuves, trajectoire et statut
+\end{lstlisting}
+
+\section{Algorithme C : restauration locale exacte}
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,frame=single]
+ENTREE : etat X, bloc b, candidats C_b, facteurs actifs F_b
+CALCULER la loi conditionnelle locale a partir de pi_t(X_b | X_-b, Zt, C)
+SI tous les facteurs du bloc sont connus et normalises :
+    tirer X_b' selon cette loi (mise a jour Gibbs)
+SINON :
+    generer une proposition r(X_b' | X, ...) avec temoins
+    calculer le ratio de Metropolis-Hastings si disponible
+    sinon appliquer une heuristique etiquetee comme telle et mesurable
+VERIFIER les contraintes dures, conserver la provenance et le delta d'energie
+\end{lstlisting}
+
+\section{Algorithme D : vérification et arrêt}
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,frame=single]
+VERIFIER : zones LOCKED, format, segmentation, contraintes et liens de preuves
+MESURER : energie, entropie, taux d'edition, desaccord, cycles et couverture
+SI masque interdit restant : statut PARTIAL_SUPPORT
+SINON SI contraintes dures violees : statut CONSTRAINT_CONFLICT
+SINON SI cycle ou oscillation : statut CYCLE_DETECTED
+SINON SI convergence multi-criteres : statut CONVERGED ou CONVERGED_WITH_UNCERTAINTY
+SINON SI budget atteint : statut BUDGET_EXHAUSTED
+SINON : poursuivre le raffinement
+\end{lstlisting}
+
+% ============================================================================
+\part{Propriétés mathématiques, garanties conditionnelles et limites}
+% ============================================================================
+\chapter{Propriétés du canal et des transitions}
+\section{Normalisation du canal direct}
+\begin{proposition}
+Si, pour chaque niveau $t$ et chaque état source, $q_t(\cdot\mid z)$ est une distribution discrète non négative de somme un, alors $q(Z_{1:T}\mid X_0)$ définit une loi de probabilité normalisée sur les trajectoires finies.
+\end{proposition}
+\begin{proof}
+Chaque facteur conditionnel est normalisé. La sommation sur les variables intermédiaires se réduit successivement à un, par normalisation de chaque noyau.
+\end{proof}
+
+\section{Invariance des mises à jour de Gibbs}
+\begin{proposition}
+Pour une distribution cible fixe $\pi_t(X\mid Z_t,C)$, une mise à jour de Gibbs exacte sur un bloc $b$, tirée de la conditionnelle $\pi_t(X_b\mid X_{-b},Z_t,C)$, préserve $\pi_t$. Si plusieurs blocs d'une même classe sont conditionnellement indépendants étant donné le reste de l'état, leur mise à jour simultanée préserve également $\pi_t$.
+\end{proposition}
+\begin{proof}
+Une transition de Gibbs remplace la composante $X_b$ par un échantillon issu de la conditionnelle de la distribution cible, laissant la marginale sur $X_{-b}$ inchangée ; la distribution jointe reste donc $\pi_t$. Pour des blocs conditionnellement indépendants, la conditionnelle jointe factorise en produit de conditionnelles de blocs et le même raisonnement s'applique simultanément. La condition d'indépendance est exactement celle imposée par le graphe de conflits et sa coloration.
+\end{proof}
+
+\section{Balance détaillée de Metropolis-Hastings}
+\begin{proposition}
+Si $\pi_t$ est une cible normalisée sur un espace admissible fini ou dénombrable, si le noyau de proposition $r_t$ est défini et si la probabilité d'acceptation est celle donnée au chapitre 7, la transition Metropolis-Hastings satisfait la balance détaillée par rapport à $\pi_t$.
+\end{proposition}
+\begin{proof}
+Pour deux états distincts $x,x'$, le flux accepté est
+\[
+\pi_t(x)r_t(x'\mid x)a(x,x')=\min\{\pi_t(x)r_t(x'\mid x),\pi_t(x')r_t(x\mid x')\},
+\]
+expression symétrique en $x$ et $x'$. La balance détaillée en découle.\\
+\end{proof}
+
+\section{Ergodicité conditionnelle}
+\begin{proposition}
+Sur un espace fini, si le noyau cible est irréductible sur l'ensemble admissible et apériodique, la chaîne converge vers son unique distribution stationnaire. Pour eSonde v5, cette conclusion ne vaut que si les propositions EDIT/BYTE/LEXICAL rendent l'espace admissible connecté et si les probabilités nécessaires restent strictement positives.
+\end{proposition}
+
+\section{Limites des garanties}
+Les propositions ci-dessus concernent la normalisation et les propriétés d'un noyau défini. Elles ne prouvent pas que l'énergie encode la sémantique correcte, que les comptes empiriques couvrent le langage, que les candidats contiennent la réponse utile, ni que le nombre fini d'itérations atteint l'équilibre. Une chaîne bien définie peut parfaitement échantillonner une distribution cible de mauvaise qualité. La qualité sémantique est donc une propriété empirique distincte.
+
+\chapter{Pourquoi diffusion et raffinement ne garantissent pas seuls une meilleure qualité}
+La diffusion permet des décisions non autorégressives et des corrections globales. Elle introduit toutefois des coûts et risques spécifiques : plusieurs passes de sondes, choix du schedule, erreurs corrélées, dépendance à la proposition de candidats, oscillations, optimum local, difficulté de longueur variable, sur-lissage et perte de cohérence lorsque trop de spans sont modifiés simultanément. Des travaux récents soulignent notamment la nécessité d'un raffinement au niveau séquence/édition pour compenser les incohérences de générations parallèles de plusieurs tokens. La v5 formalise cette correction par EDIT, CONS, TRACE et le score global, sans garantir a priori son succès.
+
+% ============================================================================
+\part{Capacités généralistes et sémantique composée}
+% ============================================================================
+\chapter{De l'association lexicale à la structure sémantique}
+\section{Niveaux de représentation}
+La sémantique est organisée en quatre niveaux cumulables :
+\begin{enumerate}
+\item profils distributionnels de termes et spans (SEM) ;
+\item relations binaires/ternaires typées, arguments et événements (REL, SLOT) ;
+\item continuité d'entités, alias, coréférence candidate, temps et discours (DISC) ;
+\item composition de règles avec prémisses, témoins et vérificateurs (TRACE/CONS).
+\end{enumerate}
+Le niveau supérieur doit se construire à partir d'observations et de règles explicites ; il ne doit pas être déclaré présent simplement parce que le nom d'une sonde existe.
+
+\section{Règles de composition}
+Une règle est un tuple $r=(P,C,O,W,B)$ : prémisses $P$, conditions $C$, conséquence candidate $O$, témoins $W$ et budget $B$. Une règle ne s'applique que si ses prémisses sont attestées et si les conditions sont satisfaites. Les conséquences sont marquées comme dérivées, avec leur profondeur de composition. Les faits récupérés, les inférences et les hypothèses restent séparés.
+
+\section{Résolution d'ambiguïtés}
+Plusieurs interprétations peuvent rester actives dans la population d'hypothèses. COORD ne doit pas forcer une décision si la différence de score est faible ou si les témoins sont contradictoires. Les réponses peuvent contenir une abstention structurée, des alternatives et le contexte de preuve.
+
+\section{Multilinguisme}
+Les relations entre langues sont apprises à partir de données multilingues, corpus parallèles, documents comparables, alias et cooccurrences vérifiables. Les translittérations, cognats et signatures morphologiques sont des indices, pas des équivalences sémantiques garanties. Les expériences doivent distinguer langue du prompt, langue du document, langue de sortie et sens de transfert.
+
+\chapter{Modes fonctionnels}
+\begin{longtable}{p{2.7cm}p{5.0cm}p{6.0cm}}
+\toprule Mode & État initial & Critère fonctionnel distinct\\
+\midrule Génération conditionnelle & Canevas multi-longueur et zones MASK & Produire une séquence entière cohérente sous condition, sans append token par token.\\
+Infilling & Contexte gauche/droit verrouillé, trou masqué & Restaurer le trou en exploitant les deux côtés et la structure globale.\\
+Réécriture & Texte altéré et zones éditables & Corriger/infléchir tout le passage par EDIT et énergie globale.\\
+Traduction & Source conditionnelle, cible vide ou partielle & Construire une séquence cible et vérifier couverture/alignement.\\
+Résumé & Graphe de passages RETR et canevas synthèse & Couvrir les preuves, éviter duplications et préserver les faits.\\
+Question-réponse & Question, documents/contextes et canevas & Formuler une réponse soutenue par passages, offsets et provenance.\\
+Dialogue & Historique, état DISC et canevas de tour & Maintenir entités, objectifs et contraintes multi-tours.\\
+Structuration & Texte source et schéma/format cible & Générer puis vérifier une structure (JSON, tableau, plan, etc.).\\
+Continuation causale & Préfixe verrouillé et zone future masquée & Mode de compatibilité à information strictement causale.\\
+\bottomrule
+\end{longtable}
+
+% ============================================================================
+\part{Migration depuis v4 et compatibilité}
+% ============================================================================
+\chapter{Migration non destructive v4 vers v5}
+\section{Conservation de l'original}
+Le checkpoint v4 n'est jamais écrasé. Toute migration se fait dans un nouveau fichier v5, avec hash de la source, hash de destination, version du convertisseur, rapport de compatibilité et sauvegarde vérifiée. Les données v4 restent consultables pour reproduire les résultats antérieurs.
+
+\section{Réutilisation des états}
+Les compteurs v4 SEQ, SKIP, MORPH, BYTE, SEM, REL, SLOT, DISC, RETR et TRACE peuvent être importés comme observations historiques dans les familles correspondantes, sous réserve de validation du schéma. Les poids COORD v4 ne deviennent pas automatiquement les poids de diffusion v5 : les objectifs et les unités diffèrent, ils sont conservés comme configuration legacy uniquement.
+
+\section{Reconstruction des vues bidirectionnelles}
+Si le checkpoint conserve les textes d'entraînement et leurs identifiants, le moteur peut reconstruire les vues gauche/droite, les spans multi-échelles et les paires corrompues de v5 à partir de ces textes train. Si les textes train ne sont pas présents, les tables causales v4 restent des preuves partielles ; elles ne peuvent pas être transformées artificiellement en observations droites. Les données de validation et test ne servent pas à reconstruire l'entraînement.
+
+\section{Continuité des évaluations}
+Les scores v4 sont conservés dans la série historique. Les résultats v5 sont nouveaux et ne remplacent pas les métriques v4. Les comparaisons exigent les mêmes documents, tâches, références, tokenizer compatible ou alignement contrôlé, budgets et conventions. Les mesures next-token v4 restent un diagnostic auxiliaire, pas la fonction objectif principale de v5.
+
+% ============================================================================
+\part{Données, pipeline, interfaces et exploitation}
+% ============================================================================
+\chapter{Pipeline complet de v5}
+\begin{enumerate}[label=\arabic*.]
+\item Préflight des chemins, checklists, versions et sauvegardes.
+\item Ingestion multi-format, contrôle CRC, validation du contenu, offsets et provenance.
+\item Attribution des documents aux splits train/validation/test par groupes sans contamination.
+\item Segmentation multi-échelle et construction des graphes/structures de base.
+\item Production des corruptions train selon les schedules enregistrés.
+\item Mise à jour des tables de débruitage et des sondes SEM/REL/DISC/RETR/EDIT/LEN/CONS.
+\item Sauvegarde atomique et contrôle SHA-256.
+\item Calibration sur validation des coefficients, températures, schedules et critères d'arrêt.
+\item Génération/test par diffusion sur le split test ou les benchmarks autorisés.
+\item Évaluation des tâches globales, ablations, analyses de latence et coûts.
+\item Audit de pureté, de provenance, de sécurité et de reproductibilité.
+\item Packaging et vérification des manifestes.
+\end{enumerate}
+
+\chapter{Ingestion des fichiers et des corpus}
+Le parseur commun de v5 doit conserver la couverture multi-format validée dans v4 et ajouter les formats nécessaires lorsqu'ils sont demandés et supportés. Chaque document extrait conserve source, type MIME/extension, hash, identifiant, offsets quand ils existent, encodage, version d'extracteur et avertissements. Les formats non pris en charge sont refusés explicitement. Les archives ZIP sont inspectées contre les chemins traversants, fichiers absolus, collisions et bombes de décompression ; les limites de décompression sont explicites et configurables.
+
+Les mêmes parseurs sont utilisés pour train, validation et test. Les différences de transformation par split sont interdites sauf transformation déclarée du protocole. Les documents multilingues, tableaux, feuilles et slides conservent leurs frontières structurelles afin de pouvoir servir aux sondes documentaires et aux tâches structurées.
+
+\chapter{CLI normative}
+Les commandes suivantes décrivent l'interface cible v5 ; elles ne prétendent pas être déjà implémentées dans le runtime v4.
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,frame=single]
+# Initialiser un modele v5 sans reseau neuronal
+esonde-v5 init --model models/esonde_v5.json --architecture probe-diffusion
+
+# Construire les statistiques de denoising depuis TRAIN uniquement
+esonde-v5 train --model models/esonde_v5.json --train data/train \\
+  --noise-schedules linear,cosine,span-adaptive --levels 32
+
+# Calibrer schedules et coefficients avec VALIDATION
+esonde-v5 calibrate --model models/esonde_v5.json --validation data/validation
+
+# Generer une sortie complete par diffusion, non token par token
+esonde-v5 generate --model models/esonde_v5.json --prompt "..." \\
+  --mode diffusion --steps 32 --particles 16 --report-trace
+
+# Infilling bidirectionnel
+esonde-v5 infill --model models/esonde_v5.json --left "..." \\
+  --right "..." --mask-span "..." --mode diffusion
+
+# Reecriture et edition globale
+esonde-v5 edit --model models/esonde_v5.json --input passage.txt \\
+  --task rewrite --preserve-facts --report-edits
+
+# Evaluation globale sur TEST independant
+esonde-v5 evaluate --model models/esonde_v5.json --test data/test \\
+  --suite generation,infill,qa,translation,consistency,robustness
+
+# Audit de purete et integrite
+esonde-v5 audit --model models/esonde_v5.json --scope static,dynamic
+esonde-v5 verify --model models/esonde_v5.json --deep
+\end{lstlisting}
+
+\chapter{Interface graphique normative}
+La GUI doit exposer les mêmes fonctions que la CLI/API : modèle et checkpoint, ingestion dossiers/fichiers/ZIP, configuration de corruption, apprentissage train, calibration validation, génération diffusion, infilling, réécriture, traduction, QA, recherche, évaluation test, visualisation des trajectoires, comparaison de particules, provenance, incertitude, sauvegardes et audit. Les paramètres de schedule, nombre de passes, population, budget et critères d'arrêt doivent être visibles. Les boutons ne doivent pas lancer silencieusement une génération autorégressive lorsque le mode diffusion est demandé.
+
+\chapter{Checkpoint, journaux et sauvegarde}
+Le checkpoint v5 contient la version du schéma, la configuration, les sondes, les canaux de corruption, les comptes de spans, graphes et index, les poids scalaires, les schedules, les provenance, l'historique des lots, les hashes et les statistiques. Chaque mutation est précédée d'une sauvegarde vérifiée. La sérialisation est canonique, atomique, déterministe lorsque la graine l'est et testée en round-trip.
+
+Chaque run consigne commande, seed, versions, hardware, hash du modèle, hash du dataset manifeste, split, options, schedule, nombre de passes, nombre de propositions, temps, mémoire, sortie, traces et code de retour. Les runs interrompus conservent leur état et ne sont pas confondus avec les runs terminés.
+
+% ============================================================================
+\part{Protocole expérimental et critères scientifiques}
+% ============================================================================
+\chapter{Pourquoi la NLL next-token ne suffit plus}
+La NLL next-token mesure une probabilité conditionnelle causale locale sous une tokenisation déterminée. Elle reste utile pour la compatibilité, pour l'évaluation du canal causal et pour certaines tâches de continuation. Elle ne mesure pas directement la qualité d'une séquence entière construite par débruitage global, la cohérence d'un passage, la réussite d'un infilling ou la qualité d'une réécriture.
+
+V5 rapporte donc la NLL token/span comme mesure secondaire lorsqu'elle est mathématiquement définie, mais la mesure principale porte sur la restauration et la qualité globale de l'état final. Les mesures ne sont pas mélangées dans un score unique sans justification.
+
+\chapter{Métriques obligatoires}
+\begin{longtable}{p{3.2cm}p{5.2cm}p{5.3cm}}
+\toprule Domaine & Mesures & Précautions\\
+\midrule
+Denoising & Exact span recovery, span-F1, edit distance, taux de spans supportés & Par niveau de bruit, longueur, granularité et langue.\\
+Génération & Exactitude tâche, cohérence globale, diversité, répétition, factualité, adéquation à la consigne & Évaluation en aveugle et plusieurs seeds.\\
+Infilling & EM, span-F1, chrF, cohérence gauche/droite, nombre d'éditions & Séparer zones vues et masquées.\\
+Réécriture & Edit distance, préservation des faits, respect de consigne, qualité humaine & Comparer au texte source et aux références.\\
+QA & EM, token-F1, preuve correcte, citation précise, taux d'abstention & Mesurer séparément réponses justifiées et non justifiées.\\
+Multilingue & Qualité par langue, sens source/cible, transfert direct/croisé & Éviter que les scores agrégés cachent les écarts.\\
+Contraintes & Format valide, couverture des contraintes, violations dures/souples & Les contraintes dures sont vérifiées exactement.\\
+Efficacité & Latence totale, passes, tokens/spans examinés, mémoire, énergie/CPU & Comparer à budget de calcul comparable.\\
+Robustesse & Perturbations, bruit, longueurs, domaines, OOV, corruption adversariale & Les perturbations sont gelées avant le test.\\
+Calibration & Brier, log-loss span, ECE, couverture/abstention & Calibration seulement sur validation.\\
+\bottomrule
+\end{longtable}
+
+\chapter{Plan de comparaison v4/v5 et baselines}
+Les comparaisons sont établies sur les mêmes splits documentaires et tâches. Les conditions contrôlées incluent : mêmes documents train, même volume d'information autorisée, même provenance, mêmes contraintes de sortie et budgets calcul clairement annoncés. Les différences de tokenizer sont éliminées ou évaluées avec des mesures de surface communes.
+
+Les comparateurs incluent :
+\begin{enumerate}
+\item v4 en génération autoregressive next-token (baseline historique) ;
+\item v5 diffusion masquée sans édition globale ;
+\item v5 diffusion + EDIT/CONS/TRACE ;
+\item v5 sans chaque famille de sonde (ablation) ;
+\item une baseline de récupération/édition non neuronale ;
+\item éventuellement des architectures neuronales externes comme références, sans les intégrer au modèle eSonde.
+\end{enumerate}
+Aucune comparaison ne doit favoriser v5 en lui donnant les références ou le test. Les budgets de calcul sont rapportés à la fois en temps, nombre de passes, nombre d'opérations de sonde et mémoire. Une amélioration de latence n'est pas assimilée à une amélioration de qualité, ni l'inverse.
+
+\section{Tests de fuite et de contamination}
+Les contrôles recherchent les recouvrements exacts, quasi-doublons, chevauchements d'entités et passages entre splits. Les réponses de référence ne sont jamais utilisées pour initialiser les canevas ou générer des candidats. Les tâches de récupération se limitent aux documents autorisés. Les corruptions sont générées uniquement depuis train.
+
+\section{Incertitude statistique}
+Les résultats sont rapportés avec agrégations par document, langue, domaine et type de tâche, intervalles bootstrap et variance multi-seed. Les comparaisons appariées conservent les mêmes exemples. Les sous-groupes trop petits sont marqués comme insuffisamment mesurés plutôt que fusionnés silencieusement.
+
+\section{Ablations préenregistrées}
+Les familles SEQ-BI, SKIP, MORPH, BYTE, SEM, REL, SLOT, DISC, RETR, TRACE, EDIT, LEN, CONS et COORD sont désactivées une par une et par groupes définis avant le test. Les ablations incluent également : mask-only, corruption structurelle, différents schedules, updates séquentielles vs parallèles par classe de conflits, mono-hypothèse vs population, initialisation masquée vs ancrée, score énergie vs mélange convexe, avec/sans longueur dynamique.
+
+\chapter{Résultats v4 : portée et motivation, sans extrapolation}
+Les résultats v4 documentés servent à motiver l'élargissement de l'objectif, non à étiqueter le principe des sondes. Le next-token MLQA v4 a obtenu 17,3065 nats/token sur son protocole et la baseline unigramme 5,0654. Les paires croisées MLQA ont obtenu un F1 inférieur aux paires diagonales. Le checkpoint testé avait 13 documents train et 1\,903 tokens. Ces résultats montrent que ce checkpoint et ce chemin d'inférence n'ont pas démontré de capacité générale ; ils n'évaluent ni une diffusion bidirectionnelle, ni un canevas de spans, ni les mises à jour globales définies dans v5.
+
+Une expérience v5 ne peut pas revendiquer une amélioration sur la seule base du fait qu'elle n'est plus next-token. Le gain doit apparaître sur les tâches globales préenregistrées. Une régression de certaines métriques peut également coexister avec une amélioration sur d'autres usages ; le rapport doit le signaler précisément.
+
+% ============================================================================
+\part{Phases, critères de sortie, risques et statut}
+% ============================================================================
+\chapter{Phases de travail obligatoires}
+\begin{longtable}{p{1.2cm}p{3.0cm}p{8.8cm}}
+\toprule Phase & Objet & Critères objectifs de clôture\\
+\midrule
+P0 & Préservation et préflight & Hash des archives/checkpoints v4, paths, manifests, checklists et snapshot indépendant vérifiés.\\
+P1 & Formalisme v5 & Cohérence mathématique relue, compile TeX, conventions/schedules/noyaux explicités, zéro contradiction avec pureté non neuronale.\\
+P2 & Schéma d'état et canal direct & Canevas, spans, MASK/GAP, corruptions et sérialisation testés, normalisation de chaque $q_t$ vérifiée.\\
+P3 & Sondes de débruitage & Contrat/tests de SEQ-BI, SKIP, MORPH, BYTE, SEM, REL, SLOT, DISC, RETR, TRACE, EDIT, LEN, CONS.\\
+P4 & Coordinateur et énergie globale & Scores par span/séquence, contraintes dures, poids, provenance et diagnostics testés sans fuite.\\
+P5 & Noyau inverse & Gibbs/MH exacts vérifiés sur petits espaces ; heuristiques explicitement nommées ; tests de stationnarité et de conflits.\\
+P6 & Raffinement parallèle & Graphe de conflits, coloration, mises à jour multi-spans, dynamique de longueur, population et convergence testés.\\
+P7 & Modes de tâche et ingestion & Génération, infilling, édition, traduction, résumé, QA, CLI/GUI et multi-formats reliés au même moteur.\\
+P8 & Apprentissage/\newline calibration & Corruptions train-only ; validation-only pour calibration ; snapshots et absence de fuite démontrés.\\
+P9 & Évaluation & Tâches globales, comparateurs, ablations, budgets, intervalles, résultats et rapports complets.\\
+P10 & Audit et livraison & Pureté statique/dynamique, tests, manifestes, sauvegardes, documentation, extraction et empreintes vérifiés.\\
+\bottomrule
+\end{longtable}
+Une phase n'est ouverte que lorsque la précédente répond à ses critères. Un critère échoué ou non mesuré maintient la phase ouverte. La présence d'un fichier ou le succès d'un smoke test ne remplace pas les critères scientifiques.
+
+\chapter{Risques techniques et réponses prévues}
+\begin{longtable}{p{3.4cm}p{5.2cm}p{4.9cm}}
+\toprule Risque & Manifestation & Réponse architecturale/expérimentale\\
+\midrule
+Erreur parallèle multi-span & Des blocs localement plausibles produisent une phrase incohérente & Graphe de conflits, score global, EDIT/CONS, ablations de granularité.\\
+Optimum local & Le raffinement se bloque dans une séquence sous-optimale & Population, réinitialisation partielle, propositions diverses et multi-schedules.\\
+Explosion de candidats & Recherche BYTE/relations trop vaste & Index, lazy expansion, budgets transparents, priorité par incertitude et support.\\
+Longueur/\newline alignement & Difficulté à insérer ou supprimer des spans & LEN, GAP, frontières dynamiques, scripts EDIT et tests de reconstruction.\\
+Corrélation des sondes & Même preuve comptée plusieurs fois & Mesure de corrélation d'erreurs, groupes de sondes, pondération et ablations.\\
+Manque de données & Tables rares ou absentes & Multi-échelle, BYTE, RETR, apprentissage incrémental autorisé, statut NO-SUPPORT.\\
+Oscillation & Les spans alternent entre hypothèses & TRACE, cycle detection, température et politique d'arrêt.\\
+Latence multi-passes & Trop de calculs de débruitage & Schedules adaptatifs, passes ciblées par incertitude, caches déterministes, profilage.\\
+Dérive factuelle & Réécriture qui change un fait ou une entité & Verrouillage des faits, graphe d'entités, RETR, vérification de preuves et tests dédiés.\\
+\bottomrule
+\end{longtable}
+
+\chapter{Décisions normatives et questions ouvertes}
+Les décisions suivantes sont normatives : diffusion discrète ; état global de spans ; accès gauche/droit selon contrat de tâche ; génération non autorégressive ; opérations d'édition ; probes explicites ; aucun neurone/MLP/Transformer ; train/validation/test séparés ; audit de pureté ; traces et provenance complètes.
+
+Les points suivants restent des choix empiriques à comparer : famille de schedules ; granularité principale ; proportion de masquage ; combinaison masque/remplacement/permutation ; architecture de population ; nombre de passes ; méthode de calibration ; coût d'édition ; prior de longueur ; poids du score de récupération ; taux de parallélisme. Le formalisme ne fixe pas une configuration gagnante sans mesure.
+
+\chapter{Déclaration de conformité et statut}
+Ce document constitue la spécification normative de conception eSonde v5. Il formalise le changement essentiel : passer d'une génération token-par-token à une génération par diffusion discrète de spans et raffinement global guidé par sondes. Il ne prétend pas que le runtime v4 possède déjà ces fonctions. La version v5 n'est considérée implémentée qu'après réalisation des phases P2 à P7 et vérification des critères correspondants. Elle n'est considérée scientifiquement évaluée qu'après P8 et P9.
+
+La supériorité, l'égalité ou l'infériorité face à v4, aux MLP ou aux LLM classiques demeure une question expérimentale ouverte. L'identité eSonde est préservée dans la conception : observations explicites, mémoires clairsemées, relations vérifiables, coordination, diffusion symbolique et absence complète de réseau neuronal.
+
+% ============================================================================
+\appendix
+\part{Annexes techniques}
+% ============================================================================
+\chapter{Exemple formel d'un infilling}
+Soit un contexte conditionnel $C=(L,R)$ avec extrémités $L$ et $R$ verrouillées. Le trou initial est un canevas $Z_T=(L,\Mask, R)$ avec hypothèses de longueur $n\in\mathcal N_C$. La sonde LEN propose des canevas $G^{(n)}$, MORPH/BYTE proposent des spans, SEQ-BI conditionne sur $L$ et $R$, REL/SLOT vérifient les cadres, SEM/DISC vérifient la continuité, RETR ajoute des preuves si autorisé. COORD construit $E_t$. Les blocs non conflictuels sont restaurés simultanément. EDIT peut ensuite insérer ou supprimer des spans. Le résultat est accepté comme convergé si les frontières sont stables, si les contraintes sont satisfaites et si les critères de convergence sont atteints. Les chaînes source et offsets sont conservés.
+
+\chapter{Exemple formel d'une génération longue}
+Pour une tâche $C$, LEN tire plusieurs segmentations et longueurs. Chaque canevas initialise des zones MASK et des ancres potentielles. Les sondes proposent des événements, entités, cadres et passages. La population compare plusieurs plans textuels. À chaque niveau de diffusion, plusieurs phrases ou groupes de spans sont restaurés ensemble ; les relations DISC/REL imposent la cohérence entre les parties du texte. TRACE mesure les changements de signatures. Une correction EDIT globale peut modifier une phrase déjà restaurée si le nouveau contexte la rend incohérente. Il n'y a donc aucune décision de token antérieure qui soit irrévocable, sauf zone explicitement LOCKED.
+
+\chapter{Audit de non-autorégressivité}
+Pour établir qu'un runtime implémente réellement le cœur v5, l'audit vérifie :
+\begin{enumerate}
+\item l'état de génération comprend plusieurs positions/spans simultanément ;
+\item des spans déjà proposés peuvent être remplacés après observation des autres spans ;
+\item les sondes voient le contexte droit pour les tâches bidirectionnelles ;
+\item le moteur n'appelle pas une prédiction du prochain token en boucle pour produire la sortie ;
+\item le journal montre des transitions d'états $X^{(0)},X^{(1)},\ldots$ et des opérations multi-spans ;
+\item l'interface indique le mode de diffusion et les étapes réellement exécutées ;
+\item les tests instrumentés prouvent qu'une décision locale peut être révisée ;
+\item un test de perturbation d'un span peut provoquer la révision d'autres spans reliés.
+\end{enumerate}
+Un mode compatibilité next-token peut exister mais il doit être isolé, identifié et non appelé par défaut par les commandes v5 de génération globale.
+
+\chapter{Glossaire}
+\begin{description}[style=nextline]
+\item[Diffusion discrète] Chaîne de corruption et de restauration sur symboles/spans discrets.
+\item[Span] Unité contiguë de texte à une granularité déterminée.
+\item[Canevas] Graphe ordonné de spans propres, masqués, vides ou mutables.
+\item[Débruitage] Opération qui propose de restaurer un état plus informatif/cohérent.
+\item[Énergie globale] Score d'un état complet issu des facteurs/sondes et contraintes.
+\item[Graphe de conflits] Graphe décrivant les blocs qui ne peuvent pas être mis à jour simultanément.
+\item[Réparation EDIT] Opération d'insertion, suppression, remplacement, fusion, division ou déplacement.
+\item[LOCKED] Zone que le moteur ne peut pas modifier selon le contrat de tâche.
+\item[NO-SUPPORT] Absence de proposition suffisamment étayée ; ce n'est pas une preuve d'impossibilité.
+\item[Trace] Historique des états, signatures, preuves, scores et décisions.
+\end{description}
+
+\chapter{Références scientifiques et positionnement}
+Les références ci-dessous documentent les familles générales de diffusion discrète, de génération non autorégressive et de raffinement par édition. Elles ne sont pas des composants importés dans eSonde et plusieurs modèles publiés utilisent des réseaux neuronaux, exclus du présent formalisme. V5 reprend uniquement les idées abstraites de corruption discrète, de débruitage, de génération parallèle et de réparation de séquence ; ses estimateurs doivent rester des sondes explicites et des structures clairsemées.
+
+\begin{thebibliography}{99}
+\bibitem{austin2021d3pm}
+J. Austin, D. D. Johnson, J. Ho, D. Tarlow et R. van den Berg.
+\newblock Structured Denoising Diffusion Models in Discrete State-Spaces.
+\newblock Advances in Neural Information Processing Systems, 2021.
+\newblock \url{https://research.google/pubs/structured-denoising-diffusion-models-in-discrete-state-spaces/}.
+
+\bibitem{li2023survey}
+Y. Li, K. Zhou, W. X. Zhao et J.-R. Wen.
+\newblock Diffusion Models for Non-autoregressive Text Generation: A Survey.
+\newblock Proceedings of IJCAI 2023, pages 6692--6701, 2023.
+\newblock DOI: \url{https://doi.org/10.24963/ijcai.2023/750}.
+
+\bibitem{yi2024survey}
+Y. Yi et al.
+\newblock Diffusion models in text generation: a survey.
+\newblock PeerJ Computer Science, 2024.
+\newblock DOI: \url{https://doi.org/10.7717/peerj-cs.1905}.
+
+\bibitem{ren2026edit}
+H. Ren et al.
+\newblock Edit-Based Refinement for Parallel Masked Diffusion Language Models.
+\newblock Proceedings of the 43rd International Conference on Machine Learning, Proceedings of Machine Learning Research, volume 306, pages 104829--104846, 2026.
+\newblock \url{https://proceedings.mlr.press/v306/ren26t.html}.
+
+\bibitem{oba2026tutorial}
+D. Oba et D. Bollegala.
+\newblock Diffusion Language Models: Foundations and Frontiers of Non-Autoregressive Language Generation.
+\newblock AACL-IJCNLP 2026 Tutorial Abstracts, pages 44--50, 2026.
+\newblock DOI: \url{https://doi.org/10.18653/2026.aacl-tutorials.6}.
+\end{thebibliography}
+
+\end{document}
