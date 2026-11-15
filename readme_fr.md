@@ -85,6 +85,12 @@ Deux voies sont distinctes. **eLLM_v0** est un modèle de langage à n-grammes d
 
 **eLLM_v1** utilise un LLM causal préentraîné et ajoute des sondes apprises à plusieurs résolutions sur ses états cachés contextualisés. Les sondes apprennent des transports et des corrections des logits afin d'influencer la prédiction, pas seulement de visualiser le modèle. Les tests des composants ne suffisent pas à affirmer une amélioration sur un vrai checkpoint : l'audit précise les conditions de disponibilité des poids et les expériences qui restent nécessaires.
 
+### `eSonde/` — modèles d’apprentissage à sondes explicites
+
+eSonde est une famille de modèles expérimentaux fondés sur des calculs par sondes explicites. Ses versions explorent des tâches et des conceptions différentes : il ne s’agit pas d’un modèle unique dont l’architecture resterait inchangée. La version documentée eSonde v0 est un modèle supervisé de régression et de classification sur données tabulaires, dont les unités prédictives sont des sondes, sans neurones ni MLP. eSonde v2 explore un prototype de modèle de langage fondé sur des familles de sondes explicites et parcimonieuses, avec des fonctions documentées d’entraînement, de génération, d’évaluation, de recherche, d’inspection et d’audit.
+
+Chaque version possède son implémentation, sa documentation, ses tests et ses limites propres ; consultez le README et la release correspondants pour les détails et les livrables complets. La réussite de tests logiciels ne démontre pas, à elle seule, une qualité générale en langage, une supériorité sur les modèles neuronaux ou une généralisation étendue.
+
 ### `models_order/` — recherche adaptative, ordre et preuve
 
 La famille ORDER étudie un moteur où les problèmes sont observés progressivement, décomposés récursivement, puis traités par synthèse de candidats et vérification dans un noyau de preuve indépendant. Les observateurs formels, documentaires et web sont séparés : une page apporte du contexte, mais ne devient pas un axiome. Seuls les certificats validés par le noyau entrent en mémoire comme preuves. Une preuve locale peut fermer un sous-problème, déclencher un nouveau test de la racine et guider d'autres branches.
