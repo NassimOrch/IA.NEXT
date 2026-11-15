@@ -194,6 +194,7 @@ Chaque travail possède sa source complète dans la release correspondante. Les 
 | `AAM/` | Agent non-LLM, observation, mémoire | ROCA-D, CEGIS, sondes, décision sous contrat |
 | `FulleGenBrain/` | Programmation compositionnelle | AST typé, 29 opérateurs, synthèse, ASCRC |
 | `NGeGenBrain/` | Observation de modèles | Instrumentation multi-vues, reconstruction expérimentale |
+| eSonde/ | Modèles expérimentaux à sondes explicites | Régression/classification tabulaires et prototype de modèle de langage, selon la version |
 | `eGenBrain/` | Mémoire relationnelle | Maillage contextuel, provenance, abstention |
 | `eLLM/` | Langage et empreintes | Markov variable, sondes apprises sur LLM causal |
 | `models_order/` | Recherche et preuve | Décomposition, synthèse, noyau de preuve |
