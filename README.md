@@ -14,6 +14,8 @@ The supplied source archive is a reference snapshot. It contains source files, s
 
 The reference documentation, scientific reports, and source documents are written in French. Readers who translate them into another language are personally responsible for the accuracy, terminology, and distribution of their translations. A reader-created translation is not automatically official or author-approved. This English README is a guide to the collection; it is not a complete translation of the French reports.
 
+Some projects or versions are proof-of-concept prototypes: they demonstrate selected ideas or mechanisms within a defined scope, but are not necessarily complete, production-ready systems or broadly validated results. The maturity and evidence vary by project and version; consult the corresponding documentation and reports for what is specified, implemented, tested, and still exploratory.
+
 ## AI architecture: central ideas
 
 ### Observation and fingerprints
