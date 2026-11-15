@@ -204,4 +204,5 @@ The complete source for each work is available in its corresponding release. Ver
 | `models_order/` | Search and proof | Decomposition, synthesis, proof kernel |
 | `sondes_experiences/` | Neuronal experiments | AdaptiveRBF, HC-RBF, CNG, CNC |
 | `theories/` | Foundations | Fingerprints, observation, cores, LLMs, composition |
-| `readme_vHS/` | Accessible material | Introductory explanations |
+|| `README.md` | Repository entry point | Overview and links to the English and French guides |
+| `readme_vHS/` | Material for high-school students | Introductory explanations of the research works |
