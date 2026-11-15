@@ -85,6 +85,12 @@ The eLLM family explores fingerprints and multi-resolution probes in language mo
 
 These are different approaches: v0 is not a Transformer; v1 is not a standalone n-gram model. The v1 source and audit include component and synthetic tests, but the pinned external checkpoint was not present in the cited build environment and a real-checkpoint fine-tuning quality gain is not established by those tests. The project therefore describes a research architecture, not a demonstrated general improvement in language-model quality.
 
+### `eSonde/` — explicit-probe learning models
+
+eSonde is a family of experimental models built around explicit probe-based computation. Its versions explore different tasks and designs rather than one single, unchanged model. The documented eSonde v0 is a supervised tabular regression and classification model whose predictive units are probes, without neurons or an MLP. eSonde v2 explores a language-model prototype based on sparse, explicit probe families, with documented functions for training, generation, scoring, retrieval, inspection, and auditing.
+
+Each version has its own implementation, documentation, tests, and limitations; consult its version-specific README and release for details and complete deliverables. Passing software tests does not by itself establish general language quality, superiority to neural models, or broad generalization.
+
 ### `models_order/` — adaptive search, ORDER, and proof
 
 ORDER develops a long-running search process with problem decomposition, focused attention, iterative learning, candidate generation, and a proof kernel. The documented architecture can use specialized teacher components during preparation and then operate from acquired local artifacts. It distinguishes documentary information from formal certificates.
