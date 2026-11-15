@@ -129,6 +129,10 @@ The formalism distinguishes the object, context, protocol, observation, record, 
 
 **Speculation:** in quantum physics, the formalism could describe experimental arrangements as contexts and measurements as probes. For the double-slit experiment, it would have to produce quantitative predictions for when interference fringes appear or disappear. For Schrödinger's cat, it can help distinguish description, apparatus, record, and fingerprint, but it does not by itself solve the measurement problem. In biology, medicine, control, remote sensing, astronomy, or chemistry, it could clarify mechanism identifiability and the limits of available data.
 
+### Exploratory work on quantum mechanics
+
+This work explores whether the theory of information fingerprints and its related observation formalism can be used to derive quantum mechanics and some of its laws, including the Born rule. The investigation has produced partial results, but it remains exploratory and incomplete; substantial further development and validation are needed before any derivation can be considered complete or established. So far, this line of work has received limited attention alongside several other ongoing projects.
+
 ### Core theory, CNG/CNC, and AdaptiveRBF
 
 `th_sondes_core_0.tex` and `th_sondes_core_1.tex` formalize probes, cores, computational dependency graphs, hierarchical composition, temporary memory, coordinators, and neuronal/logical/physical realizations. The test texts define the CNG/CNC protocols. `arch_up_formalisme_0.tex` studies adaptive organization of AdaptiveRBF centres through predictive contribution, residuals, redundancy, selection, pruning, and fingerprints.
