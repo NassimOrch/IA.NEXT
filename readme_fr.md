@@ -14,6 +14,8 @@ Le dossier source fourni est un instantané de référence. Il contient des sour
 
 Les documentations, rapports scientifiques et documents de référence sont rédigés en français. Les lecteurs qui souhaitent les traduire dans une autre langue assument personnellement la responsabilité de leur traduction, de sa fidélité, de sa terminologie et de sa diffusion. Une traduction de lecteur n'est pas automatiquement officielle ni validée par l'auteur. Le README anglais est un guide de présentation ; il ne remplace pas la traduction intégrale des rapports français.
 
+Certains projets ou certaines versions sont des preuves de concept : ils démontrent des idées ou des mécanismes précis dans un périmètre défini, sans être nécessairement des systèmes complets, prêts pour une utilisation en production ou validés de manière générale. Le niveau de maturité et les éléments de validation varient selon le projet et la version ; consultez la documentation et les rapports correspondants pour distinguer ce qui est spécifié, implémenté, testé ou encore exploratoire.
+
 ## Architecture IA : les idées centrales
 
 ### Observation et empreintes
