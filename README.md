@@ -196,6 +196,7 @@ The complete source for each work is available in its corresponding release. Ver
 | `AAM/` | Non-LLM agent, observation, memory | ROCA-D, CEGIS, probes, contractual decision-making |
 | `FulleGenBrain/` | Compositional programming | Typed AST, 29 operators, synthesis, ASCRC |
 | `NGeGenBrain/` | Model observation | Multi-view instrumentation and reconstruction experiments |
+| eSonde/ | Experimental explicit-probe models | Tabular regression/classification and a language-model prototype, depending on the version |
 | `eGenBrain/` | Relational memory | Context mesh, provenance, abstention |
 | `eLLM/` | Language and fingerprints | Variable-order Markov model, learned probes on causal LLMs |
 | `models_order/` | Search and proof | Decomposition, synthesis, proof kernel |
