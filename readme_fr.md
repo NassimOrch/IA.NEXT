@@ -202,4 +202,5 @@ Chaque travail possède sa source complète dans la release correspondante. Les 
 | `models_order/` | Recherche et preuve | Décomposition, synthèse, noyau de preuve |
 | `sondes_experiences/` | Expériences neuronales | AdaptiveRBF, HC-RBF, CNG, CNC |
 | `theories/` | Fondements | Empreintes, observation, cores, LLM, composition |
-| `readme_vHS/` | Vulgarisation | Lettres pédagogiques |
+| `README.md` | Point d’entrée du dépôt | Vue d’ensemble et liens vers les guides français et anglais |
+| `readme_vHS/` | Supports pour lycéens | Présentations introductives des travaux de recherche |
