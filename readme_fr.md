@@ -127,6 +127,10 @@ Le formalisme distingue l'objet, le contexte, le protocole, l'observation, l'enr
 
 **Spéculation :** en quantique, le formalisme pourrait permettre de décrire les dispositifs comme des contextes et les mesures comme des sondes. Pour la double fente, il faudrait montrer que les règles proposées prédisent quantitativement l'apparition ou la disparition des franges. Pour le chat de Schrödinger, il aide à distinguer description, dispositif, enregistrement et empreinte, mais ne résout pas à lui seul le problème de la mesure. En biologie, médecine, contrôle, télédétection, astronomie ou chimie, il pourrait clarifier l'identifiabilité des mécanismes et les limites des données.
 
+### Travaux exploratoires sur la mécanique quantique
+
+Ce travail explore si la théorie des empreintes informationnelles et le formalisme d’observation associé peuvent servir à dériver la mécanique quantique et certaines de ses lois, y compris la règle de Born. L’étude a produit des résultats partiels, mais elle reste exploratoire et incomplète ; un développement et une validation beaucoup plus poussés sont encore nécessaires avant qu’une dérivation puisse être considérée comme complète ou établie. Cette piste a, jusqu’à présent, reçu une attention limitée au regard des autres projets en cours.
+
 ### Théorie des cores, CNG/CNC et AdaptiveRBF
 
 `th_sondes_core_0.tex` et `th_sondes_core_1.tex` formalisent les sondes, cores, graphes de calcul, composition hiérarchique, mémoire temporaire, coordinateur et cores neuronal/logique/physique. Les textes de test établissent les protocoles CNG/CNC. `arch_up_formalisme_0.tex` étudie l'organisation adaptative des centres AdaptiveRBF.
