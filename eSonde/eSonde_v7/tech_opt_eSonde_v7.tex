@@ -1,0 +1,406 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs,longtable,array,enumitem,hyperref,microtype}
+\geometry{margin=2.35cm}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{2em}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,pdftitle={Optimisations techniques eSonde v7}}
+\newcommand{\Obs}{\mathcal{O}}
+\newcommand{\Ctx}{\mathcal{C}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Rank}{\operatorname{rank}}
+\title{\textbf{Optimisations techniques du modèle eSonde v7}\\[0.5em]\large Calcul, mémoire, convergence, intégrité, CLI et interface graphique}
+\author{Dossier technique eSonde}
+\date{14 novembre 2026}
+\begin{document}
+\pagenumbering{Roman}
+\maketitle
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\chapter{Objet et invariants techniques}
+\section{Objet}
+Ce document spécifie les choix d'optimisation du runtime eSonde v7, limité au chat. Il décrit les chemins de calcul, leurs coûts, les compromis de mémoire, les mesures obligatoires et les conditions permettant d'accepter une optimisation. Une optimisation ne doit ni effacer l'identité des Obsiss, ni supprimer une dimension d'observation sans expérience d'ablation préenregistrée, ni modifier silencieusement les poids du checkpoint.
+
+\section{Invariants non négociables}
+\begin{enumerate}[nosep]
+\item Le fichier \texttt{weights.bin} d'origine est en lecture seule ; taille et hash sont vérifiés avant et après les essais.
+\item L'ordre des lignes est préservé : l'indice $i$ reste l'identité de l'Obsiss $i$.
+\item Les seize canaux de candidat sont évalués ; une optimisation ne peut pas en retirer un silencieusement.
+\item Les rangs, votes, quantiles et seuils sont calculés avec des règles déterministes, publiées et versionnées. Le R candidate-spécifique est calculé avant le vote de token et son vecteur complet est libéré après calcul de la cohérence appariée.
+\item La dynamique P/R exacte de v6 et le premier état $F_h/F_p$ demeurent deux opérateurs distincts dans le code et les rapports.
+\item La population commence à dix Obsiss ; l'augmentation dépend des critères mesurés. La population maximale disponible n'est pas un quota.
+\item La non-réponse demeure désactivée par défaut et ne sert pas à masquer une erreur, une absence de convergence ou un faible score.
+\item Toute sortie et tout incident sont enregistrés avant qu'un snapshot post-exécution soit créé et vérifié.
+\end{enumerate}
+
+\chapter{Profil de calcul et complexité}
+\section{Variables}
+On note $n$ la population Obsiss active, $d=16$ la dimension, $M$ le nombre de candidats dans le pool d'un pas, $K$ le nombre de continuations du beam, $T$ le nombre de tokens produits, $B$ la taille du bloc de calcul et $L$ le nombre de tours du dialogue. Les statistiques TRAIN comprennent un vocabulaire de taille $V$ et des index d'associations dont le coût dépend de leur degré réel.
+
+\section{Ordres de grandeur}
+\begin{longtable}{p{.25\textwidth}p{.30\textwidth}p{.35\textwidth}}
+\toprule
+Étape & Coût principal & Mémoire temporaire principale \\
+\midrule
+Chargement du checkpoint & $O(1)$ pour la création du mmap, lectures paginées ensuite & mapping virtuel du fichier de poids \\
+Premier état P/R par lots & $O(ndB)$ en opérations de lot au total $O(nd)$ & $O(Bd)$ hors traces \\
+Dynamique de voisinage P/R & dépend des classes exactes, des index et arêtes & états $O(nd)$, index et arêtes selon le graphe réel \\
+Évaluation des perspectives et P/R candidat & $O(ndM)$ pour les activations R candidates, plus $O(ndM)$ pour les perspectives ; activations R traitées l'une après l'autre & colonne de cohérence par candidat, matrice scalaire $O(nM)$ ; pas de tenseur conservé $O(nMd) $ \\
+Rangs des canaux & $O(dM\log M)$ & $O(dM)$ \\
+Stabilité LOO pour $n\leq128$ & $O(n^2M)$ avec calcul direct des sous-ensembles & petit tableau de votes $O(nM)$ \\
+Stabilité en 8 partitions pour $n>128$ & $O(nM)$ pour les agrégats de partitions, hors classement & tableau de votes $O(nM)$ \\
+Génération beam & dépend des candidats et des statistiques consultées à chaque hypothèse & $O(KM+nM)$ au pas courant \\
+\bottomrule
+\end{longtable}
+
+La matrice de voix numérique est de taille $n\times M$ en \texttt{float32}. À $n=10$ et $M=16$, elle est négligeable ; à $n=10^6$ et $M=16$, elle représente environ 64 Mo avant les buffers et les sorties. La version v7 ne sérialise pas une liste Python d'un million de flottants pour chaque candidat : elle conserve médiane, IQR, effectif et SHA-256 de la colonne ordonnée des votes. Les voix sont reproductibles depuis la ligne du checkpoint, le contexte et le pool.
+
+\section{Limite du modèle de complexité}
+Les ordres ci-dessus ne sont pas des temps d'exécution. Le coût exact du graphe de voisinage dépend de la distribution des classes et de la densité des arêtes ; le coût de sélection des candidats dépend des index et du vocabulaire ; la latence réelle dépend du processeur, du disque, de la mémoire et de l'implémentation NumPy. Les mesures p50/p95, RSS et débit sont obligatoires avant toute revendication de performance.
+
+\chapter{Checkpoint et accès mémoire}
+\section{Mapping en lecture seule}
+Le fichier des poids est un tableau little-endian signé 16 bits structuré par ligne et par rôle : $(w_i^h,w_i^p)$. Le chemin NumPy utilise un \texttt{memmap} en lecture seule ; le chemin standard-library lit des blocs contigus. Aucun tableau mutable ne doit recouvrir le fichier original.
+
+\section{Vue de population bornée}
+Le wrapper \texttt{PrefixWeightView} expose les lignes $[0,n)$ du magasin original sans copie du fichier. Il définit explicitement $n_{\text{Obsiss}}=n$ et refuse toute lecture telle que $end>n$. Cette vue est utilisée pour l'appel à la dynamique P/R historique lorsque le run ne mobilise qu'une population réduite. Ainsi, une demande de dix lignes n'entraîne pas la lecture implicite du million de lignes.
+
+\section{Validation de l'accès}
+Les tests doivent couvrir : bornes $0$, $n$, $n+1$ ; alignement des lignes ; dimension 16 ; parité avec les mêmes lignes lues directement dans le checkpoint ; SHA-256 stable du fichier original ; refus des tentatives d'écriture. Toute lecture de ligne au-delà du plafond de run constitue un incident logiciel.
+
+\chapter{Voix Obsiss et espace d'observations}
+\section{Perspective individualisée}
+Chaque Obsiss utilise ses deux vecteurs de poids propres, son état de prompt $q_i$ et la permutation croisée $\pi(j)=(7j+3)\bmod16$. Pour $j=0,\ldots,15$ :
+\[
+u_{ij}=\tanh((w^h_{ij}+w^p_{ij})/8192)+0.50\tanh(q_{ij}/8192)+0.25\tanh(q_{i,\pi(j)}/8192).
+\]
+Puis $a_i=u_i/(\|u_i\|_1+\varepsilon_0)$ et $v_i^{16}(c)=\sum_j a_{ij}r_j(c)$. Pour chaque candidat, l'état R correspondant est calculé conditionné par $q_i$ et sa cohérence $g_i(c)=\cos(q_i,R_i(c))$ est convertie en rang. Le vote utilisé est $s_i(c)=\tfrac12\Rank(v_i^{16}(c))+\tfrac12\Rank(g_i(c))$. Chaque ligne observe les seize canaux et sa propre paire P/R. La réduction robuste est calculée candidat par candidat à partir des voix réelles, non à partir de cinq profils artificiels de gains.
+
+\section{Accélération vectorisée}
+Le chemin NumPy lit les poids en blocs, calcule \texttt{tanh}, applique la permutation 16D, normalise les lignes, puis multiplie par la matrice de rangs des observations. La taille des lots de lecture est bornée et réglable. Le chemin scalaire reprend la même formule dans le même ordre de coordonnées. Les deux chemins doivent être comparés par tests numériques sur des valeurs négatives, positives, saturées, nulles et mixtes.
+
+\section{Conservation de la preuve de voix}
+Pour un candidat $c$, la colonne $\{v_i(c)\}_{i=0}^{n-1}$ est utilisée au complet. Le runtime enregistre : nombre d'Obsiss, médiane, quartiles, IQR, rang collectif, hash SHA-256 des flottants \texttt{float32} ordonnés, hash des activations R candidates, hash du checkpoint, contexte et pool de candidats. Le hash ne remplace pas les données nécessaires au recalcul ; il en vérifie l'identité lorsqu'elles sont régénérées. Les états R des candidats ne sont pas tous conservés simultanément : le runtime calcule leur cosinus apparié au P de la même ligne, conserve le vecteur scalaire par candidat et libère immédiatement le tenseur R complet. La matrice de cohérence est donc $n\times M$ et non $n\times M\times16$.
+
+\section{Calcul robuste de stabilité}
+Pour $n\leq128$, la suppression successive de chaque voix est calculée directement ; le coût quadratique est limité à cette plage. Pour $n>128$, la matrice numérique est gardée sous forme NumPy : les huit partitions sont indexées par $i\bmod8$, et les médianes des sous-matrices sont calculées sans expansion vers des listes de millions de nombres Python. Les trois seuils sont top-1 $\geq0.90$, Jaccard top-$k$ moyen $\geq0.90$, Spearman moyen $\geq0.95$.
+
+\chapter{Convergence adaptative et budget}
+\section{Démarrage et croissance}
+La population initiale est $n_0=\min(10,N_{\mathrm{available}})$. La croissance est $n_{r+1}=\min(2n_r,N_{\mathrm{max}})$ lorsque la dynamique P n'atteint pas une évidence de point fixe déclarée ou lorsque la stabilité décisionnelle P/R échoue. Les lignes supplémentaires sont lues depuis le même checkpoint et conservent leurs index. Il n'existe pas de quota de 1M ; le critère d'arrêt est la satisfaction mesurée, non la taille atteinte.
+
+\section{Statuts distincts}
+\begin{itemize}[nosep]
+\item \texttt{NO\_ACTIVE\_NEIGHBORS} : aucune arête active n'est trouvée au contrôle exact de l'opérateur de voisinage ;
+\item \texttt{VECTOR\_LENGTH\_REACHED} : borne d'updates atteinte, pas une convergence ;
+\item \texttt{UPDATE\_BUDGET\_REACHED} : budget explicite plus faible atteint, pas une convergence ;
+\item \texttt{RANKING\_STABLE} : les trois critères de stabilité du classement sont satisfaits ;
+\item \texttt{POPULATION\_MAX\_REACHED\_NOT\_CONVERGED} : plafond actif atteint sans satisfaire les critères requis.
+\end{itemize}
+
+\section{Budgets opérationnels}
+Le maximum de tokens, la largeur du beam, la taille du pool et la population maximale sont quatre budgets distincts. Un budget technique atteint n'est pas un critère sémantique. Le rapport doit toujours préciser si l'arrêt vient d'une ponctuation terminale, du budget tokens, d'une absence de candidats, d'une convergence de population ou d'une erreur. Un état SHA-256 répété de période 1 est une évidence cryptographique ; le statut et sa méthode de vérification sont conservés, sans l'assimiler à une comparaison exhaustive collision-free.
+
+\chapter{Optimisation du contexte et du décodeur}
+\section{Contexte occurrence-level}
+Les messages du dialogue et le préfixe sont transformés en occurrences typées avec indices de tour, rôle et position. Le contexte est reconstruit par hypothèse de beam. Une cache incrémentale n'est autorisée qu'après test d'égalité du hash de contexte entre reconstruction complète et reconstruction cachée. L'ordre et la causalité restent distincts.
+
+\section{Préparation des index TRAIN}
+Les transitions inverses bigramme/trigramme et leurs dénominateurs sont préparés une fois par sélection de langue. Les statistiques sont lues en mémoire et ne sont pas modifiées par une génération. Les associations PPMI sont consultées à partir des ancrages du dialogue. Les données VALIDATION et TEST ne doivent jamais être injectées dans les statistiques de génération.
+
+\section{Propositions OOV}
+Le modèle caractère-trigramme est construit à partir des fréquences TRAIN. Il est activé lorsque le support n-gramme local est clairsemé. Le filtrage de script réduit les mélanges d'alphabets non pertinents sans prétendre résoudre la morphologie de toutes les langues. Les candidats OOV passent par les mêmes seize observations et le même vote Obsiss que les autres candidats.
+
+\section{Réduction des allocations}
+Les dictionnaires de canaux sont construits une fois par pool ; les matrices de rangs sont compactes ; le vote est calculé par blocs ; les traces détaillées peuvent être désactivées explicitement pour les essais de performance, mais le JSON de résultat, les empreintes et le statut d'exécution restent obligatoires. Une suppression de trace ne doit pas supprimer les preuves minimales du run.
+
+\chapter{CLI, GUI et déploiement}
+\section{CLI}
+Le CLI expose \texttt{chat}, \texttt{status} et \texttt{verify}. Les options de chat incluent prompt, historique, minimum de population (10 par défaut), plafond de population, limite de tokens, largeur du beam, limite de candidats, trace et non-réponse (désactivée par défaut). Les options d'administration ne sont pas des fonctions de modèle supplémentaires.
+
+\section{Interface graphique}
+La GUI offre un transcript, une zone de prompt, Envoyer et une case de non-réponse décochée par défaut. Elle n'expose aucun autre outil. Les générations s'exécutent sur un thread de travail et les mises à jour Tk sur le thread principal. L'état affiche le plafond disponible ; le résultat JSON indique la population réellement consommée.
+
+\section{Dépendances}
+Le mode standard s'appuie sur Python 3.10+ et sa bibliothèque standard. NumPy accélère le chemin vectorisé mais reste facultatif ; Tkinter est nécessaire uniquement pour la GUI. Aucun service réseau, téléchargement de poids ou API distante n'est requis à l'exécution.
+
+\chapter{Sauvegarde, préflight et intégrité}
+\section{Avant chaque exécution}
+Lire successivement les chemins, la checklist de travail, la checklist d'erreurs non-modèle, la checklist d'erreurs modèle et le pointeur de snapshot. Vérifier le manifeste, le hash du manifeste, le SHA-256 du checkpoint actif et le statut de phase autorisant le run. Aucun run ne commence si le snapshot préalable est absent ou incohérent.
+
+\section{Après chaque exécution}
+Enregistrer le résultat ou l'incident, les hashes de sortie, du checkpoint et du snapshot préalable ; mettre à jour preuves et checklists ; créer un snapshot post-run ; vérifier son manifeste et son hash. Les sauvegardes excluent les dossiers de contrôle et les sorties récursives mais contiennent les poids originaux.
+
+\section{Portabilité du paquet}
+Le package distribué doit utiliser des chemins relatifs sous \texttt{control/}, et non des chemins de la machine de développement. Un test d'extraction dans un nouveau répertoire doit exécuter \texttt{verify}, \texttt{status}, les tests unitaires et un chat plafonné à dix Obsiss avant toute validation de la portabilité.
+
+\chapter{Protocole d'optimisation et critères d'acceptation}
+\section{Mesures obligatoires}
+Pour chaque run : temps de chargement ; temps P initial ; temps P par préfixe ; temps de vote par token ; latence totale ; p50/p95 par token ; tokens/s ; population active ; nombre de candidats ; largeur de beam effective ; RSS initiale et maximale ; CPU ; taille des traces ; nombre d'OOV ; statut de convergence dynamique et décisionnelle ; réponse et empreinte ; checkpoint hash.
+
+\section{Ablations}
+Une ablation modifie un paramètre à la fois : canal, force contextuelle, permutation croisée, agrégation médiane, seuils de convergence, taille de départ, beam, retour caractère. Pour chaque variante, le jeu de prompts, les dialogues, les budgets, la population maximale et le protocole humain sont identiques. Une optimisation de vitesse ne peut être retenue si elle dégrade la qualité mesurée sans exposer le compromis.
+
+\section{Critères d'acceptation}
+Une optimisation est acceptée si elle préserve l'équivalence numérique lorsque celle-ci est exigée, sinon si son effet est explicitement comparé ; conserve les poids originaux ; garde la traçabilité des lignes Obsiss ; passe les tests de bornes et de portabilité ; ne masque aucun incident ; et rapporte des mesures observées, jamais des estimations présentées comme des résultats.
+
+\chapter{Matrice de statut}
+\begin{longtable}{p{.25\textwidth}p{.40\textwidth}p{.25\textwidth}}
+\toprule
+Mécanisme & Situation logicielle & Preuve encore exigée \\
+\midrule
+Poids mmap read-only & Implémenté & Test d'écriture interdite et vérification sur OS cibles \\
+Vue de population bornée & Implémentée et testée & Essai réel dix lignes et mesures de I/O \\
+Premier état P/R par lots & Implémenté & Mesure de latence réelle \\
+Dynamique P/R exacte v6 sur préfixe & Implémentée et testée sur fixture & Runs réels et mesure de coût \\
+Perspective complète 16D & Implémentée & Ablation et qualité de réponses \\
+Médiane/IQR des voix & Implémentés & Analyse statistique sur prompts réels \\
+Empreinte des voix & Implémentée & Vérification reproductible sur run réel \\
+Stabilité LOO/partitions & Implémentée & Sensibilité des seuils et test multi-domaine \\
+Croissance adaptative & Implémentée & Démonstration en conditions dialogue \\
+Contexte rafraîchi par préfixe & Implémenté & Mesure de latence et ablation contexte \\
+CLI/GUI chat & Implémentés & Essais d'installation sur systèmes propres \\
+Sauvegarde/préflight & Implémentés & Test de restauration sur nouvelle extraction \\
+Comparaison avec LLM & Non exécutée & Jeu de prompts commun et jugement aveugle \\
+\bottomrule
+\end{longtable}
+
+\chapter{Conclusion et statut}
+Le runtime est optimisé autour d'une population adaptative plutôt que d'un objectif de taille, d'un checkpoint mappé en lecture seule, d'une perspective complète par Obsiss, de votes calculés en blocs et de diagnostics qui préservent l'identité des voix. Le traitement de grandes populations reste possible au niveau de la conception, mais ses temps et besoins mémoire doivent être mesurés sur poste cible. L'arrêt à dix Obsiss est accepté uniquement lorsque les deux critères internes définis sont observés sur le dialogue exécuté.
+
+\begin{center}
+\textbf{Statut : spécification et implémentation technique présentes ; performance et cohérence conversationnelles restent à établir par essais réels, reproduits et évalués indépendamment.}
+\end{center}
+
+
+\section{Optimisation de provenance pour les statistiques de rôle}
+
+Le champ V6 \texttt{response\_starts} ne doit pas être interprété comme un prior de rôle assistant, car la source TRAIN inclut des textes autonomes représentés avec un prompt vide et un texte dans answer. Pour éviter de reconstruire les statistiques lourdes, le runtime V7 applique une règle de provenance au point de consommation : il ignore ce champ hérité pour le rôle assistant et n'accepte que \texttt{dialogue\_response\_starts} s'il est fourni avec une qualification de rôle explicite.
+
+Cette lecture stricte est une optimisation de correction à coût mémoire nul : le checkpoint, les tables de tokens et les poids ne sont pas réécrits. Les formes grammaticales de rôle sont obtenues à partir du vocabulaire de la langue détectée et restent des propositions de forme, non des réponses apprises. Les constructions figées sont identifiées par de courts motifs localisés ; le filtre opère uniquement sur les ancres topiques et conserve le texte exact pour les canaux lexicaux. Le calcul des motifs est linéaire dans la longueur du prompt et de l'historique, avec un nombre fini de motifs explicités.
+
+La vérification attendue inclut : (i) test que les tweets autonomes ne peuvent jamais alimenter le prior assistant ; (ii) tests multilingues de formes de rôle ; (iii) test de conservation des occurrences exactes ; (iv) ablation sur les mêmes prompts avant/après ; (v) mesure des coûts et de la qualité de réponse. Un test logiciel PASS n'est pas un résultat humain de cohérence.
+
+
+
+
+\section{Optimisation de la provenance lexicale (M-013)}
+
+Le même indice de surface ne doit pas augmenter artificiellement le vote à travers plusieurs canaux corrélés. Le contrat actualisé est : $o_2$ association PPMI sans bonus d'égalité exacte ; $o_4$ récurrence exacte ; $o_5$ morphologie sans identité exacte. Le pool de propositions réutilise directement un terme du prompt uniquement s'il est répété, cité, reconnu comme nom/acronyme, ou rare/OOV selon le seuil courant. Les salutations et constructions grammaticales reconnues ne sont pas des ancres de réemploi direct.
+
+Cette séparation réduit les additions redondantes à coût de calcul faible : la comparaison exacte de token est linéaire dans le petit contexte local, les ensembles de termes distinctifs sont construits une fois par prompt, puis réutilisés à chaque pas. Le prompt complet reste néanmoins fourni au contexte, donc cette optimisation n'en réduit ni la visibilité ni les observations P/R.
+
+L'expérience adaptative précédente a produit une réponse répétitive à 128 Obsiss et n'a pas satisfait la convergence de toutes les décisions. Après correctif, 25/25 tests logiciels passent. Une exécution conversationnelle post-correctif et une mesure d'annotation restent requises ; aucune amélioration de qualité n'est revendiquée à partir des seuls tests unitaires.
+
+
+\chapter{Optimisation du transducteur conditionnel et du panel sentinelle}
+\section{Séparation des objectifs et des partitions}
+Les paires \texttt{chat} et \texttt{math\_qa} sont stockées comme sources d'apprentissage conditionnel distinctes et rapportées séparément. Les 105 502 paires SMS canoniques sont exclues. Le texte autonome peut alimenter un objectif de langue séparé mais jamais le prior de réponse assistant sans provenance de rôle. Un groupe de prompt ne peut appartenir qu'à une seule partition, toutes sources confondues. Le checkpoint v6 est parent immuable ; les paramètres appris v7 utilisent un fichier/checkpoint distinct avec manifeste des sources et des splits.
+
+\section{Optimisation du calcul d'observation}
+Le transducteur traite une séquence de vecteurs 16D par occurrence, plutôt qu'un unique vecteur moyen. Les canaux sont construits une fois par contexte/tour et mis à jour seulement pour les nouvelles occurrences et le préfixe généré. Les Obsiss conservent leur indice d'origine. Les activations ne sont mises en cache que si l'empreinte comprend la ligne Obsiss, le rôle, l'ordre et le contexte exact.
+
+\section{Panel sentinelle borné}
+Le panel utilise au plus 256 lectures d'identité pour la sélection, indépendamment de N, puis 2 à 8 Obsiss sentinelles. Il observe les mêmes candidats que les autres Obsiss. Les votes du panel et des travailleurs sont agrégés séparément ; aucun double comptage ne doit exister dans l'agrégat global. Un désaccord déclenche une reconstruction/réévaluation, jamais un choix de token codé en dur. Le coût du panel, son taux d'alerte et ses faux accords sont mesurés avant activation par défaut.
+
+\section{Mesure de complexité}
+Si $m\leq8$ sentinelles et $K$ candidats, la comparaison panel/travailleurs ajoute $O(mK+NK)$ pour agréger les votes déjà disponibles ; la sélection à partir d'une sonde bornée $B\leq256$ ajoute $O(Bmd)$ avec $d=16$. Cette borne est une estimation analytique, pas une mesure de latence. Toute optimisation doit mesurer RSS, CPU et temps réel.
+
+\section{Prudence sur l'accord}
+Panel/worker Jaccard et Spearman sont des indices de robustesse interne. Ils ne sont pas des scores de vérité, exactitude ou qualité conversationnelle. L'acceptation du panel exige des ablations sans panel, panel aléatoire déterministe et panel diversifié, plus un lot humainement annoté incluant des cas corrects et incorrects.
+
+
+
+\chapter{Optimisation vectorisée et pondération conditionnelle}
+\section{Projection Obsiss en lots}
+La projection de chaque séquence 16D est vectorisée sur les Obsiss actives : $X\in\mathbb{R}^{T\times16}$ et les poids P/R actifs sont diffusés sur $T\times N\times16$. Les moyennes et dispersions de P et R produisent une matrice $T\times64$. La voie \texttt{project\_many} est comparée au calcul scalaire sur les mêmes données ; le test utilise \texttt{array\_equal} après quantification float16 sur sept observations et vérifie que les lignes sources P/R restent strictement identiques après changement de population. La voie scalaire standard-library reste disponible comme repli.
+
+\section{Équilibrage des objectifs}
+Les volumes préparés sont de 1 249 157 cibles LM contre 43 395 cibles chat. L'objectif utilise une pondération de tâche explicite $\lambda_{chat}=8$ au premier essai, avec métriques de validation non pondérées et pondérées rapportées séparément. Le poids ne doit jamais être caché dans les paramètres ou dans un prior lexical ; il est conservé dans le fichier d'expérience et le checkpoint. Une étude de sensibilité doit comparer au moins $\lambda\in\{1,4,8\}$ sans utiliser le split TEST pour choisir.
+
+\section{État de validation technique}
+Les tests ajoutés vérifient l'équivalence exacte de la projection vectorisée à la voie scalaire, le refus des entrées non finies ou mal formées, la conservation des lignes originales lors du passage de 10 à 12 Obsiss, la reconstruction de tokens hors vocabulaire par octets UTF-8, l'application du poids de chat et la parité du pas GRU Python avec `torch.nn.GRU` pour les mêmes paramètres. Résultat logiciel courant : 40/40 tests PASS. Ce résultat atteste le contrat numérique et logiciel, pas la qualité des réponses.
+
+
+\chapter{Projection 130D, panel individualisé et préparation conditionnelle}
+\section{Disposition exacte}
+Le bloc collectif 64D contient $\mu_P,\sigma_P,\mu_R,\sigma_R$ (16 composantes chacun). Deux slots sentinelles contiennent chacun $P_i,R_i$ (16+16), suivis de deux masques : $64+2\times32+2=130$. Le nombre de sentinelles est fixé à deux dans ce prototype pour garder une dimension de checkpoint stable ; les autres tailles sont des expériences distinctes et non interchangeables avec le même transducteur.
+\section{Cache borné de projection}
+Le préparateur utilise un cache LRU plafonné à 50 000 observations 16D. La clé inclut la population active et les indices sentinelles ; une projection associée à N ou à un panel donné ne peut pas être réutilisée après changement d'identité/périmètre. Les valeurs sont stockées en float16 pour contenir la mémoire. La voie sans cache reste la référence numérique. Hits, misses et capacité sont enregistrés ; le cache n'écrit jamais dans les poids.
+\section{Objectifs distincts dans un seul dialogue}
+Le moteur ne propose qu'un échange utilisateur→assistant. Les textes autonomes apprennent la distribution linguistique (poids 1), les exemples créatifs chat (poids 8) et les problèmes Q/R mathématiques (poids 1.5) apprennent la continuation conditionnelle à partir d'entrées réellement appariées. Les valeurs sont provisoires et doivent faire l'objet d'une étude de sensibilité sur VALIDATION uniquement. Les SMS et leurs labels de classification sont exclus.
+\section{Contrôles obligatoires}
+Vérifier le nombre de cibles par source, les splits conservés, l'absence de TEST dans le tokenizer et les gradients, les métriques séparées, la parité GRU, les hashes, la non-modification des poids, et l'ablation 64D/130D. Un cache qui modifie les valeurs projetées ou les identités Obsiss est rejeté.
+
+
+\chapter{Plan comparatif du panel sentinelle}
+L'optimisation du panel est évaluée par une ablation contrôlée 64D/130D, population active initiale fixée à dix. L'objectif n'est pas de maximiser N : le million d'Obsiss est une disponibilité du checkpoint, pas une cible. La variante 130D ajoute deux voix originales et deux masques à la synthèse collective. Les mêmes données, partitions, seed, GRU, optimiseur, epochs et poids de loss sont utilisés dans les deux variantes. Le plan exact est consigné dans \texttt{P2\_ABLATION\_64D\_VS\_130D\_PLAN\_20261114.json}. Aucune préférence n'est prédéterminée ; si le panel n'apporte pas de bénéfice mesuré, sa complexité n'est pas justifiée.
+
+La vérification logicielle pré-entraînement du 14 novembre 2026 compte 43 tests PASS, zéro erreur, avec compilation Python et compilation des quatre sources LaTeX sous \texttt{-halt-on-error}. La branche 130D a depuis été entraînée quatre époques et son export/inférence a passé la parité numérique ; le témoin 64D et l’ablation restent à exécuter. P2 reste ouverte.
+
+\section{Résultat expérimental P2 : entraînement de la branche 130D}
+\label{sec:p2-training-130d}
+La branche conditionnelle 130D a été entraînée quatre époques sur les partitions TRAIN autorisées, avec dix Obsiss actives et deux voix sentinelles originales (indices 2 et 4). Le checkpoint exporté est expérimental. La perplexité de validation mixte pondérée décroît de 12.9519 à 8.4323 ; la perplexité MathQA décroît de 13.1653 à 8.2629. La validation créative chat ne comporte qu'une seule paire canonique : sa mesure n'est pas un estimateur fiable de la qualité conversationnelle générale. Le split TEST n'a pas été consulté. Le chargement Python standard a été comparé à PyTorch sur un pas ; l'erreur absolue maximale des logits est de $5.9\times10^{-7}$. La branche 64D sans sentinelles reste à entraîner dans les mêmes conditions ; aucun effet causal des sentinelles n'est donc établi. P2 reste ouverte.
+
+\chapter{Résultats de l'ablation et budget observé P2}
+\section{Coût mesuré des deux représentations}
+Les deux variantes ont été entraînées quatre époques sur les mêmes partitions, le même tokenizer, la même graine et les mêmes hyperparamètres. La durée observée est 891,989 s pour 64D et 890,614 s pour 130D sur le même environnement CPU. La taille des exports est 1 237 371 octets (64D) et 1 254 293 octets (130D), soit une hausse d'environ 1,37\% du checkpoint 130D. Les poids V6 parent restent en lecture seule. Ces nombres sont propres à cette machine et à ce corpus ; ils ne constituent pas un benchmark universel.
+\section{Qualité prédictive de validation}
+Les PPL de validation mixte pondérée sont 8,32335 (64D) et 8,43230 (130D) ; chat 10,96728 et 11,15514 ; math\_qa 8,13319 et 8,26290. Le témoin 64D est donc légèrement meilleur sur ces trois mesures dans la graine observée. La validation chat ne comporte qu'une paire ; aucun jugement de dialogue général n'est inféré.
+\section{Décision d'optimisation}
+Le bloc 64D est le baseline mesuré. Le panel 130D demeure une option de recherche ; sa visibilité individuelle n'est pas supprimée, mais sa complexité doit être justifiée par le test tenu à l'écart et par une évaluation conversationnelle qualitative. Une variante résiduelle (voix sentinelle moins moyenne de la population) est une hypothèse distincte, pas un résultat acquis. Toute nouvelle variante doit conserver le même budget, le même jeu de test et un snapshot vérifié.
+\section{Statut}
+Le 64D et le 130D ont terminé leur apprentissage et leur export. Le test held-out et la parité numérique 64D restent à effectuer avant la clôture P2. Les performances de production et les latences de chat de bout en bout n'ont pas encore été mesurées.
+
+\chapter{Optimisation du décodage causal et validation de la grammaire UTF-8}
+\section{Décomposition du coût}
+Le recalcul complet de chaque préfixe à chaque token effectue une somme de longueurs $1+2+\cdots+T=O(T^2)$ évaluations de positions. Le décodeur incrémental conserve l'état observateur et le caché GRU pour le préfixe stable, puis calcule seulement les unités ajoutées. Un bloc UTF-8 non terminé est provisoirement rejoué à partir d'une copie de l'état stable, car sa surface décodée peut changer à l'arrivée de nouveaux octets. L'optimisation vise donc $O(T)$ pour les flux ordinaires, avec une surcharge liée à la longueur du bloc byte ouvert.
+\section{Grammaire déterministe du tokenizer}
+À l'extérieur d'un bloc, les octets bruts et \texttt{BYTE\_END} sont masqués, alors que \texttt{BYTE\_START} reste autorisé. À l'intérieur, les seuls identifiants admissibles sont $0\ldots255$ et \texttt{BYTE\_END}; EOS, tokens lexicaux et tokens de rôle sont masqués. Cela supprime les trajectoires non sérialisables au regard du tokenizer WordByte, sans favoriser aucun terme ou contenu de réponse. La règle est testée explicitement et commune au décodeur incrémental et à sa référence par recalcul complet.
+\section{Contrat d'équivalence}
+L'état causal incrémental doit égaler la construction batch à chaque position. Le clonage doit isoler la branche spéculative. Pour un même prompt, un même adaptateur et un même budget, les décisions du chemin rapide et du chemin de référence doivent être identiques sur les scénarios contrôlés. Le test des masques vérifie les ensembles autorisés et interdits dans les deux états du tokenizer. Le banc logiciel P2 du 15 novembre 2026 passe 46/46 tests. Il s'agit d'une validation logicielle, non d'une preuve de qualité conversationnelle.
+\section{Mesure empirique obligatoire}
+Pour chaque checkpoint 64D et 130D et chaque prompt TEST, mesurer durée totale, tokens/s, RSS maximale, nombre de décisions, nombre de blocs byte, longueur maximale de bloc, terminaison EOS ou épuisement du budget, et conformité du flux sérialisé. Comparer avec le décodeur de référence sur des prompts synthétiques bornés, pas nécessairement sur les six générations complètes si son coût rend la comparaison impraticable. Aucun temps théorique ne doit être publié comme mesure réelle.
+\section{Décision et réserves}
+L'implémentation et les tests du contrat sont retenus dans le runtime. La promotion de la génération comme fonction conversationnelle validée reste suspendue : les sorties antérieures étaient répétitives, les prompts TEST sont très peu nombreux, et les six générations après correction ainsi que leur annotation restent requises. La non-réponse reste désactivée dans le protocole de reprise. Aucune conclusion ne préjuge du potentiel global de eSonde.
+
+\chapter{Optimisation du conditionnement prompt et du mélange multi-tâche}
+\label{tech:prompt-conditioning}
+\section{Constat mesuré et portée}
+Six générations post-correctif restent répétitives. Le record de préparation mesure 1 419 711 tokens LM, 43 874 tokens chat et 1 238 448 tokens MathQA. Avec les poids 1, 8 et 1,5, la masse nominale de tokens supervisés pondérés est respectivement 39,13\%, 9,67\% et 51,20\%. Ce calcul ne constitue pas une attribution exacte des gradients, car la loss est normalisée au sein de chaque mini-batch et la composition des batches affecte les mises à jour.
+\section{Diagnostic préalable à faible coût}
+Avant de réentraîner, mesurer les distributions complètes du premier token sur trois prompts TEST, pour 64D et 130D. Consigner JS, L1, cosinus, top-10 Jaccard, entropie et longueur tokenisée. Le diagnostic ne fait ni sampling ni génération, et ne lit aucune cible. Il mesure la sensibilité de la distribution au prompt, pas la cohérence d'une séquence entière.
+\section{Options d'équilibrage à comparer}
+\begin{enumerate}
+\item Échantillonnage équilibré par tâche, avec mêmes nombres de mises à jour et budgets de tokens explicitement rapportés.
+\item Loss normalisée séparément par tâche avant combinaison, pour dissocier part de tokens et poids de tâche.
+\item Mesure des normes de gradients par tâche sur lots contrôlés, sans ajustement automatique dans la première expérience.
+\end{enumerate}
+Chaque option doit être isolée dans une ablation préenregistrée. Ne pas modifier simultanément l'équilibre des données, la représentation de contexte et le décodeur.
+\section{Contexte occurrence/provenance inspiré d'eGenBrain}
+\begin{sloppypar}
+La construction locale eGenBrain distingue occurrence et identité lexicale, garde surface/position/segment, liens d'ordre, ancres, alignement et provenance ; elle laisse les relations non établies inconnues.
+Le maillage prompt multidirectionnel explicite peut croître en $O(T^2)$.
+Pour éviter ce coût, une piste à étudier est un ensemble d'occurrences distinctes avec relations typées clairsemées (identité, ordre, ancre et alignement connu), puis une lecture attentionnelle éphémère des occurrences par l'état génératif.
+Les poids d'attention sont recalculés sur la conversation courante ; aucune réponse passée ou base de réponses n'est récupérée.
+\end{sloppypar}
+\section{Contraintes}
+Le contexte de travail est reconstruit à partir des tours courants, sans stockage persistant de réponses. Les positions, la provenance, l'ordre et la causalité restent distincts. Une relation inconnue ne devient pas une cause par hypothèse. Les Obsiss demeurent des perspectives observationnelles originales, et non des poids ordinaires de réseau.
+\section{Statut}
+\begin{sloppypar}
+\texttt{PROMPT-DIAGNOSTIC-COMPLETE; TASK-BALANCE-ABLATIONS-NOT-RUN; OCCURRENCE-ATTENTION-PROTOTYPE-IMPLEMENTED-AND-UNIT-TESTED; TRAINING-PENDING}.
+\end{sloppypar}
+
+
+
+\section*{Plan technique d'optimisation issu de M-022}
+\subsection*{A. Alignement de la fenêtre de contexte}
+Introduire un paramètre explicite de fenêtre d'entrée, partagé entre préparation, évaluation et inférence. Comparer au minimum (i) prompt complet, (ii) suffixe 64 unités, puis des fenêtres intermédiaires si les deux premières montrent un écart. Le contenu utilisé par les marqueurs d'observation doit être identique entre conditions et mesuré séparément. Ne pas cacher une troncature dans un chemin runtime.
+
+\subsection*{B. Représentation lexicale hybride}
+Le tokenizer actuel possède 1024 entrées lexicales, alors que 13/13 débuts de réponses chat TRAIN passent par BYTE\_START et environ 47,1\% des unités des réponses chat sont des octets bruts. Comparer sans les fusionner : vocabulaire word-byte actuel ; vocabulaire sous-mot entraîné sur TRAIN seulement avec tailles contrôlées ; segmentation byte/character plus structurée. Chaque variante doit préserver la possibilité de représenter des lexèmes inconnus, mesurer les longueurs de séquence, la fréquence des séquences byte, les erreurs de décodage UTF-8, la perplexité séparée par tâche et la qualité de génération.
+
+\subsection*{C. Équilibre multi-tâche}
+Comparer l'ordonnancement mélangé actuel à des mini-batches équilibrés par tâche et à une normalisation de loss par séquence. Garder constants les jeux de données, seed, architecture, budget de mises à jour et checkpoints parents. Rapporter les pertes chat, MathQA et LM séparément ; ne pas sélectionner sur la seule métrique mixte. Les 13 exemples chat TRAIN ne permettent pas de conclure à une généralisation large.
+
+\subsection*{D. Lecture des occurrences de contexte}
+Étudier un contexte local éphémère inspiré de l'eGenBrain : occurrences distinctes avec surface, position, rôle et provenance ; relations typées d'ordre, d'ancrage, d'alignement et d'identité. Les relations inconnues restent inconnues, sans promotion causale. Utiliser une structure clairsemée et une lecture attentionnelle vers les occurrences pendant la génération, plutôt qu'un maillage complet quadratique. Le contexte est reconstruit pour le dialogue courant et n'est pas persisté comme magasin de réponses. Le prototype M-024-SW01 est implémenté avec attention scaled-dot-product et porte de fusion ; la banque est limitée aux occurrences utilisateur. Quatre tests ciblés passent. Le chemin de training distinct est écrit mais n'a pas encore été exécuté ; les relations eGenBrain typées et la provenance riche restent un travail restant.
+
+\subsection*{E. Protocole d'ablation}
+Modifier un seul facteur par expérience ; geler les partitions TEST jusqu'à la sélection finale ; sauvegarder et préflighter avant toute exécution ; publier les commandes, empreintes, sorties brutes et échecs. Une amélioration de PPL doit être confrontée à la diversité, l'ancrage au prompt, la cohérence inter-phrases et la réponse au tour courant. Aucune de ces pistes n'est déclarée gagnante avant résultats.
+
+\subsection*{Résultat de l'alignement premier-pas (M-022)}
+Le diagnostic mesuré montre une différence de distribution full-vs-last64 quasi nulle en 64D (JS toutes classes : 2,5e-6 à 1,6e-5 nat) et plus nette en 130D (2,37e-3 à 4,25e-3 nat). Le premier token lexical et la majeure partie du top-10 demeurent inchangés. Ne pas traiter l'alignement de fenêtre comme remède suffisant : la génération libre last-64 doit être comparée au plein prompt à poids et budget fixes avant de choisir la fenêtre runtime.
+
+\subsection*{Contrat d'implémentation expérimental}
+Le paramètre \texttt{prompt\_window\_units} est explicitement nullable : \texttt{None} signifie prompt complet ; un entier strictement positif limite uniquement la séquence tokenisée récurrente au suffixe correspondant. Les termes d'observation restent calculés sur le prompt complet. L'outil d'audit expose \texttt{--prompt-window-units}; le CLI public ne l'expose pas et garde son comportement existant. Toute promotion exigera une comparaison TEST et qualitative, une documentation du coût contextuel et une preuve que les observations ne sont pas tronquées implicitement.
+
+
+
+\section*{P2-M024 — décodeur à lecture contextuelle par occurrence}
+\subsection*{Représentation volatile}
+Construire un tenseur d'occurrences de longueur L, avec embedding lexical, rôle, position, segment et métadonnées de provenance. Conserver séparément la surface et les spans caractère/token pour inspectabilité. Chaque occurrence reçoit le vecteur des 16 observations ; l'adaptateur produit les contributions P/R collectives et, lorsque activé, les slots individualisés des Obsiss sentinelles. Aucune de ces structures n'est persistée après le tour.
+\subsection*{Lecture croisée par étape}
+Le prototype actuel construit les clés/valeurs à partir de l'embedding token, des observations P/R projetées et de l'embedding positionnel appris. Un masque source admet exclusivement les positions du rôle utilisateur dans la banque. À chaque pas, le query est une projection de l'état GRU courant (qui contient le token précédent et l'observation causale projetée). Le produit scalaire mis à l'échelle et le softmax masqué produisent $c_t$ ; une porte apprise fusionne ce contexte avec l'état GRU. Les marqueurs, positions assistant et cibles futures ne sont pas admissibles comme occurrences. Les métadonnées de provenance et les relations typées eGenBrain ne sont pas encore codées dans les clés/valeurs : elles restent une extension à évaluer. Le contexte ne contient ni la réponse de référence ni des tokens futurs générés.
+\subsection*{Alternatives à comparer}
+A. Attention additive query-key avec fusion résiduelle. B. Attention bilinéaire avec porte apprise. C. Lecture locale clairsemée par fenêtre/ancres, comparée à l'attention dense linéaire $O(Ld)$. Garder le même modèle de base, tokenizer et splits. Pas de graphe de toutes les paires $O(L^2)$ par défaut.
+\subsection*{Contrôles et critères}
+Tests contre fuite de cible et fuite d'avenir, tests de conservation de provenance/ordre, permutation des positions, changement d'ancre, réponse au rôle, attention stable, masques de padding, parité float32, coût mémoire et latence. Mesurer l'attention comme mécanisme de lecture, jamais comme preuve de vérité. Pas de table de réponses, retrieval persistant ou mémoire conversationnelle. La promotion exige qualité contextuelle, diversité et réduction de répétition sur TEST, et pas uniquement PPL.
+
+\section*{M-024-SW02 — compaction de l'attention par occurrence}
+Le prototype sépare la longueur de la séquence $L$ et le nombre $U$ d'occurrences utilisateur admissibles. Il ne calcule pas les scores sur toutes les positions comme une matrice $L\times L$. Les clés/valeurs sont sélectionnées à partir du masque de rôle et compactées par lot en $B\times U_{max}\times d$ ; le produit des requêtes avec cette banque donne $B\times L\times U_{max}$. Les lots sans occurrence USER sautent l'attention et utilisent l'état GRU brut. Pour les prompts de l'expérience, $U$ est limité par 64 unités.
+
+À l'inférence, la banque est créée une seule fois pour le tour, puis chaque pas calcule une requête et relit $U$ valeurs. Le stockage contextuel est $O(Ud)$ et la lecture par pas $O(Ud)$, hors projection de préparation. La banque est libérée à la fin de la génération. Les rôles assistant et marqueurs restent inéligibles ; les tokens assistant déjà générés agissent seulement via l'état GRU causal. La provenance typée eGenBrain n'est pas encore présente dans cette optimisation ; elle ne doit pas être annoncée comme implémentée.
+
+La vérification dédiée comprend la sélection exacte des positions USER, la compaction, le lot sans occurrence, la normalisation des poids, la variation des logits selon les valeurs d'occurrence et le chemin GRU sans contexte. Le dernier banc logiciel global passe 67 tests (0 échec, 0 erreur). La mesure de latence/ mémoire sur apprentissage et dialogue réel reste à obtenir après le run M-024, et ne peut être déduite de la complexité asymptotique.
+
+
+\section{Optimisation M-025 : diversité sans cohérence}
+Le décodage nucleus contrôlé (température 0,85 ; top-p 0,90) accroît le ratio de tokens distincts de 0,104--0,167 sous greedy à 0,271--0,529 sur les mêmes six combinaisons prompt/checkpoint. Cette amélioration n'est que lexicale : les réponses restent incohérentes et peuvent reproduire des fragments de la tâche MathQA. Le sampling est donc une stratégie anti-répétition, pas une solution de compréhension.
+
+La capture attentionnelle mesure une entropie normalisée moyenne de 0,4377, un nombre effectif moyen d'environ 9,21 occurrences sur 64 et un poids maximal moyen de 0,4165. Ces statistiques ne mesurent pas la pertinence sémantique des occurrences. Une attention diffuse peut être non discriminante ; une attention concentrée peut cibler une mauvaise occurrence.
+
+\section{Résultat M-026 : knockout de l'attention à l'inférence}
+Sur les checkpoints gelés, la suppression de la banque change nettement les distributions et les sorties. Sans banque, les trois sorties 64D sont identiques ; deux sorties 130D sur trois sont identiques et la troisième rejoint presque le même motif. La banque a donc une influence fonctionnelle, mais les deux chemins produisent des réponses incohérentes. Ce test n'est pas un modèle entraîné sans attention.
+
+\section{Résultat M-027 : dépendance occurrence-position}
+La JS moyenne exact-bank/no-bank vaut 0,3754 à l'ancre initiale et 0,2699 après le préfixe. L'inversion des contenus aux positions donne seulement 0,0202 puis 0,0065 en moyenne. L'influence de la banque est forte, l'effet de l'association exacte des positions est en général bien plus faible, sauf un cas 130D (JS initiale 0,0897 ; top-1 changé). Le top-1 initial est BYTE\_START pour les six prompts. Ces résultats suggèrent une lecture plus agrégée que véritablement positionnelle dans la plupart des cas, mais ne constituent pas un test de cohérence sémantique.
+
+\section{Résultat M-027 : frontière byte terminale}
+Le smoke réel 64D reproduit les mêmes 96 ID que M-026 sur les trois prompts, mais l'affichage retire les quatre ID d'un bloc byte terminal non fermé : 92 unités visibles, aucun U+FFFD. Les ID bruts sont conservés. C'est une correction de sérialisation uniquement, sans gain de qualité conversationnelle.
+
+\section{Réserves méthodologiques}
+Le jeu de test dialogue actuel ne contient que trois paires canoniques et les trois prompts sont des consignes créatives. Une conclusion généralisable exige un corpus dialogue plus diversifié, une séparation stricte train/validation/test, plusieurs graines et une grille d'évaluation humaine/automatique de l'ancrage au prompt, de la cohérence locale et de la continuité de contexte. Aucun réglage de décodage ne doit injecter la réponse attendue ni remplacer la capacité du modèle à la produire.
+
+\subsection*{Alignement entraînement--inférence de M-024}
+Le chemin d’inférence M-024 limite désormais les unités utilisateur du tour courant au même suffixe de 64 unités que le pipeline d’entraînement. Les termes de contexte servant aux 16 observations restent calculés sur le prompt complet, comme dans la construction des exemples supervisés. Le runtime rapporte le nombre total d’unités du prompt et le nombre effectivement traité. Un test dédié compare exactement les IDs utilisateur conservés au suffixe tokenisé d’entraînement. Ce réglage est un contrat du checkpoint M-024 expérimental et ne modifie pas le runtime GRU public.
+
+
+\section{M-028 — Attribution technique des caractéristiques Obsiss}
+Les caractéristiques Obsiss modifient les distributions complètes, mais le top-1 exact reste \texttt{BYTE\_START} dans les six couples prompt/variante. Le retrait des features produit une JS moyenne après le premier bloc assistant de 0,3552 en 64D et 0,1869 en 130D. La permutation des vecteurs entre occurrences USER produit une JS de 0,00235 et 0,01192 à la même ancre. Cela distingue une influence générale de la banque de l'attribution persistante d'une feature à une occurrence précise.
+
+\subsection{Collectif et panel sentinelle}
+Dans le checkpoint 130D, collectif-seul donne JS 0,0460 au prompt et 0,1131 après préfixe ; sentinelles-seules donnent 0,0301 et 0,0387. L'effet observé du collectif est plus élevé dans ce diagnostic, mais les deux parties ont été entraînées ensemble. La non-additivité et la co-adaptation empêchent de déduire une valeur intrinsèque ou une nécessité des sentinelles.
+
+\subsection{Garde-fous d'optimisation}
+Ne pas agréger ou permuter silencieusement l'identité Obsiss, l'index d'occurrence, le rôle et la position. Garder une provenance de la feature et une mesure de contribution au niveau de chaque occurrence. Toute réduction de dimension, mise en cache ou parallélisation doit être suivie d'un test de parité et d'une mesure de sélectivité multi-token. Aucune feature du dialogue courant ne doit être conservée comme mémoire persistante après clôture du tour.
+
+\subsection{Statut}
+Diagnostic M-028 PASS ; aucune amélioration de cohérence n'est démontrée ; le travail d'optimisation reste expérimental tant que les sorties libres ne sont pas cohérentes.
+
+\section{Résultat M-028 : contribution des caractéristiques Obsiss}
+Sur 64D/130D et trois prompts, la parité exact-bank est 6/6 aux deux ancres. La mise à zéro des canaux Obsiss produit une JS moyenne de 0,0531 (64D) et 0,2225 (130D) au prompt ; après le premier bloc assistant, 0,3552 et 0,1869. La permutation des vecteurs USER produit 0,0400/0,1253 initialement, mais seulement 0,00235/0,01192 après préfixe. Pour le 130D, sentinelles seules restent plus proches du témoin que collectif seul (JS 0,0301 contre 0,0460 initialement ; 0,0387 contre 0,1131 après préfixe). Cela montre une influence numérique des caractéristiques et une persistance positionnelle limitée ; aucune conclusion de compréhension n'est permise.
+
+\section{Résultat M-029 : couverture lexicale TRAIN}
+La mesure TRAIN-only identifie 61 927 lexèmes uniques. Sur les réponses chat TRAIN, le vocabulaire 1024 couvre 69,13\% des tokens lexicaux et génère 28 000 unités byte-fallback ; le vocabulaire 16384 couvre 94,07\% et réduit le byte-fallback à 6 276 unités. Les premiers mots alphanumériques couverts passent de 0/13 à 8/13 (dénominateur de toutes les paires) ; le compte de tous premiers tokens non-espace, emoji inclus, est de 10/13 à 16384. Ce gain de couverture n'est pas une preuve de compétence conversationnelle ; l'ablation appariée M-030 doit mesurer son effet sur la génération et son coût de tête de sortie.
+
+\section{M-030 — Ablation contrôlée de capacité du tokenizer}
+Le vocabulaire lexical 16384 réduit le byte-fallback sur le TRAIN chat de 28000 à 6276 unités, par rapport au vocabulaire 1024, tout en couvrant 8/13 premiers lexèmes de réponses. La tête de sortie passe cependant d'environ 1291 à 16651 classes. Le coût dominant est le calcul et le stockage du logits/output head ; la modification ne doit donc être adoptée qu'après mesure du temps, de la mémoire, de la perplexité par tâche et de la génération libre.
+
+\subsection{Protocole technique}
+Conserver embedding 24, état GRU 48, 10 Obsiss, 64D collectifs, même fenêtre prompt, mêmes données TRAIN/VALIDATION, seed, batch, learning rate, decay, poids de perte et quatre époques. Seul `max\_vocab` passe de 1024 à 16384 ; le modèle témoin M-024 64D est gelé et non écrasé. Le test n'est consulté qu'après export et hash du checkpoint expérimental.
+
+\subsection{Critères de comparaison}
+Mesurer taille checkpoint, mémoire maximale, temps par époque, PPL mixte/chat/MathQA, taux byte-fallback des cibles, parité PyTorch/runtime et trois générations greedy 96 tokens prompt-only. Une meilleure couverture lexicale sans amélioration des sorties devra être interprétée comme gain de représentation, pas comme gain conversationnel. Aucun critère ne sera ajusté après lecture du TEST.
+
+\subsection{Statut}
+M-030 tentative 2 interrompue par SIGKILL après 2/4 époques : PPL validation mixte pondérée 26,4778 puis 16,6326 ; chat 71,3209 puis 50,1833 ; MathQA 24,2779 puis 14,5854. Aucun checkpoint final, aucun TEST et aucune génération libre ; P2 reste \texttt{IN\_PROGRESS}. Une reprise nécessite un mécanisme de checkpoint d'époque (modèle, optimiseur et RNG) testé, un snapshot vérifié et un préflight P2 PASS. La cause du SIGKILL n'est pas établie.
+
+
+\section{Résilience des entraînements : checkpoint d’époque et reprise}
+Les longues ablations de capacité de vocabulaire sont coûteuses sur CPU. Le trainer écrit maintenant un état atomique après chaque époque terminée. Il conserve le modèle courant, l’optimiseur AdamW, le meilleur état de validation, l’historique, le compteur d’époque et les états aléatoires Python/NumPy/PyTorch/CUDA. Un fingerprint couvrant les données, les splits, le tokenizer, les scripts, les versions logicielles et les hyperparamètres interdit de reprendre avec un environnement ou un protocole différent.
+
+La sauvegarde utilise un fichier temporaire frère, flush/fsync puis remplacement atomique ; un SHA-256 est immédiatement recalculé. `--resume-from` restaure le modèle, l’optimiseur et les RNG, puis commence l’époque suivante. Le checkpoint `.pt` est un état de recherche de confiance locale ; le checkpoint d’inférence demeure le JSON exporté après sélection du meilleur état.
+
+La fixture déterministe confirme 3/3 tests, dont l’égalité exacte des poids entre l’exécution continue et l’exécution interrompue/reprise. Le mécanisme réel doit encore être éprouvé lors d’une tentative M-030 complète. L’échec SIGKILL précédent reste incomplet et ne peut pas être récupéré rétroactivement.
+
+\end{document}

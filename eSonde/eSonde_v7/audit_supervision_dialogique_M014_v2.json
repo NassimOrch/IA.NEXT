@@ -1,0 +1,97 @@
+{
+  "schema": "esonde.v7.dialogue_supervision_audit.v2",
+  "created_local": "2026-11-14T20:30:00+01:00",
+  "scope": "Uploaded LIVRAISON_eSonde_v6.zip and its extracted source tree only; no data generated or corrected.",
+  "eSonde_v6_checkpoint": {
+    "manifest_path": "Dmodel_eSonde_v7/models/eSonde_v6/training_split_manifest.jsonl",
+    "manifest_sha256": "0e8484b94b8af43cadd0f1968a460f03f6dccd47a0b4358037fe2791b2e6435f",
+    "rows": 14552,
+    "source_counts": {
+      "mteb_tweet_sentiment_train": 14523,
+      "v5_examples": 12,
+      "Screenplay_dataset": 17
+    },
+    "dialogue_pairs": {
+      "unique": 17,
+      "train": 10,
+      "validation": 3,
+      "test": 4,
+      "language": "en",
+      "domain": "screenplay"
+    },
+    "text_only_rows": 14535,
+    "checkpoint_policy": "symmetric within-text co-occurrence; prompt and response processed independently; no pair lookup table",
+    "finding": "No parametric conditional prompt-to-response training objective is preserved in the delivered V6 checkpoint."
+  },
+  "eGenBrain_v4_loader": {
+    "source_code": "source_nested/Dmodel_eGenBrain_v4/egenbrain/train.py",
+    "source_code_sha256": "7de32b1a942ed232058449be6d1584bbd480a937c4ae922ecda046567b825b5a",
+    "split_seed": 20261022,
+    "split_policy": "deterministic 80/10/10 grouping by canonical task+prompt group; stable hash order; same prompt group kept in one split",
+    "raw_pair_records_read": 134759,
+    "canonical_task_prompt_response_pairs": 112992,
+    "raw_records_by_task": {
+      "chat": 4783,
+      "math_qa": 7473,
+      "sms_classification": 122503
+    },
+    "canonical_pairs_by_task": {
+      "chat": 17,
+      "math_qa": 7473,
+      "sms_classification": 105502
+    },
+    "split_counts_by_task": {
+      "chat": {
+        "train": 13,
+        "validation": 1,
+        "test": 3
+      },
+      "math_qa": {
+        "train": 5978,
+        "validation": 747,
+        "test": 748
+      },
+      "sms_classification": {
+        "train": 84398,
+        "validation": 10550,
+        "test": 10554
+      }
+    },
+    "duplicates_collapsed": 21767,
+    "issues": [
+      {
+        "file": "batch_dataset.jsonl",
+        "line": 784,
+        "error_type": "JSONDecodeError",
+        "action": "excluded_without_repair"
+      }
+    ],
+    "source_sha256": {
+      "batch_dataset.jsonl": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "Screenplay_dataset.jsonl": "03e27acb02d89f17ffdca10bf94d1125a2be743d9065055d5448b51a3994ba81",
+      "smsspamcollection.zip": "7fecc7384a0905eb21fff50110eb6d0f82e5efa83241c16e5d8065e80e5c4f4a",
+      "0000.parquet": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d"
+    },
+    "parquet": {
+      "path": "Dmodel_eGenBrain_v4/data/dataset/0000.parquet",
+      "bytes": 2306545,
+      "sha256": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+      "task": "math_qa",
+      "rows": 7473,
+      "complete_pairs": 7473
+    },
+    "task_policy": {
+      "chat": "eligible for conditional chat objective",
+      "math_qa": "eligible as a distinct Q/A domain within the chat interface; report separately",
+      "sms_classification": "exclude from chat training and chat evaluation"
+    },
+    "scope_warning": "The 7,473 math_qa pairs are not general conversation data. Their presence does not change the V6 checkpoint finding or establish French dialogue supervision."
+  },
+  "data_policy_for_v7": {
+    "inference_memory": "forbidden; no prompt/answer table, nearest-neighbour answer retrieval, or raw-answer datastore at inference",
+    "training": "conditional parameters may be learned from TRAIN pairs only; validation for model selection; test held out until final reporting",
+    "text_only": "may support a separately logged next-token/language regularization objective; never contribute assistant-role response-start statistics unless role provenance is explicit",
+    "grouping": "all identical canonical prompts across source files must share one split; exact duplicate pairs retain provenance and multiplicity but do not create independent examples",
+    "v6_checkpoint": "read-only and immutable; new learned V7 parameters must be stored in a separately versioned derived checkpoint"
+  }
+}

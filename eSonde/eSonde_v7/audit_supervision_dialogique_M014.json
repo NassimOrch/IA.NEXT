@@ -1,0 +1,83 @@
+{
+  "schema": "esonde.v7.dialogue_supervision_audit.v1",
+  "created_local": "2026-11-14T19:45:00+01:00",
+  "scope": "Only the user-supplied LIVRAISON_eSonde_v6.zip and its extracted contents; no external corpora or fabricated samples.",
+  "v6_manifest": {
+    "path": "Dmodel_eSonde_v7/models/eSonde_v6/training_split_manifest.jsonl",
+    "sha256": "0e8484b94b8af43cadd0f1968a460f03f6dccd47a0b4358037fe2791b2e6435f",
+    "rows": 14552,
+    "sources": {
+      "Screenplay_dataset": 17,
+      "mteb_tweet_sentiment_train": 14523,
+      "v5_examples": 12
+    },
+    "screenplay_pairs": 17,
+    "screenplay_splits": {
+      "train": 10,
+      "validation": 3,
+      "test": 4
+    },
+    "screenplay_languages": {
+      "en": 17
+    },
+    "prompt_chars_min": 107,
+    "prompt_chars_max": 360,
+    "answer_chars_min": 2186,
+    "answer_chars_max": 5950
+  },
+  "raw_dialogue_sources": {
+    "Screenplay_dataset.jsonl": {
+      "sha256": "03e27acb02d89f17ffdca10bf94d1125a2be743d9065055d5448b51a3994ba81",
+      "bytes": 20502764,
+      "physical_rows": 4000,
+      "unique_ids": 2000,
+      "unique_textual_prompt_answer_pairs": 17
+    },
+    "batch_dataset.jsonl": {
+      "sha256": "ceb5343258932b703496d0fbbef467c4ffdc4bc902728f3ec0a28c098919a081",
+      "bytes": 3986317,
+      "nonempty_rows": 784,
+      "valid_json_rows": 783,
+      "malformed_rows": 1,
+      "unique_ids": 783,
+      "unique_textual_prompt_answer_pairs": 17
+    },
+    "deduplicated_union_unique_pairs": 17,
+    "overlap": "The two source files contain the same 17 unique prompt/answer contents after exact content deduplication."
+  },
+  "checkpoint_learning_policy": {
+    "semantic_learning_policy": "symmetric within-text co-occurrence; prompt and response processed independently; no pair lookup table",
+    "evidence_source": "source_nested/Dmodel_eSonde_v6/Dmodel_eSonde_v6/src/esonde_v6/corpus.py::build_language_statistics",
+    "text_only_examples": {
+      "mteb_tweet_sentiment_train": 14523,
+      "v5_examples": 12
+    },
+    "paired_examples": {
+      "total": 17,
+      "train": 10,
+      "validation": 3,
+      "test": 4,
+      "language": "en"
+    },
+    "implication": "No learned conditional prompt-to-response objective is preserved in the delivered V6 checkpoint."
+  },
+  "run_002": {
+    "path": "Dmodel_eSonde_v7/runs_v7/CHAT_V7_ADAPTIVE_FR_002.json",
+    "sha256": "b89f7d0f0b7ef31aeabce6ffc8d0901eff9a4ea21cac7777fba42924904e52c3",
+    "response": "Je viens échange échange contexte contexte échange échange canada et états - unis - le figaro | a quand pour répondre échange contexte contexte",
+    "allow_non_response": false,
+    "minimum_population": 10,
+    "maximum_population": 128,
+    "active_population": 128,
+    "decode_steps": 24,
+    "converged_steps": 23,
+    "nonconverged_steps": 1,
+    "nonconverged_step_indices": [
+      7
+    ],
+    "all_decode_steps_converged": false,
+    "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+    "preflight_savepoint_sha256": "6ed06f7b61f994f2990265cc0acbecedb8aac3df26cfb325e6e8298e35d6b978",
+    "post_execution_savepoint_manifest_sha256": "701ad8eb84676771e66ead1954a6a0f62220248734886386afaede8204f63734"
+  }
+}
