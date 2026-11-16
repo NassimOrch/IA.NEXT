@@ -1,3 +1,127 @@
+
+# eSonde v7 — Experimental Dialogue Runtime
+
+**Runtime version:** 7.0.0-experimental  
+**Public function:** chat prompt/response with optional current dialogue history  
+**Checkpoint:** original eSonde v6 checkpoint, 1,000,000 Obsiss, dimension 16  
+**Weights:** `models/eSonde_v6/weights.bin`, 64,000,000 bytes, SHA-256 `8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4`
+
+> The v7 runtime is an experimental dialogue prototype built on the original v6 checkpoint. It implements a token-by-token contextual decoder and cross-voting across 16 Obsiss families. It does not yet claim general conversational competence, equality with, or superiority over LLMs. Its capabilities must be established through independent and comparative testing.
+
+## 1. Functional Scope
+
+The sole user-facing task is chat: a prompt, optionally preceded by `user`/`assistant`/`system` turns, produces a response. The public CLI exposes only `chat`, `status`, and `verify` (the latter two are administrative operations). The GUI provides only a conversation interface. The retained v6 computational modules are internal compatibility components required by the checkpoint; the previous CLI/GUI/evaluation interfaces are not exposed: no translation, infill, classification, search, or separate QA mode.
+
+Non-response is **disabled by default**. The model attempts the best available continuation. The `--allow-no-response` option (CLI) or the GUI checkbox explicitly enables it.
+
+## 2. Architecture Overview
+
+1. **Inherited Checkpoint:** The `weights.bin` weights, linguistic statistics, and training manifest are preserved identically. No v7 training or weight overwriting is claimed.
+2. **Transient Context:** Each token occurrence retains its turn, role, and position. Turn-order and succession relationships are typed; no causality is inferred from order alone. The framework is reconstructed from the current conversation and the generated prefix, without a persistent knowledge base.
+3. **16-Observation Space:** Local transition, prompt association, dialogue association, lexical recurrence, morphological affinity, response role, discursive continuity, polarity, temporality, boundary, TRAIN support, subword feedback, referential continuity, modality, speaker alignment, and informational novelty.
+4. **Obsiss Voices:** Each checkpoint row remains identified by its index. Each Obsiss combines a primary channel `a_i = i mod 16` and a secondary channel `b_i = (7i+3) mod 16`, with a gain derived from its original parameters. The quantiles of each family preserve dispersion instead of masking all voices within an average.
+5. **Generation:** Each beam prefix reactivates the context, produces n-gram/PPMI candidates, triggers TRAIN character-level feedback when local lexical support is rare, computes observations, and selects continuations through Obsiss votes. P observes the prompt; R observes the generated response afterward as a complementary diagnostic.
+
+The complete specifications are available in `formalism/formalisme_eSonde_v7.tex`, `formalism/laboratoire_eSonde_v7.tex`, and `formalism/tech_opt_eSonde_v7.tex`.
+
+## 3. Requirements and Installation
+
+- Python 3.10 or later.
+- Python standard libraries.
+- NumPy is optional and accelerates vectorized calibration. A fallback scalar path is provided.
+- Tkinter is required for the GUI; it may be distributed separately in some Linux distributions.
+- No model download is required: the weights and statistics are located in `models/eSonde_v6/`.
+
+On a fresh system, check:
+
+```bash
+python --version
+python -c "import tkinter; print('Tk OK')"   # GUI only
+python -c "import numpy; print(numpy.__version__)"  # optional acceleration
+```
+
+The portable distribution folder may contain `control/suivi_model_eSonde_v7/` and `control/sav_eSonde_v7/` alongside the runtime so that an independently extracted Dmodel includes its checklists and initial snapshot. In the development directory structure, these elements are sibling folders of Dmodel. The CLI detects both layouts.
+
+## 4. Quick Start — CLI
+
+From the package root directory:
+
+```bash
+python RUN_CLI.py --help
+python RUN_CLI.py verify
+python RUN_CLI.py status
+python RUN_CLI.py chat --prompt "Hello. Introduce yourself in one sentence."
+```
+
+For a JSON history:
+
+```json
+[
+  {"speaker": "user", "text": "I'm planning a trip."},
+  {"speaker": "assistant", "text": "What kind of trip?"}
+]
+```
+
+```bash
+python RUN_CLI.py chat --prompt "More of a cultural trip." --history-file history.json
+```
+
+By default, the entire available checkpoint population is used. `--n-obsiss 10000` is an explicit reduction useful for ablation or latency testing; it does not modify the checkpoint and does not become the default value.
+
+## 5. Quick Start — GUI
+
+```bash
+python RUN_GUI.py
+```
+
+Linux/macOS: `./RUN_GUI.sh`; Windows: `RUN_GUI.bat`. The interface allows users to enter a prompt, continue turns, and explicitly enable the non-response policy. Session exchanges are retained in the temporary dialogue history; there is no search or recall of previous conversations.
+
+## 6. Backups, Checks, and Evidence
+
+Before each generation, the runtime reads the files `chemins_eSonde_v7.json`, `checklist_de_travail_eSonde_v7.json`, `checklist_erreurs_no_model.json`, `checklist_erreurs_model.json`, and the savepoint registry. It checks the presence of the snapshot, its manifest, the manifest SHA-256, and the active checkpoint hash. If a critical check fails, generation is blocked rather than continuing without a trace.
+
+After a generation or generation error, the runtime writes a result or incident report, updates the evidence, and attempts a post-execution snapshot. The paths are specified in `chemins_eSonde_v7.json`. Dialogue and log files may contain sensitive content; protect the output directory and apply the desired local retention policy.
+
+## 7. Checkpoint Integrity Verification
+
+```bash
+python RUN_CLI.py verify --json-out runs_v7/verify.json
+sha256sum models/eSonde_v6/weights.bin
+```
+
+The expected hash for `weights.bin` is:
+
+`8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4`
+
+The hash check guarantees that the file is identical to the delivered version; it does not guarantee generation quality or the truthfulness of a response.
+
+## 8. Currently Verified Limitations and Open Questions
+
+- The generator relies on v6 TRAIN statistics: n-gram transitions, PPMI associations, and characters. It is not a trained Transformer, and the learned lexical support conditions its proposals.
+- Negation, temporality, and modality markers are explicitly lexical; they do not constitute a complete semantic parser.
+- The context preserves occurrences, roles, order, and provenance, but does not fully resolve coreference or causality.
+- The ranking score and disagreement are not calibrated probabilities.
+- Software tests are not sufficient to demonstrate dialogue coherence; blind, multilingual, multi-turn, comparative human evaluation is still required.
+- The v6 P/R campaign at 1M is incomplete. v7 latency and memory usage across the entire population must be measured on a target machine.
+
+These findings are not absolute theoretical limitations: they are the limitations demonstrated or not yet overcome by the currently available sources and tests.
+
+## 9. Document References
+
+- `formalism/formalisme_eSonde_v7.tex`: end-to-end architecture formalization.
+- `formalism/formalise_eSonde_v7.tex`: requested copy using the alternative naming spelling.
+- `formalism/laboratoire_eSonde_v7.tex`: experiments, comparisons, results, and decisions.
+- `formalism/tech_opt_eSonde_v7.tex`: optimization and instrumentation.
+- `docs/CLI_GUIDE.md`: detailed CLI contracts.
+- `docs/GUI_GUIDE.md`: GUI guide.
+- `docs/REPORT_TEMPLATE.md`: single report template with nine sections.
+
+
+
+
+
+
+======================================================================================================================================
 # eSonde v7 — Runtime de dialogue expérimental
 
 **Version du runtime :** 7.0.0-experimental  
