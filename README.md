@@ -212,4 +212,4 @@ The complete source for each work is available in its corresponding release. Ver
 | `readme_vHS/` | Material for high-school students | Introductory explanations of the research works |
 
 
-##WEBSITE : https://nassimorch.github.io/IA.NEXT/
+## Website : https://nassimorch.github.io/IA.NEXT/
