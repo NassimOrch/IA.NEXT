@@ -1,0 +1,989 @@
+% bismi ALLAH ARRAHMN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.6cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm,booktabs,enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{definition}{Définition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remarque}
+
+\providecommand{\Ppch}{\mathcal P^{\mathrm{PCH}}}
+\providecommand{\Tpch}{\mathcal T^{\mathrm{PCH}}_{\eta}}
+\providecommand{\Gain}{\mathsf{Gain}}
+
+\title{Spécification rigoureuse d'un LLM purement PCH sans attention standard}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Objet et principe directeur}
+
+On fixe ici une architecture de \emph{LLM purement PCH} : aucun bloc d'attention standard, aucun softmax sur des produits requêtes-clés, aucun mécanisme de type
+\[
+\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt d}\right)V.
+\]
+Toute la propagation d'information se fait par des blocs proximaux PCH, des résumés globaux non attentionnels, des MLP résiduels, et un schéma de diffusion en espace latent.
+
+Le point de départ est le noyau PCH exact utilisé dans les expériences précédentes :
+\[
+\Ppch(w;c)
+=
+\arg\min_u
+\left\{
+\frac12\|u-w\|^2+\Phi_{\mathrm{PCH},c}(u)
+\right\},
+\]
+avec
+\[
+\Phi_{\mathrm{PCH},c}(u)
+=
+\lambda_{\mathrm{ctx}}\operatorname{dist}(u,\mathcal M_c)^2
++
+\lambda_{\mathrm{ch}}\Omega_{\mathrm{ch}}(u)
++
+\lambda_{\mathrm{reg}}\|u\|^2.
+\]
+Dans la version expérimentale de référence, on instancie explicitement
+\[
+\Omega_{\mathrm{ch}}(u)=\|u\|^2,
+\qquad
+\lambda_{\mathrm{ridge}}=\lambda_{\mathrm{ch}}+\lambda_{\mathrm{reg}}.
+\]
+Le noyau est donc un prox exact d'une énergie convexe, résolu par programmation quadratique convexe.
+
+\section{Notation séquentielle}
+
+Soit une séquence de tokens
+\[
+x_{1:n}=(x_1,\dots,x_n).
+\]
+On note :
+\[
+e_i = E_{\theta}(x_i),\qquad
+h_i^{(0)} = e_i + p_i,
+\]
+où \(E_\theta\) est l'embedding de tokens appris et \(p_i\) un encodage positionnel déterministe.
+
+On regroupe les états dans une matrice :
+\[
+H^{(\ell)} = (h_1^{(\ell)},\dots,h_n^{(\ell)})^\top \in \mathbb R^{n\times d}.
+\]
+
+\section{Architecture générale du LLM PCH}
+
+L'architecture est une pile de blocs sans attention standard :
+\[
+H^{(0)}
+\;\longrightarrow\;
+\mathsf{PCHBlock}_1
+\;\longrightarrow\;
+\mathsf{PCHBlock}_2
+\;\longrightarrow\;\cdots\;\longrightarrow\;
+\mathsf{PCHBlock}_L
+\;\longrightarrow\;
+\mathsf{Decoder}.
+\]
+
+Chaque bloc \(\mathsf{PCHBlock}_\ell\) comporte trois sous-étapes :
+\begin{enumerate}[leftmargin=2em]
+    \item un routage de contexte non attentionnel ;
+    \item un prox PCH exact ;
+    \item un MLP résiduel de mélange local.
+\end{enumerate}
+
+Il n'existe nulle part de mécanisme de type requête-clé-valeur.
+
+\subsection{Réservoir de contextes}
+
+À chaque couche \(\ell\), on maintient un réservoir de contextes
+\[
+\mathcal B_\ell = \{\mathcal B^{(\ell)}_c\}_{c=1}^{C_\ell},
+\]
+où \(\mathcal B^{(\ell)}_c\) est un ensemble de calibrations pour le contexte \(c\).
+
+On définit le contexte admissible par l'enveloppe convexe
+\[
+\mathcal M^{(\ell)}_c
+=
+\operatorname{conv}\{\psi_\ell(v): v\in \mathcal B^{(\ell)}_c\},
+\]
+où \(\psi_\ell\) est une projection linéaire ou un petit réseau linéaire appris de faible rang, utilisé uniquement pour placer les calibrations dans l'espace latent de la couche \(\ell\).
+
+Dans l'implémentation pure, le contexte n'est pas inféré par attention, mais par sélection géométrique :
+\[
+c_i^{(\ell)}
+=
+\arg\min_{c\in\{1,\dots,C_\ell\}}
+\operatorname{dist}\!\left(h_i^{(\ell)}, \mathcal M^{(\ell)}_c\right)^2.
+\]
+C'est le routeur par distance de projection, qui est le routeur géométrique le plus direct et le plus fidèle au noyau testé expérimentalement.
+
+\subsection{Bloc PCH d'une couche}
+
+Pour chaque token \(i\) et chaque couche \(\ell\), on applique :
+\[
+\tilde h_i^{(\ell)}
+=
+\Ppch_\ell\!\left(h_i^{(\ell)}; c_i^{(\ell)}\right)
+=
+\arg\min_u
+\left\{
+\frac12\|u-h_i^{(\ell)}\|^2
++
+\Phi_{\mathrm{PCH},c_i^{(\ell)}}^{(\ell)}(u)
+\right\}.
+\]
+
+Ici
+\[
+\Phi_{\mathrm{PCH},c}^{(\ell)}(u)
+=
+\lambda_{\mathrm{ctx}}^{(\ell)}
+\operatorname{dist}(u,\mathcal M_c^{(\ell)})^2
++
+\lambda_{\mathrm{ch}}^{(\ell)}\Omega_{\mathrm{ch}}^{(\ell)}(u)
++
+\lambda_{\mathrm{reg}}^{(\ell)}\|u\|^2.
+\]
+
+La sortie de la couche est ensuite donnée par un résiduel simple :
+\[
+h_i^{(\ell+1)}
+=
+\tilde h_i^{(\ell)}
++
+\mathrm{MLP}_\ell\!\left(\tilde h_i^{(\ell)}\right).
+\]
+On peut ajouter une normalisation de couche si nécessaire, mais aucune attention n'est introduite.
+
+\subsection{Interaction entre tokens sans attention}
+
+Pour obtenir un couplage séquentiel sans attention, on utilise deux canaux seulement :
+
+\begin{enumerate}[leftmargin=2em]
+    \item un canal \emph{global} via un résumé
+    \[
+    s^{(\ell)}=\frac1n\sum_{i=1}^n h_i^{(\ell)},
+    \]
+    qui conditionne le routage de contexte ;
+    \item un canal \emph{géométrique} via les hulls \(\mathcal M_c^{(\ell)}\), qui sont construits à partir de banques de calibration et de l'état latent courant.
+\end{enumerate}
+
+Ainsi, l'information circule par contraction géométrique vers des ensembles admissibles, et non par pondérations attentionnelles pair-à-pair.
+
+\section{Version diffusion : génération non autoregressive}
+
+Pour éviter le coût d'un décodage token-par-token, le modèle est formulé comme un \emph{modèle de diffusion en espace latent}. La génération et l'entraînement portent alors sur des séquences entières, en parallèle.
+
+\subsection{Processus direct}
+
+Soit \(Z_0 \in \mathbb R^{n\times d}\) le latent propre associé à une séquence de texte.
+On définit un processus de noising classique :
+\[
+Z_t
+=
+\sqrt{\bar\alpha_t}\,Z_0
++
+\sqrt{1-\bar\alpha_t}\,\varepsilon,
+\qquad
+\varepsilon\sim\mathcal N(0,I),
+\]
+où \(\bar\alpha_t\) suit un calendrier de diffusion fixé.
+
+\subsection{Processus inverse PCH}
+
+Le débruitage inverse n'utilise ni attention ni score-network à attention.
+Il est porté par un débruiteur latent \(\mu_\theta\), puis corrigé par un pas PCH exact.
+
+Le cœur du pas inverse est :
+\[
+Z_{t-1}
+=
+\arg\min_Z
+\left\{
+\frac1{2\sigma_t^2}\|Z-\mu_\theta(Z_t,t)\|_F^2
++
+\Phi_{\mathrm{PCH},t}(Z)
+\right\},
+\]
+où \(\Phi_{\mathrm{PCH},t}\) agit ligne par ligne sur les états latents des tokens, avec des contextes définis par la banque \(\mathcal B_t\).
+
+Autrement dit, la diffusion inverse est un \emph{pas proximal corrigé} :
+\[
+Z_{t-1}
+=
+\mathsf{PCHReverse}(Z_t,t).
+\]
+Cette formulation est entièrement compatible avec le noyau PCH exact : le terme proximal est une vraie minimisation convexe, pas une approximation stochastique cachée.
+
+\section{Architecture complète d'un LLM PCH pur}
+
+La version complète est la suivante.
+
+\subsection{Encodage}
+
+\begin{enumerate}[leftmargin=2em]
+    \item Tokenisation.
+    \item Embedding appris \(E_\theta\).
+    \item Encodage positionnel.
+    \item Passage dans une pile de blocs PCH.
+\end{enumerate}
+
+\subsection{Bloc élémentaire}
+
+Pour chaque couche \(\ell\), on exécute :
+\[
+H^{(\ell)}
+\;\mapsto\;
+C^{(\ell)}
+\;\mapsto\;
+\tilde H^{(\ell)}
+\;\mapsto\;
+H^{(\ell+1)}.
+\]
+
+Plus précisément :
+\[
+c_i^{(\ell)}
+=
+\arg\min_c \operatorname{dist}(h_i^{(\ell)}, \mathcal M_c^{(\ell)})^2,
+\]
+\[
+\tilde h_i^{(\ell)}
+=
+\Ppch_\ell(h_i^{(\ell)};c_i^{(\ell)}),
+\]
+\[
+h_i^{(\ell+1)}
+=
+\tilde h_i^{(\ell)}+\mathrm{MLP}_\ell(\tilde h_i^{(\ell)}).
+\]
+
+\subsection{Sortie}
+
+La tête de sortie est un décodeur linéaire ou MLP :
+\[
+\mathrm{logits}_i = W_{\mathrm{out}} h_i^{(L)} + b_{\mathrm{out}}.
+\]
+Le texte est produit soit :
+\begin{itemize}[leftmargin=2em]
+    \item par débruitage diffusion puis décodage parallèle ;
+    \item soit par raffinements successifs sur toute la séquence.
+\end{itemize}
+
+Il n'y a pas de génération autoregressive basée sur l'attention.
+
+\section{Objectif d'entraînement}
+
+L'entraînement combine un terme de diffusion et un terme de reconstruction de texte.
+
+\subsection{Perte diffusion}
+
+On minimise :
+\[
+\mathcal L_{\mathrm{diff}}
+=
+\mathbb E_{x,t,\varepsilon}
+\left[
+\left\|
+Z_0-\widehat Z_0(Z_t,t)
+\right\|_F^2
+\right],
+\]
+où \(\widehat Z_0\) est la prédiction du latent propre par le réseau PCH.
+
+\subsection{Perte textuelle}
+
+On ajoute une perte de décodage token :
+\[
+\mathcal L_{\mathrm{tok}}
+=
+-\sum_{i=1}^n \log p_\theta(x_i \mid H^{(L)}).
+\]
+
+\subsection{Pertes de cohérence PCH}
+
+On ajoute des régularisations compatibles avec le noyau :
+\[
+\mathcal L_{\mathrm{PCH}}
+=
+\sum_{\ell=1}^L\sum_{i=1}^n
+J_{\mathrm{PCH}}^{(\ell)}\!\left(\tilde h_i^{(\ell)}; h_i^{(\ell)}, c_i^{(\ell)}\right),
+\]
+ainsi qu'un terme de stabilité du routage si besoin :
+\[
+\mathcal L_{\mathrm{route}}
+=
+\sum_{\ell,i}
+\operatorname{dist}\!\left(h_i^{(\ell)}, \mathcal M_{c_i^{(\ell)}}^{(\ell)}\right)^2.
+\]
+
+La perte totale est
+\[
+\mathcal L
+=
+\mathcal L_{\mathrm{diff}}
++
+\beta\,\mathcal L_{\mathrm{tok}}
++
+\gamma\,\mathcal L_{\mathrm{PCH}}
++
+\delta\,\mathcal L_{\mathrm{route}}.
+\]
+
+\section{Protocoles d'implémentation}
+
+\subsection{Bootstrap}
+
+Au démarrage, on initialise :
+\begin{itemize}[leftmargin=2em]
+    \item l'embedding \(E_\theta\),
+    \item les MLP de couche,
+    \item la banque de contextes \(\mathcal B_\ell\) par calibrations initiales,
+    \item les projections \(\psi_\ell\).
+\end{itemize}
+
+Les contextes peuvent être construits par un pré-clustering géométrique des états latents initiaux.
+
+\subsection{Boucle d'entraînement}
+
+Pour chaque mini-batch :
+\begin{enumerate}[leftmargin=2em]
+    \item encoder la séquence en latent propre \(Z_0\) ;
+    \item échantillonner un temps \(t\) ;
+    \item corroder \(Z_0\) en \(Z_t\) ;
+    \item appliquer la pile de blocs PCH sur \(Z_t\) ;
+    \item reconstruire \(\widehat Z_0\) et les logits textuels ;
+    \item calculer \(\mathcal L\) ;
+    \item mettre à jour les paramètres par rétropropagation à travers les solveurs convexes différentiables ;
+    \item rafraîchir périodiquement les contextes \(\mathcal B_\ell\) à partir des activations récentes.
+\end{enumerate}
+
+\subsection{Rafraîchissement des contextes}
+
+Les ensembles \(\mathcal B_\ell\) sont mis à jour par buffer glissant, de manière périodique et contrôlée.
+On conserve pour chaque couche des calibrations représentatives, puis on recalcule les hulls :
+\[
+\mathcal M_c^{(\ell)}
+=
+\operatorname{conv}\{\psi_\ell(v): v\in\mathcal B_c^{(\ell)}\}.
+\]
+Ce mécanisme garde le noyau PCH fidèle à sa forme exacte tout en lui permettant d'opérer sur des représentations apprises.
+
+\subsection{Inférence}
+
+À l'inférence :
+\begin{enumerate}[leftmargin=2em]
+    \item on part d'un bruit latent ou d'une représentation partielle ;
+    \item on itère le processus inverse PCH ;
+    \item on décode en sortie ;
+    \item on peut appliquer un second passage de purification si nécessaire.
+\end{enumerate}
+
+\section{Protocole de validation}
+
+La validation d'un LLM PCH pur doit vérifier quatre familles de propriétés :
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{stabilité proximale} :
+    décroissance d'énergie et résidus de point fixe faibles ;
+    \item \textbf{stabilité de diffusion} :
+    reconstruction cohérente du latent propre ;
+    \item \textbf{cohérence séquentielle} :
+    amélioration de perplexité et de qualité de génération ;
+    \item \textbf{cohérence géométrique} :
+    maintien d'une contraction locale et réduction de distance aux hulls admissibles.
+\end{enumerate}
+
+\section{Complexité et mise en oeuvre}
+
+Le coût dominant vient des sous-problèmes convexes PCH.
+Pour une séquence de longueur \(n\), une couche et un pas diffusion, on résout \(n\) prox exacts, chacun conditionné par un contexte.
+
+Le schéma reste donc :
+\[
+\text{séquence} \to \text{projections convexes} \to \text{MLP} \to \text{diffusion inverse}.
+\]
+Il est massivement parallélisable sur les tokens et sur les couches, à condition de réutiliser des banks de contextes partagées et des solveurs warm-startés.
+
+\section{Garantie de fidélité au noyau PCH}
+
+Cette architecture respecte le noyau PCH exact dans le sens suivant :
+\begin{itemize}[leftmargin=2em]
+    \item la purification contextuelle est toujours définie comme un vrai minimiseur convexe ;
+    \item le contexte est un hull convexe réel ;
+    \item la monotonie énergétique peut être contrôlée couche par couche ;
+    \item la contraction locale reste mesurable par linéarisation ;
+    \item le routage est séparé du noyau et ne remplace pas le prox.
+\end{itemize}
+
+Le modèle est donc un \emph{LLM à noyau proximal contextuel}, non un Transformer déguisé.
+
+\section{Résumé opérationnel}
+
+Le pipeline complet est :
+\[
+x_{1:n}
+\;\to\;
+E_\theta
+\;\to\;
+H^{(0)}
+\;\to\;
+\mathsf{PCHBlock}_1
+\;\to\;\cdots\;\to\;
+\mathsf{PCHBlock}_L
+\;\to\;
+\mathsf{DiffusionHead}
+\;\to\;
+\text{texte}.
+\]
+
+Chaque bloc PCH fait :
+\[
+\text{routage géométrique}
+\;\to\;
+\text{prox exact}
+\;\to\;
+\text{résiduel MLP}.
+\]
+
+Aucune attention standard n'intervient à aucun endroit.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pipeline de bout en bout 
+
+\section{Pipeline complet d'un LLM PCH pur : de l'entraînement à l'usage chat}
+
+\subsection{Vue d'ensemble du pipeline}
+
+On considère un LLM purement PCH dont le cycle de vie complet est le suivant :
+\[
+\text{données textuelles}
+\;\to\;
+\text{tokenisation}
+\;\to\;
+\text{encodage latent}
+\;\to\;
+\text{entraînement conjoint PCH + diffusion}
+\;\to\;
+\text{sauvegarde de checkpoint}
+\;\to\;
+\text{chargement du modèle entraîné}
+\;\to\;
+\text{usage chat prompt/réponse}.
+\]
+
+Le point essentiel est que le modèle ne comporte à aucun endroit de mécanisme d'attention standard. Toute propagation d'information repose sur :
+\begin{itemize}[leftmargin=2em]
+    \item des encodages latents appris ;
+    \item des résumés globaux sans attention, par pooling ou agrégation géométrique ;
+    \item des blocs PCH exacts ;
+    \item une dynamique de diffusion en espace latent ;
+    \item un décodeur final non attentionnel.
+\end{itemize}
+
+\subsection{Format des données d'entraînement}
+
+Les données sont organisées sous forme de paires \((p, r)\), où :
+\[
+p = \text{prompt / contexte dialogue},
+\qquad
+r = \text{réponse cible}.
+\]
+
+Dans le cas d'un pré-entraînement sur corpus brut, on peut aussi utiliser des segments textuels longs :
+\[
+x = (x_1,\dots,x_n),
+\]
+puis former des tâches de reconstruction, de débruitage ou de continuation structurée.
+
+Pour un usage conversationnel, on définit une séquence complète :
+\[
+s = (\texttt{system}, \texttt{user}_1, \texttt{assistant}_1, \dots, \texttt{user}_k, \texttt{assistant}_k),
+\]
+puis on isole :
+\[
+p = \text{historique de dialogue + message courant},
+\qquad
+r = \text{réponse à générer}.
+\]
+
+\subsection{Tokenisation et encodage}
+
+Soit un tokenizer déterministe \(\tau\). On obtient une séquence de tokens :
+\[
+\tau(s) = (t_1,\dots,t_n).
+\]
+
+Chaque token est transformé en embedding :
+\[
+e_i = E_\theta(t_i),
+\]
+où \(E_\theta\) est l'embedding appris.
+
+On ajoute un encodage positionnel fixe ou appris :
+\[
+h_i^{(0)} = e_i + p_i.
+\]
+
+La matrice initiale est donc :
+\[
+H^{(0)} = (h_1^{(0)},\dots,h_n^{(0)})^\top \in \mathbb R^{n\times d}.
+\]
+
+Aucune attention n'intervient dans cette étape.
+
+\subsection{Organisation des contextes admissibles}
+
+À chaque couche \(\ell\), on maintient une banque de contextes :
+\[
+\mathcal B_\ell = \{\mathcal B_c^{(\ell)}\}_{c=1}^{C_\ell}.
+\]
+
+Chaque contexte \(c\) est associé à un hull convexe :
+\[
+\mathcal M_c^{(\ell)} = \operatorname{conv}\{\psi_\ell(v): v\in \mathcal B_c^{(\ell)}\},
+\]
+où \(\psi_\ell\) est une projection linéaire ou un petit module de compression de faible rang.
+
+Le point important est que le contexte est géométrique, non attentionnel :
+\[
+c_i^{(\ell)}
+=
+\arg\min_{c\in\{1,\dots,C_\ell\}}
+\operatorname{dist}\!\left(h_i^{(\ell)}, \mathcal M_c^{(\ell)}\right)^2.
+\]
+
+Le routeur est donc un routeur par distance de projection, cohérent avec le noyau PCH testé expérimentalement.
+
+\subsection{Bloc PCH élémentaire}
+
+Le bloc de couche \(\ell\) applique d'abord la purification contextuelle exacte :
+\[
+\tilde h_i^{(\ell)}
+=
+\Ppch_\ell\!\left(h_i^{(\ell)};c_i^{(\ell)}\right)
+=
+\arg\min_u
+\left\{
+\frac12\|u-h_i^{(\ell)}\|^2
++
+\Phi_{\mathrm{PCH},c_i^{(\ell)}}^{(\ell)}(u)
+\right\}.
+\]
+
+On prend
+\[
+\Phi_{\mathrm{PCH},c}^{(\ell)}(u)
+=
+\lambda_{\mathrm{ctx}}^{(\ell)}\operatorname{dist}(u,\mathcal M_c^{(\ell)})^2
++
+\lambda_{\mathrm{ch}}^{(\ell)}\Omega_{\mathrm{ch}}^{(\ell)}(u)
++
+\lambda_{\mathrm{reg}}^{(\ell)}\|u\|^2.
+\]
+
+Ensuite, un mélange local non attentionnel est appliqué :
+\[
+h_i^{(\ell+1)}
+=
+\tilde h_i^{(\ell)}
++
+\mathrm{MLP}_\ell\!\left(\tilde h_i^{(\ell)}\right).
+\]
+
+La couche complète est donc :
+\[
+H^{(\ell)} \;\to\; C^{(\ell)} \;\to\; \tilde H^{(\ell)} \;\to\; H^{(\ell+1)}.
+\]
+
+\subsection{Interaction entre tokens sans attention}
+
+L'architecture PCH pure n'utilise pas de pondérations pair-à-pair de type attention.  
+L'échange d'information entre tokens passe par deux canaux seulement :
+
+\begin{enumerate}[leftmargin=2em]
+    \item un \emph{canal global} non attentionnel, par résumé :
+    \[
+    s^{(\ell)} = \frac1n\sum_{i=1}^n h_i^{(\ell)};
+    \]
+    \item un \emph{canal géométrique}, par attraction vers les hulls \(\mathcal M_c^{(\ell)}\).
+\end{enumerate}
+
+Le résumé global peut servir à sélectionner le contexte dominant, ou à moduler les paramètres de couche, mais il ne joue pas le rôle d'attention.
+
+\subsection{Version diffusion : génération parallèle du texte}
+
+Pour éviter un décodage autoregressif coûteux, on formule la génération comme une diffusion en espace latent.
+
+Soit \(Z_0\in\mathbb R^{n\times d}\) le latent propre associé à la séquence cible.
+Le processus direct est :
+\[
+Z_t
+=
+\sqrt{\bar\alpha_t}\,Z_0
++
+\sqrt{1-\bar\alpha_t}\,\varepsilon,
+\qquad
+\varepsilon\sim\mathcal N(0,I).
+\]
+
+Le processus inverse est porté par un débruiteur latent \(\mu_\theta\), corrigé par PCH :
+\[
+Z_{t-1}
+=
+\arg\min_Z
+\left\{
+\frac1{2\sigma_t^2}\|Z-\mu_\theta(Z_t,t)\|_F^2
++
+\Phi_{\mathrm{PCH},t}(Z)
+\right\}.
+\]
+
+Ainsi, la génération n'est pas token-par-token au sens standard, mais \emph{séquentielle en temps de diffusion} et parallèle sur les positions.
+
+\subsection{Objectifs d'entraînement}
+
+L'entraînement est conçu en plusieurs termes complémentaires.
+
+\paragraph{Perte de débruitage diffusion.}
+\[
+\mathcal L_{\mathrm{diff}}
+=
+\mathbb E_{x,t,\varepsilon}
+\left[
+\left\|
+Z_0-\widehat Z_0(Z_t,t)
+\right\|_F^2
+\right].
+\]
+
+\paragraph{Perte de reconstruction textuelle.}
+Pour les données dialogues, on ajoute une perte sur la réponse cible :
+\[
+\mathcal L_{\mathrm{tok}}
+=
+-\sum_{i\in \mathcal I_{\mathrm{resp}}}
+\log p_\theta(x_i \mid H^{(L)}),
+\]
+où \(\mathcal I_{\mathrm{resp}}\) désigne les positions de la réponse à générer.
+
+\paragraph{Perte PCH.}
+On pénalise les sorties de couche par l'énergie exacte :
+\[
+\mathcal L_{\mathrm{PCH}}
+=
+\sum_{\ell=1}^L\sum_{i=1}^n
+J_{\mathrm{PCH}}^{(\ell)}\!\left(
+\tilde h_i^{(\ell)};
+h_i^{(\ell)},
+c_i^{(\ell)}
+\right).
+\]
+
+\paragraph{Perte de routage géométrique.}
+On peut ajouter un terme favorisant des choix de contexte stables :
+\[
+\mathcal L_{\mathrm{route}}
+=
+\sum_{\ell=1}^L\sum_{i=1}^n
+\operatorname{dist}\!\left(h_i^{(\ell)},\mathcal M_{c_i^{(\ell)}}^{(\ell)}\right)^2.
+\]
+
+\paragraph{Perte totale.}
+La perte finale est :
+\[
+\mathcal L
+=
+\mathcal L_{\mathrm{diff}}
++
+\beta\,\mathcal L_{\mathrm{tok}}
++
+\gamma\,\mathcal L_{\mathrm{PCH}}
++
+\delta\,\mathcal L_{\mathrm{route}}.
+\]
+
+\subsection{Procédure d'entraînement complète}
+
+L'entraînement se déroule en quatre phases.
+
+\subsubsection{Phase 1 : initialisation}
+
+On initialise :
+\begin{itemize}[leftmargin=2em]
+    \item l'embedding \(E_\theta\) ;
+    \item les MLP de couche ;
+    \item les projections \(\psi_\ell\) ;
+    \item les banques de contextes \(\mathcal B_\ell\) ;
+    \item le calendrier de diffusion \(\{\bar\alpha_t\}_{t=1}^T\).
+\end{itemize}
+
+Les banques de contextes peuvent être construites par pré-clustering sur un corpus de calibration, puis révisées périodiquement.
+
+\subsubsection{Phase 2 : pré-calibration géométrique}
+
+On extrait un ensemble de calibration par couche et par contexte, puis on forme les hulls :
+\[
+\mathcal M_c^{(\ell)}
+=
+\operatorname{conv}\{\psi_\ell(v):v\in\mathcal B_c^{(\ell)}\}.
+\]
+
+Cette phase fixe la géométrie admissible de départ.
+
+\subsubsection{Phase 3 : entraînement conjoint}
+
+Pour chaque mini-batch :
+\begin{enumerate}[leftmargin=2em]
+    \item tokeniser les séquences ;
+    \item calculer les embeddings initiaux ;
+    \item échantillonner un temps de diffusion \(t\) ;
+    \item corrompre le latent en \(Z_t\) ;
+    \item propager dans les blocs PCH de couches successives ;
+    \item calculer la sortie de débruitage et la sortie textuelle ;
+    \item calculer \(\mathcal L\) ;
+    \item rétropropager à travers les solveurs convexes via différentiation implicite ou couche convexe différentiable ;
+    \item mettre à jour les paramètres ;
+    \item rafraîchir les banques de contextes à période fixée.
+\end{enumerate}
+
+\subsubsection{Phase 4 : stabilisation finale}
+
+On fige partiellement ou totalement les banques de contextes, puis on affine les modules restants pour stabiliser :
+\begin{itemize}[leftmargin=2em]
+    \item la décroissance d'énergie ;
+    \item la contraction locale ;
+    \item la cohérence de génération ;
+    \item la stabilité du routage.
+\end{itemize}
+
+\subsection{Différentiation à travers le prox exact}
+
+Le prox PCH exact est un solveur convexe.  
+Pendant l'entraînement, son gradient peut être obtenu par différentiation implicite du système KKT associé, ou par une couche convexe différentiable.
+
+Si
+\[
+u^\star = \Ppch(w;c),
+\]
+alors les gradients par rapport aux paramètres appris sont calculés en utilisant la structure locale du problème convexe résolu exactement. Cela permet de garder le noyau PCH fidèle à sa définition tout en l'intégrant dans l'entraînement.
+
+\subsection{Chargement du modèle entraîné}
+
+Le checkpoint doit contenir au minimum :
+\begin{itemize}[leftmargin=2em]
+    \item \(E_\theta\) ;
+    \item les MLP de couches ;
+    \item les projections \(\psi_\ell\) ;
+    \item les banques de contextes \(\mathcal B_\ell\) ;
+    \item les paramètres \(\lambda_{\mathrm{ctx}}^{(\ell)},\lambda_{\mathrm{ch}}^{(\ell)},\lambda_{\mathrm{reg}}^{(\ell)}\) ;
+    \item le calendrier de diffusion ;
+    \item le tokenizer ;
+    \item les statistiques de normalisation ;
+    \item les éventuels tenseurs de décodage.
+\end{itemize}
+
+Le chargement consiste à restaurer exactement ces objets, puis à passer le modèle en mode inférence.
+
+\subsection{Usage du modèle en chat prompt / réponse}
+
+À l'usage, un échange chat est transformé en séquence structurée :
+\[
+(\texttt{system}, \texttt{user}_1, \texttt{assistant}_1, \dots, \texttt{user}_k).
+\]
+
+Le modèle reçoit :
+\[
+p = \text{historique complet + dernier message utilisateur},
+\]
+puis il génère la réponse \(r\).
+
+La procédure d'inférence est :
+\begin{enumerate}[leftmargin=2em]
+    \item tokeniser le prompt \(p\) ;
+    \item encoder les tokens ;
+    \item construire l'état latent initial ;
+    \item fixer le sous-espace de conditionnement du prompt ;
+    \item initialiser la partie réponse par bruit latent ou par état neutre ;
+    \item itérer la diffusion inverse PCH ;
+    \item décoder la séquence réponse ;
+    \item concaténer la réponse au dialogue courant ;
+    \item répéter pour le tour suivant.
+\end{enumerate}
+
+Le point important est que le modèle ne consulte jamais l'historique via attention standard.  
+Le contexte est porté par :
+\begin{itemize}[leftmargin=2em]
+    \item le prompt latent ;
+    \item les banques de contextes ;
+    \item les prox PCH ;
+    \item la diffusion inverse.
+\end{itemize}
+
+\subsection{Pseudo-code de l'inférence chat}
+
+\[
+\boxed{
+\begin{array}{l}
+\text{Input : } p \\
+\text{Tokenizer : } \tau(p) \\
+\text{Embeddings : } H^{(0)} \\
+\text{For }\ell=1\ldots L:\\
+\qquad c_i^{(\ell)} \leftarrow \arg\min_c \operatorname{dist}(h_i^{(\ell)},\mathcal M_c^{(\ell)})^2\\
+\qquad \tilde h_i^{(\ell)} \leftarrow \Ppch_\ell(h_i^{(\ell)};c_i^{(\ell)})\\
+\qquad h_i^{(\ell+1)} \leftarrow \tilde h_i^{(\ell)}+\mathrm{MLP}_\ell(\tilde h_i^{(\ell)})\\
+\text{Diffusion inverse : } Z_{T}\sim \mathcal N(0,I) \\
+\text{For }t=T,\dots,1:\\
+\qquad Z_{t-1}\leftarrow \arg\min_Z\left\{\frac1{2\sigma_t^2}\|Z-\mu_\theta(Z_t,t)\|_F^2+\Phi_{\mathrm{PCH},t}(Z)\right\} \\
+\text{Decode : } r = \mathrm{Decoder}(Z_0) \\
+\end{array}
+}
+\]
+
+\subsection{Protocole de validation}
+
+La validation d'un LLM PCH pur doit vérifier les points suivants :
+\begin{enumerate}[leftmargin=2em]
+    \item décroissance énergétique couche par couche ;
+    \item résidus de point fixe faibles ;
+    \item contraction locale non dégénérée ;
+    \item stabilité du routage de contexte ;
+    \item cohérence de la diffusion inverse ;
+    \item qualité de génération sur tâches de chat ;
+    \item absence totale d'attention standard dans le graphe computationnel.
+\end{enumerate}
+
+\subsection{Fidélité au noyau PCH}
+
+L'architecture proposée reste fidèle au noyau PCH exact parce que :
+\begin{itemize}[leftmargin=2em]
+    \item chaque purification est un vrai minimiseur convexe ;
+    \item le contexte est un hull convexe réel ;
+    \item la contraction locale est mesurable ;
+    \item la monotonie énergétique peut être contrôlée ;
+    \item le routage est séparé du prox et ne le remplace pas.
+\end{itemize}
+
+\subsection{Résumé du pipeline complet}
+
+Le pipeline final est :
+\[
+\text{texte}
+\;\to\;
+\text{tokenisation}
+\;\to\;
+E_\theta
+\;\to\;
+H^{(0)}
+\;\to\;
+\mathsf{PCHBlock}_1
+\;\to\;
+\cdots
+\;\to\;
+\mathsf{PCHBlock}_L
+\;\to\;
+\mathsf{DiffusionReverse}
+\;\to\;
+\text{décodeur}
+\;\to\;
+\text{réponse chat}.
+\]
+
+Aucune attention standard n'intervient à aucun point du pipeline.
+Le modèle est donc un LLM à base de noyaux proximaux contextuels et de diffusion, entièrement compatible avec le formalisme PCH exact.
+
+\end{document}
