@@ -397,7 +397,7 @@ A citation template can be completed once the authorship, publication date, repo
 ```bibtex
 @misc{pure_pch,
   title        = {Pure PCH: Normalized Geometry, Exact Proximal Operators and Experimental Validation},
-  author       = {Author(s) to be specified},
+  author       = {Author(s) to be specified : BENSALEM NASSIM.},
   year         = {Year to be specified},
   howpublished = {Research repository},
   url          = {Repository URL to be specified}
@@ -793,7 +793,7 @@ Le modèle de citation suivant pourra être complété lorsque les auteurs, la d
 ```bibtex
 @misc{pure_pch,
   title        = {Pure PCH: Normalized Geometry, Exact Proximal Operators and Experimental Validation},
-  author       = {Auteur(s) à préciser},
+  author       = {Auteur(s) à préciser : BENSALEM NASSIM.},
   year         = {Année à préciser},
   howpublished = {Dépôt de recherche},
   url          = {URL du dépôt à préciser}
