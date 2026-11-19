@@ -1,6 +1,9 @@
 
 
 
+#Vesrion EN
+
+
 # Pure PCH LLM — A Contextual Proximal Language Model Without Standard Attention
 
 ## Overview
@@ -256,9 +259,13 @@ The resulting model is designed as a contextual proximal language model rather t
 **Generation mechanism:** Latent Diffusion with PCH Correction  
 **Attention:** No Standard Attention  
 **Mathematical foundation:** Convex Optimization and Proximal Operators
+
+
+
+
 #############################################################################################################################################################################################
 
-
+#Vesrion VF
 
 # Pure PCH LLM — Un modèle de langage proximal contextuel sans attention standard
 
