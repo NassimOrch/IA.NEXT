@@ -1,0 +1,226 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,array,pdflscape}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\geometry{margin=2.2cm}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\newcommand{\code}[1]{\texttt{#1}}
+\begin{document}
+\begin{center}
+{\LARGE Rapport rigoureux sur le Cas 3 normalisé}\\[0.5em]
+{\large Synthèse des 13 blocs expérimentaux et de leurs 54 runs}\\[1em]
+\end{center}
+\section*{Résumé exécutif}
+J'ai pu extraire et lire \textbf{13 blocs d'expériences} (\code{ex1} à \code{ex13}) répartis sur les cinq fichiers fournis, pour un total de \textbf{54 runs} distincts. Le cadre expérimental est celui du \emph{Cas 3 normalisé} avec la jauge $\mu = 1 + 2\lambda_{\mathrm{ridge}}$, $\gamma = \lambda_{\mathrm{ctx}}/\mu$, $\tau = \eta\mu$. La loi scalaire cible est $\rho_\star = 1/(1+\tau) = 0.22727272727272727$ lorsque $\tau=3.4$.
+Le verdict scripté ne dépend que de deux bornes : $\max \rho_{\mathrm{gap}} \le 10^{-4}$ et $\max \texttt{operator\_gap} \le 10^{-4}$. Il ne dépend pas des performances de classification aval (\code{probe\_routed\_pch}), qui peuvent être bonnes ou mauvaises indépendamment du verdict normalisé.
+Sur l'ensemble des 13 blocs, \textbf{7 sont supportés} par ce critère (\code{ex6}, \code{ex7}, \code{ex8}, \code{ex9}, \code{ex11}, \code{ex12}, \code{ex13}) et \textbf{6 ne le sont pas} (\code{ex1}--\code{ex5}, \code{ex10}).
+\section*{Cadre théorique et pipeline exact}
+Le script implémente : encodeur SentenceTransformer gelé, PCA ajustée sur la calibration seulement, ensembles de contexte $M_c$ définis comme enveloppes convexes exactes des embeddings de calibration, projection exacte par QP convexe, minimiseur PCH exact par QP convexe, map proximale exacte par QP convexe, et jacobiens locaux par différences finies.
+Le solveur utilisé est \code{cvxpy + OSQP}, avec tolérances absolues et relatives $10^{-10}$ et \code{max\_iter}=500000 pour les sous-problèmes convexes.
+Les diagnostics de contraction utilisent uniquement les \emph{premières itérations utiles} avant le bruit numérique, puis une linéarisation locale par différences finies autour du point fixe.
+\section*{Table de synthèse par expérience}
+\begin{landscape}
+\small
+\begin{longtable}{r r l r r r l l r r r r r r l}
+\toprule
+ex & runs & corpus & d & $\gamma$ & $\tau$ & $\lambda_{\mathrm{ridge}}$ & régularisateurs & raw acc & oracle acc. & routed acc. & ctx acc. & $\max\rho_{\mathrm{gap}}$ & $\max$ op gap & verdict\\
+\midrule
+\endfirsthead
+\toprule
+ex & runs & corpus & d & $\gamma$ & $\tau$ & $\lambda_{\mathrm{ridge}}$ & régularisateurs & raw acc & oracle acc. & routed acc. & ctx acc. & $\max\rho_{\mathrm{gap}}$ & $\max$ op gap & verdict\\
+\midrule
+\endhead
+\midrule
+\multicolumn{15}{r}{Suite en page suivante}\\
+\endfoot
+\bottomrule
+\endlastfoot
+1 & 8 & 20news4 & 48 & 0.5 & 3.4 & 0.2, 0.8, 1.5, 3.0 & none, ridge & 0.75 & [0.8984375, 1.0] & [0.7890625, 0.8203125] & [0.8359375, 0.8359375] & 2.0188560808015454e-05 & 0.0003117917197859498 & \texttt{false} \\
+2 & 8 & 20news4 & 48 & 0.5 & 3.4 & 0.2, 0.8, 1.5, 3.0 & none, ridge & 0.765625 & [0.890625, 1.0] & [0.7578125, 0.78125] & [0.828125, 0.828125] & 1.947840438887294e-06 & 0.00018429706750188861 & \texttt{false} \\
+3 & 8 & 20news4 & 48 & 0.5 & 3.4 & 0.2, 0.8, 1.5, 3.0 & none, ridge & 0.7734375 & [0.953125, 1.0] & [0.796875, 0.8046875] & [0.8515625, 0.859375] & 9.717152463506462e-06 & 0.000282493931358685 & \texttt{false} \\
+4 & 6 & 20news4 & 64 & 0.5 & 3.4 & 0.2, 0.8, 3.0 & none, ridge & 0.7265625 & [0.8828125, 1.0] & [0.8125, 0.8671875] & [0.84375, 0.859375] & 4.237050244465523e-06 & 0.00034959314896703807 & \texttt{false} \\
+5 & 6 & 20news4 & 32 & 0.5 & 3.4 & 0.2, 0.8, 3.0 & none, ridge & 0.765625 & [0.8984375, 1.0] & [0.796875, 0.8203125] & [0.859375, 0.875] & 1.7168868826633599e-09 & 0.00010016336371819233 & \texttt{false} \\
+6 & 6 & 20news4 & 16 & 0.5 & 3.4 & 0.2, 0.8, 3.0 & none, ridge & 0.7734375 & [0.984375, 1.0] & [0.7890625, 0.8125] & [0.8203125, 0.8203125] & 6.849787923812745e-07 & 7.756357342791706e-06 & \texttt{true} \\
+7 & 2 & 20news4 & 48 & 0.5 & 3.4 & 0.8 & none, ridge & 0.7734375 & [1.0, 1.0] & [0.8203125, 0.8203125] & [0.859375, 0.859375] & 4.82693611386642e-07 & 4.287171418077552e-05 & \texttt{true} \\
+8 & 2 & 20news20 & 16 & 0.5 & 3.4 & 0.8 & none, ridge & 0.55625 & [0.9609375, 0.9609375] & [0.565625, 0.565625] & [0.496875, 0.496875] & 1.9156883526716406e-07 & 1.6799312468709252e-05 & \texttt{true} \\
+9 & 2 & 20news4 & 16 & 1.0 & 3.4 & 0.8 & none, ridge & 0.7734375 & [1.0, 1.0] & [0.7890625, 0.7890625] & [0.8203125, 0.8203125] & 2.289946010591848e-12 & 7.683268731046075e-12 & \texttt{true} \\
+10 & 2 & 20news4 & 48 & 1.0 & 3.4 & 0.8 & none, ridge & 0.7734375 & [1.0, 1.0] & [0.796875, 0.796875] & [0.8515625, 0.8515625] & 2.579042407330201e-06 & 0.00011058508883429947 & \texttt{false} \\
+11 & 2 & 20news4 & 8 & 1.0 & 3.4 & 0.8 & none, ridge & 0.7109375 & [1.0, 1.0] & [0.65625, 0.65625] & [0.65625, 0.65625] & 1.4839796058652155e-12 & 6.1111734282524266e-12 & \texttt{true} \\
+12 & 1 & 20news4 & 8 & 5.0 & 3.4 & 0.8 & ridge & 0.7109375 & [1.0, 1.0] & [0.671875, 0.671875] & [0.65625, 0.65625] & 5.632994071191888e-13 & 8.504740049644727e-12 & \texttt{true} \\
+13 & 1 & 20news4 & 8 & 15.0 & 3.4 & 0.8 & ridge & 0.7109375 & [1.0, 1.0] & [0.671875, 0.671875] & [0.65625, 0.65625] & 7.866263196376622e-12 & 1.785273254161832e-11 & \texttt{true} \\
+\end{longtable}
+\end{landscape}
+\section*{Lecture scientifique des 13 blocs}
+\subsection*{1. Les blocs \code{ex1}--\code{ex5} : même jauge, dimensions 48/64/32/16, support scripté négatif}
+Ces blocs utilisent \code{20news4} et $\tau=3.4$, avec $\gamma=0.5$ et $d\in\{48,64,32,16\}$. Tous présentent une loi scalaire très proche de $\rho_\star$, mais le seuil du script échoue parce que les \code{operator\_gap} dépassent $10^{-4}$. Le cas le plus proche du seuil est \code{ex5} (\code{d}=32), avec \code{max operator gap} = 0.00010016336371819233, donc juste au-dessus du critère $10^{-4}$.
+\subsection*{2. \code{ex6} : premier bloc clairement supporté en $d=16$}
+\code{ex6} est le premier bloc où le critère est franchi nettement : \code{max rho\_gap} = 6.849787923812745e-07 et \code{max operator gap} = 7.756357342791706e-06. La performance brute reste à 0.7734375, l'oracle atteint jusqu'à 1.0, et le routage reste à 0.7890625--0.8125. Le contexte routé de test est stable à 0.8203125.
+\subsection*{3. \code{ex7} : même dimension 48, mais \code{max\_iters}=1}
+\code{ex7} montre que le verdict normalisé ne dépend pas du nombre d'itérations internes une fois le solveur exact en place : le bloc est supporté (\code{max rho\_gap}=4.82693611386642e-07, \code{max operator gap}=4.287171418077552e-05), malgré \code{max\_iters}=1. Le script calcule toujours des QP exactes et des jacobiens par différences finies ; la boucle d'itération n'est qu'une petite partie du coût. Vos observations de temps comparable et de fichiers \code{npz} plus gros sont donc cohérentes avec le fait que les diagnostics et les trajectoires stockées dominent le coût opérationnel.
+\subsection*{4. \code{ex8} : le cas 20 classes en dimension 16}
+\code{ex8} est le bloc le plus spectaculaire du point de vue compression/performances aval : il passe à \code{20news20} (20 classes) avec une dimension latente de 16. La performance brute est seulement 0.55625, mais l'oracle PCH monte à 0.9609375, soit un gain de 0.4046875. Le routage automatique reste presque plat (\code{0.565625}, gain \code{+0.009375}), et le contexte n'est correct qu'à 0.496875 sur le test. Cela dit clairement que le mécanisme PCH lui-même est très fort, alors que le routage de contexte est le goulot d'étranglement.
+\subsection*{5. \code{ex9}--\code{ex11} : même dimension 16/8, changement de $\gamma$ et verdicts contrastés}
+\code{ex9} (\code{d}=16, $\gamma=1.0$) est supporté et donne oracle 1.0 avec routé 0.7890625. \code{ex10} (\code{d}=48, $\gamma=1.0$) échoue au critère parce que \code{max operator gap}=1.1058508883429947e-04 $> 10^{-4}$. \code{ex11} (\code{d}=8, $\gamma=1.0$) est supporté malgré une dégradation du routage (\code{routed accuracy}=0.65625, gain routé = -0.0546875). Donc le verdict porte sur la loi normalisée locale, pas sur la qualité aval du routage.
+\subsection*{6. \code{ex12}--\code{ex13} : $\gamma$ extrême, mais même verdict scripté supporté}
+Les blocs \code{ex12} et \code{ex13} gardent $d=8$, $\lambda_{\mathrm{ridge}}=0.8$, $\tau=3.4$, mais poussent $\gamma$ à 5 puis 15. Les deux restent supportés au sens du script. La métrique scalaire reste collée à $\rho_\star$ : \code{rho\_gap} est de l'ordre de $10^{-12}$, et les \code{operator\_gap} restent sous $1.8\times 10^{-11}$. En revanche, le routage reste mauvais et même négatif en gain pour \code{ex12} et \code{ex13}. Cela montre que la stabilité du noyau normalisé est indépendante de fortes variations de $\gamma$, mais pas que le système aval est automatiquement bon.
+\section*{Comparaison dimensionnelle et conséquence conceptuelle}
+À corpus égal \code{20news4} et $\tau=3.4$, la réduction dimensionnelle n'entraîne pas une monotonie simple sur les performances, mais elle change fortement la géométrie active (trace du projecteur). On observe des traces test typiquement autour de $15$--$22$ pour $d=48$, autour de $17$--$27$ pour $d=64$, autour de $12$--$15$ pour $d=32$, autour de $7.7$--$8.0$ pour $d=16$, et autour de $3.69$--$3.76$ pour $d=8$. La loi scalaire reste très stable, mais la géométrie de l'espace actif ne l'est pas. Autrement dit, l'universalité forte porte sur la composante scalaire normalisée, pas sur une identité géométrique brute du projecteur.
+Pour \code{ex8}, obtenir un oracle à 0.9609375 en $d=16$ sur 20 classes est plus spectaculaire qu'en $d=48$ ou $d=120$ (à contexte comparable), parce qu'une dimension plus basse impose un comprimé bien plus sévère. Le fait que l'oracle reste excellent suggère que le mécanisme PCH extrait une structure réellement utile. Le fait que le routage n'augmente presque pas la précision, voire la dégrade parfois, montre que le problème n'est pas le PCH exact lui-même mais le choix automatique du contexte.
+En pratique, cela signifie que l'architecture devrait séparer plus nettement : (i) la purification locale exacte, qui est déjà très solide ; (ii) le routage de contexte, qui est la partie fragile ; (iii) la calibration des seuils et de la sélection de contexte, qui gouverne largement les gains réels.
+\section*{Verdict global sur l'universalité du Cas 3 normalisé}
+Le verdict global est \textbf{mixte}. Le résultat le plus robuste est que \(\rho_{\mathrm{obs}}\) reste très proche de \(\rho_\star = 1/(1+\tau)\) dans toutes les expériences, avec des écarts très petits. Mais le critère scripté est plus strict : il n'est pas validé sur \code{ex1}--\code{ex5} ni sur \code{ex10}. Il est validé sur \code{ex6}--\code{ex9} et \code{ex11}--\code{ex13}. Donc la bonne conclusion scientifique est : \emph{universalité scalaire très fortement soutenue, universalité géométrique globale encore non démontrée}.
+Le point important est que \code{ex11} peut être \code{supported=true} malgré un routage négatif, parce que le verdict ne dépend pas du probe aval. Il juge seulement la conformité locale du noyau normalisé.
+\section*{Appendice A : tableau complet des 54 runs}
+\begin{landscape}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r r r r r l r r r r r r r r l}
+\toprule
+ex & run & d & $\gamma$ & $\lambda$ & reg & raw acc & oracle & routed & ctx & $\rho_{\mathrm{gap}}$ & op gap & proj gap & tr(test) & verdict\\
+\midrule
+\endfirsthead
+\toprule
+ex & run & d & $\gamma$ & $\lambda$ & reg & raw acc & oracle & routed & ctx & $\rho_{\mathrm{gap}}$ & op gap & proj gap & tr(test) & verdict\\
+\midrule
+\endhead
+\midrule
+\multicolumn{15}{r}{Suite en page suivante}\\
+\endfoot
+\bottomrule
+\endlastfoot
+1 & 0 & 48 & 0.5 & 0.2 & ridge & 0.75 & 0.8984375 & 0.8125 & 0.8359375 & 2.0188560808015454e-05 & 0.0003117917197859498 & 0.0017341836891890973 & 15.521878804368042 & \texttt{false} \\
+1 & 1 & 48 & 0.5 & 0.2 & none & 0.75 & 0.8984375 & 0.8125 & 0.8359375 & 2.0188560808015454e-05 & 0.0003117917197859498 & 0.0017341836891890973 & 15.521878804368042 & \texttt{false} \\
+1 & 2 & 48 & 0.5 & 0.8 & ridge & 0.75 & 0.9765625 & 0.7890625 & 0.8359375 & 1.4053835452554342e-05 & 0.00019860864448366283 & 0.001038430449186755 & 21.014599993049256 & \texttt{false} \\
+1 & 3 & 48 & 0.5 & 0.8 & none & 0.75 & 0.9765625 & 0.7890625 & 0.8359375 & 1.4053835452554342e-05 & 0.00019860864448366283 & 0.001038430449186755 & 21.014599993049256 & \texttt{false} \\
+1 & 4 & 48 & 0.5 & 1.5 & ridge & 0.75 & 1.0 & 0.7890625 & 0.8359375 & 5.879799835656341e-06 & 0.0002694819409219884 & 0.0019302818127722389 & 21.746580897633194 & \texttt{false} \\
+1 & 5 & 48 & 0.5 & 1.5 & none & 0.75 & 1.0 & 0.7890625 & 0.8359375 & 5.879799835656341e-06 & 0.0002694819409219884 & 0.0019302818127722389 & 21.746580897633194 & \texttt{false} \\
+1 & 6 & 48 & 0.5 & 3.0 & ridge & 0.75 & 1.0 & 0.8203125 & 0.8359375 & 4.51808035428769e-12 & 1.2268415640879059e-11 & 8.439085998002008e-12 & 21.929687499999694 & \texttt{false} \\
+1 & 7 & 48 & 0.5 & 3.0 & none & 0.75 & 1.0 & 0.8203125 & 0.8359375 & 4.51808035428769e-12 & 1.2268415640879059e-11 & 8.439085998002008e-12 & 21.929687499999694 & \texttt{false} \\
+2 & 0 & 48 & 0.5 & 0.2 & ridge & 0.765625 & 0.890625 & 0.7578125 & 0.828125 & 1.947840438887294e-06 & 0.00018429706750188861 & 0.0017842793065451174 & 15.557274580859561 & \texttt{false} \\
+2 & 1 & 48 & 0.5 & 0.2 & none & 0.765625 & 0.890625 & 0.7578125 & 0.828125 & 1.947840438887294e-06 & 0.00018429706750188861 & 0.0017842793065451174 & 15.557274580859561 & \texttt{false} \\
+2 & 2 & 48 & 0.5 & 0.8 & ridge & 0.765625 & 0.96875 & 0.765625 & 0.828125 & 5.2160498142939105e-12 & 1.50545373248188e-11 & 8.926241735565655e-12 & 20.31250000000035 & \texttt{false} \\
+2 & 3 & 48 & 0.5 & 0.8 & none & 0.765625 & 0.96875 & 0.765625 & 0.828125 & 5.2160498142939105e-12 & 1.50545373248188e-11 & 8.926241735565655e-12 & 20.31250000000035 & \texttt{false} \\
+2 & 4 & 48 & 0.5 & 1.5 & ridge & 0.765625 & 0.9921875 & 0.765625 & 0.828125 & 4.849537438289531e-12 & 1.3465082473790502e-11 & 8.617733430011106e-12 & 21.52343749999962 & \texttt{false} \\
+2 & 5 & 48 & 0.5 & 1.5 & none & 0.765625 & 0.9921875 & 0.765625 & 0.828125 & 4.849537438289531e-12 & 1.3465082473790502e-11 & 8.617733430011106e-12 & 21.52343749999962 & \texttt{false} \\
+2 & 6 & 48 & 0.5 & 3.0 & ridge & 0.765625 & 1.0 & 0.78125 & 0.828125 & 6.831073878776905e-08 & 1.4483269946288169e-05 & 0.00011842962376908531 & 21.703197696365727 & \texttt{false} \\
+2 & 7 & 48 & 0.5 & 3.0 & none & 0.765625 & 1.0 & 0.78125 & 0.828125 & 6.831073878776905e-08 & 1.4483269946288169e-05 & 0.00011842962376908531 & 21.703197696365727 & \texttt{false} \\
+3 & 0 & 48 & 0.5 & 0.2 & ridge & 0.7734375 & 0.953125 & 0.796875 & 0.8515625 & 9.717152463506462e-06 & 0.000282493931358685 & 0.0025200644255559054 & 15.479688630394707 & \texttt{false} \\
+3 & 1 & 48 & 0.5 & 0.2 & none & 0.7734375 & 0.953125 & 0.796875 & 0.8515625 & 9.717152463506462e-06 & 0.000282493931358685 & 0.0025200644255559054 & 15.479688630394707 & \texttt{false} \\
+3 & 2 & 48 & 0.5 & 0.8 & ridge & 0.7734375 & 1.0 & 0.8046875 & 0.859375 & 4.82693611386642e-07 & 4.287171418077552e-05 & 0.0004420007481043077 & 20.5003307881078 & \texttt{false} \\
+3 & 3 & 48 & 0.5 & 0.8 & none & 0.7734375 & 1.0 & 0.8046875 & 0.859375 & 4.82693611386642e-07 & 4.287171418077552e-05 & 0.0004420007481043077 & 20.5003307881078 & \texttt{false} \\
+3 & 4 & 48 & 0.5 & 1.5 & ridge & 0.7734375 & 1.0 & 0.796875 & 0.8515625 & 5.389300117286666e-12 & 1.5138685347607934e-11 & 9.386156814174312e-12 & 21.937500000000078 & \texttt{false} \\
+3 & 5 & 48 & 0.5 & 1.5 & none & 0.7734375 & 1.0 & 0.796875 & 0.8515625 & 5.389300117286666e-12 & 1.5138685347607934e-11 & 9.386156814174312e-12 & 21.937500000000078 & \texttt{false} \\
+3 & 6 & 48 & 0.5 & 3.0 & ridge & 0.7734375 & 1.0 & 0.796875 & 0.8515625 & 5.754036136451646e-12 & 1.612034068168962e-11 & 9.843801175939368e-12 & 22.36718749999978 & \texttt{false} \\
+3 & 7 & 48 & 0.5 & 3.0 & none & 0.7734375 & 1.0 & 0.796875 & 0.8515625 & 5.754036136451646e-12 & 1.612034068168962e-11 & 9.843801175939368e-12 & 22.36718749999978 & \texttt{false} \\
+4 & 0 & 64 & 0.5 & 0.2 & ridge & 0.7265625 & 0.8828125 & 0.8203125 & 0.84375 & 4.438505118997682e-12 & 1.6608457392294298e-11 & 1.483604493161697e-11 & 17.687500000000405 & \texttt{false} \\
+4 & 1 & 64 & 0.5 & 0.2 & none & 0.7265625 & 0.8828125 & 0.8203125 & 0.84375 & 4.438505118997682e-12 & 1.6608457392294298e-11 & 1.483604493161697e-11 & 17.687500000000405 & \texttt{false} \\
+4 & 2 & 64 & 0.5 & 0.8 & ridge & 0.7265625 & 0.9296875 & 0.8125 & 0.859375 & 2.355612086224479e-06 & 0.00014732292397841488 & 0.0016641622371859873 & 24.618578272859622 & \texttt{false} \\
+4 & 3 & 64 & 0.5 & 0.8 & none & 0.7265625 & 0.9296875 & 0.8125 & 0.859375 & 2.355612086224479e-06 & 0.00014732292397841488 & 0.0016641622371859873 & 24.618578272859622 & \texttt{false} \\
+4 & 4 & 64 & 0.5 & 3.0 & ridge & 0.7265625 & 1.0 & 0.8671875 & 0.8515625 & 4.237050244465523e-06 & 0.00034959314896703807 & 0.0017816956973127776 & 27.255177491001845 & \texttt{false} \\
+4 & 5 & 64 & 0.5 & 3.0 & none & 0.7265625 & 1.0 & 0.8671875 & 0.8515625 & 4.237050244465523e-06 & 0.00034959314896703807 & 0.0017816956973127776 & 27.255177491001845 & \texttt{false} \\
+5 & 0 & 32 & 0.5 & 0.2 & ridge & 0.765625 & 0.8984375 & 0.796875 & 0.859375 & 1.7168868826633599e-09 & 0.00010016336371819233 & 0.0019531123118175545 & 12.574207235962106 & \texttt{false} \\
+5 & 1 & 32 & 0.5 & 0.2 & none & 0.765625 & 0.8984375 & 0.796875 & 0.859375 & 1.7168868826633599e-09 & 0.00010016336371819233 & 0.0019531123118175545 & 12.574207235962106 & \texttt{false} \\
+5 & 2 & 32 & 0.5 & 0.8 & ridge & 0.765625 & 0.9921875 & 0.8046875 & 0.8671875 & 3.5955405319754163e-12 & 1.024789914467913e-11 & 7.201302771477606e-12 & 14.953125000000174 & \texttt{false} \\
+5 & 3 & 32 & 0.5 & 0.8 & none & 0.765625 & 0.9921875 & 0.8046875 & 0.8671875 & 3.5955405319754163e-12 & 1.024789914467913e-11 & 7.201302771477606e-12 & 14.953125000000174 & \texttt{false} \\
+5 & 4 & 32 & 0.5 & 3.0 & ridge & 0.765625 & 1.0 & 0.8203125 & 0.875 & 4.193423386311679e-12 & 1.1890548564717164e-11 & 7.685810028363118e-12 & 15.53124999999957 & \texttt{false} \\
+5 & 5 & 32 & 0.5 & 3.0 & none & 0.765625 & 1.0 & 0.8203125 & 0.875 & 4.193423386311679e-12 & 1.1890548564717164e-11 & 7.685810028363118e-12 & 15.53124999999957 & \texttt{false} \\
+6 & 0 & 16 & 0.5 & 0.2 & ridge & 0.7734375 & 0.984375 & 0.796875 & 0.8203125 & 1.8606505225449155e-12 & 6.2174100050504464e-12 & 5.549599908867816e-12 & 7.7421875000006235 & \texttt{true} \\
+6 & 1 & 16 & 0.5 & 0.2 & none & 0.7734375 & 0.984375 & 0.796875 & 0.8203125 & 1.8606505225449155e-12 & 6.2174100050504464e-12 & 5.549599908867816e-12 & 7.7421875000006235 & \texttt{true} \\
+6 & 2 & 16 & 0.5 & 0.8 & ridge & 0.7734375 & 1.0 & 0.7890625 & 0.8203125 & 1.7417733921831768e-12 & 5.570259030805289e-12 & 5.122594623577182e-12 & 8.046875000000377 & \texttt{true} \\
+6 & 3 & 16 & 0.5 & 0.8 & none & 0.7734375 & 1.0 & 0.7890625 & 0.8203125 & 1.7417733921831768e-12 & 5.570259030805289e-12 & 5.122594623577182e-12 & 8.046875000000377 & \texttt{true} \\
+6 & 4 & 16 & 0.5 & 3.0 & ridge & 0.7734375 & 1.0 & 0.8125 & 0.8203125 & 6.849787923812745e-07 & 7.756357342791706e-06 & 4.317520451945029e-05 & 7.726526939294411 & \texttt{true} \\
+6 & 5 & 16 & 0.5 & 3.0 & none & 0.7734375 & 1.0 & 0.8125 & 0.8203125 & 6.849787923812745e-07 & 7.756357342791706e-06 & 4.317520451945029e-05 & 7.726526939294411 & \texttt{true} \\
+7 & 0 & 48 & 0.5 & 0.8 & ridge & 0.7734375 & 1.0 & 0.8203125 & 0.859375 & 4.82693611386642e-07 & 4.287171418077552e-05 & 0.0004420007481043077 & 20.5003307881078 & \texttt{true} \\
+7 & 1 & 48 & 0.5 & 0.8 & none & 0.7734375 & 1.0 & 0.8203125 & 0.859375 & 4.82693611386642e-07 & 4.287171418077552e-05 & 0.0004420007481043077 & 20.5003307881078 & \texttt{true} \\
+8 & 0 & 16 & 0.5 & 0.8 & ridge & 0.55625 & 0.9609375 & 0.565625 & 0.496875 & 1.9156883526716406e-07 & 1.6799312468709252e-05 & 0.00020368588090238882 & 6.007972104245529 & \texttt{true} \\
+8 & 1 & 16 & 0.5 & 0.8 & none & 0.55625 & 0.9609375 & 0.565625 & 0.496875 & 1.9156883526716406e-07 & 1.6799312468709252e-05 & 0.00020368588090238882 & 6.007972104245529 & \texttt{true} \\
+9 & 0 & 16 & 1.0 & 0.8 & ridge & 0.7734375 & 1.0 & 0.7890625 & 0.8203125 & 2.289946010591848e-12 & 7.683268731046075e-12 & 4.645677059758489e-12 & 8.046875000000611 & \texttt{true} \\
+9 & 1 & 16 & 1.0 & 0.8 & none & 0.7734375 & 1.0 & 0.7890625 & 0.8203125 & 2.289946010591848e-12 & 7.683268731046075e-12 & 4.645677059758489e-12 & 8.046875000000611 & \texttt{true} \\
+10 & 0 & 48 & 1.0 & 0.8 & ridge & 0.7734375 & 1.0 & 0.796875 & 0.8515625 & 2.579042407330201e-06 & 0.00011058508883429947 & 0.0010171831622135604 & 20.501026854471583 & \texttt{false} \\
+10 & 1 & 48 & 1.0 & 0.8 & none & 0.7734375 & 1.0 & 0.796875 & 0.8515625 & 2.579042407330201e-06 & 0.00011058508883429947 & 0.0010171831622135604 & 20.501026854471583 & \texttt{false} \\
+11 & 0 & 8 & 1.0 & 0.8 & ridge & 0.7109375 & 1.0 & 0.65625 & 0.65625 & 1.4839796058652155e-12 & 6.1111734282524266e-12 & 3.488206498871038e-12 & 3.68750000000063 & \texttt{true} \\
+11 & 1 & 8 & 1.0 & 0.8 & none & 0.7109375 & 1.0 & 0.65625 & 0.65625 & 1.4839796058652155e-12 & 6.1111734282524266e-12 & 3.488206498871038e-12 & 3.68750000000063 & \texttt{true} \\
+12 & 0 & 8 & 5.0 & 0.8 & ridge & 0.7109375 & 1.0 & 0.671875 & 0.65625 & 5.632994071191888e-13 & 8.504740049644727e-12 & 3.4942514965713513e-12 & 3.6874999999998836 & \texttt{true} \\
+13 & 0 & 8 & 15.0 & 0.8 & ridge & 0.7109375 & 1.0 & 0.671875 & 0.65625 & 7.866263196376622e-12 & 1.785273254161832e-11 & 3.509653877022513e-12 & 3.687500000000352 & \texttt{true} \\
+\end{longtable}
+\end{landscape}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+% Requires: \usepackage{booktabs}
+%           \usepackage{graphicx}
+%           \usepackage{array}
+
+\section{Synthèse expérimentale des expériences ex20--ex29}
+
+Toutes les expériences de cette section ont été exécutées avec
+\[
+\texttt{max\_iters}=1,\qquad \tau_{\mathrm{target}}=3.4,\qquad \texttt{energy\_monotonic\_violations}=0,
+\]
+ce qui signifie que les effets observés proviennent de la géométrie locale et du routage, et non d'un déploiement itératif profond.
+
+\begin{table}[ht]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llllllllllllll}
+\toprule
+Exp. & Corpus & $D/n_{\mathrm{calib}}$ & $\gamma$ & Reg. &
+$\overline{\mathrm{op\,gap}}$ (test) &
+$\overline{\mathrm{proj\,gap}}$ (test) &
+$\operatorname{tr}(P)_{\mathrm{test}}$ &
+Raw acc. &
+Oracle acc. &
+Routed acc. &
+Ctx acc. &
+$\Delta_{\mathrm{oracle}}$ &
+$\Delta_{\mathrm{routed}}$ \\
+\midrule
+ex20 & 20news4  & $1/120$ & 1.0 & ridge & $2.8332268891314433\mathrm{e}{-07}$ & $9.60931178882636\mathrm{e}{-07}$ & $1.0000002976520916$ & $0.578125$ & $0.578125$ & $0.578125$ & $0.359375$ & $0$ & $0$ \\
+ex21 & 20news4  & $1/16$  & 1.0 & none  & $5.0197394201815376\mathrm{e}{-08}$ & $9.499978212857557\mathrm{e}{-08}$ & $0.9843749752809888$ & $0.4375$ & $0.4375$ & $0.4375$ & $0.3359375$ & $0$ & $0$ \\
+ex22 & 20news20 & $2/2$   & 1.0 & ridge & $1.927339316273483\mathrm{e}{-12}$ & $9.387206727290035\mathrm{e}{-13}$ & $0.6343750000001542$ & $0.1984375$ & $0.75625$ & $0.184375$ & $0.1109375$ & $0.5578125$ & $-0.0140625$ \\
+ex23 & 20news4  & $1/1$   & 1.0 & ridge & $7.977234324496596\mathrm{e}{-13}$ & $0$ & $0$ & $0.5$ & $1.0$ & $0.5$ & $0.5$ & $0.5$ & $0$ \\
+ex24 & 20news4  & $3/3$   & 1.0 & ridge & $8.365461680220431\mathrm{e}{-12}$ & $4.845669062094327\mathrm{e}{-12}$ & $7.664062500000584$ & $0.703125$ & $1.0$ & $0.7578125$ & $0.765625$ & $0.296875$ & $0.0546875$ \\
+ex25 & 20news4  & $3/3$   & 1.0 & ridge & $8.365461680220431\mathrm{e}{-12}$ & $4.845669062094327\mathrm{e}{-12}$ & $7.664062500000584$ & $0.703125$ & $1.0$ & $0.7578125$ & $0.765625$ & $0.296875$ & $0.0546875$ \\
+ex26 & 20news20 & $16/16$ & 1.0 & ridge & $4.8477902496167524\mathrm{e}{-05}$ & $4.951291982818756\mathrm{e}{-04}$ & $6.008259986660002$ & $0.55625$ & $0.99375$ & $0.546875$ & $0.496875$ & $0.4375$ & $-0.009375$ \\
+ex27 & 20news20 & $16/16$ & 0.5 & none  & $1.6799312468709252\mathrm{e}{-05}$ & $2.0368588090238882\mathrm{e}{-04}$ & $6.007972104245529$ & $0.55625$ & $0.9609375$ & $0.559375$ & $0.496875$ & $0.4046875$ & $0.003125$ \\
+ex28 & 20news20 & $1/1$   & 0.5 & ridge & $6.070682585096466\mathrm{e}{-13}$ & $0$ & $0$ & $0.121875$ & $0.3953125$ & $0.13125$ & $0.05625$ & $0.2734375$ & $0.009375$ \\
+ex29 & 20news20 & $1/1$   & 1.0 & ridge & $6.358561680658292\mathrm{e}{-13}$ & $0$ & $0$ & $0.121875$ & $0.434375$ & $0.128125$ & $0.0640625$ & $0.3125$ & $0.00625$ \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Synthèse des expériences ex20--ex29. Les valeurs reportées sont celles du test pour les diagnostics géométriques et de classification.}
+\end{table}
+
+\paragraph{Lecture méthodologique.}
+Les expériences ex24 et ex25 sont numériquement identiques dans les résultats fournis. Les expériences ex26 et ex27 sont proches mais non identiques. Les expériences ex28 et ex29 partagent la même structure expérimentale sauf pour $\gamma_{\mathrm{target}}$ (respectivement $0.5$ et $1.0$).
+
+\paragraph{Constat global.}
+Dans toutes ces expériences, la stabilité locale est très forte : les violations de monotonie énergétique sont nulles, les résidus de point fixe restent au voisinage de la précision machine, et les écarts opérateur/projecteur sont faibles à très faibles selon le régime. En revanche, la performance de classification dépend fortement du couple \emph{(dimension latente, calibration, nombre de classes, qualité du routage)}.
+
+\paragraph{Interprétation.}
+Les expériences ex20 et ex21 montrent un régime stable mais presque sans gain utile : le système est géométriquement cohérent, mais il ne transfère pas de séparabilité exploitable. Les expériences ex22 et ex23 montrent au contraire que l'oracle peut créer une forte séparabilité lorsque le bon contexte est disponible, mais que le routage reste le goulot d'étranglement. Les expériences ex24 et ex25 donnent le meilleur compromis observé dans ce lot, car le routage y devient enfin utile. Les expériences ex26 et ex27 montrent que, sur $20news20$, la géométrie oracle reste très forte en dimension $16$, mais que la qualité du routage reste le facteur limitant principal. Les expériences ex28 et ex29 montrent qu'en dimension $1$ sur $20news20$, l'oracle conserve encore un gain non négligeable, alors que le routage reste presque au niveau du hasard.
+
+\paragraph{Conséquence scientifique.}
+Ces résultats soutiennent une lecture très nette : le Cas 3 normalisé donne une \emph{loi locale stable} et un \emph{transfert de séparabilité possible}, mais l'usage opérationnel est limité par le routage du contexte. Autrement dit, la géométrie PCH semble robuste, mais son utilité réelle dépend de l'accès au bon contexte.
+
+\paragraph{Conséquence pratique.}
+Le levier le plus important n'est pas d'augmenter aveuglément le nombre d'itérations, car ici tous les runs sont déjà à $\texttt{max\_iters}=1$ et convergent proprement. Le levier critique est la qualité du routage, puis le réglage du régime $(D, n_{\mathrm{calib}}, \gamma)$.
+
+\paragraph{Verdict prudent.}
+Ces expériences ne démontrent pas une universalité géométrique absolue de PCH. Elles démontrent quelque chose de plus précis et plus solide : une stabilité normalisée très forte, une loi locale cohérente, et un écart systématique entre l'oracle et le routé qui identifie le routage comme principal point faible.
+
+\end{document}
