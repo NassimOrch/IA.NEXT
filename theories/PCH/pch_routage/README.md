@@ -137,208 +137,13 @@ Can this decision be made invariant to context-dependent additive changes in the
 
 ---
 
-## 4. Collection of Documents and Their Roles
-
-The repository contains several manuscripts that should be understood as related research documents, not automatically as independent implementations or interchangeable mathematical models.
-
-### Document 1 — Context Selection by Value Functions
-
-**Suggested filename:**
-
-`01_context_selection_by_value_functions.tex`
-
-**Title:**
-
-*Sélection de contexte par fonctions valeur — Routage variationnel pour PCH*
-
-This manuscript establishes the mathematical foundation of finite-dimensional variational routing.
-
-Its central object is the normalized reduced value associated with each context:
-
-\[
-\widetilde V_c(w)
-=
-\inf_{u\in\mathbb R^d}
-\widetilde J_c(u;w).
-\]
-
-The selected context is
-
-\[
-c^\star(w)
-\in
-\arg\min_{c\in\mathcal C}
-\widetilde V_c(w).
-\]
-
-The manuscript develops:
-
-- The context-dependent PCH optimization problem.
-- The canonical normalization by the strong-convexity parameter.
-- The relationship between reduced values and Moreau envelopes.
-- The exact routing formulation.
-- The geometry of context-dominance regions.
-- The regularity of the global routing value.
-- The Clarke generalized gradient at decision boundaries.
-- Entropic soft routing.
-- Short-rollout approximations and routing stability.
-- A one-dimensional analytical example.
-
-**Role in the project:** foundational mathematical formulation of reduced-value routing.
-
-### Document 2 — Variational Routing for PCH
-
-**Suggested filename:**
-
-`02_variational_routing_for_pch.tex`
-
-**Title:**
-
-*Routage variationnel pour PCH — Choix du contexte comme problème d'optimisation*
-
-This manuscript presents a closely related formulation of the same finite-dimensional routing framework.
-
-It emphasizes the interpretation of context selection as an optimization problem over
-
-\[
-\mathbb R^d\times\mathcal C.
-\]
-
-Its central principle remains
-
-\[
-c^\star(w)
-\in
-\arg\min_{c\in\mathcal C}
-\widetilde V_c(w).
-\]
-
-It provides a complementary presentation of:
-
-- Exact context selection.
-- Local proximal optimization.
-- Normalized value functions.
-- Decision cells and switching boundaries.
-- Entropic relaxation.
-- Stability under a strict decision margin.
-- Approximate routing through finite proximal iterations.
-
-**Role in the project:** an alternative or revised presentation of the foundational reduced-value routing manuscript.
-
-**Important:** Documents 1 and 2 are substantially overlapping. They should be treated as manuscript variants unless a final editorial comparison establishes a specific reason to maintain both as separate publications.
-
-### Document 3 — PCH-ESM and the Variational Routing Paradigm
-
-**Suggested filename:**
-
-`03_pch_esm_variational_routing.tex`
-
-**Title:**
-
-*Routage variationnel PCH-ESM — Sélection de contexte par fonctions valeur et changement de paradigme*
-
-This manuscript extends the foundational routing formulation.
-
-It moves from the finite-dimensional presentation toward a Hilbert-space formulation and develops the interpretation of routing as a decision mechanism induced by a family of local value functions.
-
-Its main topics include:
-
-- The lower-envelope formulation of context selection.
-- Variational decision geometry.
-- Context-dominance regions and their boundaries.
-- Stability under a positive routing margin.
-- A certificate based on upper and lower bounds.
-- Entropic soft routing.
-- Computational complexity of exhaustive routing.
-- Comparison with conventional Mixture-of-Experts routing.
-- Spectral specialization through PCH-ESM.
-- Orthogonal projection and reconstruction properties.
-- Inverse-variance weighted consensus under explicit statistical assumptions.
-- One-dimensional and multidimensional illustrative examples.
-
-The key relation is
-
-\[
-F(w)
-=
-\min_{c\in\mathcal C}\widetilde V_c(w).
-\]
-
-The manuscript interprets the resulting lower envelope as the mathematical object that induces the routing decision.
-
-**Role in the project:** generalization and structured specialization of the reduced-value routing framework, including its application to PCH-ESM.
-
-### Document 4 — Normalized Evidence-Based Routing
-
-**Suggested filename:**
-
-`04_normalized_gain_routing_extension.tex`
-
-**Title:**
-
-*Extension théorique du routage contextuel dans le noyau PCH*
-
-This manuscript introduces an additional routing criterion based on the normalized improvement achieved by each context.
-
-For a context \(c\), define the energy reduction
-
-\[
-\Delta_{\alpha,c}(w)
-=
-\widehat J_{\alpha,c}(w;w)
--
-\widehat J_{\alpha,c}
-\left(
-u^\star_{\alpha,c}(w);w
-\right).
-\]
-
-The corresponding normalized evidence score is
-
-\[
-\mathcal R_{\alpha,c}(w)
-=
-\frac{
-\Delta_{\alpha,c}(w)
-}{
-\widehat J_{\alpha,c}(w;w)+\varepsilon
-},
-\qquad \varepsilon>0.
-\]
-
-The selected context is
-
-\[
-c^\star_\alpha(w)
-\in
-\arg\max_{c\in\mathcal C}
-\mathcal R_{\alpha,c}(w).
-\]
-
-This manuscript additionally develops:
-
-- Invariance of the energy gain under context-dependent additive shifts.
-- Normalized evidence-based context selection.
-- Stability under a strict score margin.
-- Gibbs probabilistic routing.
-- Short-rollout evidence certificates.
-- Finite-iteration routing guarantees under suitable assumptions.
-- A geometric tie-breaker based on the limiting projector \(P_0\).
-- A final lexicographic routing rule.
-
-**Role in the project:** an alternative routing criterion based on normalized purification gain, rather than minimum reduced value.
-
-**Important:** This is not merely another notation for the reduced-value rule. It defines a different decision criterion and should be studied as a separate routing extension.
-
----
-
-## 5. The Two Main Routing Principles
+## 4. The Two Main Routing Principles
 
 A major objective of this repository is to distinguish the two mathematical approaches.
 
 They are related, but they are not generally equivalent.
 
-### 5.1 Reduced-value routing
+### 4.1 Reduced-value routing
 
 For each context, define
 
@@ -383,7 +188,7 @@ p_c^\star(w)
 }.
 \]
 
-### 5.2 Normalized-evidence routing
+### 4.2 Normalized-evidence routing
 
 For each context, calculate its normalized energy reduction:
 
@@ -426,7 +231,7 @@ Its probabilistic version is
 }.
 \]
 
-### 5.3 Conceptual difference
+### 4.3 Conceptual difference
 
 | Aspect | Reduced-value routing | Normalized-evidence routing |
 |---|---|---|
@@ -443,17 +248,17 @@ The appropriate criterion depends on the intended interpretation of context sele
 
 ---
 
-## 6. Mathematical Foundations
+## 5. Mathematical Foundations
 
 The manuscripts draw on several established areas of mathematics.
 
-### 6.1 Convex analysis
+### 5.1 Convex analysis
 
 Each context is associated with a convex optimization problem.
 
 Under the stated assumptions, the quadratic proximity term and ridge regularization provide strong convexity, ensuring uniqueness of the local minimizer.
 
-### 6.2 Proximal operators
+### 5.2 Proximal operators
 
 After normalization, the local minimizer can be represented as
 
@@ -465,7 +270,7 @@ u_c^\star(w)
 
 This connects PCH context purification to proximal optimization.
 
-### 6.3 Moreau envelopes
+### 5.3 Moreau envelopes
 
 The normalized reduced value is
 
@@ -484,7 +289,7 @@ Under the standard assumptions on \(g_c\), this value function is continuously d
 \left(w-u_c^\star(w)\right).
 \]
 
-### 6.4 Variational decision geometry
+### 5.4 Variational decision geometry
 
 The routing value is the lower envelope
 
@@ -512,7 +317,7 @@ w:
 
 Decision boundaries correspond to locations where multiple contexts attain the same minimum.
 
-### 6.5 Stability through a margin
+### 5.5 Stability through a margin
 
 Suppose a context \(c^\star\) is uniquely optimal and satisfies
 
@@ -532,7 +337,7 @@ Then continuity of the value functions guarantees local stability of the selecte
 
 The normalized-evidence manuscript establishes an analogous stability principle for a strict score margin.
 
-### 6.6 Entropic relaxation
+### 5.6 Entropic relaxation
 
 A discrete routing decision can be relaxed over the probability simplex
 
@@ -548,7 +353,7 @@ p_c\geq 0,\;
 
 The resulting Gibbs distributions provide continuous context weights and recover the hard decision in the appropriate large-\(\beta\) limit when the optimum is unique.
 
-### 6.7 PCH-ESM specialization
+### 5.7 PCH-ESM specialization
 
 PCH-ESM introduces structured context families through spectral or orthogonal decompositions.
 
@@ -558,7 +363,7 @@ This specialization is an application of the general routing theory, not a repla
 
 ---
 
-## 7. How the Framework Works
+## 6. How the Framework Works
 
 At a conceptual level, the routing process follows the same sequence across the manuscripts.
 
@@ -640,7 +445,7 @@ The exact mathematical assumptions and approximation guarantees must be checked 
 
 ---
 
-## 8. Computational Considerations
+## 7. Computational Considerations
 
 The manuscripts distinguish exact routing from approximate routing.
 
@@ -702,7 +507,7 @@ The practical value of this approach depends on whether sufficiently informative
 
 ---
 
-## 9. Relationship to Mixture of Experts
+## 8. Relationship to Mixture of Experts
 
 The manuscripts compare variational routing with conventional Mixture-of-Experts architectures.
 
@@ -739,92 +544,7 @@ The purpose of the comparison is to clarify the mathematical status of the decis
 
 ---
 
-## 10. Repository Structure
-
-A recommended organization is:
-
-    PCH-Variational-Routing/
-    |
-    |-- README.md
-    |-- LICENSE
-    |-- CITATION.cff
-    |
-    |-- docs/
-    |   |
-    |   |-- 01_context_selection_by_value_functions.tex
-    |   |-- 02_variational_routing_for_pch.tex
-    |   |-- 03_pch_esm_variational_routing.tex
-    |   |-- 04_normalized_gain_routing_extension.tex
-    |   |
-    |   |-- figures/
-    |   |
-    |   |-- supplementary/
-    |
-    |-- references/
-    |   |
-    |   |-- references.bib
-    |
-    |-- examples/
-    |   |
-    |   |-- analytical_examples.md
-    |
-    |-- implementation/
-    |   |
-    |   |-- README.md
-    |
-    |-- tests/
-    |   |
-    |   |-- README.md
-    |
-    |-- LICENSE
-
-This is a suggested structure. Directories such as `implementation/`, `tests/`, and `references/` should only be populated when their corresponding materials actually exist.
-
-The repository currently describes a theoretical document collection. The presence of a proposed directory structure does not imply that a software implementation, numerical benchmark, or automated test suite is already available.
-
----
-
-## 11. Requirements and Compilation
-
-The manuscripts are written in LaTeX.
-
-A standard LaTeX distribution such as TeX Live or MiKTeX should provide the required packages.
-
-The documents use packages including:
-
-- `amsmath`
-- `amssymb`
-- `amsfonts`
-- `amsthm`
-- `mathtools`
-- `booktabs`
-- `geometry`
-- `enumitem`
-- `hyperref`
-- `tikz`
-- `microtype`
-- `bm` where required
-
-### Compile a manuscript
-
-From the directory containing the chosen `.tex` file, run:
-
-    latexmk -pdf -interaction=nonstopmode -halt-on-error 01_context_selection_by_value_functions.tex
-
-Alternatively, using pdfLaTeX:
-
-    pdflatex 01_context_selection_by_value_functions.tex
-    pdflatex 01_context_selection_by_value_functions.tex
-
-Run the compilation process from the appropriate directory and ensure that all required figures, bibliography files, and dependencies are available.
-
-The manuscripts containing an embedded `thebibliography` environment do not require a separate BibTeX database for those references.
-
-Each manuscript should be compiled independently unless a common LaTeX project has explicitly been created.
-
----
-
-## 12. Current Scope and Limitations
+## 9. Current Scope and Limitations
 
 This repository should be understood as a **theoretical research collection**.
 
@@ -848,7 +568,7 @@ The theoretical guarantees should therefore be distinguished from numerical or e
 
 ---
 
-## 13. Mathematical Consistency and Verification Notes
+## 10. Mathematical Consistency and Verification Notes
 
 Before treating the manuscripts as a final publication-ready mathematical reference, the following details should be checked carefully.
 
@@ -888,7 +608,7 @@ F(w).
 
 The inequalities printed in the supplied reduced-value manuscripts should be corrected because their direction is reversed.
 
-### 13.2 Normalized-evidence equality claim
+### 10.2 Normalized-evidence equality claim
 
 The evidence manuscript defines
 
@@ -912,7 +632,7 @@ However, the statement that the score equals \(1\) if and only if the input is a
 
 That proposition should be revised before publication.
 
-### 13.3 Exact ties versus quasi-ties
+### 10.3 Exact ties versus quasi-ties
 
 The final geometric tie-breaker is presented lexicographically.
 
@@ -920,7 +640,7 @@ A lexicographic rule resolves exact ties in the first component.
 
 To resolve numerical quasi-ties, an explicit tolerance must also be defined, including its scale and its effect on the selection rule.
 
-### 13.4 Separation of routing formulations
+### 10.4 Separation of routing formulations
 
 The reduced-value score and normalized-evidence score are different mathematical quantities.
 
@@ -930,7 +650,7 @@ These verification notes are included to preserve mathematical clarity and shoul
 
 ---
 
-## 14. Research Roadmap
+## 11. Research Roadmap
 
 The manuscripts suggest several directions for further development.
 
@@ -963,7 +683,7 @@ These are research directions, not claims that the corresponding experiments or 
 
 ---
 
-## 15. References
+## 12. References
 
 The manuscripts draw on classical works in convex analysis, variational analysis, proximal optimization, and nonsmooth analysis.
 
@@ -980,17 +700,17 @@ The complete bibliographic entries are provided in the corresponding manuscripts
 
 ---
 
-## 16. Citation and Reuse
+## 13. Citation and Reuse
 
 When referring to this collection, cite the specific manuscript relevant to the mathematical result being discussed.
 
 Do not cite the entire repository as evidence for a theorem that appears only in one particular manuscript.
 
-A formal citation should be added once the authorship, publication information, and repository metadata have been finalized.
+
 
 ---
 
-## 17. Final Perspective
+## 14. Final Perspective
 
 The central contribution of this research collection is the study of context selection as a variational decision problem built around local PCH optimization problems.
 
@@ -1138,208 +858,13 @@ Cette décision peut-elle être rendue invariante aux changements additifs dépe
 
 ---
 
-## 4. Collection des documents et rôle de chaque manuscrit
-
-Le dépôt contient plusieurs manuscrits qui doivent être compris comme des documents scientifiques liés, et non automatiquement comme des implémentations indépendantes ou des modèles mathématiques interchangeables.
-
-### Document 1 — Sélection de contexte par fonctions valeur
-
-**Nom de fichier proposé :**
-
-`01_context_selection_by_value_functions.tex`
-
-**Titre :**
-
-*Sélection de contexte par fonctions valeur — Routage variationnel pour PCH*
-
-Ce manuscrit établit les fondements mathématiques du routage variationnel en dimension finie.
-
-Son objet central est la valeur réduite normalisée associée à chaque contexte :
-
-\[
-\widetilde V_c(w)
-=
-\inf_{u\in\mathbb R^d}
-\widetilde J_c(u;w).
-\]
-
-Le contexte sélectionné est défini par
-
-\[
-c^\star(w)
-\in
-\arg\min_{c\in\mathcal C}
-\widetilde V_c(w).
-\]
-
-Le manuscrit développe :
-
-- Le problème d'optimisation PCH dépendant du contexte.
-- La normalisation canonique par le paramètre de forte convexité.
-- Le lien entre les valeurs réduites et les enveloppes de Moreau.
-- La formulation exacte du routage.
-- La géométrie des régions de dominance contextuelle.
-- La régularité de la valeur globale de routage.
-- Le gradient généralisé de Clarke aux frontières de décision.
-- Le routage souple entropique.
-- Les approximations par pré-roulage court et la stabilité du routage.
-- Un exemple analytique en dimension un.
-
-**Rôle dans le projet :** formulation mathématique fondamentale du routage par valeurs réduites.
-
-### Document 2 — Routage variationnel pour PCH
-
-**Nom de fichier proposé :**
-
-`02_variational_routing_for_pch.tex`
-
-**Titre :**
-
-*Routage variationnel pour PCH — Choix du contexte comme problème d'optimisation*
-
-Ce manuscrit présente une formulation très proche du même cadre de routage variationnel en dimension finie.
-
-Il met particulièrement l'accent sur l'interprétation de la sélection contextuelle comme un problème d'optimisation sur
-
-\[
-\mathbb R^d\times\mathcal C.
-\]
-
-Son principe central reste
-
-\[
-c^\star(w)
-\in
-\arg\min_{c\in\mathcal C}
-\widetilde V_c(w).
-\]
-
-Il fournit une présentation complémentaire des éléments suivants :
-
-- Sélection exacte du contexte.
-- Optimisation proximale locale.
-- Fonctions valeur normalisées.
-- Cellules de décision et frontières de transition.
-- Relaxation entropique.
-- Stabilité sous une marge stricte.
-- Routage approché par itérations proximales finies.
-
-**Rôle dans le projet :** présentation alternative ou révisée du manuscrit fondateur consacré au routage par valeurs réduites.
-
-**Important :** les documents 1 et 2 présentent un chevauchement substantiel. Ils doivent être considérés comme des variantes de manuscrit, sauf si une comparaison éditoriale finale établit une raison spécifique de les conserver comme publications distinctes.
-
-### Document 3 — PCH-ESM et routage variationnel
-
-**Nom de fichier proposé :**
-
-`03_pch_esm_variational_routing.tex`
-
-**Titre :**
-
-*Routage variationnel PCH-ESM — Sélection de contexte par fonctions valeur et changement de paradigme*
-
-Ce manuscrit étend la formulation fondamentale du routage.
-
-Il passe de la présentation en dimension finie vers une formulation sur espace de Hilbert et développe l'interprétation du routage comme mécanisme de décision induit par une famille de fonctions valeur locales.
-
-Ses principaux sujets sont :
-
-- La formulation par enveloppe inférieure des fonctions valeur.
-- La géométrie de décision variationnelle.
-- Les régions de dominance contextuelle et leurs frontières.
-- La stabilité sous une marge positive.
-- Un certificat fondé sur des bornes inférieures et supérieures.
-- Le routage souple entropique.
-- La complexité calculatoire du routage exhaustif.
-- La comparaison avec les architectures classiques de type Mixture of Experts.
-- La spécialisation spectrale par PCH-ESM.
-- Les propriétés de projection orthogonale et de reconstruction.
-- Le consensus pondéré par variance inverse sous des hypothèses statistiques explicites.
-- Des exemples illustratifs en dimension un et en dimension deux.
-
-La relation centrale est
-
-\[
-F(w)
-=
-\min_{c\in\mathcal C}\widetilde V_c(w).
-\]
-
-Le manuscrit interprète l'enveloppe inférieure ainsi obtenue comme l'objet mathématique qui induit la décision de routage.
-
-**Rôle dans le projet :** généralisation et spécialisation structurée du routage par valeurs réduites, avec une application à PCH-ESM.
-
-### Document 4 — Extension du routage par évidence normalisée
-
-**Nom de fichier proposé :**
-
-`04_normalized_gain_routing_extension.tex`
-
-**Titre :**
-
-*Extension théorique du routage contextuel dans le noyau PCH*
-
-Ce manuscrit introduit un critère supplémentaire de routage fondé sur l'amélioration normalisée produite par chaque contexte.
-
-Pour un contexte \(c\), on définit la réduction d'énergie
-
-\[
-\Delta_{\alpha,c}(w)
-=
-\widehat J_{\alpha,c}(w;w)
--
-\widehat J_{\alpha,c}
-\left(
-u^\star_{\alpha,c}(w);w
-\right).
-\]
-
-Le score d'évidence normalisée correspondant est
-
-\[
-\mathcal R_{\alpha,c}(w)
-=
-\frac{
-\Delta_{\alpha,c}(w)
-}{
-\widehat J_{\alpha,c}(w;w)+\varepsilon
-},
-\qquad \varepsilon>0.
-\]
-
-Le contexte sélectionné est
-
-\[
-c^\star_\alpha(w)
-\in
-\arg\max_{c\in\mathcal C}
-\mathcal R_{\alpha,c}(w).
-\]
-
-Ce manuscrit développe également :
-
-- L'invariance du gain énergétique aux décalages additifs dépendant du contexte.
-- La sélection du contexte par évidence normalisée.
-- La stabilité sous une marge stricte du score.
-- Le routage probabiliste de Gibbs.
-- Les certificats d'évidence par pré-roulage court.
-- Les garanties de routage en nombre fini d'itérations sous des hypothèses appropriées.
-- Un départage géométrique fondé sur le projecteur limite \(P_0\).
-- Une règle finale de routage lexicographique.
-
-**Rôle dans le projet :** critère de routage alternatif fondé sur le gain de purification normalisé, plutôt que sur la minimisation de la valeur réduite.
-
-**Important :** il ne s'agit pas simplement d'une autre notation de la règle par valeur réduite. Ce manuscrit définit un critère de décision différent, qui doit être étudié comme une extension distincte.
-
----
-
-## 5. Les deux principaux principes de routage
+## 4. Les deux principaux principes de routage
 
 L'un des objectifs importants du dépôt est de distinguer clairement les deux approches mathématiques.
 
 Elles sont liées, mais ne sont pas généralement équivalentes.
 
-### 5.1 Routage par valeur réduite
+### 4.1 Routage par valeur réduite
 
 Pour chaque contexte, on définit
 
@@ -1384,7 +909,7 @@ p_c^\star(w)
 }.
 \]
 
-### 5.2 Routage par évidence normalisée
+### 4.2 Routage par évidence normalisée
 
 Pour chaque contexte, on calcule sa réduction d'énergie normalisée :
 
@@ -1427,7 +952,7 @@ Sa version probabiliste est
 }.
 \]
 
-### 5.3 Différence conceptuelle
+### 4.3 Différence conceptuelle
 
 | Aspect | Routage par valeur réduite | Routage par évidence normalisée |
 |---|---|---|
@@ -1444,17 +969,17 @@ Le critère approprié dépend de l'interprétation recherchée pour la sélecti
 
 ---
 
-## 6. Fondements mathématiques
+## 5. Fondements mathématiques
 
 Les manuscrits mobilisent plusieurs domaines classiques des mathématiques.
 
-### 6.1 Analyse convexe
+### 5.1 Analyse convexe
 
 Chaque contexte est associé à un problème d'optimisation convexe.
 
 Sous les hypothèses retenues, le terme quadratique de proximité et la régularisation ridge assurent la forte convexité et donc l'unicité du minimiseur local.
 
-### 6.2 Opérateurs proximaux
+### 5.2 Opérateurs proximaux
 
 Après normalisation, le minimiseur local peut être représenté par
 
@@ -1466,7 +991,7 @@ u_c^\star(w)
 
 Cela relie la purification contextuelle PCH à l'optimisation proximale.
 
-### 6.3 Enveloppes de Moreau
+### 5.3 Enveloppes de Moreau
 
 La valeur réduite normalisée est
 
@@ -1485,7 +1010,7 @@ Sous les hypothèses classiques sur \(g_c\), cette fonction valeur est continûm
 \left(w-u_c^\star(w)\right).
 \]
 
-### 6.4 Géométrie de décision variationnelle
+### 5.4 Géométrie de décision variationnelle
 
 La valeur de routage est l'enveloppe inférieure
 
@@ -1513,7 +1038,7 @@ w:
 
 Les frontières de décision correspondent aux points où plusieurs contextes atteignent simultanément le minimum.
 
-### 6.5 Stabilité par marge
+### 5.5 Stabilité par marge
 
 Supposons qu'un contexte \(c^\star\) soit optimal de manière unique et vérifie
 
@@ -1533,7 +1058,7 @@ La continuité des fonctions valeur garantit alors la stabilité locale du conte
 
 Le manuscrit sur l'évidence normalisée établit un principe analogue de stabilité pour une marge stricte entre les scores.
 
-### 6.6 Relaxation entropique
+### 5.6 Relaxation entropique
 
 Une décision discrète de routage peut être relaxée sur le simplexe des probabilités
 
@@ -1549,7 +1074,7 @@ p_c\geq 0,\;
 
 Les distributions de Gibbs obtenues fournissent des poids contextuels continus et retrouvent la décision dure dans la limite appropriée lorsque l'optimum est unique.
 
-### 6.7 Spécialisation PCH-ESM
+### 5.7 Spécialisation PCH-ESM
 
 PCH-ESM introduit des familles structurées de contextes au moyen de décompositions spectrales ou orthogonales.
 
@@ -1559,7 +1084,7 @@ Cette spécialisation constitue une application de la théorie générale du rou
 
 ---
 
-## 7. Fonctionnement général du cadre
+## 6. Fonctionnement général du cadre
 
 À un niveau conceptuel, le processus de routage suit la même séquence dans les différents manuscrits.
 
@@ -1641,7 +1166,7 @@ Les hypothèses mathématiques exactes et les garanties d'approximation doivent 
 
 ---
 
-## 8. Considérations calculatoires
+## 7. Considérations calculatoires
 
 Les manuscrits distinguent le routage exact du routage approché.
 
@@ -1703,7 +1228,7 @@ L'intérêt pratique de cette approche dépend de la possibilité de calculer ef
 
 ---
 
-## 9. Relation avec les Mixture of Experts
+## 8. Relation avec les Mixture of Experts
 
 Les manuscrits comparent le routage variationnel aux architectures classiques de type Mixture of Experts.
 
@@ -1738,94 +1263,10 @@ Les approches présentent des compromis différents :
 
 L'objectif de la comparaison est de clarifier le statut mathématique de la décision, et non d'affirmer qu'une architecture domine toutes les autres.
 
----
-
-## 10. Organisation du dépôt
-
-Une organisation recommandée est la suivante :
-
-    PCH-Variational-Routing/
-    |
-    |-- README.md
-    |-- LICENSE
-    |-- CITATION.cff
-    |
-    |-- docs/
-    |   |
-    |   |-- 01_context_selection_by_value_functions.tex
-    |   |-- 02_variational_routing_for_pch.tex
-    |   |-- 03_pch_esm_variational_routing.tex
-    |   |-- 04_normalized_gain_routing_extension.tex
-    |   |
-    |   |-- figures/
-    |   |
-    |   |-- supplementary/
-    |
-    |-- references/
-    |   |
-    |   |-- references.bib
-    |
-    |-- examples/
-    |   |
-    |   |-- analytical_examples.md
-    |
-    |-- implementation/
-    |   |
-    |   |-- README.md
-    |
-    |-- tests/
-    |   |
-    |   |-- README.md
-    |
-    |-- LICENSE
-
-Il s'agit d'une organisation proposée. Les répertoires tels que `implementation/`, `tests/` et `references/` ne doivent être remplis que lorsque les éléments correspondants existent réellement.
-
-Le dépôt décrit actuellement une collection de documents théoriques. La présence d'une arborescence proposée ne signifie pas qu'une implémentation logicielle, un benchmark numérique ou une suite de tests automatisés sont déjà disponibles.
 
 ---
 
-## 11. Prérequis et compilation
-
-Les manuscrits sont écrits en LaTeX.
-
-Une distribution LaTeX standard, telle que TeX Live ou MiKTeX, doit fournir les packages nécessaires.
-
-Les documents utilisent notamment :
-
-- `amsmath`
-- `amssymb`
-- `amsfonts`
-- `amsthm`
-- `mathtools`
-- `booktabs`
-- `geometry`
-- `enumitem`
-- `hyperref`
-- `tikz`
-- `microtype`
-- `bm` lorsque nécessaire
-
-### Compiler un manuscrit
-
-Depuis le répertoire contenant le fichier `.tex` choisi, exécuter :
-
-    latexmk -pdf -interaction=nonstopmode -halt-on-error 01_context_selection_by_value_functions.tex
-
-Une compilation avec pdfLaTeX est également possible :
-
-    pdflatex 01_context_selection_by_value_functions.tex
-    pdflatex 01_context_selection_by_value_functions.tex
-
-La compilation doit être exécutée depuis le répertoire approprié, en veillant à ce que toutes les figures, bibliographies et dépendances nécessaires soient disponibles.
-
-Les manuscrits qui contiennent directement un environnement `thebibliography` n'ont pas besoin d'une base BibTeX séparée pour ces références.
-
-Chaque manuscrit doit être compilé indépendamment, sauf si un projet LaTeX commun a explicitement été créé.
-
----
-
-## 12. Portée actuelle et limites
+## 9. Portée actuelle et limites
 
 Ce dépôt doit être considéré comme une **collection de travaux de recherche théoriques**.
 
@@ -1849,11 +1290,11 @@ Les garanties théoriques doivent donc être distinguées des affirmations numé
 
 ---
 
-## 13. Cohérence mathématique et points de vérification
+## 10. Cohérence mathématique et points de vérification
 
 Avant de considérer les manuscrits comme une référence mathématique définitive prête à être publiée, certains points doivent être vérifiés avec attention.
 
-### 13.1 Inégalité du soft-min
+### 10.1 Inégalité du soft-min
 
 Pour le routage par valeurs réduites, on définit
 
@@ -1889,7 +1330,7 @@ F(w).
 
 Les inégalités imprimées dans les manuscrits consacrés aux valeurs réduites doivent être corrigées, car leur sens est inversé.
 
-### 13.2 Affirmation sur l'égalité du score d'évidence normalisée
+### 10.2 Affirmation sur l'égalité du score d'évidence normalisée
 
 Le manuscrit sur l'évidence définit
 
@@ -1913,7 +1354,7 @@ En revanche, l'affirmation selon laquelle le score est égal à \(1\) si et seul
 
 Cette proposition doit être révisée avant publication.
 
-### 13.3 Égalités exactes et quasi-égalités
+### 10.3 Égalités exactes et quasi-égalités
 
 Le départage géométrique final est présenté sous forme lexicographique.
 
@@ -1921,7 +1362,7 @@ Une règle lexicographique départage les égalités exactes dans la première c
 
 Pour traiter des quasi-égalités numériques, il faut également définir une tolérance explicite, son échelle et son effet sur la règle de sélection.
 
-### 13.4 Séparation des formulations de routage
+### 10.4 Séparation des formulations de routage
 
 Le score par valeur réduite et le score par évidence normalisée sont des quantités mathématiques différentes.
 
@@ -1931,7 +1372,7 @@ Ces points de vérification sont indiqués dans un souci de rigueur mathématiqu
 
 ---
 
-## 14. Perspectives de recherche
+## 11. Perspectives de recherche
 
 Les manuscrits suggèrent plusieurs directions de développement.
 
@@ -1964,7 +1405,7 @@ Il s'agit de directions de recherche, et non d'affirmations selon lesquelles les
 
 ---
 
-## 15. Références
+## 12. Références
 
 Les manuscrits s'appuient sur des travaux classiques en analyse convexe, analyse variationnelle, optimisation proximale et analyse non lisse.
 
@@ -1981,17 +1422,16 @@ Les références bibliographiques complètes sont indiquées dans les manuscrits
 
 ---
 
-## 16. Citation et réutilisation
+## 13. Citation et réutilisation
 
 Lorsqu'un résultat est repris de cette collection, il convient de citer le manuscrit précis dans lequel il est établi.
 
 Il ne faut pas citer l'ensemble du dépôt comme preuve d'un théorème qui n'apparaît que dans un manuscrit particulier.
 
-Une citation formelle pourra être ajoutée une fois les informations relatives aux auteurs, à la publication et aux métadonnées du dépôt finalisées.
 
 ---
 
-## 17. Perspective finale
+## 14. Perspective finale
 
 La contribution centrale de cette collection de recherche est l'étude de la sélection contextuelle comme problème de décision variationnel construit à partir des problèmes d'optimisation locaux de PCH.
 
