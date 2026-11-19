@@ -1,0 +1,824 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------------------------------
+% Encodage, langue, typographie
+% -------------------------------------------------
+\usepackage[french]{babel}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% -------------------------------------------------
+% Mathématiques
+% -------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{enumitem}
+
+% -------------------------------------------------
+% Liens
+% -------------------------------------------------
+\usepackage[hidelinks]{hyperref}
+
+% -------------------------------------------------
+% Police (XeLaTeX)
+% -------------------------------------------------
+\setmainfont{TeX Gyre Pagella}
+
+% -------------------------------------------------
+% Environnements
+% -------------------------------------------------
+\newtheorem{definition}{Définition}[section]
+\newtheorem{assumption}{Hypothèse}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{remark}{Remarque}[section]
+
+% -------------------------------------------------
+% Opérateurs
+% -------------------------------------------------
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\KL}{KL}
+\DeclareMathOperator{\Id}{Id}
+\DeclareMathOperator{\softmax}{softmax}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Tr}{Tr}
+
+% -------------------------------------------------
+% Raccourcis
+% -------------------------------------------------
+\newcommand{\X}{\mathcal X}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\E}{\mathcal E}
+\newcommand{\Z}{\mathcal Z}
+\newcommand{\Hh}{\mathcal H}
+\newcommand{\I}{\mathcal I}
+\newcommand{\T}{\mathcal T}
+\newcommand{\W}{\mathcal W}
+\newcommand{\N}{\mathcal N}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Qcal}{\mathcal Q}
+\newcommand{\Gcal}{\mathcal G}
+\newcommand{\Mcal}{\mathcal M}
+\newcommand{\1}{\mathbf 1}
+
+\title{PCH-ESM\\
+\large Purification Contextuelle Hiérarchique et Espaces Sémantiques Modulaires}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce document formalise une théorie d'architecture pour systèmes séquentiels et modèles de langage, fondée sur deux idées centrales :
+(i) la purification récursive d'une représentation dans un contexte donné, et
+(ii) la décomposition hiérarchique d'un espace sémantique global en sous-espaces spécialisés coordonnés.
+La théorie distingue explicitement la représentation, la stabilité contextuelle, la hiérarchie, la spécialisation, la coordination inter-espaces, et la fonction de distillation \(G\) qui transfère la structure de trajectoire d'un modèle généraliste vers un ensemble de modèles spécialisés.
+\end{abstract}
+
+\tableofcontents
+
+% =================================================
+\section{Cadre général et intuition mathématique}
+% =================================================
+
+L'idée centrale de PCH-ESM est la suivante.
+
+Un objet séquentiel \(x\) n'est pas traité comme une simple suite de symboles ou de vecteurs, mais comme une représentation située dans un espace de latent sémantique, sous contrainte d'un contexte \(c\). La bonne représentation n'est pas seulement celle qui prédit bien, mais celle qui \emph{résiste} à une purification récursive adaptée au contexte.
+
+Autrement dit, la stabilité devient une notion \emph{contextuelle}, et non absolue. Cette stabilité se décline ensuite en une structure hiérarchique, puis en un réseau de sous-espaces spécialisés, chacun muni d'agents et de règles de coordination.
+
+% =================================================
+\section{Notation et objets primitifs}
+% =================================================
+
+\begin{definition}[Espaces de base]
+On fixe :
+
+\begin{itemize}[leftmargin=2em]
+    \item un espace de données \(\X\) ;
+    \item un espace de contextes \(\C\) ;
+    \item un espace de tâches \(\T\) ;
+    \item un espace latent sémantique global \(\Z \subseteq \Hh\), où \(\Hh\) est un espace de Hilbert réel ;
+    \item une famille d'espaces sémantiques spécialisés \(\{\E_i\}_{i\in\I}\), chacun étant aussi un espace de Hilbert réel.
+\end{itemize}
+
+Un contexte est un élément
+\[
+c = (d,\tau,\beta,\kappa)\in \C,
+\]
+où \(d\) désigne un domaine, \(\tau\) une tâche, \(\beta\) un budget de calcul ou de mémoire, et \(\kappa\) un ensemble de contraintes matérielles ou opérationnelles.
+\end{definition}
+
+\begin{remark}
+Le contexte est donc plus riche qu'une simple étiquette de domaine : il encode la tâche, le coût admissible, le matériel, et les contraintes de routage ou de spécialisation.
+\end{remark}
+
+% =================================================
+\section{Purification Contextuelle Hiérarchique (PCH)}
+% =================================================
+
+\subsection{Fonction de stabilité contextuelle}
+
+\begin{definition}[Fonctionnelle de stabilité]
+On appelle \emph{fonctionnelle de stabilité contextuelle} toute application
+\[
+J : \Z \times \C \to \R \cup \{+\infty\},
+\]
+telle que, pour un contexte fixé \(c\), la quantité \(J(\cdot;c)\) mesure le coût d'instabilité d'une représentation latente.
+Une valeur plus petite de \(J(z;c)\) signifie une représentation plus stable dans le contexte \(c\).
+\end{definition}
+
+\begin{definition}[Opérateur de purification contextuelle]
+Pour un paramètre \(\lambda>0\), on définit l'opérateur de purification contextuelle par
+\[
+\Pcal_\lambda(z;c)
+\;:=\;
+\prox_{\lambda J(\cdot;c)}(z)
+\;=\;
+\argmin_{u\in\Z}
+\left\{
+J(u;c)
++
+\frac{1}{2\lambda}\|u-z\|^2
+\right\}.
+\]
+\end{definition}
+
+Cet opérateur réalise une mise à jour qui concilie deux exigences :
+\begin{enumerate}[leftmargin=2em]
+    \item rester proche de l'état courant \(z\) ;
+    \item se déplacer vers un état plus stable dans le contexte \(c\).
+\end{enumerate}
+
+\subsection{Récursion et noyau terminal}
+
+\begin{definition}[Purification récursive]
+Soit \(x\in\X\) une donnée d'entrée et soit \(E_\theta:\X\to\Z\) un encodeur.
+On définit la récursion de purification par
+\[
+z^{(0)} = E_\theta(x),
+\qquad
+z^{(r+1)} = \Pcal_\lambda\!\bigl(z^{(r)};c\bigr),
+\quad r\ge 0.
+\]
+\end{definition}
+
+\begin{definition}[Noyau terminal]
+On appelle \emph{noyau terminal} la limite, lorsqu'elle existe,
+\[
+N^\star(x,c) = \lim_{r\to\infty} z^{(r)}.
+\]
+Si la limite est approchée numériquement à une profondeur finie \(r^\star\), on note
+\[
+N^\star(x,c) \approx z^{(r^\star)}.
+\]
+\end{definition}
+
+\begin{definition}[Résidu]
+Le résidu associé au noyau terminal est défini par
+\[
+R^{(0)}(x,c) = z^{(0)} - N^\star(x,c).
+\]
+\end{definition}
+
+\subsection{Purification guidée du résidu}
+
+L'idée essentielle est que le résidu ne doit pas être considéré comme un simple bruit à supprimer, mais comme une structure encore potentiellement reconstructible à l'aide du noyau terminal.
+
+\begin{definition}[Purification guidée du résidu]
+On définit un opérateur de purification guidée du résidu par
+\[
+\Qcal_\lambda(r;N^\star,c)
+=
+\argmin_{u\in\Z}
+\left\{
+J_{\mathrm{res}}(u;N^\star,c)
++
+\frac{1}{2\lambda}\|u-r\|^2
+\right\},
+\]
+où \(J_{\mathrm{res}}\) est une fonctionnelle de stabilité du résidu, conditionnée par le noyau terminal \(N^\star\).
+La récursion guidée est
+\[
+r^{(0)} = R^{(0)}(x,c),
+\qquad
+r^{(s+1)} = \Qcal_\lambda\!\bigl(r^{(s)};N^\star,c\bigr).
+\]
+Le résidu final est noté \(\widetilde R(x,c)\).
+\end{definition}
+
+\subsection{Représentation finale}
+
+\begin{definition}[Représentation PCH]
+La représentation finale d'un exemple \(x\) dans le contexte \(c\) est donnée par
+\[
+h(x,c)
+=
+\Gamma\!\Bigl(
+N^\star(x,c),
+\widetilde R(x,c),
+\{z^{(r)}\}_{r=0}^{r^\star}
+\Bigr),
+\]
+où \(\Gamma\) est un agrégateur (projection, attention, pooling, fusion non linéaire, ou combinaison de ces éléments).
+\end{definition}
+
+\begin{theorem}[Convergence de la purification récursive]
+Supposons que, pour tout contexte \(c\), la fonctionnelle \(J(\cdot;c)\) soit propre, fermée, convexe, et que l'ensemble des minimisateurs soit non vide. Alors la suite définie par
+\[
+z^{(r+1)}=\Pcal_\lambda(z^{(r)};c)
+\]
+converge vers un minimisateur de \(J(\cdot;c)\). Si \(J(\cdot;c)\) est en outre strictement convexe, la limite est unique.
+\end{theorem}
+
+\begin{proof}
+C'est une conséquence classique des propriétés de l'opérateur proximal : il est fermement non expansif pour une fonction convexe propre fermée, et l'itération proximale est Fejér-monotone par rapport à l'ensemble des minimisateurs. La stricte convexité assure l'unicité du minimisateur.
+\end{proof}
+
+\begin{remark}
+Dans cette formalisation, le noyau terminal n'est pas un simple lissage ; il est l'état stable optimal au sens de la fonctionnelle \(J\) conditionnée par le contexte.
+\end{remark}
+
+% =================================================
+\section{L'attention standard comme cas plat de PCH}
+% =================================================
+
+On considère une séquence latente
+\[
+Z=(z_1,\dots,z_T),\qquad z_t\in\Z.
+\]
+
+L'attention standard s'écrit, pour chaque position \(i\),
+\[
+a_{ij}
+=
+\frac{\exp\!\left(s_{ij}\right)}{\sum_{\ell=1}^T \exp\!\left(s_{i\ell}\right)},
+\qquad
+o_i = \sum_{j=1}^T a_{ij} v_j,
+\]
+avec typiquement
+\[
+s_{ij} = \frac{\langle q_i,k_j\rangle}{\sqrt{d}}.
+\]
+
+\begin{proposition}[Cas plat]
+L'attention standard peut être vue comme un cas limite de PCH lorsque :
+\begin{enumerate}[leftmargin=2em]
+    \item la hiérarchie a profondeur \(1\) ;
+    \item le score contextuel est bilinéaire ;
+    \item la règle de sélection est une normalisation de Gibbs ;
+    \item la fusion est une moyenne pondérée des valeurs.
+\end{enumerate}
+Dans ce cas, le mécanisme QKV n'est pas la théorie fondamentale, mais une implémentation particulière d'un opérateur de sélection contextuelle plat.
+\end{proposition}
+
+\begin{remark}
+Cette lecture ne remplace pas l'attention par PCH au sens naïf ; elle considère plutôt l'attention comme le \emph{cas dégénéré} d'un principe plus général de sélection par stabilité contextuelle.
+\end{remark}
+
+% =================================================
+\section{PH adaptative : purification des poids et méta-stabilité}
+% =================================================
+
+L'idée d'une PH adaptative est que non seulement les états latents, mais aussi les paramètres du modèle, peuvent être traités comme des objets soumis à purification.
+
+\begin{definition}[Espace des paramètres]
+Soit \(\Theta\) l'espace des paramètres d'un modèle. On définit une fonctionnelle de stabilité des paramètres
+\[
+\mathcal J : \Theta \times \C \to \R\cup\{+\infty\}.
+\]
+\end{definition}
+
+\begin{definition}[Purification des paramètres]
+Pour un paramètre \(\eta>0\), on définit
+\[
+\Qcal_\eta(\Theta;c)
+=
+\argmin_{\Xi\in\Theta}
+\left\{
+\mathcal J(\Xi;c)
++
+\frac{1}{2\eta}\|\Xi-\Theta\|^2
+\right\}.
+\]
+La récursion paramétrique est alors
+\[
+\Theta^{(r+1)} = \Qcal_\eta(\Theta^{(r)};c).
+\]
+\end{definition}
+
+\begin{remark}
+Dans cette perspective, les poids d'un modèle ne sont pas seulement des coefficients appris ; ils constituent une mémoire compressée, donc potentiellement purifiable. La PH adaptative permet de traiter cette mémoire paramétrique comme un objet dynamique et contextuel.
+\end{remark}
+
+% =================================================
+\section{Multi-ES : espaces sémantiques modulaires et hiérarchiques}
+% =================================================
+
+Cette section formalise la partie la plus importante de la théorie, car elle décrit la décentralisation de l'espace sémantique, la spécialisation locale, la coordination globale, la gestion du calcul et de la mémoire, ainsi que l'émergence de trajectoires de pensée traçables.
+
+\subsection{Définition générale}
+
+\begin{definition}[Système Multi-ES]
+Un système Multi-ES est un tuple
+\[
+\mathfrak M
+=
+\Bigl(
+\E_G,
+\{\E_i\}_{i=1}^n,
+\{\Pi_i,\iota_i,\Pcal_i,\pi_i\}_{i=1}^n,
+\Gcal,
+r,
+\Gamma
+\Bigr),
+\]
+où :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\E_G\) est l'espace sémantique global ;
+    \item \(\E_i\) est le \(i\)-ème espace sémantique spécialisé ;
+    \item \(\Pi_i:\E_G\to\E_i\) est la projection locale ;
+    \item \(\iota_i:\E_i\to\E_G\) est l'injection ou remontée vers l'espace global ;
+    \item \(\Pcal_i\) est l'opérateur local de purification dans \(\E_i\) ;
+    \item \(\pi_i\) est l'agent ou politique locale responsable de \(\E_i\) ;
+    \item \(\Gcal\) est un graphe orienté acyclique de dépendances entre espaces ;
+    \item \(r\) est une politique de routage ;
+    \item \(\Gamma\) est l'opérateur de fusion globale.
+\end{itemize}
+\end{definition}
+
+\subsection{Coherence entre espace global et espaces locaux}
+
+\begin{assumption}[Compatibilité des projections]
+Pour tout \(i\in\{1,\dots,n\}\),
+\[
+\Pi_i\circ \iota_i = \Id_{\E_i}.
+\]
+De plus, pour tout \(z\in\E_G\), l'assemblage des composantes locales reconstruit approximativement l'état global :
+\[
+\left\| z - \Gamma\bigl(\iota_1\Pi_1 z,\dots,\iota_n\Pi_n z\bigr)\right\|
+\le \varepsilon_{\mathrm{coh}}.
+\]
+\end{assumption}
+
+\begin{remark}
+Cette condition exprime le fait qu'un espace global peut être décomposé en sous-espaces spécialisés sans perdre complètement sa cohérence, à condition que la fusion et les projections soient compatibles.
+\end{remark}
+
+\subsection{Graphe hiérarchique de collaboration}
+
+On considère un graphe orienté acyclique
+\[
+\Gcal=(\I,\mathcal E),
+\]
+dont les sommets sont les espaces spécialisés et dont les arêtes représentent des canaux de communication, de dépendance ou de transfert de contexte.
+
+\begin{definition}[Trajectoire de pensée]
+Une trajectoire de pensée est une suite finie
+\[
+\tau
+=
+\bigl((i_1,z_1,m_1),(i_2,z_2,m_2),\dots,(i_T,z_T,m_T)\bigr),
+\]
+où \(i_t\in\I\) est l'espace actif à l'instant \(t\), \(z_t\in\E_{i_t}\) l'état local, et \(m_t\) un message ou une mise à jour émise vers d'autres espaces.
+\end{definition}
+
+\begin{remark}
+Cette définition rend la trajectoire de calcul explicitement observable. Le modèle n'est plus seulement une boîte noire qui produit une sortie ; il devient un système dont le cheminement interne peut être inspecté.
+\end{remark}
+
+\subsection{Routage et activation sparse}
+
+\begin{definition}[Politique de routage]
+La politique de routage est une application
+\[
+r:\E_G\times\C \to \Delta(\I),
+\]
+où \(\Delta(\I)\) désigne le simplexe des distributions sur \(\I\).
+Pour un état global \(z\) et un contexte \(c\), la politique \(r(z,c)\) donne la probabilité ou la pondération d'activation des différents espaces.
+On impose souvent une sparsité :
+\[
+|\supp(r(z,c))|\le k \ll n.
+\]
+\end{definition}
+
+\begin{remark}
+Cette sparsité formalise la gestion locale du calcul matriciel et de la mémoire : tous les espaces ne sont pas activés simultanément, seuls ceux jugés pertinents par le contexte participent à la computation.
+\end{remark}
+
+\subsection{Agents responsables d'espaces}
+
+\begin{definition}[Agent local]
+Un agent local \(A_i\) est le triplet
+\[
+A_i = (\pi_i,\Pcal_i,\Theta_i),
+\]
+où \(\pi_i\) est la politique de décision locale, \(\Pcal_i\) l'opérateur de purification associé, et \(\Theta_i\) les paramètres internes de l'agent.
+\end{definition}
+
+Chaque agent est responsable d'un espace sémantique particulier, mais peut communiquer avec les autres agents via le graphe \(\Gcal\).
+
+\begin{definition}[Mise à jour locale]
+Si l'agent \(A_i\) est activé à l'instant \(t\), ses paramètres sont mis à jour par
+\[
+\Theta_i^{t+1}
+=
+\Theta_i^t
+-
+\eta_t \nabla_{\Theta_i}\mathcal L_i^t,
+\]
+tandis que les autres paramètres restent inchangés ou subissent une mise à jour nulle.
+\end{definition}
+
+\subsection{Traçabilité et déterminisme}
+
+\begin{proposition}[Traçabilité]
+Si la politique de routage \(r\), les opérateurs locaux \(\Pcal_i\), et l'opérateur de fusion \(\Gamma\) sont déterministes, alors la trajectoire \(\tau\) produite par le système Multi-ES est elle-même déterministe pour une entrée et un contexte donnés.
+\end{proposition}
+
+\begin{remark}
+Le déterminisme n'est donc pas automatique ; il doit être imposé. En revanche, l'architecture Multi-ES rend cette propriété plus facile à contrôler qu'un grand espace sémantique monolithique.
+\end{remark}
+
+\subsection{Coherence locale et généralisation globale}
+
+Le point essentiel est que la spécialisation renforce la compétence locale mais fragilise la généralisation globale si aucune couche de coordination n'existe.
+
+On distingue donc :
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{généralisation locale} : bonne performance sur le domaine propre de l'espace spécialisé ;
+    \item \textbf{généralisation globale} : bonne performance sur des tâches transversales, hors domaine initial, et sur des compositions multi-domaines.
+\end{itemize}
+
+L'architecture Multi-ES seule ne garantit pas la généralisation globale. Celle-ci doit être reconstruite par une fonction de coordination, notée \(G\), définie plus loin.
+
+% =================================================
+\section{La fonction \(G\) : distillation de trajectoires et coordination inter-espaces}
+% =================================================
+
+On suppose maintenant l'existence :
+
+\begin{itemize}[leftmargin=2em]
+    \item d'un modèle généraliste \(M_G\) entraîné sur un corpus multi-disciplinaire ;
+    \item d'une famille de modèles spécialisés \(\{M_i\}_{i=1}^n\), chacun entraîné sur un sous-domaine \(D_i\).
+\end{itemize}
+
+Le point clé n'est pas de distiller seulement des \emph{réponses}, mais de distiller des \emph{trajectoires de coordination}.
+
+\subsection{Modèle généraliste}
+
+Le modèle généraliste induit une politique de trajectoire
+\[
+\pi_G^{\mathrm{tr}}(\tau \mid x,c),
+\]
+où \(\tau\) est une trajectoire de pensée, de routage, de consultation d'experts et de fusion.
+
+Le modèle généraliste apprend ainsi non seulement des connaissances, mais surtout des \emph{transitions inter-domaines}.
+
+\subsection{Modèles spécialisés}
+
+Chaque modèle spécialisé \(M_i\) est entraîné sur un domaine \(D_i\). Il doit être fort localement, c'est-à-dire performant sur son domaine, mais aussi apprendre à collaborer hors de son domaine.
+
+On introduit un indicateur de domaine
+\[
+m_i(x)=
+\begin{cases}
+1 & \text{si } x\in D_i,\\
+0 & \text{sinon.}
+\end{cases}
+\]
+
+\subsection{Objectif de coordination}
+
+L'objectif n'est pas que l'agent mathématique imite le comportement mathématique du généraliste sur son propre domaine, puisqu'il le maîtrise déjà localement. L'objectif est qu'il apprenne \emph{quand et comment déléguer} ou coopérer lorsque le problème sort de son périmètre initial.
+
+On sépare donc deux régimes :
+
+\[
+\text{si } m_i(x)=1,\quad \text{compétence locale forte};
+\]
+\[
+\text{si } m_i(x)=0,\quad \text{coordination inter-spécialités}.
+\]
+
+\begin{definition}[Perte locale-coordination]
+Pour le modèle \(M_i\), on définit
+\[
+\mathcal L_i
+=
+\mathbb E_{(x,y)\sim D_i}
+\Bigl[
+m_i(x)\,\mathcal L_i^{\mathrm{loc}}(x,y)
++
+(1-m_i(x))\,\mathcal L_i^{\mathrm{coord}}(x)
+\Bigr]
++
+\lambda_i \mathcal L_i^{\mathrm{reg}}.
+\]
+\end{definition}
+
+Ici :
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathcal L_i^{\mathrm{loc}}\) mesure la compétence spécialisée ;
+    \item \(\mathcal L_i^{\mathrm{coord}}\) mesure l'alignement avec les trajectoires du modèle généraliste hors domaine ;
+    \item \(\mathcal L_i^{\mathrm{reg}}\) régularise le modèle ;
+    \item \(\lambda_i>0\) pondère la régularisation.
+\end{itemize}
+
+\subsection{Définition de la fonction \(G\)}
+
+\begin{definition}[Fonction de coordination \(G\)]
+La fonction \(G\) est une application de distillation qui transforme les trajectoires générales en politiques locales coordonnées :
+\[
+G:\ \pi_G^{\mathrm{tr}} \longmapsto \{\pi_i^{\mathrm{coord}}\}_{i=1}^n.
+\]
+Plus précisément, \(G\) est obtenu par minimisation d'une divergence entre la trajectoire générale et la trajectoire produite par le système spécialisé :
+\[
+G^\star
+=
+\argmin_{G}
+\;
+\mathbb E_{(x,c)\sim \mathcal D}
+\left[
+\KL\!\left(
+\pi_G^{\mathrm{tr}}(\cdot\mid x,c)
+\;\middle\|\;
+\pi_{G}^{\mathrm{spec}}(\cdot\mid x,c)
+\right)
+\right],
+\]
+sous contraintes de compétence locale sur chaque sous-domaine \(D_i\).
+\end{definition}
+
+\begin{remark}
+La fonction \(G\) ne transfère pas la connaissance brute d'un modèle généraliste vers des spécialistes. Elle transfère la \emph{forme des trajectoires} : quand consulter qui, dans quel ordre, avec quelle profondeur, et selon quelle hiérarchie de dépendances.
+\end{remark}
+
+\subsection{Fusion globale}
+
+Une fois les politiques spécialisées alignées par \(G\), la sortie globale est obtenue par fusion :
+\[
+\hat y
+=
+D_\psi\!\Bigl(
+\Gamma\bigl(
+h_1,\dots,h_n
+\bigr)
+\Bigr),
+\]
+où \(h_i\) est la représentation locale issue de \(E_i\) et de sa purification propre.
+
+\begin{proposition}[Principe de cohérence globale]
+Si :
+\begin{enumerate}[leftmargin=2em]
+    \item chaque modèle spécialisé est compétent sur son domaine ;
+    \item les politiques de coordination sont alignées avec la trajectoire générale via \(G\) ;
+    \item la fusion \(\Gamma\) satisfait une condition de cohérence sur les espaces de recouvrement ;
+\end{enumerate}
+alors le système Multi-ES coordonné par \(G\) peut approcher une généralisation globale comparable à celle d'un modèle généraliste, tout en conservant la spécialisation locale.
+\end{proposition}
+
+% =================================================
+\section{Multi-PH : modèle du monde et états hiérarchiques}
+% =================================================
+
+On appelle Multi-PH la version où la purification hiérarchique ne sert plus seulement à construire une représentation utile pour une tâche, mais à modéliser l'évolution d'un \emph{état du monde} latent.
+
+\begin{definition}[État du monde hiérarchique]
+On note
+\[
+\Omega_t = \bigl(\omega_t^{(1)},\dots,\omega_t^{(L)}\bigr)
+\]
+l'état du monde à l'instant \(t\), organisé en niveaux hiérarchiques.
+Chaque niveau \(\omega_t^{(\ell)}\) représente une abstraction différente du monde.
+\end{definition}
+
+\begin{definition}[Dynamique PCH du monde]
+La dynamique de monde est donnée par
+\[
+\Omega_{t+1}
+=
+F\!\bigl(\Omega_t, a_t, o_t\bigr),
+\]
+où \(a_t\) est une action, \(o_t\) une observation, et \(F\) est une application construite elle-même à partir d'une purification contextuelle hiérarchique.
+\end{definition}
+
+\begin{remark}
+Dans cette perspective, prédire le prochain token n'est qu'un cas particulier d'une observation issue de l'état du monde. La vraie variable à prédire est l'état hiérarchique \(\Omega_{t+1}\), et le token est un readout.
+\end{remark}
+
+\begin{definition}[Readout token]
+Le prochain token est obtenu par une tête de lecture
+\[
+p_\psi(x_{t+1}\mid \Omega_{t+1})
+=
+D_\psi(\Omega_{t+1}).
+\]
+\end{definition}
+
+% =================================================
+\section{Architecture unifiée}
+% =================================================
+
+L'architecture complète peut être schématisée par
+\[
+x_{1:T}
+\;\longrightarrow\;
+E_G(x_{1:T})
+\;\longrightarrow\;
+Z_G
+\;\longrightarrow\;
+\{\E_i\}_{i=1}^n
+\;\longrightarrow\;
+\{\tau_i\}_{i=1}^n
+\;\longrightarrow\;
+\Gamma
+\;\longrightarrow\;
+\hat y
+\]
+ou, dans la variante Multi-PH,
+\[
+x_{1:T}
+\;\longrightarrow\;
+\Omega_{1:T}
+\;\longrightarrow\;
+p_\psi(x_{t+1}\mid \Omega_{t+1}).
+\]
+
+\subsection{Fonction de perte globale}
+
+On peut écrire une perte globale de la forme
+\[
+\mathcal L_{\mathrm{tot}}
+=
+\lambda_{\mathrm{task}}\mathcal L_{\mathrm{task}}
++
+\lambda_{\mathrm{pch}}\mathcal L_{\mathrm{pch}}
++
+\lambda_{\mathrm{coord}}\mathcal L_{\mathrm{coord}}
++
+\lambda_{\mathrm{multiES}}\mathcal L_{\mathrm{multiES}}
++
+\lambda_{\mathrm{world}}\mathcal L_{\mathrm{world}}
++
+\lambda_{\mathrm{reg}}\Omega(\Theta,\Psi),
+\]
+où :
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathcal L_{\mathrm{task}}\) est la perte de tâche ;
+    \item \(\mathcal L_{\mathrm{pch}}\) force la stabilité contextuelle ;
+    \item \(\mathcal L_{\mathrm{coord}}\) aligne les trajectoires entre espaces ;
+    \item \(\mathcal L_{\mathrm{multiES}}\) pénalise l'incohérence entre espaces ;
+    \item \(\mathcal L_{\mathrm{world}}\) entraîne le modèle du monde ;
+    \item \(\Omega\) est une régularisation standard.
+\end{itemize}
+
+% =================================================
+\section{Interprétation théorique}
+% =================================================
+
+La théorie PCH-ESM affirme les points suivants :
+
+\begin{enumerate}[leftmargin=2em]
+    \item La bonne représentation n'est pas seulement celle qui prédit, mais celle qui reste stable sous purification récursive dans un contexte donné.
+    \item L'attention standard n'est qu'un cas plat de ce principe.
+    \item Les poids eux-mêmes peuvent être traités comme mémoire purifiable.
+    \item Un espace sémantique monolithique peut être remplacé par une hiérarchie d'espaces spécialisés.
+    \item La généralisation globale ne disparaît pas nécessairement avec la spécialisation locale ; elle peut être reconstruite par une fonction de coordination \(G\) apprenant les trajectoires d'un modèle généraliste.
+    \item Les trajectoires internes de calcul deviennent explicites, donc traçables et potentiellement déterministes.
+    \item La version monde du formalisme (Multi-PH) remplace la prédiction de tokens comme objectif fondamental par la prédiction d'états hiérarchiques latents.
+\end{enumerate}
+
+\begin{remark}
+Cette théorie ne suppose pas que la spécialisation soit gratuite : elle exige une couche de coordination pour préserver la généralisation transversale. C'est précisément le rôle de \(G\).
+\end{remark}
+
+\section{Conclusion}
+
+PCH-ESM fournit une formalisation unifiée de :
+\begin{itemize}[leftmargin=2em]
+    \item la purification contextuelle hiérarchique ;
+    \item la version adaptative des paramètres ;
+    \item la hiérarchisation de l'espace sémantique ;
+    \item la décentralisation de l'IA en espaces spécialisés ;
+    \item la coordination inter-espaces par apprentissage de trajectoires ;
+    \item le modèle du monde hiérarchique.
+\end{itemize}
+
+La proposition centrale est que la structure cognitive utile n'est pas uniquement un grand espace latent global, mais un \emph{écosystème hiérarchique d'espaces sémantiques} dont la stabilité, la spécialisation et la coordination sont explicitement représentées.
+
+\end{document}

@@ -1,0 +1,811 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{
+Lois expérimentales du PCH :
+Analyse globale des régimes dimension--calibration,
+stabilité géométrique et applications aux LLM
+}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+
+Cette étude synthétise l'ensemble des expériences PCH historiques
+et des nouvelles expériences ex14--ex20.
+
+Les résultats révèlent que PCH n'est pas simplement un mécanisme
+d'amélioration de représentation mais un opérateur géométrique
+contextuel qui transforme un espace latent selon une contrainte
+d'information.
+
+La variable déterminante n'est pas uniquement la dimension latente
+mais le rapport :
+
+\[
+\kappa =
+\frac{dim}{n_{\mathrm{calib\_per\_context}}}
+\]
+
+L'étude montre l'existence d'un régime critique lorsque :
+
+\[
+dim=n_{\mathrm{calib\_per\_context}}
+\]
+
+où apparaissent une stabilité maximale, une projection quasi exacte
+et une forte amélioration oracle.
+
+\end{abstract}
+
+
+\section{Modèle conceptuel}
+
+Le système applique une transformation :
+
+\[
+z \rightarrow P_c(z)
+\]
+
+où :
+
+\[
+c
+\]
+
+représente un contexte latent.
+
+Le projecteur dépend donc du contexte :
+
+\[
+P_c:\mathbb{R}^{D}\rightarrow\mathbb{R}^{D}
+\]
+
+mais modifie la géométrie interne des représentations.
+
+
+Contrairement à une simple transformation statistique,
+PCH agit comme une contraction vers une variété contextuelle.
+
+
+\section{Loi 1 : attracteur universel de normalisation}
+
+
+Toutes les expériences convergent vers :
+
+\[
+\gamma=1
+\]
+
+et :
+
+\[
+\tau=3.4
+\]
+
+
+Les valeurs restent invariantes malgré :
+
+\begin{itemize}
+\item changement de ridge ;
+\item suppression du régularisateur ;
+\item nombre d'itérations ;
+\item changement de dimension.
+\end{itemize}
+
+
+La conséquence est :
+
+\[
+\boxed{
+La normalisation impose une géométrie cible universelle.
+}
+\]
+
+
+Le système ne cherche pas une optimisation classique.
+Il force une configuration géométrique stable.
+
+
+\section{Loi 2 : contraction et stabilité dynamique}
+
+
+Toutes les expériences donnent :
+
+\[
+N_{\mathrm{violations}}=0
+\]
+
+
+pour la monotonie énergétique.
+
+
+Donc :
+
+\[
+E(P_c(x))\leq E(x)
+\]
+
+
+Les résidus point fixe sont :
+
+\[
+10^{-17}
+\]
+
+à :
+
+\[
+10^{-12}
+\]
+
+
+même dans les régimes difficiles.
+
+
+Ainsi :
+
+\[
+\boxed{
+PCH\ est un opérateur contractant.
+}
+\]
+
+
+La stabilité ne dépend pas seulement de la dimension.
+
+
+Elle dépend de la cohérence entre :
+
+\[
+dim
+\]
+
+et :
+
+\[
+n_{\mathrm{calib}}
+\]
+
+
+\section{Loi 3 : compression géométrique}
+
+
+Les expériences montrent une réduction massive :
+
+\[
+\Delta d =
+d_{avant}-d_{après}
+\]
+
+
+avec :
+
+\[
+\frac{\Delta d}{d_{avant}}
+\approx 90\%-95\%
+\]
+
+
+Exemples :
+
+
+\[
+0.036\rightarrow0.0028
+\]
+
+
+(ex14)
+
+
+et :
+
+\[
+0.232\rightarrow0.027
+\]
+
+
+(ex18)
+
+
+Donc :
+
+\[
+\boxed{
+PCH rapproche les représentations d'une variété contextuelle.
+}
+\]
+
+
+\section{Découverte principale :
+loi dimension--calibration}
+
+
+La variable fondamentale est :
+
+\[
+\kappa=
+\frac{dim}{n_{\mathrm{calib\_per\_context}}}
+\]
+
+
+Les expériences révèlent trois régimes.
+
+
+\subsection{Régime équilibré}
+
+
+Lorsque :
+
+\[
+dim=n_{\mathrm{calib}}
+\]
+
+
+on observe :
+
+\[
+\kappa=1
+\]
+
+
+Cas :
+
+\[
+(4,4)
+\]
+
+(ex14)
+
+
+Résultats :
+
+\[
+\rho=0.2272727
+\]
+
+
+\[
+gap_{operator}\approx10^{-12}
+\]
+
+
+\[
+gap_{projector}\approx10^{-12}
+\]
+
+
+Le projecteur devient presque idéal.
+
+
+Conséquence :
+
+\[
+\boxed{
+dim=n_{\mathrm{calib}}
+\Rightarrow
+géométrie optimale
+}
+\]
+
+
+Il existe un alignement parfait entre :
+
+\[
+\text{nombre de degrés de liberté}
+\]
+
+et :
+
+\[
+\text{nombre de contraintes contextuelles}.
+\]
+
+
+\section{Régime sous-dimensionné}
+
+
+Lorsque :
+
+\[
+dim<n_{\mathrm{calib}}
+\]
+
+
+Exemple :
+
+\[
+dim=1,n_{\mathrm{calib}}=1
+\]
+
+(ex18)
+
+
+donne :
+
+\[
+\rho=0.089
+\]
+
+
+La stabilité reste parfaite :
+
+\[
+fixed\ point\approx10^{-17}
+\]
+
+
+mais la capacité représentative chute.
+
+
+Le projecteur conserve trop peu de directions.
+
+
+Le résultat :
+
+\[
+accuracy_{oracle}=1
+\]
+
+
+mais :
+
+\[
+accuracy_{routed}<baseline
+\]
+
+
+Donc :
+
+\[
+\boxed{
+La projection est correcte mais la représentation est trop compressée.
+}
+\]
+
+
+\section{Régime surdimensionné}
+
+
+Lorsque :
+
+\[
+dim>n_{\mathrm{calib}}
+\]
+
+
+Exemple :
+
+\[
+dim=32,n_{\mathrm{calib}}=48
+\]
+
+
+Même si :
+
+\[
+\kappa<1
+\]
+
+
+la calibration devient suffisante.
+
+
+On observe :
+
+\[
+operator\ gap
+\approx10^{-4}
+\]
+
+
+au lieu de :
+
+\[
+10^{-12}
+\]
+
+
+Le système reste stable mais la projection devient moins exacte.
+
+
+\section{Nouvelle loi générale}
+
+
+Les résultats imposent :
+
+\[
+\boxed{
+Qualité(PCH)=f
+\left(
+\frac{dim}{n_{\mathrm{calib}}}
+\right)
+}
+\]
+
+
+La zone optimale est :
+
+\[
+\boxed{
+\frac{dim}{n_{\mathrm{calib}}}\approx1
+}
+\]
+
+
+Trop faible :
+
+\[
+\frac{dim}{n_{\mathrm{calib}}}\ll1
+\]
+
+perte d'information.
+
+
+Trop élevé :
+
+\[
+\frac{dim}{n_{\mathrm{calib}}}\gg1
+\]
+
+sous-détermination.
+
+
+\section{Expérience ex20 : saturation par sur-calibration}
+
+
+Cas :
+
+\[
+dim=1
+\]
+
+mais :
+
+\[
+n_{\mathrm{calib}}=120
+\]
+
+
+Le système atteint :
+
+\[
+\rho=0.22727
+\]
+
+
+mais :
+
+\[
+distance_{avant}
+\approx0
+\]
+
+
+Donc :
+
+\[
+PCH
+\]
+
+n'a plus rien à corriger.
+
+
+La transformation devient quasi identité.
+
+
+Conclusion :
+
+
+\[
+\boxed{
+Une calibration excessive peut annuler le gain.
+}
+\]
+
+
+La calibration doit correspondre à la complexité réelle.
+
+
+\section{Oracle versus routage}
+
+
+Toutes les expériences montrent :
+
+
+\[
+accuracy_{oracle}
+>
+accuracy_{routed}
+\]
+
+
+Donc :
+
+le problème principal n'est pas :
+
+\[
+P_c
+\]
+
+
+mais :
+
+\[
+\hat c
+\]
+
+
+l'estimation du contexte.
+
+
+L'amélioration future doit porter sur :
+
+\[
+x\rightarrow c
+\]
+
+plutôt que :
+
+\[
+P_c
+\]
+
+
+\section{Conséquences pour les LLM}
+
+
+Un LLM classique :
+
+\[
+z=f(x)
+\]
+
+
+devient :
+
+\[
+z'=P_c(f(x))
+\]
+
+
+où :
+
+\[
+c
+\]
+
+est un contexte latent.
+
+
+\subsection{Adaptation sans fine tuning}
+
+
+PCH peut remplacer certains adaptateurs.
+
+
+Au lieu de :
+
+\[
+LLM+\mathrm{LoRA}
+\]
+
+
+on obtient :
+
+\[
+LLM+P_c
+\]
+
+
+avec plusieurs géométries :
+
+\[
+P_{medical}
+\]
+
+\[
+P_{legal}
+\]
+
+\[
+P_{scientific}
+\]
+
+
+\subsection{Mémoire contextuelle}
+
+
+La mémoire devient :
+
+\[
+M=
+\{P_c(z)\}
+\]
+
+
+Les souvenirs sont stockés
+dans une géométrie cohérente.
+
+
+\subsection{RAG géométrique}
+
+
+Le pipeline devient :
+
+\[
+document
+\rightarrow embedding
+\rightarrow P_c(embedding)
+\]
+
+
+Le contexte ne sélectionne plus seulement des documents.
+
+Il transforme l'espace de recherche.
+
+
+\subsection{Détection d'anomalies}
+
+
+Le score :
+
+\[
+A(x)=||x-P_c(x)||
+\]
+
+
+devient un indicateur de :
+
+\[
+\text{incohérence contextuelle}
+\]
+
+
+\subsection{Routage multi-experts}
+
+
+Chaque expert peut avoir :
+
+\[
+P_i
+\]
+
+
+Le contexte choisit :
+
+\[
+P_{\hat c}
+\]
+
+
+sans changer le modèle principal.
+
+
+\section{Lois finales révélées}
+
+
+Les expériences supportent les lois suivantes :
+
+
+\[
+\boxed{
+L_1:
+\text{La normalisation crée un attracteur géométrique universel}
+}
+\]
+
+
+\[
+\boxed{
+L_2:
+PCH est un opérateur contractant stable
+}
+\]
+
+
+\[
+\boxed{
+L_3:
+La variable fondamentale est }
+\frac{dim}{n_{\mathrm{calib}}}
+\]
+
+
+\[
+\boxed{
+L_4:
+dim=n_{\mathrm{calib}}
+\Rightarrow
+projection optimale
+}
+\]
+
+
+\[
+\boxed{
+L_5:
+Le routage du contexte est le vrai goulot d'étranglement
+}
+\]
+
+
+\section{Conclusion}
+
+
+Les expériences montrent que PCH introduit une nouvelle manière
+de contrôler les représentations neuronales.
+
+La dimension seule n'est pas le facteur déterminant.
+
+Le facteur critique est l'accord entre :
+
+\[
+\text{capacité géométrique}
+\]
+
+et :
+
+\[
+\text{information de calibration}.
+\]
+
+
+Cette loi ouvre une voie pour des LLM capables de changer
+leur géométrie interne dynamiquement,
+sans modification des poids du modèle.
+
+
+\end{document}

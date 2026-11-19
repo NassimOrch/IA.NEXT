@@ -1,0 +1,1310 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ et des composantes spécialisées."
+
+ok donc je remplace extension 1 par extension 2 sans problemes?
+extension 1
+% =================================================
+\subsection{Décomposition orthogonale exacte de l'erreur de reconstruction}
+% =================================================
+
+Cette sous-section ferme le verrou logique restant : elle montre que la décomposition
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P)
+\]
+résulte exactement de la décomposition orthogonale, pour la partition \(\mathbf P\), du résidu
+entre l'opérateur cible et son approximation collée bloc-diagonale.
+
+\begin{definition}[Espace des opérateurs et produit de Frobenius]
+On pose
+\[
+\mathfrak E=\mathcal L(\Hh^T),
+\]
+muni du produit scalaire de Frobenius
+\[
+\langle A,B\rangle_F=\tr(A^\top B),
+\qquad
+\|A\|_F^2=\langle A,A\rangle_F.
+\]
+\end{definition}
+
+\begin{definition}[Projecteurs de blocs]
+Pour toute partition orthogonale admissible \(\mathbf P=(P_0,\dots,P_n)\), on définit les projections
+bloc-diagonale et hors-diagonale par
+\[
+\Pi_{\mathrm{coll}}^{\mathbf P}(X)
+=
+\sum_{i=0}^n P_iXP_i,
+\qquad
+\Pi_{\mathrm{leak}}^{\mathbf P}(X)
+=
+\sum_{i\neq j}P_iXP_j,
+\qquad
+X\in\mathfrak E.
+\]
+On note aussi
+\[
+\mathfrak E_{\mathrm{coll}}^{\mathbf P}:=\mathrm{Im}\bigl(\Pi_{\mathrm{coll}}^{\mathbf P}\bigr),
+\qquad
+\mathfrak E_{\mathrm{leak}}^{\mathbf P}:=\mathrm{Im}\bigl(\Pi_{\mathrm{leak}}^{\mathbf P}\bigr).
+\]
+\end{definition}
+
+\begin{lemma}[Orthogonalité des blocs]
+Les sous-espaces \(\mathfrak E_{ij}^{\mathbf P}:=P_i\mathfrak E P_j\) sont deux à deux orthogonaux pour le produit de Frobenius.
+En particulier,
+\[
+\mathfrak E
+=
+\bigoplus_{i,j=0}^n \mathfrak E_{ij}^{\mathbf P}
+=
+\mathfrak E_{\mathrm{coll}}^{\mathbf P}\oplus \mathfrak E_{\mathrm{leak}}^{\mathbf P},
+\]
+et les projections \(\Pi_{\mathrm{coll}}^{\mathbf P}\) et \(\Pi_{\mathrm{leak}}^{\mathbf P}\) sont orthogonales.
+\end{lemma}
+
+\begin{proof}
+Soient \(A=P_iXP_j\) et \(B=P_kYP_\ell\). Alors
+\[
+\langle A,B\rangle_F
+=
+\tr\!\bigl((P_iXP_j)^\top P_kYP_\ell\bigr)
+=
+\tr\!\bigl(P_jX^\top P_iP_kYP_\ell\bigr).
+\]
+Si \(i\neq k\), alors \(P_iP_k=0\), donc \(\langle A,B\rangle_F=0\).
+
+Si \(i=k\) et \(j\neq \ell\), alors
+\[
+\tr\!\bigl(P_jX^\top P_iYP_\ell\bigr)
+=
+\tr\!\bigl(P_\ell P_jX^\top P_iY\bigr)=0,
+\]
+car \(P_\ell P_j=0\). Ainsi, deux blocs distincts sont orthogonaux.
+
+Enfin, comme \(\sum_{i=0}^n P_i=\Id\), tout opérateur \(X\in\mathfrak E\) se décompose en
+\[
+X=\sum_{i,j=0}^n P_iXP_j,
+\]
+d'où la somme directe orthogonale annoncée.
+\end{proof}
+
+\begin{definition}[Résidu de reconstruction et approximation collée]
+On note \(\widehat \Sigma_{\mathrm{coll}}(G)\in\mathfrak E_{\mathrm{coll}}^{\mathbf P}\) l'opérateur reconstruit par la fonction de collage \(G\).
+
+On définit le résidu total de reconstruction par
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\Sigma-\widehat \Sigma_{\mathrm{coll}}(G).
+\]
+On définit sa composante collée et sa composante de leakage par
+\[
+R_{\mathrm{coll}}(\mathbf P,G)
+:=
+\Pi_{\mathrm{coll}}^{\mathbf P}\!\bigl(R_{\mathrm{rec}}(\mathbf P,G)\bigr),
+\qquad
+R_{\mathrm{leak}}(\mathbf P)
+:=
+\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma).
+\]
+\end{definition}
+
+\begin{definition}[Erreurs globales]
+On définit
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{rec}}(\mathbf P,G)\|_F^2\bigr],
+\qquad
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr].
+\]
+Quand \(\mathbf P\) est fixé, on abrège parfois \(\mathcal E_{\mathrm{coll}}(G)\).
+Le terme \(\mathcal E_{\mathrm{coll}}(\mathbf P,G)\) est l'erreur portée par la composante bloc-diagonale reconstruite.
+\end{definition}
+
+
+
+
+
+\begin{definition}[Le terme de leakage]
+On pose
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)
+=
+\bigl\|\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)\bigr\|_F^2
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2.
+\]
+\end{definition}
+
+\begin{theorem}[Décomposition orthogonale exacte de l'erreur de reconstruction]
+Sous les définitions précédentes, pour toute architecture admissible \((\mathbf P,G)\),
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P).
+\]
+\end{theorem}
+
+\begin{proof}
+On écrit d'abord
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\Sigma-\widehat \Sigma_{\mathrm{coll}}(G).
+\]
+Comme \(\widehat \Sigma_{\mathrm{coll}}(G)\in \mathfrak E_{\mathrm{coll}}^{\mathbf P}\), sa projection hors-diagonale est nulle, donc
+\[
+\Pi_{\mathrm{leak}}^{\mathbf P}\!\bigl(R_{\mathrm{rec}}(\mathbf P,G)\bigr)
+=
+\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma).
+\]
+De plus,
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\underbrace{\Bigl(\Pi_{\mathrm{coll}}^{\mathbf P}(\Sigma)-\widehat \Sigma_{\mathrm{coll}}(G)\Bigr)}_{R_{\mathrm{coll}}(\mathbf P,G)\in\mathfrak E_{\mathrm{coll}}^{\mathbf P}}
++
+\underbrace{\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)}_{R_{\mathrm{leak}}(\mathbf P)\in\mathfrak E_{\mathrm{leak}}^{\mathbf P}}.
+\]
+Les deux termes appartiennent à des sous-espaces orthogonaux, donc le terme croisé s'annule exactement :
+\[
+\|R_{\mathrm{rec}}(\mathbf P,G)\|_F^2
+=
+\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2
++
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2.
+\]
+En prenant l'espérance,
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr]
++
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2.
+\]
+Par définition,
+\[
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr].
+\]
+En outre,
+\[
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2
+=
+\bigl\|\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)\bigr\|_F^2
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2
+=
+\mathcal J_{\mathrm{leak}}(\mathbf P).
+\]
+Donc finalement,
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P),
+\]
+ce qu'il fallait démontrer.
+\end{proof}
+
+\begin{remark}
+Le résultat ne repose pas sur une orthogonalité postulée entre deux erreurs abstraites.
+Il découle directement de la décomposition orthogonale des opérateurs induite par la partition \(\mathbf P\),
+puis de la définition de la reconstruction collée comme approximation bloc-diagonale.
+Le terme hors-diagonal de \(\Sigma\) est exactement la part irréductible au collage.
+\end{remark}
+
+% =================================================
+\subsection{Optimalité conjointe sous compatibilité spectrale exacte}
+% =================================================
+
+Cette sous-section établit le résultat structural maximal du formalisme sous une hypothèse de compatibilité exacte entre
+(i) le découplage spectral des modules,
+(ii) l'ordre hiérarchique des blocs, et
+(iii) la reconstruction globale par collage pondéré.
+
+\begin{assumption}[Spectre simple et partitions orthogonales de rangs fixés]
+On suppose que la covariance de calibration \(\Sigma\) est symétrique positive semi-définie
+et que son spectre est simple.
+On ordonne ses valeurs propres de façon décroissante :
+\[
+\lambda_1>\lambda_2>\cdots>\lambda_{dT}\ge 0,
+\]
+avec une base orthonormée associée \((e_1,\dots,e_{dT})\) telle que
+\[
+\Sigma e_k=\lambda_k e_k.
+\]
+
+On fixe des tailles entières \(d_0,\dots,d_n\ge 0\) telles que
+\[
+d_0+\cdots+d_n=dT.
+\]
+On note
+\[
+I_0=\{1,\dots,d_0\},\quad
+I_1=\{d_0+1,\dots,d_0+d_1\},\quad \dots,\quad
+I_n=\{d_0+\cdots+d_{n-1}+1,\dots,dT\}.
+\]
+
+On définit la partition canonique
+\[
+\mathbf P^\star=(P_0^\star,\dots,P_n^\star)
+\]
+par
+\[
+P_i^\star=\sum_{k\in I_i} e_ke_k^\top,
+\qquad i=0,\dots,n.
+\]
+
+On appelle \emph{admissible} toute partition orthogonale
+\[
+\mathbf P=(P_0,\dots,P_n)
+\]
+de rangs fixés vérifiant
+\[
+P_iP_j=0\quad(i\neq j),
+\qquad
+\sum_{i=0}^n P_i=\Id.
+\]
+La classe admissible n'est donc pas réduite a priori à \(\{\mathbf P^\star\}\) :
+l'unicité sera obtenue par le critère d'optimalité ci-dessous.
+\end{assumption}
+
+\begin{assumption}[Compatibilité hiérarchique exacte]
+Les architectures admissibles sont les couples \((\mathbf P,G)\) tels que :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathbf P=(P_0,\dots,P_n)\) est une partition orthogonale admissible ;
+    \item les certificats locaux appartiennent aux sous-espaces associés, c'est-à-dire
+    \[
+    u_0^{(i)}(w,c)\in \mathrm{Im}(P_0),
+    \qquad
+    \Psi_i(w,c)\in \mathrm{Im}(P_i);
+    \]
+    \item le collage global \(G\) est affine en les certificats locaux, et son estimateur partagé
+    \(\bar u_0(w,c)\) est non biaisé au sens
+    \[
+    \mathbb E[\bar u_0(w,c)]=u_0^\star(w,c).
+    \]
+\end{itemize}
+\end{assumption}
+
+\begin{assumption}[Modèle de bruit hétéroscédastique]
+Pour chaque \(i\in\{1,\dots,n\}\), les certificats partagés vérifient
+\[
+u_0^{(i)}=u_0^\star+\varepsilon_i,
+\]
+où les \(\varepsilon_i\) sont indépendantes, centrées, isotropes, et de variance scalaire
+\[
+\mathbb E\|\varepsilon_i\|^2=d\,\tau_i,
+\qquad \tau_i>0.
+\]
+\end{assumption}
+
+\begin{definition}[Terme d'ordre spectral]
+On fixe des poids hiérarchiques strictement décroissants
+\[
+\omega_0>\omega_1>\cdots>\omega_n>0.
+\]
+On définit le terme d'ordre par
+\[
+\mathcal J_{\mathrm{ord}}(\mathbf P)
+=
+-\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma).
+\]
+Ce terme impose que les plus grandes directions spectrales soient affectées aux blocs les plus prioritaires.
+\end{definition}
+
+\begin{definition}[Objectif architectural conjoint]
+On définit l'objectif global par
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+\lambda_{\mathrm{leak}}\,\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{rec}}(\mathbf P,G).
+\]
+En utilisant le théorème précédent, on obtient l'écriture équivalente
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+(\lambda_{\mathrm{leak}}+\lambda_{\mathrm{rec}})\,
+\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{coll}}(\mathbf P,G).
+\]
+\end{definition}
+
+\begin{lemma}[Zéro leakage et compatibilité spectrale]
+Pour toute partition admissible \(\mathbf P\),
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)\ge 0.
+\]
+De plus,
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)=0
+\quad\Longleftrightarrow\quad
+P_i\Sigma=\Sigma P_i
+\ \text{ pour tout } i,
+\]
+c'est-à-dire si et seulement si chaque bloc \(P_i\) est une somme de projecteurs spectraux de \(\Sigma\).
+\end{lemma}
+
+\begin{proof}
+Par définition, \(\mathcal J_{\mathrm{leak}}\) est une somme de normes au carré, donc elle est non négative.
+Si elle vaut \(0\), alors \(P_i\Sigma P_j=0\) pour tous \(i\neq j\), ce qui signifie que \(\Sigma\) est bloc-diagonale dans la décomposition \(\mathbf P\), donc que chaque \(P_i\) commute avec \(\Sigma\).
+Réciproquement, si chaque \(P_i\) commute avec \(\Sigma\), alors les blocs hors diagonale sont nuls et \(\mathcal J_{\mathrm{leak}}(\mathbf P)=0\).
+\end{proof}
+
+\begin{lemma}[Réécriture télescopique du terme d'ordre]
+Soient
+\[
+m_r=\sum_{i=0}^r d_i
+\qquad\text{et}\qquad
+Q_r=\sum_{i=0}^r P_i,
+\quad r=0,\dots,n,
+\]
+avec la convention \(Q_{-1}=0\).
+Alors
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\omega_n\,\mathrm{tr}(\Sigma)
++
+\sum_{r=0}^{n-1}(\omega_r-\omega_{r+1})\,\mathrm{tr}(Q_r\Sigma).
+\]
+\end{lemma}
+
+\begin{proof}
+Comme \(P_i=Q_i-Q_{i-1}\), on a
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\sum_{i=0}^n \omega_i\bigl(\mathrm{tr}(Q_i\Sigma)-\mathrm{tr}(Q_{i-1}\Sigma)\bigr).
+\]
+Un regroupement télescopique donne
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\omega_n\,\mathrm{tr}(Q_n\Sigma)
++
+\sum_{r=0}^{n-1}(\omega_r-\omega_{r+1})\,\mathrm{tr}(Q_r\Sigma).
+\]
+Comme \(Q_n=\Id\), on obtient la formule annoncée.
+\end{proof}
+
+\begin{lemma}[Sélection canonique par l'ordre spectral]
+Parmi les partitions admissibles, le terme
+\[
+\mathcal J_{\mathrm{ord}}(\mathbf P)
+=
+-\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+\]
+est strictement minimisé par la partition canonique \(\mathbf P^\star\), et seulement par elle.
+\end{lemma}
+
+\begin{proof}
+Par le lemme précédent, minimiser \(\mathcal J_{\mathrm{ord}}\) revient à maximiser chaque quantité \(\mathrm{tr}(Q_r\Sigma)\), puisque les coefficients \(\omega_r-\omega_{r+1}\) sont strictement positifs.
+
+Pour tout projecteur orthogonal \(Q\) de rang \(m_r\), le principe de Ky Fan donne
+\[
+\mathrm{tr}(Q\Sigma)\le \sum_{k=1}^{m_r}\lambda_k,
+\]
+avec égalité si et seulement si
+\[
+Q=\sum_{k=1}^{m_r} e_ke^\top_k,
+\]
+l'unicité étant assurée par la simplicité du spectre.
+
+En l'appliquant à chaque \(Q_r\), on obtient
+\[
+\mathrm{tr}(Q_r\Sigma)\le \sum_{k=1}^{m_r}\lambda_k,
+\]
+et l'égalité simultanée pour tout \(r\) impose
+\[
+Q_r=\sum_{k=1}^{m_r} e_ke^\top_k
+\qquad\text{pour tout } r.
+\]
+Par différence,
+\[
+P_i=Q_i-Q_{i-1}
+=
+\sum_{k\in I_i} e_ke^\top_k
+=
+P_i^\star.
+\]
+Donc \(\mathbf P^\star\) est l'unique minimiseur de \(\mathcal J_{\mathrm{ord}}\) sur la classe admissible.
+\end{proof}
+
+\begin{proposition}[Optimalité du collage inverse-variance]
+Sous le modèle de bruit hétéroscédastique, tout estimateur affine non biaisé de la forme
+\[
+\tilde u_0=\sum_{i=1}^n \beta_i u_0^{(i)},
+\qquad
+\sum_{i=1}^n \beta_i=1,
+\]
+vérifie
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+d\sum_{i=1}^n \beta_i^2\tau_i.
+\]
+Cette quantité est strictement minimisée par
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}},
+\qquad i=1,\dots,n.
+\]
+\end{proposition}
+
+\begin{proof}
+On a
+\[
+\mathbb E[\tilde u_0-u_0^\star]
+=
+\sum_{i=1}^n \beta_i\mathbb E[\varepsilon_i]
+=
+0.
+\]
+Par indépendance et isotropie,
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+\mathbb E\left\|\sum_{i=1}^n\beta_i\varepsilon_i\right\|^2
+=
+\sum_{i=1}^n\beta_i^2\,\mathbb E\|\varepsilon_i\|^2
+=
+d\sum_{i=1}^n\beta_i^2\tau_i.
+\]
+La fonction
+\[
+\beta\mapsto d\sum_{i=1}^n\beta_i^2\tau_i
+\]
+est strictement convexe sur l'hyperplan \(\sum_i\beta_i=1\).  
+Le minimiseur unique est donc obtenu par multiplicateurs de Lagrange, ce qui donne
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}}.
+\]
+\end{proof}
+
+\begin{theorem}[Optimalité conjointe et unicité du couple partition spectrale + collage pondéré]
+Sous les hypothèses précédentes, le problème
+\[
+\min_{(\mathbf P,G)\ \mathrm{admissible}} \ \mathcal J_{\mathrm{arch}}(\mathbf P,G)
+\]
+admet un unique minimiseur admissible.
+Ce minimiseur est précisément le couple
+\[
+(\mathbf P^\star,G^\star),
+\]
+où :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathbf P^\star\) est la partition spectrale canonique ;
+    \item \(G^\star\) est le collage pondéré inverse-variance, i.e.
+    \[
+    \bar u_0^\star(w,c)
+    =
+    \sum_{i=1}^n \alpha_i^\star(w,c)\,u_0^{(i)}(w,c),
+    \qquad
+    \alpha_i^\star(w,c)
+    =
+    \frac{\tau_i^{-1}}{\sum_{j=1}^n \tau_j^{-1}}.
+    \]
+\end{itemize}
+
+En particulier, le couple \((\mathbf P^\star,G^\star)\) est l'unique architecture admissible qui minimise simultanément le leakage inter-modules et l'erreur globale de reconstruction.
+\end{theorem}
+
+\begin{proof}
+Posons
+\[
+A=\lambda_{\mathrm{leak}}+\lambda_{\mathrm{rec}}>0.
+\]
+Alors, pour tout couple admissible \((\mathbf P,G)\),
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+A\,\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{coll}}(\mathbf P,G).
+\]
+
+\medskip
+\noindent
+\textbf{Étape 1 : optimisation de la partie partition.}
+Comme \(\mathcal J_{\mathrm{leak}}(\mathbf P)\ge 0\) et que \(\mathbf P^\star\) minimise strictement \(\mathcal J_{\mathrm{ord}}(\mathbf P)\) sur la classe admissible, on a pour toute partition admissible
+\[
+A\,\mathcal J_{\mathrm{leak}}(\mathbf P)+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
+\ge
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
+\ge
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P^\star).
+\]
+De plus,
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P^\star)=0
+\]
+par compatibilité spectrale de la partition canonique.
+Ainsi, la partie dépendant de \(\mathbf P\) est minimisée de manière unique par \(\mathbf P^\star\).
+
+\medskip
+\noindent
+\textbf{Étape 2 : optimisation du collage.}
+Une fois \(\mathbf P^\star\) fixé, la partie dépendant de \(G\) se réduit à \(\mathcal E_{\mathrm{coll}}(\mathbf P^\star,G)\), que l'on abrège en \(\mathcal E_{\mathrm{coll}}(G)\).
+Sous le modèle de bruit hétéroscédastique, la proposition précédente montre que l'unique collage affine non biaisé minimisant cette erreur est le collage inverse-variance \(G^\star\), avec
+\[
+\alpha_i^\star(w,c)=\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}}.
+\]
+
+\medskip
+\noindent
+\textbf{Étape 3 : unicité globale.}
+Si \((\mathbf P,G)\) est un minimiseur global, alors il doit satisfaire simultanément
+\[
+\mathbf P=\mathbf P^\star
+\qquad\text{et}\qquad
+G=G^\star,
+\]
+car l'égalité dans les deux inégalités précédentes impose respectivement l'égalité dans le lemme spectral et l'égalité dans la proposition sur le collage.
+Réciproquement, \((\mathbf P^\star,G^\star)\) atteint cette borne minimale.
+Le minimiseur global est donc unique et vaut exactement \((\mathbf P^\star,G^\star)\).
+\end{proof}
+
+\begin{remark}
+Le théorème précédent remplace l'hypothèse de décomposition leakage--reconstruction utilisée dans les versions préliminaires du formalisme.
+Le couple \((\mathbf P^\star,G^\star)\) minimise simultanément le terme de découplage spectral et le terme de reconstruction collée dans la classe des architectures admissibles.
+\end{remark}
+
+\begin{corollary}[Optimalité conjointe]
+Le formalisme PCH-ESM réalise simultanément :
+\begin{enumerate}[leftmargin=2em]
+    \item le découplage maximal des modules via la partition spectrale canonique ;
+    \item la reconstruction globale de risque minimal via le collage pondéré inverse-variance.
+\end{enumerate}
+Autrement dit, sous les hypothèses précédentes, le couple \((\mathbf P^\star,G^\star)\) est l'unique minimiseur simultané du leakage inter-modules et de l'erreur de reconstruction dans la classe des architectures admissibles.
+\end{corollary}
+
+
+
+
+
+
+extension 2
+% =================================================
+\subsection{Décomposition orthogonale exacte de l'erreur de reconstruction}
+% =================================================
+
+Cette sous-section ferme le verrou logique restant : elle montre que la décomposition
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P)
+\]
+résulte exactement de la décomposition orthogonale, pour la partition \(\mathbf P\), du résidu
+entre l'opérateur cible et son approximation collée bloc-diagonale.
+
+\begin{definition}[Espace des opérateurs et produit de Frobenius]
+On pose
+\[
+\mathfrak E=\mathcal L(\Hh^T),
+\]
+muni du produit scalaire de Frobenius
+\[
+\langle A,B\rangle_F=\tr(A^\top B),
+\qquad
+\|A\|_F^2=\langle A,A\rangle_F.
+\]
+\end{definition}
+
+\begin{definition}[Projecteurs de blocs]
+Pour toute partition orthogonale admissible \(\mathbf P=(P_0,\dots,P_n)\), on définit les projections
+bloc-diagonale et hors-diagonale par
+\[
+\Pi_{\mathrm{coll}}^{\mathbf P}(X)
+=
+\sum_{i=0}^n P_iXP_i,
+\qquad
+\Pi_{\mathrm{leak}}^{\mathbf P}(X)
+=
+\sum_{i\neq j}P_iXP_j,
+\qquad
+X\in\mathfrak E.
+\]
+On note aussi
+\[
+\mathfrak E_{\mathrm{coll}}^{\mathbf P}:=\mathrm{Im}\bigl(\Pi_{\mathrm{coll}}^{\mathbf P}\bigr),
+\qquad
+\mathfrak E_{\mathrm{leak}}^{\mathbf P}:=\mathrm{Im}\bigl(\Pi_{\mathrm{leak}}^{\mathbf P}\bigr).
+\]
+\end{definition}
+
+\begin{lemma}[Orthogonalité des blocs]
+Les sous-espaces \(\mathfrak E_{ij}^{\mathbf P}:=P_i\mathfrak E P_j\) sont deux à deux orthogonaux pour le produit de Frobenius.
+En particulier,
+\[
+\mathfrak E
+=
+\bigoplus_{i,j=0}^n \mathfrak E_{ij}^{\mathbf P}
+=
+\mathfrak E_{\mathrm{coll}}^{\mathbf P}\oplus \mathfrak E_{\mathrm{leak}}^{\mathbf P},
+\]
+et les projections \(\Pi_{\mathrm{coll}}^{\mathbf P}\) et \(\Pi_{\mathrm{leak}}^{\mathbf P}\) sont orthogonales.
+\end{lemma}
+
+\begin{proof}
+Soient \(A=P_iXP_j\) et \(B=P_kYP_\ell\). Alors
+\[
+\langle A,B\rangle_F
+=
+\tr\!\bigl((P_iXP_j)^\top P_kYP_\ell\bigr)
+=
+\tr\!\bigl(P_jX^\top P_iP_kYP_\ell\bigr).
+\]
+Si \(i\neq k\), alors \(P_iP_k=0\), donc \(\langle A,B\rangle_F=0\).
+
+Si \(i=k\) et \(j\neq \ell\), alors
+\[
+\tr\!\bigl(P_jX^\top P_iYP_\ell\bigr)
+=
+\tr\!\bigl(P_\ell P_jX^\top P_iY\bigr)=0,
+\]
+car \(P_\ell P_j=0\). Ainsi, deux blocs distincts sont orthogonaux.
+
+Enfin, comme \(\sum_{i=0}^n P_i=\Id\), tout opérateur \(X\in\mathfrak E\) se décompose en
+\[
+X=\sum_{i,j=0}^n P_iXP_j,
+\]
+d'où la somme directe orthogonale annoncée.
+\end{proof}
+
+\begin{definition}[Résidu de reconstruction et approximation collée]
+On note \(\widehat \Sigma_{\mathrm{coll}}(G)\in\mathfrak E_{\mathrm{coll}}^{\mathbf P}\) l'opérateur reconstruit par la fonction de collage \(G\).
+
+On définit le résidu total de reconstruction par
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\Sigma-\widehat \Sigma_{\mathrm{coll}}(G).
+\]
+On définit sa composante collée et sa composante de leakage par
+\[
+R_{\mathrm{coll}}(\mathbf P,G)
+:=
+\Pi_{\mathrm{coll}}^{\mathbf P}\!\bigl(R_{\mathrm{rec}}(\mathbf P,G)\bigr),
+\qquad
+R_{\mathrm{leak}}(\mathbf P)
+:=
+\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma).
+\]
+\end{definition}
+
+\begin{definition}[Erreurs globales]
+On définit
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{rec}}(\mathbf P,G)\|_F^2\bigr],
+\qquad
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr].
+\]
+Quand \(\mathbf P\) est fixé, on abrège parfois \(\mathcal E_{\mathrm{coll}}(G)\).
+Le terme \(\mathcal E_{\mathrm{coll}}(\mathbf P,G)\) est l'erreur portée par la composante bloc-diagonale reconstruite.
+
+L'espérance est prise relativement à la distribution des données de calibration utilisées pour construire
+\(\widehat \Sigma_{\mathrm{coll}}(G)\).
+\end{definition}
+
+\begin{definition}[Le terme de leakage]
+On pose
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)
+=
+\bigl\|\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)\bigr\|_F^2
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2.
+\]
+Le terme de leakage dépend uniquement de la covariance de calibration \(\Sigma\), supposée fixée ; il est donc déterministe.
+\end{definition}
+
+\begin{assumption}[Compatibilité minimale du mécanisme de collage]
+Pour toute partition admissible \(\mathbf P\), il existe une constante \(C\ge 0\), indépendante de \(\mathbf P\), et une fonction strictement croissante
+\[
+\phi_{\mathbf P}:[0,\infty)\to[0,\infty),
+\]
+telles que, pour tout collage admissible \(G\),
+\[
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+C
++
+\phi_{\mathbf P}\!\left(\mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr]\right).
+\]
+\end{assumption}
+
+\begin{proposition}[Principe de réduction du collage]
+Sous l'hypothèse précédente, pour toute partition admissible \(\mathbf P\),
+\[
+\argmin_G \mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\argmin_G \mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr].
+\]
+\end{proposition}
+
+\begin{proof}
+Comme \(\phi_{\mathbf P}\) est strictement croissante, minimiser \(\mathcal E_{\mathrm{coll}}(\mathbf P,G)\) équivaut exactement à minimiser
+\[
+\mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr].
+\]
+La constante \(C\) est indépendante de \(G\) et de \(\mathbf P\), donc elle n'affecte pas l'ensemble des minimiseurs.
+\end{proof}
+
+\begin{theorem}[Décomposition orthogonale exacte de l'erreur de reconstruction]
+Sous les définitions précédentes, pour toute architecture admissible \((\mathbf P,G)\),
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P).
+\]
+\end{theorem}
+
+\begin{proof}
+On écrit d'abord
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\Sigma-\widehat \Sigma_{\mathrm{coll}}(G).
+\]
+Comme \(\widehat \Sigma_{\mathrm{coll}}(G)\in \mathfrak E_{\mathrm{coll}}^{\mathbf P}\), sa projection hors-diagonale est nulle, donc
+\[
+\Pi_{\mathrm{leak}}^{\mathbf P}\!\bigl(R_{\mathrm{rec}}(\mathbf P,G)\bigr)
+=
+\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma).
+\]
+De plus,
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\underbrace{\Bigl(\Pi_{\mathrm{coll}}^{\mathbf P}(\Sigma)-\widehat \Sigma_{\mathrm{coll}}(G)\Bigr)}_{R_{\mathrm{coll}}(\mathbf P,G)\in\mathfrak E_{\mathrm{coll}}^{\mathbf P}}
++
+\underbrace{\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)}_{R_{\mathrm{leak}}(\mathbf P)\in\mathfrak E_{\mathrm{leak}}^{\mathbf P}}.
+\]
+Les deux termes appartiennent à des sous-espaces orthogonaux, donc le terme croisé s'annule exactement :
+\[
+\|R_{\mathrm{rec}}(\mathbf P,G)\|_F^2
+=
+\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2
++
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2.
+\]
+En prenant l'espérance,
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr]
++
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2.
+\]
+Par définition,
+\[
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr].
+\]
+En outre,
+\[
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2
+=
+\bigl\|\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)\bigr\|_F^2
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2
+=
+\mathcal J_{\mathrm{leak}}(\mathbf P).
+\]
+Donc finalement,
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P),
+\]
+ce qu'il fallait démontrer.
+\end{proof}
+
+\begin{remark}
+La décomposition orthogonale précédente est indépendante du mécanisme de collage.
+En revanche, l'identification du minimiseur de \(\mathcal E_{\mathrm{coll}}\) avec le collage inverse-variance repose uniquement sur l'hypothèse minimale de compatibilité du mécanisme de collage, qui exprime que \(\mathcal E_{\mathrm{coll}}\) est une transformation strictement croissante de l'erreur de partage.
+Le théorème précédent remplace l'hypothèse de décomposition leakage--reconstruction utilisée dans les versions préliminaires du formalisme.
+\end{remark}
+
+% =================================================
+\subsection{Optimalité conjointe sous compatibilité spectrale exacte}
+% =================================================
+
+Cette sous-section établit le résultat structural maximal du formalisme sous une hypothèse de compatibilité exacte entre
+(i) le découplage spectral des modules,
+(ii) l'ordre hiérarchique des blocs, et
+(iii) la reconstruction globale par collage pondéré.
+
+\begin{assumption}[Spectre simple et partitions orthogonales de rangs fixés]
+On suppose que la covariance de calibration \(\Sigma\) est symétrique positive semi-définie
+et que son spectre est simple.
+On ordonne ses valeurs propres de façon décroissante :
+\[
+\lambda_1>\lambda_2>\cdots>\lambda_{dT}\ge 0,
+\]
+avec une base orthonormée associée \((e_1,\dots,e_{dT})\) telle que
+\[
+\Sigma e_k=\lambda_k e_k.
+\]
+
+On fixe des tailles entières \(d_0,\dots,d_n\ge 0\) telles que
+\[
+d_0+\cdots+d_n=dT.
+\]
+On note
+\[
+I_0=\{1,\dots,d_0\},\quad
+I_1=\{d_0+1,\dots,d_0+d_1\},\quad \dots,\quad
+I_n=\{d_0+\cdots+d_{n-1}+1,\dots,dT\}.
+\]
+
+On définit la partition canonique
+\[
+\mathbf P^\star=(P_0^\star,\dots,P_n^\star)
+\]
+par
+\[
+P_i^\star=\sum_{k\in I_i} e_ke^\top_k,
+\qquad i=0,\dots,n.
+\]
+
+On appelle \emph{admissible} toute partition orthogonale
+\[
+\mathbf P=(P_0,\dots,P_n)
+\]
+de rangs fixés vérifiant
+\[
+P_iP_j=0\quad(i\neq j),
+\qquad
+\sum_{i=0}^n P_i=\Id.
+\]
+La classe admissible n'est donc pas réduite a priori à \(\{\mathbf P^\star\}\) :
+l'unicité sera obtenue par le critère d'optimalité ci-dessous.
+\end{assumption}
+
+\begin{assumption}[Compatibilité hiérarchique exacte]
+Les architectures admissibles sont les couples \((\mathbf P,G)\) tels que :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathbf P=(P_0,\dots,P_n)\) est une partition orthogonale admissible ;
+    \item les certificats locaux appartiennent aux sous-espaces associés, c'est-à-dire
+    \[
+    u_0^{(i)}(w,c)\in \mathrm{Im}(P_0),
+    \qquad
+    \Psi_i(w,c)\in \mathrm{Im}(P_i);
+    \]
+    \item le collage global \(G\) est affine en les certificats locaux, et son estimateur partagé
+    \(\bar u_0(w,c)\) est non biaisé au sens
+    \[
+    \mathbb E[\bar u_0(w,c)]=u_0^\star(w,c).
+    \]
+\end{itemize}
+\end{assumption}
+
+\begin{assumption}[Modèle de bruit hétéroscédastique]
+Pour chaque \(i\in\{1,\dots,n\}\), les certificats partagés vérifient
+\[
+u_0^{(i)}=u_0^\star+\varepsilon_i,
+\]
+où les \(\varepsilon_i\) sont indépendantes, centrées, isotropes, et de variance scalaire
+\[
+\mathbb E\|\varepsilon_i\|^2=d\,\tau_i,
+\qquad \tau_i>0.
+\]
+\end{assumption}
+
+\begin{assumption}[Poids strictement positifs]
+On suppose
+\[
+\lambda_{\mathrm{leak}}>0,
+\qquad
+\lambda_{\mathrm{ord}}>0,
+\qquad
+\lambda_{\mathrm{rec}}>0.
+\]
+\end{assumption}
+
+\begin{definition}[Terme d'ordre spectral]
+On fixe des poids hiérarchiques strictement décroissants
+\[
+\omega_0>\omega_1>\cdots>\omega_n>0.
+\]
+On définit le terme d'ordre par
+\[
+\mathcal J_{\mathrm{ord}}(\mathbf P)
+=
+-\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma).
+\]
+Ce terme impose que les plus grandes directions spectrales soient affectées aux blocs les plus prioritaires.
+\end{definition}
+
+\begin{definition}[Objectif architectural conjoint]
+On définit l'objectif global par
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+\lambda_{\mathrm{leak}}\,\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{rec}}(\mathbf P,G).
+\]
+En utilisant le théorème précédent, on obtient l'écriture équivalente
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+(\lambda_{\mathrm{leak}}+\lambda_{\mathrm{rec}})\,
+\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{coll}}(\mathbf P,G).
+\]
+\end{definition}
+
+\begin{lemma}[Zéro leakage et compatibilité spectrale]
+Pour toute partition admissible \(\mathbf P\),
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)\ge 0.
+\]
+De plus,
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)=0
+\quad\Longleftrightarrow\quad
+P_i\Sigma=\Sigma P_i
+\ \text{ pour tout } i,
+\]
+c'est-à-dire si et seulement si chaque bloc \(P_i\) est une somme de projecteurs spectraux de \(\Sigma\).
+\end{lemma}
+
+\begin{proof}
+Par définition, \(\mathcal J_{\mathrm{leak}}\) est une somme de normes au carré, donc elle est non négative.
+Si elle vaut \(0\), alors \(P_i\Sigma P_j=0\) pour tous \(i\neq j\), ce qui signifie que \(\Sigma\) est bloc-diagonale dans la décomposition \(\mathbf P\), donc que chaque \(P_i\) commute avec \(\Sigma\).
+Réciproquement, si chaque \(P_i\) commute avec \(\Sigma\), alors les blocs hors diagonale sont nuls et \(\mathcal J_{\mathrm{leak}}(\mathbf P)=0\).
+\end{proof}
+
+\begin{lemma}[Réécriture télescopique du terme d'ordre]
+Soient
+\[
+m_r=\sum_{i=0}^r d_i
+\qquad\text{et}\qquad
+Q_r=\sum_{i=0}^r P_i,
+\quad r=0,\dots,n,
+\]
+avec la convention \(Q_{-1}=0\).
+Alors
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\omega_n\,\mathrm{tr}(\Sigma)
++
+\sum_{r=0}^{n-1}(\omega_r-\omega_{r+1})\,\mathrm{tr}(Q_r\Sigma).
+\]
+\end{lemma}
+
+\begin{proof}
+Comme \(P_i=Q_i-Q_{i-1}\), on a
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\sum_{i=0}^n \omega_i\bigl(\mathrm{tr}(Q_i\Sigma)-\mathrm{tr}(Q_{i-1}\Sigma)\bigr).
+\]
+Un regroupement télescopique donne
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\omega_n\,\mathrm{tr}(Q_n\Sigma)
++
+\sum_{r=0}^{n-1}(\omega_r-\omega_{r+1})\,\mathrm{tr}(Q_r\Sigma).
+\]
+Comme \(Q_n=\Id\), on obtient la formule annoncée.
+\end{proof}
+
+\begin{lemma}[Sélection canonique par l'ordre spectral]
+Parmi les partitions admissibles, le terme
+\[
+\mathcal J_{\mathrm{ord}}(\mathbf P)
+=
+-\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+\]
+est strictement minimisé par la partition canonique \(\mathbf P^\star\), et seulement par elle.
+\end{lemma}
+
+\begin{proof}
+Par le lemme précédent, minimiser \(\mathcal J_{\mathrm{ord}}\) revient à maximiser chaque quantité \(\mathrm{tr}(Q_r\Sigma)\), puisque les coefficients \(\omega_r-\omega_{r+1}\) sont strictement positifs.
+
+Pour tout projecteur orthogonal \(Q\) de rang \(m_r\), le principe de Ky Fan donne
+\[
+\mathrm{tr}(Q\Sigma)\le \sum_{k=1}^{m_r}\lambda_k,
+\]
+avec égalité si et seulement si
+\[
+Q=\sum_{k=1}^{m_r} e_k e_k^\top,
+\]
+l'unicité étant assurée par la simplicité du spectre.
+
+En l'appliquant à chaque \(Q_r\), on obtient
+\[
+\mathrm{tr}(Q_r\Sigma)\le \sum_{k=1}^{m_r}\lambda_k,
+\]
+et l'égalité simultanée pour tout \(r\) impose
+\[
+Q_r=\sum_{k=1}^{m_r} e_k e_k^\top
+\qquad\text{pour tout } r.
+\]
+Par différence,
+\[
+P_i=Q_i-Q_{i-1}
+=
+\sum_{k\in I_i} e_k e_k^\top
+=
+P_i^\star.
+\]
+Donc \(\mathbf P^\star\) est l'unique minimiseur de \(\mathcal J_{\mathrm{ord}}\) sur la classe admissible.
+\end{proof}
+
+\begin{proposition}[Optimalité du collage inverse-variance]
+Sous le modèle de bruit hétéroscédastique, tout estimateur affine non biaisé de la forme
+\[
+\tilde u_0=\sum_{i=1}^n \beta_i u_0^{(i)},
+\qquad
+\sum_{i=1}^n \beta_i=1,
+\]
+vérifie
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+d\sum_{i=1}^n \beta_i^2\tau_i.
+\]
+Cette quantité est strictement minimisée par
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}},
+\qquad i=1,\dots,n.
+\]
+\end{proposition}
+
+\begin{proof}
+On a
+\[
+\mathbb E[\tilde u_0-u_0^\star]
+=
+\sum_{i=1}^n \beta_i\mathbb E[\varepsilon_i]
+=
+0.
+\]
+Par indépendance et isotropie,
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+\mathbb E\left\|\sum_{i=1}^n\beta_i\varepsilon_i\right\|^2
+=
+\sum_{i=1}^n\beta_i^2\,\mathbb E\|\varepsilon_i\|^2
+=
+d\sum_{i=1}^n\beta_i^2\tau_i.
+\]
+La fonction
+\[
+\beta\mapsto d\sum_{i=1}^n\beta_i^2\tau_i
+\]
+est strictement convexe sur l'hyperplan \(\sum_i\beta_i=1\).  
+Le minimiseur unique est donc obtenu par multiplicateurs de Lagrange, ce qui donne
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}}.
+\]
+\end{proof}
+
+\begin{theorem}[Optimalité conjointe et unicité du couple partition spectrale + collage pondéré]
+Sous les hypothèses précédentes, le problème
+\[
+\min_{(\mathbf P,G)\ \mathrm{admissible}} \ \mathcal J_{\mathrm{arch}}(\mathbf P,G)
+\]
+admet un unique minimiseur admissible.
+Ce minimiseur est précisément le couple
+\[
+(\mathbf P^\star,G^\star),
+\]
+où :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathbf P^\star\) est la partition spectrale canonique ;
+    \item \(G^\star\) est le collage pondéré inverse-variance, i.e.
+    \[
+    \bar u_0^\star(w,c)
+    =
+    \sum_{i=1}^n \alpha_i^\star(w,c)\,u_0^{(i)}(w,c),
+    \qquad
+    \alpha_i^\star(w,c)
+    =
+    \frac{\tau_i^{-1}}{\sum_{j=1}^n \tau_j^{-1}}.
+    \]
+\end{itemize}
+
+En particulier, le couple \((\mathbf P^\star,G^\star)\) est l'unique architecture admissible qui minimise simultanément le leakage inter-modules et l'erreur globale de reconstruction.
+\end{theorem}
+
+\begin{proof}
+Posons
+\[
+A=\lambda_{\mathrm{leak}}+\lambda_{\mathrm{rec}}>0.
+\]
+Alors, pour tout couple admissible \((\mathbf P,G)\),
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+A\,\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{coll}}(\mathbf P,G).
+\]
+
+\medskip
+\noindent
+\textbf{Étape 1 : optimisation de la partie partition.}
+Comme \(\mathcal J_{\mathrm{leak}}(\mathbf P)\ge 0\) et que \(\mathbf P^\star\) minimise strictement \(\mathcal J_{\mathrm{ord}}(\mathbf P)\) sur la classe admissible, on a pour toute partition admissible
+\[
+A\,\mathcal J_{\mathrm{leak}}(\mathbf P)+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
+\ge
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
+\ge
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P^\star).
+\]
+De plus,
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P^\star)=0
+\]
+par compatibilité spectrale de la partition canonique.
+Ainsi, la partie dépendant de \(\mathbf P\) est minimisée de manière unique par \(\mathbf P^\star\).
+
+\medskip
+\noindent
+\textbf{Étape 2 : optimisation du collage.}
+Une fois \(\mathbf P^\star\) fixé, la partie dépendant de \(G\) se réduit à \(\mathcal E_{\mathrm{coll}}(\mathbf P^\star,G)\).
+Par la proposition de réduction du collage,
+\[
+\argmin_G \mathcal E_{\mathrm{coll}}(\mathbf P^\star,G)
+=
+\argmin_G \mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr].
+\]
+Sous le modèle de bruit hétéroscédastique, la proposition précédente montre que cet ensemble est réduit au seul collage affine non biaisé inverse-variance \(G^\star\), avec
+\[
+\alpha_i^\star(w,c)=\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}}.
+\]
+
+\medskip
+\noindent
+\textbf{Étape 3 : unicité globale.}
+Si \((\mathbf P,G)\) est un minimiseur global, alors il doit satisfaire simultanément
+\[
+\mathbf P=\mathbf P^\star
+\qquad\text{et}\qquad
+G=G^\star,
+\]
+car l'égalité dans l'étape 1 force \(\mathbf P=\mathbf P^\star\), et l'égalité dans l'étape 2 force \(G=G^\star\).
+Réciproquement, \((\mathbf P^\star,G^\star)\) atteint cette borne minimale.
+Le minimiseur global est donc unique et vaut exactement \((\mathbf P^\star,G^\star)\).
+\end{proof}
+
+\begin{remark}
+La décomposition orthogonale précédente est indépendante du mécanisme de collage.
+En revanche, l'identification du minimiseur de \(\mathcal E_{\mathrm{coll}}\) avec le collage inverse-variance repose uniquement sur l'hypothèse minimale de compatibilité du mécanisme de collage, qui exprime que \(\mathcal E_{\mathrm{coll}}\) est une transformation strictement croissante de l'erreur de partage.
+Le théorème précédent remplace l'hypothèse de décomposition leakage--reconstruction utilisée dans les versions préliminaires du formalisme.
+\end{remark}
+
+\begin{corollary}[Optimalité conjointe]
+Le formalisme PCH-ESM réalise simultanément :
+\begin{enumerate}[leftmargin=2em]
+    \item le découplage maximal des modules via la partition spectrale canonique ;
+    \item la reconstruction globale de risque minimal via le collage pondéré inverse-variance.
+\end{enumerate}
+Autrement dit, sous les hypothèses précédentes, le couple \((\mathbf P^\star,G^\star)\) est l'unique minimiseur simultané du leakage inter-modules et de l'erreur de reconstruction dans la classe des architectures admissibles.
+\end{corollary}

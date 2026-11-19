@@ -1,0 +1,2527 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------------------------------
+% Encodage, langue, typographie
+% -------------------------------------------------
+\usepackage[french]{babel}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% -------------------------------------------------
+% Mathématiques
+% -------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{enumitem}
+
+% -------------------------------------------------
+% Liens
+% -------------------------------------------------
+\usepackage[hidelinks]{hyperref}
+
+% -------------------------------------------------
+% Police
+% -------------------------------------------------
+\setmainfont{TeX Gyre Pagella}
+
+% -------------------------------------------------
+% Environnements
+% -------------------------------------------------
+\newtheorem{definition}{Définition}[section]
+\newtheorem{assumption}{Hypothèse}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{remark}{Remarque}[section]
+\newtheorem{lemma}{Lemme}[section]
+
+% -------------------------------------------------
+% Opérateurs
+% -------------------------------------------------
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\KL}{KL}
+\DeclareMathOperator{\Id}{Id}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\softmax}{softmax}
+\DeclareMathOperator{\conv}{conv}
+\DeclareMathOperator{\tr}{tr}
+
+% -------------------------------------------------
+% Raccourcis
+% -------------------------------------------------
+\newcommand{\X}{\mathcal X}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\E}{\mathcal E}
+\newcommand{\Z}{\mathcal Z}
+\newcommand{\Hh}{\mathcal H}
+\newcommand{\I}{\mathcal I}
+\newcommand{\T}{\mathcal T}
+\newcommand{\W}{\mathcal W}
+\newcommand{\N}{\mathcal N}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Qcal}{\mathcal Q}
+\newcommand{\Gcal}{\mathcal G}
+\newcommand{\Mcal}{\mathcal M}
+\newcommand{\1}{\mathbf 1}
+
+\title{PCH-ESM\\
+\large Purification Contextuelle Hiérarchique et Espaces Sémantiques Modulaires}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce document formalise une architecture hiérarchique pour modèles séquentiels et systèmes de langage, fondée sur quatre briques explicites et compatibles :
+(i) une purification récursive d'une représentation dans un contexte donné ;
+(ii) une décomposition orthogonale et déterministe d'un espace latent global en sous-espaces spécialisés obtenus par construction spectrale ;
+(iii) une spécialisation locale certifiée par une fonctionnelle explicite d'apprentissage, puis un opérateur de coordination pondéré à retour ;
+(iv) une dynamique Multi-PH pour un état latent hiérarchique interprété comme état du monde, avec croyance et incertitude explicites.
+Chaque objet central est défini par projection, distance, argmin, ou opération spectrale. Aucune notion structurante n'est laissée implicite.
+\end{abstract}
+
+\tableofcontents
+
+% =================================================
+\section{Cadre général}
+% =================================================
+
+L'idée directrice de PCH-ESM est qu'une bonne représentation n'est pas seulement une représentation prédictive, mais une représentation stable \emph{dans un contexte}.  
+Cette stabilité n'est pas absolue : elle dépend de la tâche, du domaine, du mode de coopération, des contraintes de calcul, et de la structure locale de spécialisation.
+
+La théorie distingue trois niveaux :
+
+\begin{enumerate}[leftmargin=2em]
+    \item un niveau de purification hiérarchique de base, noté PH ;
+    \item un niveau contextuel, noté PCH ;
+    \item un niveau architectural distribué, noté PCH-ESM.
+\end{enumerate}
+
+\begin{remark}
+Dans ce document, le mot \emph{contexte} est formellement un indice \(c\in\C\).  
+Il sélectionne un ensemble admissible \(\Mcal_c\) construit explicitement à partir d'un ensemble de calibration et d'un encodeur figé.
+\end{remark}
+
+\subsection*{Séparation des objets continus et discrets}
+
+La théorie sépare strictement deux niveaux :
+
+\begin{itemize}[leftmargin=2em]
+    \item le niveau \emph{continu}, où l'on purifie des états latents par minimisation d'énergies ;
+    \item le niveau \emph{discret}, où l'on choisit des espaces actifs par structure spectrale et par règles de départage fixées.
+\end{itemize}
+
+Cette séparation évite de mélanger dans un seul objet des opérations d'optimisation convexe et des décisions discrètes.
+
+% =================================================
+\section{Hypothèses et notations globales}
+% =================================================
+
+\begin{assumption}[Espace latent fini-dimensionnel]
+On fixe un espace euclidien réel \(\Hh=\R^d\).  
+Les représentations latentes vivent dans \(\Hh\) ou dans \(\Hh^T=\R^{dT}\) lorsqu'il s'agit de fenêtres séquentielles de longueur \(T\).
+\end{assumption}
+
+\begin{assumption}[Fenêtres et normes]
+Pour une fenêtre \(u=(u_1,\dots,u_T)\in \Hh^T\), on considère la norme produit
+\[
+\|u\|^2 = \sum_{t=1}^T \|u_t\|^2.
+\]
+\end{assumption}
+
+\begin{assumption}[Base de calibration]
+On fixe un ensemble de calibration fini
+\[
+\D_0=\{x_1,\dots,x_N\}\subset \X
+\]
+muni de labels contextuels \(c_j\in\C\).  
+On fixe aussi un encodeur de calibration \(E_{\theta_0}:\X\to \Hh^T\), tenu fixe lors de la construction des ensembles contextuels.
+\end{assumption}
+
+\begin{assumption}[Fidélité et régularité]
+Les coefficients \(\lambda_{\mathrm{ch}},\lambda_{\mathrm{reg}},\lambda_{\mathrm{ctx}},\lambda_{i,\mathrm{reg}},\lambda_{i,\mathrm{ctx}},\lambda_{\mathrm{fb}},\lambda_{\mathrm{dyn}},\lambda_{\mathrm{sm}},\lambda_{\mathrm{spec}},\lambda_{\mathrm{glue}},\lambda_{\mathrm{coord}},\lambda_{\mathrm{task}}\) sont strictement positifs.
+\end{assumption}
+
+% =================================================
+\section{PH : purification hiérarchique}
+% =================================================
+
+Dans cette théorie, PH est défini comme un opérateur de purification associé à une pénalisation explicite de chaîne et de norme.
+
+\subsection{Énergie de PH}
+
+\begin{definition}[Partie régulière de PH]
+On définit
+\[
+\Phi_{\mathrm{PH}}(u)
+=
+\lambda_{\mathrm{ch}}\,\Omega_{\mathrm{ch}}(u)
++
+\lambda_{\mathrm{reg}}\|u\|^2,
+\qquad
+\Omega_{\mathrm{ch}}(u)=\sum_{t=2}^T\|u_t-u_{t-1}\|^2.
+\]
+\end{definition}
+
+\begin{definition}[Opérateur PH]
+L'opérateur de purification hiérarchique est défini par
+\[
+\Pcal^{\mathrm{PH}}(w)
+=
+\argmin_{u\in\Hh^T}
+\left\{
+\frac12\|u-w\|^2+\Phi_{\mathrm{PH}}(u)
+\right\}.
+\]
+\end{definition}
+
+\begin{proposition}[Existence et unicité de PH]
+Si \(\lambda_{\mathrm{reg}}>0\), alors \(\Phi_{\mathrm{PH}}\) est fortement convexe.  
+Par conséquent, pour tout \(w\in\Hh^T\), l'opérateur \(\Pcal^{\mathrm{PH}}(w)\) existe et est unique.
+\end{proposition}
+
+\begin{proof}
+Le terme \(u\mapsto \lambda_{\mathrm{reg}}\|u\|^2\) est fortement convexe.  
+La somme avec la fonction convexe \(\lambda_{\mathrm{ch}}\Omega_{\mathrm{ch}}(u)\) demeure fortement convexe.  
+L'ajout du terme \(\frac12\|u-w\|^2\) conserve cette propriété.  
+Une fonction fortement convexe admet un minimiseur unique.
+\end{proof}
+
+\begin{remark}
+Le schéma bidirectionnel du document initial peut être interprété comme un solveur numérique du problème ci-dessus.  
+Il ne définit pas un objet concurrent : il réalise approximativement l'opérateur PH.
+\end{remark}
+
+\subsection{Stabilité du mapping de PH}
+
+\begin{theorem}[Lipschitz de l'opérateur PH]
+Pour \(\lambda_{\mathrm{reg}}>0\), l'application
+\[
+w\longmapsto \Pcal^{\mathrm{PH}}(w)
+\]
+est bien définie et lipschitzienne. Plus précisément, il existe une constante \(L_{\mathrm{PH}}\in(0,1]\) telle que
+\[
+\|\Pcal^{\mathrm{PH}}(w_1)-\Pcal^{\mathrm{PH}}(w_2)\|
+\le
+L_{\mathrm{PH}}\|w_1-w_2\|
+\qquad
+\text{pour tous } w_1,w_2\in\Hh^T.
+\]
+\end{theorem}
+
+\begin{proof}
+On pose \(\Phi_{\mathrm{PH}}=\lambda_{\mathrm{ch}}\Omega_{\mathrm{ch}}+\lambda_{\mathrm{reg}}\|\cdot\|^2\).  
+Comme \(\Phi_{\mathrm{PH}}\) est fortement convexe, son opérateur proximal \(\prox_{\Phi_{\mathrm{PH}}}\) est contractant.  
+Or \(\Pcal^{\mathrm{PH}}=\prox_{\Phi_{\mathrm{PH}}}\).  
+Le résultat suit.
+\end{proof}
+
+\subsection{Trajectoire proximale de PH}
+
+\begin{definition}[Itération proximale de PH]
+Pour \(\eta>0\), on définit
+\[
+\mathcal T^{\mathrm{PH}}_{\eta}(z;w)
+=
+\argmin_{u\in\Hh^T}
+\left\{
+\frac12\|u-w\|^2
++\Phi_{\mathrm{PH}}(u)
++\frac{1}{2\eta}\|u-z\|^2
+\right\}.
+\]
+La trajectoire proximale est
+\[
+z^{(0)}=w,
+\qquad
+z^{(r+1)}=\mathcal T^{\mathrm{PH}}_{\eta}(z^{(r)};w),
+\quad r\ge 0.
+\]
+\end{definition}
+
+\begin{theorem}[Contraction de l'itération proximale PH]
+Soit \(J_{\mathrm{PH}}(u;w)=\frac12\|u-w\|^2+\Phi_{\mathrm{PH}}(u)\).  
+Alors \(J_{\mathrm{PH}}(\cdot;w)\) est fortement convexe, et pour tout \(\eta>0\), l'opérateur \(\mathcal T^{\mathrm{PH}}_{\eta}(\cdot;w)\) est une contraction.  
+Par conséquent, la suite \(z^{(r)}\) converge linéairement vers l'unique point fixe \(\bar z_{\mathrm{PH}}(w)\), qui coïncide avec \(\Pcal^{\mathrm{PH}}(w)\).
+\end{theorem}
+
+\begin{proof}
+Soient \(x=\mathcal T^{\mathrm{PH}}_{\eta}(a;w)\) et \(y=\mathcal T^{\mathrm{PH}}_{\eta}(b;w)\).  
+Par optimalité,
+\[
+\frac{a-x}{\eta}\in \partial J_{\mathrm{PH}}(x;w),
+\qquad
+\frac{b-y}{\eta}\in \partial J_{\mathrm{PH}}(y;w).
+\]
+Comme \(J_{\mathrm{PH}}(\cdot;w)\) est fortement convexe, son sous-différentiel est fortement monotone.  
+On obtient donc
+\[
+\langle x-y,a-b\rangle\ge (1+\eta\mu_{\mathrm{PH}})\|x-y\|^2
+\]
+pour un certain \(\mu_{\mathrm{PH}}>0\).  
+Par Cauchy-Schwarz,
+\[
+\|x-y\|\le \frac{1}{1+\eta\mu_{\mathrm{PH}}}\|a-b\|.
+\]
+L'opérateur est contractant, donc la convergence suit par Banach.  
+Le point fixe vérifie la condition d'optimalité du minimiseur.
+\end{proof}
+
+\begin{proposition}[Décroissance de l'énergie en PH]
+La trajectoire proximale vérifie
+\[
+J_{\mathrm{PH}}(z^{(r+1)};w)
++
+\frac{1}{2\eta}\|z^{(r+1)}-z^{(r)}\|^2
+\le
+J_{\mathrm{PH}}(z^{(r)};w),
+\]
+d'où la décroissance monotone de \(J_{\mathrm{PH}}(z^{(r)};w)\).
+\end{proposition}
+
+\begin{proof}
+Par définition de \(z^{(r+1)}\) comme minimiseur du problème proximal, en comparant à \(u=z^{(r)}\), on obtient immédiatement l'inégalité.
+\end{proof}
+
+% =================================================
+\section{De PH vers PCH : purification contextuelle hiérarchique}
+% =================================================
+
+Cette section généralise PH en introduisant explicitement un contexte admissible.
+
+\subsection{Construction explicite des ensembles contextuels}
+
+\begin{definition}[Échantillon contextuel]
+Pour chaque contexte \(c\in\C\), on note
+\[
+\D_c=\{x_j\in\D_0 : c_j=c\}.
+\]
+\end{definition}
+
+\begin{definition}[Ensemble admissible contextuel]
+Pour chaque contexte \(c\), on définit
+\[
+\Mcal_c
+=
+\conv\{E_{\theta_0}(x): x\in\D_c\}\subseteq \Hh^T.
+\]
+Comme \(\D_c\) est fini, \(\Mcal_c\) est compact et convexe.
+\end{definition}
+
+\begin{lemma}[Projection sur l'ensemble contextuel]
+Pour tout \(u\in\Hh^T\) et tout \(c\in\C\), la projection orthogonale
+\[
+\Pi_{\Mcal_c}(u)=\argmin_{v\in\Mcal_c}\|u-v\|
+\]
+existe et est unique.
+\end{lemma}
+
+\begin{proof}
+En dimension finie, \(\Mcal_c\) est non vide, fermé et convexe.  
+La projection orthogonale sur un tel ensemble existe et est unique.
+\end{proof}
+
+\begin{remark}
+Cette définition ferme la difficulté pratique restante : le contexte n'est pas un prototype caché.  
+Il est une région admissible dérivée d'un corpus calibré et d'un encodeur figé.
+\end{remark}
+
+\subsection{Fonctionnelle contextuelle}
+
+\begin{definition}[Partie contextuelle régulière]
+On définit
+\[
+\Phi_{\mathrm{PCH},c}(u)
+=
+\lambda_{\mathrm{ctx}}\,\dist(u,\Mcal_c)^2
++
+\lambda_{\mathrm{ch}}\,\Omega_{\mathrm{ch}}(u)
++
+\lambda_{\mathrm{reg}}\|u\|^2.
+\]
+\end{definition}
+
+\begin{definition}[Opérateur PCH]
+L'opérateur de purification contextuelle hiérarchique est défini par
+\[
+\Pcal^{\mathrm{PCH}}(w;c)
+=
+\argmin_{u\in\Hh^T}
+\left\{
+\frac12\|u-w\|^2+\Phi_{\mathrm{PCH},c}(u)
+\right\}.
+\]
+\end{definition}
+
+\begin{proposition}[Existence et unicité de PCH]
+Si \(\lambda_{\mathrm{reg}}>0\), alors \(\Phi_{\mathrm{PCH},c}\) est fortement convexe pour tout \(c\).  
+Par conséquent, pour tout \(w\) et tout \(c\), \(\Pcal^{\mathrm{PCH}}(w;c)\) existe et est unique.
+\end{proposition}
+
+\begin{proof}
+Le terme \(u\mapsto \lambda_{\mathrm{reg}}\|u\|^2\) est fortement convexe.  
+Les termes \(\lambda_{\mathrm{ctx}}\dist(u,\Mcal_c)^2\) et \(\lambda_{\mathrm{ch}}\Omega_{\mathrm{ch}}(u)\) sont convexes.  
+La somme reste fortement convexe, donc admet un minimiseur unique.
+\end{proof}
+
+\subsection{Stabilité du mapping contextuel}
+
+\begin{theorem}[Lipschitz de l'opérateur PCH]
+Pour chaque contexte \(c\), l'application
+\[
+w\longmapsto \Pcal^{\mathrm{PCH}}(w;c)
+\]
+est bien définie et lipschitzienne.  
+En particulier, il existe une constante \(L_{\mathrm{PCH}}\in(0,1]\) telle que
+\[
+\|\Pcal^{\mathrm{PCH}}(w_1;c)-\Pcal^{\mathrm{PCH}}(w_2;c)\|
+\le
+L_{\mathrm{PCH}}\|w_1-w_2\|
+\]
+pour tous \(w_1,w_2\in\Hh^T\).
+\end{theorem}
+
+\begin{proof}
+On écrit
+\[
+\Pcal^{\mathrm{PCH}}(w;c)=\prox_{\Phi_{\mathrm{PCH},c}}(w).
+\]
+Comme \(\Phi_{\mathrm{PCH},c}\) est fortement convexe, son proximal est contractant.  
+La conclusion suit.
+\end{proof}
+
+\subsection{Itération proximale de PCH}
+
+\begin{definition}[Itération proximale de PCH]
+Pour \(\eta>0\), on définit
+\[
+\mathcal T^{\mathrm{PCH}}_{\eta}(z;w,c)
+=
+\argmin_{u\in\Hh^T}
+\left\{
+\frac12\|u-w\|^2+\Phi_{\mathrm{PCH},c}(u)+\frac{1}{2\eta}\|u-z\|^2
+\right\}.
+\]
+La trajectoire proximale est
+\[
+u^{(0)}=w,
+\qquad
+u^{(r+1)}=\mathcal T^{\mathrm{PCH}}_{\eta}(u^{(r)};w,c),
+\quad r\ge 0.
+\]
+\end{definition}
+
+\begin{theorem}[Contraction de l'itération proximale PCH]
+Soit \(J_{\mathrm{PCH}}(u;w,c)=\frac12\|u-w\|^2+\Phi_{\mathrm{PCH},c}(u)\).  
+Alors \(J_{\mathrm{PCH}}(\cdot;w,c)\) est fortement convexe, et pour tout \(\eta>0\), l'opérateur \(\mathcal T^{\mathrm{PCH}}_{\eta}(\cdot;w,c)\) est une contraction.  
+Par conséquent, la suite \(u^{(r)}\) converge linéairement vers l'unique point fixe \(\bar z_{\mathrm{PCH}}(w,c)\), qui coïncide avec \(\Pcal^{\mathrm{PCH}}(w;c)\).
+\end{theorem}
+
+\begin{proof}
+La preuve est identique à celle de PH, en remplaçant \(J_{\mathrm{PH}}\) par \(J_{\mathrm{PCH}}\).  
+La forte convexité donne la forte monotonie du sous-différentiel, puis la contraction.  
+Banach donne la convergence vers un unique point fixe.  
+Ce point fixe vérifie la condition d'optimalité du minimiseur.
+\end{proof}
+
+\begin{proposition}[Décroissance de l'énergie en PCH]
+La trajectoire proximale vérifie
+\[
+J_{\mathrm{PCH}}(u^{(r+1)};w,c)
++
+\frac{1}{2\eta}\|u^{(r+1)}-u^{(r)}\|^2
+\le
+J_{\mathrm{PCH}}(u^{(r)};w,c),
+\]
+d'où la décroissance monotone de \(J_{\mathrm{PCH}}(u^{(r)};w,c)\).
+\end{proposition}
+
+\begin{proof}
+Même argument que pour PH : on compare le minimum proximal à la valeur en \(u^{(r)}\).
+\end{proof}
+
+\begin{theorem}[PH est un cas limite de PCH]
+Supposons que le contexte soit trivial au sens suivant :
+\[
+\Mcal_c=\Hh^T
+\quad\text{pour tout } c\in\C.
+\]
+Alors
+\[
+\dist(u,\Mcal_c)=0
+\quad\text{pour tout } u\in\Hh^T,
+\]
+et
+\[
+\Pcal^{\mathrm{PCH}}(w;c)=\Pcal^{\mathrm{PH}}(w).
+\]
+Par conséquent, les trajectoires proximales coïncident.
+\end{theorem}
+
+\begin{proof}
+Si \(\Mcal_c=\Hh^T\), le terme contextuel est identiquement nul.  
+La fonctionnelle PCH se réduit alors exactement à PH, et les minimisateurs coïncident.
+\end{proof}
+
+\subsection{Stabilité contextuelle canonique}
+
+\begin{definition}[Instabilité contextuelle fondamentale]
+On définit
+\[
+\mathcal I(z;w,c)
+=
+J_{\mathrm{PCH}}(z;w,c)-\inf_{u\in\Hh^T}J_{\mathrm{PCH}}(u;w,c).
+\]
+\end{definition}
+
+\begin{definition}[Stabilité contextuelle fondamentale]
+On définit le score canonique de stabilité par
+\[
+S_C^\star(z;w,c)=\frac{1}{1+\mathcal I(z;w,c)}.
+\]
+\end{definition}
+
+\begin{proposition}[Bornes]
+Pour tout \(z,w,c\),
+\[
+0<S_C^\star(z;w,c)\le 1.
+\]
+De plus, \(S_C^\star=1\) si et seulement si \(z\) minimise \(J_{\mathrm{PCH}}(\cdot;w,c)\).
+\end{proposition}
+
+\begin{proof}
+Par définition, \(\mathcal I\ge 0\).  
+Le reste est immédiat.
+\end{proof}
+
+\begin{definition}[Gain de stabilité]
+On définit
+\[
+\mathsf{Gain}(w,c)
+=
+J_{\mathrm{PCH}}\!\bigl(w;w,c\bigr)
+-
+J_{\mathrm{PCH}}\!\bigl(\Pcal^{\mathrm{PCH}}(w;c);w,c\bigr).
+\]
+\end{definition}
+
+\begin{proposition}[Gain de stabilité non négatif]
+On a \(\mathsf{Gain}(w,c)\ge 0\) pour tout \(w,c\).
+\end{proposition}
+
+\begin{proof}
+Par définition, \(\Pcal^{\mathrm{PCH}}(w;c)\) minimise \(J_{\mathrm{PCH}}(\cdot;w,c)\).  
+Donc
+\[
+J_{\mathrm{PCH}}(\Pcal^{\mathrm{PCH}}(w;c);w,c)\le J_{\mathrm{PCH}}(w;w,c),
+\]
+d'où \(\mathsf{Gain}(w,c)\ge 0\).
+\end{proof}
+
+\begin{remark}
+Le score \(S_C^\star\) est une stabilité relative à la fonctionnelle PCH elle-même.  
+Il ne prétend pas mesurer une vérité universelle, mais une stabilité certifiée dans le cadre formel défini ici.
+\end{remark}
+
+% =================================================
+\section{PCH-ESM : base spectrale, spécialisation certifiée et apprentissage}
+% =================================================
+
+Cette section formalise la décentralisation de l'espace latent, la spécialisation locale, et la construction déterministe des sous-espaces.  
+Le point essentiel est que la spécialisation n'est plus seulement une intuition : elle est définie par un objectif explicite, des certificats de marge, et une condition d'identifiabilité.
+
+\subsection{Construction spectrale déterministe}
+
+\begin{definition}[Covariance de calibration]
+Soient \(z_j=E_{\theta_0}(x_j)\in\Hh^T\) les latents de calibration.  
+On définit la moyenne
+\[
+\bar z=\frac1N\sum_{j=1}^N z_j
+\]
+et la covariance empirique symétrique
+\[
+\Sigma=\frac1N\sum_{j=1}^N (z_j-\bar z)(z_j-\bar z)^\top\in\R^{dT\times dT}.
+\]
+\end{definition}
+
+\begin{definition}[Projecteurs spectraux]
+Par le théorème spectral, il existe une famille finie de projecteurs orthogonaux \((P_1,\dots,P_m)\) associés aux sous-espaces propres de \(\Sigma\).  
+Lorsque certaines valeurs propres sont multiples, on travaille avec les projecteurs spectraux et non avec une base arbitraire ; la construction reste donc déterministe.
+\end{definition}
+
+\begin{definition}[Partition spectrale]
+On fixe une partition déterministe de l'ensemble des indices spectraux \(\{1,\dots,m\}\) en blocs disjoints \(B_0,\dots,B_n\).  
+On définit alors
+\[
+\Hh_i=\bigoplus_{k\in B_i}\mathrm{Im}(P_k),\qquad i=0,\dots,n.
+\]
+\end{definition}
+
+\begin{definition}[Projecteurs sur les sous-espaces spécialisés]
+On note \(\Pi_i:\Hh^T\to\Hh_i\) la projection orthogonale sur \(\Hh_i\).  
+Elle est linéaire, idempotente et auto-adjointe.
+\end{definition}
+
+\begin{proposition}[Décomposition orthogonale unique]
+On a
+\[
+\Hh^T=\Hh_0\oplus\Hh_1\oplus\cdots\oplus\Hh_n.
+\]
+Pour tout \(z\in\Hh^T\), il existe une unique écriture
+\[
+z=z_0+\cdots+z_n,
+\qquad
+z_i\in\Hh_i.
+\]
+De plus,
+\[
+\|z\|^2=\|z_0\|^2+\cdots+\|z_n\|^2.
+\]
+\end{proposition}
+
+\begin{proof}
+Les sous-espaces \(\Hh_i\) sont construits à partir de projecteurs spectraux orthogonaux.  
+Ils sont donc deux à deux orthogonaux et leur somme directe est l'espace total.  
+L'unicité et la formule de Pythagore suivent immédiatement.
+\end{proof}
+
+\begin{remark}
+La base de spécialisation n'est pas postulée comme une boîte noire : elle est obtenue par projecteurs spectraux.  
+La détermination est explicite et ne dépend pas d'un choix arbitraire de base dans les sous-espaces propres dégénérés.
+\end{remark}
+
+\subsection{Signature de spécialité certifiée}
+
+\begin{definition}[Signature probabiliste complète]
+Pour \(z\in\Hh^T\), on définit la signature
+\[
+\sigma(z)=\bigl(\sigma_0(z),\sigma_1(z),\dots,\sigma_n(z)\bigr)
+\]
+par
+\[
+\sigma_i(z)
+=
+\frac{\|\Pi_i z\|^2+\varepsilon}{\|z\|^2+(n+1)\varepsilon},
+\qquad i=0,\dots,n,
+\]
+où \(\varepsilon>0\) évite la division par zéro.
+\end{definition}
+
+\begin{proposition}[Normalisation]
+Pour tout \(z\in\Hh^T\),
+\[
+\sum_{i=0}^n \sigma_i(z)=1.
+\]
+\end{proposition}
+
+\begin{proof}
+Par définition,
+\[
+\sum_{i=0}^n(\|\Pi_i z\|^2+\varepsilon)
+=
+\|z\|^2+(n+1)\varepsilon.
+\]
+La somme des composantes est donc exactement \(1\).
+\end{proof}
+
+\begin{remark}
+La signature n'est pas une étiquette postulée.  
+Elle est dérivée de la géométrie effective du latent et peut être utilisée comme variable de spécialisation certifiée.
+\end{remark}
+
+\subsection{Objectif de spécialisation}
+
+\begin{assumption}[Séparabilité des domaines]
+Pour chaque domaine \(D_i\), il existe une marge \(\delta_i>0\) telle que, sur les données de calibration du domaine \(D_i\),
+\[
+\mathbb E_{x\sim D_i}\bigl[\sigma_i(E_{\theta_0}(x))\bigr]
+\ge
+\max_{j\neq i}\mathbb E_{x\sim D_i}\bigl[\sigma_j(E_{\theta_0}(x))\bigr]
++\delta_i.
+\]
+\end{assumption}
+
+\begin{definition}[Fonctionnelle de spécialisation]
+Pour des projecteurs \(\mathbf \Pi=(\Pi_0,\dots,\Pi_n)\) et des têtes locales \(\mathbf h=(h_1,\dots,h_n)\), on définit
+\[
+\mathcal J_{\mathrm{spec}}(\mathbf\Pi,\mathbf h)
+=
+\sum_{i=1}^n
+\mathbb E_{(x,y)\sim D_i}
+\Bigl[
+\ell_i\bigl(h_i(\Pi_i E_{\theta_0}(x)),y\bigr)
+\Bigr]
++
+\lambda_{\mathrm{leak}}
+\sum_{i\neq j}
+\mathbb E_{x\sim D_i}\|\Pi_j E_{\theta_0}(x)\|^2
++
+\lambda_{\mathrm{bal}}
+\sum_{i=0}^n
+\bigl(\operatorname{tr}(\Pi_i)-d_i\bigr)^2.
+\]
+Ici \(\ell_i\) est une perte locale convexe pour la tâche \(i\), et les têtes \(h_i\) sont prises dans une classe bornée de maps linéaires ou affines.
+\end{definition}
+
+\begin{proposition}[Existence d'une spécialisation optimale]
+L'ensemble des tuples de projecteurs orthogonaux \((\Pi_0,\dots,\Pi_n)\) de rangs fixés est compact, et la classe bornée des têtes \(\mathbf h\) est compacte en dimension finie.  
+Par conséquent, \(\mathcal J_{\mathrm{spec}}\) admet au moins un minimiseur global.
+\end{proposition}
+
+\begin{proof}
+En dimension finie, l'ensemble des projecteurs orthogonaux de rang fixé s'identifie à un produit de variétés de Grassmann compactes.  
+La classe bornée des têtes est compacte par Heine-Borel.  
+La fonction \(\mathcal J_{\mathrm{spec}}\) est continue, donc elle atteint son minimum.
+\end{proof}
+
+\begin{theorem}[Identifiabilité de la spécialisation]
+Sous l'hypothèse de séparabilité des domaines, si un tuple \((\mathbf \Pi^\star,\mathbf h^\star)\) minimise \(\mathcal J_{\mathrm{spec}}\), alors chaque domaine \(D_i\) est associé de manière identifiable à son bloc \(\Hh_i\) au sens suivant :
+pour tout \(j\neq i\),
+\[
+\mathbb E_{x\sim D_i}\bigl[\sigma_i(\Pi_i^\star E_{\theta_0}(x))\bigr]
+>
+\mathbb E_{x\sim D_i}\bigl[\sigma_j(\Pi_j^\star E_{\theta_0}(x))\bigr].
+\]
+En particulier, l'attribution des domaines aux blocs spécialisés est unique à permutation interne près dans les sous-espaces spectraux dégénérés.
+\end{theorem}
+
+\begin{proof}
+La marge \(\delta_i>0\) impose une séparation stricte entre le score du bon bloc et ceux des blocs concurrents.  
+Si un minimiseur violait cette séparation, il augmenterait nécessairement le terme de fuite \(\mathcal J_{\mathrm{spec}}\) d'au moins une quantité strictement positive.  
+Ainsi, tout minimiseur respecte la séparation de marge et l'association domaine-bloc est identifiable.  
+L'unicité n'est perdue qu'à l'intérieur des sous-espaces spectraux dégénérés, où la théorie travaille avec des projecteurs et non avec une base arbitraire.
+\end{proof}
+
+\begin{definition}[Apprentissage par alternance]
+On considère l'itération bloc-coordinate déterministe
+\[
+\Pi^{(k+1)}
+=
+\argmin_{\Pi\in\mathfrak P}\mathcal J_{\mathrm{spec}}(\Pi,h^{(k)}),
+\qquad
+h^{(k+1)}
+=
+\argmin_{h\in\mathfrak H}\mathcal J_{\mathrm{spec}}(\Pi^{(k+1)},h),
+\]
+où \(\mathfrak P\) désigne l'ensemble admissible des partitions spectrales et \(\mathfrak H\) l'ensemble admissible des têtes bornées.
+\end{definition}
+
+\begin{proposition}[Décroissance de l'apprentissage]
+La suite
+\[
+\mathcal J_{\mathrm{spec}}(\Pi^{(k)},h^{(k)})
+\]
+est décroissante.  
+Toute suite d'itérations possède au moins un point d'accumulation, et tout point d'accumulation est stationnaire pour la fonctionnelle de spécialisation.
+\end{proposition}
+
+\begin{proof}
+À chaque étape, on minimise exactement l'objectif sur l'un des blocs de variables.  
+La valeur ne peut donc qu'être non croissante.  
+La compacité des ensembles admissibles assure l'existence de points d'accumulation.  
+Par continuité de l'objectif, tout point limite satisfait la condition stationnaire usuelle d'un minimum sur ensemble compact.
+\end{proof}
+
+\subsection{Contextes locaux spécialisés}
+
+\begin{definition}[Contexte local]
+Pour chaque contexte global \(c\in\C\), on considère des ensembles admissibles locaux
+\[
+\Mcal_{c,i}=\Pi_i(\Mcal_c)\subseteq \Hh_i,
+\qquad i=0,\dots,n.
+\]
+Comme \(\Mcal_c\) est compact convexe et \(\Pi_i\) est linéaire, chaque \(\Mcal_{c,i}\) est compact convexe.
+\end{definition}
+
+\begin{assumption}[Admissibles locaux]
+Pour chaque \(i\in\{0,\dots,n\}\), \(\Mcal_{c,i}\subseteq \Hh_i\) est non vide, fermé et convexe.
+\end{assumption}
+
+\begin{definition}[Opérateur local de purification]
+Pour \(w_i\in\Hh_i\), on définit
+\[
+\Phi_i(w_i;c)
+=
+\argmin_{u_i\in\Hh_i}
+\left\{
+\frac12\|u_i-w_i\|^2
++
+\lambda_{i,\mathrm{ctx}}\dist(u_i,\Mcal_{c,i})^2
++
+\lambda_{i,\mathrm{reg}}\|u_i\|^2
+\right\}.
+\]
+\end{definition}
+
+\begin{proposition}[Unicité locale]
+Si \(\lambda_{i,\mathrm{reg}}>0\), alors \(\Phi_i(\cdot;c)\) est bien définie et unique pour tout \(c\).
+\end{proposition}
+
+\begin{proof}
+La fonction à minimiser est fortement convexe par la présence du terme quadratique \(\|u_i-w_i\|^2\) et du terme \(\lambda_{i,\mathrm{reg}}\|u_i\|^2\).  
+Le minimiseur est donc unique.
+\end{proof}
+
+\begin{definition}[Sortie locale activée]
+Pour une entrée locale \(w_i\in\Hh_i\), on pose
+\[
+u_i^\circ(w_i;c)=\Phi_i(w_i;c),
+\]
+puis le score de fiabilité et d'activation
+\[
+\rho_i(w,c)
+=
+\exp\!\bigl(-\|u_0^{(i)}(w,c)-\Pi_0 w\|^2\bigr)\,
+\frac{\|\Pi_i w\|^2+\varepsilon}{\|w\|^2+(n+1)\varepsilon}\,
+\frac{1}{1+\|u_i^\circ(\Pi_i w;c)-\Pi_i w\|^2}.
+\]
+Enfin, la sortie locale activée est
+\[
+\Psi_i(w,c)
+=
+\rho_i(w,c)\,u_i^\circ(\Pi_i w;c)
++
+\bigl(1-\rho_i(w,c)\bigr)\Pi_i w.
+\]
+\end{definition}
+
+\begin{remark}
+Le score \(\rho_i\) n'est pas décoratif : il pondère directement la part corrigée par l'opérateur local, puis il intervient dans le collage global.  
+Il mesure simultanément la proximité au sous-espace partagé, la concentration sur le bloc \(i\), et la stabilité de la sortie locale.
+\end{remark}
+
+\begin{definition}[Certificat local]
+Pour une entrée \(w\in\Hh^T\) et un contexte \(c\in\C\), le certificat local de l'espace \(i\) est le couple
+\[
+\mathfrak c_i(w,c)=\bigl(u_0^{(i)}(w,c),\Psi_i(w,c)\bigr)\in \Hh_0\oplus \Hh_i.
+\]
+\end{definition}
+
+\begin{definition}[Sous-espace certifié local]
+Pour chaque \(i\in\{1,\dots,n\}\), on définit
+\[
+\mathcal K_{c,i}
+=
+\{(\Pi_0 u,\Pi_i u): u\in \Mcal_c\}
+\subseteq \Hh_0\oplus \Hh_i.
+\]
+Comme \(\Mcal_c\) est compact et convexe, \(\mathcal K_{c,i}\) est compact et convexe.
+\end{definition}
+
+\begin{proposition}[Existence et unicité du certificat local]
+Si \(\lambda_{i,\mathrm{reg}}>0\), alors le certificat local construit à partir de la minimisation sur \(\mathcal K_{c,i}\) existe et est unique pour tout \(w\) et tout \(c\).
+\end{proposition}
+
+\begin{proof}
+La fonction à minimiser est fortement convexe sur le sous-ensemble convexe compact \(\mathcal K_{c,i}\).  
+Un minimiseur unique existe donc.
+\end{proof}
+
+\begin{definition}[Fusion globale]
+On définit
+\[
+\Gamma(z_0,z_1,\dots,z_n)=z_0+\sum_{i=1}^n z_i.
+\]
+\end{definition}
+
+\begin{proposition}[Cohérence de fusion]
+Pour tout \(z\in\Hh^T\),
+\[
+\Gamma(\Pi_0 z,\Pi_1 z,\dots,\Pi_n z)=z.
+\]
+\end{proposition}
+
+\begin{proof}
+C'est la propriété de la décomposition orthogonale.
+\end{proof}
+
+% =================================================
+\section{La fonction \(G\) : collage pondéré et coordination inter-espaces}
+% =================================================
+
+Dans cette théorie, \(G\) n'est pas une simple moyenne.  
+C'est l'opérateur de collage pondéré à retour qui reconstruit une cohérence globale à partir de certificats locaux, et dont les poids dépendent explicitement de la fiabilité, de la spécialisation et de la stabilité.
+
+\subsection{Fonctionnelle de coordination}
+
+\begin{definition}[Fonctionnelle locale de coordination]
+Pour une entrée \(w\in\Hh^T\) et un contexte \(c\in\C\), on définit
+\[
+\mathcal J_{\mathrm{G}}(v_0,v_1,\dots,v_n;w,c)
+=
+\sum_{i=1}^n \rho_i(w,c)\,\|v_0-u_0^{(i)}(w,c)\|^2
++
+\lambda_{\mathrm{fb}}
+\sum_{i=1}^n \rho_i(w,c)\,
+\bigl\|v_i-\Psi_i(w,c)-\Pi_i\bigl(v_0-u_0^{(i)}(w,c)\bigr)\bigr\|^2.
+\]
+\end{definition}
+
+\begin{definition}[Collage global \(G\)]
+La fonction de coordination \(G\) est l'opérateur défini par
+\[
+G\bigl(\mathfrak c_1(w,c),\dots,\mathfrak c_n(w,c);w,c\bigr)
+=
+\bigl(\bar u_0(w,c),\bar u_1(w,c),\dots,\bar u_n(w,c)\bigr),
+\]
+où \((\bar u_0,\bar u_1,\dots,\bar u_n)\) est l'unique minimiseur de \(\mathcal J_{\mathrm{G}}(\cdot;w,c)\).
+\end{definition}
+
+\begin{proposition}[Forme explicite de la solution]
+Le minimiseur de \(\mathcal J_{\mathrm{G}}\) vérifie
+\[
+\bar u_0(w,c)
+=
+\frac{\sum_{i=1}^n \rho_i(w,c)\,u_0^{(i)}(w,c)}{\sum_{i=1}^n \rho_i(w,c)},
+\]
+et
+\[
+\bar u_i(w,c)
+=
+\Psi_i(w,c)
++
+\Pi_i\bigl(\bar u_0(w,c)-u_0^{(i)}(w,c)\bigr).
+\]
+\end{proposition}
+
+\begin{proof}
+Pour \(v_0\) fixé, chaque \(v_i\) minimise un terme quadratique strictement convexe, d'où
+\[
+v_i=\Psi_i+\Pi_i(v_0-u_0^{(i)}).
+\]
+En réinjectant dans l'objectif, on obtient une somme pondérée de carrés en \(v_0\), dont le minimiseur est la moyenne pondérée par les \(\rho_i\).  
+La formule suit.
+\end{proof}
+
+\begin{remark}
+La fonction \(G\) n'est donc ni une simple moyenne aveugle ni une boîte noire de distillation.  
+Elle réalise un consensus pondéré sur la composante partagée et un retour correctif sur les composantes spécialisées.  
+Les poids \(\rho_i\) contrôlent réellement l'influence de chaque espace.
+\end{remark}
+
+\begin{definition}[Disagreement de collage]
+On définit le coût de désaccord partagé
+\[
+\mathcal E_{\mathrm{glue}}(w,c)
+=
+\sum_{i=1}^n
+\rho_i(w,c)\,\|u_0^{(i)}(w,c)-\bar u_0(w,c)\|^2.
+\]
+\end{definition}
+
+\begin{proposition}[Minimalité du consensus]
+Le consensus \(\bar u_0(w,c)\) minimise \(\mathcal E_{\mathrm{glue}}(\cdot,c)\) parmi tous les choix possibles de composante partagée.
+\end{proposition}
+
+\begin{proof}
+C'est la caractérisation standard du barycentre pondéré euclidien comme minimiseur d'une somme pondérée de carrés.
+\end{proof}
+
+\begin{proposition}[Robustesse du collage]
+Si le certificat local \(k\) est perturbé en norme par \(\delta\), alors la perturbation induite sur le consensus partagé vérifie
+\[
+\|\Delta \bar u_0\|
+\le
+\frac{\rho_k(w,c)}{\sum_{i=1}^n \rho_i(w,c)}\,\delta.
+\]
+En particulier, si \(\rho_k(w,c)\) décroît, l'influence du certificat \(k\) décroît aussi.
+\end{proposition}
+
+\begin{proof}
+La formule du consensus pondéré est linéaire en les certificats.  
+La variation du consensus est donc bornée par le poids normalisé du certificat perturbé multiplié par la taille de la perturbation.
+\end{proof}
+
+\begin{theorem}[Exactitude du collage lorsque les certificats concordent]
+Supposons que
+\[
+u_0^{(1)}(w,c)=\cdots=u_0^{(n)}(w,c)=u_0^\star(w,c).
+\]
+Alors
+\[
+\bar u_0(w,c)=u_0^\star(w,c),
+\]
+et le collage \(G\) restitue exactement la composante partagée certifiée.
+\end{theorem}
+
+\begin{proof}
+Si tous les certificats partagés sont égaux, leur moyenne pondérée leur est égale.  
+Le résultat suit immédiatement.
+\end{proof}
+
+\begin{definition}[Signature locale de coordination]
+On définit la signature locale de coordination par
+\[
+\rho_i^{\mathrm{coord}}(w,c)
+=
+\exp\!\left(-\|u_0^{(i)}(w,c)-\bar u_0(w,c)\|^2\right).
+\]
+\end{definition}
+
+\begin{theorem}[Reconnaissance de la faible fiabilité]
+Si \(\rho_i(w,c)\to 0\), alors la contribution effective de l'espace \(i\) au collage global tend vers \(0\).  
+En particulier, le certificat \(i\) devient asymptotiquement sans influence sur le collage global.
+\end{theorem}
+
+\begin{proof}
+Par définition, les poids de \(G\) sont normalisés par la somme des fiabilités.  
+Si \(\rho_i\) tend vers zéro alors que les autres fiabilités restent bornées strictement au-dessus de zéro, le poids normalisé de l'espace \(i\) tend vers zéro.
+\end{proof}
+
+% =================================================
+\section{Multi-PH : état du monde, observations partielles et croyances}
+% =================================================
+
+On appelle Multi-PH la version où la purification hiérarchique ne sert plus seulement à construire une représentation utile pour une tâche, mais à modéliser l'évolution d'un état latent hiérarchique interprété comme état du monde.
+
+\begin{remark}
+Ici, le terme \emph{monde} ne signifie pas une causalité cachée supposée a priori.  
+Il désigne l'état latent complet sur lequel s'exerce la dynamique variationnelle, avec observabilité partielle et incertitude explicitement modélisées.
+\end{remark}
+
+\subsection{Espace d'état}
+
+\begin{assumption}[Décomposition hiérarchique de l'état]
+On fixe un espace d'état euclidien
+\[
+\Hh_\Omega=\Hh^{(0)}\oplus\Hh^{(1)}\oplus\cdots\oplus\Hh^{(L)}.
+\]
+On identifie
+\[
+\Hh^{(0)}=\Hh_{\mathrm{obs}},
+\qquad
+\Hh^{(1)}=\Hh_{\mathrm{act}},
+\]
+et les niveaux \(\Hh^{(2)},\dots,\Hh^{(L)}\) comme niveaux de mémoire ou d'abstraction.
+\end{assumption}
+
+\begin{definition}[État hiérarchique]
+Un état du monde à l'instant \(t\) est un vecteur
+\[
+\Omega_t=(\omega_t^{(0)},\omega_t^{(1)},\dots,\omega_t^{(L)})\in\Hh_\Omega.
+\]
+\end{definition}
+
+\begin{definition}[Projecteurs d'observation et d'action]
+On définit
+\[
+R:\Hh_\Omega\to\Hh_{\mathrm{obs}},
+\qquad
+A:\Hh_\Omega\to\Hh_{\mathrm{act}}
+\]
+par
+\[
+R(\Omega)=\omega^{(0)},
+\qquad
+A(\Omega)=\omega^{(1)}.
+\]
+\end{definition}
+
+\subsection{Belief state et observabilité partielle}
+
+\begin{definition}[Belief state]
+On appelle croyance au temps \(t\) le triplet
+\[
+\mathfrak B_t=(\Omega_t,Q_t,r_t),
+\]
+où \(Q_t\succ 0\) est une métrique de confiance et \(r_t\ge 0\) un rayon d'incertitude.
+\end{definition}
+
+\begin{definition}[Ensemble de croyance]
+À partir d'une observation partielle \(o_t\in\Hh_{\mathrm{obs}}\) et d'une action \(a_t\in\Hh_{\mathrm{act}}\), on définit l'ensemble admissible
+\[
+\mathcal B_t
+=
+\Bigl\{
+\Omega\in\Hh_\Omega:
+\|R\Omega-o_t\|_{W_t}\le \varepsilon_t,\;
+\|A\Omega-a_t\|_{V_t}\le \eta_t,\;
+\|\Omega-\Omega_t\|_{Q_t}\le r_t
+\Bigr\},
+\]
+où \(W_t\succ 0\) et \(V_t\succ 0\) sont des poids de confiance, et \(\varepsilon_t,\eta_t>0\).
+\end{definition}
+
+\begin{lemma}[Convexité de la croyance]
+L'ensemble \(\mathcal B_t\) est fermé, convexe et non vide dès que les contraintes observées sont compatibles avec \(\Omega_t\).
+\end{lemma}
+
+\begin{proof}
+Chaque contrainte est l'inégalité d'une norme définissant une boule fermée convexe.  
+L'intersection finie de fermés convexes est fermée et convexe.  
+La non-vacuité suit de la compatibilité des observations avec l'état courant.
+\end{proof}
+
+\subsection{Énergie du monde}
+
+\begin{definition}[Régularité du monde]
+On pose
+\[
+\Omega_{\mathrm{world}}(\Omega)
+=
+\sum_{\ell=2}^{L}\|\omega^{(\ell)}-\omega^{(\ell-1)}\|^2.
+\]
+\end{definition}
+
+\begin{definition}[Fonctionnelle dynamique du monde]
+Soient \(o_t\in\Hh_{\mathrm{obs}}\) une observation et \(a_t\in\Hh_{\mathrm{act}}\) une action à l'instant \(t\).  
+On définit
+\[
+J_{\mathrm{world}}(\Omega;\Omega_t,o_t,a_t)
+=
+\frac12\|\Omega-\Omega_t\|_{Q_t}^2
++
+\frac12\|R\Omega-o_t\|_{W_t}^2
++
+\frac12\|A\Omega-a_t\|_{V_t}^2
++
+\lambda_{\mathrm{sm}}\Omega_{\mathrm{world}}(\Omega).
+\]
+\end{definition}
+
+\begin{definition}[Mise à jour Multi-PH]
+La mise à jour du monde est définie en deux étapes :
+\[
+\tilde\Omega_{t+1}
+=
+\argmin_{\Omega\in\Hh_\Omega}
+J_{\mathrm{world}}(\Omega;\Omega_t,o_t,a_t),
+\qquad
+\Omega_{t+1}
+=
+\Pi_{\mathcal B_t}(\tilde\Omega_{t+1}).
+\]
+\end{definition}
+
+\begin{proposition}[Existence et unicité de la mise à jour du monde]
+Si \(Q_t\succ 0\), alors \(J_{\mathrm{world}}(\cdot;\Omega_t,o_t,a_t)\) est fortement convexe.  
+Par conséquent, \(\tilde\Omega_{t+1}\) existe et est unique.  
+Comme \(\mathcal B_t\) est fermé et convexe, la projection \(\Pi_{\mathcal B_t}\) est aussi unique, donc \(\Omega_{t+1}\) est unique.
+\end{proposition}
+
+\begin{proof}
+Le terme \(\frac12\|\Omega-\Omega_t\|_{Q_t}^2\) est fortement convexe car \(Q_t\succ 0\).  
+La somme avec les autres termes convexes reste fortement convexe.  
+La projection orthogonale sur un fermé convexe est unique.
+\end{proof}
+
+\begin{definition}[Mise à jour de la confiance]
+On définit la précision de croyance suivante :
+\[
+Q_{t+1}^{-1}
+=
+Q_t^{-1}
++
+R^\top W_t R
++
+A^\top V_t A.
+\]
+\end{definition}
+
+\begin{remark}
+Cette mise à jour rend l'incertitude explicite : plus les observations sont informatives, plus la précision augmente.  
+La théorie ne masque donc pas l'incertitude ; elle la porte dans la croyance elle-même.
+\end{remark}
+
+\begin{definition}[Itération proximale du monde]
+Pour \(\eta>0\), on définit
+\[
+\mathcal T^\Omega_\eta(\Xi;\Omega_t,o_t,a_t)
+=
+\argmin_{\Omega\in\Hh_\Omega}
+\left\{
+J_{\mathrm{world}}(\Omega;\Omega_t,o_t,a_t)
++
+\frac{1}{2\eta}\|\Omega-\Xi\|^2
+\right\}.
+\]
+\end{definition}
+
+\begin{proposition}[Contraction de la dynamique du monde]
+Si \(J_{\mathrm{world}}(\cdot;\Omega_t,o_t,a_t)\) est \(\mu_{\mathrm{world}}\)-fortement convexe avec \(\mu_{\mathrm{world}}>0\), alors \(\mathcal T^\Omega_\eta(\cdot;\Omega_t,o_t,a_t)\) est une contraction.  
+La trajectoire proximale converge vers l'unique point fixe, qui coïncide avec \(\tilde\Omega_{t+1}\).
+\end{proposition}
+
+\begin{proof}
+La preuve est identique à celle de PH et PCH.  
+La forte convexité donne la forte monotonie du sous-différentiel, ce qui entraîne la contraction du proximal.  
+Banach donne alors la convergence vers l'unique point fixe.
+\end{proof}
+
+\begin{remark}
+Dans cette perspective, prédire le prochain token n'est qu'un readout particulier d'un état latent hiérarchique.  
+La théorie décrit donc un estimateur d'état certifié, et non une causalité cachée supplémentaire.
+\end{remark}
+
+\begin{definition}[Readout token]
+Le prochain token est obtenu par une tête de lecture affine
+\[
+p_\psi(x_{t+1}\mid \Omega_{t+1})
+=
+\softmax(H_\psi \Omega_{t+1}),
+\]
+où \(H_\psi\) est une matrice apprise.
+\end{definition}
+
+% =================================================
+\section{Fonction objective globale}
+% =================================================
+
+L'ensemble du système peut être entraîné ou calibré par une perte globale qui agrège les composantes validées.
+
+\begin{definition}[Perte globale]
+On définit
+\[
+\mathcal L_{\mathrm{tot}}
+=
+\lambda_{\mathrm{PCH}}\mathcal L_{\mathrm{PCH}}
++
+\lambda_{\mathrm{spec}}\mathcal J_{\mathrm{spec}}
++
+\lambda_{\mathrm{coord}}\mathcal J_{\mathrm{G}}
++
+\lambda_{\mathrm{world}}\mathcal L_{\mathrm{world}}
++
+\lambda_{\mathrm{task}}\mathcal L_{\mathrm{task}}
++
+\lambda_{\mathrm{reg}}\Omega_{\mathrm{tot}}(\Theta,\Psi),
+\]
+où
+\[
+\mathcal L_{\mathrm{PCH}}
+=
+\mathbb E_{(x,c)}\!\left[
+J_{\mathrm{PCH}}\bigl(\Pcal^{\mathrm{PCH}}(w(x);c);w(x),c\bigr)
+\right],
+\]
+\[
+\mathcal L_{\mathrm{world}}
+=
+\mathbb E_{t}\!\left[
+J_{\mathrm{world}}(\Omega_{t+1};\Omega_t,o_t,a_t)
+\right],
+\]
+et
+\[
+\mathcal J_{\mathrm{G}}
+=
+\mathbb E_{(x,c)}\!\left[
+\mathcal J_{\mathrm{G}}\bigl(\bar u_0(x,c),\bar u_1(x,c),\dots,\bar u_n(x,c);x,c\bigr)
+\right].
+\]
+\end{definition}
+
+\begin{remark}
+La perte globale ne crée pas de nouvelle boîte noire : elle agrège seulement les objectifs déjà explicitement définis.  
+La partie essentielle de la coordination est le collage pondéré \(G\), pas une distillation cachée.
+\end{remark}
+
+% =================================================
+\section{Résultats structurels}
+% =================================================
+
+\begin{proposition}[Principe d'unification structurelle]
+Sous les hypothèses de convexité, de décomposition orthogonale spectrale, de séparabilité des domaines et de départage déterministe, l'architecture PCH-ESM est entièrement décrite par :
+\begin{enumerate}[leftmargin=2em]
+    \item un problème variationnel PH ;
+    \item son extension contextuelle PCH ;
+    \item une décomposition orthogonale du latent en sous-espaces spécialisés ;
+    \item un objectif de spécialisation certifiée \(\mathcal J_{\mathrm{spec}}\) ;
+    \item un collage pondéré certifié \(G\) sur la composante partagée ;
+    \item une dynamique Multi-PH définie par minimisation d'une énergie explicite avec croyance et incertitude.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Chaque composante est donnée explicitement : PH et PCH par des minimisations convexes, les sous-espaces par une construction spectrale, la spécialisation par une fonctionnelle définie sur un ensemble compact, \(G\) par un collage pondéré à retour, et Multi-PH par une minimisation énergétique suivie d'une projection sur un ensemble de croyance.  
+Aucun objet structurel non défini n'est introduit.
+\end{proof}
+
+\begin{proposition}[Déterminisme global]
+Si les ensembles de calibration, les partitions spectrales, les poids de confiance, les départages des minimisations et les paramètres sont fixés, alors la pipeline complète
+\[
+(x,c)\longmapsto \bigl(\hat y,\Omega_{t+1}\bigr)
+\]
+est déterministe.
+\end{proposition}
+
+\begin{proof}
+Toutes les opérations intervenant dans la pipeline sont déterministes : moyenne, covariance, projecteurs spectraux, projections orthogonales, minimisations convexes uniques, collage pondéré, projection sur un fermé convexe, et lecture affine finale.  
+La composition de ces opérations est donc déterministe.
+\end{proof}
+
+\begin{proposition}[Erreur globale contrôlée par les erreurs locales]
+Soit
+\[
+\hat z=\bar u_0+\sum_{i=1}^n \bar u_i
+\qquad\text{et}\qquad
+z=z_0+\sum_{i=1}^n z_i,
+\]
+avec \(z_0,\bar u_0\in\Hh_0\) et \(z_i,\bar u_i\in\Hh_i\).  
+Alors
+\[
+\|\hat z-z\|^2
+=
+\|\bar u_0-z_0\|^2+\sum_{i=1}^n\|\bar u_i-z_i\|^2.
+\]
+\end{proposition}
+
+\begin{proof}
+C'est la formule de Pythagore dans la somme directe orthogonale \(\Hh_0\oplus\cdots\oplus\Hh_n\).
+\end{proof}
+
+\begin{corollary}[Contrôle global]
+Si
+\[
+\|\bar u_0-z_0\|\le \varepsilon_0
+\quad\text{et}\quad
+\|\bar u_i-z_i\|\le \varepsilon_i,
+\]
+alors
+\[
+\|\hat z-z\|
+\le
+\Bigl(\varepsilon_0^2+\sum_{i=1}^n \varepsilon_i^2\Bigr)^{1/2}.
+\]
+\end{corollary}
+
+\begin{proof}
+C'est une conséquence immédiate de la proposition précédente.
+\end{proof}
+
+\subsection{Capacité, dimension et nombre d'espaces}
+
+\begin{definition}[Coût de coordination]
+On définit la coordination moyenne associée à une configuration \((K,\mathbf d)\) par
+\[
+\mathcal E_{\mathrm{coord}}(K,\mathbf d)
+=
+\mathbb E_{(x,c)}\!\left[
+\sum_{i=1}^{K}\bigl(1-\rho_i(x,c)\bigr)\,
+\bigl\|\Psi_i(x,c)-\Pi_i E_{\theta_0}(x)\bigr\|^2
+\right].
+\]
+\end{definition}
+
+\begin{definition}[Fonction de capacité]
+Soient \(K\in\{1,\dots,dT\}\) le nombre d'espaces spécialisés, \(\mathbf d=(d_1,\dots,d_K)\) une allocation avec \(\sum_i d_i=dT\), et \(\varepsilon_i:\mathbb N\to\R_+\) des erreurs locales décroissantes en dimension.  
+On définit la fonction de capacité
+\[
+\mathcal C(K,\mathbf d)
+=
+\sum_{i=1}^K \varepsilon_i(d_i)
++
+\lambda_{\mathrm{glue}}\mathcal E_{\mathrm{glue}}(K,\mathbf d)
++
+\lambda_{\mathrm{coord}}\mathcal E_{\mathrm{coord}}(K,\mathbf d).
+\]
+\end{definition}
+
+\begin{theorem}[Capacité et compromis entre dimension, nombre d'espaces et consensus]
+La fonction \(\mathcal C(K,\mathbf d)\) atteint un minimum sur l'ensemble fini des allocations admissibles.  
+De plus, le nombre optimal d'espaces \(K^\star\) existe, et il résulte d'un compromis explicite entre réduction de l'erreur locale et coût de consensus.
+\end{theorem}
+
+\begin{proof}
+L'ensemble des allocations entières \(\mathbf d\) telles que \(\sum_i d_i=dT\) est fini pour un \(K\) fixé, et l'ensemble des valeurs possibles de \(K\) est fini.  
+Ainsi, l'ensemble admissible total est fini, donc \(\mathcal C\) atteint un minimum.  
+Le compromis local/consensus est donc non seulement conceptuel, mais aussi formellement défini par un problème de minimisation discret.
+\end{proof}
+
+% =================================================
+\section{Portée et limites}
+% =================================================
+
+Cette théorie établit une cohérence interne forte et donne des résultats exacts sur :
+\begin{itemize}[leftmargin=2em]
+    \item l'existence et l'unicité des purifications PH, PCH et Multi-PH ;
+    \item la convergence des trajectoires proximales ;
+    \item la construction explicite des espaces spécialisés ;
+    \item le collage pondéré certifié de la composante partagée ;
+    \item le contrôle exact de l'erreur globale par les erreurs locales ;
+    \item la modélisation explicite de l'incertitude et des croyances ;
+    \item l'existence d'un optimum de capacité pour le nombre d'espaces.
+\end{itemize}
+
+En revanche, cette formalisation ne prétend pas démontrer à elle seule une supériorité empirique universelle sur toutes les architectures existantes.  
+Cette question relève ensuite de l'évaluation expérimentale.
+
+% =================================================
+\section{Interprétation théorique}
+% =================================================
+
+La théorie PCH-ESM affirme les points suivants :
+
+\begin{enumerate}[leftmargin=2em]
+    \item La bonne représentation n'est pas seulement celle qui prédit, mais celle qui reste stable sous purification récursive dans un contexte donné.
+    \item L'attention standard peut être comprise comme un cas plat d'un schéma de sélection, sans qu'il soit nécessaire d'en faire une équivalence forte non démontrée.
+    \item Les poids eux-mêmes peuvent être traités comme mémoire purifiable.
+    \item Un espace sémantique monolithique peut être remplacé par une hiérarchie d'espaces spécialisés plus un noyau partagé.
+    \item La généralisation globale ne disparaît pas nécessairement avec la spécialisation locale ; elle peut être reconstruite par un collage pondéré certifié sur la composante partagée.
+    \item Les trajectoires internes de calcul deviennent explicites, donc traçables et déterministes dès lors que les départages sont fixés.
+    \item La version monde du formalisme (Multi-PH) décrit un état hiérarchique estimé par minimisation variationnelle, avec croyance et incertitude.
+    \item La capacité du système résulte d'un compromis formel entre dimension locale, nombre d'espaces et coût de consensus.
+\end{enumerate}
+
+\begin{remark}
+Cette théorie ne suppose pas que la spécialisation soit gratuite : elle exige une couche de collage pour préserver la cohérence globale.
+C'est précisément le rôle de \(G\).
+\end{remark}
+
+\section{Conclusion}
+
+PCH-ESM fournit une formalisation unifiée de :
+\begin{itemize}[leftmargin=2em]
+    \item la purification contextuelle hiérarchique ;
+    \item la hiérarchisation de l'espace sémantique ;
+    \item la décentralisation de l'IA en espaces spécialisés ;
+    \item le collage pondéré certifié de la composante partagée ;
+    \item le contrôle exact des erreurs globales ;
+    \item la modélisation explicite de l'incertitude et des croyances ;
+    \item le modèle du monde hiérarchique ;
+    \item le compromis de capacité entre dimension, nombre d'espaces et consensus.
+\end{itemize}
+
+La proposition centrale est que la structure cognitive utile n'est pas uniquement un grand espace latent global, mais un \emph{écosystème hiérarchique d'espaces sémantiques} dont la stabilité, la spécialisation et la coordination sont explicitement représentées.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%extention 1
+
+
+
+% =================================================
+\section{Résultats spécifiques à PCH-ESM}
+% =================================================
+
+Cette section établit quatre résultats qui ne sont pas de simples conséquences de la théorie proximale classique :
+elle montre que la spécialisation réduit l'erreur sous compatibilité orthogonale,
+que le collage pondéré surpasse la fusion naïve sous bruit hétéroscédastique,
+que la partition spectrale canonique minimise exactement le couplage inter-blocs,
+et que Multi-PH domine l'estimateur standard sous un modèle génératif cohérent avec la croyance hiérarchique.
+
+% =================================================
+\subsection{Gain de spécialisation certifié}
+% =================================================
+
+\begin{assumption}[Découplage orthogonal du problème d'apprentissage]
+On suppose qu'il existe un sous-espace fermé \(\mathfrak S\) du paramètre global \(\Theta\) tel que
+\[
+\Theta=\mathfrak S\oplus \mathfrak S^\perp,
+\]
+et que l'objectif d'apprentissage quadratique pertinent pour la spécialisation se décompose orthogonalement :
+\[
+\mathcal J(\theta)
+=
+\mathcal J\bigl(\Pi_{\mathfrak S}\theta\bigr)
++
+\mathcal J\bigl(\Pi_{\mathfrak S^\perp}\theta\bigr),
+\]
+où \(\Pi_{\mathfrak S}\) désigne la projection orthogonale sur \(\mathfrak S\).
+On suppose en outre que le paramètre vrai \(\theta^\star\) appartient à \(\mathfrak S\).
+\end{assumption}
+
+\begin{theorem}[La spécialisation réduit l'erreur sous compatibilité orthogonale]
+Soit \(\hat\theta_{\mathrm{dense}}\) le minimiseur global de \(\mathcal J\) dans \(\Theta\), et soit
+\[
+\hat\theta_{\mathrm{spec}}=\Pi_{\mathfrak S}\hat\theta_{\mathrm{dense}}
+\]
+le paramètre spécialisé obtenu par projection orthogonale.
+Alors
+\[
+\|\hat\theta_{\mathrm{spec}}-\theta^\star\|
+\le
+\|\hat\theta_{\mathrm{dense}}-\theta^\star\|.
+\]
+De plus, si \(\Pi_{\mathfrak S^\perp}\hat\theta_{\mathrm{dense}}\neq 0\), alors l'inégalité est stricte.
+\end{theorem}
+
+\begin{proof}
+Comme \(\theta^\star\in\mathfrak S\), on a la décomposition orthogonale
+\[
+\hat\theta_{\mathrm{dense}}-\theta^\star
+=
+\bigl(\Pi_{\mathfrak S}\hat\theta_{\mathrm{dense}}-\theta^\star\bigr)
++
+\Pi_{\mathfrak S^\perp}\hat\theta_{\mathrm{dense}}.
+\]
+Les deux termes sont orthogonaux. Par Pythagore,
+\[
+\|\hat\theta_{\mathrm{dense}}-\theta^\star\|^2
+=
+\|\Pi_{\mathfrak S}\hat\theta_{\mathrm{dense}}-\theta^\star\|^2
++
+\|\Pi_{\mathfrak S^\perp}\hat\theta_{\mathrm{dense}}\|^2.
+\]
+Or \(\hat\theta_{\mathrm{spec}}=\Pi_{\mathfrak S}\hat\theta_{\mathrm{dense}}\), donc
+\[
+\|\hat\theta_{\mathrm{dense}}-\theta^\star\|^2
+=
+\|\hat\theta_{\mathrm{spec}}-\theta^\star\|^2
++
+\|\Pi_{\mathfrak S^\perp}\hat\theta_{\mathrm{dense}}\|^2.
+\]
+L'inégalité annoncée suit immédiatement, avec stricte inégalité si la composante orthogonale n'est pas nulle.
+\end{proof}
+
+\begin{corollary}[Interprétation PCH-ESM]
+Sous les hypothèses du théorème précédent, la spécialisation ne constitue pas seulement une factorisation descriptive :
+elle améliore effectivement la reconstruction du paramètre vrai dès lors que la solution dense contient une composante hors sous-espace spécialisé.
+\end{corollary}
+
+% =================================================
+\subsection{Optimalité du collage pondéré}
+% =================================================
+
+\begin{assumption}[Modèle de bruit hétéroscédastique]
+On suppose que les certificats locaux de la composante partagée s'écrivent
+\[
+u_0^{(i)} = u_0^\star + \varepsilon_i,
+\qquad i=1,\dots,n,
+\]
+où \(u_0^\star\in\Hh_0\) est la vraie composante partagée, les erreurs \(\varepsilon_i\) sont indépendantes,
+centrées, isotropes, et vérifient
+\[
+\mathbb E[\varepsilon_i]=0,
+\qquad
+\mathbb E\|\varepsilon_i\|^2 = d\,\tau_i,
+\]
+pour une variance scalaire \(\tau_i>0\).
+\end{assumption}
+
+\begin{theorem}[Le collage pondéré minimise l'erreur quadratique moyenne parmi les combinaisons affines non biaisées]
+Considérons tout estimateur affine non biaisé de la forme
+\[
+\tilde u_0=\sum_{i=1}^n \beta_i u_0^{(i)},
+\qquad
+\sum_{i=1}^n \beta_i=1.
+\]
+Alors son erreur quadratique moyenne vaut
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+d\sum_{i=1}^n \beta_i^2 \tau_i.
+\]
+Cette quantité est minimisée lorsque
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n \tau_j^{-1}},
+\qquad i=1,\dots,n.
+\]
+Autrement dit, le consensus pondéré par des poids proportionnels aux fiabilités
+\(\rho_i\propto \tau_i^{-1}\) est l'estimateur linéaire non biaisé optimal.
+\end{theorem}
+
+\begin{proof}
+Par non biaiséness,
+\[
+\mathbb E[\tilde u_0-u_0^\star]
+=
+\sum_{i=1}^n \beta_i \mathbb E[\varepsilon_i]
+=
+0.
+\]
+Par indépendance et isotropie,
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+\mathbb E\left\|\sum_{i=1}^n \beta_i\varepsilon_i\right\|^2
+=
+\sum_{i=1}^n \beta_i^2\,\mathbb E\|\varepsilon_i\|^2
+=
+d\sum_{i=1}^n \beta_i^2\tau_i.
+\]
+On minimise cette quantité sous la contrainte linéaire \(\sum_i \beta_i=1\) par multiplicateurs de Lagrange :
+\[
+\mathcal L(\beta,\lambda)
+=
+d\sum_{i=1}^n \beta_i^2\tau_i
++
+\lambda\left(\sum_{i=1}^n \beta_i-1\right).
+\]
+La condition stationnaire donne
+\[
+2d\,\tau_i\beta_i+\lambda=0,
+\]
+donc \(\beta_i\propto \tau_i^{-1}\). La contrainte de somme égale à \(1\) impose la formule annoncée.
+\end{proof}
+
+\begin{corollary}[G domine la fusion naïve lorsque les fiabilités sont inégales]
+Si \(\tau_1,\dots,\tau_n\) ne sont pas toutes égales, alors le collage pondéré est strictement meilleur que la moyenne naïve
+\[
+u_0^{\mathrm{naif}}=\frac1n\sum_{i=1}^n u_0^{(i)}.
+\]
+Plus précisément,
+\[
+\mathbb E\|u_0^{G}-u_0^\star\|^2
+\le
+\mathbb E\|u_0^{\mathrm{naif}}-u_0^\star\|^2,
+\]
+avec stricte inégalité dès que les \(\tau_i\) ne sont pas toutes égales.
+\end{corollary}
+
+\begin{proof}
+Le membre de gauche est l'erreur quadratique moyenne du minimiseur pondéré issu du théorème précédent.
+La moyenne naïve correspond au choix \(\beta_i=\frac1n\), d'où
+\[
+\mathbb E\|u_0^{\mathrm{naif}}-u_0^\star\|^2
+=
+d\,\frac{1}{n^2}\sum_{i=1}^n \tau_i.
+\]
+Par Cauchy-Schwarz,
+\[
+\left(\sum_{i=1}^n \tau_i\right)\left(\sum_{i=1}^n \tau_i^{-1}\right)\ge n^2,
+\]
+donc
+\[
+\frac{1}{\sum_i \tau_i^{-1}}
+\le
+\frac1{n^2}\sum_i \tau_i.
+\]
+Or l'erreur du poids optimal vaut \(d(\sum_i\tau_i^{-1})^{-1}\). On obtient l'inégalité annoncée, avec stricte inégalité si les \(\tau_i\) ne sont pas toutes égales.
+\end{proof}
+
+\begin{corollary}[Interprétation PCH-ESM]
+Dans le formalisme PCH-ESM, les poids \(\rho_i\) ne sont pas décoratifs :
+ils réalisent la règle de pondération inverse-variance qui rend \(G\) optimal au sens quadratique parmi les collages affines non biaisés.
+\end{corollary}
+
+% =================================================
+\subsection{Optimalité de la partition spectrale}
+% =================================================
+
+\begin{definition}[Couplage inter-blocs de la covariance]
+Soient \(P_0,\dots,P_n\) des projecteurs orthogonaux de somme \(\Id\), définissant une partition orthogonale
+\[
+\Hh^T=\mathrm{Im}(P_0)\oplus\cdots\oplus\mathrm{Im}(P_n).
+\]
+On définit le couplage inter-blocs de la covariance empirique \(\Sigma\) par
+\[
+\mathcal J_{\mathrm{leak}}(P_0,\dots,P_n)
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2.
+\]
+\end{definition}
+
+\begin{theorem}[La partition spectrale canonique minimise exactement le couplage inter-blocs]
+Soit \(\Sigma\) symétrique positive semi-définie.  
+Si \(P_0,\dots,P_n\) sont les projecteurs spectraux associés à la décomposition spectrale canonique de \(\Sigma\),
+alors
+\[
+\mathcal J_{\mathrm{leak}}(P_0,\dots,P_n)=0.
+\]
+Par conséquent, cette partition est globalement optimale pour le critère de découplage inter-blocs :
+\[
+\mathcal J_{\mathrm{leak}}(Q_0,\dots,Q_n)\ge 0
+\]
+pour toute autre partition orthogonale \((Q_0,\dots,Q_n)\), avec égalité si et seulement si chaque \(Q_i\) est une somme de projecteurs spectraux de \(\Sigma\).
+\end{theorem}
+
+\begin{proof}
+Par le théorème spectral, \(\Sigma\) admet une décomposition
+\[
+\Sigma=\sum_{k=1}^m \lambda_k P_k,
+\]
+où les \(P_k\) sont des projecteurs orthogonaux sur les sous-espaces propres.  
+Si l'on regroupe ces projecteurs en blocs \(P_0,\dots,P_n\), alors chaque \(P_i\) commute avec \(\Sigma\), donc pour \(i\neq j\),
+\[
+P_i\Sigma P_j
+=
+P_iP_j\Sigma
+=
+0.
+\]
+Ainsi \(\mathcal J_{\mathrm{leak}}(P_0,\dots,P_n)=0\).  
+Comme \(\mathcal J_{\mathrm{leak}}\) est somme de normes au carré, elle est toujours \(\ge 0\), donc la valeur \(0\) est globale minimale.  
+L'égalité impose \(P_i\Sigma P_j=0\) pour tout \(i\neq j\), ce qui signifie précisément que les sous-espaces sont invariants par \(\Sigma\), donc constitués de sommes de sous-espaces propres.
+\end{proof}
+
+\begin{corollary}[Déterminisme et optimalité de la partition spectrale]
+La partition spectrale déterministe utilisée dans PCH-ESM n'est pas seulement canonique :
+elle est exactement celle qui annule le couplage inter-blocs de la covariance de calibration.
+Elle constitue donc le meilleur choix pour séparer les blocs au sens du critère de leakage.
+\end{corollary}
+
+% =================================================
+\subsection{Supériorité de Multi-PH sur l'estimateur standard}
+% =================================================
+
+\begin{assumption}[Modèle génératif gaussien hiérarchique]
+On suppose que l'état vrai \(\Omega_{t+1}^\star\) suit le prior gaussien
+\[
+\Omega_{t+1}^\star \mid \Omega_t \sim \mathcal N(\Omega_t,Q_t^{-1}),
+\]
+et que les observations vérifient
+\[
+o_t = R\Omega_{t+1}^\star + \xi_t,
+\qquad
+a_t = A\Omega_{t+1}^\star + \zeta_t,
+\]
+où \(\xi_t\sim\mathcal N(0,W_t^{-1})\), \(\zeta_t\sim\mathcal N(0,V_t^{-1})\), indépendamment.
+On suppose en outre que \(\Omega_{t+1}^\star\in\mathcal B_t\) presque sûrement.
+\end{assumption}
+
+\begin{definition}[Estimateur standard]
+On définit l'estimateur standard par
+\[
+\hat\Omega_{t+1}^{\mathrm{std}}
+=
+\argmin_{\Omega\in\Hh_\Omega}
+\left\{
+\frac12\|R\Omega-o_t\|_{W_t}^2
++
+\frac12\|A\Omega-a_t\|_{V_t}^2
+\right\}.
+\]
+\end{definition}
+
+\begin{definition}[Estimateur Multi-PH]
+On définit l'estimateur Multi-PH par
+\[
+\tilde\Omega_{t+1}
+=
+\argmin_{\Omega\in\Hh_\Omega}
+J_{\mathrm{world}}(\Omega;\Omega_t,o_t,a_t),
+\qquad
+\Omega_{t+1}^{\mathrm{MPH}}
+=
+\Pi_{\mathcal B_t}(\tilde\Omega_{t+1}).
+\]
+\end{definition}
+
+\begin{theorem}[Multi-PH domine l'estimateur standard en risque quadratique]
+Sous le modèle génératif gaussien ci-dessus, \(\tilde\Omega_{t+1}\) est l'estimateur MAP et, comme le posterior est gaussien, il coïncide avec l'estimateur bayésien pour la perte quadratique.
+Par conséquent,
+\[
+\mathbb E\!\left[\|\tilde\Omega_{t+1}-\Omega_{t+1}^\star\|^2 \,\middle|\, o_t,a_t\right]
+\le
+\mathbb E\!\left[\|\hat\Omega_{t+1}^{\mathrm{std}}-\Omega_{t+1}^\star\|^2 \,\middle|\, o_t,a_t\right].
+\]
+De plus, comme \(\Omega_{t+1}^\star\in\mathcal B_t\), la projection finale ne peut pas augmenter l'erreur :
+\[
+\|\Omega_{t+1}^{\mathrm{MPH}}-\Omega_{t+1}^\star\|
+\le
+\|\tilde\Omega_{t+1}-\Omega_{t+1}^\star\|.
+\]
+Ainsi, Multi-PH est au moins aussi bon que l'estimateur standard, et strictement meilleur dès que le prior \((\Omega_t,Q_t)\) apporte une information non triviale.
+\end{theorem}
+
+\begin{proof}
+Le terme \(J_{\mathrm{world}}(\Omega;\Omega_t,o_t,a_t)\) est, à constante additive près, le logarithme négatif de la densité a posteriori de \(\Omega_{t+1}^\star\) sous le modèle gaussien supposé.
+Le minimiseur \(\tilde\Omega_{t+1}\) est donc l'estimateur MAP.  
+Dans le cas gaussien quadratique, le MAP coïncide avec le posterior mean, lequel minimise le risque quadratique bayésien.
+Cela implique la première inégalité.
+
+Pour la seconde, on utilise le fait standard suivant :
+si \(C\) est un fermé convexe et si \(y\in C\), alors pour tout \(x\),
+\[
+\|\Pi_C(x)-y\|^2+\|x-\Pi_C(x)\|^2\le \|x-y\|^2.
+\]
+En particulier, avec \(C=\mathcal B_t\) et \(y=\Omega_{t+1}^\star\in\mathcal B_t\), on obtient
+\[
+\|\Pi_{\mathcal B_t}(\tilde\Omega_{t+1})-\Omega_{t+1}^\star\|
+\le
+\|\tilde\Omega_{t+1}-\Omega_{t+1}^\star\|.
+\]
+Comme \(\Omega_{t+1}^{\mathrm{MPH}}=\Pi_{\mathcal B_t}(\tilde\Omega_{t+1})\), la conclusion suit.
+
+La stricte amélioration suit dès que le prior n'est pas plat et que les observations sont bruitées, car alors le posterior mean diffère de l'estimateur standard sans prior.
+\end{proof}
+
+\begin{corollary}[Interprétation PCH-ESM]
+Multi-PH n'est pas seulement un lissage proximal supplémentaire :
+dans le modèle génératif explicitement posé, il est l'estimateur bayésien quadratique optimal, puis sa projection sur l'ensemble de croyance ne peut qu'améliorer ou préserver la précision.
+\end{corollary}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%extention 2
+
+% =================================================
+\subsection{Décomposition orthogonale exacte de l'erreur de reconstruction}
+% =================================================
+
+Cette sous-section ferme le verrou logique restant : elle montre que la décomposition
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P)
+\]
+résulte exactement de la décomposition orthogonale, pour la partition \(\mathbf P\), du résidu
+entre l'opérateur cible et son approximation collée bloc-diagonale.
+
+\begin{definition}[Espace des opérateurs et produit de Frobenius]
+On pose
+\[
+\mathfrak E=\mathcal L(\Hh^T),
+\]
+muni du produit scalaire de Frobenius
+\[
+\langle A,B\rangle_F=\tr(A^\top B),
+\qquad
+\|A\|_F^2=\langle A,A\rangle_F.
+\]
+\end{definition}
+
+\begin{definition}[Projecteurs de blocs]
+Pour toute partition orthogonale admissible \(\mathbf P=(P_0,\dots,P_n)\), on définit les projections
+bloc-diagonale et hors-diagonale par
+\[
+\Pi_{\mathrm{coll}}^{\mathbf P}(X)
+=
+\sum_{i=0}^n P_iXP_i,
+\qquad
+\Pi_{\mathrm{leak}}^{\mathbf P}(X)
+=
+\sum_{i\neq j}P_iXP_j,
+\qquad
+X\in\mathfrak E.
+\]
+On note aussi
+\[
+\mathfrak E_{\mathrm{coll}}^{\mathbf P}:=\mathrm{Im}\bigl(\Pi_{\mathrm{coll}}^{\mathbf P}\bigr),
+\qquad
+\mathfrak E_{\mathrm{leak}}^{\mathbf P}:=\mathrm{Im}\bigl(\Pi_{\mathrm{leak}}^{\mathbf P}\bigr).
+\]
+\end{definition}
+
+\begin{lemma}[Orthogonalité des blocs]
+Les sous-espaces \(\mathfrak E_{ij}^{\mathbf P}:=P_i\mathfrak E P_j\) sont deux à deux orthogonaux pour le produit de Frobenius.
+En particulier,
+\[
+\mathfrak E
+=
+\bigoplus_{i,j=0}^n \mathfrak E_{ij}^{\mathbf P}
+=
+\mathfrak E_{\mathrm{coll}}^{\mathbf P}\oplus \mathfrak E_{\mathrm{leak}}^{\mathbf P},
+\]
+et les projections \(\Pi_{\mathrm{coll}}^{\mathbf P}\) et \(\Pi_{\mathrm{leak}}^{\mathbf P}\) sont orthogonales.
+\end{lemma}
+
+\begin{proof}
+Soient \(A=P_iXP_j\) et \(B=P_kYP_\ell\). Alors
+\[
+\langle A,B\rangle_F
+=
+\tr\!\bigl((P_iXP_j)^\top P_kYP_\ell\bigr)
+=
+\tr\!\bigl(P_jX^\top P_iP_kYP_\ell\bigr).
+\]
+Si \(i\neq k\), alors \(P_iP_k=0\), donc \(\langle A,B\rangle_F=0\).
+
+Si \(i=k\) et \(j\neq \ell\), alors
+\[
+\tr\!\bigl(P_jX^\top P_iYP_\ell\bigr)
+=
+\tr\!\bigl(P_\ell P_jX^\top P_iY\bigr)=0,
+\]
+car \(P_\ell P_j=0\). Ainsi, deux blocs distincts sont orthogonaux.
+
+Enfin, comme \(\sum_{i=0}^n P_i=\Id\), tout opérateur \(X\in\mathfrak E\) se décompose en
+\[
+X=\sum_{i,j=0}^n P_iXP_j,
+\]
+d'où la somme directe orthogonale annoncée.
+\end{proof}
+
+\begin{definition}[Résidu de reconstruction et approximation collée]
+On note \(\widehat \Sigma_{\mathrm{coll}}(G)\in\mathfrak E_{\mathrm{coll}}^{\mathbf P}\) l'opérateur reconstruit par la fonction de collage \(G\).
+
+On définit le résidu total de reconstruction par
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\Sigma-\widehat \Sigma_{\mathrm{coll}}(G).
+\]
+On définit sa composante collée et sa composante de leakage par
+\[
+R_{\mathrm{coll}}(\mathbf P,G)
+:=
+\Pi_{\mathrm{coll}}^{\mathbf P}\!\bigl(R_{\mathrm{rec}}(\mathbf P,G)\bigr),
+\qquad
+R_{\mathrm{leak}}(\mathbf P)
+:=
+\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma).
+\]
+\end{definition}
+
+\begin{definition}[Erreurs globales]
+On définit
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{rec}}(\mathbf P,G)\|_F^2\bigr],
+\qquad
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr].
+\]
+Quand \(\mathbf P\) est fixé, on abrège parfois \(\mathcal E_{\mathrm{coll}}(G)\).
+Le terme \(\mathcal E_{\mathrm{coll}}(\mathbf P,G)\) est l'erreur portée par la composante bloc-diagonale reconstruite.
+
+L'espérance est prise relativement à la distribution des données de calibration utilisées pour construire
+\(\widehat \Sigma_{\mathrm{coll}}(G)\).
+\end{definition}
+
+\begin{definition}[Le terme de leakage]
+On pose
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)
+=
+\bigl\|\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)\bigr\|_F^2
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2.
+\]
+Le terme de leakage dépend uniquement de la covariance de calibration \(\Sigma\), supposée fixée ; il est donc déterministe.
+\end{definition}
+
+\begin{assumption}[Compatibilité minimale du mécanisme de collage]
+Pour toute partition admissible \(\mathbf P\), il existe une constante \(C\ge 0\), indépendante de \(\mathbf P\), et une fonction strictement croissante
+\[
+\phi_{\mathbf P}:[0,\infty)\to[0,\infty),
+\]
+telles que, pour tout collage admissible \(G\),
+\[
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+C
++
+\phi_{\mathbf P}\!\left(\mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr]\right).
+\]
+\end{assumption}
+
+\begin{proposition}[Principe de réduction du collage]
+Sous l'hypothèse précédente, pour toute partition admissible \(\mathbf P\),
+\[
+\argmin_G \mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\argmin_G \mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr].
+\]
+\end{proposition}
+
+\begin{proof}
+Comme \(\phi_{\mathbf P}\) est strictement croissante, minimiser \(\mathcal E_{\mathrm{coll}}(\mathbf P,G)\) équivaut exactement à minimiser
+\[
+\mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr].
+\]
+La constante \(C\) est indépendante de \(G\) et de \(\mathbf P\), donc elle n'affecte pas l'ensemble des minimiseurs.
+\end{proof}
+
+\begin{theorem}[Décomposition orthogonale exacte de l'erreur de reconstruction]
+Sous les définitions précédentes, pour toute architecture admissible \((\mathbf P,G)\),
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P).
+\]
+\end{theorem}
+
+\begin{proof}
+On écrit d'abord
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\Sigma-\widehat \Sigma_{\mathrm{coll}}(G).
+\]
+Comme \(\widehat \Sigma_{\mathrm{coll}}(G)\in \mathfrak E_{\mathrm{coll}}^{\mathbf P}\), sa projection hors-diagonale est nulle, donc
+\[
+\Pi_{\mathrm{leak}}^{\mathbf P}\!\bigl(R_{\mathrm{rec}}(\mathbf P,G)\bigr)
+=
+\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma).
+\]
+De plus,
+\[
+R_{\mathrm{rec}}(\mathbf P,G)
+=
+\underbrace{\Bigl(\Pi_{\mathrm{coll}}^{\mathbf P}(\Sigma)-\widehat \Sigma_{\mathrm{coll}}(G)\Bigr)}_{R_{\mathrm{coll}}(\mathbf P,G)\in\mathfrak E_{\mathrm{coll}}^{\mathbf P}}
++
+\underbrace{\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)}_{R_{\mathrm{leak}}(\mathbf P)\in\mathfrak E_{\mathrm{leak}}^{\mathbf P}}.
+\]
+Les deux termes appartiennent à des sous-espaces orthogonaux, donc le terme croisé s'annule exactement :
+\[
+\|R_{\mathrm{rec}}(\mathbf P,G)\|_F^2
+=
+\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2
++
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2.
+\]
+En prenant l'espérance,
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr]
++
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2.
+\]
+Par définition,
+\[
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
+=
+\mathbb E\bigl[\|R_{\mathrm{coll}}(\mathbf P,G)\|_F^2\bigr].
+\]
+En outre,
+\[
+\|R_{\mathrm{leak}}(\mathbf P)\|_F^2
+=
+\bigl\|\Pi_{\mathrm{leak}}^{\mathbf P}(\Sigma)\bigr\|_F^2
+=
+\sum_{i\neq j}\|P_i\Sigma P_j\|_F^2
+=
+\mathcal J_{\mathrm{leak}}(\mathbf P).
+\]
+Donc finalement,
+\[
+\mathcal E_{\mathrm{rec}}(\mathbf P,G)
+=
+\mathcal E_{\mathrm{coll}}(\mathbf P,G)
++
+\mathcal J_{\mathrm{leak}}(\mathbf P),
+\]
+ce qu'il fallait démontrer.
+\end{proof}
+
+\begin{remark}
+La décomposition orthogonale précédente est indépendante du mécanisme de collage.
+En revanche, l'identification du minimiseur de \(\mathcal E_{\mathrm{coll}}\) avec le collage inverse-variance repose uniquement sur l'hypothèse minimale de compatibilité du mécanisme de collage, qui exprime que \(\mathcal E_{\mathrm{coll}}\) est une transformation strictement croissante de l'erreur de partage.
+Le théorème précédent remplace l'hypothèse de décomposition leakage--reconstruction utilisée dans les versions préliminaires du formalisme.
+\end{remark}
+
+% =================================================
+\subsection{Optimalité conjointe sous compatibilité spectrale exacte}
+% =================================================
+
+Cette sous-section établit le résultat structural maximal du formalisme sous une hypothèse de compatibilité exacte entre
+(i) le découplage spectral des modules,
+(ii) l'ordre hiérarchique des blocs, et
+(iii) la reconstruction globale par collage pondéré.
+
+\begin{assumption}[Spectre simple et partitions orthogonales de rangs fixés]
+On suppose que la covariance de calibration \(\Sigma\) est symétrique positive semi-définie
+et que son spectre est simple.
+On ordonne ses valeurs propres de façon décroissante :
+\[
+\lambda_1>\lambda_2>\cdots>\lambda_{dT}\ge 0,
+\]
+avec une base orthonormée associée \((e_1,\dots,e_{dT})\) telle que
+\[
+\Sigma e_k=\lambda_k e_k.
+\]
+
+On fixe des tailles entières \(d_0,\dots,d_n\ge 0\) telles que
+\[
+d_0+\cdots+d_n=dT.
+\]
+On note
+\[
+I_0=\{1,\dots,d_0\},\quad
+I_1=\{d_0+1,\dots,d_0+d_1\},\quad \dots,\quad
+I_n=\{d_0+\cdots+d_{n-1}+1,\dots,dT\}.
+\]
+
+On définit la partition canonique
+\[
+\mathbf P^\star=(P_0^\star,\dots,P_n^\star)
+\]
+par
+\[
+P_i^\star=\sum_{k\in I_i} e_ke^\top_k,
+\qquad i=0,\dots,n.
+\]
+
+On appelle \emph{admissible} toute partition orthogonale
+\[
+\mathbf P=(P_0,\dots,P_n)
+\]
+de rangs fixés vérifiant
+\[
+P_iP_j=0\quad(i\neq j),
+\qquad
+\sum_{i=0}^n P_i=\Id.
+\]
+La classe admissible n'est donc pas réduite a priori à \(\{\mathbf P^\star\}\) :
+l'unicité sera obtenue par le critère d'optimalité ci-dessous.
+\end{assumption}
+
+\begin{assumption}[Compatibilité hiérarchique exacte]
+Les architectures admissibles sont les couples \((\mathbf P,G)\) tels que :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathbf P=(P_0,\dots,P_n)\) est une partition orthogonale admissible ;
+    \item les certificats locaux appartiennent aux sous-espaces associés, c'est-à-dire
+    \[
+    u_0^{(i)}(w,c)\in \mathrm{Im}(P_0),
+    \qquad
+    \Psi_i(w,c)\in \mathrm{Im}(P_i);
+    \]
+    \item le collage global \(G\) est affine en les certificats locaux, et son estimateur partagé
+    \(\bar u_0(w,c)\) est non biaisé au sens
+    \[
+    \mathbb E[\bar u_0(w,c)]=u_0^\star(w,c).
+    \]
+\end{itemize}
+\end{assumption}
+
+\begin{assumption}[Modèle de bruit hétéroscédastique]
+Pour chaque \(i\in\{1,\dots,n\}\), les certificats partagés vérifient
+\[
+u_0^{(i)}=u_0^\star+\varepsilon_i,
+\]
+où les \(\varepsilon_i\) sont indépendantes, centrées, isotropes, et de variance scalaire
+\[
+\mathbb E\|\varepsilon_i\|^2=d\,\tau_i,
+\qquad \tau_i>0.
+\]
+\end{assumption}
+
+\begin{assumption}[Poids strictement positifs]
+On suppose
+\[
+\lambda_{\mathrm{leak}}>0,
+\qquad
+\lambda_{\mathrm{ord}}>0,
+\qquad
+\lambda_{\mathrm{rec}}>0.
+\]
+\end{assumption}
+
+\begin{definition}[Terme d'ordre spectral]
+On fixe des poids hiérarchiques strictement décroissants
+\[
+\omega_0>\omega_1>\cdots>\omega_n>0.
+\]
+On définit le terme d'ordre par
+\[
+\mathcal J_{\mathrm{ord}}(\mathbf P)
+=
+-\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma).
+\]
+Ce terme impose que les plus grandes directions spectrales soient affectées aux blocs les plus prioritaires.
+\end{definition}
+
+\begin{definition}[Objectif architectural conjoint]
+On définit l'objectif global par
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+\lambda_{\mathrm{leak}}\,\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{rec}}(\mathbf P,G).
+\]
+En utilisant le théorème précédent, on obtient l'écriture équivalente
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+(\lambda_{\mathrm{leak}}+\lambda_{\mathrm{rec}})\,
+\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{coll}}(\mathbf P,G).
+\]
+\end{definition}
+
+\begin{lemma}[Zéro leakage et compatibilité spectrale]
+Pour toute partition admissible \(\mathbf P\),
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)\ge 0.
+\]
+De plus,
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P)=0
+\quad\Longleftrightarrow\quad
+P_i\Sigma=\Sigma P_i
+\ \text{ pour tout } i,
+\]
+c'est-à-dire si et seulement si chaque bloc \(P_i\) est une somme de projecteurs spectraux de \(\Sigma\).
+\end{lemma}
+
+\begin{proof}
+Par définition, \(\mathcal J_{\mathrm{leak}}\) est une somme de normes au carré, donc elle est non négative.
+Si elle vaut \(0\), alors \(P_i\Sigma P_j=0\) pour tous \(i\neq j\), ce qui signifie que \(\Sigma\) est bloc-diagonale dans la décomposition \(\mathbf P\), donc que chaque \(P_i\) commute avec \(\Sigma\).
+Réciproquement, si chaque \(P_i\) commute avec \(\Sigma\), alors les blocs hors diagonale sont nuls et \(\mathcal J_{\mathrm{leak}}(\mathbf P)=0\).
+\end{proof}
+
+\begin{lemma}[Réécriture télescopique du terme d'ordre]
+Soient
+\[
+m_r=\sum_{i=0}^r d_i
+\qquad\text{et}\qquad
+Q_r=\sum_{i=0}^r P_i,
+\quad r=0,\dots,n,
+\]
+avec la convention \(Q_{-1}=0\).
+Alors
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\omega_n\,\mathrm{tr}(\Sigma)
++
+\sum_{r=0}^{n-1}(\omega_r-\omega_{r+1})\,\mathrm{tr}(Q_r\Sigma).
+\]
+\end{lemma}
+
+\begin{proof}
+Comme \(P_i=Q_i-Q_{i-1}\), on a
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\sum_{i=0}^n \omega_i\bigl(\mathrm{tr}(Q_i\Sigma)-\mathrm{tr}(Q_{i-1}\Sigma)\bigr).
+\]
+Un regroupement télescopique donne
+\[
+\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+=
+\omega_n\,\mathrm{tr}(Q_n\Sigma)
++
+\sum_{r=0}^{n-1}(\omega_r-\omega_{r+1})\,\mathrm{tr}(Q_r\Sigma).
+\]
+Comme \(Q_n=\Id\), on obtient la formule annoncée.
+\end{proof}
+
+\begin{lemma}[Sélection canonique par l'ordre spectral]
+Parmi les partitions admissibles, le terme
+\[
+\mathcal J_{\mathrm{ord}}(\mathbf P)
+=
+-\sum_{i=0}^n \omega_i\,\mathrm{tr}(P_i\Sigma)
+\]
+est strictement minimisé par la partition canonique \(\mathbf P^\star\), et seulement par elle.
+\end{lemma}
+
+\begin{proof}
+Par le lemme précédent, minimiser \(\mathcal J_{\mathrm{ord}}\) revient à maximiser chaque quantité \(\mathrm{tr}(Q_r\Sigma)\), puisque les coefficients \(\omega_r-\omega_{r+1}\) sont strictement positifs.
+
+Pour tout projecteur orthogonal \(Q\) de rang \(m_r\), le principe de Ky Fan donne
+\[
+\mathrm{tr}(Q\Sigma)\le \sum_{k=1}^{m_r}\lambda_k,
+\]
+avec égalité si et seulement si
+\[
+Q=\sum_{k=1}^{m_r} e_k e_k^\top,
+\]
+l'unicité étant assurée par la simplicité du spectre.
+
+En l'appliquant à chaque \(Q_r\), on obtient
+\[
+\mathrm{tr}(Q_r\Sigma)\le \sum_{k=1}^{m_r}\lambda_k,
+\]
+et l'égalité simultanée pour tout \(r\) impose
+\[
+Q_r=\sum_{k=1}^{m_r} e_k e_k^\top
+\qquad\text{pour tout } r.
+\]
+Par différence,
+\[
+P_i=Q_i-Q_{i-1}
+=
+\sum_{k\in I_i} e_k e_k^\top
+=
+P_i^\star.
+\]
+Donc \(\mathbf P^\star\) est l'unique minimiseur de \(\mathcal J_{\mathrm{ord}}\) sur la classe admissible.
+\end{proof}
+
+\begin{proposition}[Optimalité du collage inverse-variance]
+Sous le modèle de bruit hétéroscédastique, tout estimateur affine non biaisé de la forme
+\[
+\tilde u_0=\sum_{i=1}^n \beta_i u_0^{(i)},
+\qquad
+\sum_{i=1}^n \beta_i=1,
+\]
+vérifie
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+d\sum_{i=1}^n \beta_i^2\tau_i.
+\]
+Cette quantité est strictement minimisée par
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}},
+\qquad i=1,\dots,n.
+\]
+\end{proposition}
+
+\begin{proof}
+On a
+\[
+\mathbb E[\tilde u_0-u_0^\star]
+=
+\sum_{i=1}^n \beta_i\mathbb E[\varepsilon_i]
+=
+0.
+\]
+Par indépendance et isotropie,
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+\mathbb E\left\|\sum_{i=1}^n\beta_i\varepsilon_i\right\|^2
+=
+\sum_{i=1}^n\beta_i^2\,\mathbb E\|\varepsilon_i\|^2
+=
+d\sum_{i=1}^n\beta_i^2\tau_i.
+\]
+La fonction
+\[
+\beta\mapsto d\sum_{i=1}^n\beta_i^2\tau_i
+\]
+est strictement convexe sur l'hyperplan \(\sum_i\beta_i=1\).  
+Le minimiseur unique est donc obtenu par multiplicateurs de Lagrange, ce qui donne
+\[
+\beta_i^\star
+=
+\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}}.
+\]
+\end{proof}
+
+\begin{theorem}[Optimalité conjointe et unicité du couple partition spectrale + collage pondéré]
+Sous les hypothèses précédentes, le problème
+\[
+\min_{(\mathbf P,G)\ \mathrm{admissible}} \ \mathcal J_{\mathrm{arch}}(\mathbf P,G)
+\]
+admet un unique minimiseur admissible.
+Ce minimiseur est précisément le couple
+\[
+(\mathbf P^\star,G^\star),
+\]
+où :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathbf P^\star\) est la partition spectrale canonique ;
+    \item \(G^\star\) est le collage pondéré inverse-variance, i.e.
+    \[
+    \bar u_0^\star(w,c)
+    =
+    \sum_{i=1}^n \alpha_i^\star(w,c)\,u_0^{(i)}(w,c),
+    \qquad
+    \alpha_i^\star(w,c)
+    =
+    \frac{\tau_i^{-1}}{\sum_{j=1}^n \tau_j^{-1}}.
+    \]
+\end{itemize}
+
+En particulier, le couple \((\mathbf P^\star,G^\star)\) est l'unique architecture admissible qui minimise simultanément le leakage inter-modules et l'erreur globale de reconstruction.
+\end{theorem}
+
+\begin{proof}
+Posons
+\[
+A=\lambda_{\mathrm{leak}}+\lambda_{\mathrm{rec}}>0.
+\]
+Alors, pour tout couple admissible \((\mathbf P,G)\),
+\[
+\mathcal J_{\mathrm{arch}}(\mathbf P,G)
+=
+A\,\mathcal J_{\mathrm{leak}}(\mathbf P)
++
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
++
+\lambda_{\mathrm{rec}}\,\mathcal E_{\mathrm{coll}}(\mathbf P,G).
+\]
+
+\medskip
+\noindent
+\textbf{Étape 1 : optimisation de la partie partition.}
+Comme \(\mathcal J_{\mathrm{leak}}(\mathbf P)\ge 0\) et que \(\mathbf P^\star\) minimise strictement \(\mathcal J_{\mathrm{ord}}(\mathbf P)\) sur la classe admissible, on a pour toute partition admissible
+\[
+A\,\mathcal J_{\mathrm{leak}}(\mathbf P)+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
+\ge
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P)
+\ge
+\lambda_{\mathrm{ord}}\,\mathcal J_{\mathrm{ord}}(\mathbf P^\star).
+\]
+De plus,
+\[
+\mathcal J_{\mathrm{leak}}(\mathbf P^\star)=0
+\]
+par compatibilité spectrale de la partition canonique.
+Ainsi, la partie dépendant de \(\mathbf P\) est minimisée de manière unique par \(\mathbf P^\star\).
+
+\medskip
+\noindent
+\textbf{Étape 2 : optimisation du collage.}
+Une fois \(\mathbf P^\star\) fixé, la partie dépendant de \(G\) se réduit à \(\mathcal E_{\mathrm{coll}}(\mathbf P^\star,G)\).
+Par la proposition de réduction du collage,
+\[
+\argmin_G \mathcal E_{\mathrm{coll}}(\mathbf P^\star,G)
+=
+\argmin_G \mathbb E\bigl[\|\bar u_0(w,c)-u_0^\star(w,c)\|^2\bigr].
+\]
+Sous le modèle de bruit hétéroscédastique, la proposition précédente montre que cet ensemble est réduit au seul collage affine non biaisé inverse-variance \(G^\star\), avec
+\[
+\alpha_i^\star(w,c)=\frac{\tau_i^{-1}}{\sum_{j=1}^n\tau_j^{-1}}.
+\]
+
+\medskip
+\noindent
+\textbf{Étape 3 : unicité globale.}
+Si \((\mathbf P,G)\) est un minimiseur global, alors il doit satisfaire simultanément
+\[
+\mathbf P=\mathbf P^\star
+\qquad\text{et}\qquad
+G=G^\star,
+\]
+car l'égalité dans l'étape 1 force \(\mathbf P=\mathbf P^\star\), et l'égalité dans l'étape 2 force \(G=G^\star\).
+Réciproquement, \((\mathbf P^\star,G^\star)\) atteint cette borne minimale.
+Le minimiseur global est donc unique et vaut exactement \((\mathbf P^\star,G^\star)\).
+\end{proof}
+
+\begin{remark}
+La décomposition orthogonale précédente est indépendante du mécanisme de collage.
+En revanche, l'identification du minimiseur de \(\mathcal E_{\mathrm{coll}}\) avec le collage inverse-variance repose uniquement sur l'hypothèse minimale de compatibilité du mécanisme de collage, qui exprime que \(\mathcal E_{\mathrm{coll}}\) est une transformation strictement croissante de l'erreur de partage.
+Le théorème précédent remplace l'hypothèse de décomposition leakage--reconstruction utilisée dans les versions préliminaires du formalisme.
+\end{remark}
+
+\begin{corollary}[Optimalité conjointe]
+Le formalisme PCH-ESM réalise simultanément :
+\begin{enumerate}[leftmargin=2em]
+    \item le découplage maximal des modules via la partition spectrale canonique ;
+    \item la reconstruction globale de risque minimal via le collage pondéré inverse-variance.
+\end{enumerate}
+Autrement dit, sous les hypothèses précédentes, le couple \((\mathbf P^\star,G^\star)\) est l'unique minimiseur simultané du leakage inter-modules et de l'erreur de reconstruction dans la classe des architectures admissibles.
+\end{corollary}
+
+
+
+
+\end{document}

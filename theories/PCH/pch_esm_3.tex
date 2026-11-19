@@ -1,0 +1,1149 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------------------------------
+% Encodage, langue, typographie
+% -------------------------------------------------
+\usepackage[french]{babel}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% -------------------------------------------------
+% Mathématiques
+% -------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{enumitem}
+
+% -------------------------------------------------
+% Liens
+% -------------------------------------------------
+\usepackage[hidelinks]{hyperref}
+
+% -------------------------------------------------
+% Police
+% -------------------------------------------------
+\setmainfont{TeX Gyre Pagella}
+
+% -------------------------------------------------
+% Environnements
+% -------------------------------------------------
+\newtheorem{definition}{Définition}[section]
+\newtheorem{assumption}{Hypothèse}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{remark}{Remarque}[section]
+
+% -------------------------------------------------
+% Opérateurs
+% -------------------------------------------------
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\KL}{KL}
+\DeclareMathOperator{\Id}{Id}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\softmax}{softmax}
+
+% -------------------------------------------------
+% Raccourcis
+% -------------------------------------------------
+\newcommand{\X}{\mathcal X}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\E}{\mathcal E}
+\newcommand{\Z}{\mathcal Z}
+\newcommand{\Hh}{\mathcal H}
+\newcommand{\I}{\mathcal I}
+\newcommand{\T}{\mathcal T}
+\newcommand{\W}{\mathcal W}
+\newcommand{\N}{\mathcal N}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Qcal}{\mathcal Q}
+\newcommand{\Gcal}{\mathcal G}
+\newcommand{\Mcal}{\mathcal M}
+\newcommand{\1}{\mathbf 1}
+
+\title{PCH-ESM\\
+\large Purification Contextuelle Hiérarchique et Espaces Sémantiques Modulaires}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce document formalise une architecture hiérarchique pour modèles séquentiels et systèmes de langage, fondée sur trois piliers :
+(i) la purification récursive d'une représentation dans un contexte donné,
+(ii) la décomposition hiérarchique d'un espace sémantique global en sous-espaces spécialisés,
+et (iii) une fonction de coordination \(G\) qui transfère la structure de trajectoire d'un modèle généraliste vers un ensemble de modèles spécialisés.
+La théorie distingue explicitement la représentation, la stabilité contextuelle, la hiérarchie, la spécialisation, la coordination inter-espaces et le rôle de modèle du monde.
+\end{abstract}
+
+\tableofcontents
+
+% =================================================
+\section{Cadre général}
+% =================================================
+
+L'idée directrice de PCH-ESM est qu'une bonne représentation n'est pas seulement une représentation prédictive, mais une représentation stable \emph{dans un contexte}.
+Cette stabilité n'est pas absolue : elle dépend de la tâche, du domaine, du mode d'exécution, des contraintes de calcul et de la structure locale de coopération entre sous-modèles.
+
+On distingue donc trois niveaux :
+
+\begin{enumerate}[leftmargin=2em]
+    \item un niveau de purification hiérarchique de base, noté PH ;
+    \item un niveau contextuel, noté PCH ;
+    \item un niveau architectural distribué, noté Multi-ES.
+\end{enumerate}
+
+L'architecture complète combine ensuite une couche de coordination \(G\), puis éventuellement une couche de modèle du monde Multi-PH.
+
+% =================================================
+\section{PH : purification hiérarchique}
+% =================================================
+
+Cette section résume la base PH déjà présente dans le document EEG.
+
+\begin{definition}[Opérateur de purification hiérarchique]
+Soit \(u\) un objet séquentiel ou latent. On définit un opérateur de purification \(\Pcal_\alpha\), de paramètre \(\alpha\in[0,1]\), qui agit récursivement via deux passes directionnelles :
+\[
+\mathcal F_\alpha(u)_i
+=
+\alpha\,\mathcal F_\alpha(u)_{i-1}
++
+(1-\alpha)u_i,
+\]
+\[
+\mathcal B_\alpha(u)_i
+=
+\alpha\,\mathcal B_\alpha(u)_{i+1}
++
+(1-\alpha)u_i,
+\]
+et la purification symétrique :
+\[
+\Pcal_\alpha(u)
+=
+\frac12\Bigl(\mathcal F_\alpha(u)+\mathcal B_\alpha(u)\Bigr).
+\]
+\end{definition}
+
+\begin{definition}[Hiérarchie de noyaux]
+On définit :
+\[
+N^{(0)} = W,
+\qquad
+N^{(r+1)} = \Pcal_\alpha\!\left(N^{(r)}\right),
+\quad r\ge 0.
+\]
+Le noyau terminal est
+\[
+N^{(\star)} = N^{(r^\star)}
+\]
+lorsque la suite converge ou lorsqu'une profondeur maximale est atteinte.
+\end{definition}
+
+\begin{definition}[Résidu]
+Le résidu associé au noyau terminal est
+\[
+R^{(0)} = W - N^{(\star)}.
+\]
+Il peut être purifié à son tour, possiblement sous guidage du noyau terminal.
+\end{definition}
+
+\begin{proposition}[Attention standard comme cas plat]
+L'attention standard peut être vue comme un cas plat de purification hiérarchique lorsque la hiérarchie a profondeur \(1\), que la sélection est bilinéaire, et que la fusion est une moyenne pondérée des valeurs.
+Dans ce cas, l'opérateur \(QK^\top\) n'est pas la théorie fondamentale mais une implémentation particulière d'une sélection contextuelle plate.
+\end{proposition}
+
+% =================================================
+\section{De PH vers PCH : purification contextuelle hiérarchique}
+% =================================================
+
+Cette section généralise PH en introduisant explicitement un contexte.
+
+\subsection{Espace des contextes}
+
+\begin{definition}[Espace des contextes]
+On note \(\C\) l'espace des contextes.
+Un contexte est un élément
+\[
+c\in\C.
+\]
+On peut décomposer un contexte sous la forme
+\[
+c=(d,\tau,m,\omega,\xi),
+\]
+où :
+\begin{itemize}[leftmargin=2em]
+    \item \(d\) désigne le domaine ou la spécialité ;
+    \item \(\tau\) désigne la tâche ou l'objectif ;
+    \item \(m\) désigne le mode d'exécution ou de coopération ;
+    \item \(\omega\) désigne des contraintes de calcul, mémoire ou temps ;
+    \item \(\xi\) désigne des paramètres additionnels propres à l'application.
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+Le contexte n'est pas une simple étiquette. Il encode la manière dont l'objet doit être interprété, purifié et utilisé.
+Deux contextes distincts peuvent donc induire deux stabilités différentes pour une même représentation.
+\end{remark}
+
+\subsection{Stabilité contextuelle}
+
+\begin{definition}[Fonctionnelle de stabilité contextuelle]
+Soit \(\Z\) un espace latent.
+On définit une fonctionnelle
+\[
+J:\Z\times\C\to\R\cup\{+\infty\},
+\]
+où \(J(z;c)\) mesure le coût d'instabilité de la représentation \(z\) dans le contexte \(c\).
+On suppose que, pour chaque \(c\in\C\), la fonction \(z\mapsto J(z;c)\) est propre, semi-continue inférieurement, et au moins coercive sur le sous-espace considéré.
+\end{definition}
+
+\begin{definition}[Stabilité contextuelle]
+Une représentation \(z^\star\in\Z\) est dite \emph{stable dans le contexte \(c\)} si
+\[
+z^\star\in\argmin_{z\in\Z} J(z;c).
+\]
+Si l'ensemble des minimisateurs est singleton, on parle de \emph{noyau contextuel unique}.
+Sinon, on parle d'un \emph{ensemble de noyaux contextuels}.
+\end{definition}
+
+\begin{remark}
+La stabilité n'est donc plus globale ni absolue : elle est relative au contexte \(c\).
+C'est précisément ce qui distingue PCH de PH.
+\end{remark}
+
+\subsection{Opérateur de purification contextuelle}
+
+\begin{definition}[Opérateur de purification contextuelle]
+Pour un pas \(\lambda>0\), on définit
+\[
+\Pcal_{\lambda}(\,\cdot\,;c):\Z\to\Z,
+\qquad
+\Pcal_{\lambda}(z;c)
+=
+\argmin_{u\in\Z}
+\left\{
+J(u;c)
++
+\frac{1}{2\lambda}\|u-z\|^2
+\right\}.
+\]
+\end{definition}
+
+\begin{remark}
+Lorsque \(J(\cdot;c)\) est convexe, \(\Pcal_{\lambda}(\cdot;c)\) est l'opérateur proximal associé à la stabilité contextuelle.
+Lorsque \(J\) est non convexe, la définition reste formelle mais nécessite un choix de branche ou une approximation numérique.
+\end{remark}
+
+\subsection{Trajectoires de purification contextuelle}
+
+\begin{definition}[Trajectoire de purification contextuelle]
+Soit une entrée \(x\in\X\), un encodeur \(E_\theta:\X\to\Z\), et un contexte \(c\in\C\).
+La trajectoire de purification contextuelle associée à \((x,c)\) est la suite
+\[
+z^{(0)}(x,c)=E_\theta(x),
+\qquad
+z^{(r+1)}(x,c)=\Pcal_{\lambda}\!\bigl(z^{(r)}(x,c);c\bigr),
+\quad r\ge 0.
+\]
+On note cette trajectoire
+\[
+\T(x,c)=\bigl(z^{(0)}(x,c),z^{(1)}(x,c),z^{(2)}(x,c),\dots\bigr).
+\]
+\end{definition}
+
+\begin{definition}[Noyau contextuel]
+Si la suite \(\{z^{(r)}(x,c)\}_{r\ge 0}\) converge, on définit le noyau contextuel par
+\[
+N^\star(x,c)=\lim_{r\to\infty}z^{(r)}(x,c).
+\]
+Si la convergence numérique n'est pas garantie, on prend une approximation au rang \(r^\star\) :
+\[
+N^\star(x,c)\approx z^{(r^\star)}(x,c).
+\]
+\end{definition}
+
+\begin{definition}[Résidu contextuel]
+Le résidu contextuel associé à \((x,c)\) est
+\[
+R^{(0)}(x,c)=z^{(0)}(x,c)-N^\star(x,c).
+\]
+Il représente la partie de la représentation initiale qui n'est pas absorbée par la stabilité contextuelle principale.
+\end{definition}
+
+\begin{theorem}[PH est un cas limite de PCH]
+Supposons que le contexte soit trivial au sens suivant :
+\[
+\mathcal M_c = \Z
+\quad\text{pour tout } c\in\C,
+\]
+et que le décodeur soit contextuellement inactif, c'est-à-dire
+\[
+D_\psi(z,c)=D_\psi(z)
+\quad\text{pour tout } z\in\Z,\; c\in\C.
+\]
+Alors la pénalité contextuelle s'annule identiquement :
+\[
+\ell_{\mathrm{ctx}}(z;c)=0,
+\]
+et la fonctionnelle fondamentale devient indépendante du contexte :
+\[
+J(z;x,c)=J(z;x).
+\]
+Par conséquent, l'opérateur \(\Pcal_{\lambda}(z;x,c)\) se réduit à l'opérateur PH classique.
+\end{theorem}
+
+\begin{proof}
+Si \(\mathcal M_c=\Z\), alors
+\[
+\dist(z,\mathcal M_c)=0
+\]
+pour tout \(z\in\Z\), donc \(\ell_{\mathrm{ctx}}(z;c)=0\).
+Si en outre \(D_\psi(z,c)=D_\psi(z)\), la dépendance à \(c\) disparaît complètement de \(J\).
+L'opérateur proximal associé devient alors exactement celui de PH.
+\end{proof}
+
+\begin{corollary}
+La transition \(\mathrm{PH}\to\mathrm{PCH}\) consiste à remplacer un espace de stabilité unique par un ensemble admissible contextuel \(\mathcal M_c\), puis à propager cette dépendance contextuelle dans l'énergie, le noyau, le résidu et la trajectoire de purification.
+\end{corollary}
+
+\subsection{Version bidirectionnelle contextuelle}
+
+Pour rester fidèle à la purification bidirectionnelle de PH, on peut introduire une version contextuelle symétrique.
+
+\begin{definition}[Purification bidirectionnelle contextuelle]
+Soit \(u=(u_1,\dots,u_T)\) une séquence latente locale.
+On définit :
+\[
+\mathcal F_{\alpha,c}(u)_i
+=
+\alpha(c)\,\mathcal F_{\alpha,c}(u)_{i-1}
++
+\bigl(1-\alpha(c)\bigr)u_i,
+\]
+\[
+\mathcal B_{\alpha,c}(u)_i
+=
+\alpha(c)\,\mathcal B_{\alpha,c}(u)_{i+1}
++
+\bigl(1-\alpha(c)\bigr)u_i,
+\]
+où \(\alpha:\C\to[0,1]\) est une fonction de contrôle contextuel.
+La purification contextuelle bidirectionnelle est alors
+\[
+\Pcal_{\alpha,c}(u)
+=
+\frac12\Bigl(\mathcal F_{\alpha,c}(u)+\mathcal B_{\alpha,c}(u)\Bigr).
+\]
+\end{definition}
+
+\begin{remark}
+Dans cette version, le contexte influence le degré de lissage, la profondeur effective de récursion, et le compromis entre compression et reconstruction.
+\end{remark}
+
+% =================================================
+\section{Fonctionnelle fondamentale de stabilité contextuelle}
+% =================================================
+
+Cette section fixe la brique conceptuelle centrale de la théorie : la fonctionnelle fondamentale \(J\).
+L'objectif n'est pas de poser une stabilité abstraite comme primitive, mais de la dériver à partir
+d'une énergie variationnelle construite sur trois exigences observables :
+(i) la fidélité à l'entrée,
+(ii) la compatibilité contextuelle,
+(iii) la parcimonie structurelle.
+
+\subsection{Principe fondamental}
+
+Dans PCH-ESM, la stabilité n'est pas une propriété primitive.
+Elle résulte d'un compromis entre reconstruction, adéquation au contexte et simplicité de la représentation.
+
+Autrement dit, la stabilité contextuelle est une quantité \emph{variationnelle} :
+elle correspond à des états qui minimisent une énergie sous contrainte contextuelle.
+
+\subsection{Contexte comme ensemble admissible}
+
+\begin{definition}[Ensemble admissible contextuel]
+À tout contexte \(c\in\C\), on associe un ensemble admissible de représentations latentes
+\[
+\mathcal M_c \subseteq \Z.
+\]
+Cet ensemble représente l'ensemble des états latents compatibles avec le contexte \(c\).
+
+On peut le définir de manière empirique par
+\[
+\mathcal M_c
+=
+\overline{
+\{\,E_\theta(x)\;:\;(x,c)\in\mathcal D\,\}
+},
+\]
+où \(\mathcal D\) désigne l'ensemble d'entraînement ou de calibration, et la barre indique la fermeture topologique.
+\end{definition}
+
+\begin{remark}
+Le contexte n'est donc pas ramené à un point central.
+Il est représenté comme une région, une variété ou un ensemble admissible dans l'espace latent.
+C'est cette correction qui rend la théorie robuste : un contexte n'est pas nécessairement une valeur unique,
+mais une classe de compatibilité.
+\end{remark}
+
+\subsection{Fonctionnelle fondamentale}
+
+\begin{definition}[Fonctionnelle fondamentale de stabilité]
+Soient \(x\in\X\) une observation, \(c\in\C\) un contexte, et \(z\in\Z\) une représentation latente.
+On définit la fonctionnelle fondamentale par
+\[
+J(z;x,c)
+=
+\lambda_{\mathrm{fid}}\,\ell_{\mathrm{fid}}(z;x,c)
++
+\lambda_{\mathrm{ctx}}\,\ell_{\mathrm{ctx}}(z;c)
++
+\lambda_{\mathrm{cmp}}\,\Omega(z),
+\]
+où :
+\[
+\ell_{\mathrm{fid}}(z;x,c)
+=
+\|D_\psi(z,c)-x\|^2
+\]
+mesure l'erreur de reconstruction ou de réconciliation avec l'entrée,
+\[
+\ell_{\mathrm{ctx}}(z;c)
+=
+\dist(z,\mathcal M_c)^2
+=
+\inf_{u\in\mathcal M_c}\|z-u\|^2
+\]
+mesure l'écart à l'ensemble admissible contextuel,
+et \(\Omega(z)\) est une pénalisation de complexité, de variation ou de non-parcimonie.
+
+Les coefficients \(\lambda_{\mathrm{fid}},\lambda_{\mathrm{ctx}},\lambda_{\mathrm{cmp}}>0\) pondèrent ces trois contributions.
+\end{definition}
+
+\begin{remark}
+Cette définition résout la difficulté précédente sans déplacer le problème ailleurs.
+Le contexte n'est pas un point caché à estimer ; il est une structure admissible dérivée des données,
+et la compatibilité est mesurée par distance à cette structure.
+\end{remark}
+
+\subsection{Interprétation probabiliste équivalente}
+
+\begin{proposition}[Forme probabiliste équivalente]
+Sous une modélisation de type Gibbs, on peut associer au contexte une densité conditionnelle
+\[
+p_\eta(z\mid c)\propto \exp\!\left(-\frac{1}{\tau}\dist(z,\mathcal M_c)^2\right),
+\]
+où \(\tau>0\) est une température.
+Dans cette lecture, la pénalité contextuelle peut aussi s'écrire
+\[
+\ell_{\mathrm{ctx}}(z;c) = -\tau \log p_\eta(z\mid c) + \text{constante}.
+\]
+\end{proposition}
+
+\begin{remark}
+La version géométrique et la version probabiliste sont compatibles.
+La première est plus directe conceptuellement ; la seconde est utile pour l'entraînement et l'inférence.
+\end{remark}
+
+\subsection{Instabilité, stabilité et métrique dérivée}
+
+\begin{definition}[Instabilité contextuelle fondamentale]
+On définit l'instabilité contextuelle fondamentale d'un état \(z\) par
+\[
+\mathcal I(z;x,c)
+=
+J(z;x,c)
+-
+\inf_{u\in\Z}J(u;x,c).
+\]
+\end{definition}
+
+\begin{definition}[Stabilité contextuelle fondamentale]
+On définit le score de stabilité fondamentale par
+\[
+S_C^\star(z;x,c)
+=
+\frac{1}{1+\mathcal I(z;x,c)}.
+\]
+\end{definition}
+
+\begin{proposition}[Bornes et interprétation]
+Pour tout \(z,x,c\), on a
+\[
+0<S_C^\star(z;x,c)\le 1.
+\]
+De plus :
+\begin{itemize}[leftmargin=2em]
+    \item \(S_C^\star(z;x,c)=1\) si et seulement si \(z\) est un minimiseur de \(J(\cdot;x,c)\) ;
+    \item \(S_C^\star(z;x,c)\) décroît lorsque l'écart au minimum contextuel augmente ;
+    \item \(S_C^\star\) est donc une mesure monotone de stabilité dérivée, et non un postulat indépendant.
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+Par définition, \(\mathcal I(z;x,c)\ge 0\). Donc \(1+\mathcal I(z;x,c)\ge 1\), d'où
+\(0<S_C^\star(z;x,c)\le 1\).
+Si \(z\) est minimiseur de \(J(\cdot;x,c)\), alors \(\mathcal I(z;x,c)=0\), donc \(S_C^\star=1\).
+Réciproquement, \(S_C^\star=1\) implique \(\mathcal I=0\), donc \(z\) est minimiseur.
+\end{proof}
+
+\begin{proposition}[Métrique empirique de stabilité]
+En pratique, \(S_C^\star\) peut être estimé par une métrique empirique fondée sur la trajectoire de purification,
+par exemple en combinant la variation de la trajectoire, la sensibilité locale du noyau et le gain d'énergie.
+Cette métrique empirique est une approximation calculable de la stabilité canonique.
+\end{proposition}
+
+\subsection{Opérateur proximal canonique}
+
+\begin{definition}[Purification contextuelle canonique]
+Pour \(\lambda>0\), on définit l'opérateur de purification contextuelle par
+\[
+\Pcal_{\lambda}(z;x,c)
+=
+\argmin_{u\in\Z}
+\left\{
+J(u;x,c)
++
+\frac{1}{2\lambda}\|u-z\|^2
+\right\}.
+\]
+\end{definition}
+
+\begin{remark}
+Cette définition relie directement la purification au principe variationnel fondamental.
+PH et PCH ne sont donc plus des mécanismes sans support énergétique explicite :
+elles sont les itérations proximales de la fonctionnelle \(J\).
+\end{remark}
+
+\subsection{PH comme cas limite de la fonctionnelle fondamentale}
+
+\begin{theorem}[PH comme cas limite de PCH]
+Supposons que le contexte soit trivial au sens suivant :
+\[
+\mathcal M_c = \Z
+\quad\text{pour tout } c\in\C,
+\]
+et que le décodeur soit contextuellement inactif, c'est-à-dire
+\[
+D_\psi(z,c)=D_\psi(z)
+\quad\text{pour tout } z\in\Z,\; c\in\C.
+\]
+Alors la pénalité contextuelle s'annule identiquement :
+\[
+\ell_{\mathrm{ctx}}(z;c)=0,
+\]
+et la fonctionnelle fondamentale devient indépendante du contexte :
+\[
+J(z;x,c)=J(z;x).
+\]
+Par conséquent, l'opérateur \(\Pcal_{\lambda}(z;x,c)\) se réduit à l'opérateur PH classique.
+\end{theorem}
+
+\begin{proof}
+Si \(\mathcal M_c=\Z\), alors
+\[
+\dist(z,\mathcal M_c)=0
+\]
+pour tout \(z\in\Z\), donc \(\ell_{\mathrm{ctx}}(z;c)=0\).
+Si en outre \(D_\psi(z,c)=D_\psi(z)\), la dépendance à \(c\) disparaît complètement de \(J\).
+L'opérateur proximal associé devient alors exactement celui de PH.
+\end{proof}
+
+\begin{corollary}
+La transition \(\mathrm{PH}\to\mathrm{PCH}\) consiste à remplacer un espace de stabilité unique par un ensemble admissible contextuel \(\mathcal M_c\), puis à propager cette dépendance contextuelle dans l'énergie, le noyau, le résidu et la trajectoire de purification.
+\end{corollary}
+
+\begin{remark}
+Cette formulation ferme la dernière faille conceptuelle :
+(i) \(J\) est une énergie fondée sur des objets observables,
+(ii) le contexte est un ensemble admissible, non un point arbitraire,
+(iii) la stabilité est déduite comme minimum relatif,
+et (iv) PH apparaît comme cas limite naturel de PCH.
+\end{remark}
+
+% =================================================
+\section{PCH-ESM : espaces sémantiques modulaires et hiérarchiques}
+% =================================================
+
+Cette section formalise la décentralisation de l'espace sémantique, la spécialisation locale, la coordination globale, la gestion de la mémoire et du calcul, ainsi que l'émergence de trajectoires de pensée traçables.
+
+\subsection{Définition générale}
+
+\begin{definition}[Système PCH-ESM]
+Un système PCH-ESM est un tuple
+\[
+\mathfrak M
+=
+\Bigl(
+\E_G,
+\{\E_i\}_{i=1}^n,
+\{\Pi_i,\iota_i,\Pcal_i,\pi_i\}_{i=1}^n,
+\Gcal,
+r,
+\Gamma
+\Bigr),
+\]
+où :
+
+\begin{itemize}[leftmargin=2em]
+    \item \(\E_G\) est l'espace sémantique global ;
+    \item \(\E_i\) est le \(i\)-ème espace sémantique spécialisé ;
+    \item \(\Pi_i:\E_G\to\E_i\) est la projection locale ;
+    \item \(\iota_i:\E_i\to\E_G\) est l'injection ou remontée vers l'espace global ;
+    \item \(\Pcal_i\) est l'opérateur local de purification dans \(\E_i\) ;
+    \item \(\pi_i\) est l'agent ou politique locale responsable de \(\E_i\) ;
+    \item \(\Gcal\) est un graphe orienté acyclique de dépendances entre espaces ;
+    \item \(r\) est une politique de routage ;
+    \item \(\Gamma\) est l'opérateur de fusion globale.
+\end{itemize}
+\end{definition}
+
+\subsection{Compatibilité entre espace global et espaces locaux}
+
+\begin{assumption}[Compatibilité des projections]
+Pour tout \(i\in\{1,\dots,n\}\),
+\[
+\Pi_i\circ \iota_i = \Id_{\E_i}.
+\]
+De plus, pour tout \(z\in\E_G\), l'assemblage des composantes locales reconstruit approximativement l'état global :
+\[
+\left\| z - \Gamma\bigl(\iota_1\Pi_1 z,\dots,\iota_n\Pi_n z\bigr)\right\|
+\le \varepsilon_{\mathrm{coh}}.
+\]
+\end{assumption}
+
+\begin{remark}
+Cette condition exprime le fait qu'un espace global peut être décomposé en sous-espaces spécialisés sans perdre toute cohérence, à condition que la fusion et les projections soient compatibles.
+\end{remark}
+
+\subsection{Graphe hiérarchique de collaboration}
+
+On considère un graphe orienté acyclique
+\[
+\Gcal=(\I,\mathcal E),
+\]
+dont les sommets sont les espaces spécialisés et dont les arêtes représentent des canaux de communication, de dépendance ou de transfert de contexte.
+
+\begin{definition}[Trajectoire de pensée]
+Une trajectoire de pensée est une suite finie
+\[
+\tau
+=
+\bigl((i_1,z_1,m_1),(i_2,z_2,m_2),\dots,(i_T,z_T,m_T)\bigr),
+\]
+où \(i_t\in\I\) est l'espace actif à l'instant \(t\), \(z_t\in\E_{i_t}\) l'état local, et \(m_t\) un message ou une mise à jour émise vers d'autres espaces.
+\end{definition}
+
+\begin{remark}
+Cette définition rend la trajectoire de calcul explicitement observable. Le modèle n'est plus seulement une boîte noire qui produit une sortie ; il devient un système dont le cheminement interne peut être inspecté.
+\end{remark}
+
+\subsection{Routage et activation sparse}
+
+\begin{definition}[Politique de routage]
+La politique de routage est une application
+\[
+r:\E_G\times\C\to\Delta(\I),
+\]
+où \(\Delta(\I)\) désigne le simplexe des distributions sur \(\I\).
+Pour un état global \(z\) et un contexte \(c\), la politique \(r(z,c)\) donne la probabilité ou la pondération d'activation des différents espaces.
+On impose souvent une sparsité :
+\[
+|\supp(r(z,c))|\le k\ll n.
+\]
+\end{definition}
+
+\begin{remark}
+Cette sparsité formalise la gestion locale du calcul matriciel et de la mémoire : tous les espaces ne sont pas activés simultanément, seuls ceux jugés pertinents par le contexte participent à la computation.
+\end{remark}
+
+\subsection{Agents spécialisés}
+
+\begin{definition}[Agent local]
+Un agent local \(A_i\) est le triplet
+\[
+A_i=(\pi_i,\Pcal_i,\Theta_i),
+\]
+où \(\pi_i\) est la politique de décision locale, \(\Pcal_i\) l'opérateur de purification associé, et \(\Theta_i\) les paramètres internes de l'agent.
+\end{definition}
+
+Chaque agent est responsable d'un espace sémantique particulier, mais peut communiquer avec les autres agents via le graphe \(\Gcal\).
+
+\begin{definition}[Mise à jour locale]
+Si l'agent \(A_i\) est activé à l'instant \(t\), ses paramètres sont mis à jour par
+\[
+\Theta_i^{t+1}
+=
+\Theta_i^t
+-
+\eta_t \nabla_{\Theta_i}\mathcal L_i^t,
+\]
+tandis que les autres paramètres restent inchangés ou subissent une mise à jour nulle.
+\end{definition}
+
+\subsection{Traçabilité et déterminisme}
+
+\begin{proposition}[Traçabilité]
+Si la politique de routage \(r\), les opérateurs locaux \(\Pcal_i\), et l'opérateur de fusion \(\Gamma\) sont déterministes, alors la trajectoire \(\tau\) produite par le système PCH-ESM est elle-même déterministe pour une entrée et un contexte donnés.
+\end{proposition}
+
+\begin{remark}
+Le déterminisme n'est donc pas automatique ; il doit être imposé. En revanche, l'architecture PCH-ESM le rend plus facile à contrôler qu'un grand espace sémantique monolithique.
+\end{remark}
+
+\subsection{Coherence locale et généralisation globale}
+
+La spécialisation renforce la compétence locale mais fragilise la généralisation globale si aucune couche de coordination n'existe.
+
+On distingue donc :
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{généralisation locale} : bonne performance sur le domaine propre de l'espace spécialisé ;
+    \item \textbf{généralisation globale} : bonne performance sur des tâches transversales, hors domaine initial, et sur des compositions multi-domaines.
+\end{itemize}
+
+L'architecture PCH-ESM seule ne garantit pas la généralisation globale. Celle-ci doit être reconstruite par la fonction \(G\).
+
+% =================================================
+\section{La fonction \(G\) : distillation de trajectoires et coordination inter-espaces}
+% =================================================
+
+On suppose l'existence :
+
+\begin{itemize}[leftmargin=2em]
+    \item d'un modèle généraliste \(M_G\) entraîné sur un corpus multi-disciplinaire ;
+    \item d'une famille de modèles spécialisés \(\{M_i\}_{i=1}^n\), chacun entraîné sur un sous-domaine \(D_i\).
+\end{itemize}
+
+Le point clé n'est pas de distiller seulement des réponses, mais de distiller des trajectoires de coordination.
+
+\subsection{Modèle généraliste}
+
+Le modèle généraliste induit une politique de trajectoire
+\[
+\pi_G^{\mathrm{tr}}(\tau\mid x,c),
+\]
+où \(\tau\) est une trajectoire de pensée, de routage, de consultation d'experts et de fusion.
+
+Le modèle généraliste apprend ainsi non seulement des connaissances, mais surtout des transitions inter-domaines.
+
+\subsection{Modèles spécialisés}
+
+Chaque modèle spécialisé \(M_i\) est entraîné sur un domaine \(D_i\).
+Il doit être fort localement, c'est-à-dire performant sur son domaine, mais aussi apprendre à collaborer hors de son domaine.
+
+On introduit un indicateur de domaine
+\[
+m_i(x)=
+\begin{cases}
+1 & \text{si } x\in D_i,\\
+0 & \text{sinon.}
+\end{cases}
+\]
+
+\subsection{Objectif de coordination}
+
+L'objectif n'est pas que l'agent mathématique imite le comportement mathématique du généraliste sur son propre domaine, puisqu'il le maîtrise déjà localement.
+L'objectif est qu'il apprenne \emph{quand et comment déléguer} ou coopérer lorsque le problème sort de son périmètre initial.
+
+On sépare donc deux régimes :
+
+\[
+\text{si } m_i(x)=1,\quad \text{compétence locale forte};
+\]
+\[
+\text{si } m_i(x)=0,\quad \text{coordination inter-spécialités}.
+\]
+
+\begin{definition}[Perte locale-coordination]
+Pour le modèle \(M_i\), on définit
+\[
+\mathcal L_i
+=
+\mathbb E_{(x,y)\sim D_i}
+\Bigl[
+m_i(x)\,\mathcal L_i^{\mathrm{loc}}(x,y)
++
+(1-m_i(x))\,\mathcal L_i^{\mathrm{coord}}(x)
+\Bigr]
++
+\lambda_i \mathcal L_i^{\mathrm{reg}}.
+\]
+\end{definition}
+
+Ici :
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathcal L_i^{\mathrm{loc}}\) mesure la compétence spécialisée ;
+    \item \(\mathcal L_i^{\mathrm{coord}}\) mesure l'alignement avec les trajectoires du modèle généraliste hors domaine ;
+    \item \(\mathcal L_i^{\mathrm{reg}}\) régularise le modèle ;
+    \item \(\lambda_i>0\) pondère la régularisation.
+\end{itemize}
+
+\subsection{Définition de la fonction \(G\)}
+
+\begin{definition}[Fonction de coordination \(G\)]
+La fonction \(G\) est une application de distillation qui transforme les trajectoires générales en politiques locales coordonnées :
+\[
+G:\pi_G^{\mathrm{tr}}\longmapsto \{\pi_i^{\mathrm{coord}}\}_{i=1}^n.
+\]
+Plus précisément, \(G\) est obtenu par minimisation d'une divergence entre la trajectoire générale et la trajectoire produite par le système spécialisé :
+\[
+G^\star
+=
+\argmin_{G}
+\;
+\mathbb E_{(x,c)\sim \mathcal D}
+\left[
+\KL\!\left(
+\pi_G^{\mathrm{tr}}(\cdot\mid x,c)
+\;\middle\|\;
+\pi_{G}^{\mathrm{spec}}(\cdot\mid x,c)
+\right)
+\right],
+\]
+sous contraintes de compétence locale sur chaque sous-domaine \(D_i\).
+\end{definition}
+
+\begin{remark}
+La fonction \(G\) ne transfère pas la connaissance brute d'un modèle généraliste vers des spécialistes.
+Elle transfère la \emph{forme des trajectoires} : quand consulter qui, dans quel ordre, avec quelle profondeur, et selon quelle hiérarchie de dépendances.
+\end{remark}
+
+\subsection{Jeu de données de coordination}
+
+\begin{definition}[Signature de spécialité]
+On note \(\I=\{1,\dots,n\}\) l'ensemble des espaces sémantiques ou spécialités.
+Une signature de spécialité est une application
+\[
+\sigma:\X\to [0,1]^n,
+\]
+où \(\sigma_i(x)\) mesure le degré d'appartenance ou d'activation du prompt \(x\)
+dans la spécialité \(i\).
+On impose souvent une normalisation
+\[
+\sum_{i=1}^n \sigma_i(x)=1.
+\]
+\end{definition}
+
+\begin{definition}[Trajectoire cible]
+Soit \(M_G\) le modèle généraliste de référence.
+On note
+\[
+\tau^\star(x,c)
+=
+\Xi(M_G,x,c)
+\]
+la trajectoire de référence extraite du modèle généraliste par un opérateur d'observation \(\Xi\).
+Cette trajectoire encode l'ordre des espaces consultés, les passages inter-agents et les fusions intermédiaires.
+\end{definition}
+
+\begin{definition}[Trajectoire prédite]
+Soit \(G_\phi\) la fonction de coordination paramétrée par \(\phi\).
+On note
+\[
+\widehat{\tau}(x,c)=\Xi(G_\phi,x,c)
+\]
+la trajectoire prédite par le système coordonné.
+\end{definition}
+
+\begin{definition}[Jeu de données de coordination]
+Le jeu de données utilisé pour entraîner \(G\) est
+\[
+\mathcal D_G
+=
+\bigl\{
+(x,c,\sigma(x),\tau^\star(x,c),y)
+\bigr\}_{k=1}^N,
+\]
+où :
+\begin{itemize}[leftmargin=2em]
+    \item \(x\) est le prompt ou l'entrée ;
+    \item \(c\) est le contexte ;
+    \item \(\sigma(x)\) est la signature de spécialité ;
+    \item \(\tau^\star(x,c)\) est la trajectoire de référence ;
+    \item \(y\) est la cible finale de la tâche.
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+Cette construction est compatible avec l'idée suivante :
+on extrait dans l'ESM la localisation des signatures de spécialité,
+puis on fabrique un jeu de données prompt / signature / trajectoire,
+qui révèle les chemins de coordination à apprendre par \(G\).
+\end{remark}
+
+\subsection{Fonction de perte associée à \(G\)}
+
+\begin{definition}[Perte de tâche]
+La perte de tâche standard est notée
+\[
+\mathcal L_{\mathrm{task}}(\hat y,y).
+\]
+\end{definition}
+
+\begin{definition}[Perte de signature]
+On note \(\widehat\sigma(x)\) la signature prédite par le système.
+La perte de signature est définie par
+\[
+\mathcal L_{\mathrm{sig}}
+=
+\mathrm{KL}\!\bigl(\sigma(x)\,\|\,\widehat\sigma(x)\bigr),
+\]
+ou, si les signatures sont multi-étiquettes, par une entropie croisée binaire adaptée.
+\end{definition}
+
+\begin{definition}[Perte de trajectoire]
+La perte de trajectoire est définie par
+\[
+\mathcal L_{\mathrm{traj}}
+=
+d_{\mathrm{traj}}\!\bigl(\widehat{\tau}(x,c),\tau^\star(x,c)\bigr),
+\]
+où \(d_{\mathrm{traj}}\) est une distance sur l'espace des trajectoires
+(par exemple une divergence séquentielle, un coût d'édition, ou une somme de divergences locales le long du graphe de collaboration).
+\end{definition}
+
+\begin{definition}[Perte de cohérence de routage]
+Soit \(\widehat r_t\in\Delta(\I)\) la distribution de routage prédite à l'étape \(t\).
+La perte de cohérence entre routage et signature est
+\[
+\mathcal L_{\mathrm{route}}
+=
+\sum_t
+\mathrm{KL}\!\bigl(r_t^\star\,\|\,\widehat r_t\bigr),
+\]
+où \(r_t^\star\) est le routage cible extrait du modèle généraliste ou déduit des signatures.
+\end{definition}
+
+\begin{definition}[Régularisation de graphe]
+Soit \(\Gcal=(\I,\mathcal E)\) le graphe des dépendances autorisées entre espaces.
+La pénalité de graphe est
+\[
+\mathcal L_{\mathrm{graph}}
+=
+\sum_t
+\mathbf 1\!\left[(\widehat i_t,\widehat i_{t+1})\notin \mathcal E\right],
+\]
+ou une relaxation continue de cette quantité.
+\end{definition}
+
+\begin{definition}[Fonction de perte de \(G\)]
+La fonction de perte totale pour \(G\) est
+\[
+\mathcal L_G
+=
+\lambda_{\mathrm{task}}\mathcal L_{\mathrm{task}}
++
+\lambda_{\mathrm{sig}}\mathcal L_{\mathrm{sig}}
++
+\lambda_{\mathrm{traj}}\mathcal L_{\mathrm{traj}}
++
+\lambda_{\mathrm{route}}\mathcal L_{\mathrm{route}}
++
+\lambda_{\mathrm{graph}}\mathcal L_{\mathrm{graph}}
++
+\lambda_{\mathrm{reg}}\Omega(\phi),
+\]
+où \(\Omega(\phi)\) est une régularisation standard des paramètres de \(G\).
+\end{definition}
+
+\begin{remark}
+Cette perte n'apprend pas seulement à produire la bonne sortie ;
+elle apprend à reproduire la bonne \emph{coordination} entre espaces spécialisés.
+C'est exactement ce qui permet de transférer la généralisation globale d'un modèle généraliste vers un système de spécialistes.
+\end{remark}
+
+\begin{proposition}[Interprétation de l'optimum]
+Si \(\mathcal L_G\) est minimisée, alors :
+\begin{enumerate}[leftmargin=2em]
+    \item les signatures de spécialité sont correctement localisées ;
+    \item les trajectoires internes approchent celles du modèle généraliste ;
+    \item le routage respecte la structure du graphe \(\Gcal\) ;
+    \item la sortie finale reste alignée avec la tâche supervisée.
+\end{enumerate}
+Ainsi, \(G\) apprend une politique de coordination et non une simple table de correspondance entrée-sortie.
+\end{proposition}
+
+% =================================================
+\section{Multi-PH : modèle du monde et états hiérarchiques}
+% =================================================
+
+On appelle Multi-PH la version où la purification hiérarchique ne sert plus seulement à construire une représentation utile pour une tâche, mais à modéliser l'évolution d'un \emph{état du monde} latent.
+
+\begin{definition}[État du monde hiérarchique]
+On note
+\[
+\Omega_t = \bigl(\omega_t^{(1)},\dots,\omega_t^{(L)}\bigr)
+\]
+l'état du monde à l'instant \(t\), organisé en niveaux hiérarchiques.
+Chaque niveau \(\omega_t^{(\ell)}\) représente une abstraction différente du monde.
+\end{definition}
+
+\begin{definition}[Dynamique PCH du monde]
+La dynamique de monde est donnée par
+\[
+\Omega_{t+1}
+=
+F\!\bigl(\Omega_t,a_t,o_t\bigr),
+\]
+où \(a_t\) est une action, \(o_t\) une observation, et \(F\) est une application construite elle-même à partir d'une purification contextuelle hiérarchique.
+\end{definition}
+
+\begin{remark}
+Dans cette perspective, prédire le prochain token n'est qu'un cas particulier d'une observation issue de l'état du monde.
+La vraie variable à prédire est l'état hiérarchique \(\Omega_{t+1}\), et le token est un readout.
+\end{remark}
+
+\begin{definition}[Readout token]
+Le prochain token est obtenu par une tête de lecture
+\[
+p_\psi(x_{t+1}\mid \Omega_{t+1})
+=
+D_\psi(\Omega_{t+1}).
+\]
+\end{definition}
+
+% =================================================
+\section{Architecture unifiée}
+% =================================================
+
+L'architecture complète peut être schématisée par
+\[
+x_{1:T}
+\longrightarrow
+E_G(x_{1:T})
+\longrightarrow
+Z_G
+\longrightarrow
+\{\E_i\}_{i=1}^n
+\longrightarrow
+\{\tau_i\}_{i=1}^n
+\longrightarrow
+\Gamma
+\longrightarrow
+\hat y,
+\]
+ou, dans la variante Multi-PH,
+\[
+x_{1:T}
+\longrightarrow
+\Omega_{1:T}
+\longrightarrow
+p_\psi(x_{t+1}\mid \Omega_{t+1}).
+\]
+
+\subsection{Fonction de perte globale}
+
+On peut écrire une perte globale de la forme
+\[
+\mathcal L_{\mathrm{tot}}
+=
+\lambda_{\mathrm{task}}\mathcal L_{\mathrm{task}}
++
+\lambda_{\mathrm{pch}}\mathcal L_{\mathrm{pch}}
++
+\lambda_{\mathrm{coord}}\mathcal L_{\mathrm{coord}}
++
+\lambda_{\mathrm{multiES}}\mathcal L_{\mathrm{multiES}}
++
+\lambda_{\mathrm{world}}\mathcal L_{\mathrm{world}}
++
+\lambda_{\mathrm{reg}}\Omega(\Theta,\Psi),
+\]
+où :
+\begin{itemize}[leftmargin=2em]
+    \item \(\mathcal L_{\mathrm{task}}\) est la perte de tâche ;
+    \item \(\mathcal L_{\mathrm{pch}}\) force la stabilité contextuelle ;
+    \item \(\mathcal L_{\mathrm{coord}}\) aligne les trajectoires entre espaces ;
+    \item \(\mathcal L_{\mathrm{multiES}}\) pénalise l'incohérence entre espaces ;
+    \item \(\mathcal L_{\mathrm{world}}\) entraîne le modèle du monde ;
+    \item \(\Omega\) est une régularisation standard.
+\end{itemize}
+
+% =================================================
+\section{Interprétation théorique}
+% =================================================
+
+La théorie PCH-ESM affirme les points suivants :
+
+\begin{enumerate}[leftmargin=2em]
+    \item La bonne représentation n'est pas seulement celle qui prédit, mais celle qui reste stable sous purification récursive dans un contexte donné.
+    \item L'attention standard peut être comprise comme un cas plat de ce principe.
+    \item Les poids eux-mêmes peuvent être traités comme mémoire purifiable.
+    \item Un espace sémantique monolithique peut être remplacé par une hiérarchie d'espaces spécialisés.
+    \item La généralisation globale ne disparaît pas nécessairement avec la spécialisation locale ; elle peut être reconstruite par une fonction de coordination \(G\) apprenant les trajectoires d'un modèle généraliste.
+    \item Les trajectoires internes de calcul deviennent explicites, donc traçables et potentiellement déterministes.
+    \item La version monde du formalisme (Multi-PH) remplace la prédiction de tokens comme objectif fondamental par la prédiction d'états hiérarchiques latents.
+\end{enumerate}
+
+\begin{remark}
+Cette théorie ne suppose pas que la spécialisation soit gratuite : elle exige une couche de coordination pour préserver la généralisation transversale.
+C'est précisément le rôle de \(G\).
+\end{remark}
+
+\section{Conclusion}
+
+PCH-ESM fournit une formalisation unifiée de :
+\begin{itemize}[leftmargin=2em]
+    \item la purification contextuelle hiérarchique ;
+    \item la version adaptative des paramètres ;
+    \item la hiérarchisation de l'espace sémantique ;
+    \item la décentralisation de l'IA en espaces spécialisés ;
+    \item la coordination inter-espaces par apprentissage de trajectoires ;
+    \item le modèle du monde hiérarchique.
+\end{itemize}
+
+La proposition centrale est que la structure cognitive utile n'est pas uniquement un grand espace latent global, mais un \emph{écosystème hiérarchique d'espaces sémantiques} dont la stabilité, la spécialisation et la coordination sont explicitement représentées.
+
+\end{document}

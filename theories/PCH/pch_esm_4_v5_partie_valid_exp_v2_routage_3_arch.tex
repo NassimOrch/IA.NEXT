@@ -1,0 +1,541 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Architectures d'apprentissage guidées par l'oracle variationnel}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Le routage variationnel développé dans les sections précédentes fournit une
+loi de décision exacte
+
+\[
+c^\star(w)
+\in
+\arg\min_{c\in\mathcal C}
+\widetilde V_c(w).
+\]
+
+Cette loi n'est pas apprise.
+
+Elle est entièrement déterminée par le problème variationnel local.
+
+Elle constitue donc un \emph{oracle de routage}.
+
+L'idée développée dans cette section est que cet oracle peut également servir
+de mécanisme d'apprentissage.
+
+Autrement dit, le même objet mathématique joue simultanément deux rôles :
+
+\begin{enumerate}
+\item décider du contexte optimal ;
+\item produire automatiquement les données nécessaires à l'apprentissage
+d'un routeur rapide.
+\end{enumerate}
+
+Aucune base de données annotée n'est alors nécessaire.
+
+Les exemples d'apprentissage sont générés pendant le fonctionnement même
+du système.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Oracle variationnel}
+
+\begin{definition}[Oracle variationnel]
+
+On appelle oracle variationnel l'application
+
+\[
+\mathcal O :
+\mathbb R^d
+\rightarrow
+\mathcal C
+\]
+
+définie par
+
+\[
+\boxed{
+\mathcal O(w)
+=
+c^\star(w)
+=
+\arg\min_{c\in\mathcal C}
+\widetilde V_c(w).
+}
+\]
+
+\end{definition}
+
+L'oracle est entièrement déterminé par les problèmes variationnels locaux.
+
+Il ne possède aucun paramètre entraînable.
+
+Ses décisions sont donc entièrement explicables.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Réseau de routage}
+
+On considère un réseau
+
+\[
+G_\theta :
+\mathbb R^d
+\longrightarrow
+\Delta_K,
+\]
+
+où
+
+\[
+G_\theta(w)
+=
+(p_1(w),\ldots,p_K(w))
+\]
+
+désigne une distribution de probabilité sur les contextes.
+
+La décision du réseau est
+
+\[
+\widehat c_\theta(w)
+=
+\arg\max_c p_c(w).
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Apprentissage auto-supervisé}
+
+Chaque appel à l'oracle produit automatiquement
+
+\[
+(w,\mathcal O(w)).
+\]
+
+Cette paire constitue un exemple d'apprentissage.
+
+Le réseau est mis à jour en minimisant
+
+\[
+L(\theta)
+=
+-
+\log
+p_{\mathcal O(w)}(w).
+\]
+
+Ainsi,
+
+aucune annotation extérieure n'est requise.
+
+L'ensemble d'apprentissage est construit en temps réel.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{proposition}
+
+L'apprentissage précédent est entièrement auto-supervisé.
+
+Les étiquettes ne proviennent pas d'une intervention humaine mais du problème
+variationnel lui-même.
+
+\end{proposition}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Architecture générale}
+
+Toute architecture hybride peut être décrite par une politique
+
+\[
+\Pi
+:
+\mathbb R^d
+\times
+\Theta
+\longrightarrow
+\{0,1\},
+\]
+
+où
+
+\[
+\Pi(w,\theta)=
+\begin{cases}
+1,&\text{appel de l'oracle},\\
+0,&\text{utilisation directe du réseau}.
+\end{cases}
+\]
+
+Le routage final est
+
+\[
+R(w)
+=
+\begin{cases}
+\mathcal O(w),
+&
+\Pi(w,\theta)=1,
+\\
+\widehat c_\theta(w),
+&
+\Pi(w,\theta)=0.
+\end{cases}
+\]
+
+Toutes les variantes ci-dessous correspondent simplement à différents choix
+de la politique
+\(
+\Pi.
+\)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante I : oracle permanent}
+
+La politique est
+
+\[
+\Pi(w,\theta)\equiv1.
+\]
+
+Le réseau apprend en permanence tandis que les décisions restent celles de
+l'oracle.
+
+Cette variante fournit la référence théorique.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante II : alternance oracle--réseau}
+
+On fixe un seuil
+
+\[
+\tau\in(0,1).
+\]
+
+Si
+
+\[
+\max_c p_c(w)\ge\tau,
+\]
+
+le réseau décide.
+
+Sinon,
+
+l'oracle est appelé.
+
+Autrement dit,
+
+\[
+\Pi(w,\theta)
+=
+\mathbf1
+\left(
+\max_c p_c(w)<\tau
+\right).
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante III : oracle fondé sur l'entropie}
+
+On définit
+
+\[
+H(w)
+=
+-
+\sum_c
+p_c(w)
+\log p_c(w).
+\]
+
+Pour un seuil
+
+\[
+\gamma>0,
+\]
+
+on choisit
+
+\[
+\Pi(w,\theta)
+=
+\mathbf1
+(H(w)>\gamma).
+\]
+
+L'oracle n'est donc interrogé que lorsque
+l'incertitude est élevée.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante IV : oracle intermittent}
+
+On fixe
+
+\[
+q\in(0,1].
+\]
+
+À chaque observation,
+
+l'oracle est interrogé avec probabilité
+
+\[
+q.
+\]
+
+Ainsi,
+
+\[
+\mathbb P
+(\Pi=1)
+=
+q.
+\]
+
+Cette stratégie réduit le coût de calcul tout en maintenant une correction
+régulière du réseau.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante V : distillation variationnelle}
+
+Au lieu de transmettre uniquement
+
+\[
+c^\star,
+\]
+
+l'oracle transmet la distribution
+
+\[
+p^\star_\beta(c|w)
+=
+\frac
+{
+e^{-\beta\widetilde V_c(w)}
+}
+{
+\sum_j
+e^{-\beta\widetilde V_j(w)}
+}.
+\]
+
+Le réseau minimise
+
+\[
+L(\theta)
+=
+D_{KL}
+\left(
+p^\star_\beta
+\|
+G_\theta
+\right).
+\]
+
+Le réseau apprend alors la géométrie complète des valeurs réduites.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante VI : pré-routage appris}
+
+Le réseau fournit
+
+\[
+S(w)
+\subset
+\mathcal C,
+\]
+
+avec
+
+\[
+|S(w)|=m\ll K.
+\]
+
+L'oracle est ensuite restreint à
+
+\[
+S(w),
+\]
+
+et calcule
+
+\[
+\arg\min_{c\in S(w)}
+\widetilde V_c(w).
+\]
+
+Le coût du routage devient proportionnel à
+
+\[
+m
+\]
+
+au lieu de
+
+\[
+K.
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Variante VII : apprentissage permanent}
+
+Après chaque appel de l'oracle,
+
+les paramètres sont actualisés selon
+
+\[
+\theta_{n+1}
+=
+\theta_n
+-
+\eta
+\nabla_\theta
+L
+\left(
+G_{\theta_n}(w_n),
+\mathcal O(w_n)
+\right).
+\]
+
+Le réseau converge progressivement vers la loi de décision induite par
+l'oracle.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{remark}
+
+Toutes les variantes précédentes reposent sur le même principe fondamental.
+
+Le routage variationnel constitue une vérité mathématique produite par la
+minimisation des valeurs réduites.
+
+Le réseau n'apprend jamais directement le problème de routage.
+
+Il apprend uniquement à approximer une loi de décision déjà définie par
+l'analyse variationnelle.
+
+Le rôle de l'apprentissage est donc exclusivement celui d'une accélération
+algorithmique.
+
+La correction théorique demeure assurée par l'oracle variationnel.
+
+\end{remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{theorem}[Principe général des architectures guidées par PCH]
+
+Soit
+
+\[
+\mathcal O(w)
+=
+\arg\min_{c}
+\widetilde V_c(w)
+\]
+
+l'oracle variationnel.
+
+Toute architecture définie par une politique
+d'interrogation
+
+\[
+\Pi
+\]
+
+vérifie les propriétés suivantes.
+
+\begin{enumerate}
+
+\item
+Le routage exact est retrouvé lorsque
+\(
+\Pi\equiv1.
+\)
+
+\item
+Le réseau construit automatiquement ses données
+d'entraînement.
+
+\item
+Aucune annotation extérieure n'est requise.
+
+\item
+Le coût asymptotique diminue au fur et à mesure que
+le réseau remplace progressivement l'oracle.
+
+\item
+Lorsque l'oracle demeure accessible,
+la correction variationnelle du système reste garantie.
+
+\end{enumerate}
+
+\end{theorem}

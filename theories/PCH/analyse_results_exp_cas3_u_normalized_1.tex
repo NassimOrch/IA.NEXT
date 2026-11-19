@@ -1,0 +1,672 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass{article}
+
+\begin{document}
+
+\title{Lois expérimentales révélées par les expériences PCH :
+croisement des régimes dimension-calibration et implications pour les LLM}
+
+\maketitle
+
+
+\section{Résumé expérimental global}
+
+L'ensemble des expériences montre que le PCH (Projection Contextuelle Harmonisée)
+ne se comporte pas comme un simple module d'amélioration de features.
+
+Il agit comme un opérateur géométrique contraint :
+
+\[
+z \rightarrow P_c(z)
+\]
+
+où $P_c$ dépend du contexte latent $c$.
+
+Les expériences historiques
+(cas3\_norm\_all\_exps\_0$-$4)
+et les nouvelles expériences
+(ex14, ex15, ex17, ex18, ex19)
+révèlent des lois invariantes.
+
+
+\section{Loi 1 : invariance par normalisation}
+
+Toutes les expériences montrent :
+
+\[
+\gamma \approx 1
+\]
+
+\[
+\tau \approx 3.4
+\]
+
+et dans le régime dimensionnel stable :
+
+\[
+\rho_{obs}\approx0.2272727
+\]
+
+
+Cette convergence est indépendante de :
+
+\begin{itemize}
+\item $\lambda_{ridge}$
+\item ridge ou absence de ridge
+\item nombre d'itérations
+\item dimension latente modérée
+\end{itemize}
+
+
+Donc :
+
+\[
+\boxed{
+La normalisation impose un attracteur géométrique universel
+}
+\]
+
+
+Le système ne cherche plus le meilleur hyperparamètre.
+
+Il cherche une géométrie satisfaisant les contraintes.
+
+
+\section{Loi 2 : stabilité dynamique}
+
+Toutes les expériences donnent :
+
+\[
+N_{violations}=0
+\]
+
+pour la monotonie énergétique.
+
+
+Le résidu point fixe :
+
+\[
+||x-T(x)||
+\]
+
+reste :
+
+\[
+10^{-17}
+\]
+
+à
+
+\[
+10^{-16}
+\]
+
+
+Donc :
+
+\[
+E(T(x))\leq E(x)
+\]
+
+
+et :
+
+\[
+x^*=T(x^*)
+\]
+
+
+Le PCH est un opérateur contractant.
+
+
+\section{Loi 3 : compression géométrique}
+
+Avant projection :
+
+\[
+d_{avant}
+\]
+
+Après :
+
+\[
+d_{apres}
+\]
+
+
+On observe :
+
+\[
+\frac{d_{avant}-d_{apres}}
+{d_{avant}}
+\approx90\%-95\%
+\]
+
+
+Exemples :
+
+\[
+0.036\rightarrow0.0028
+\]
+
+(ex14)
+
+\[
+0.232\rightarrow0.027
+\]
+
+(ex18)
+
+
+Donc :
+
+\[
+\boxed{
+Le PCH réduit fortement la distance au contexte latent
+}
+\]
+
+
+Ce n'est pas une amélioration statistique classique.
+
+C'est une contraction vers une variété.
+
+
+\section{Loi 4 : découverte du régime dimension-calibration}
+
+La nouvelle observation fondamentale vient du croisement :
+
+\[
+d = \text{latent\_dim}
+\]
+
+et :
+
+\[
+n_c=n_{calib\_per\_context}
+\]
+
+
+Trois régimes apparaissent.
+
+
+\subsection{Régime équilibré}
+
+Lorsque :
+
+\[
+d=n_c
+\]
+
+
+Exemples :
+
+\[
+d=4,\ n_c=4
+\]
+
+(ex14)
+
+
+Le système donne :
+
+\[
+\rho=0.22727
+\]
+
+\[
+operator\ gap\approx10^{-12}
+\]
+
+\[
+projector\ gap\approx10^{-12}
+\]
+
+
+La projection est quasi exacte.
+
+
+Conclusion :
+
+\[
+\boxed{
+d=n_c
+\Rightarrow
+projection idéale
+}
+\]
+
+
+Le nombre de degrés de liberté correspond exactement
+au nombre de contraintes contextuelles.
+
+
+\subsection{Régime sous-calibré}
+
+Lorsque :
+
+\[
+d<n_c
+\]
+
+
+Exemple :
+
+\[
+d=1,\ n_c=1
+\]
+
+
+(ex18)
+
+
+On obtient :
+
+\[
+\rho=0.089
+\]
+
+
+Le système reste stable :
+
+\[
+fixed\ point\approx10^{-17}
+\]
+
+
+mais la capacité contextuelle chute.
+
+
+La projection devient :
+
+\[
+P_c:\mathbb{R}^D\rightarrow\mathbb{R}
+\]
+
+
+Elle détruit trop d'information.
+
+
+Conséquence :
+
+oracle :
+
+\[
+accuracy=1
+\]
+
+
+mais routed :
+
+\[
+accuracy<baseline
+\]
+
+
+Donc :
+
+\[
+\boxed{
+Une projection trop basse dimension devient dangereuse sans contexte parfait
+}
+\]
+
+
+\subsection{Régime surdimensionné}
+
+Lorsque :
+
+\[
+d>n_c
+\]
+
+
+Exemple :
+
+\[
+d=32,\ n_c=48
+\]
+
+
+Ici :
+
+\[
+d<n_c
+\]
+
+mais le nombre de points de calibration est grand.
+
+
+On observe :
+
+\[
+operator\ gap=10^{-4}
+\]
+
+à
+
+\[
+10^{-2}
+\]
+
+
+Donc la projection existe mais perd son exactitude.
+
+
+Le système reste stable mais la géométrie est moins propre.
+
+
+\section{Nouvelle loi fondamentale}
+
+Le facteur critique n'est pas seulement :
+
+\[
+d
+\]
+
+
+mais :
+
+\[
+\frac{d}{n_c}
+\]
+
+
+On observe :
+
+\[
+\boxed{
+\text{qualité géométrique}
+=
+f(\frac{d}{n_c})
+}
+\]
+
+
+avec une zone optimale proche de :
+
+\[
+\frac{d}{n_c}\approx1
+\]
+
+
+Trop faible :
+
+\[
+\frac{d}{n_c}<1
+\]
+
+perte d'information.
+
+
+Trop grand :
+
+\[
+\frac{d}{n_c}>1
+\]
+
+sous-détermination géométrique.
+
+
+\section{Loi 5 : oracle vs routage}
+
+Toutes les expériences confirment :
+
+Oracle :
+
+\[
+accuracy\rightarrow1
+\]
+
+
+mais routé :
+
+\[
+accuracy\approx0.4-0.8
+\]
+
+
+Donc :
+
+\[
+\boxed{
+La projection est rarement le problème.
+L'identification du contexte est le goulot.
+}
+\]
+
+
+Le système sait corriger.
+
+Il ne sait pas toujours choisir la bonne correction.
+
+
+\section{Conséquence pour les LLM}
+
+Un LLM classique produit :
+
+\[
+z=f(x)
+\]
+
+
+Le PCH introduit :
+
+\[
+z'=P_c(f(x))
+\]
+
+
+où :
+
+\[
+c=\text{contexte latent}
+\]
+
+
+Cela permet :
+
+
+\subsection{RAG contextuel}
+
+Au lieu de seulement récupérer :
+
+\[
+documents\rightarrow embedding
+\]
+
+
+on applique :
+
+\[
+embedding\rightarrow P_c(embedding)
+\]
+
+
+Le contexte devient une transformation géométrique.
+
+
+\subsection{Adaptation multi-domaines}
+
+Un même modèle peut avoir :
+
+\[
+P_{medical}
+\]
+
+\[
+P_{legal}
+\]
+
+\[
+P_{technical}
+\]
+
+
+sans réentraîner le modèle.
+
+
+\subsection{Réduction du drift}
+
+Le drift devient :
+
+\[
+z_t\rightarrow P_{c_t}(z_t)
+\]
+
+
+La représentation est ramenée dans la variété attendue.
+
+
+\subsection{Mémoire contextuelle}
+
+La mémoire n'est plus seulement :
+
+\[
+store(text)
+\]
+
+
+mais :
+
+\[
+store(P_c(z))
+\]
+
+
+Les souvenirs sont normalisés par contexte.
+
+
+\section{Usage opérationnel innovant}
+
+\begin{enumerate}
+
+\item Adaptateur latent sans fine-tuning :
+
+\[
+LLM+P_c
+\]
+
+au lieu de LoRA.
+
+
+\item Correction dynamique d'embeddings.
+
+
+\item Routage de modèles :
+
+le contexte choisit la projection.
+
+
+\item Compression intelligente :
+
+garder uniquement les directions utiles.
+
+
+\item Détection d'anomalies :
+
+distance :
+
+\[
+||z-P_c(z)||
+\]
+
+devient un score de cohérence.
+
+
+\item Séparation de domaines dans un même espace latent.
+
+\end{enumerate}
+
+
+\section{Conclusion finale}
+
+Les expériences révèlent trois lois principales :
+
+\[
+\boxed{
+La normalisation crée un attracteur universel
+}
+\]
+
+
+\[
+\boxed{
+Le PCH est un opérateur contractant de renormalisation
+}
+\]
+
+
+\[
+\boxed{
+La performance dépend du rapport dimension/calibration
+}
+\]
+
+
+La nouvelle variable fondamentale n'est pas :
+
+\[
+dim
+\]
+
+seul.
+
+
+Mais :
+
+\[
+\boxed{
+\frac{dim}{n_{calib\_per\_context}}
+}
+\]
+
+
+Le futur axe d'amélioration n'est donc pas seulement une meilleure projection.
+
+C'est un meilleur système d'inférence du contexte.
+
+\end{document}
