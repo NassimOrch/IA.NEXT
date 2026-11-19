@@ -1,0 +1,63 @@
+{
+  "experiment_id": "V81-FREE-GEN-001",
+  "description": "Exploratory free-running French greeting generation after integrating the TRAIN-only language-conditioned assistant-response bigram/trigram model. No non-response/abstention; no target answer or prompt-specific answer was injected.",
+  "architecture": "Independent v8.1 decoder; OASST1 TRAIN-only response-start and n-gram proposal support; 16 named Obsiss observation channels in E_O; same-row P/R scoring in E_C; scalar rank fusion; original checkpoint read-only.",
+  "pipeline": [
+    "CLI verifies the registered pre-execution savepoint manifest and checkpoint byte identity",
+    "Load all 1,000,000 original Obsiss weights",
+    "Detect French from the current user turn",
+    "Build response-start proposals from TRAIN-only French priors",
+    "At each decode step, query language-conditioned trigram then bigram transitions, with response-unigram backoff",
+    "Rank candidates using existing Obsiss channels and same-row P/R evidence",
+    "Return a free-running response with abstention disabled"
+  ],
+  "commands": [
+    "PYTHONPATH=src python RUN_CLI_V81.py chat --prompt \"Bonjour, comment vas-tu ?\" --min-obsiss 32 --max-tokens 48 --beam-width 4 --candidate-limit 24 --no-trace"
+  ],
+  "results": {
+    "status": "GENERATED",
+    "response": "La ville, il est grand chapeau de",
+    "language": "fr",
+    "allow_non_response": false,
+    "active_obsiss": 32,
+    "available_obsiss": 1000000,
+    "decode_steps": 8,
+    "initial_candidates": [
+      [
+        "la",
+        "v8_chat_response_start",
+        0.9694568342593565
+      ],
+      [
+        "ville",
+        "v8_chat_response_transition",
+        0.7789367133177163
+      ],
+      [
+        ",",
+        "v8_chat_response_transition",
+        0.8270874753469162
+      ],
+      [
+        "il",
+        "v8_chat_response_transition",
+        1.0
+      ]
+    ],
+    "prompt_context_association_nonzero": false
+  },
+  "interpretation": "The response is not contextually appropriate to the greeting. The selected first token is a language-wide response-start prior (\"la\"), not a prompt-conditioned reply. All observed context_response scores are zero; greeting tokens are excluded from topical context anchors. The later continuation is linguistically attested (\"la ville, ...\") but semantically unrelated to the user turn. Obsiss ranking convergence does not imply response correctness.",
+  "consequences": {
+    "theoretical": "A language-only response-start prior provides grammatical continuation support but does not establish pragmatic conditioning on the current user turn.",
+    "conceptual": "The architecture needs a distinct prompt-to-response-start association derived from TRAIN parent-child message links, kept separate from topical lexical anchoring and fused through an existing named Obsiss channel, not a new dimension.",
+    "operational": "Investigate and implement aggregate prompt-cue → assistant-start counts from OASST1 TRAIN, preserve no raw prompt/response storage, then re-evaluate free generation."
+  },
+  "conclusion": "FAIL for greeting-context coherence; PASS only for runtime execution and language routing. This is a model-quality error to resolve, not a reason to suppress output.",
+  "model_status": "ACTIVE_PROTOTYPE_UNDER_EVALUATION",
+  "timestamp_local": "2026-11-18T10:16:00+01:00",
+  "neural_components": [],
+  "checkpoint_unchanged": true,
+  "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+  "response_lm_sha256": "ae13d723222b227023f862edbf97334269c74ab39c4bd3cce110e0887512821c",
+  "raw_prompt_response_storage": false
+}

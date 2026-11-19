@@ -1,0 +1,40 @@
+{
+  "experiment_id": "V81-P-FIRST-STATE-001",
+  "timestamp_local": "2026-11-18T12:48:18+01:00",
+  "description": "Exact first-state P activation using all original Obsiss rows for the French greeting prompt; no candidate generation and no target answer.",
+  "architecture": "Original eSonde v6 checkpoint, 1,000,000 Obsiss, dimension 16, exact batched F_h/F_p operator, separate E_C CountSketch and E_O semantic observations. The first-state P operator returns paired Q without claiming diffusion convergence.",
+  "pipeline": [
+    "Verify checkpoint and source statistics",
+    "Load all 1,000,000 checkpoint rows read-only",
+    "Tokenize the user prompt into local/global feature vectors",
+    "Compute exact F_h/F_p on every row in 123 batches of 8,192",
+    "Build P published state and paired Q context",
+    "Hash all published/Q rows and report exact row coverage"
+  ],
+  "command": "PYTHONPATH=src OMP_NUM_THREADS=3 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 ESONDE_INDEX_WORKERS=3 python experiments/profile_full_population_first_state_P_20261118.py",
+  "results": {
+    "status": "PASS",
+    "elapsed_seconds": 4.203,
+    "load_model_seconds": 2.129,
+    "activation_seconds": 2.071223,
+    "population": 1000000,
+    "processed_rows": 1000000,
+    "all_rows_processed_once": true,
+    "batch_count": 123,
+    "published_sha256": "eec54aaefd800f72384117a7d3105b75c1c9a15448829b4b9ce07011b7428f54",
+    "q_context_sha256": "c596c558156e2a46dc108c6ee7b70fafab4e9839acd7304573f1554f260a3abf",
+    "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+    "fixed_point_established": false,
+    "convergent_diffusion_run": false
+  },
+  "interpretation": "The full-population first-state operator completed in 2.071 seconds in this environment. This is a direct, repeatable operator measurement; it does not establish neighbour-diffusion convergence or response quality.",
+  "consequences": {
+    "theoretical": "P defines a complete deterministic all-row F_h/F_p evaluation and a paired Q context. It is not a fixed point.",
+    "conceptual": "First-state P and first-state R are a symmetric, explicitly distinguished operator mode. The exact convergent mode remains a separate lab variant.",
+    "operational": "Use first_state as the default runtime experiment while preserving the full convergent path for future exact optimisation and ablation."
+  },
+  "conclusion": "PASS for exact all-row first-state activation and latency; no statement about chat coherence.",
+  "model_status": "RUNTIME_PROTOTYPE_UNDER_EVALUATION",
+  "neural_components": [],
+  "weights_mutated": false
+}

@@ -1,0 +1,159 @@
+{
+  "schema": "esonde.v8.proofs.v1",
+  "generated_local": "2026-11-17T15:08:57+01:00",
+  "model": "eSonde_v8",
+  "version": "8.0.0-dev",
+  "task_scope": "chat prompt/reponse only",
+  "status": "EXPERIMENTAL_FREE_GENERATION_NOT_EVALUATED",
+  "architecture": {
+    "checkpoint_parent": "eSonde_v6",
+    "generation_engine_lineage": "esonde_v7.generation.generate_chat",
+    "v8_components": [
+      "EsondeV8ChatRuntime",
+      "dialogue_learning",
+      "OASST1 everyday_dialogue profile",
+      "language-aware proposal filter",
+      "phase-aware preflight"
+    ],
+    "obsiss_count": 1000000,
+    "obsiss_dimension": 16,
+    "neural_components": [],
+    "original_checkpoint_modified": false
+  },
+  "integrity": {
+    "checkpoint": {
+      "path": "Dmodel_eSonde_v8/models/eSonde_v6/weights.bin",
+      "bytes": 64000000,
+      "sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+      "status": "VERIFIED"
+    },
+    "dialogue_profile": {
+      "path": "Dmodel_eSonde_v8/models/eSonde_v8/dialogue_profiles.json",
+      "bytes": 178135159,
+      "sha256": "c517a0a5023add538d7588853652cc01cc7e5f3b305e404d34df6d35cc881544",
+      "profile_id": "everyday_dialogue",
+      "neural_components": [],
+      "status": "VERIFIED"
+    },
+    "language_priors": {
+      "path": "Dmodel_eSonde_v8/models/eSonde_v8/response_language_priors.json",
+      "sha256": "8b769436d13b31ce9b8639720bf97a902b35bed82a17c7b4f713ad0739d15e91",
+      "status": "VERIFIED"
+    }
+  },
+  "data": {
+    "dataset": "OpenAssistant/oasst1",
+    "source_rows_train": 84437,
+    "source_rows_validation": 4401,
+    "source_rows_total": 88838,
+    "unique_message_ids": 88838,
+    "conversation_trees": 10364,
+    "derived_tree_isolated_splits": {
+      "train": 48557,
+      "validation": 2495,
+      "test": 2653
+    },
+    "profile_rows_consumed": 48557,
+    "profile_examples_nonempty": 48549,
+    "profile_anchors": 57884,
+    "response_vocabulary": 252793,
+    "response_tokens": 6950298,
+    "trigram_prefixes": 1762580,
+    "raw_prompt_response_pairs_persisted_in_profile": false
+  },
+  "software_validation": {
+    "command": "PYTHONPATH=src pytest -q tests",
+    "passed": 81,
+    "failed": 0,
+    "elapsed_seconds": 24.36,
+    "status": "PASS"
+  },
+  "cli_validation": {
+    "development_status": "PASS",
+    "development_verify": "PASS",
+    "portable_status_without_embedded_savepoint": "PASS",
+    "portable_verify_without_embedded_savepoint": "PASS",
+    "generation_authorized": false
+  },
+  "formalism_validation": {
+    "documents": [
+      "formalisme_eSonde_v8.tex",
+      "laboratoire_eSonde_v8.tex",
+      "tech_opt_eSonde_v8.tex"
+    ],
+    "pdflatex_passes_per_document": 2,
+    "compile_status": "PASS",
+    "formalism_frozen": false,
+    "five_pass_review_completed": false
+  },
+  "experiments": {
+    "transition_support_ablation": {
+      "status": "COMPLETED_TEACHER_FORCED_ONLY",
+      "train_examples": 2000,
+      "internal_validation_examples": 500,
+      "teacher_forced_coverage_before": 0.462,
+      "teacher_forced_coverage_after": 0.863,
+      "top5_all_token_accuracy": 0.2067,
+      "free_running_coherence_claim": false
+    },
+    "separate_language_views": {
+      "status": "ABORTED_RESOURCE_COST_NOT_PUBLISHED",
+      "train_rows_processed": 10750,
+      "train_rows_expected": 48557,
+      "language_tags_seen": 22,
+      "lang_ctx_edges": 5363007,
+      "sqlite_database_size_mib_approx": 339,
+      "wal_size_mib_approx": 85,
+      "active_profile_replaced": false
+    },
+    "obsiss_heldout_next_token": {
+      "status": "COMPLETED_COMPONENT_DIAGNOSTIC",
+      "result_sha256": "4d97e25e03ddffdf99936f21e12d0d165d1d470888a61f33dcf58fba0fd1fd9f",
+      "examples": 12,
+      "active_obsiss": 256,
+      "variants": 5,
+      "candidate_pool_recall": 0.08333333333333333,
+      "mrr": 0.020833333333333332,
+      "targets_absent_from_pool": 11,
+      "non_response_enabled": false,
+      "target_used_before_ranking": false,
+      "free_generation": false
+    },
+    "free_running_generation_v8": "NOT_RUN_PHASE_BLOCKED",
+    "v7_baseline_probe": "TIMEOUT_300S_ZERO_COMPLETED_GENERATIONS_3_PROMPTS",
+    "latest_user_language_route": {
+      "status": "COMPLETED_COMPONENT_EVALUATION",
+      "result_sha256": "c7f6e58c9004fafcf8c6700fb3a891fe78302a6654cce82d9b7c6e9445f0d197",
+      "validation_unique_contexts": 1004,
+      "test_unique_contexts": 1080,
+      "test_routed": 1068,
+      "test_coverage": 0.9888888888888889,
+      "test_selective_accuracy": 0.9925093632958801,
+      "test_correct_fraction_all": 0.9814814814814815,
+      "test_used_for_threshold_selection": false,
+      "measures_dialogue_quality": false
+    }
+  },
+  "phase_status": {
+    "P0_SOURCE_RECONCILIATION": "IN_PROGRESS",
+    "P1_FORMALISM_AND_LAB": "NOT_STARTED",
+    "P2_IMPLEMENTATION": "NOT_STARTED",
+    "P3_EVALUATION": "NOT_STARTED",
+    "P4_DOCUMENTATION_AND_DELIVERY": "NOT_STARTED"
+  },
+  "source_review_progress": {
+    "theorie_emp_paths": 2018,
+    "deep_read_paths": 160,
+    "structural_only_paths": 1699,
+    "metadata_only_paths": 159,
+    "formalismes_paths": 1925,
+    "p0_complete": false
+  },
+  "delivery_exclusions": [
+    "attached source archive",
+    "raw OASST1 Parquet files",
+    "sav_eSonde_v6/v7/v8 directories",
+    "checkpoint backup copies",
+    "savepoint snapshots"
+  ]
+}

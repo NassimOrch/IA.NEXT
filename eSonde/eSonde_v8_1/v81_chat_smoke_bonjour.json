@@ -1,0 +1,2615 @@
+{
+  "model": "eSonde_v8_1",
+  "version": "8.1.0-dev",
+  "task": "chat",
+  "status": "GENERATED",
+  "prompt": "Bonjour, comment vas-tu ?",
+  "response": "Européen,.'de plus par fonds conseil fonds la cour",
+  "non_response": {
+    "allowed": false,
+    "triggered": false,
+    "reason": null
+  },
+  "language_selection": {
+    "selected": "fr",
+    "status": "TRAIN_DISTRIBUTION_ROUTE",
+    "evidence_tokens": 4,
+    "margin": 0.18626989302678676,
+    "scores": {
+      "es": {
+        "score": 0.16844382307515382,
+        "coverage": 0.5,
+        "matched_tokens": 2,
+        "token_count": 30584
+      },
+      "fr": {
+        "score": 0.3547137161019406,
+        "coverage": 0.75,
+        "matched_tokens": 3,
+        "token_count": 32250
+      },
+      "hi": {
+        "score": 0.05775980400987413,
+        "coverage": 0.5,
+        "matched_tokens": 2,
+        "token_count": 30782
+      },
+      "it": {
+        "score": -0.5205730122420635,
+        "coverage": 0.5,
+        "matched_tokens": 2,
+        "token_count": 32684
+      }
+    }
+  },
+  "dialogue_language_selection": {
+    "selected": "fr",
+    "status": "TRAIN_DISTRIBUTION_ROUTE",
+    "evidence_tokens": 4,
+    "margin": 3.065154838262372,
+    "coverage": 1.0
+  },
+  "active_dialogue_language": "fr",
+  "candidate_proposals": {
+    "one_hop_context_candidates": 0,
+    "two_hop_composed_candidates": 0,
+    "proposal_routes_are_context_only": true,
+    "generated_tokens_promoted_to_anchors": false,
+    "stratified_source_order": true
+  },
+  "dialogue_learning": {
+    "enabled": true,
+    "profile_id": "everyday_dialogue",
+    "training_examples": 48549,
+    "architecture": "non_neural_aggregate_associations_plus_original_Obsiss_voices",
+    "raw_prompt_answer_lookup": false,
+    "new_observation_dimensions": 0,
+    "context_association_computed_once_per_turn": true,
+    "transition_backoff_policy": "response_start | trigram -> bigram -> response_unigram_fallback",
+    "original_obsiss_checkpoint_mutated": false
+  },
+  "numeric_reasoning": {
+    "enabled": false,
+    "candidate": null,
+    "selected_by_obsiss": false,
+    "new_observation_dimensions": 0,
+    "method": null
+  },
+  "context": {
+    "scope": "ephemeral_current_dialogue_only",
+    "persistent_graph_mutated": false,
+    "message_count": 1,
+    "occurrence_count": 7,
+    "relation_count": 6,
+    "relation_types": [
+      "observed_order"
+    ],
+    "causal_edges_inferred": 0,
+    "hash_sha256": "8ee3b23dd0399c8399722b56ea92a334c6e9a03bdfa7b2f6be9042662de37f79",
+    "dialogue_intent": {
+      "kind": "how",
+      "direct_address": true,
+      "question_mark": true
+    },
+    "context_terms_are_role_separated": true,
+    "context_used_at_each_decode_step": true,
+    "turn_occurrence_graph_rebuilt_per_step": true,
+    "P_observation_refreshed_with_generated_prefix": true,
+    "context_graph_is_memory": false
+  },
+  "obsiss": {
+    "population": 32,
+    "available_population": 64,
+    "identity_preserved": true,
+    "one_obsiss_spans_all_semantic_observations": true,
+    "semantic_channels": [
+      "local_transition",
+      "prompt_association",
+      "dialogue_association",
+      "lexical_recurrence",
+      "morphological_affinity",
+      "response_role",
+      "discourse_continuity",
+      "polarity_observation",
+      "temporal_observation",
+      "boundary_observation",
+      "training_support",
+      "subword_backoff",
+      "reference_continuity",
+      "modality_observation",
+      "speaker_alignment",
+      "information_novelty"
+    ],
+    "collective_method": "context-conditioned full-16D individual Obsiss votes fused with same-row candidate-specific P/R coherence; candidate-wise median and IQR; leave-one-out or partition stability; geometric population growth only when needed",
+    "population_profile": {
+      "version": "v8.1-basis-separated-obsiss-v1",
+      "available_population": 64,
+      "active_population": 32,
+      "dimension": 16,
+      "semantic_observations": [
+        "local_transition",
+        "prompt_association",
+        "dialogue_association",
+        "lexical_recurrence",
+        "morphological_affinity",
+        "response_role",
+        "discourse_continuity",
+        "polarity_observation",
+        "temporal_observation",
+        "boundary_observation",
+        "training_support",
+        "subword_backoff",
+        "reference_continuity",
+        "modality_observation",
+        "speaker_alignment",
+        "information_novelty"
+      ],
+      "identity_preserved": true,
+      "identity_key": "original_checkpoint_weight_row_index",
+      "one_obsiss_spans_all_observations": true,
+      "individual_perspective": "L1-normalized signed 16D profile from its own wh/wp checkpoint row plus its own prompt activation and fixed cross-observation permutation",
+      "context_strength": 0.5,
+      "cross_observation_strength": 0.25,
+      "scale": 8192.0,
+      "cross_observation_permutation": [
+        3,
+        10,
+        1,
+        8,
+        15,
+        6,
+        13,
+        4,
+        11,
+        2,
+        9,
+        0,
+        7,
+        14,
+        5,
+        12
+      ],
+      "observer_configuration_id": "741bc4bc5999b67fef54371030f93fa6031ba168d76d8b545ad7fb465014ce17",
+      "collective_rule": "candidate-wise median of individual Obsiss votes; interquartile disagreement; P/R same-row candidate coherence rank-fused with 16-channel evidence; leave-one-out or disjoint-partition stability",
+      "population_sha256": "7122cade23dbeb8cf2ce5355189a49a517e98370b8d8542139ae3ffb20450fc2",
+      "sensitivity_strength_legacy_parameter": 0.1,
+      "interpretation": "Obsiss are distinct observation perspectives, not model weight-sharing units. Stability is not factual correctness or general-intelligence certification.",
+      "basis_separation": true,
+      "semantic_observation_space": "E_O",
+      "countsketch_state_space": "E_C",
+      "coordinate_identification_assumed": false,
+      "fusion": "candidate-level scalar rank fusion after each space is independently evaluated",
+      "semantic_dimensions": [
+        "local_transition",
+        "prompt_association",
+        "dialogue_association",
+        "lexical_recurrence",
+        "morphological_affinity",
+        "response_role",
+        "discourse_continuity",
+        "polarity_observation",
+        "temporal_observation",
+        "boundary_observation",
+        "training_support",
+        "subword_backoff",
+        "reference_continuity",
+        "modality_observation",
+        "speaker_alignment",
+        "information_novelty"
+      ]
+    },
+    "convergence": {
+      "all_decode_decisions_converged": true,
+      "decode_decisions": [
+        {
+          "step": 0,
+          "prefix": [],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "6de57c08c921bddfa1c54e5447d8b5adbab094f0baad66b89cf1382aaf111417",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            4,
+            9
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 1,
+          "prefix": [
+            "européen"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "dbf2a876f600699b2cf55f94aa3676fb0cef7c94293b45c1ad6c2f1a4f4257bb",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            8,
+            5
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 1,
+          "prefix": [
+            "conseil"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "7586d4c0f42b5b258c0705938ad7eaf6ce24bcf2425f0618f7fc269284473888",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            4,
+            8
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 2,
+          "prefix": [
+            "européen",
+            ","
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "ddd20b8c29a33620dc8f8f6899ee602e416843d49c7851fba4c082f800a12260",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            4,
+            8
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 2,
+          "prefix": [
+            "conseil",
+            "."
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "78933a2b3ccabe5920c6137e176af8bf17caa453023a09f15ff4e90d9bd882d5",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            5,
+            8
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 3,
+          "prefix": [
+            "européen",
+            ",",
+            "."
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "e02e9e7d165edaf2153eb8168bbe2fe47a5e5616b9a210820181f6b9752689ac",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            7,
+            15
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 3,
+          "prefix": [
+            "conseil",
+            ".",
+            ","
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "e6ab2569f0a9bfe4275c58378382df5085e09946335920c96f0b261434bd7fb7",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            5,
+            11
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 4,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "'"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "636d9ddc4268297ed2e476a6ca82e0a669031e09b84381d6ae478979e13a2945",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            8,
+            2
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 4,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "le"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "b78cb82c31e2f8995e6ce7009c6ff925a52bb4cc5bfb6b2167b24574ad7e133e",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            6,
+            15
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 5,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "le",
+            "co2"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "7d67414d7831df0df215bee708c42c61c949f2b8bb92bd0911c9aa56bd6a564c",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            11,
+            0
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 5,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "'",
+            "de"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "e3ecb0e96d199cad262e1b28f6f6096d8ced2512e82a9cc237a6e68f36c9c1b8",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            3,
+            0
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 6,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "le",
+            "co2",
+            "conseil"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "ad970618ce109fc69133914564559fda606284b70a61f0b944f47b4154c49370",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            11,
+            15
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 6,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "'",
+            "de",
+            "plus"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "54e944efe0a1486244498234edc7e4434ac3ddc8634aeab149a72922e3a808f4",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            3,
+            0
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 7,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "le",
+            "co2",
+            "conseil",
+            "fonds"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "0a9c01acc2572e899741d2960fa75aef2c49fd26a8492d129b6f28396cb6f85f",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            12,
+            2
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 7,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "'",
+            "de",
+            "plus",
+            "par"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "674fb9190cfb83afd7fb0f5c6ab3963b9eff2d7415a8064c09149ecd84d00ce6",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            15,
+            11
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 8,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "'",
+            "de",
+            "plus",
+            "par",
+            "fonds"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "3787cae66b1ce56fd447fb3452666704566324d55632ae0d3eb8157ee621a568",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            12,
+            2
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 8,
+          "prefix": [
+            "européen",
+            ",",
+            ".",
+            "le",
+            "co2",
+            "conseil",
+            "fonds",
+            "de"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "bd85bdca9aefcc8bbaad082801d96add89fb8d2da6abde051651c9595d10c5b7",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            10,
+            14
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 9,
+          "prefix": [
+            ",",
+            ".",
+            "'",
+            "de",
+            "plus",
+            "par",
+            "fonds",
+            "conseil"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "7a3713d8d3e7edf54cb0d4339c8246425fa3d2382ae2b0e1458569d8979939ad",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            15,
+            11
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 9,
+          "prefix": [
+            ",",
+            ".",
+            "le",
+            "co2",
+            "conseil",
+            "fonds",
+            "de",
+            "conseil"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "bcf217d5a9cd4587630553b5560071b9d78d354951bf94c1e0e49d7e0abe7f4f",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            11,
+            8
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 10,
+          "prefix": [
+            ".",
+            "'",
+            "de",
+            "plus",
+            "par",
+            "fonds",
+            "conseil",
+            "fonds"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "6f4f5e91f915b6c8019ab448edf25f8b88f72c8184b7d6ec696955228a17aeeb",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            12,
+            11
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 10,
+          "prefix": [
+            ".",
+            "'",
+            "de",
+            "plus",
+            "par",
+            "fonds",
+            "conseil",
+            "conseil"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "ebac45b56dfd5151766eb6326bb3c64d94dc9952aa4a78a6491cbc6a80219e19",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            15,
+            11
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 11,
+          "prefix": [
+            "'",
+            "de",
+            "plus",
+            "par",
+            "fonds",
+            "conseil",
+            "fonds",
+            "la"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "ba8ab9d1f675c488586694335dcc3d5cf8ef2049281b543e31f41b51d6f0b6f5",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            9,
+            12
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        },
+        {
+          "step": 11,
+          "prefix": [
+            "'",
+            "de",
+            "plus",
+            "par",
+            "fonds",
+            "conseil",
+            "fonds",
+            "conseil"
+          ],
+          "active_obsiss": 32,
+          "step_P_activation_sha256": "e08ab5c6b27fbd6f3bbbea442db5f6d032896c2b9aab976263e96bd05b5f4342",
+          "base_P_dynamics_status": "NO_ACTIVE_NEIGHBORS",
+          "base_P_fixed_point": true,
+          "base_P_cycle_decision_stable": false,
+          "base_P_cycle_decision_stability": null,
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            4,
+            6
+          ],
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      ],
+      "population_growth_history": [],
+      "minimum_population_requested": 32,
+      "maximum_available_population": 64,
+      "population_is_not_a_training_target": true
+    },
+    "P_observation": {
+      "role": "P",
+      "population": 32,
+      "available_population": 64,
+      "dimension": 16,
+      "input_tokens": 7,
+      "input_sha256": "fe773128cb4155d2db19f7bbd1f31fe922c80f1d32aa00d5aa1bef719328d1b5",
+      "published_sha256": "6de57c08c921bddfa1c54e5447d8b5adbab094f0baad66b89cf1382aaf111417",
+      "q_context_sha256": "b4c21fcdc34657acb330da76e7925d62e263b0c05d2d74e230ebf3fe74a978ea",
+      "conditioning": "none_prompt_entry",
+      "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+      "rounds": 0,
+      "trajectory_length": 1,
+      "elapsed_seconds": 0.005216,
+      "stop_status": "NO_ACTIVE_NEIGHBORS",
+      "fixed_point_established": true,
+      "fixed_point_exact_no_active_edges": true,
+      "fixed_point_verification": "exact_zero_active_edge_check",
+      "state_cycle": null,
+      "cycle_q_context_count": 0,
+      "cycle_q_context_sha256": [],
+      "oscillation_detected": false,
+      "vector_length_reached_is_not_convergence": false,
+      "near_neighbor_edges": [
+        0
+      ],
+      "exact_classes_initial": 32,
+      "exact_classes_final": 32,
+      "published_equal_pairs": 0,
+      "trace": null,
+      "trace_retained_in_memory": false,
+      "trace_temporary_deleted": true
+    },
+    "R_observation": {
+      "role": "R",
+      "population": 32,
+      "available_population": 64,
+      "dimension": 16,
+      "input_tokens": 12,
+      "input_sha256": "b143724d05221bf6624526477a4473a9d3d2457d0262eab9c6bb24fcd1c93286",
+      "published_sha256": "6db49d4594eb8f4bcde8d805ae1a69e39c5d8fd4c43b1f0713242fbeb132091a",
+      "q_context_sha256": null,
+      "conditioning": "paired_P_q_context",
+      "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+      "rounds": 0,
+      "trajectory_length": 1,
+      "elapsed_seconds": 0.002215,
+      "stop_status": "NO_ACTIVE_NEIGHBORS",
+      "fixed_point_established": true,
+      "fixed_point_exact_no_active_edges": true,
+      "fixed_point_verification": "exact_zero_active_edge_check",
+      "state_cycle": null,
+      "cycle_q_context_count": 0,
+      "cycle_q_context_sha256": [],
+      "oscillation_detected": false,
+      "vector_length_reached_is_not_convergence": false,
+      "near_neighbor_edges": [
+        0
+      ],
+      "exact_classes_initial": 32,
+      "exact_classes_final": 32,
+      "published_equal_pairs": 0,
+      "trace": null,
+      "trace_retained_in_memory": false,
+      "trace_temporary_deleted": true
+    },
+    "P_R_cosine_diagnostic_only": 0.9995176260758543
+  },
+  "generation": {
+    "proposal_architecture": "diversified_multisource_plus_two_hop_context_composition",
+    "proposal_pool_selection": "source_stratified_round_robin_then_Obsiss_full_16_observation_ranking",
+    "steps": 12,
+    "beam_width": 2,
+    "candidate_limit": 16,
+    "max_tokens": 12,
+    "active_obsiss": 32,
+    "converged_at_population": 32,
+    "score": 11.613333333333335,
+    "step_evidence": [
+      {
+        "step": 0,
+        "prefix_before": [],
+        "candidate": "européen",
+        "collective_rank_score": 0.9666666666666667,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.800000011920929,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "98d08e7c41ae43db25d6fb465332cd343e812f7ff1214903c3b7d740f5e1fdf6",
+        "channels": {
+          "local_transition": 0.5166666666666666,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.75,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.0,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 1.9459101490553132,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "4dbfa0fb8407cc1ca8421ffb302efa0385ff4f9a1d184df45b1d928fdf253d31",
+        "proposal_source": "v8_chat_context_response_association",
+        "dialogue_profile_scores": {
+          "context_response": 2.4119698158587957,
+          "response_transition": 0.0,
+          "transition_backoff_level": "language_response_start"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [],
+          "prompt_association": [],
+          "dialogue_association": [
+            "v8_trained_context_to_response_association"
+          ],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:1.94591"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            4,
+            9
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 1,
+        "prefix_before": [
+          "européen"
+        ],
+        "candidate": ",",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.8833333253860474,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "89bd7149878120ad499eef36392ef6fd1cd190db35939b721bbcdcfa1510bdde",
+        "channels": {
+          "local_transition": 0.8666666666666667,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.3833333333333333,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.0,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 1.0,
+          "training_support": 6.519147287940395,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "ed84c258826e986d89935cd3f759fde6d54abdae63b282473c2a51511c7faff2",
+        "proposal_source": "v8_chat_response_transition",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.9838323223644345,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [
+            "boundary_observation:1"
+          ],
+          "training_support": [
+            "training_support:6.51915"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            8,
+            5
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 2,
+        "prefix_before": [
+          "européen",
+          ","
+        ],
+        "candidate": ".",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.8333333730697632,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "5bcbb50ca7171b6868614f4dffd18dd10b00a7d0c7973d0e71ad4b6c48022c4b",
+        "channels": {
+          "local_transition": 0.7,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.3666666666666667,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.0,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 1.0,
+          "training_support": 7.315218389752975,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "5dac15136bcf2de7dd24387e727d81f8876da60a511fe75f7ebdbd7ce57a47db",
+        "proposal_source": "v8_chat_response_transition",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.990283332880598,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [
+            "boundary_observation:1"
+          ],
+          "training_support": [
+            "training_support:7.31522"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            4,
+            8
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 3,
+        "prefix_before": [
+          "européen",
+          ",",
+          "."
+        ],
+        "candidate": "'",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.800000011920929,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "98d08e7c41ae43db25d6fb465332cd343e812f7ff1214903c3b7d740f5e1fdf6",
+        "channels": {
+          "local_transition": 0.6333333333333333,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.3666666666666667,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.0,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 7.0707241072602764,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "79384aa43920b73c57d3abeef2e865a3cc494cc9e933365616fb98bd93744cea",
+        "proposal_source": "v8_chat_response_transition",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.9750877815737626,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:7.07072"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            7,
+            15
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 4,
+        "prefix_before": [
+          "européen",
+          ",",
+          ".",
+          "'"
+        ],
+        "candidate": "de",
+        "collective_rank_score": 0.9,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.7333333492279053,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "e108814639c2fbaa0ba749723e8a74d5cb7356e845627b2e749bdea1edfc613a",
+        "channels": {
+          "local_transition": 0.6166666666666667,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.41666666666666663,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.2099265189717549,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 7.00488198971286,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "2b1f8f1ee85ebebae502c0426428c77d0e28423000eb1b013676463f05692e42",
+        "proposal_source": "v8_chat_response_transition",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 1.0,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.209927"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:7.00488"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            8,
+            2
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 5,
+        "prefix_before": [
+          "européen",
+          ",",
+          ".",
+          "'",
+          "de"
+        ],
+        "candidate": "plus",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.800000011920929,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "98d08e7c41ae43db25d6fb465332cd343e812f7ff1214903c3b7d740f5e1fdf6",
+        "channels": {
+          "local_transition": 0.7666666666666666,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.41666666666666663,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.3605093758203648,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 4.74493212836325,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "88014bd64c9ac0783a5a95ebe1a9f9597897b5b1c97c8ee39aa8470b25e9bad6",
+        "proposal_source": "local_ngram",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.7665882003960416,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.360509"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:4.74493"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            3,
+            0
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 6,
+        "prefix_before": [
+          "européen",
+          ",",
+          ".",
+          "'",
+          "de",
+          "plus"
+        ],
+        "candidate": "par",
+        "collective_rank_score": 0.9333333333333333,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.800000011920929,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "98d08e7c41ae43db25d6fb465332cd343e812f7ff1214903c3b7d740f5e1fdf6",
+        "channels": {
+          "local_transition": 0.7666666666666666,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.3833333333333333,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.38884177355400823,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 4.663439094112067,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "cdf90dbaec4ecb352799da62f09dc3b1cc057ba77ef97d643f5d5321a24aa363",
+        "proposal_source": "local_ngram",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.7481452441484286,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.388842"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:4.66344"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            3,
+            0
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 7,
+        "prefix_before": [
+          "européen",
+          ",",
+          ".",
+          "'",
+          "de",
+          "plus",
+          "par"
+        ],
+        "candidate": "fonds",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.8666666746139526,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "bf587d9ab1831eea03524f532c8d769ce938b15f8780c88369e42618a705c89c",
+        "channels": {
+          "local_transition": 0.4666666666666667,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.5166666666666666,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.25215674177994163,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 1.791759469228055,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "149451fb37a9124119bed6cc56a7056509435d1b65d11cbecb3101313009d7ac",
+        "proposal_source": "v8_chat_context_response_association",
+        "dialogue_profile_scores": {
+          "context_response": 1.446307068398335,
+          "response_transition": 0.26430729848712164,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [
+            "v8_trained_context_to_response_association"
+          ],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.252157"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:1.79176"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            15,
+            11
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 8,
+        "prefix_before": [
+          "européen",
+          ",",
+          ".",
+          "'",
+          "de",
+          "plus",
+          "par",
+          "fonds"
+        ],
+        "candidate": "conseil",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.8166666626930237,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "ae25c7216ca685855a8c1a5845ec463b3c01af9d0e74c24f4add9fd28b74d145",
+        "channels": {
+          "local_transition": 0.3833333333333333,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.5666666666666667,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.14285714285714285,
+          "response_role": 0.0,
+          "discourse_continuity": 0.1362902829181545,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 2.0794415416798357,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "9e79e20a50ed4d90d8ee8ff8f476113eca63083d1cfe39d98977c01caba5bf6f",
+        "proposal_source": "v8_chat_context_response_association",
+        "dialogue_profile_scores": {
+          "context_response": 1.532219124035278,
+          "response_transition": 0.22336557991292963,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [
+            "comment",
+            "morphological_affinity:0.142857"
+          ],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [
+            "v8_trained_context_to_response_association"
+          ],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.13629"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:2.07944"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            12,
+            2
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 9,
+        "prefix_before": [
+          ",",
+          ".",
+          "'",
+          "de",
+          "plus",
+          "par",
+          "fonds",
+          "conseil"
+        ],
+        "candidate": "fonds",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.8666666746139526,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "bf587d9ab1831eea03524f532c8d769ce938b15f8780c88369e42618a705c89c",
+        "channels": {
+          "local_transition": 0.5,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.5166666666666666,
+          "lexical_recurrence": 0.2875,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.151294045067965,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 1.791759469228055,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 0.0
+        },
+        "candidate_R_published_sha256": "cb04d2b530685e1f7eb9d9a7ea36f4b43f6d6d082bc5fe5edf6693b7f35721fb",
+        "proposal_source": "v8_chat_context_response_association",
+        "dialogue_profile_scores": {
+          "context_response": 1.446307068398335,
+          "response_transition": 0.26430729848712164,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [
+            "v8_trained_context_to_response_association"
+          ],
+          "lexical_recurrence": [
+            "lexical_recurrence:0.2875"
+          ],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.151294"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:1.79176"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": []
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            15,
+            11
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 10,
+        "prefix_before": [
+          ".",
+          "'",
+          "de",
+          "plus",
+          "par",
+          "fonds",
+          "conseil",
+          "fonds"
+        ],
+        "candidate": "la",
+        "collective_rank_score": 0.9333333333333333,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.7666666507720947,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "f02a188122cb6da75400e3c61675864dbefe0e2eb03d0e9b52e232f4220af218",
+        "channels": {
+          "local_transition": 0.5666666666666667,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.3833333333333333,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.0,
+          "response_role": 0.0,
+          "discourse_continuity": 0.13664839165924622,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 6.525029657843462,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "ad2de650618a40074a18c09c2b5aa9539dee4b96f56780e34dd8aa3ad81f2687",
+        "proposal_source": "v8_chat_response_transition",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.9360322527775278,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.136648"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:6.52503"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            12,
+            11
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      },
+      {
+        "step": 11,
+        "prefix_before": [
+          "'",
+          "de",
+          "plus",
+          "par",
+          "fonds",
+          "conseil",
+          "fonds",
+          "la"
+        ],
+        "candidate": "cour",
+        "collective_rank_score": 1.0,
+        "observer_disagreement": 0.0,
+        "observer_vote_median": 0.8999999761581421,
+        "observer_population_count": 32,
+        "observer_voice_sha256": "80abf9a3f1d70af90827b4e7428c4c728c6c6ba8b569caf98bde5223cc8d3690",
+        "channels": {
+          "local_transition": 0.4666666666666667,
+          "prompt_association": 0.0,
+          "dialogue_association": 0.41666666666666663,
+          "lexical_recurrence": 0.0,
+          "morphological_affinity": 0.3779644730092272,
+          "response_role": 0.0,
+          "discourse_continuity": 0.49692608793259296,
+          "polarity_observation": 0.25,
+          "temporal_observation": 0.15,
+          "boundary_observation": 0.0,
+          "training_support": 2.5649493574615367,
+          "subword_backoff": 0.0,
+          "reference_continuity": 0.0,
+          "modality_observation": 0.1,
+          "speaker_alignment": 0.0,
+          "information_novelty": 1.0
+        },
+        "candidate_R_published_sha256": "049df23c1615cdf9d60f0cc87f1b5d5d250eba6ab266929b490149f3136f56e4",
+        "proposal_source": "local_ngram",
+        "dialogue_profile_scores": {
+          "context_response": 0.0,
+          "response_transition": 0.12610662988573978,
+          "transition_backoff_level": "language_response_unigram_fallback"
+        },
+        "dialogue_intent": {
+          "kind": "how",
+          "direct_address": true,
+          "question_mark": true,
+          "language": "fr"
+        },
+        "evidence": {
+          "morphological_affinity": [
+            "bonjour",
+            "morphological_affinity:0.377964"
+          ],
+          "local_transition": [
+            "v8_trained_response_transition"
+          ],
+          "prompt_association": [],
+          "dialogue_association": [],
+          "lexical_recurrence": [],
+          "response_role": [],
+          "discourse_continuity": [
+            "discourse_continuity:0.496926"
+          ],
+          "polarity_observation": [
+            "polarity_observation:0.25"
+          ],
+          "temporal_observation": [
+            "temporal_observation:0.15"
+          ],
+          "boundary_observation": [],
+          "training_support": [
+            "training_support:2.56495"
+          ],
+          "subword_backoff": [],
+          "reference_continuity": [],
+          "modality_observation": [
+            "modality_observation:0.1"
+          ],
+          "speaker_alignment": [],
+          "information_novelty": [
+            "information_novelty:1"
+          ]
+        },
+        "oov": false,
+        "convergence": {
+          "assessed": true,
+          "converged": true,
+          "method": "leave_one_obsiss_out",
+          "top1_retention": 1.0,
+          "mean_topk_jaccard": 1.0,
+          "mean_spearman": 1.0,
+          "comparison_count": 32,
+          "thresholds": {
+            "top1_retention": 0.9,
+            "mean_topk_jaccard": 0.9,
+            "mean_spearman": 0.95
+          },
+          "collective_top_indices": [
+            9,
+            12
+          ],
+          "active_obsiss": 32,
+          "available_obsiss": 64,
+          "P_R_pairing_used": true,
+          "P_R_pairing_method": "per-Obsiss E_C same-row cosine ranked within candidate pool",
+          "semantic_observation_space": "E_O named channels, each independently ranked then equally averaged",
+          "countsketch_space": "E_C original 16-coordinate CountSketch states used only for P/R activation and same-row cosine",
+          "cross_space_fusion": "scalar rank fusion: 0.5 * E_O semantic score + 0.5 * E_C same-row P/R score",
+          "cross_basis_coordinate_mapping": null,
+          "basis_separation_verified": true,
+          "cycle_phase_count": 1,
+          "cycle_phase_consensus": null
+        }
+      }
+    ],
+    "oov_candidate_pool_count": 4,
+    "char_backoff_enabled": true,
+    "candidate_pool_trace_count": 46
+  },
+  "interpretation": {
+    "rank_score_is_probability": false,
+    "observer_agreement_proves_correctness": false,
+    "provenance": "TRAIN-only language statistics and the supplied current dialogue; one-hop context associations only; generated tokens are not promoted to semantic anchors; no prompt/answer lookup table or target-answer templates.",
+    "known_semantic_scope": "The named channels are measurable lexical, sequential, morphological, recurrence, discourse and marker observations. Negation/temporal channels detect explicit cues but do not implement a complete semantic parser.",
+    "convergence_scope": "Two distinct tests are reported: V6 dynamics reach NO_ACTIVE_NEIGHBORS or a SHA-256 period-one state fingerprint repeats, and candidate rankings remain stable under leave-one-Obsiss-out or disjoint observer partitions. A hash repeat is cryptographic evidence, not a collision-free mathematical identity proof; VECTOR_LENGTH_REACHED is not convergence. Neither test certifies factual correctness or general intelligence."
+  },
+  "runtime_lineage": {
+    "decoder": "esonde_v8.generation_v81.generate_chat_v81",
+    "proposal_engine": "local_transition + one_hop + two_hop_composition + language-profile + character backoff",
+    "ranking": "original 16 observations per Obsiss + same-row P/R coherence",
+    "obsiss_dimension": 16,
+    "obsiss_checkpoint_mutated": false,
+    "neural_components": [],
+    "numeric_or_translation_tasks": false,
+    "non_response_allowed": false,
+    "phase_gate_dependency": false
+  },
+  "integrity": {
+    "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+    "dialogue_profile_sha256": "c517a0a5023add538d7588853652cc01cc7e5f3b305e404d34df6d35cc881544",
+    "language_priors_sha256": "8b769436d13b31ce9b8639720bf97a902b35bed82a17c7b4f713ad0739d15e91",
+    "checkpoint_unchanged": true,
+    "neural_components": [],
+    "profile_id": "everyday_dialogue"
+  },
+  "pre_execution_backup": {
+    "status": "PASS",
+    "snapshot": "/mnt/data/esonde_audit/sav_eSonde_v8_1/progress_snapshots/20261118_pre_v81_chat_generation",
+    "manifest_sha256": "3b9d9100d3f62d79ca93c2ead1c62f0cdd307e62d16b0bd8c0597f39354b10b9",
+    "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+    "backup_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+    "files_verified_in_snapshot": 150
+  },
+  "prompt_sha256": "fe773128cb4155d2db19f7bbd1f31fe922c80f1d32aa00d5aa1bef719328d1b5",
+  "response_sha256": "b143724d05221bf6624526477a4473a9d3d2457d0262eab9c6bb24fcd1c93286"
+}

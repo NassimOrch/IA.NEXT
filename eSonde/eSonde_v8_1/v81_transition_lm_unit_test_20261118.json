@@ -1,0 +1,31 @@
+{
+  "experiment_id": "V81-TRANSITION-LM-UNIT-001",
+  "description": "Targeted unit tests for separated Obsiss bases, all 16 named semantic dimensions, response-role quota, greeting anchor exclusion, and longest-observed response-language transition lookup.",
+  "architecture": "OASST1 TRAIN-only language-conditioned response bigram/trigram counts queried by v8.1 generation; E_C and E_O remain separately typed.",
+  "pipeline": [
+    "Read v8.1 work checklist and both error checklists",
+    "Verify registered pre-execution savepoint and immutable checkpoint hash",
+    "Run pytest on test_v81_basis_separation.py and test_v81_proposal_engine.py"
+  ],
+  "commands": [
+    "PYTHONPATH=src pytest -q tests/test_v81_basis_separation.py tests/test_v81_proposal_engine.py"
+  ],
+  "results": {
+    "passed": 7,
+    "failed": 0,
+    "duration_seconds": 0.22,
+    "sqlite_integrity": "ok"
+  },
+  "interpretation": "Targeted code-level invariants pass. These tests do not establish fluent chat, coherence, or generalization.",
+  "consequences": {
+    "theoretical": "No new observation dimensions; the 16 original E_O channels remain named, and E_C is only used for same-row P/R state.",
+    "conceptual": "Language-conditioned empirical transition support is available before the Obsiss ranking stage.",
+    "operational": "Proceed to free-running evaluation with non-response disabled and all original Obsiss weights loaded."
+  },
+  "conclusion": "PASS for targeted implementation invariants only; not a model-quality pass.",
+  "model_status": "ACTIVE_PROTOTYPE_UNDER_EVALUATION",
+  "timestamp_local": "2026-11-18T10:12:00+01:00",
+  "neural_components": [],
+  "allow_non_response": false,
+  "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4"
+}

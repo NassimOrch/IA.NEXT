@@ -1,0 +1,56 @@
+F......                                                                  [100%]
+=================================== FAILURES ===================================
+____ test_eo_observation_aggregation_is_invariant_to_coordinate_reordering _____
+
+    def test_eo_observation_aggregation_is_invariant_to_coordinate_reordering():
+        rows=[]
+        base={ch: 0.0 for ch in CHANNELS}
+        for i in range(5):
+            ch=dict(base)
+            for j,key in enumerate(CHANNELS):
+                ch[key]=float((i+1)*(j+2) % 13)
+            rows.append({"token":f"t{i}","channels":ch})
+        actual=ObsissPopulationV81.semantic_dimension_scores(rows)
+        permuted=[]
+        rev=list(reversed(CHANNELS))
+        for row in rows:
+            values=list(row["channels"].values())
+            permuted.append({"token":row["token"],"channels":dict(zip(rev,values))})
+        reordered=ObsissPopulationV81.semantic_dimension_scores(permuted)
+>       assert actual == reordered
+E       assert [0.5, 0.0, 0.75, 0.25, 1.0] == [1.0, 0.75, 0.5, 0.25, 0.0]
+E         
+E         At index 0 diff: 0.5 != 1.0
+E         
+E         Full diff:
+E           [
+E         +     0.5,
+E         +     0.0,
+E         +     0.75,
+E         +     0.25,
+E               1.0,
+E         -     0.75,
+E         -     0.5,
+E         -     0.25,
+E         -     0.0,
+E           ]
+
+mnt/data/esonde_audit/v8_1_work/Dmodel_eSonde_v8_1/tests/test_v81_basis_separation.py:20: AssertionError
+=========================== short test summary info ============================
+FAILED mnt/data/esonde_audit/v8_1_work/Dmodel_eSonde_v8_1/tests/test_v81_basis_separation.py::test_eo_observation_aggregation_is_invariant_to_coordinate_reordering - assert [0.5, 0.0, 0.75, 0.25, 1.0] == [1.0, 0.75, 0.5, 0.25, 0.0]
+  
+  At index 0 diff: 0.5 != 1.0
+  
+  Full diff:
+    [
+  +     0.5,
+  +     0.0,
+  +     0.75,
+  +     0.25,
+        1.0,
+  -     0.75,
+  -     0.5,
+  -     0.25,
+  -     0.0,
+    ]
+1 failed, 6 passed in 0.74s

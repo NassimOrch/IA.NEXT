@@ -1,0 +1,84 @@
+{
+  "schema": "esonde.v8_1.evidence.v1",
+  "project": "eSonde_v8_1",
+  "created_local": "2026-11-18T08:46:00+01:00",
+  "evidence": [
+    {
+      "id": "PROOF-001",
+      "claim": "L’archive source fournie est lisible et son intégrité ZIP interne ne signale aucune entrée corrompue.",
+      "evidence_path": "/mnt/data/model_eSonde_v8.zip",
+      "sha256": "f3a1787473ead56a2938196d08c207f7dab7dfcd33884b6cb9c544be1f14e220",
+      "size_bytes": 366943600,
+      "verification": "zipfile.testzip() == None",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "PROOF-002",
+      "claim": "Le checkpoint original v6 est présent et conservé sans modification dans le Dmodel baseline et le savepoint.",
+      "evidence_path": "Dmodel_eSonde_v8_1/models/eSonde_v6/weights.bin",
+      "sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+      "size_bytes": 64000000,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "PROOF-003",
+      "claim": "Le savepoint v8.1 contient le Dmodel de référence et une copie hash-identique de l’archive utilisateur.",
+      "evidence_path": "/mnt/data/esonde_audit/sav_eSonde_v8_1/savepoint_manifest.json",
+      "sha256": "edd0173172a691b2af897208ec653e092cfbe8e8bc34f8fd5286d52154035026",
+      "files_count": 119,
+      "total_bytes": 676386582,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "PROOF-005",
+      "claim": "Le travail P0 n’est pas complet, car le registre hérité ne classe que 160/2 018 chemins en DEEP_READ.",
+      "evidence_path": "P0_THEORIE_EMP_FILE_BY_FILE_REGISTER_V81.jsonl",
+      "counts": {
+        "total_paths": 2018,
+        "deep_read": 160,
+        "structural_inventory_only": 1699,
+        "metadata_only": 159
+      },
+      "status": "VERIFIED_LIMITATION"
+    },
+    {
+      "id": "PROOF-006",
+      "claim": "Des générations libres v8.1 ont été exécutées; leurs réponses et diagnostics sont enregistrés, mais les sorties évaluées restent qualitativement insuffisantes.",
+      "evidence_path": "experiments/v81_fullmultitoken_greeting_20261118/result.json; experiments/v81_photo_confidence_repetition_fullpop_20261118/result.json; experiments/v81_photo_legacy_context_ablation_off_fullpop_20261118/result.json",
+      "status": "VERIFIED_RESULT_FILES_PRESENT",
+      "weights_mutated": false,
+      "non_response_enabled": false,
+      "population": 1000000
+    },
+    {
+      "id": "PROOF-007",
+      "claim": "Suite complète de tests du dernier code: 131 tests réussis, 0 échec; contrôles TeX de 3 fichiers réussis.",
+      "evidence_path": "logs/v81_full_suite_delivery_20261118.log; logs/v81_tex_compile_delivery_20261118.log",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "PROOF-008",
+      "claim": "Le checkpoint original livré et sa copie locale pré-exécution sont SHA-256 identiques.",
+      "evidence_path": "Dmodel_eSonde_v8_1/models/eSonde_v6/weights.bin; Dmodel_eSonde_v8_1/control/sav_eSonde_v8_1/pre_execution_snapshot/Dmodel_eSonde_v8_1/models/eSonde_v6/weights.bin",
+      "sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "PROOF-009",
+      "claim": "Les trois bases SQLite livrées passent PRAGMA quick_check; le checkpoint et sa copie pré-exécution restent SHA-256 identiques.",
+      "evidence_path": "proofs/sqlite_integrity_check_delivery_20261118.json",
+      "status": "VERIFIED",
+      "weights_mutated": false
+    },
+    {
+      "id": "PROOF-010",
+      "claim": "Le CLI portable RUN_CLI_V81.sh verify termine en PASS et valide les empreintes du checkpoint, des profils, des priors et des trois bases SQLite; il confirme un million d’Obsiss et aucun composant neuronal.",
+      "evidence_path": "logs/v81_cli_verify_delivery_20261118.json",
+      "status": "VERIFIED",
+      "model_generation_executed": false,
+      "weights_mutated": false
+    }
+  ],
+  "signature_note": "Empreintes SHA-256 locales et reçus de tests; aucune signature personnelle ou attestation de propriété intellectuelle n’est prétendue.",
+  "updated_local": "2026-11-18T16:45:00+01:00"
+}

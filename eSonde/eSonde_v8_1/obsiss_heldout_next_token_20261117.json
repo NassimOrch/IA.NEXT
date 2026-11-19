@@ -1,0 +1,4791 @@
+{
+  "schema": "esonde.v8.heldout_next_token_rank_diagnostic.v1",
+  "created_local": "2026-11-17T14:57:18+01:00",
+  "experiment_id": "V8-P0-OBSISS-HELDOUT-NEXT-TOKEN-001",
+  "status": "COMPLETED_COMPONENT_DIAGNOSTIC",
+  "task": "prompt-to-first-response-token candidate ranking only; no full answer generation",
+  "non_response_enabled": false,
+  "test_split_only": true,
+  "target_used_during_candidate_proposal_or_scoring": false,
+  "target_access_stage": "post-ranking metric calculation only",
+  "data": {
+    "path": "/mnt/data/eSonde_v8_work/derived/OASST1_chat/test.jsonl",
+    "sha256": "65819ed0582f9cde0fbe9a5a322c6354081d289967e4474a0ba3db0801153f44",
+    "source_split": "OpenAssistant/oasst1 validation reserved as held-out test",
+    "sample_count_requested": 12,
+    "sample_count_evaluated": 12,
+    "per_language_requested": 2,
+    "languages": [
+      "en",
+      "es",
+      "fr",
+      "de",
+      "ru",
+      "zh"
+    ],
+    "language_routes": {
+      "en": 2,
+      "es": 2,
+      "fr": 2,
+      "de": 2,
+      "global": 2,
+      "zh": 2
+    }
+  },
+  "model": {
+    "checkpoint_sha256": "8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4",
+    "profile_sha256": "c517a0a5023add538d7588853652cc01cc7e5f3b305e404d34df6d35cc881544",
+    "profile_training_examples": 48549,
+    "neural_components": [],
+    "obsiss_active_count": 256,
+    "dimension": 16,
+    "candidate_limit": 16
+  },
+  "variants": {
+    "historical_v7": "context_strength=0.5; cross_strength=0.25; historical permutation; scale=8192",
+    "no_own_context": "context_strength=0; cross_strength=0.25",
+    "no_cross_observation": "context_strength=0.5; cross_strength=0",
+    "no_context_no_cross": "context_strength=0; cross_strength=0",
+    "identity_cross_permutation": "context_strength=0.5; cross_strength=0.25; identity permutation"
+  },
+  "aggregate": {
+    "historical_v7": {
+      "n": 12,
+      "candidate_pool_recall": 0.08333333333333333,
+      "mrr": 0.020833333333333332,
+      "top1_frequency": {
+        "yet": 1,
+        "u002c": 1,
+        "tío": 1,
+        "colegio": 1,
+        "alimentaire": 1,
+        "tableau": 1,
+        "bin": 1,
+        "er": 1,
+        "i": 2,
+        "。": 1,
+        "user": 1
+      }
+    },
+    "no_own_context": {
+      "n": 12,
+      "candidate_pool_recall": 0.08333333333333333,
+      "mrr": 0.020833333333333332,
+      "top1_frequency": {
+        "yet": 1,
+        "u002c": 1,
+        "tío": 1,
+        "colegio": 1,
+        "plus": 1,
+        "tableau": 1,
+        "bin": 1,
+        "er": 1,
+        "¡": 1,
+        "i": 1,
+        "。": 2
+      }
+    },
+    "no_cross_observation": {
+      "n": 12,
+      "candidate_pool_recall": 0.08333333333333333,
+      "mrr": 0.020833333333333332,
+      "top1_frequency": {
+        "yet": 1,
+        "u002c": 1,
+        "dormir": 1,
+        "colegio": 1,
+        "plus": 1,
+        "tableau": 1,
+        "bin": 1,
+        "er": 1,
+        "i": 2,
+        "。": 1,
+        "user": 1
+      }
+    },
+    "no_context_no_cross": {
+      "n": 12,
+      "candidate_pool_recall": 0.08333333333333333,
+      "mrr": 0.020833333333333332,
+      "top1_frequency": {
+        "yet": 1,
+        "u002c": 1,
+        "tío": 1,
+        "colegio": 1,
+        "plus": 1,
+        "tableau": 1,
+        "auf": 1,
+        "er": 1,
+        "i": 2,
+        "。": 1,
+        "user": 1
+      }
+    },
+    "identity_cross_permutation": {
+      "n": 12,
+      "candidate_pool_recall": 0.08333333333333333,
+      "mrr": 0.020833333333333332,
+      "top1_frequency": {
+        "yet": 1,
+        "u002c": 1,
+        "dormir": 1,
+        "colegio": 1,
+        "plus": 1,
+        "tableau": 1,
+        "auf": 1,
+        "er": 1,
+        "i": 2,
+        "。": 1,
+        "user": 1
+      }
+    }
+  },
+  "proposal_source_counts": {
+    "direct_context_association": 82,
+    "v8_chat_context_response_association": 50,
+    "v8_chat_response_transition": 32,
+    "prompt_occurrence_reuse": 7
+  },
+  "examples": [
+    {
+      "sample_index": 1,
+      "source_language": "en",
+      "language_route": "en",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "9b8b79c19f88370b01f0a3b3b6754b2bc0f16fc546aa354692fd5f60c42cc406",
+      "source_target_message_id_sha256": "1b8c0401312495001f4cf88272054d1b33232b8b42f1cd8efaef7c1a6ad9a3fd",
+      "context_sha256": "b092133ecba6e31626e73c7e781ddcdf1eaafb89db6a84251347d62d7164f3ca",
+      "target_first_token": "bob",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "big",
+        "jay",
+        "cena",
+        "season",
+        "brother",
+        "marley",
+        "act",
+        "hilarious",
+        "siblings",
+        "kasich",
+        "years",
+        "want",
+        "aunt",
+        "uncle",
+        "yet",
+        "thing"
+      ],
+      "candidate_sources": [
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 65,
+        "input_sha256": "b092133ecba6e31626e73c7e781ddcdf1eaafb89db6a84251347d62d7164f3ca",
+        "published_sha256": "896180bf4488af28dea236b1aa38bfc400bc20bca02055242c548d2ed1f43ff6",
+        "q_context_sha256": "9e3869e091b816ca9ede8e0c9b9b1a980f8f93f344b734ba4734f55447649c72",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.076552,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "fc9edcbb022a18761e0a13f0b9255d04a2fcf740dc2f9ad58230112fe69cb461",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "9e3869e091b816ca9ede8e0c9b9b1a980f8f93f344b734ba4734f55447649c72"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "yet",
+          "top5": [
+            "yet",
+            "years",
+            "want",
+            "brother",
+            "act"
+          ],
+          "mean_rank_scores": {
+            "yet": 1.0,
+            "years": 0.9333333333333333,
+            "want": 0.8666666666666667,
+            "brother": 0.8,
+            "act": 0.7333333333333333,
+            "siblings": 0.6666666666666666,
+            "jay": 0.6,
+            "marley": 0.5333333333333333,
+            "big": 0.4666666666666667,
+            "aunt": 0.4,
+            "uncle": 0.3333333333333333,
+            "cena": 0.23333333333333334,
+            "hilarious": 0.23333333333333334,
+            "season": 0.13333333333333333,
+            "thing": 0.06666666666666667,
+            "kasich": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.7619047619047619,
+              "mean_spearman": 0.9378521599222116,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                14,
+                10,
+                11,
+                4,
+                6
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "yet",
+          "top5": [
+            "yet",
+            "years",
+            "want",
+            "act",
+            "brother"
+          ],
+          "mean_rank_scores": {
+            "yet": 1.0,
+            "years": 0.9333333333333333,
+            "want": 0.8666666666666667,
+            "act": 0.7666666666666667,
+            "brother": 0.7666666666666667,
+            "siblings": 0.6666666666666666,
+            "jay": 0.6,
+            "marley": 0.5333333333333333,
+            "big": 0.4666666666666667,
+            "uncle": 0.4,
+            "aunt": 0.3333333333333333,
+            "cena": 0.23333333333333334,
+            "hilarious": 0.23333333333333334,
+            "kasich": 0.06666666666666667,
+            "thing": 0.06666666666666667,
+            "season": 0.06666666666666667
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8333333333333333,
+              "mean_spearman": 0.9321669767822265,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                14,
+                10,
+                11,
+                4,
+                6
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "yet",
+          "top5": [
+            "yet",
+            "years",
+            "want",
+            "act",
+            "brother"
+          ],
+          "mean_rank_scores": {
+            "yet": 1.0,
+            "years": 0.9333333333333333,
+            "want": 0.8666666666666667,
+            "act": 0.7666666666666667,
+            "brother": 0.7666666666666667,
+            "jay": 0.6666666666666666,
+            "marley": 0.5333333333333333,
+            "big": 0.5333333333333333,
+            "siblings": 0.5333333333333333,
+            "aunt": 0.4,
+            "uncle": 0.3333333333333333,
+            "cena": 0.26666666666666666,
+            "hilarious": 0.16666666666666666,
+            "season": 0.16666666666666666,
+            "thing": 0.06666666666666667,
+            "kasich": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9331824139676481,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                14,
+                10,
+                11,
+                4,
+                6
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "yet",
+          "top5": [
+            "yet",
+            "want",
+            "years",
+            "brother",
+            "act"
+          ],
+          "mean_rank_scores": {
+            "yet": 1.0,
+            "want": 0.9333333333333333,
+            "years": 0.8666666666666667,
+            "brother": 0.8,
+            "act": 0.7333333333333333,
+            "jay": 0.6666666666666666,
+            "marley": 0.5666666666666667,
+            "siblings": 0.5666666666666667,
+            "big": 0.4666666666666667,
+            "aunt": 0.4,
+            "uncle": 0.3333333333333333,
+            "cena": 0.23333333333333334,
+            "hilarious": 0.23333333333333334,
+            "season": 0.13333333333333333,
+            "thing": 0.06666666666666667,
+            "kasich": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9295016083588464,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                14,
+                11,
+                10,
+                4,
+                6
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "yet",
+          "top5": [
+            "yet",
+            "years",
+            "want",
+            "act",
+            "brother"
+          ],
+          "mean_rank_scores": {
+            "yet": 1.0,
+            "years": 0.9333333333333333,
+            "want": 0.8666666666666667,
+            "act": 0.7666666666666667,
+            "brother": 0.7666666666666667,
+            "jay": 0.6666666666666666,
+            "marley": 0.5333333333333333,
+            "big": 0.5333333333333333,
+            "siblings": 0.5333333333333333,
+            "aunt": 0.4,
+            "uncle": 0.3333333333333333,
+            "cena": 0.26666666666666666,
+            "hilarious": 0.16666666666666666,
+            "season": 0.16666666666666666,
+            "thing": 0.06666666666666667,
+            "kasich": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9332570980343413,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                14,
+                10,
+                11,
+                4,
+                6
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 2,
+      "source_language": "en",
+      "language_route": "en",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "02577e1412c0b5b2b862ec181e8dd1635b2a31235a95d33c77ddc44e976ed0e0",
+      "source_target_message_id_sha256": "0ef073b3621fbd3e4d3b908801df028bd8bebf783db95250b81a1366af7d0387",
+      "context_sha256": "e7c285a65335e9f6ed9b116866e5f787cc7835e45c65cd66448e18a2b7d1ec84",
+      "target_first_token": "i",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "don",
+        "going",
+        "prosecutor",
+        "u2019t",
+        "guilty",
+        "u002c",
+        "cole",
+        "seen",
+        "even",
+        "monday",
+        "pll",
+        "really",
+        "let",
+        "time",
+        "ever",
+        "watching"
+      ],
+      "candidate_sources": [
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 102,
+        "input_sha256": "e7c285a65335e9f6ed9b116866e5f787cc7835e45c65cd66448e18a2b7d1ec84",
+        "published_sha256": "edded5f99144a03359679fc3bc834bec232e7350da6ed56440297e1ad66ee463",
+        "q_context_sha256": "ba9ff32ff7dbaca89cd42fd1a3a65d8397f08ab865d2c9baae702a5783b836a6",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.073437,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "cd6867dbd71964d38170759e8826edf22df280aded02ca805b4e12182ee910ef",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "ba9ff32ff7dbaca89cd42fd1a3a65d8397f08ab865d2c9baae702a5783b836a6"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "u002c",
+          "top5": [
+            "u002c",
+            "u2019t",
+            "don",
+            "even",
+            "monday"
+          ],
+          "mean_rank_scores": {
+            "u002c": 1.0,
+            "u2019t": 0.9333333333333333,
+            "even": 0.8333333333333334,
+            "don": 0.8333333333333334,
+            "monday": 0.7333333333333333,
+            "really": 0.6333333333333333,
+            "going": 0.6333333333333333,
+            "let": 0.5,
+            "prosecutor": 0.5,
+            "ever": 0.4,
+            "seen": 0.3333333333333333,
+            "cole": 0.26666666666666666,
+            "time": 0.2,
+            "pll": 0.13333333333333333,
+            "guilty": 0.06666666666666667,
+            "watching": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9325969347703711,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                5,
+                3,
+                0,
+                8,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "u002c",
+          "top5": [
+            "u002c",
+            "u2019t",
+            "even",
+            "don",
+            "monday"
+          ],
+          "mean_rank_scores": {
+            "u002c": 1.0,
+            "u2019t": 0.9333333333333333,
+            "even": 0.8666666666666667,
+            "monday": 0.7666666666666667,
+            "don": 0.7666666666666667,
+            "really": 0.6666666666666666,
+            "going": 0.6,
+            "let": 0.5333333333333333,
+            "prosecutor": 0.4666666666666667,
+            "cole": 0.36666666666666664,
+            "ever": 0.36666666666666664,
+            "seen": 0.26666666666666666,
+            "time": 0.16666666666666666,
+            "guilty": 0.16666666666666666,
+            "pll": 0.06666666666666667,
+            "watching": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.9166666666666666,
+              "mean_spearman": 0.9458887790267695,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                5,
+                3,
+                8,
+                0,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "u002c",
+          "top5": [
+            "u002c",
+            "u2019t",
+            "don",
+            "even",
+            "monday"
+          ],
+          "mean_rank_scores": {
+            "u002c": 1.0,
+            "u2019t": 0.9333333333333333,
+            "even": 0.8333333333333334,
+            "don": 0.8333333333333334,
+            "monday": 0.7333333333333333,
+            "going": 0.6666666666666666,
+            "really": 0.6,
+            "let": 0.5333333333333333,
+            "prosecutor": 0.4666666666666667,
+            "ever": 0.4,
+            "cole": 0.3333333333333333,
+            "seen": 0.23333333333333334,
+            "time": 0.23333333333333334,
+            "pll": 0.13333333333333333,
+            "guilty": 0.06666666666666667,
+            "watching": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9304112501214102,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                5,
+                3,
+                0,
+                8,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "u002c",
+          "top5": [
+            "u002c",
+            "u2019t",
+            "don",
+            "even",
+            "monday"
+          ],
+          "mean_rank_scores": {
+            "u002c": 1.0,
+            "u2019t": 0.9333333333333333,
+            "even": 0.8333333333333334,
+            "don": 0.8333333333333334,
+            "monday": 0.7333333333333333,
+            "going": 0.6666666666666666,
+            "really": 0.6,
+            "let": 0.5,
+            "prosecutor": 0.5,
+            "ever": 0.4,
+            "cole": 0.3333333333333333,
+            "seen": 0.23333333333333334,
+            "time": 0.23333333333333334,
+            "pll": 0.13333333333333333,
+            "guilty": 0.06666666666666667,
+            "watching": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9295705448702842,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                5,
+                3,
+                0,
+                8,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "u002c",
+          "top5": [
+            "u002c",
+            "u2019t",
+            "don",
+            "even",
+            "monday"
+          ],
+          "mean_rank_scores": {
+            "u002c": 1.0,
+            "u2019t": 0.9333333333333333,
+            "even": 0.8333333333333334,
+            "don": 0.8333333333333334,
+            "monday": 0.7333333333333333,
+            "going": 0.6666666666666666,
+            "really": 0.6,
+            "let": 0.5333333333333333,
+            "prosecutor": 0.4666666666666667,
+            "ever": 0.4,
+            "cole": 0.3333333333333333,
+            "seen": 0.23333333333333334,
+            "time": 0.23333333333333334,
+            "pll": 0.13333333333333333,
+            "guilty": 0.06666666666666667,
+            "watching": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9301050018569954,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                5,
+                3,
+                0,
+                8,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 3,
+      "source_language": "es",
+      "language_route": "es",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "cea127fb9b85750fca2a20cb365eccece880d7ddbe89a9eaa6825b8f37d80d86",
+      "source_target_message_id_sha256": "59345e2b4b70138196a176194eaeb431df5214174362f02f9a9a207f9db5f9d8",
+      "context_sha256": "d718ab1041d225230d59be39b8fa6f03ac3804e324ab55e9cf4d8f675f3870c3",
+      "target_first_token": "👉",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "ver",
+        "mañana",
+        "noche",
+        "tan",
+        "si",
+        "bien",
+        "tarde",
+        "tiene",
+        "navideña",
+        "creer",
+        "con",
+        "todo",
+        "molestó",
+        "tío",
+        "ya",
+        "dormir"
+      ],
+      "candidate_sources": [
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 36,
+        "input_sha256": "d718ab1041d225230d59be39b8fa6f03ac3804e324ab55e9cf4d8f675f3870c3",
+        "published_sha256": "d6dc828beb9c36eb5982f8c0bfa643c9a57b671c90ec3184a2d05251dbd679e5",
+        "q_context_sha256": "568a957e86549f0fb396ebf3912a989e5b82e08766aeca3964e58ca96d5f4d39",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.05609,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "d8d08bb457bcb6ccdbdcc5fef80f5ac7b81a1e2f3cc16b57e3d6fb3522fda56b",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "568a957e86549f0fb396ebf3912a989e5b82e08766aeca3964e58ca96d5f4d39"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tío",
+          "top5": [
+            "tío",
+            "dormir",
+            "si",
+            "bien",
+            "todo"
+          ],
+          "mean_rank_scores": {
+            "tío": 1.0,
+            "dormir": 0.9333333333333333,
+            "si": 0.8666666666666667,
+            "bien": 0.8,
+            "todo": 0.7333333333333333,
+            "noche": 0.6666666666666666,
+            "ya": 0.5666666666666667,
+            "con": 0.5666666666666667,
+            "tarde": 0.4666666666666667,
+            "tan": 0.36666666666666664,
+            "ver": 0.36666666666666664,
+            "tiene": 0.26666666666666666,
+            "molestó": 0.2,
+            "mañana": 0.13333333333333333,
+            "creer": 0.03333333333333333,
+            "navideña": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.9464855159303861,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                13,
+                15,
+                4,
+                5,
+                11
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tío",
+          "top5": [
+            "tío",
+            "dormir",
+            "si",
+            "bien",
+            "todo"
+          ],
+          "mean_rank_scores": {
+            "tío": 1.0,
+            "dormir": 0.9333333333333333,
+            "si": 0.8666666666666667,
+            "bien": 0.8,
+            "todo": 0.7333333333333333,
+            "ya": 0.6666666666666666,
+            "noche": 0.6,
+            "con": 0.5333333333333333,
+            "tarde": 0.4666666666666667,
+            "tan": 0.4,
+            "ver": 0.3333333333333333,
+            "tiene": 0.26666666666666666,
+            "molestó": 0.2,
+            "navideña": 0.13333333333333333,
+            "mañana": 0.06666666666666667,
+            "creer": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.7916666666666666,
+              "mean_spearman": 0.9340664609511273,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                13,
+                15,
+                4,
+                5,
+                11
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "dormir",
+          "top5": [
+            "dormir",
+            "tío",
+            "si",
+            "bien",
+            "todo"
+          ],
+          "mean_rank_scores": {
+            "dormir": 0.9666666666666667,
+            "tío": 0.9666666666666667,
+            "si": 0.8666666666666667,
+            "bien": 0.8,
+            "todo": 0.7333333333333333,
+            "con": 0.6666666666666666,
+            "noche": 0.6,
+            "ya": 0.5333333333333333,
+            "ver": 0.4666666666666667,
+            "tarde": 0.4,
+            "tan": 0.3333333333333333,
+            "tiene": 0.26666666666666666,
+            "molestó": 0.2,
+            "mañana": 0.13333333333333333,
+            "creer": 0.06666666666666667,
+            "navideña": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.9464436803863969,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                13,
+                15,
+                4,
+                5,
+                11
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tío",
+          "top5": [
+            "tío",
+            "dormir",
+            "si",
+            "bien",
+            "todo"
+          ],
+          "mean_rank_scores": {
+            "tío": 1.0,
+            "dormir": 0.9333333333333333,
+            "si": 0.8666666666666667,
+            "bien": 0.8,
+            "todo": 0.7333333333333333,
+            "con": 0.6666666666666666,
+            "noche": 0.6,
+            "ya": 0.5333333333333333,
+            "ver": 0.4666666666666667,
+            "tarde": 0.4,
+            "tan": 0.3333333333333333,
+            "tiene": 0.26666666666666666,
+            "molestó": 0.2,
+            "mañana": 0.13333333333333333,
+            "creer": 0.06666666666666667,
+            "navideña": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.9396790707590619,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                13,
+                15,
+                4,
+                5,
+                11
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "dormir",
+          "top5": [
+            "dormir",
+            "tío",
+            "si",
+            "bien",
+            "todo"
+          ],
+          "mean_rank_scores": {
+            "dormir": 0.9666666666666667,
+            "tío": 0.9666666666666667,
+            "si": 0.8666666666666667,
+            "bien": 0.8,
+            "todo": 0.7333333333333333,
+            "con": 0.6666666666666666,
+            "noche": 0.6,
+            "ya": 0.5333333333333333,
+            "ver": 0.4666666666666667,
+            "tarde": 0.4,
+            "tan": 0.3333333333333333,
+            "tiene": 0.26666666666666666,
+            "molestó": 0.2,
+            "mañana": 0.13333333333333333,
+            "creer": 0.06666666666666667,
+            "navideña": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.943625194296167,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                13,
+                15,
+                4,
+                5,
+                11
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 4,
+      "source_language": "es",
+      "language_route": "es",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "2652a9c7e8cae670aae9f60c07ad7d64674d96c2863928f00c288d3c98c9d9cd",
+      "source_target_message_id_sha256": "5529e39f436f2936811615befaf05614d3f5f7778530610d8558571d09e46af8",
+      "context_sha256": "df57a38f1a31b3849f8a5952e4c1e94663756c3d057553e39bbaab333f8c98f0",
+      "target_first_token": "no",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "descansó",
+        "ser",
+        "colegio",
+        "mañana",
+        "abuelo",
+        "amistades",
+        "voy",
+        "esta",
+        "bien",
+        "caminando",
+        "hace",
+        "si",
+        "día",
+        "mucho",
+        "pues",
+        "todo"
+      ],
+      "candidate_sources": [
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 14,
+        "input_sha256": "df57a38f1a31b3849f8a5952e4c1e94663756c3d057553e39bbaab333f8c98f0",
+        "published_sha256": "acda05eaa79fa823cccba393a9eb39616099fd888fd88e1bd06ca8efd4508e51",
+        "q_context_sha256": "db7bc4f11b4e5abbda74b863f0df15b850754d3044d952d95bcf3b8f11c4d3eb",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.050531,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "2dd4fa52b78391f1cbaf52bfc70c4152b38ef205796bedf0df47337d61bba84c",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "db7bc4f11b4e5abbda74b863f0df15b850754d3044d952d95bcf3b8f11c4d3eb"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "colegio",
+          "top5": [
+            "colegio",
+            "bien",
+            "esta",
+            "día",
+            "voy"
+          ],
+          "mean_rank_scores": {
+            "colegio": 1.0,
+            "bien": 0.9333333333333333,
+            "esta": 0.8666666666666667,
+            "día": 0.7666666666666667,
+            "voy": 0.7666666666666667,
+            "si": 0.6666666666666666,
+            "ser": 0.6,
+            "mañana": 0.5333333333333333,
+            "pues": 0.4666666666666667,
+            "todo": 0.4,
+            "amistades": 0.3333333333333333,
+            "hace": 0.26666666666666666,
+            "caminando": 0.2,
+            "descansó": 0.13333333333333333,
+            "abuelo": 0.06666666666666667,
+            "mucho": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8333333333333333,
+              "mean_spearman": 0.9518641172790152,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                8,
+                7,
+                6,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "colegio",
+          "top5": [
+            "colegio",
+            "bien",
+            "esta",
+            "día",
+            "voy"
+          ],
+          "mean_rank_scores": {
+            "colegio": 1.0,
+            "bien": 0.9333333333333333,
+            "esta": 0.8666666666666667,
+            "voy": 0.7666666666666667,
+            "día": 0.7666666666666667,
+            "si": 0.6666666666666666,
+            "ser": 0.6,
+            "mañana": 0.5333333333333333,
+            "todo": 0.4666666666666667,
+            "pues": 0.4,
+            "amistades": 0.3333333333333333,
+            "hace": 0.26666666666666666,
+            "caminando": 0.2,
+            "descansó": 0.1,
+            "abuelo": 0.1,
+            "mucho": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8333333333333333,
+              "mean_spearman": 0.9476907190092866,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                8,
+                7,
+                6,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "colegio",
+          "top5": [
+            "colegio",
+            "bien",
+            "esta",
+            "día",
+            "voy"
+          ],
+          "mean_rank_scores": {
+            "colegio": 1.0,
+            "bien": 0.9333333333333333,
+            "esta": 0.8666666666666667,
+            "día": 0.7666666666666667,
+            "voy": 0.7666666666666667,
+            "si": 0.6666666666666666,
+            "ser": 0.6,
+            "mañana": 0.5333333333333333,
+            "pues": 0.4666666666666667,
+            "todo": 0.4,
+            "hace": 0.3333333333333333,
+            "amistades": 0.26666666666666666,
+            "descansó": 0.16666666666666666,
+            "caminando": 0.16666666666666666,
+            "abuelo": 0.06666666666666667,
+            "mucho": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.875,
+              "mean_spearman": 0.9472369488780512,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                8,
+                7,
+                6,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "colegio",
+          "top5": [
+            "colegio",
+            "bien",
+            "esta",
+            "día",
+            "voy"
+          ],
+          "mean_rank_scores": {
+            "colegio": 1.0,
+            "bien": 0.9333333333333333,
+            "esta": 0.8666666666666667,
+            "día": 0.7666666666666667,
+            "voy": 0.7666666666666667,
+            "si": 0.6666666666666666,
+            "ser": 0.6,
+            "mañana": 0.5333333333333333,
+            "pues": 0.4666666666666667,
+            "todo": 0.4,
+            "hace": 0.3333333333333333,
+            "amistades": 0.26666666666666666,
+            "descansó": 0.16666666666666666,
+            "caminando": 0.16666666666666666,
+            "abuelo": 0.06666666666666667,
+            "mucho": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8333333333333333,
+              "mean_spearman": 0.9485965118689175,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                8,
+                7,
+                6,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "colegio",
+          "top5": [
+            "colegio",
+            "bien",
+            "esta",
+            "día",
+            "voy"
+          ],
+          "mean_rank_scores": {
+            "colegio": 1.0,
+            "bien": 0.9333333333333333,
+            "esta": 0.8666666666666667,
+            "día": 0.7666666666666667,
+            "voy": 0.7666666666666667,
+            "si": 0.6666666666666666,
+            "ser": 0.6,
+            "mañana": 0.5333333333333333,
+            "pues": 0.4666666666666667,
+            "todo": 0.4,
+            "hace": 0.3333333333333333,
+            "amistades": 0.26666666666666666,
+            "caminando": 0.2,
+            "descansó": 0.13333333333333333,
+            "abuelo": 0.06666666666666667,
+            "mucho": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.875,
+              "mean_spearman": 0.9464935473293912,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                8,
+                7,
+                6,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 5,
+      "source_language": "fr",
+      "language_route": "fr",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "fb318748f9d224c1d177a6fc023769a1e010818b7cb886c2c7c72ec8009b58c5",
+      "source_target_message_id_sha256": "20a5a01450ce4f1c0f41ef2cf16130d143c4b9c07236cd7cf61cd628bd37be98",
+      "context_sha256": "886f8b8293c5a949f250fab9a7dc2b71d7b66ae93e58cf5395369235c49998e5",
+      "target_first_token": "les",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "plus",
+        "grand",
+        "régime",
+        "alimentaire",
+        "vite",
+        "mieux",
+        "décès",
+        "toujours",
+        "aller",
+        "fois",
+        "encore",
+        "cher",
+        "devient",
+        "enfants",
+        "ministre",
+        "écologiques"
+      ],
+      "candidate_sources": [
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 84,
+        "input_sha256": "886f8b8293c5a949f250fab9a7dc2b71d7b66ae93e58cf5395369235c49998e5",
+        "published_sha256": "2ea97cfe00597cf8555b2cf49e61f61f8d9955f7dccaffe6a6b905b9f1a1964d",
+        "q_context_sha256": "b8328901a779a4a9356563ad370557aad29cbf8057296e8891d02e7d4c8cf0f4",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.091995,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "7fb7ab251a788163fee7ef4e9cc806f15ec6090965e479d44aaadb18150e4d9c",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "b8328901a779a4a9356563ad370557aad29cbf8057296e8891d02e7d4c8cf0f4"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "alimentaire",
+          "top5": [
+            "alimentaire",
+            "plus",
+            "régime",
+            "vite",
+            "fois"
+          ],
+          "mean_rank_scores": {
+            "alimentaire": 1.0,
+            "plus": 0.9333333333333333,
+            "vite": 0.8333333333333334,
+            "régime": 0.8333333333333334,
+            "fois": 0.7333333333333333,
+            "mieux": 0.6666666666666666,
+            "ministre": 0.6,
+            "cher": 0.5,
+            "enfants": 0.5,
+            "décès": 0.36666666666666664,
+            "aller": 0.36666666666666664,
+            "encore": 0.23333333333333334,
+            "grand": 0.23333333333333334,
+            "devient": 0.13333333333333333,
+            "toujours": 0.03333333333333333,
+            "écologiques": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9442548891524769,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                0,
+                2,
+                4,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "plus",
+          "top5": [
+            "plus",
+            "régime",
+            "vite",
+            "alimentaire",
+            "fois"
+          ],
+          "mean_rank_scores": {
+            "plus": 1.0,
+            "vite": 0.9,
+            "régime": 0.9,
+            "alimentaire": 0.8,
+            "fois": 0.7333333333333333,
+            "mieux": 0.6666666666666666,
+            "ministre": 0.6,
+            "cher": 0.5333333333333333,
+            "aller": 0.4666666666666667,
+            "enfants": 0.4,
+            "décès": 0.3333333333333333,
+            "grand": 0.26666666666666666,
+            "encore": 0.2,
+            "devient": 0.13333333333333333,
+            "toujours": 0.03333333333333333,
+            "écologiques": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8035714285714286,
+              "mean_spearman": 0.9284327497572186,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                2,
+                4,
+                3,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "plus",
+          "top5": [
+            "plus",
+            "alimentaire",
+            "vite",
+            "fois",
+            "ministre"
+          ],
+          "mean_rank_scores": {
+            "plus": 1.0,
+            "alimentaire": 0.9333333333333333,
+            "vite": 0.8666666666666667,
+            "fois": 0.8,
+            "ministre": 0.7,
+            "régime": 0.7,
+            "mieux": 0.6,
+            "cher": 0.5333333333333333,
+            "enfants": 0.4666666666666667,
+            "décès": 0.36666666666666664,
+            "aller": 0.36666666666666664,
+            "grand": 0.26666666666666666,
+            "encore": 0.2,
+            "devient": 0.13333333333333333,
+            "toujours": 0.06666666666666667,
+            "écologiques": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.25,
+              "mean_topk_jaccard": 0.8154761904761905,
+              "mean_spearman": 0.9287197367344109,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                3,
+                4,
+                9,
+                2
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "plus",
+          "top5": [
+            "plus",
+            "alimentaire",
+            "vite",
+            "fois",
+            "mieux"
+          ],
+          "mean_rank_scores": {
+            "plus": 1.0,
+            "vite": 0.9,
+            "alimentaire": 0.9,
+            "fois": 0.8,
+            "mieux": 0.7,
+            "régime": 0.7,
+            "ministre": 0.6,
+            "cher": 0.5333333333333333,
+            "décès": 0.4,
+            "enfants": 0.4,
+            "aller": 0.4,
+            "grand": 0.26666666666666666,
+            "encore": 0.2,
+            "toujours": 0.1,
+            "devient": 0.1,
+            "écologiques": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.375,
+              "mean_topk_jaccard": 0.7738095238095238,
+              "mean_spearman": 0.9239991763113297,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                3,
+                4,
+                9,
+                2
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "plus",
+          "top5": [
+            "plus",
+            "alimentaire",
+            "vite",
+            "fois",
+            "ministre"
+          ],
+          "mean_rank_scores": {
+            "plus": 1.0,
+            "alimentaire": 0.9333333333333333,
+            "vite": 0.8666666666666667,
+            "fois": 0.8,
+            "ministre": 0.7,
+            "régime": 0.7,
+            "mieux": 0.6,
+            "cher": 0.5333333333333333,
+            "enfants": 0.4666666666666667,
+            "décès": 0.36666666666666664,
+            "aller": 0.36666666666666664,
+            "grand": 0.26666666666666666,
+            "encore": 0.2,
+            "devient": 0.13333333333333333,
+            "toujours": 0.06666666666666667,
+            "écologiques": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.25,
+              "mean_topk_jaccard": 0.8154761904761905,
+              "mean_spearman": 0.9281944334554889,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                3,
+                4,
+                9,
+                2
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 6,
+      "source_language": "fr",
+      "language_route": "fr",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "b6344abfd104bd38afc18175f49662ab5b80b209063f84a59e19fd731e40b4f6",
+      "source_target_message_id_sha256": "c5006e1349b7413273487e468d2fa7e6b04b696e5d3f738da8dc2b0380f649ef",
+      "context_sha256": "6612fe8361be96cf1f1b5fc8631b84fde9654fe861129a50ea0707fdfd29944b",
+      "target_first_token": "def",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "cellules",
+        "département",
+        "moyenne",
+        "dossiers",
+        "année",
+        "dossier",
+        "méthode",
+        "océans",
+        "51",
+        "entrée",
+        "espèces",
+        "tableau",
+        "textes",
+        "programme",
+        "fonction",
+        "st"
+      ],
+      "candidate_sources": [
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 34,
+        "input_sha256": "6612fe8361be96cf1f1b5fc8631b84fde9654fe861129a50ea0707fdfd29944b",
+        "published_sha256": "0115a09130949656214d50df77f0e09459f3ba08a0609f3b7e2182abcdab65f0",
+        "q_context_sha256": "17eba8f29a116b6337815c31c3f752e9278c1817909be9555a60adf6a4d38fab",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.068868,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "34a17a97dbf279a491f830fd1babdcda46f4fda1218300face76c3bfec3daebf",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "17eba8f29a116b6337815c31c3f752e9278c1817909be9555a60adf6a4d38fab"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tableau",
+          "top5": [
+            "tableau",
+            "espèces",
+            "année",
+            "cellules",
+            "st"
+          ],
+          "mean_rank_scores": {
+            "tableau": 1.0,
+            "espèces": 0.9333333333333333,
+            "cellules": 0.8333333333333334,
+            "année": 0.8333333333333334,
+            "st": 0.7333333333333333,
+            "51": 0.6666666666666666,
+            "textes": 0.6,
+            "méthode": 0.5,
+            "moyenne": 0.5,
+            "dossiers": 0.36666666666666664,
+            "entrée": 0.36666666666666664,
+            "fonction": 0.23333333333333334,
+            "programme": 0.23333333333333334,
+            "dossier": 0.1,
+            "département": 0.1,
+            "océans": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8229166666666666,
+              "mean_spearman": 0.9430324772741607,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                11,
+                10,
+                0,
+                4,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tableau",
+          "top5": [
+            "tableau",
+            "espèces",
+            "cellules",
+            "année",
+            "st"
+          ],
+          "mean_rank_scores": {
+            "tableau": 1.0,
+            "espèces": 0.9333333333333333,
+            "cellules": 0.8666666666666667,
+            "année": 0.8,
+            "st": 0.7333333333333333,
+            "51": 0.6666666666666666,
+            "textes": 0.6,
+            "méthode": 0.5333333333333333,
+            "moyenne": 0.4666666666666667,
+            "dossiers": 0.36666666666666664,
+            "entrée": 0.36666666666666664,
+            "département": 0.26666666666666666,
+            "fonction": 0.2,
+            "dossier": 0.1,
+            "programme": 0.1,
+            "océans": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8035714285714286,
+              "mean_spearman": 0.941327447838375,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                11,
+                10,
+                0,
+                4,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tableau",
+          "top5": [
+            "tableau",
+            "espèces",
+            "année",
+            "cellules",
+            "st"
+          ],
+          "mean_rank_scores": {
+            "tableau": 1.0,
+            "espèces": 0.9333333333333333,
+            "année": 0.8666666666666667,
+            "cellules": 0.8,
+            "st": 0.7333333333333333,
+            "textes": 0.6666666666666666,
+            "51": 0.6,
+            "moyenne": 0.5333333333333333,
+            "méthode": 0.4666666666666667,
+            "dossiers": 0.36666666666666664,
+            "entrée": 0.36666666666666664,
+            "fonction": 0.2,
+            "programme": 0.2,
+            "département": 0.2,
+            "dossier": 0.06666666666666667,
+            "océans": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8645833333333334,
+              "mean_spearman": 0.9418519120393343,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                11,
+                10,
+                4,
+                0,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tableau",
+          "top5": [
+            "tableau",
+            "espèces",
+            "année",
+            "cellules",
+            "st"
+          ],
+          "mean_rank_scores": {
+            "tableau": 1.0,
+            "espèces": 0.9333333333333333,
+            "année": 0.8666666666666667,
+            "cellules": 0.8,
+            "st": 0.7333333333333333,
+            "51": 0.6666666666666666,
+            "textes": 0.6,
+            "moyenne": 0.5333333333333333,
+            "méthode": 0.4666666666666667,
+            "dossiers": 0.36666666666666664,
+            "entrée": 0.36666666666666664,
+            "fonction": 0.2,
+            "programme": 0.2,
+            "département": 0.2,
+            "dossier": 0.06666666666666667,
+            "océans": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8645833333333334,
+              "mean_spearman": 0.9420445608317112,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                11,
+                10,
+                4,
+                0,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "tableau",
+          "top5": [
+            "tableau",
+            "espèces",
+            "année",
+            "cellules",
+            "st"
+          ],
+          "mean_rank_scores": {
+            "tableau": 1.0,
+            "espèces": 0.9333333333333333,
+            "année": 0.8666666666666667,
+            "cellules": 0.8,
+            "st": 0.7333333333333333,
+            "textes": 0.6666666666666666,
+            "51": 0.6,
+            "moyenne": 0.5333333333333333,
+            "méthode": 0.4666666666666667,
+            "dossiers": 0.36666666666666664,
+            "entrée": 0.36666666666666664,
+            "fonction": 0.2,
+            "programme": 0.2,
+            "département": 0.2,
+            "dossier": 0.06666666666666667,
+            "océans": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8645833333333334,
+              "mean_spearman": 0.9398253207751943,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                11,
+                10,
+                4,
+                0,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 7,
+      "source_language": "de",
+      "language_route": "de",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "0552593df063f420a2156231755938e44659f3e2c51141dc992a63b8521d3f0c",
+      "source_target_message_id_sha256": "6ed14f06bdf3732ebc23eb664ee2611d7740d0995e34b6c3523398aaebf229ad",
+      "context_sha256": "e236503db4382872fc4a1567d5cf367129865624a320e731babc03e9a0d31bcb",
+      "target_first_token": "das",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "auf",
+        "sind",
+        "ist",
+        "bin",
+        "ich",
+        "nicht",
+        "war",
+        "hat",
+        "mich",
+        "kann",
+        "dann",
+        "das",
+        "wenn",
+        "für",
+        "nur",
+        "hab"
+      ],
+      "candidate_sources": [
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 426,
+        "input_sha256": "e236503db4382872fc4a1567d5cf367129865624a320e731babc03e9a0d31bcb",
+        "published_sha256": "12515614d3842fea312477d35cc9f604c02ca328813d675f681c61172b4753d5",
+        "q_context_sha256": "381dafe8f5f58ea1d5e1eff8a8dee12c663cbd7e76c13eb65a776a8fb374888d",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.179592,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "21ef8e9db5968669bfbdfc2a7f349a33b6991e9cea9762f38c0c12ebef7bb9a4",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "381dafe8f5f58ea1d5e1eff8a8dee12c663cbd7e76c13eb65a776a8fb374888d"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": 4,
+          "target_in_candidate_pool": true,
+          "reciprocal_rank": 0.25,
+          "hit_at_5": true,
+          "top1": "bin",
+          "top5": [
+            "bin",
+            "auf",
+            "nur",
+            "das",
+            "wenn"
+          ],
+          "mean_rank_scores": {
+            "bin": 1.0,
+            "auf": 0.9333333333333333,
+            "nur": 0.8666666666666667,
+            "das": 0.7666666666666667,
+            "wenn": 0.7666666666666667,
+            "ich": 0.6666666666666666,
+            "dann": 0.5666666666666667,
+            "war": 0.5666666666666667,
+            "kann": 0.4666666666666667,
+            "sind": 0.36666666666666664,
+            "mich": 0.36666666666666664,
+            "für": 0.26666666666666666,
+            "hab": 0.2,
+            "ist": 0.13333333333333333,
+            "hat": 0.03333333333333333,
+            "nicht": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.375,
+              "mean_topk_jaccard": 0.7916666666666666,
+              "mean_spearman": 0.9556006705837854,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                0,
+                14,
+                11,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": 4,
+          "target_in_candidate_pool": true,
+          "reciprocal_rank": 0.25,
+          "hit_at_5": true,
+          "top1": "bin",
+          "top5": [
+            "bin",
+            "nur",
+            "auf",
+            "das",
+            "wenn"
+          ],
+          "mean_rank_scores": {
+            "bin": 1.0,
+            "nur": 0.9333333333333333,
+            "auf": 0.8666666666666667,
+            "das": 0.7666666666666667,
+            "wenn": 0.7666666666666667,
+            "ich": 0.6666666666666666,
+            "war": 0.6,
+            "dann": 0.5,
+            "kann": 0.5,
+            "sind": 0.36666666666666664,
+            "mich": 0.36666666666666664,
+            "hab": 0.26666666666666666,
+            "für": 0.2,
+            "hat": 0.1,
+            "ist": 0.1,
+            "nicht": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.7916666666666666,
+              "mean_spearman": 0.9500941563593306,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                14,
+                0,
+                11,
+                12
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": 4,
+          "target_in_candidate_pool": true,
+          "reciprocal_rank": 0.25,
+          "hit_at_5": true,
+          "top1": "bin",
+          "top5": [
+            "bin",
+            "auf",
+            "nur",
+            "das",
+            "ich"
+          ],
+          "mean_rank_scores": {
+            "bin": 1.0,
+            "auf": 0.9333333333333333,
+            "nur": 0.8666666666666667,
+            "das": 0.8,
+            "wenn": 0.7,
+            "ich": 0.7,
+            "dann": 0.5666666666666667,
+            "war": 0.5666666666666667,
+            "mich": 0.4666666666666667,
+            "kann": 0.4,
+            "sind": 0.3333333333333333,
+            "für": 0.26666666666666666,
+            "hab": 0.2,
+            "ist": 0.13333333333333333,
+            "hat": 0.06666666666666667,
+            "nicht": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9521546089971259,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                0,
+                14,
+                11,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": 4,
+          "target_in_candidate_pool": true,
+          "reciprocal_rank": 0.25,
+          "hit_at_5": true,
+          "top1": "auf",
+          "top5": [
+            "auf",
+            "bin",
+            "nur",
+            "das",
+            "ich"
+          ],
+          "mean_rank_scores": {
+            "auf": 0.9666666666666667,
+            "bin": 0.9666666666666667,
+            "nur": 0.8666666666666667,
+            "das": 0.8,
+            "wenn": 0.7,
+            "ich": 0.7,
+            "dann": 0.5666666666666667,
+            "war": 0.5666666666666667,
+            "kann": 0.4666666666666667,
+            "sind": 0.36666666666666664,
+            "mich": 0.36666666666666664,
+            "für": 0.26666666666666666,
+            "hab": 0.2,
+            "ist": 0.13333333333333333,
+            "hat": 0.03333333333333333,
+            "nicht": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8154761904761905,
+              "mean_spearman": 0.9580394673462076,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                3,
+                14,
+                11,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": 4,
+          "target_in_candidate_pool": true,
+          "reciprocal_rank": 0.25,
+          "hit_at_5": true,
+          "top1": "auf",
+          "top5": [
+            "auf",
+            "bin",
+            "nur",
+            "das",
+            "ich"
+          ],
+          "mean_rank_scores": {
+            "auf": 0.9666666666666667,
+            "bin": 0.9666666666666667,
+            "nur": 0.8666666666666667,
+            "das": 0.8,
+            "wenn": 0.7,
+            "ich": 0.7,
+            "dann": 0.5666666666666667,
+            "war": 0.5666666666666667,
+            "mich": 0.4666666666666667,
+            "kann": 0.4,
+            "sind": 0.3333333333333333,
+            "für": 0.26666666666666666,
+            "hab": 0.2,
+            "ist": 0.13333333333333333,
+            "hat": 0.03333333333333333,
+            "nicht": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8452380952380952,
+              "mean_spearman": 0.9522580417017132,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                3,
+                14,
+                11,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 8,
+      "source_language": "de",
+      "language_route": "de",
+      "language_route_status": "TRAIN_DISTRIBUTION_ROUTE",
+      "source_tree_id_sha256": "e7fc3c8ac8209ab4496245a771adbf95ef3db727551959f43ca236f3ff1aad72",
+      "source_target_message_id_sha256": "01c45f02c1762a0040a78b656bf2a803138c346aee9f913f4f3f4c60ac36e2d5",
+      "context_sha256": "bb5bff6bce6ba9666ad48c229f82905b5417847ecb86972d4fb82a7d1d275ef9",
+      "target_first_token": "sehr",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "ein",
+        "mich",
+        "auf",
+        "das",
+        "dann",
+        "sind",
+        "tanzt",
+        "heute",
+        "hat",
+        "sein",
+        "viel",
+        "gut",
+        "er",
+        "mehr",
+        "haben",
+        "einfach"
+      ],
+      "candidate_sources": [
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "direct_context_association",
+        "v8_chat_context_response_association",
+        "direct_context_association"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 93,
+        "input_sha256": "bb5bff6bce6ba9666ad48c229f82905b5417847ecb86972d4fb82a7d1d275ef9",
+        "published_sha256": "16b545613232e521af91e02d4ab2371fa8bd25203ef26b1bb64645210dd1bb5a",
+        "q_context_sha256": "86676f62d6d502292e3ebc84d45d88188f04aaab2cedca3d0e70d7ce4a903d11",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.065263,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "c69ad34f54808a4e4251910f8609f507e88b8b1026d278d6df1146e017f79c79",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "86676f62d6d502292e3ebc84d45d88188f04aaab2cedca3d0e70d7ce4a903d11"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "er",
+          "top5": [
+            "er",
+            "ein",
+            "sind",
+            "mich",
+            "haben"
+          ],
+          "mean_rank_scores": {
+            "er": 1.0,
+            "ein": 0.9333333333333333,
+            "sind": 0.8666666666666667,
+            "mich": 0.8,
+            "haben": 0.7333333333333333,
+            "auf": 0.6666666666666666,
+            "gut": 0.6,
+            "heute": 0.5333333333333333,
+            "sein": 0.4666666666666667,
+            "das": 0.4,
+            "viel": 0.3333333333333333,
+            "hat": 0.26666666666666666,
+            "dann": 0.2,
+            "mehr": 0.13333333333333333,
+            "einfach": 0.06666666666666667,
+            "tanzt": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.7619047619047619,
+              "mean_spearman": 0.9456851303632057,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                12,
+                0,
+                5,
+                1,
+                14
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "er",
+          "top5": [
+            "er",
+            "ein",
+            "haben",
+            "mich",
+            "sind"
+          ],
+          "mean_rank_scores": {
+            "er": 1.0,
+            "ein": 0.9333333333333333,
+            "mich": 0.8333333333333334,
+            "haben": 0.8333333333333334,
+            "sind": 0.7333333333333333,
+            "gut": 0.6666666666666666,
+            "heute": 0.6,
+            "auf": 0.5333333333333333,
+            "das": 0.4666666666666667,
+            "sein": 0.36666666666666664,
+            "viel": 0.36666666666666664,
+            "hat": 0.26666666666666666,
+            "dann": 0.2,
+            "mehr": 0.13333333333333333,
+            "einfach": 0.03333333333333333,
+            "tanzt": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.7916666666666666,
+              "mean_spearman": 0.9488214605357238,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                12,
+                0,
+                1,
+                14,
+                5
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "er",
+          "top5": [
+            "er",
+            "ein",
+            "sind",
+            "mich",
+            "haben"
+          ],
+          "mean_rank_scores": {
+            "er": 1.0,
+            "ein": 0.9333333333333333,
+            "sind": 0.8666666666666667,
+            "mich": 0.8,
+            "haben": 0.7333333333333333,
+            "gut": 0.6666666666666666,
+            "heute": 0.5666666666666667,
+            "auf": 0.5666666666666667,
+            "das": 0.4666666666666667,
+            "sein": 0.4,
+            "viel": 0.3333333333333333,
+            "hat": 0.26666666666666666,
+            "dann": 0.2,
+            "mehr": 0.13333333333333333,
+            "einfach": 0.06666666666666667,
+            "tanzt": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.9326477441793825,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                12,
+                0,
+                5,
+                1,
+                14
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "er",
+          "top5": [
+            "er",
+            "ein",
+            "sind",
+            "haben",
+            "mich"
+          ],
+          "mean_rank_scores": {
+            "er": 1.0,
+            "ein": 0.9333333333333333,
+            "sind": 0.8666666666666667,
+            "mich": 0.7666666666666667,
+            "haben": 0.7666666666666667,
+            "gut": 0.6666666666666666,
+            "heute": 0.5666666666666667,
+            "auf": 0.5666666666666667,
+            "das": 0.4666666666666667,
+            "sein": 0.4,
+            "viel": 0.3333333333333333,
+            "hat": 0.26666666666666666,
+            "dann": 0.2,
+            "mehr": 0.13333333333333333,
+            "einfach": 0.06666666666666667,
+            "tanzt": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.7619047619047619,
+              "mean_spearman": 0.9258660560610297,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                12,
+                0,
+                5,
+                1,
+                14
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "er",
+          "top5": [
+            "er",
+            "sind",
+            "ein",
+            "mich",
+            "haben"
+          ],
+          "mean_rank_scores": {
+            "er": 1.0,
+            "sind": 0.9333333333333333,
+            "ein": 0.8666666666666667,
+            "mich": 0.8,
+            "haben": 0.7333333333333333,
+            "gut": 0.6666666666666666,
+            "heute": 0.5666666666666667,
+            "auf": 0.5666666666666667,
+            "sein": 0.4666666666666667,
+            "das": 0.4,
+            "viel": 0.3333333333333333,
+            "hat": 0.26666666666666666,
+            "dann": 0.2,
+            "mehr": 0.13333333333333333,
+            "einfach": 0.06666666666666667,
+            "tanzt": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.9276729007640145,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                12,
+                5,
+                0,
+                1,
+                14
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 9,
+      "source_language": "ru",
+      "language_route": "global",
+      "language_route_status": "AMBIGUOUS_FALLBACK_GLOBAL",
+      "source_tree_id_sha256": "2d818a8a5e776347f89457232a8c9e8e029016dc1ed667a60ed53a81ac253859",
+      "source_target_message_id_sha256": "a6c7146cfb35c2931a93374cd0fa81959a5a172f67a4355712a4810ff3e91678",
+      "context_sha256": "07b5b477720f116d56f067f9d583e432b59e3eda847cc83ffc627bd1a987d302",
+      "target_first_token": "в",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "the",
+        "la",
+        "sure",
+        "i",
+        "el",
+        "here",
+        "yes",
+        "you",
+        "¡",
+        "claro",
+        "no",
+        "there",
+        "a",
+        "para",
+        "it",
+        "to"
+      ],
+      "candidate_sources": [
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 250,
+        "input_sha256": "07b5b477720f116d56f067f9d583e432b59e3eda847cc83ffc627bd1a987d302",
+        "published_sha256": "64224ba20c246ef7a266ca23937d9e12a3f74e06f000a0b9a03db69b523f1ac6",
+        "q_context_sha256": "1299544357f15e271b942c02198b5833bebb14390a18bc38817dadd2e8ae453b",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.105541,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "bb5cd0c0b23fd932567a29b59b14d10693ef6f3c3a1515daf6cbf6e33b6df9bd",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "1299544357f15e271b942c02198b5833bebb14390a18bc38817dadd2e8ae453b"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "¡",
+            "la",
+            "claro",
+            "it"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.9333333333333333,
+            "la": 0.8666666666666667,
+            "it": 0.7666666666666667,
+            "claro": 0.7666666666666667,
+            "el": 0.6666666666666666,
+            "you": 0.5666666666666667,
+            "sure": 0.5666666666666667,
+            "a": 0.4666666666666667,
+            "to": 0.4,
+            "the": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "yes": 0.2,
+            "here": 0.06666666666666667,
+            "there": 0.06666666666666667,
+            "no": 0.06666666666666667
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.7202380952380952,
+              "mean_spearman": 0.9456491966219872,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                8,
+                1,
+                9,
+                14
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "¡",
+          "top5": [
+            "¡",
+            "claro",
+            "i",
+            "it",
+            "la"
+          ],
+          "mean_rank_scores": {
+            "¡": 1.0,
+            "claro": 0.9333333333333333,
+            "i": 0.8666666666666667,
+            "it": 0.8,
+            "la": 0.7333333333333333,
+            "el": 0.6666666666666666,
+            "you": 0.5666666666666667,
+            "sure": 0.5666666666666667,
+            "to": 0.4666666666666667,
+            "a": 0.4,
+            "para": 0.3333333333333333,
+            "the": 0.26666666666666666,
+            "there": 0.16666666666666666,
+            "yes": 0.16666666666666666,
+            "here": 0.03333333333333333,
+            "no": 0.03333333333333333
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.5,
+              "mean_topk_jaccard": 0.8333333333333333,
+              "mean_spearman": 0.9375679741278721,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                8,
+                9,
+                3,
+                14,
+                1
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "¡",
+            "la",
+            "it",
+            "claro"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.9333333333333333,
+            "la": 0.8666666666666667,
+            "it": 0.8,
+            "claro": 0.7333333333333333,
+            "el": 0.6666666666666666,
+            "you": 0.6,
+            "sure": 0.5,
+            "to": 0.5,
+            "a": 0.4,
+            "the": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "yes": 0.2,
+            "here": 0.13333333333333333,
+            "no": 0.06666666666666667,
+            "there": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.7619047619047619,
+              "mean_spearman": 0.933758113260478,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                8,
+                1,
+                14,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "la",
+            "¡",
+            "claro",
+            "it"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.9,
+            "la": 0.9,
+            "it": 0.7666666666666667,
+            "claro": 0.7666666666666667,
+            "el": 0.6666666666666666,
+            "you": 0.6,
+            "sure": 0.5,
+            "to": 0.5,
+            "a": 0.4,
+            "the": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "yes": 0.2,
+            "here": 0.1,
+            "no": 0.1,
+            "there": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.75,
+              "mean_spearman": 0.9372387011064269,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                1,
+                8,
+                9,
+                14
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "¡",
+            "la",
+            "it",
+            "claro"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.9333333333333333,
+            "la": 0.8666666666666667,
+            "it": 0.8,
+            "claro": 0.7333333333333333,
+            "el": 0.6666666666666666,
+            "you": 0.6,
+            "sure": 0.5,
+            "to": 0.5,
+            "a": 0.4,
+            "the": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "yes": 0.2,
+            "here": 0.13333333333333333,
+            "no": 0.06666666666666667,
+            "there": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.7619047619047619,
+              "mean_spearman": 0.933758113260478,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                8,
+                1,
+                14,
+                9
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 10,
+      "source_language": "ru",
+      "language_route": "global",
+      "language_route_status": "INSUFFICIENT_LANGUAGE_EVIDENCE",
+      "source_tree_id_sha256": "1ba56ef523180c8bdc406c3e739c98973488443b83702b2472211d2f6b4f7570",
+      "source_target_message_id_sha256": "61affcb29f8810f2b7a916704ddaa7fe3bce483fe5308b9daed275fa84abdd12",
+      "context_sha256": "2ef80582c42833adedb0e38d24b388980cf0964a15bf2b09b8a0bd899bc16405",
+      "target_first_token": "текущая",
+      "candidate_count": 16,
+      "candidate_tokens": [
+        "the",
+        "la",
+        "sure",
+        "i",
+        "el",
+        "here",
+        "yes",
+        "you",
+        "¡",
+        "claro",
+        "no",
+        "there",
+        "a",
+        "para",
+        "it",
+        "to"
+      ],
+      "candidate_sources": [
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition",
+        "v8_chat_response_transition"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 12,
+        "input_sha256": "2ef80582c42833adedb0e38d24b388980cf0964a15bf2b09b8a0bd899bc16405",
+        "published_sha256": "4850710034d9fb1890f75ee780be1f40fd78b45dec016a8e6e62dc7a32adf30d",
+        "q_context_sha256": "8e2cd7812d1f4eb4586304b6785ec33e20d68383699a27d5fee08b8d434e8052",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.061062,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "05f816dfec0c78c99ab6a0b60dcf6bba23b71fad2649fadedb94494f69edcbbf",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "8e2cd7812d1f4eb4586304b6785ec33e20d68383699a27d5fee08b8d434e8052"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "claro",
+            "el",
+            "¡",
+            "to"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "claro": 0.9333333333333333,
+            "¡": 0.8333333333333334,
+            "el": 0.8333333333333334,
+            "to": 0.7333333333333333,
+            "it": 0.6666666666666666,
+            "you": 0.5666666666666667,
+            "yes": 0.5666666666666667,
+            "a": 0.43333333333333335,
+            "la": 0.43333333333333335,
+            "there": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "no": 0.2,
+            "here": 0.1,
+            "sure": 0.1,
+            "the": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.8333333333333333,
+              "mean_spearman": 0.9258268348117337,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                9,
+                4,
+                8,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "claro",
+            "el",
+            "¡",
+            "to"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.8666666666666667,
+            "el": 0.8666666666666667,
+            "claro": 0.8666666666666667,
+            "to": 0.7333333333333333,
+            "it": 0.6666666666666666,
+            "yes": 0.6,
+            "you": 0.5333333333333333,
+            "a": 0.4666666666666667,
+            "there": 0.4,
+            "la": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "sure": 0.16666666666666666,
+            "no": 0.16666666666666666,
+            "here": 0.06666666666666667,
+            "the": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.9166666666666666,
+              "mean_spearman": 0.9276301594485482,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                4,
+                8,
+                9,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "claro",
+            "el",
+            "¡",
+            "to"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.8666666666666667,
+            "el": 0.8666666666666667,
+            "claro": 0.8666666666666667,
+            "to": 0.7333333333333333,
+            "it": 0.6666666666666666,
+            "you": 0.5666666666666667,
+            "yes": 0.5666666666666667,
+            "la": 0.4666666666666667,
+            "there": 0.36666666666666664,
+            "a": 0.36666666666666664,
+            "para": 0.26666666666666666,
+            "here": 0.2,
+            "no": 0.13333333333333333,
+            "sure": 0.06666666666666667,
+            "the": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.875,
+              "mean_spearman": 0.9311904029280841,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                4,
+                8,
+                9,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "claro",
+            "el",
+            "¡",
+            "to"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "el": 0.9,
+            "claro": 0.9,
+            "¡": 0.8,
+            "to": 0.7333333333333333,
+            "it": 0.6666666666666666,
+            "you": 0.5666666666666667,
+            "yes": 0.5666666666666667,
+            "la": 0.4666666666666667,
+            "there": 0.4,
+            "a": 0.3333333333333333,
+            "para": 0.26666666666666666,
+            "no": 0.2,
+            "here": 0.13333333333333333,
+            "sure": 0.06666666666666667,
+            "the": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 0.875,
+              "mean_spearman": 0.9325037258155205,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                4,
+                9,
+                8,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "i",
+          "top5": [
+            "i",
+            "claro",
+            "el",
+            "¡",
+            "to"
+          ],
+          "mean_rank_scores": {
+            "i": 1.0,
+            "¡": 0.8666666666666667,
+            "claro": 0.8666666666666667,
+            "el": 0.8666666666666667,
+            "to": 0.7333333333333333,
+            "it": 0.6666666666666666,
+            "you": 0.5666666666666667,
+            "yes": 0.5666666666666667,
+            "la": 0.4666666666666667,
+            "there": 0.36666666666666664,
+            "a": 0.36666666666666664,
+            "para": 0.26666666666666666,
+            "here": 0.2,
+            "no": 0.13333333333333333,
+            "sure": 0.06666666666666667,
+            "the": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 0.9166666666666666,
+              "mean_spearman": 0.9301500744231116,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                3,
+                4,
+                8,
+                9,
+                15
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 11,
+      "source_language": "zh",
+      "language_route": "zh",
+      "language_route_status": "UNICODE_SCRIPT_ROUTE",
+      "source_tree_id_sha256": "2b78b199b5c98edf7841246fb17c7f0f4a20896147f667fba3f46407c23894d9",
+      "source_target_message_id_sha256": "869a43b1ef1b4dd57a97c8cacfb38491befaaaeac643d347135a7db0be8bd05c",
+      "context_sha256": "4aa6d578950054ac97058d850a42f19eac5f817788b394acd0a5df5cbf7e3bbe",
+      "target_first_token": "你好",
+      "candidate_count": 7,
+      "candidate_tokens": [
+        "。",
+        "、",
+        "assistant",
+        "user",
+        "一个开源的智能助理",
+        "您有什么需要我的帮助吗",
+        "我是open"
+      ],
+      "candidate_sources": [
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "prompt_occurrence_reuse",
+        "prompt_occurrence_reuse",
+        "prompt_occurrence_reuse",
+        "prompt_occurrence_reuse",
+        "prompt_occurrence_reuse"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 11,
+        "input_sha256": "4aa6d578950054ac97058d850a42f19eac5f817788b394acd0a5df5cbf7e3bbe",
+        "published_sha256": "4f71ecfc1de28edcbf93b5b0a2613204a4aacf80fc286745ff3bd551f980ca73",
+        "q_context_sha256": "df7ca0957dab2fc493667284a9518b77078335bf6322f6b2865cde46aa77e335",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.048277,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "70bd0b1b0812ca57e4ad62e9c773fa102c6df4263780d1f4e4fd0760a3e4150c",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "df7ca0957dab2fc493667284a9518b77078335bf6322f6b2865cde46aa77e335"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "。",
+          "top5": [
+            "。",
+            "、",
+            "我是open",
+            "assistant",
+            "一个开源的智能助理"
+          ],
+          "mean_rank_scores": {
+            "。": 1.0,
+            "、": 0.8333333333333334,
+            "我是open": 0.6666666666666666,
+            "assistant": 0.5,
+            "一个开源的智能助理": 0.3333333333333333,
+            "user": 0.16666666666666666,
+            "您有什么需要我的帮助吗": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.875,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.9293794605552702,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                1,
+                6,
+                2,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "。",
+          "top5": [
+            "。",
+            "、",
+            "我是open",
+            "assistant",
+            "一个开源的智能助理"
+          ],
+          "mean_rank_scores": {
+            "。": 1.0,
+            "、": 0.8333333333333334,
+            "我是open": 0.6666666666666666,
+            "assistant": 0.5,
+            "一个开源的智能助理": 0.3333333333333333,
+            "user": 0.16666666666666666,
+            "您有什么需要我的帮助吗": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.875,
+              "mean_topk_jaccard": 0.9583333333333334,
+              "mean_spearman": 0.9260868212175548,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                1,
+                6,
+                2,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "。",
+          "top5": [
+            "。",
+            "、",
+            "我是open",
+            "assistant",
+            "一个开源的智能助理"
+          ],
+          "mean_rank_scores": {
+            "。": 1.0,
+            "我是open": 0.75,
+            "、": 0.75,
+            "assistant": 0.5,
+            "一个开源的智能助理": 0.3333333333333333,
+            "user": 0.16666666666666666,
+            "您有什么需要我的帮助吗": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.875,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.9137891030263467,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                1,
+                6,
+                2,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "。",
+          "top5": [
+            "。",
+            "、",
+            "我是open",
+            "assistant",
+            "一个开源的智能助理"
+          ],
+          "mean_rank_scores": {
+            "。": 1.0,
+            "我是open": 0.75,
+            "、": 0.75,
+            "assistant": 0.5,
+            "一个开源的智能助理": 0.3333333333333333,
+            "user": 0.16666666666666666,
+            "您有什么需要我的帮助吗": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.75,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.8761974226643756,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                1,
+                6,
+                2,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "。",
+          "top5": [
+            "。",
+            "、",
+            "我是open",
+            "assistant",
+            "一个开源的智能助理"
+          ],
+          "mean_rank_scores": {
+            "。": 1.0,
+            "、": 0.8333333333333334,
+            "我是open": 0.6666666666666666,
+            "assistant": 0.5,
+            "一个开源的智能助理": 0.3333333333333333,
+            "user": 0.16666666666666666,
+            "您有什么需要我的帮助吗": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.875,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.8942711988288656,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                0,
+                1,
+                6,
+                2,
+                4
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    },
+    {
+      "sample_index": 12,
+      "source_language": "zh",
+      "language_route": "zh",
+      "language_route_status": "UNICODE_SCRIPT_ROUTE",
+      "source_tree_id_sha256": "a6848021121d3672e0bc6d02afc0fbb2af3d99c951578efb4b774a4065e50ba5",
+      "source_target_message_id_sha256": "6b4492fbf3f12459bf7497b5b8eb40b484aa178a5c63f4cfe3b751931eaf9ea3",
+      "context_sha256": "7f31d4b672e188593bcc00ce4fc0a971a9154b5f21b0c1d5abc1870ce51ff7d4",
+      "target_first_token": "在交战区内",
+      "candidate_count": 4,
+      "candidate_tokens": [
+        "、",
+        "。",
+        "user",
+        "一个四人的小队如何安全的穿过一个十字路口"
+      ],
+      "candidate_sources": [
+        "v8_chat_context_response_association",
+        "v8_chat_context_response_association",
+        "prompt_occurrence_reuse",
+        "prompt_occurrence_reuse"
+      ],
+      "p_activation": {
+        "role": "P",
+        "population": 256,
+        "available_population": 256,
+        "dimension": 16,
+        "input_tokens": 6,
+        "input_sha256": "7f31d4b672e188593bcc00ce4fc0a971a9154b5f21b0c1d5abc1870ce51ff7d4",
+        "published_sha256": "fc9e96ba039165efe1be5724b2e12ec2dd5c57b48e6fdd653c31cf9f24d39ea8",
+        "q_context_sha256": "f052fc3145b5c2c41a2c893ea2650d2d8cfa1226f71a0d7af16d16348d8f2fb1",
+        "conditioning": "none_prompt_entry",
+        "operator": "exact_V6_interact_population_Fh_Fp_neighbor_diffusion",
+        "rounds": 5,
+        "trajectory_length": 6,
+        "elapsed_seconds": 0.04656,
+        "stop_status": "STATE_FIXED_POINT_HASH_REPEAT",
+        "fixed_point_established": true,
+        "fixed_point_exact_no_active_edges": false,
+        "fixed_point_verification": "SHA-256 fingerprint repeat of complete hidden/published/fingerprint/message state",
+        "state_cycle": {
+          "first_round": 4,
+          "repeat_round": 5,
+          "period": 1,
+          "sha256": "6140aaa04ba4274ea4df45540035f14373f2acc7d3912d4995d5973bd560692b",
+          "verification": "SHA-256 fingerprint repeat of hidden/published/fingerprint/message state"
+        },
+        "cycle_q_context_count": 1,
+        "cycle_q_context_sha256": [
+          "f052fc3145b5c2c41a2c893ea2650d2d8cfa1226f71a0d7af16d16348d8f2fb1"
+        ],
+        "oscillation_detected": false,
+        "vector_length_reached_is_not_convergence": false,
+        "near_neighbor_edges": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_classes_initial": 256,
+        "exact_classes_final": 256,
+        "published_equal_pairs": 0,
+        "trace": null,
+        "trace_retained_in_memory": false,
+        "trace_temporary_deleted": true
+      },
+      "variants": {
+        "historical_v7": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "user",
+          "top5": [
+            "user",
+            "。",
+            "一个四人的小队如何安全的穿过一个十字路口",
+            "、"
+          ],
+          "mean_rank_scores": {
+            "user": 1.0,
+            "。": 0.6666666666666666,
+            "一个四人的小队如何安全的穿过一个十字路口": 0.3333333333333333,
+            "、": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.375,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.7212900399257872,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                1,
+                3,
+                0
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "ea2ec95d1e8f0b228ca53eca03ef6bc45d98cc60bbf6039e86d50fd3cbe6d303"
+        },
+        "no_own_context": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "。",
+          "top5": [
+            "。",
+            "user",
+            "一个四人的小队如何安全的穿过一个十字路口",
+            "、"
+          ],
+          "mean_rank_scores": {
+            "。": 1.0,
+            "user": 0.6666666666666666,
+            "一个四人的小队如何安全的穿过一个十字路口": 0.3333333333333333,
+            "、": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.7131761569173682,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                1,
+                2,
+                3,
+                0
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "49774dd291a93dff52ccbcff532139091a24e68f91f30a220149acdb09779eaf"
+        },
+        "no_cross_observation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "user",
+          "top5": [
+            "user",
+            "。",
+            "一个四人的小队如何安全的穿过一个十字路口",
+            "、"
+          ],
+          "mean_rank_scores": {
+            "user": 1.0,
+            "。": 0.6666666666666666,
+            "一个四人的小队如何安全的穿过一个十字路口": 0.3333333333333333,
+            "、": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.8212900399257872,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                1,
+                3,
+                0
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "09e381b17441a9d6a02d87f48a93078b17a2fcc841c9f69fdd955e9329e77004"
+        },
+        "no_context_no_cross": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "user",
+          "top5": [
+            "user",
+            "。",
+            "一个四人的小队如何安全的穿过一个十字路口",
+            "、"
+          ],
+          "mean_rank_scores": {
+            "user": 1.0,
+            "。": 0.6666666666666666,
+            "一个四人的小队如何安全的穿过一个十字路口": 0.3333333333333333,
+            "、": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.8212900399257872,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                1,
+                3,
+                0
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "6c3625fef36aa0c0933083223bce95ac92646c72d1e82a37623b233fa2d1fe6e"
+        },
+        "identity_cross_permutation": {
+          "target_rank": null,
+          "target_in_candidate_pool": false,
+          "reciprocal_rank": 0.0,
+          "hit_at_5": false,
+          "top1": "user",
+          "top5": [
+            "user",
+            "。",
+            "一个四人的小队如何安全的穿过一个十字路口",
+            "、"
+          ],
+          "mean_rank_scores": {
+            "user": 1.0,
+            "。": 0.6666666666666666,
+            "一个四人的小队如何安全的穿过一个十字路口": 0.3333333333333333,
+            "、": 0.0
+          },
+          "phase_count": 1,
+          "partition_stability_each_phase": [
+            {
+              "assessed": true,
+              "converged": false,
+              "method": "eight_disjoint_observer_partitions",
+              "top1_retention": 0.625,
+              "mean_topk_jaccard": 1.0,
+              "mean_spearman": 0.8212900399257872,
+              "comparison_count": 8,
+              "thresholds": {
+                "top1_retention": 0.9,
+                "mean_topk_jaccard": 0.9,
+                "mean_spearman": 0.95
+              },
+              "collective_top_indices": [
+                2,
+                1,
+                3,
+                0
+              ],
+              "active_obsiss": 256,
+              "available_obsiss": 256,
+              "P_R_pairing_used": true,
+              "P_R_pairing_method": "same-Obsiss-row cosine between current P q_context and each candidate R published state; per-Obsiss rank fusion with the 16-channel vote"
+            }
+          ],
+          "observer_configuration_id": "87c6e056819f3464044c5e94c781800290dc66593383693d44acd3397fb5cf11"
+        }
+      }
+    }
+  ],
+  "elapsed_seconds": 10.837142,
+  "interpretation_constraints": [
+    "This diagnostic evaluates only the first response token, not complete answer coherence.",
+    "Candidate-pool recall and conditional rank are reported separately.",
+    "A low recall is a proposal-coverage limitation, not evidence about Obsiss ranking.",
+    "Internal partition stability is not truth, relevance, or generalization.",
+    "Only the first 256 checkpoint rows were used; this is not a full-population result.",
+    "Language route is inferred from prompt text; source lang is metadata and is not supplied to the model."
+  ]
+}
