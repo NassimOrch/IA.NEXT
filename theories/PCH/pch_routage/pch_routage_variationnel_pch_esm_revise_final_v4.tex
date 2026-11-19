@@ -1,0 +1,748 @@
+% bismi ALLAH ARRAHMAN ARRAHIM
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\hypersetup{hidelinks}
+\geometry{margin=2.5cm}
+
+% -------------------------------------------------
+% Environnements
+% -------------------------------------------------
+\newtheorem{definition}{Définition}[section]
+\newtheorem{assumption}{Hypothèse}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{remark}{Remarque}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{example}{Exemple}[section]
+
+% -------------------------------------------------
+% Opérateurs
+% -------------------------------------------------
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\conv}{conv}
+
+% -------------------------------------------------
+% Raccourcis
+% -------------------------------------------------
+\newcommand{\R}{\mathbb R}
+\newcommand{\Hh}{\mathcal H}
+\newcommand{\Mcal}{\mathcal M}
+\newcommand{\Ccal}{\mathcal C}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Tcal}{\mathcal T}
+\newcommand{\Rcal}{\mathcal R}
+\newcommand{\Acal}{\mathcal A}
+\newcommand{\Bcal}{\mathcal B}
+
+\title{Routage variationnel PCH-ESM\\
+\large Sélection de contexte par fonctions valeur et spécialisation hiérarchique}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce manuscrit formalise le routage dans le cadre PCH comme une conséquence directe des fonctions valeur locales associées aux contextes. Le routage n'est pas une couche ajoutée : il choisit le contexte minimisant une enveloppe inférieure construite à partir de problèmes locaux convexes. On obtient ainsi un problème d'optimisation sur \(\Hh\times\Ccal\), une relaxation entropique sur le simplexe des contextes, une géométrie de cellules et de frontières, ainsi qu'une interprétation PCH-ESM où la décomposition spectrale fournit une famille finie de blocs spécialisés. Les outils classiques de Moreau, Berge, Clarke et Rockafellar--Wets sont employés uniquement comme instruments d'analyse ; la contribution propre est la géométrie de décision induite par la famille de fonctions valeur.
+\end{abstract}
+
+\tableofcontents
+
+% =================================================
+\section{Introduction}
+% =================================================
+
+On considère un noyau PCH déjà défini et validé. Pour chaque entrée latente \(w\in\Hh\), plusieurs contextes admissibles \(c\in\Ccal\) sont possibles, chacun associé à un ensemble convexe non vide et fermé \(\Mcal_c\subset\Hh\) et à une fonctionnelle locale propre.
+
+Le point conceptuel central est le suivant : la question \emph{quel contexte purifier ?} n'est pas extérieure à PCH. Elle est déjà contenue dans la famille des valeurs locales. Le routage n'ajoute donc pas une couche artificielle ; il compare les branches d'énergie que PCH fournit déjà.
+
+La contribution du manuscrit est précisément cette mise en forme :
+\begin{itemize}[leftmargin=2em]
+    \item le noyau PCH est conservé sans modification ;
+    \item le routage est défini comme minimisation d'une famille finie de fonctions valeur ;
+    \item la normalisation explique pourquoi la comparaison entre branches est canonique ;
+    \item la relaxation entropique fournit un routage souple explicite ;
+    \item la géométrie des cellules, des frontières et des marges est entièrement déterminée par les valeurs réduites ;
+    \item PCH-ESM fournit une instanciation naturelle où les contextes sont les blocs spectraux spécialisés.
+\end{itemize}
+
+Cette lecture est compatible avec l'architecture PCH-ESM : une décomposition spectrale fournit une famille finie de blocs spécialisés, et le routage choisit alors le bloc dont la valeur réduite est la plus basse. Le routage devient ainsi la continuité naturelle de la théorie PCH.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=1.7cm, >=Latex, every node/.style={align=center}]
+\node (w) [draw, rounded corners, minimum width=2.8cm, minimum height=0.9cm] {$w\in\Hh$};
+\node (locals) [draw, rounded corners, right=2.7cm of w, minimum width=4.2cm, minimum height=1.0cm] {Problèmes locaux\\$\widetilde J_c(\cdot;w)$};
+\node (values) [draw, rounded corners, right=2.7cm of locals, minimum width=3.8cm, minimum height=1.0cm] {Valeurs réduites\\$\widetilde V_c(w)$};
+\node (argmin) [draw, rounded corners, below=1.25cm of values, minimum width=3.8cm, minimum height=1.0cm] {Sélection\\$\argmin_{c\in\Ccal}\widetilde V_c(w)$};
+\node (chosen) [draw, rounded corners, left=2.7cm of argmin, minimum width=3.8cm, minimum height=1.0cm] {Contexte choisi\\$c^\star(w)$};
+
+\draw[->] (w) -- (locals);
+\draw[->] (locals) -- (values);
+\draw[->] (values) -- (argmin);
+\draw[->] (argmin) -- (chosen);
+\end{tikzpicture}
+\caption{Chaîne conceptuelle du routage variationnel : le contexte choisi est l'indice qui minimise la valeur réduite.}
+\end{figure}
+
+\begin{remark}
+Le point original du manuscrit n'est pas un nouveau score appris, mais une géométrie de décision induite par des fonctions valeur locales.
+\end{remark}
+
+\section*{Table des notations principales}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Notation & Signification \\ \midrule
+\(\widetilde J_c(u;w)\) & énergie locale normalisée du contexte \(c\) \\
+\(\widetilde V_c(w)\) & valeur réduite associée au contexte \(c\) \\
+\(u_c^\star(w)\) & minimiseur local unique du problème normalisé \\
+\(F(w)\) & valeur globale de routage, \(F(w)=\min_c \widetilde V_c(w)\) \\
+\(\Acal(w)\) & ensemble des contextes actifs \\
+\(\Omega_c^{\mathrm{str}}\) & cellule stricte du contexte \(c\) \\
+\(\Bcal\) & ensemble des points de bord \\
+\(\Rcal_\beta\) & fonctionnelle de routage souple \\
+\(\Delta_K\) & simplexe des contextes \\ \bottomrule
+\end{tabular}
+\end{center}
+
+% =================================================
+\section{Problème local, normalisation et valeur réduite}
+% =================================================
+
+\begin{assumption}[Espace latent]
+On fixe un espace euclidien réel \(\Hh=\R^d\). Les états latents purifiés vivent dans \(\Hh\).
+\end{assumption}
+
+\begin{assumption}[Famille de contextes]
+On considère un ensemble fini de contextes admissibles
+\[
+\Ccal=\{1,\dots,K\}.
+\]
+À chaque contexte \(c\in\Ccal\) est associé un ensemble convexe non vide et fermé \(\Mcal_c\subset\Hh\).
+\end{assumption}
+
+\begin{assumption}[Paramètres PCH]
+Pour chaque contexte \(c\), on fixe des paramètres \(\lambda_{\mathrm{ctx},c}>0\) et \(\lambda_{\mathrm{ridge},c}\ge 0\).
+\end{assumption}
+
+\begin{definition}[Énergie contextuelle]
+Pour un contexte \(c\in\Ccal\), on définit
+\[
+J_c(u;w)=\frac12\|u-w\|^2+\lambda_{\mathrm{ctx},c}\,\dist(u,\Mcal_c)^2+\lambda_{\mathrm{ridge},c}\,\|u\|^2.
+\]
+\end{definition}
+
+\begin{definition}[Opérateur PCH associé]
+Pour un contexte \(c\in\Ccal\), on définit
+\[
+\Pcal_c(w):=\argmin_{u\in\Hh}J_c(u;w).
+\]
+\end{definition}
+
+\begin{proposition}[Convexité forte et unicité]
+Pour tout contexte \(c\) et toute entrée \(w\), la fonctionnelle \(u\mapsto J_c(u;w)\) est \(\mu_c\)-fortement convexe, où
+\[
+\mu_c:=1+2\lambda_{\mathrm{ridge},c}.
+\]
+En particulier, \(\Pcal_c(w)\) est un singleton.
+\end{proposition}
+
+\begin{proof}
+Le terme \(u\mapsto \frac12\|u-w\|^2+\lambda_{\mathrm{ridge},c}\|u\|^2\) est \((1+2\lambda_{\mathrm{ridge},c})\)-fortement convexe. La fonction \(u\mapsto \dist(u,\Mcal_c)^2\) est convexe parce que \(\Mcal_c\) est non vide, fermé et convexe. La somme est donc fortement convexe, d'où l'existence et l'unicité du minimiseur.
+\end{proof}
+
+\begin{remark}
+La normalisation par \(\mu_c\) ne change pas le minimiseur ; elle aligne les branches sur une échelle commune et isole la composante proximale du problème. C'est cette échelle qui rend la comparaison des valeurs réduites canonique.
+\end{remark}
+
+\begin{definition}[Fonction de base normalisée]
+On pose
+\[
+f_c(u):=\lambda_{\mathrm{ctx},c}\,\dist(u,\Mcal_c)^2+\lambda_{\mathrm{ridge},c}\,\|u\|^2,
+\qquad
+g_c(u):=\frac{1}{\mu_c}f_c(u).
+\]
+Alors
+\[
+\widetilde J_c(u;w)=\frac{1}{\mu_c}J_c(u;w)=g_c(u)+\frac{1}{2\mu_c}\|u-w\|^2.
+\]
+\end{definition}
+
+\begin{definition}[Valeur réduite]
+Pour tout contexte \(c\) et toute entrée \(w\), on définit la valeur réduite
+\[
+\widetilde V_c(w):=\inf_{u\in\Hh}\widetilde J_c(u;w).
+\]
+On note aussi
+\[
+ u_c^\star(w):=\argmin_{u\in\Hh}\widetilde J_c(u;w),
+\qquad
+ e_{\mu_c g_c}(w):=\inf_{u\in\Hh}\left\{g_c(u)+\frac{1}{2\mu_c}\|u-w\|^2\right\}.
+\]
+\end{definition}
+
+\begin{proposition}[Enveloppe de Moreau et gradient]
+Pour tout contexte \(c\), la fonction \(g_c\) est propre, convexe et semi-continue inférieurement. On a
+\[
+ u_c^\star(w)=\prox_{\mu_c g_c}(w),
+\qquad
+ \widetilde V_c(w)=e_{\mu_c g_c}(w).
+\]
+De plus, \(e_{\mu_c g_c}\) est de classe \(C^1\) sur \(\Hh\) et
+\[
+\nabla e_{\mu_c g_c}(w)=\frac{1}{\mu_c}\bigl(w-\prox_{\mu_c g_c}(w)\bigr)
+=\frac{1}{\mu_c}\bigl(w-u_c^\star(w)\bigr).
+\]
+Par conséquent,
+\[
+\nabla \widetilde V_c(w)=\frac{1}{\mu_c}\bigl(w-u_c^\star(w)\bigr).
+\]
+\end{proposition}
+
+\begin{proof}
+La convexité et la semi-continuité inférieure de \(g_c\) proviennent de celles de \(\dist(\cdot,\Mcal_c)^2\) et de \(\|\cdot\|^2\). Le résultat classique sur les enveloppes de Moreau d'une fonction propre, convexe et s.c.i. implique la différentiabilité \(C^1\) de \(e_{\mu_c g_c}\) et la formule du gradient. Comme \(\widetilde J_c(u;w)=g_c(u)+\frac{1}{2\mu_c}\|u-w\|^2\), les minimiseurs coïncident.
+\end{proof}
+
+\begin{remark}
+Ces identités sont des résultats standards de l'analyse convexe ; elles sont rappelées seulement là où elles servent le raisonnement \cite{Moreau1965,Rockafellar1970,BauschkeCombettes2017,RockafellarWets1998}.
+\end{remark}
+
+\begin{proposition}[PCH comme générateur des valeurs de routage]
+Le routage ne peut pas être défini sans la famille \((\widetilde V_c)_{c\in\Ccal}\). Dans le cadre proposé, PCH génère naturellement cette famille de valeurs locales, et la sélection de contexte consiste ensuite à prendre leur enveloppe inférieure canonique.
+\end{proposition}
+
+\begin{proof}
+Une règle de routage doit comparer des branches. Ici, les branches comparées sont les fonctions valeur \(\widetilde V_c\), issues des problèmes locaux PCH. Sans elles, il n'existe ni enveloppe inférieure \(F\), ni contextes actifs, ni cellules de dominance.
+\end{proof}
+
+% =================================================
+\section{Théorème central : lower envelope routing}
+% =================================================
+
+\begin{definition}[Fonctionnelle de routage]
+Pour une entrée \(w\in\Hh\), on introduit
+\[
+\mathcal E_{\mathrm{route}}(w;u,c):=\widetilde J_c(u;w),
+\qquad (u,c)\in\Hh\times\Ccal.
+\]
+\end{definition}
+
+\begin{theorem}[Lower envelope routing theorem]
+Pour tout \(w\in\Hh\), on a
+\[
+F(w):=\min_{c\in\Ccal}\widetilde V_c(w)
+=
+\inf_{(u,c)\in\Hh\times\Ccal}\mathcal E_{\mathrm{route}}(w;u,c).
+\]
+De plus, tout minimiseur global \((\hat u(w),\hat c(w))\) vérifie
+\[
+\hat u(w)=u_{\hat c(w)}^\star(w),
+\qquad
+\hat c(w)\in\argmin_{c\in\Ccal}\widetilde V_c(w).
+\]
+La fonction \(F\) est continue et localement lipschitzienne. Elle est directionnellement différentiable et, pour tout \(h\in\Hh\),
+\[
+F'(w;h)=\min_{c\in\Acal(w)}\langle \nabla \widetilde V_c(w),h\rangle.
+\]
+Enfin,
+\[
+\partial^C F(w)=\conv\{\nabla \widetilde V_c(w): c\in\Acal(w)\}.
+\]
+Sur toute cellule stricte \(\Omega_c^{\mathrm{str}}\), la fonction \(F\) est de classe \(C^1\) et
+\[
+\nabla F(w)=\nabla \widetilde V_c(w).
+\]
+\end{theorem}
+
+\begin{proof}
+Comme \(\Ccal\) est fini,
+\[
+\inf_{(u,c)\in\Hh\times\Ccal}\mathcal E_{\mathrm{route}}(w;u,c)
+=
+\min_{c\in\Ccal}\inf_{u\in\Hh}\widetilde J_c(u;w)
+=
+\min_{c\in\Ccal}\widetilde V_c(w).
+\]
+Le minimiseur en \(u\) est unique pour chaque contexte \(c\), d'où la première partie. Comme \(F\) est le minimum fini de fonctions \(C^1\), il est continu, localement lipschitzien et directionnellement différentiable. Les formules de dérivée directionnelle et de sous-différentiel de Clarke sont les règles standards du minimum fini de fonctions \(C^1\) localement lipschitziennes \cite{Clarke1983}. Sur une cellule stricte, une seule branche est active, donc \(F\) y coïncide avec une fonction \(C^1\) unique.
+\end{proof}
+
+\begin{proposition}[Maximalité de l'enveloppe inférieure]
+La fonction \(F=\min_{c\in\Ccal}\widetilde V_c\) est la plus grande fonction \(G:\Hh\to\R\) telle que
+\[
+G(w)\le \widetilde V_c(w)\qquad\text{pour tout }w\in\Hh\text{ et tout }c\in\Ccal.
+\]
+Autrement dit, \(F\) est l'enveloppe inférieure canonique des valeurs locales.
+\end{proposition}
+
+\begin{proof}
+Si \(G\le \widetilde V_c\) pour tout \(c\), alors \(G\le \min_c \widetilde V_c=F\). La maximalité est donc immédiate.
+\end{proof}
+
+\begin{proposition}[Correspondance active et version finie de Berge]
+La correspondance active \(\Acal:\Hh\rightrightarrows\Ccal\) a des valeurs non vides et finies. Elle est semi-continue supérieurement. En particulier, sur toute cellule de dominance stricte, elle est localement constante. Ce point est la version finie du théorème du maximum de Berge \cite{Berge1963}.
+\end{proposition}
+
+\begin{proof}
+Pour chaque \(c\),
+\[
+\{w\in\Hh:\ c\in\Acal(w)\}
+=
+\bigcap_{j\in\Ccal}\{w\in\Hh:\widetilde V_c(w)\le \widetilde V_j(w)\},
+\]
+intersection finie d'ensembles fermés, donc ensemble fermé. Comme \(\Ccal\) est fini, la correspondance est à valeurs finies, non vides et fermées ; elle est donc semi-continue supérieurement. Sur une cellule stricte, les inégalités sont strictes et stables par continuité, d'où la constance locale.
+\end{proof}
+
+\begin{definition}[Cellules de contexte]
+On définit
+\[
+\Omega_c^{\mathrm{str}}:=\{w\in\Hh:\ \widetilde V_c(w)<\widetilde V_j(w)\ \forall j\neq c\},
+\]
+\[
+\Omega_c:=\{w\in\Hh:\ c\in\argmin_{j\in\Ccal}\widetilde V_j(w)\}
+=\bigcap_{j\neq c}\{w\in\Hh:\widetilde V_c(w)\le \widetilde V_j(w)\},
+\]
+et
+\[
+\Bcal:=\{w\in\Hh:\ \#\Acal(w)\ge 2\}.
+\]
+\end{definition}
+
+\begin{proposition}[Partition de l'espace latent et frontières]
+Pour chaque \(c\in\Ccal\), \(\Omega_c^{\mathrm{str}}\) est ouvert et \(\Omega_c\) est fermé. Les cellules strictes sont deux à deux disjointes, et
+\[
+\Hh=\left(\bigsqcup_{c\in\Ccal}\Omega_c^{\mathrm{str}}\right)\sqcup \Bcal.
+\]
+Pour chaque paire \(c\neq j\), en posant
+\[
+\Gamma_{c,j}(w):=\widetilde V_c(w)-\widetilde V_j(w),
+\qquad
+\Sigma_{c,j}:=\{w\in\Hh:\Gamma_{c,j}(w)=0\},
+\]
+on a que \(\Sigma_{c,j}\) est fermé. Si \(\nabla\Gamma_{c,j}(w_0)\neq 0\), alors \(\Sigma_{c,j}\) est localement une hypersurface \(C^1\) au voisinage de \(w_0\).
+\end{proposition}
+
+\begin{proof}
+Chaque \(\widetilde V_c-\widetilde V_j\) est continue. Donc \(\Omega_c^{\mathrm{str}}\), défini par des inégalités strictes de fonctions continues, est ouvert, et \(\Omega_c\), défini par des inégalités larges, est fermé. Les cellules strictes sont disjointes par contradiction immédiate. La fermeture de \(\Sigma_{c,j}\) découle de la continuité de \(\Gamma_{c,j}\). Si \(\nabla\Gamma_{c,j}(w_0)\neq 0\), le théorème des fonctions implicites s'applique à \(\Gamma_{c,j}(w)=0\).
+\end{proof}
+
+\begin{corollary}[Stabilité sous marge stricte]
+Supposons qu'en un point \(w\in\Hh\), le minimiseur de \(c\mapsto\widetilde V_c(w)\) soit unique, noté \(c^\star\), et qu'il existe une marge
+\[
+\delta(w):=\min_{c\neq c^\star}\bigl(\widetilde V_c(w)-\widetilde V_{c^\star}(w)\bigr)>0.
+\]
+Alors il existe un voisinage \(U\) de \(w\) tel que tout \(z\in U\) admet le même contexte routé \(c^\star\).
+\end{corollary}
+
+\begin{proof}
+Par continuité finie des fonctions \(\widetilde V_c\), on choisit \(U\) tel que \(|\widetilde V_c(z)-\widetilde V_c(w)|<\delta(w)/3\) pour tous \(c\) et tout \(z\in U\). L'argument standard de comparaison des branches donne alors la stabilité locale du contexte optimal.
+\end{proof}
+
+% =================================================
+\section{Routage souple et complexité de calcul}
+% =================================================
+
+Le routage dur est discret. Pour obtenir une relaxation convexe, on passe au simplexe des contextes. Le routage souple est une approximation stable du routage exact, utile quand l'évaluation exhaustive de toutes les branches est coûteuse.
+
+\begin{definition}[Simplexe des contextes]
+On note
+\[
+\Delta_K:=\left\{p\in\R^K:\ p_c\ge 0,\ \sum_{c=1}^K p_c=1\right\},
+\qquad
+\Delta_K^\circ:=\{p\in\Delta_K:\ p_c>0\ \text{pour tout }c\}.
+\]
+\end{definition}
+
+\begin{definition}[Fonctionnelle de routage souple]
+Pour \(\beta>0\), on définit
+\[
+\Rcal_\beta(w,p)
+=
+\sum_{c=1}^K p_c\,\widetilde V_c(w)
++\frac{1}{\beta}\sum_{c=1}^K p_c\log p_c,
+\qquad p\in\Delta_K,
+\]
+avec la convention \(0\log 0=0\).
+\end{definition}
+
+\begin{proposition}[Existence et unicité du routage souple]
+Pour tout \(w\), la fonctionnelle \(p\mapsto \Rcal_\beta(w,p)\) admet un unique minimiseur \(p^\star_\beta(w)\) dans \(\Delta_K\).
+\end{proposition}
+
+\begin{proof}
+La fonction \(p\mapsto \sum_c p_c\log p_c\) est strictement convexe sur \(\Delta_K\) et \(p\mapsto \sum_c p_c\,\widetilde V_c(w)\) est affine. La somme est donc strictement convexe sur le compact \(\Delta_K\), d'où l'existence et l'unicité du minimiseur.
+
+Montrons maintenant que le minimiseur appartient à l'intérieur \(\Delta_K^\circ\). Supposons au contraire que \(p^\star_i=0\) pour un certain indice \(i\). Comme \(\sum_c p^\star_c=1\), il existe un indice \(j\) tel que \(p^\star_j>0\). Pour \(t\in(0,p^\star_j)\), posons \(p(t)=p^\star+t(e_i-e_j)\in\Delta_K\). On obtient une fonction unidimensionnelle dont la dérivée à droite en \(0\) est \(-\infty\), car \(\log t\to-\infty\) lorsque \(t\downarrow 0\). Cela contredit la minimalité de \(p^\star\). Ainsi, tout minimiseur appartient à \(\Delta_K^\circ\).
+\end{proof}
+
+\begin{theorem}[Forme explicite du routage souple]
+Le minimiseur unique de \(\Rcal_\beta(w,\cdot)\) est donné par
+\[
+p_c^\star(w)=\frac{\exp\!\bigl(-\beta\,\widetilde V_c(w)\bigr)}
+{\sum_{j=1}^K \exp\!\bigl(-\beta\,\widetilde V_j(w)\bigr)}.
+\]
+\end{theorem}
+
+\begin{proof}
+Comme le minimiseur appartient à \(\Delta_K^\circ\), on peut appliquer la méthode des multiplicateurs de Lagrange au problème
+\[
+\min_{p\in\Delta_K^\circ}\ \sum_{c=1}^K p_c\,\widetilde V_c(w)+\frac{1}{\beta}\sum_{c=1}^K p_c\log p_c.
+\]
+On obtient, pour chaque \(c\),
+\[
+\widetilde V_c(w)+\frac{1}{\beta}(1+\log p_c)+\lambda=0,
+\]
+donc
+\[
+p_c=\exp(-1-\beta\lambda)\,\exp\!\bigl(-\beta\widetilde V_c(w)\bigr).
+\]
+La contrainte \(\sum_c p_c=1\) donne la formule annoncée. Le résultat est la forme usuelle du softmin entropique \cite{BauschkeCombettes2017,RockafellarWets1998}.
+\end{proof}
+
+\begin{corollary}[Valeur du problème de routage et limite dure]
+On a l'identité
+\[
+\inf_{p\in\Delta_K}\Rcal_\beta(w,p)
+=
+-\frac{1}{\beta}\log\!\left(\sum_{c=1}^K \exp\!\bigl(-\beta\,\widetilde V_c(w)\bigr)\right).
+\]
+De plus,
+\[
+F(w)\le -\frac{1}{\beta}\log\!\left(\sum_{c=1}^K e^{-\beta \widetilde V_c(w)}\right)\le F(w)+\frac{\log K}{\beta}.
+\]
+Enfin, si le minimiseur de \(c\mapsto \widetilde V_c(w)\) est unique, noté \(c^\star(w)\), alors
+\[
+p^\star_\beta(w)\xrightarrow[\beta\to+\infty]{}e_{c^\star(w)}.
+\]
+\end{corollary}
+
+\begin{proof}
+C'est la valeur classique de l'entropie log-sum-exp. La borne sandwich est la propriété standard du \(\log\)-sum-exp. Pour la limite dure, on compare chaque poids non optimal au poids optimal ; les différences strictement positives dans les valeurs réduites sont écrasées exponentiellement lorsque \(\beta\to+\infty\).
+\end{proof}
+
+\begin{proposition}[Profil de calcul et comparaison conceptuelle]
+Si le coût d'une résolution locale du contexte \(c\) à précision \(\varepsilon\) est noté \(T_c(\varepsilon)\), alors un routage exact par comparaison exhaustive coûte
+\[
+C_{\mathrm{exact}}(\varepsilon)=\sum_{c\in\Ccal}T_c(\varepsilon).
+\]
+Un routage appris par gate a un coût d'inférence approximatif
+\[
+C_{\mathrm{gate}}\approx T_{\mathrm{gate}}+T_{c^\star},
+\]
+mais il exige une phase d'apprentissage séparée et n'offre pas, en lui-même, de certificat de marge sur le contexte choisi. Le routage variationnel exact est donc plus coûteux à l'inférence, mais il est interprétable, certifiable par marge et n'introduit pas de module externe de décision.
+\end{proposition}
+
+\begin{proof}
+Le premier terme suit de la comparaison explicite de tous les contextes. Le second profil reflète le schéma classique gate-plus-expert : un gate est évalué puis un expert est exécuté. La différence conceptuelle est que le gate appris doit être entraîné et peut se tromper hors distribution, alors que le routage variationnel compare directement les valeurs locales et peut être validé par marge.
+\end{proof}
+
+\begin{quote}
+\small
+\textbf{Algorithme de routage calculable.}
+
+Entrée : \(w\), ensemble fini \(\Ccal\), tolérance \(\varepsilon\).
+
+1. Pour chaque contexte \(c\in\Ccal\), résoudre le problème local et calculer une approximation \(\widetilde V_c^{(N)}(w)\).
+
+2. Choisir \(c^\star\in\argmin_{c\in\Ccal}\widetilde V_c^{(N)}(w)\).
+
+3. Si une marge \(\delta>0\) est certifiée, arrêter dès que
+\[
+\bigl|\widetilde V_c^{(N)}(w)-\widetilde V_{c^\star}^{(N)}(w)\bigr|<\delta/3
+\qquad\text{pour tout }c\neq c^\star.
+\]
+
+Sortie : contexte routé \(c^\star\) et minimiseur local \(u_{c^\star}^\star(w)\).
+\end{quote}
+
+\begin{remark}
+La procédure précédente n'est pas une heuristique cachée : elle n'utilise que des valeurs locales, une marge calculable et un critère d'arrêt explicite.
+\end{remark}
+
+% =================================================
+\section{Comparaison avec les \emph{Mixture of Experts}}
+% =================================================
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+Aspect & \emph{Mixture of Experts} & Routage PCH \\
+\midrule
+Sélection & gate appris & \(\argmin_c \widetilde V_c(w)\) \\
+Objet de base & score séparé & fonction valeur locale \\
+Décision & statistique / discriminative & variationnelle / énergétique \\
+Interprétation & souvent opaque & géométrie de cellules \\
+Certificat & rarement explicite & marge énergétique explicite \\
+Apprentissage du routeur & requis & non requis pour la règle de base \\
+\bottomrule
+\end{tabular}
+\caption{Différence conceptuelle entre routage appris et routage variationnel.}
+\end{table}
+
+Le message n'est pas qu'un gate appris serait inutile dans toute application, mais qu'il s'agit d'un objet différent : le routeur variationnel ne prédit pas le contexte, il le sélectionne en minimisant une énergie locale déjà calculée.
+
+% =================================================
+\section{Pont avec PCH-ESM : spécialisation spectrale et collage}
+% =================================================
+
+Dans PCH-ESM, une décomposition orthogonale et déterministe fournit une famille finie de sous-espaces spécialisés. Ce sont des contextes naturels pour le routage variationnel.
+
+\begin{assumption}[Décomposition spectrale]
+On suppose un espace latent \(\Hh=\Hh_0\oplus \Hh_1\oplus\cdots\oplus \Hh_n\), obtenu par projecteurs spectraux orthogonaux. On note \(\Pi_i:\Hh\to\Hh_i\) la projection orthogonale.
+\end{assumption}
+
+\begin{definition}[Bloc certifié]
+On appelle bloc certifié un bloc \(i\) muni d'une valeur réduite \(\widetilde V_i^{\mathrm{ESM}}(w)\), d'une borne d'erreur explicite \(\epsilon_i(w)\), et d'une marge de séparation \(\delta_i(w)\) vérifiée sur le jeu de calibration.
+\end{definition}
+
+\begin{definition}[Contextes PCH-ESM]
+On note \(\Ccal_{\mathrm{ESM}}=\{1,\dots,n\}\) l'ensemble des blocs spécialisés induits par la décomposition spectrale. À chaque bloc \(i\) on associe une valeur réduite \(\widetilde V_i^{\mathrm{ESM}}(w)\) calculée par le problème local du bloc correspondant.
+\end{definition}
+
+\begin{proposition}[Instantiation du routage sur PCH-ESM]
+Si les contextes admissibles sont pris parmi les blocs spécialisés de PCH-ESM, alors le bloc routé est
+\[
+i^\star(w)\in\argmin_{i\in\Ccal_{\mathrm{ESM}}}\widetilde V_i^{\mathrm{ESM}}(w).
+\]
+Autrement dit, la décomposition spectrale fournit une famille de contextes admissibles, et le routage variationnel sélectionne le bloc de plus faible valeur réduite.
+\end{proposition}
+
+\begin{proof}
+C'est l'application directe du théorème de routage exact à la famille finie des blocs spécialisés.
+\end{proof}
+
+\begin{proposition}[Spécialisation orthogonale et gain de reconstruction]
+Supposons que la cible vraie \(\theta^\star\) appartienne à un sous-espace spécialisé \(\Hh_i\), et qu'une estimation dense \(\hat\theta_{\mathrm{dense}}\in\Hh\) soit projetée par \(\hat\theta_{\mathrm{spec}}:=\Pi_i\hat\theta_{\mathrm{dense}}\). En notant \(\Pi_i^\perp:=\mathrm{Id}-\Pi_i\), on a alors
+\[
+\|\hat\theta_{\mathrm{dense}}-\theta^\star\|^2
+=
+\|\hat\theta_{\mathrm{spec}}-\theta^\star\|^2
++
+\|\Pi_i^\perp \hat\theta_{\mathrm{dense}}\|^2.
+\]
+En particulier, si \(\Pi_i^\perp \hat\theta_{\mathrm{dense}}\neq 0\), la spécialisation réduit strictement l'erreur quadratique.
+\end{proposition}
+
+\begin{proof}
+Comme \(\theta^\star\in\Hh_i\), la différence \(\hat\theta_{\mathrm{dense}}-\theta^\star\) se décompose orthogonalement en une composante dans \(\Hh_i\) et une composante orthogonale. L'identité suit par Pythagore.
+\end{proof}
+
+\begin{proposition}[Collage pondéré inverse-variance]
+Supposons que les certificats locaux de la composante partagée s'écrivent
+\[
+u_0^{(i)} = u_0^\star + \varepsilon_i,\qquad i=1,\dots,n,
+\]
+où \(u_0^\star\in\Hh_0\) est la vraie composante partagée, les erreurs \(\varepsilon_i\) sont indépendantes, centrées et isotropes, avec \(\mathbb E\|\varepsilon_i\|^2 = d\,\tau_i\) pour des \(\tau_i>0\). Alors, parmi tous les estimateurs affines non biaisés \(\tilde u_0=\sum_{i=1}^n \beta_i u_0^{(i)}\) avec \(\sum_i\beta_i=1\), le choix
+\[
+\beta_i^\star=\frac{\tau_i^{-1}}{\sum_{j=1}^n \tau_j^{-1}}
+\]
+minimise l'erreur quadratique moyenne. Le consensus pondéré est donc l'estimateur linéaire non biaisé optimal.
+\end{proposition}
+
+\begin{proof}
+On a \(\mathbb E[\tilde u_0-u_0^\star]=0\) et, par indépendance,
+\[
+\mathbb E\|\tilde u_0-u_0^\star\|^2
+=
+ d\sum_{i=1}^n \beta_i^2 \tau_i.
+\]
+La minimisation sous la contrainte \(\sum_i\beta_i=1\) donne \(\beta_i\propto \tau_i^{-1}\), donc la formule annoncée.
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=1.5cm, >=Latex, every node/.style={align=center}]
+\node (pch) [draw, rounded corners, minimum width=3.1cm, minimum height=0.95cm] {PCH\\valeurs locales};
+\node (esm) [draw, rounded corners, right=1.8cm of pch, minimum width=3.4cm, minimum height=0.95cm] {PCH-ESM\\blocs spécialisés};
+\node (vals) [draw, rounded corners, right=1.8cm of esm, minimum width=3.4cm, minimum height=0.95cm] {Valeurs réduites\\par bloc};
+\node (sel) [draw, rounded corners, below=1.2cm of vals, minimum width=3.4cm, minimum height=0.95cm] {Sélection\\\(\argmin\)};
+\node (out) [draw, rounded corners, left=1.8cm of sel, minimum width=3.4cm, minimum height=0.95cm] {Contexte choisi\\ou bloc expert};
+
+\draw[->] (pch) -- (esm);
+\draw[->] (esm) -- (vals);
+\draw[->] (vals) -- (sel);
+\draw[->] (sel) -- (out);
+\end{tikzpicture}
+\caption{Chaîne conceptuelle PCH \(\rightarrow\) PCH-ESM \(\rightarrow\) routage.}
+\end{figure}
+
+\begin{remark}
+Cette compatibilité clarifie le rôle de PCH-ESM : il ne remplace pas le routage, il fournit une famille de branches spécialisées sur lesquelles le routage variationnel opère.
+\end{remark}
+
+% =================================================
+\section{Exemples}
+% =================================================
+
+\begin{example}[Cas unidimensionnel symétrique]
+On prend \(d=1\), \(\Mcal_1=\{-a\}\), \(\Mcal_2=\{a\}\) avec \(a>0\), et des paramètres identiques
+\[
+\lambda_{\mathrm{ctx},1}=\lambda_{\mathrm{ctx},2}=\lambda>0,
+\qquad
+\lambda_{\mathrm{ridge},1}=\lambda_{\mathrm{ridge},2}=\rho\ge 0.
+\]
+Alors \(\mu_1=\mu_2=1+2\rho\), et une complétion du carré donne
+\[
+u_1^\star(w)=\frac{w-2\lambda a}{1+2\lambda+2\rho},
+\qquad
+u_2^\star(w)=\frac{w+2\lambda a}{1+2\lambda+2\rho}.
+\]
+De plus,
+\[
+\widetilde V_1(w)-\widetilde V_2(w)
+=
+\frac{4a\lambda}{(1+2\rho)(1+2\lambda+2\rho)}\,w.
+\]
+Par conséquent,
+\[
+\Omega_1^{\mathrm{str}}=(-\infty,0),
+\qquad
+\Omega_2^{\mathrm{str}}=(0,\infty),
+\qquad
+\Bcal=\{0\}.
+\]
+Le routage exact se lit donc immédiatement : le contexte \(1\) est choisi pour \(w<0\), le contexte \(2\) pour \(w>0\), et la frontière de décision est réduite au point \(0\).
+\end{example}
+
+\begin{example}[Cas bidimensionnel]
+On prend \(\Hh=\R^2\) et deux fonctions valeur convexes
+\[
+\widetilde V_1(x_1,x_2)=\|(x_1,x_2)-(1,0)\|^2,\qquad
+\widetilde V_2(x_1,x_2)=\|(x_1,x_2)-(-1,0)\|^2.
+\]
+Alors
+\[
+\widetilde V_1-\widetilde V_2=-4x_1,
+\]
+donc les cellules strictes sont les demi-plans \(x_1<0\) et \(x_1>0\), et la frontière est la droite \(x_1=0\). Ce toy model illustre la partition géométrique produite par le minimum de deux valeurs locales.
+\end{example}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=1]
+\draw[->] (-3.2,0) -- (3.2,0) node[right] {$x_1$};
+\draw[->] (0,-2.0) -- (0,2.2) node[above] {$x_2$};
+\fill[blue!10] (-3,-2) rectangle (0,2);
+\fill[orange!12] (0,-2) rectangle (3,2);
+\draw[dashed, very thick] (0,-2) -- (0,2);
+\node at (-1.4,1.6) {$\Omega_1^{\mathrm{str}}$};
+\node at (1.4,1.6) {$\Omega_2^{\mathrm{str}}$};
+\node at (0.35,0.2) {$\Bcal$};
+\end{tikzpicture}
+\caption{Exemple bidimensionnel : deux cellules strictes séparées par une frontière linéaire.}
+\end{figure}
+
+% =================================================
+\section{Relation à la littérature}
+% =================================================
+
+Le cadre ici présenté se place à l'interface de l'analyse convexe, de la théorie des fonctions valeur, de la programmation disjonctive et des modèles de type \emph{Mixture of Experts}. Les références classiques pertinentes sont celles de Moreau, Rockafellar, Berge, Clarke, ainsi que Bauschke--Combettes et Rockafellar--Wets \cite{Moreau1965,Rockafellar1970,Berge1963,Clarke1983,BauschkeCombettes2017,RockafellarWets1998}.
+
+La nouveauté du manuscrit n'est pas d'inventer de nouveaux outils de convexité ; elle est de faire du routage un problème variationnel à part entière. Les méthodes classiques de routage utilisent un score appris, un classifieur ou un \emph{gate} séparé. Ici, le contexte est sélectionné comme minimiseur d'une famille de valeurs réduites issues directement de problèmes locaux. Le routage n'est donc plus un module externe : il devient une conséquence de la structure énergétique.
+
+En termes pratiques, le routage appris est souvent moins coûteux à l'inférence une fois le gate entraîné, mais il introduit une phase d'apprentissage séparée, une dépendance aux données d'entraînement du gate et une opacité de décision. Le routage variationnel est plus coûteux si l'on résout exhaustivement toutes les branches, mais il est interprétable, il s'inscrit directement dans PCH et il peut être accéléré par un pré-roulage court avec marge. Ce compromis est la formulation scientifique du problème.
+
+\begin{remark}
+Cette lecture permet de séparer proprement ce qui relève d'un rappel classique et ce qui relève de la contribution propre du manuscrit : la sélection de contexte par minimisation des valeurs réduites et l'interprétation géométrique qui en découle.
+\end{remark}
+
+% =================================================
+\section{Théorème de synthèse structurelle}
+% =================================================
+
+\begin{theorem}[Structure variationnelle globale du routage PCH et instanciation PCH-ESM]
+Sous les hypothèses du document :
+\begin{enumerate}[leftmargin=2em]
+\item pour chaque contexte \(c\), le problème local admet un unique minimiseur \(u_c^\star(w)=\prox_{\mu_c g_c}(w)\) et \(\widetilde V_c(w)=e_{\mu_c g_c}(w)\) ;
+\item la fonction globale \(F(w)=\min_{c\in\Ccal}\widetilde V_c(w)\) est continue, localement lipschitzienne, directionnellement différentiable et de classe \(C^1\) sur toute cellule stricte ;
+\item l'espace latent se décompose en cellules strictes \(\Omega_c^{\mathrm{str}}\), en cellules faibles \(\Omega_c\) et en une strate de bord \(\Bcal\) ;
+\item la correspondance active est semi-continue supérieurement et la régularité de Clarke est donnée par l'enveloppe convexe des gradients actifs ;
+\item le routage souple est la régularisation entropique du critère des valeurs réduites, avec minimiseur de Gibbs ;
+\item les cellules strictes sont les régions de stabilité locale du contexte routé ;
+\item si les contextes admissibles proviennent des blocs spécialisés de PCH-ESM, alors le bloc routé est exactement le bloc minimisant la valeur réduite correspondante ;
+\item la spécialisation orthogonale améliore strictement la reconstruction dès lors qu'une composante dense vit hors du sous-espace spécialisé ;
+\item le collage pondéré inverse-variance est l'estimateur linéaire non biaisé optimal de la composante partagée ;
+\item la fonction \(F\) est l'enveloppe inférieure canonique des valeurs locales et le routage est la sélection de son minimiseur.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Les points \(1\) à \(5\) sont établis dans les sections précédentes. Les points \(6\) à \(10\) sont les reformulations structurelles des résultats obtenus : la stabilité locale des cellules découle de la marge stricte, l'instanciation PCH-ESM découle de la famille finie de blocs spécialisés, le gain de spécialisation découle de Pythagore, l'optimalité inverse-variance découle de la minimisation quadratique, et la maximalité de l'enveloppe inférieure découle de la définition même de \(F\).
+\end{proof}
+
+% =================================================
+\section{Conclusion}
+% =================================================
+
+Le noyau PCH n'est pas le problème à résoudre ; il est déjà la brique mathématique centrale. Le routage est la continuité naturelle de PCH : le contexte sélectionné est celui qui minimise la valeur locale réduite.
+
+La formulation canonique est
+\[
+(\hat u(w),\hat c(w))\in\argmin_{(u,c)\in\Hh\times\Ccal}\mathcal E_{\mathrm{route}}(w;u,c),
+\]
+équivalente à
+\[
+\hat c(w)\in\argmin_{c\in\Ccal}\widetilde V_c(w),
+\qquad
+\widetilde V_c(w)=e_{\mu_c g_c}(w).
+\]
+La version souple est donnée par
+\[
+p^\star_\beta(w)=\argmin_{p\in\Delta_K}\Rcal_\beta(w,p).
+\]
+
+Cette formulation conserve strictement le noyau PCH, définit explicitement le critère de sélection du contexte, donne une écriture exacte du routage comme problème sur \(\Hh\times\Ccal\), admet une relaxation convexe sur le simplexe, relie le pré-roulage à la convergence vers la valeur réduite et fournit une interprétation variationnelle propre du choix de contexte. Le pont avec PCH-ESM est également explicite : la décomposition spectrale fournit une famille finie de blocs spécialisés, et le même principe de minimisation sélectionne le bloc de plus faible valeur réduite.
+
+\begin{thebibliography}{99}
+
+\bibitem{Moreau1965}
+J.-J. Moreau,
+\newblock Proximité et dualité dans un espace hilbertien.
+\newblock \emph{Bull. Soc. Math. France}, 93:273--299, 1965.
+
+\bibitem{Rockafellar1970}
+R. T. Rockafellar,
+\newblock \emph{Convex Analysis}.
+\newblock Princeton University Press, 1970.
+
+\bibitem{Berge1963}
+C. Berge,
+\newblock \emph{Topological Spaces: Including a Treatment of Multi-Valued Functions, Vector Spaces and Convexity}.
+\newblock Oliver \& Boyd, 1963.
+
+\bibitem{Clarke1983}
+F. H. Clarke,
+\newblock \emph{Optimization and Nonsmooth Analysis}.
+\newblock Wiley, 1983.
+
+\bibitem{BauschkeCombettes2017}
+H. H. Bauschke and P. L. Combettes,
+\newblock \emph{Convex Analysis and Monotone Operator Theory in Hilbert Spaces}.
+\newblock 2nd ed., Springer, 2017.
+
+\bibitem{RockafellarWets1998}
+R. T. Rockafellar and R. J.-B. Wets,
+\newblock \emph{Variational Analysis}.
+\newblock Springer, 1998.
+
+\end{thebibliography}
+
+\end{document}

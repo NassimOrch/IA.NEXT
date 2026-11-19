@@ -1,0 +1,437 @@
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+\newtheorem{definition}{Définition}[section]
+\newtheorem{assumption}{Hypothèse}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{remark}{Remarque}[section]
+
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\Tr}{tr}
+\DeclareMathOperator{\Id}{Id}
+\DeclareMathOperator{\op}{op}
+\DeclareMathOperator{\conv}{conv}
+
+\newcommand{\R}{\mathbb R}
+\newcommand{\Hh}{\mathcal H}
+\newcommand{\Mcal}{\mathcal M}
+\newcommand{\Ccal}{\mathcal C}
+\newcommand{\Pcal}{\mathcal P}
+\newcommand{\Jcal}{\mathcal J}
+\newcommand{\Ical}{\mathcal I}
+
+\title{Extension théorique du routage contextuel dans le noyau PCH}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+On prolonge la théorie PCH déjà établie en isolant explicitement la couche de routage.
+Le noyau PCH n'est pas modifié : pour chaque contexte admissible, on conserve l'opérateur exact et sa normalisation.
+La nouvelle contribution est une fonctionnelle de sélection de contexte fondée sur l'évidence variationnelle normalisée, sur un certificat de gain, puis sur un raffinement géométrique par projecteur limite.
+Cette construction sépare la purification locale exacte et le choix de contexte, ce qui retire au routage son rôle de goulot d'étranglement sans altérer la dynamique PCH elle-même.
+\end{abstract}
+
+\section{Préliminaires et jauge normalisée}
+
+On se place dans la même jauge que celle du Cas 3 normalisé.
+Pour un index de famille $\alpha$, on note
+\[
+\mu_\alpha := 1+2\lambda_{\mathrm{ridge},\alpha},\qquad
+\gamma_\alpha := \frac{\lambda_{\mathrm{ctx},\alpha}}{\mu_\alpha},\qquad
+\tau_\alpha := \eta_\alpha \mu_\alpha.
+\]
+Sous la normalisation retenue dans la théorie précédente, les quantités $\gamma_\alpha$ et $\tau_\alpha$ convergent vers des constantes déterministes, et le projecteur différentiel local se concentre vers un projecteur orthogonal limite $P_0$.
+
+Pour chaque contexte $c\in\Ccal$, on dispose d'un ensemble admissible convexe fermé
+\[
+\Mcal_{\alpha,c}\subset \Hh^{d_\alpha}
+\]
+construit à partir des embeddings de calibration.
+L'énergie locale normalisée est
+\[
+\widehat J_{\alpha,c}(u;w)
+=
+\frac{1}{\mu_\alpha}
+\Bigl(
+\frac12\|u-w\|^2
++
+\lambda_{\mathrm{ctx},\alpha}\,\dist(u,\Mcal_{\alpha,c})^2
++
+\lambda_{\mathrm{ridge},\alpha}\,\|u\|^2
+\Bigr).
+\]
+L'opérateur PCH exact du contexte $c$ est
+\[
+u^\star_{\alpha,c}(w)
+=
+\Pcal^{\mathrm{PCH}}_{\alpha,c}(w)
+=
+\argmin_{u\in \Hh^{d_\alpha}} \widehat J_{\alpha,c}(u;w).
+\]
+Le noyau PCH reste donc strictement inchangé : seule la couche de décision entre contextes sera définie plus bas.
+
+\section{Pourquoi le routage doit être formulé comme un problème variationnel}
+
+Le choix de contexte ne doit pas reposer sur un classifieur plat $x\mapsto c$.
+Il doit comparer, pour un même \(w\), les minima exacts des problèmes PCH associés à chaque contexte.
+La quantité brute pertinente pour un contexte \(c\) est le gain exact
+\begin{equation}\label{eq:gain-def}
+\Delta_{\alpha,c}(w)
+=
+\widehat J_{\alpha,c}(w;w)
+-
+\widehat J_{\alpha,c}\bigl(u^\star_{\alpha,c}(w);w\bigr).
+\end{equation}
+Elle mesure la baisse d'énergie obtenue lorsque le point d'entrée est purifié par le contexte \(c\).
+
+\begin{proposition}[Invariance par recentrage additif]
+\label{prop:additive-invariance}
+Soit \(b_{\alpha,c}:\Hh^{d_\alpha}\to \R\) une fonction ne dépendant pas de \(u\), et posons
+\[
+\widetilde J_{\alpha,c}(u;w)=\widehat J_{\alpha,c}(u;w)+b_{\alpha,c}(w).
+\]
+Alors le gain associé satisfait
+\[
+\widetilde\Delta_{\alpha,c}(w)=\Delta_{\alpha,c}(w).
+\]
+\end{proposition}
+
+\begin{proof}
+Les termes ajoutés s'annulent dans la différence
+\[
+\widetilde J_{\alpha,c}(w;w)-\widetilde J_{\alpha,c}(u^\star_{\alpha,c}(w);w)
+=
+\widehat J_{\alpha,c}(w;w)-\widehat J_{\alpha,c}(u^\star_{\alpha,c}(w);w).
+\]
+Donc le gain est invariant sous tout recentrage additif contexte-dépendant.
+\end{proof}
+
+\begin{remark}
+Cette invariance est précisément ce qui manque aux comparaisons par énergie finale brute lorsqu'elles sont appliquées de façon naïve entre contextes.
+Le bon objet n'est pas la valeur absolue du minimum, mais la quantité d'information effectivement extraite par la purification.
+\end{remark}
+
+\section{Score canonique de routage}
+
+\begin{definition}[Score de routage par gain normalisé]
+Pour un contexte \(c\), on définit
+\begin{equation}\label{eq:routing-score}
+\mathcal R_{\alpha,c}(w)
+=
+\frac{\Delta_{\alpha,c}(w)}{\widehat J_{\alpha,c}(w;w)+\varepsilon},
+\qquad \varepsilon>0.
+\end{equation}
+\end{definition}
+
+\begin{proposition}[Bornes]
+Pour tout \(w\) et tout \(c\),
+\[
+0\le \mathcal R_{\alpha,c}(w)\le 1.
+\]
+De plus, \(\mathcal R_{\alpha,c}(w)=1\) si et seulement si \(w\) est déjà un minimiseur de \(\widehat J_{\alpha,c}(\cdot;w)\).
+\end{proposition}
+
+\begin{proof}
+Par définition, \(\Delta_{\alpha,c}(w)\ge 0\) puisque \(u^\star_{\alpha,c}(w)\) minimise \(\widehat J_{\alpha,c}(\cdot;w)\).
+De plus,
+\[
+0\le \Delta_{\alpha,c}(w)\le \widehat J_{\alpha,c}(w;w),
+\]
+puisque \(\widehat J_{\alpha,c}(u^\star_{\alpha,c}(w);w)\ge 0\).
+La division par un terme strictement positif préserve donc l'encadrement.
+L'égalité \(\mathcal R_{\alpha,c}(w)=1\) équivaut à \(\widehat J_{\alpha,c}(u^\star_{\alpha,c}(w);w)=0\), donc à l'optimalité immédiate de \(w\).
+\end{proof}
+
+\begin{definition}[Routeur exact par evidence]
+On définit le contexte retenu par
+\begin{equation}\label{eq:hard-router}
+c^\star_\alpha(w)\in
+\argmax_{c\in\Ccal}\mathcal R_{\alpha,c}(w).
+\end{equation}
+Le point purifié final est alors
+\[
+\widetilde u_\alpha(w)=u^\star_{\alpha,c^\star_\alpha(w)}(w).
+\]
+\end{definition}
+
+\begin{theorem}[Routage exact sans modification du noyau]
+La règle \eqref{eq:hard-router} ne modifie en rien le noyau PCH :
+pour chaque contexte \(c\), on résout le même problème exact qu'avant.
+La seule nouveauté est l'agrégation externe qui choisit le contexte maximisant le gain normalisé.
+\end{theorem}
+
+\begin{proof}
+Pour tout \(c\), le calcul de \(u^\star_{\alpha,c}(w)\) est identique à celui de la purification contextuelle déjà définie.
+La couche de routage n'ajoute qu'une comparaison scalaire entre les gains \(\mathcal R_{\alpha,c}(w)\).
+Aucun terme du noyau PCH n'est modifié.
+\end{proof}
+
+\begin{theorem}[Stabilité de la décision sous marge]
+\label{thm:margin-stability}
+Supposons qu'il existe un contexte \(c^\star\) et une marge \(\delta>0\) tels que
+\[
+\mathcal R_{\alpha,c^\star}(w)\ge \mathcal R_{\alpha,c}(w)+2\delta
+\qquad\text{pour tout }c\neq c^\star.
+\]
+Si des perturbations \(\eta_c(w)\) satisfont
+\[
+|\eta_c(w)|\le \delta\qquad\text{pour tout }c,
+\]
+alors le contexte sélectionné par les scores perturbés
+\(\mathcal R_{\alpha,c}(w)+\eta_c(w)\) reste \(c^\star\).
+\end{theorem}
+
+\begin{proof}
+Pour tout \(c\neq c^\star\),
+\[
+\mathcal R_{\alpha,c^\star}(w)+\eta_{c^\star}(w)
+\ge
+\mathcal R_{\alpha,c^\star}(w)-\delta
+\ge
+\mathcal R_{\alpha,c}(w)+\delta
+\ge
+\mathcal R_{\alpha,c}(w)+\eta_c(w).
+\]
+Le maximiseur reste donc inchangé.
+\end{proof}
+
+\section{Routage probabiliste et limite dure}
+
+Un routeur probabiliste naturel est donné par la loi de Gibbs
+\begin{equation}\label{eq:soft-router}
+\pi_{\beta,\alpha}(c\mid w)
+=
+\frac{\exp\!\bigl(\beta\,\mathcal R_{\alpha,c}(w)\bigr)}
+{\sum_{j\in\Ccal}\exp\!\bigl(\beta\,\mathcal R_{\alpha,j}(w)\bigr)},
+\qquad \beta>0.
+\end{equation}
+
+\begin{theorem}[Concentration vers le routeur dur]
+\label{thm:soft-to-hard}
+Si \(c^\star\) est l'unique maximiseur de \(\mathcal R_{\alpha,c}(w)\), alors
+\[
+\pi_{\beta,\alpha}(c^\star\mid w)\xrightarrow[\beta\to\infty]{}1
+\qquad\text{et}\qquad
+\pi_{\beta,\alpha}(c\mid w)\xrightarrow[\beta\to\infty]{}0
+\quad(c\neq c^\star).
+\]
+\end{theorem}
+
+\begin{proof}
+Écrivons \(\Delta_c=\mathcal R_{\alpha,c^\star}(w)-\mathcal R_{\alpha,c}(w)\), avec \(\Delta_c>0\) pour \(c\neq c^\star\).
+Alors
+\[
+\pi_{\beta,\alpha}(c^\star\mid w)
+=
+\frac{1}{1+\sum_{c\neq c^\star}e^{-\beta\Delta_c}}
+\to 1.
+\]
+Le reste suit immédiatement.
+\end{proof}
+
+\begin{corollary}
+Le routeur dur \eqref{eq:hard-router} est la limite froide du routeur probabiliste \eqref{eq:soft-router}.
+Ainsi, la décision exacte peut être lue comme une sélection de type \(\beta\to\infty\).
+\end{corollary}
+
+\section{Certificat de routage par pré-roulage court}
+
+La théorie permet un routeur exact, mais son coût peut être élevé.
+On introduit donc un certificat approché fondé sur un pré-roulage de \(K\) itérations par contexte.
+
+Pour chaque contexte \(c\), on définit
+\[
+u^{(0)}_{\alpha,c}(w)=w,
+\qquad
+u^{(k+1)}_{\alpha,c}(w)
+=
+\mathcal T_{\eta_\alpha,\alpha}\!\bigl(u^{(k)}_{\alpha,c}(w);w,c\bigr),
+\qquad k\ge 0,
+\]
+où \(\mathcal T_{\eta_\alpha,\alpha}\) est l'opérateur proximal exact du contexte \(c\).
+Le certificat court est alors
+\[
+\Delta^{(K)}_{\alpha,c}(w)
+=
+\widehat J_{\alpha,c}(w;w)
+-
+\widehat J_{\alpha,c}\bigl(u^{(K)}_{\alpha,c}(w);w\bigr),
+\]
+et son score normalisé
+\[
+\mathcal R^{(K)}_{\alpha,c}(w)
+=
+\frac{\Delta^{(K)}_{\alpha,c}(w)}{\widehat J_{\alpha,c}(w;w)+\varepsilon}.
+\]
+
+\begin{proposition}[Monotonie du certificat court]
+Sous forte convexité locale, la suite \(k\mapsto \widehat J_{\alpha,c}(u^{(k)}_{\alpha,c}(w);w)\) est décroissante.
+Par conséquent,
+\[
+0\le \Delta^{(1)}_{\alpha,c}(w)\le \cdots \le \Delta^{(K)}_{\alpha,c}(w)\le \Delta_{\alpha,c}(w),
+\]
+et les scores correspondants vérifient la même monotonie.
+\end{proposition}
+
+\begin{proof}
+Chaque itération est définie comme un minimiseur proximal.
+L'inégalité de décroissance du fonctionnel proximal donne la monotonie de l'énergie.
+En soustrayant à la valeur initiale, on obtient la monotonie du gain.
+\end{proof}
+
+\begin{theorem}[Contrôle géométrique de l'erreur de routage court]
+\label{thm:short-rollout}
+Supposons que, pour chaque contexte \(c\), l'opérateur proximal local soit contractant avec facteur \(\rho_c\in(0,1)\).
+Supposons en outre qu'il existe une constante \(L_c>0\) telle que le score \(\mathcal R_{\alpha,c}\) soit \(L_c\)-Lipschitz par rapport à l'état latent sur la trajectoire de pré-roulage.
+Alors il existe une constante \(C_c>0\) telle que
+\[
+\bigl|\mathcal R^{(K)}_{\alpha,c}(w)-\mathcal R_{\alpha,c}(w)\bigr|
+\le
+C_c\,\rho_c^K.
+\]
+\end{theorem}
+
+\begin{proof}
+La contraction donne
+\[
+\|u^{(K)}_{\alpha,c}(w)-u^\star_{\alpha,c}(w)\|
+\le
+\rho_c^K\,\|w-u^\star_{\alpha,c}(w)\|.
+\]
+Par Lipschitzianité du score, on en déduit
+\[
+\bigl|\mathcal R^{(K)}_{\alpha,c}(w)-\mathcal R_{\alpha,c}(w)\bigr|
+\le
+L_c\|u^{(K)}_{\alpha,c}(w)-u^\star_{\alpha,c}(w)\|.
+\]
+En posant \(C_c=L_c\|w-u^\star_{\alpha,c}(w)\|\), on obtient l'estimation annoncée.
+\end{proof}
+
+\begin{corollary}[Exactitude finie sous marge]
+\label{cor:finite-exactness}
+Si le contexte optimal \(c^\star\) vérifie
+\[
+\mathcal R_{\alpha,c^\star}(w)\ge \mathcal R_{\alpha,c}(w)+2\delta
+\qquad(c\neq c^\star)
+\]
+et si \(K\) est tel que
+\[
+\max_{c\in\Ccal}\bigl|\mathcal R^{(K)}_{\alpha,c}(w)-\mathcal R_{\alpha,c}(w)\bigr|<\delta,
+\]
+alors le routage court renvoie le même contexte que le routage exact.
+\end{corollary}
+
+\begin{proof}
+Cela résulte immédiatement du théorème de stabilité par marge, en prenant comme perturbations les erreurs de troncature du pré-roulage.
+\end{proof}
+
+\section{Raffinement géométrique et tie-breaker universel}
+
+Le score de gain normalisé résout le choix principal.
+Lorsque plusieurs contextes sont quasi ex æquo, il faut un départage géométrique compatible avec la normalisation universelle.
+
+On note
+\[
+P_{\alpha,c}
+=
+D\Pi_{\Mcal_{\alpha,c}}\bigl(u^\star_{\alpha,c}(w)\bigr)
+\]
+le différentiel local de projection au point fixe du contexte \(c\).
+La théorie normalisée fournit un projecteur limite \(P_0\).
+
+\begin{definition}[Divergence géométrique normalisée]
+On pose
+\[
+\Xi_{\alpha,c}(w)
+=
+-\bigl\|P_{\alpha,c}-P_0\bigr\|_{\op}.
+\]
+\end{definition}
+
+\begin{definition}[Routage lexicographique]
+Le routage final choisit le contexte maximisant le couple
+\[
+\bigl(\mathcal R_{\alpha,c}(w),\ \Xi_{\alpha,c}(w)\bigr)
+\]
+au sens lexicographique :
+on maximise d'abord \(\mathcal R_{\alpha,c}(w)\), puis, en cas d'égalité ou de quasi-égalité numérique, on maximise \(\Xi_{\alpha,c}(w)\), c'est-à-dire qu'on minimise la distance au projecteur universel \(P_0\).
+\end{definition}
+
+\begin{proposition}[Cohérence du tie-breaker]
+Si deux contextes sont à gain égal, le tie-breaker géométrique sélectionne celui dont la géométrie locale est la plus proche du régime universel normalisé.
+Ce départage est compatible avec la théorie du Cas 3 normalisé, car il ne modifie ni la fonctionnelle PCH ni la jauge \((\mu_\alpha,\gamma_\alpha,\tau_\alpha)\).
+\end{proposition}
+
+\begin{proof}
+Le critère géométrique n'intervient qu'après égalité du score principal.
+Il ne touche donc pas à la définition du noyau PCH.
+De plus, il compare directement les différentielles de projection au projecteur limite \(P_0\), ce qui est précisément la quantité contrôlée dans la théorie normalisée.
+\end{proof}
+
+\begin{theorem}[Sélection finale canonique]
+La règle combinée
+\[
+c^\star_\alpha(w)
+=
+\argmax_{c\in\Ccal}
+\Bigl(\mathcal R_{\alpha,c}(w),\ \Xi_{\alpha,c}(w)\Bigr)
+\]
+est un routeur externe canonique pour PCH.
+Elle laisse le noyau intact, compare les contextes sur une quantité d'évidence invariante par recentrage additif, et ne mobilise le projecteur limite universel qu'en second rang.
+\end{theorem}
+
+\section{Lecture opérationnelle}
+
+La couche de sélection peut être résumée ainsi :
+\[
+\boxed{
+\begin{aligned}
+u^\star_{\alpha,c}(w)&=\Pcal^{\mathrm{PCH}}_{\alpha,c}(w),\\[0.2em]
+\mathcal R_{\alpha,c}(w)&=
+\frac{
+\widehat J_{\alpha,c}(w;w)
+-
+\widehat J_{\alpha,c}(u^\star_{\alpha,c}(w);w)
+}{
+\widehat J_{\alpha,c}(w;w)+\varepsilon
+},\\[0.2em]
+c^\star_\alpha(w)&=\argmax_{c\in\Ccal}
+\bigl(\mathcal R_{\alpha,c}(w),\Xi_{\alpha,c}(w)\bigr),\\[0.2em]
+\widetilde u_\alpha(w)&=u^\star_{\alpha,c^\star_\alpha(w)}(w).
+\end{aligned}
+}
+\]
+
+Cette écriture montre clairement que :
+\begin{itemize}[leftmargin=2em]
+\item le noyau PCH est entièrement préservé ;
+\item le choix de contexte est formulé comme une sélection variationnelle normalisée ;
+\item la version courte par pré-roulage fournit un certificat d'approximation ;
+\item le tie-breaker géométrique utilise uniquement la théorie normalisée déjà validée.
+\end{itemize}
+
+\begin{remark}
+Le rôle du routage n'est donc plus de deviner un label de contexte par apprentissage direct.
+Il devient celui d'un problème de sélection de modèles certifié par le gain d'énergie, puis départagé par la géométrie universelle lorsque nécessaire.
+C'est précisément ce qui retire au routage son statut de goulot d'étranglement sans altérer le noyau PCH.
+\end{remark}
+
+\end{document}
