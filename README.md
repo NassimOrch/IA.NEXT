@@ -213,3 +213,4 @@ The complete source for each work is available in its corresponding release. Ver
 
 
 ## Website : https://nassimorch.github.io/IA.NEXT/
+## Other Works : Zenodo - https://doi.org/10.5281/zenodo.20606404
