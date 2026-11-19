@@ -1,0 +1,79 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,booktabs,longtable,tabularx}
+\usepackage{geometry,hyperref}
+\geometry{margin=24mm}
+\title{Optimisation technique d'eSonde v8\\Pipeline de dialogue non neuronal}
+\author{Dossier de recherche eSonde}
+\date{17 novembre 2026 -- état de travail}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter{Contrat et objectifs d'optimisation}
+Optimiser signifie réduire le coût ou améliorer la qualité mesurée à architecture et protocole constants. Une optimisation ne peut pas réduire silencieusement la population Obsiss, supprimer un canal, limiter le vocabulaire, tronquer le contexte, raccourcir la réponse ou activer la non-réponse pour masquer un coût. Toute réduction de calcul est une variante expérimentale identifiée. Le checkpoint original est en lecture seule. Aucune dépendance neuronale n'est autorisée.
+
+\chapter{Profilage avant optimisation}
+Chaque exécution doit enregistrer temps et mémoire par étape: lecture des données, tokenisation, extraction d'ancres, calcul des associations, proposition des candidats, calcul des observations, purification PCH, activation P/R, vote/rang, sélection et sérialisation. Le profilage doit distinguer temps CPU, mémoire résidente maximale, nombre d'ancres, candidats, Obsiss évalués, tokens générés et temps par token. Une limite d'exécution doit être traitée comme incident; elle ne doit pas être transformée en résultat modèle.
+
+\chapter{Construction du profil d'apprentissage}
+\section{Lecture en flux}
+Ne pas matérialiser l'intégralité des lignes TRAIN en liste. Lire le JSONL ligne par ligne et alimenter des compteurs bornés. Vérifier le hash du fichier et du manifeste avant lecture, le nombre de lignes et le champ source\_split. Les compteurs d'association sont mis à jour par exemple, puis les tables sont triées et tronquées une seule fois en fin de construction. Éviter de recalculer les mêmes ancres ou le même contexte lors de la validation.
+
+\section{Bornes et biais}
+La borne top-$K$ par ancre et le budget d'ancres sont des hyperparamètres scientifiques, pas des optimisations gratuites. Pour chaque valeur, rapporter couverture des tokens cibles, précision micro, précision moyenne par exemple, fréquence des ancres supprimées et effet sur la génération libre. Les compteurs globaux restent exacts même si les tables d'association stockées sont bornées. Tout changement de borne implique un nouveau hash de profil.
+
+\section{Écriture atomique}
+Construire dans un fichier temporaire sur le même système de fichiers. Écrire par blocs, vider les buffers, synchroniser le fichier, calculer son SHA-256, relire le JSON et vérifier le schéma, puis renommer atomiquement. Un profil partiel n'est jamais publié sous le nom final. Conserver le journal de progression séparément.
+
+\chapter{Optimisation du runtime}
+\section{Calcul des observations}
+Calculer une seule fois les observations du contexte immuable pour une étape de génération. Mettre en cache uniquement les résultats déterministes identifiés par hash du contexte, tokenizer, version de code et paramètres. Invalider le cache à chaque nouveau token généré. Ne jamais réutiliser une observation d'un prompt différent par simple similarité de hash lexical.
+
+\section{Évaluation Obsiss}
+Les perspectives individuelles peuvent être chargées en blocs contigus afin de préserver l'accès séquentiel. Les sommes et produits scalaires sont accumulés dans un ordre déterministe; les types entiers et flottants sont explicités. Le mode complet évalue la population complète. Les sous-échantillons ne sont permis que pour le diagnostic et portent un identifiant d'expérience.
+
+\section{Classement}
+Calculer les rangs moyens par candidat et par Obsiss avec un ordre de départage déterministe. Les médianes et quantiles sont calculés sur les valeurs effectivement présentes; les candidats manquants ne reçoivent pas de score fictif. Pour les gros pools, utiliser une sélection partielle seulement si elle produit exactement le même top-$k$ que le tri complet; sinon, publier le delta et le traiter comme changement d'algorithme.
+
+\section{Transitions}
+Indexer les bigrammes et trigrammes par clé compacte et conserver les compteurs entiers. La recherche trigramme puis bigramme puis unigramme est déterministe. Un seuil de support ne peut être choisi sur le TEST. Les transitions ne traversent jamais deux réponses d'entraînement distinctes. Les candidats proposés par le repli sont marqués avec leur niveau de preuve statistique.
+
+\chapter{PCH et calcul numérique}
+La dimension est fixée à 16 et aucun encodeur externe n'est appelé. La projection sur l'enveloppe convexe peut utiliser un solveur simplex déterministe avec tolérances explicites. Vérifier résidu primal, non-négativité, somme des coefficients et résidu KKT. Détecter les doublons et les dépendances affines. Le cache de projection est indexé par hashes des signatures et du contexte. Si le certificat échoue, conserver la branche non purifiée et tracer l'échec; ne jamais remplacer le résultat par un vecteur arbitraire.
+
+\chapter{Optimisation des données et de la provenance}
+Les splits sont construits par arbre conversationnel. Les fichiers source Parquet restent inchangés et leur SHA-256 est inscrit dans le manifeste. Les dérivés contiennent la provenance, le split source, l'identifiant d'arbre et les règles de filtrage. Les identifiants utilisateur, notes et colonnes non nécessaires sont exclus des artefacts runtime. Les données TEST ne sont jamais chargées par le constructeur de profil.
+
+\chapter{Optimisation de la génération libre}
+La génération est incrémentale: un seul token est choisi par étape, le préfixe est mis à jour et seules les observations dépendantes de ce préfixe sont recalculées. Détecter les cycles exacts et les boucles de n-grammes comme métriques; une pénalité de répétition doit être une ablation mesurée, non un correctif caché. La longueur maximale est un paramètre de protocole et toute troncature est rapportée. La non-réponse reste désactivée pour les évaluations principales.
+
+\chapter{Tests de non-régression et de performance}
+\begin{longtable}{p{.23\linewidth}p{.40\linewidth}p{.29\linewidth}}
+\toprule Test & Contrôle & Condition d'acceptation \\
+\midrule
+Hash checkpoint & poids originaux avant/après & égalité octet pour octet \\
+Profil TRAIN & compte, provenance, hash, schéma & 100\% des lignes attendues et aucune ligne non-TRAIN \\
+Atomicité & interruption simulée avant renommage & aucun profil final partiel \\
+Déterminisme & même entrée/configuration deux fois & même hash de profil et même sortie déterministe \\
+Obsiss complet & compteur d'évaluations & population complète dans le mode normatif \\
+PCH & certificats numériques & tolérances respectées ou fallback explicite \\
+Absence neuronale & imports, dépendances, appels, fichiers modèle & aucun chemin neuronal direct ou indirect \\
+GUI/CLI & mêmes prompt, paramètres et version & résultats fonctionnels équivalents \\
+\bottomrule
+\end{longtable}
+
+\chapter{Protocole d'exécution et journalisation}
+Avant toute exécution, lire \texttt{chemins\_eSonde\_v8.json}, la checklist principale et les deux checklists d'erreurs. Créer une sauvegarde complète et vérifier son manifeste. Après exécution, conserver les commandes exactes, codes de retour, stdout/stderr, durée, mémoire, hashes et erreurs. Une optimisation est retenue uniquement si elle préserve l'équivalence fonctionnelle attendue et améliore une mesure préenregistrée. Si l'équivalence n'est pas démontrée, elle devient une nouvelle variante, jamais une substitution silencieuse.
+
+\chapter{Ordre de priorité technique}
+\begin{enumerate}
+\item Corriger les goulots de profilage et les constructions répétées avant toute réduction de population.
+\item Construire le profil TRAIN en flux avec commit atomique et hash.
+\item Instrumenter le runtime v7 par étape sur un prompt unique, puis traiter le goulot identifié.
+\item Tester les chemins B, C, D et E séparément selon le laboratoire.
+\item Mesurer génération libre, cohérence et généralisation avant de composer les modules.
+\end{enumerate}
+\end{document}

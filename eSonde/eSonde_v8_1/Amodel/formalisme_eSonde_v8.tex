@@ -1,0 +1,401 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{array,booktabs,longtable,tabularx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\geometry{margin=25mm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{lemma}[definition]{Lemme}
+\newtheorem{theorem}[definition]{Théorème}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{corollary}[definition]{Corollaire}
+\newtheorem{remark}[definition]{Remarque}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Obs}{\mathcal O}
+\newcommand{\V}{\mathcal V}
+\newcommand{\Ctx}{\mathcal C}
+\newcommand{\conv}{\operatorname{conv}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\med}{\operatorname{med}}
+\newcommand{\IQR}{\operatorname{IQR}}
+\newcommand{\proj}{\operatorname{proj}}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\sha}{\operatorname{SHA256}}
+\title{Formalisme complet d'eSonde v8\\Architecture de dialogue Obsiss--PCH sans réseau neuronal}
+\author{Dossier de recherche eSonde}
+\date{17 novembre 2026 -- révision de travail v8.1}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter*{Statut, périmètre et fidélité aux sources}
+\addcontentsline{toc}{chapter}{Statut, périmètre et fidélité aux sources}
+Ce document définit une architecture de génération de dialogue par prompt/réponse. Il ne définit ni traduction autonome, ni résumé, ni moteur de recherche documentaire, ni agent à outils. L'historique de dialogue fourni par l'utilisateur est un état de calcul transitoire de la requête courante; aucune mémoire persistante d'épisodes conversationnels n'est utilisée pour décider d'une réponse.
+
+L'architecture normative exclut les neurones artificiels, perceptrons, MLP, RBF appris, GRU, LSTM, Transformer, embeddings appris, rétropropagation, optimiseur de gradient, distillation neuronale et appel à un fournisseur de modèle externe. Cette exclusion vaut pour le chemin d'exécution, l'apprentissage, le routage et les dépendances du paquet Dmodel. Les prototypes historiques qui emploient ces mécanismes restent dans le dossier d'audit et ne sont pas importés.
+
+Le checkpoint original eSonde v6 est conservé en lecture seule. Son fichier `weights.bin` a pour taille 64 000 000 octets et SHA-256 `8526943d1528418fa8bbbf9128b61b5e1acd90a16eeb7cc062e18864b083dff4`. Il contient la population de 1 000 000 d'Obsiss, chacun associé à deux vecteurs de 16 coefficients entiers. Le checkpoint n'est ni réécrit ni ré-entraîné dans la présente architecture. Les paramètres statistiques de dialogue sont un artefact séparé, reproductible depuis la partition TRAIN.
+
+Les nombres de corpus et résultats consignés ici sont des observations de préparation et de pilotes déjà exécutés. Les essais non encore réalisés sont identifiés comme tels; aucune métrique attendue n'est présentée comme résultat.
+
+\chapter{Objets mathématiques et contrat de calcul}
+\section{Alphabet, tokenizer et dialogues}
+Soit $\Sigma$ l'ensemble des chaînes Unicode admissibles et $\tau:\Sigma\to\V^*$ le tokenizer versionné du runtime eSonde. $\V$ est le vocabulaire observé dans les données TRAIN auxquelles sont ajoutés les symboles structurels strictement nécessaires. Le tokenizer est déterministe et sa version fait partie de l'identité du modèle.
+
+Un dialogue courant est une suite finie
+\[
+D_t=((s_1,m_1),\ldots,(s_{t-1},m_{t-1}),(\texttt{user},p_t)),
+\]
+où $s_j\in\{\texttt{user},\texttt{assistant},\texttt{system}\}$ et $m_j,p_t\in\Sigma$. La réponse produite est une suite $r_t=(w_1,\ldots,w_L)\in\V^*$. Le contexte actif est reconstruit à chaque appel à partir de $D_t$; il ne survit pas à la requête sauf si le client le renvoie explicitement comme historique.
+
+\begin{definition}[Occurrence]
+Une occurrence est un tuple $o=(id,turn,speaker,token,offset_{start},offset_{end})$. Deux occurrences du même token demeurent deux objets distincts. L'égalité lexicale ne démontre ni coréférence, ni causalité, ni identité de référent.
+\end{definition}
+
+\begin{definition}[Cadre de dialogue éphémère]
+Le cadre $G(D_t)$ est le graphe fini dont les sommets sont les occurrences et dont les seules arêtes natives sont (i) ordre adjacent intra-message, (ii) ordre des tours, et (iii) répétition lexicale exacte entre tours. Chaque arête porte son type et sa provenance. Une arête de causalité ou de coréférence n'est ajoutée que si une règle explicitement documentée et validée l'autorise; la version normative v8 n'infère pas ces relations à partir d'une simple répétition.
+\end{definition}
+
+Cette représentation réutilise d'eGenBrain la provenance d'occurrence, le typage de relation et la séparation entre succession et causalité. Elle n'importe ni la base persistante de faits, ni la récupération de réponses, ni un moteur de réponse externe.
+
+\section{Périmètre des sorties}
+L'interface publique prend un prompt et, facultativement, un historique explicite; elle retourne un texte de réponse et un rapport technique facultatif. Les états administratifs du CLI ne sont pas des tâches de modèle. La non-réponse est un paramètre explicite $a_{nr}\in\{0,1\}$, avec valeur par défaut $0$. Les expériences normatives de génération sont conduites avec $a_{nr}=0$; la sortie vide ne peut donc pas masquer une difficulté de génération.
+
+\chapter{Les seize observations et les Obsiss}
+\section{Espace d'observation}
+L'espace des observations est
+\[
+\Obs=[0,1]^{16}.
+\]
+Les coordonnées sont des observations nommées calculées à partir du dialogue, du préfixe de réponse, du candidat et des statistiques TRAIN. Ce sont les seize dimensions d'observation demandées, non seize neurones. Un Obsiss n'est pas une coordonnée: chaque Obsiss individuel porte une perspective signée sur les seize coordonnées.
+
+\begin{longtable}{p{0.055\linewidth}p{0.26\linewidth}p{0.61\linewidth}}
+\toprule $j$ & Observation & Définition opérationnelle et garde-fou sémantique \\
+\midrule
+1 & \texttt{local\_transition} & Soutien de continuation du préfixe de réponse par les transitions TRAIN; ne constitue pas une vérité grammaticale.\\
+2 & \texttt{prompt\_association} & Association agrégée entre ancres du prompt courant et tokens de réponse; les occurrences brutes ne sont pas conservées.\\
+3 & \texttt{dialogue\_association} & Association agrégée entre ancres des tours antérieurs et tokens candidats; la décroissance temporelle est explicite.\\
+4 & \texttt{lexical\_recurrence} & Réapparition exacte d'une forme normalisée dans le dialogue actif; ne prouve pas une équivalence de sens.\\
+5 & \texttt{morphological\_affinity} & Similarité de n-grammes de caractères; signal orthographique seulement.\\
+6 & \texttt{response\_role} & Soutien du rôle assistant au début de la réponse; hors position initiale, cette coordonnée est neutre.\\
+7 & \texttt{discourse\_continuity} & Compatibilité du candidat avec le préfixe déjà produit et les relations de transition.\\
+8 & \texttt{polarity\_observation} & Présence et proximité de marqueurs explicites de négation; n'est pas une analyse syntaxique complète de portée.\\
+9 & \texttt{temporal\_observation} & Présence et compatibilité de marqueurs temporels explicites; ne résout pas seul les relations temporelles complexes.\\
+10 & \texttt{boundary\_observation} & Compatibilité de frontière lexicale et de ponctuation avec la longueur et la structure locale; ne doit pas donner systématiquement un bonus maximal à toute ponctuation.\\
+11 & \texttt{training\_support} & Soutien marginal TRAIN, transformé de façon bornée afin que la fréquence brute ne domine pas.\\
+12 & \texttt{subword\_backoff} & Soutien de forme par transitions de caractères pour candidats rares ou inconnus; ne crée pas une définition sémantique.\\
+13 & \texttt{reference\_continuity} & Témoin lexical exact entre le candidat et le contexte; aucune coréférence implicite n'est affirmée.\\
+14 & \texttt{modality\_observation} & Compatibilité locale avec les marqueurs de possibilité, capacité, obligation ou incertitude; les niveaux ne sont pas interchangeables.\\
+15 & \texttt{speaker\_alignment} & Continuité avec les productions antérieures du locuteur assistant dans l'historique fourni; ne doit pas encourager la répétition vide.\\
+16 & \texttt{information\_novelty} & Nouveauté relative au préfixe courant, accompagnée d'une pénalisation de nouveauté non étayée; la nouveauté n'est pas une qualité en soi.\\
+\bottomrule
+\end{longtable}
+
+\section{Normalisation et redondance}
+Chaque coordonnée brute $g_j(D_t,r_{<k},c)$ est calculée sans consultation de la réponse cible. Elle est normalisée relativement à l'ensemble fini des candidats et ancres présents à l'étape. Pour un ensemble de $m\geq2$ valeurs, $\rho_j(x)$ est le rang moyen (mid-rank) divisé par $m-1$; les ex-aequo ont le même rang moyen. Pour $m=1$, on pose $\rho_j(x)=1/2$. Ainsi $\phi_j=\rho_j\circ g_j\in[0,1]$.
+
+La normalisation par rang est dépendante du pool. Le hash du pool et la règle d'ex-aequo doivent donc accompagner tout résultat reproductible. Elle ne produit pas une probabilité calibrée. Les coordonnées ne sont pas supposées indépendantes: corrélations de rang, ablations leave-one-channel-out et contribution marginale doivent être rapportées.
+
+\section{Identité individuelle d'un Obsiss}
+Soit $N=10^6$, $d=16$, et pour chaque identité $i\in\{1,\ldots,N\}$, les poids originaux $W_i^h,W_i^p\in\mathbb Z^{16}$. La clé d'identité est l'indice de ligne dans le checkpoint dont le hash a été vérifié. Un Obsiss n'est jamais remplacé par une moyenne de lignes ni réétiqueté par une coordonnée. Chaque ligne observe les seize coordonnées et vote sur chaque candidat.
+
+\chapter{Opérateurs Obsiss P/R}
+\section{Prétraitement déterministe}
+Pour un texte $x$, le runtime produit des vecteurs locaux ordonnés $v_1(x),\ldots,v_T(x)\in\mathbb Z^{16}$ et un vecteur global $v_g(x)\in\mathbb Z^{16}$. Pour chaque Obsiss $i$, une permutation signée déterministe $T_i$ est dérivée de l'identifiant, de la dimension et de la graine globale. Ce transformateur est une permutation orthogonale signée: $\|T_i(v)\|_2=\|v\|_2$.
+
+On note $Q_B$ la saturation entière coordonnée par coordonnée dans $[-B,B]$ suivie de la conversion entière de la version normative. La division entière négative est tronquée vers zéro selon la fonction source \texttt{trunc\_div}; la moyenne est arrondie selon \texttt{round\_ratio\_away}. Ces conventions font partie de la spécification et sont testées en parité.
+
+\section{État de prompt P}
+Pour chaque $i$ et $t$, l'état caché initial est
+\[
+ h^P_{i,t}=Q_B\!\left(T_i(v_t(p_t^D))+\operatorname{trunc}(W_i^h/4)\right),
+\qquad \bar h_i^P=\operatorname{rmean}_{t=1}^{T}h^P_{i,t}.
+\]
+Le vecteur publié et le contexte apparié sont
+\[
+ p_i^P=Q_B\!\left(T_i(v_g(p_t^D))+\bar h_i^P+W_i^p\right),\qquad
+ q_i=Q_B(\bar h_i^P+p_i^P).
+\]
+L'indice $i$ est conservé dans toutes les opérations. $q_i$ n'est pas un embedding appris; c'est l'état entier déterministe de la ligne Obsiss $i$ pour ce prompt et cet historique.
+
+\section{État de réponse R conditionné par le même Obsiss}
+Pour un candidat de continuation $c$ et le préfixe déjà généré $r_{<k}$, soit $x_c=r_{<k}\Vert c$. On calcule
+\[
+ h^R_{i,t}(c)=Q_B\!\left(T_i(v_t(x_c))+\operatorname{trunc}(W_i^h/4)+\operatorname{trunc}(q_i/4)\right),
+\]
+\[
+ \bar h_i^R(c)=\operatorname{rmean}_{t}h^R_{i,t}(c),\qquad
+ p_i^R(c)=Q_B\!\left(T_i(v_g(x_c))+\bar h_i^R(c)+W_i^p+q_i\right).
+\]
+La réponse n'est pas comparée à un autre Obsiss: la comparaison est appariée $(q_i,p_i^R(c))$ pour la même identité $i$. Aucun état de réponse-cible n'entre dans la décision.
+
+\begin{proposition}[Parité de l'opérateur de premier état]
+Si le tokenizer, les vecteurs locaux/globaux, la graine, $B$, les poids et les conventions d'arrondi sont identiques, l'opérateur par lots qui applique les équations ci-dessus à chaque ligne produit les mêmes entiers que l'application scalaire Obsiss ligne par ligne.
+\end{proposition}
+\begin{proof}
+Les opérations par ligne sont des additions entières, une permutation signée déterministe, une moyenne entière définie par la même règle et une saturation coordonnée. Le calcul par lots ne mélange pas les indices entre eux: il applique la même transformation $T_i$, les mêmes poids $W_i^h,W_i^p$ et la même suite de réductions sur les coordonnées. La permutation des lignes n'est pas modifiée et les réductions sur $t$ gardent le même ordre logique. La parité est donc une identité d'évaluation, sous réserve que les implémentations utilisent exactement la même définition de moyenne et de saturation. Les tests doivent vérifier cette hypothèse pour les entrées et les frontières d'arrondi.
+\end{proof}
+
+\chapter{Séparation des espaces de coordonnées à seize composantes}
+\section{Deux espaces de même dimension, mais de nature différente}
+Le runtime met en jeu deux espaces qui possèdent chacun seize coordonnées, sans que cette égalité de cardinalité fournisse une identification sémantique.
+\begin{definition}[Espace CountSketch du checkpoint]
+On note $E_C=\mathbb R^{16}$ l'espace des coordonnées produites par les fonctions locales/globales de caractéristiques du checkpoint V6. Les vecteurs d'activation de prompt $q_i$ appartiennent à cet espace; leurs coordonnées sont indexées par les buckets déterministes du hachage de caractéristiques.
+\end{definition}
+\begin{definition}[Espace des observations nommées]
+On note $E_O=\mathbb R^{16}$ l'espace dont les axes sont les observations nommées de la table du chapitre Obsiss: transition locale, association au prompt, association au dialogue, récurrence lexicale, morphologie, rôle de réponse, continuité, polarité, temporalité, frontière, support TRAIN, repli sous-mot, continuité référentielle, modalité, locuteur et nouveauté.
+\end{definition}
+L'index numérique $j$ dans $E_C$ désigne un bucket de hachage; l'index $j$ dans $E_O$ désigne un observable nommé. Il n'est pas permis de déduire de $\dim E_C=\dim E_O=16$ que les bases sont canoniquement identiques.
+
+\section{Couplage effectivement présent dans le runtime}
+Dans la voie active inspectée, le vote Obsiss forme, pour chaque ligne $i$, une perspective à partir de $W_i^h+W_i^p$, de $q_i$ et d'une permutation croisée déterministe de $q_i$, puis calcule son produit scalaire avec les rangs des seize canaux candidats. Cette opération équivaut à employer implicitement une identification coordonnée $T_0:E_C\to E_O$ dont la matrice est l'identité, après normalisation non linéaire et permutation croisée.
+
+Cette convention est calculable et reproductible; elle n'est pas une conséquence des définitions de CountSketch ni de la sémantique des seize canaux. Aucune preuve de correspondance bucket-par-bucket n'a été trouvée dans les sources examinées. Le couplage $T_0$ doit donc être classé comme \textbf{hypothèse architecturale historique non validée}, et non comme théorème ou fait sémantique. L'erreur de suivi correspondante est `V8-MODEL-BASIS-001`.
+
+\section{Conséquences de typage et invariants}
+Une écriture formelle sans ambiguïté doit conserver les types
+\[
+q_i\in E_C,\qquad \varphi(c)\in E_O,\qquad
+T:E_C\to E_O.
+\]
+Une somme $\varphi(c)+q_i$ est interdite tant qu'un opérateur $T$ explicitement défini ne l'a pas rendue bien typée. Le produit scalaire final est alors entre deux vecteurs de $E_O$. L'égalité des dimensions n'est pas une justification de $T=I$.
+
+\section{Comparaisons préenregistrées avant sélection}
+Le laboratoire doit comparer, sur les mêmes prompts et le même pool de candidats: (i) le couplage historique $T_0=I$; (ii) l'ablation du terme $q_i$; (iii) une contribution CountSketch séparée, qui n'est pas ajoutée coordonnée par coordonnée aux rangs sémantiques; (iv) des permutations discrètes prédéfinies de coordonnées, sélectionnées uniquement sur validation. Les résultats doivent inclure la sensibilité aux prompts, la cohérence libre évaluée à l'aveugle, le coût et les erreurs par langue. Le TEST reste scellé. Aucun de ces candidats n'est déclaré meilleur avant mesure.
+
+Une transformation dense ajustée par rétropropagation, un embedding appris ou une couche neuronale est exclue. La recherche d'un opérateur de correspondance ne doit pas réintroduire indirectement un réseau neuronal ou un MLP sous un autre nom.
+
+\section{État opérationnel}
+Le calcul historique $T_0$ reste dans le code de compatibilité à titre expérimental jusqu'à son ablation contrôlée; il n'est pas certifié par le présent formalisme. Aucune exécution comparative de génération n'est encore validée. Le présent chapitre formalise la dette de correspondance et définit l'expérience nécessaire; il ne prétend pas avoir résolu le problème.
+
+\chapter{Apprentissage dialogique agrégé sans mémoire d'épisodes}
+\section{Partitions et provenance}
+La source OASST1 est l'archive Parquet fournie sous `dataset/datasets--OpenAssistant--oasst1/.../data`. Le décodage utilise les primitives de bas niveau et le lecteur compact retrouvés dans eGenBrain, complétés par l'adaptation du schéma OpenAssistant. Les fichiers originaux ne sont pas modifiés. Les partitions sources contiennent 84\,437 messages TRAIN et 4\,401 messages validation; 88\,838 identifiants sont uniques et les 10\,364 arbres ne traversent pas les partitions sources.
+
+Après reconstruction parent-enfant et filtrage déclaré des cibles supprimées, non revues ou synthétiques, le corpus de dialogue dérivé contient 48\,557 exemples TRAIN, 2\,495 exemples de validation interne et 2\,653 exemples de test. Les trois ensembles sont disjoints par arbre conversationnel. Le jeu de test reste scellé jusqu'au gel de la version et de ses hyperparamètres. Le texte brut et les paires prompt-réponse ne sont pas inclus dans Dmodel.
+
+\section{Statistiques de dialogue}
+Pour chaque exemple TRAIN $e=(C_e,r_e)$, on construit un ensemble fini d'ancres $A_K(C_e)$: tokens informatifs admissibles, dédupliqués par dernière occurrence, classés par récence puis par règles déterministes; $K$ est fixé à partir des ablations sur validation. Le pilote de budget d'ancres a étudié $K\in\{8,16,32,64,\text{toutes}\}$ sur 2\,000 TRAIN / 500 validation. $K=16$ a donné la meilleure précision micro des associations mesurées (0,09410), tandis que $K=8$ a donné la meilleure précision moyenne par exemple (0,08713). Ce résultat ne tranche pas la qualité de génération; $K$ reste un paramètre de validation.
+
+Pour $A_K(C_e)$ et la tokenisation $r_e=(w_1,\ldots,w_T)$, les compteurs d'association sont
+\[
+ C(a,w)\mathrel{+}=\#\{j:w_j=w\},\quad
+ DF(a)\mathrel{+}=1,\quad
+ L(a)\mathrel{+}=T.
+\]
+Les transitions sont strictement confinées à une réponse:
+\[
+ U(w_1)\mathrel{+}=1,\quad B(w_{j-1},w_j)\mathrel{+}=1,\quad
+ T(w_{j-2},w_{j-1},w_j)\mathrel{+}=1.
+\]
+Aucune transition n'est construite entre la fin d'une réponse et le début d'un autre exemple. Le profil stocke des compteurs agrégés et des identifiants de version/hash, pas des exemples ni des réponses complètes. Il ne peut donc pas effectuer une consultation exacte prompt-vers-réponse.
+
+\section{Score contextuel}
+Pour l'ancre $a$, la probabilité lissée de candidat et sa base globale sont
+\[
+ \hat p(w\mid a)=\frac{C(a,w)+\alpha}{L(a)+\alpha|\V_r|},\qquad
+ \hat p_0(w)=\frac{U(w)+\alpha}{L_0+\alpha|\V_r|},
+\]
+où $\alpha>0$ est déclaré et $\V_r$ est le vocabulaire des réponses. Le score d'association est
+\[
+ A(w\mid C)=\sum_{a\in A_K(C)}\omega_a\max\left(0,\log\frac{\hat p(w\mid a)}{\hat p_0(w)}\right),
+\quad
+\omega_a=\frac{DF(a)^{-1/2}}{\sum_{b\in A_K(C)}DF(b)^{-1/2}}.
+\]
+Pour éviter qu'une seule ancre ambiguë impose un thème, une proposition contextuelle n'est admissible que si elle est soutenue par au moins deux ancres distinctes ou par un seuil de compte défini dans le protocole et validé séparément.
+
+\section{Transitions avec repli hiérarchique}
+À l'étape $k$, l'ordre de transition disponible est choisi de manière explicite: trigramme si le préfixe de deux tokens possède un support suffisant; sinon bigramme si le dernier token possède un support suffisant; sinon unigramme de départ seulement à $k=1$. Le statut de chaque candidat indique le niveau utilisé. Les expériences teacher-forced ont montré, sur 73\,726 tokens cibles de validation du pilote 2\,000/500, une couverture stricte trigramme de 46,21\% et une couverture du repli trigramme-vers-bigramme de 86,26\%; l'exactitude top-5 sur tous les tokens était respectivement 12,04\% et 20,67\%. Ces chiffres sont teacher-forced, non des scores de réponse libre.
+
+\section{Absence de mémoire de réponses}
+Le profil ne contient pas de correspondance conservant l'ordre complet des textes, ni de clé de prompt, ni de réponse cible reconstituable. Les statistiques sont agrégées, versionnées et destinées à estimer un soutien linguistique de transitions et d'associations. Le contexte de l'utilisateur n'est conservé que pendant le calcul. Les journaux opérationnels ne doivent pas persister le texte brut par défaut; le mode d'audit conserve des hashes et des métadonnées, sauf consentement explicite et protocole séparé.
+
+\chapter{Purification contextuelle PCH sur les seize observations}
+\section{Espace et ensemble contextuel}
+Le noyau proximal PCH est réinstancié directement dans $\R^{16}$, l'espace des seize observations. Aucun encodeur pré-entraîné, embedding, PCA, réseau appris ou projection neuronale n'est utilisé. À une étape de génération, chaque ancre contextuelle $a_j$ est passée par les mêmes fonctions d'observation que les candidats, puis normalisée dans le même pool de rangs. On obtient $z_j\in[-1,1]^{16}$. L'ensemble contextuel est le polytope compact
+\[
+ C_t=\conv\{z_1,\ldots,z_m\},\quad 1\le m\le K.
+\]
+Si $m=0$, l'opérateur PCH est explicitement omis et le statut \texttt{NO\_CONTEXT\_ANCHORS} est émis; aucun vecteur de remplacement n'est inventé.
+
+\section{Fonctionnelle PCH simplifiée}
+Pour le vecteur candidat brut normalisé $w\in\R^{16}$, on définit
+\[
+ J(u;w,C_t)=\frac12\|u-w\|_2^2+\lambda_c\,d(u,C_t)^2+\lambda_r\|u\|_2^2,
+ \qquad \lambda_c\ge0,\;\lambda_r>0,
+\]
+avec $d(u,C_t)=\inf_{z\in C_t}\|u-z\|_2$. La fonctionnelle n'introduit aucun paramètre par Obsiss; ses deux coefficients sont globaux, versionnés et sélectionnés uniquement sur la validation.
+
+\begin{theorem}[Solution exacte du noyau PCH quadratique]
+Soit $C\subset\R^d$ non vide, fermé et convexe. Pour $\lambda_c\ge0$ et $\lambda_r>0$, $J(\cdot;w,C)$ possède un unique minimiseur. En posant
+\[
+ z^*=\Pi_C\!\left(\frac{w}{1+2\lambda_r}\right),\qquad
+ u^*=\frac{w+2\lambda_c z^*}{1+2\lambda_c+2\lambda_r},
+\]
+ce vecteur $u^*$ est ce minimiseur.
+\end{theorem}
+\begin{proof}
+Puisque $C$ est fermé convexe en dimension finie, la projection $\Pi_C(x)$ existe et est unique. On écrit
+\[
+ J(u;w,C)=\min_{z\in C}\left[\frac12\|u-w\|^2+\lambda_c\|u-z\|^2+\lambda_r\|u\|^2\right].
+\]
+Pour $z$ fixé, la partie entre crochets est strictement convexe en $u$, et son gradient s'annule lorsque
+\[
+ (u-w)+2\lambda_c(u-z)+2\lambda_r u=0,
+\]
+d'où $u(z)=(w+2\lambda_c z)/(1+2\lambda_c+2\lambda_r)$. Après substitution et suppression des termes indépendants de $z$, le problème réduit est un multiple strictement positif de
+\[
+ \left\|z-\frac{w}{1+2\lambda_r}\right\|^2.
+\]
+Son minimiseur sur $C$ est donc $z^*=\Pi_C(w/(1+2\lambda_r))$. En substituant $z^*$ dans $u(z)$, on obtient la formule annoncée. Le terme $\frac12\|u-w\|^2+\lambda_r\|u\|^2$ est strictement convexe; $d(u,C)^2$ est convexe pour un ensemble fermé convexe. Le minimiseur en $u$ est par conséquent unique.
+\end{proof}
+
+\begin{theorem}[Contraction du mapping PCH]
+Le mapping $P_{C}(w)=u^*(w)$ défini ci-dessus satisfait
+\[
+ \|P_C(w_1)-P_C(w_2)\|_2\le\frac{1}{1+2\lambda_r}\|w_1-w_2\|_2.
+\]
+Il est donc une contraction stricte lorsque $\lambda_r>0$.
+\end{theorem}
+\begin{proof}
+La projection sur un convexe fermé est non expansive: $\|\Pi_C(x)-\Pi_C(y)\|\le\|x-y\|$. En appliquant la formule explicite,
+\[
+\begin{aligned}
+\|P_C(w_1)-P_C(w_2)\|&\le\frac{1}{1+2\lambda_c+2\lambda_r}
+\left(1+\frac{2\lambda_c}{1+2\lambda_r}\right)\|w_1-w_2\|\\
+&=\frac{1}{1+2\lambda_r}\|w_1-w_2\|.
+\end{aligned}
+\]
+La dernière égalité résulte de $1+2\lambda_c+2\lambda_r$ au dénominateur commun. Comme $\lambda_r>0$, le facteur est strictement inférieur à un.
+\end{proof}
+
+\section{Projection finie et certificat numérique}
+La projection sur $C_t$ équivaut à
+\[
+\min_{\alpha\in\R^m}\|Z\alpha-x\|_2^2\quad\text{sous}\quad
+\alpha_j\ge0,\;\sum_j\alpha_j=1,
+\]
+où les colonnes de $Z$ sont les signatures contextuelles. Le solveur doit retourner $\alpha$, le résidu primal, la violation de positivité, le résidu de somme et le résidu KKT. Une solution n'est déclarée certifiée qu'au regard de tolérances numériques explicites. Les doublons d'ancres sont éliminés; les ensembles affinement dépendants sont traités par un solveur de simplex robuste, non par inversion aveugle d'une matrice singulière.
+
+Le noyau mathématique garantit la contraction de la solution exacte. Il ne garantit ni que le polytope contextuel soit sémantiquement correct, ni que le score aval améliore la cohérence d'une phrase. Cette propriété reste une question expérimentale. Les travaux PCH historiques utilisant `all-MiniLM-L6-v2`, `all-mpnet-base-v2` ou PCA ne sont pas transposés.
+
+\chapter{Vote collectif, décision et génération}
+\section{Perspective Obsiss}
+Pour l'Obsiss $i$, la perspective est
+\[
+ b_i=\tanh((W_i^h+W_i^p)/S),\quad
+ c_i=\tanh(q_i/S),\quad
+ \tilde c_i=\tanh(\Pi(q_i)/S),
+\]
+\[
+ \pi_i=\frac{b_i+\alpha c_i+\beta\tilde c_i}
+ {\|b_i+\alpha c_i+\beta\tilde c_i\|_1\vee\varepsilon},
+ \quad S=8192,\;\alpha=0.50,\;\beta=0.25.
+\]
+Les valeurs sont celles du runtime historique à auditer; toute modification de coefficients constitue une ablation et non une correction implicite. Chaque $\pi_i$ possède seize coordonnées et reste attaché à l'identité $i$.
+
+\section{Vote et cohérence P/R}
+Pour chaque candidat $c$, l'Obsiss vote
+\[
+ v_i(c)=\langle\pi_i,\phi(c)\rangle.
+\]
+La cohérence P/R appariée est
+\[
+ \gamma_i(c)=\frac{\langle q_i,p_i^R(c)\rangle}
+ {\|q_i\|_2\|p_i^R(c)\|_2},
+\]
+avec la convention $0$ si l'un des deux vecteurs est nul. Les valeurs $v_i(c)$ et $\gamma_i(c)$ sont converties séparément en rangs moyens par Obsiss sur le même pool de candidats, puis fusionnées à poids égaux dans la version de référence. Cette fusion est un rang ordinal; elle ne constitue ni une probabilité ni une mesure absolue de vérité.
+
+Pour un candidat $c$, l'agrégat est
+\[
+ M(c)=\med_i s_i(c),\qquad D(c)=Q_{.75}(s_i(c))-Q_{.25}(s_i(c)).
+\]
+Le classement lexicographique est: rang de $M(c)$ décroissant, puis $M(c)$ décroissant, puis $D(c)$ croissant, puis ordre déterministe du token. Le désaccord n'est pas supprimé; il est conservé dans le rapport.
+
+\section{Stabilité décisionnelle}
+Le classement de la population complète est comparé à des sous-populations de contrôle déterministes et stratifiées. Les diagnostics comprennent la rétention top-1, le Jaccard top-$k$ et la corrélation de Spearman. Pour réduire le biais d'une partition index-modulo seule, la v8 contrôle au minimum (i) partitions intercalées par indice et (ii) blocs contigus, avec graine et permutation fixées. Une décision stable signifie seulement que le classement varie peu sous ces changements de population; elle ne signifie pas que le candidat est vrai ou cohérent pour un humain.
+
+La version normative exploite les $N$ identités du checkpoint lorsque le mode complet est demandé. Toute expérience sur sous-population est explicitement étiquetée comme diagnostic et ne remplace pas une exécution complète. Il n'existe aucune obligation d'atteindre la convergence d'un attracteur dynamique pour déclarer une réponse; l'état P/R de premier passage est défini exactement et la robustesse du classement est évaluée séparément. Les dynamiques de voisinage de v6/v7 sont conservées comme branche d'expérience documentée, pas comme étape silencieuse du chemin de génération.
+
+\section{Boucle de génération}
+À chaque étape $k$:
+\begin{enumerate}
+\item reconstruire le contexte occurrence-level à partir de l'historique explicite, du prompt et du préfixe généré;
+\item calculer $A_K(C)$ et construire le pool de candidats à partir des associations agrégées, transitions hiérarchiques, réutilisation contrôlée du prompt et retour caractère;
+\item calculer les seize observations brutes pour chaque candidat; conserver le pool et les hashes;
+\item appliquer PCH dans l'espace des seize observations si le polytope contextuel est construit et certifié; sinon conserver le vecteur brut avec un statut explicite;
+\item exécuter R pour chaque continuation sur le même index Obsiss que P; calculer les votes et les rangs appariés;
+\item agréger médiane, IQR, stabilité; sélectionner le candidat top-1;
+\item ajouter le token au préfixe transitoire puis recommencer.
+\end{enumerate}
+
+Le beam search est facultatif au niveau de la recherche de séquence, mais le chemin de référence doit exposer ses paramètres et les sélectionner sur validation. Il ne doit pas transformer la génération en recherche d'une réponse cible: aucune cible de validation/test n'est accessible à la fonction de génération. Les règles d'arrêt reposent sur une ponctuation observée, une limite explicite de génération et une condition de fin documentée; un nombre fixe de tokens n'est pas une preuve de complétude sémantique.
+
+\chapter{Généralisation observationnelle et théorie des empreintes}
+\section{Empreintes et équivalence}
+Soit $\Phi_K$ une famille finie de sondes admissibles construites à partir des seize observations et de transformations de contexte déclarées. L'empreinte d'un état de dialogue $x$ est
+\[
+ I_{\Phi_K}(x)=(\phi_1(x),\ldots,\phi_K(x)).
+\]
+On définit $x\sim_{\Phi_K}y$ si et seulement si $I_{\Phi_K}(x)=I_{\Phi_K}(y)$. C'est une relation d'équivalence: réflexivité, symétrie et transitivité découlent de l'égalité dans $\R^K$. La fibre de $x$ est $[x]=\{y:I(y)=I(x)\}$ et le quotient est $X/\sim_{\Phi_K}$.
+
+\begin{theorem}[Factorisation par empreinte]
+Soient $X,Y$ des ensembles, $I:X\to Z$ une empreinte, et $f:X\to Y$. Il existe $\bar f:I(X)\to Y$ telle que $f=\bar f\circ I$ si et seulement si $f$ est constante sur chaque fibre de $I$.
+\end{theorem}
+\begin{proof}
+Si $f=\bar f\circ I$ et $I(x)=I(y)$, alors $f(x)=\bar f(I(x))=\bar f(I(y))=f(y)$. Réciproquement, si $f$ est constante sur les fibres, poser $\bar f(z)=f(x)$ pour n'importe quel $x$ tel que $I(x)=z$. La constance sur les fibres assure que cette définition ne dépend pas du représentant. Ainsi $f=\bar f\circ I$.
+\end{proof}
+
+\section{Portée pour le dialogue}
+La factorisation est un résultat mathématique, pas une preuve que les seize observations sont suffisantes. Si deux dialogues de sens différent tombent dans la même fibre, toute fonction de réponse qui ne voit que l'empreinte doit leur associer la même sortie. Le laboratoire doit mesurer les collisions, les faux rapprochements et la séparation sous perturbations sémantiquement contrôlées. Une séparation obtenue sur un jeu artificiel ne démontre pas une séparation générale de toutes les langues.
+
+La fermeture observationnelle $Cl$ doit satisfaire séparément extensivité $A\subseteq Cl(A)$, monotonie $A\subseteq B\Rightarrow Cl(A)\subseteq Cl(B)$ et idempotence $Cl(Cl(A))=Cl(A)$. Ces propriétés ne sont pas déduites d'une simple normalisation statistique; elles doivent être établies pour l'opérateur effectivement retenu. Les notions de seuil et d'ultramétrique issues de DDD Base sont des outils de résolution lorsque leurs axiomes sont vérifiés, et non un score sémantique ajouté par convention.
+
+\chapter{Propriétés prouvées, hypothèses et limites}
+\section{Résultats mathématiques établis par définition}
+\begin{itemize}
+\item L'ordre des occurrences et les arêtes explicitement définies forment un graphe fini acyclique d'ordre, puisque les indices de tokens/tours croissent strictement.
+\item L'équivalence observationnelle définie par égalité d'empreintes est une relation d'équivalence.
+\item Le théorème de factorisation est exact si et seulement si la sortie est constante sur les fibres.
+\item Le noyau proximal PCH quadratique possède une solution unique et une contraction stricte selon les hypothèses indiquées.
+\item La médiane et l'IQR sont définis pour toute population finie non vide; ils n'impliquent aucune vérité sémantique.
+\end{itemize}
+
+\section{Hypothèses opérationnelles à vérifier}
+\begin{itemize}
+\item La segmentation/tokenisation conserve suffisamment d'information utile pour le dialogue multilingue.
+\item Les associations agrégées et transitions de TRAIN procurent un pool de propositions qui contient des continuations utiles en validation.
+\item Les seize observations différencient suffisamment les candidats et les contextes pour le domaine testé.
+\item Le signal P/R du même Obsiss améliore la sélection sans amplifier une compatibilité numérique non sémantique.
+\item La purification PCH dans $\R^{16}$ augmente, ou au moins ne détériore pas, la cohérence contextuelle mesurée indépendamment.
+\item Les règles d'arrêt et le contexte transitoire ne produisent pas de boucle de répétition ou de dérive thématique.
+\end{itemize}
+
+\section{Ce qui n'est pas démontré par le formalisme}
+Aucune proposition ci-dessus ne démontre une intelligence générale, une compréhension humaine, la factualité de chaque réponse, la supériorité ou l'égalité avec les LLM, ni la généralisation hors des distributions testées. Ces questions restent ouvertes et mesurables. Inversement, les limites constatées à une étape de l'implémentation ne sont pas des théorèmes d'impossibilité du modèle.
+
+\chapter{Protocole de preuve et de validation}
+Toute expérience doit publier: description; architecture; pipeline complet; commandes exactes; version/hashes; partition; taille d'échantillon; paramètres; résultats bruts; métriques; interprétation; conséquences théoriques, conceptuelles et opérationnelles; conclusion; statut. Les métriques lexicales (précision/rappel de tokens, couverture, exactitude teacher-forced) sont explicitement séparées des évaluations de cohérence de réponses libres. La validation humaine, lorsqu'elle est disponible, doit être aveugle, randomisée et inclure des critères de pertinence au prompt, continuité, contradiction, factualité, complétude et qualité linguistique.
+
+Le jeu TEST OASST1 dérivé est scellé avant sélection finale. Il n'est évalué qu'après gel des paramètres et une seule fois pour la comparaison finale définie. Tout changement après consultation du TEST crée une nouvelle version nécessitant une nouvelle source de test indépendante.
+
+\chapter{Cinq passes de vérification formelle}
+Les cinq passes ci-dessous sont indépendantes par objectif; une passe n'est pas validée par la simple présence du texte.
+\begin{enumerate}
+\item \textbf{Passe source/fidélité.} Comparaison des identités Obsiss, des seize canaux, des opérateurs P/R et des statistiques OASST1 avec le code et les manifestes effectivement présents. Les poids sont traités en lecture seule.
+\item \textbf{Passe mathématique.} Relecture des définitions d'équivalence et factorisation; vérification algébrique de la formule PCH et de sa constante de contraction; vérification des hypothèses de convexité et de dimension finie.
+\item \textbf{Passe algorithmique.} Vérification que chaque équation possède un calcul déterministe, une règle d'arrondi, une donnée d'entrée et un artefact de sortie; toute condition d'échec est nommée.
+\item \textbf{Passe anti-fuite/anti-mémoire.} Vérification des arbres TRAIN/validation/test, de l'absence de paires brutes dans le profil Runtime, de l'absence de recherche exacte de réponse et de l'absence de persistance d'historique.
+\item \textbf{Passe non-neuronale et falsifiabilité.} Inspection des imports, dépendances, appels et données; vérification qu'aucun composant neuronal n'est appelé indirectement; séparation des théorèmes, hypothèses et résultats à mesurer.
+\end{enumerate}
+
+\chapter*{Statut de formalisation}
+\addcontentsline{toc}{chapter}{Statut de formalisation}
+Le présent texte spécifie un modèle testable de bout en bout. Il ne déclare pas l'architecture empiriquement supérieure ni validée en cohérence libre. Les cinq passes doivent être enregistrées, les tests automatiques exécutés, puis les expériences de génération libre conduites avec sauvegarde préalable, non-réponse désactivée et partition TEST scellée.
+\end{document}

@@ -1,0 +1,115 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{geometry,hyperref}
+\geometry{margin=24mm}
+\title{Laboratoire de recherche eSonde v8\\Exploration de bout en bout du dialogue et de la généralisation}
+\author{Dossier de recherche eSonde}
+\date{17 novembre 2026 -- état de travail}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter*{Contrat scientifique et règles de laboratoire}
+\addcontentsline{toc}{chapter}{Contrat scientifique et règles de laboratoire}
+Le laboratoire traite exclusivement la génération de réponses conversationnelles conditionnées par un prompt et, lorsque le client le fournit, un historique explicite. La non-réponse est un paramètre activable, mais elle est désactivée dans toutes les expériences principales. Le checkpoint original eSonde v6 demeure immuable. Aucune expérience v8 ne peut importer ou appeler neurone artificiel, MLP, RBF appris, GRU, LSTM, Transformer, embedding appris, rétropropagation, optimiseur de gradient ou encodeur neuronal externe, directement ou indirectement.
+
+Chaque résultat est classé comme (i) théorème mathématique, (ii) propriété du code vérifiée, (iii) mesure expérimentale, (iv) hypothèse, ou (v) question ouverte. Un test logiciel réussi ne vaut pas preuve de cohérence. Une métrique teacher-forced ne vaut pas preuve de qualité en génération libre. Les données TEST sont scellées et ne servent ni au réglage ni au choix de variante. Aucun résultat manquant n'est remplacé par une estimation.
+
+\chapter{Réconciliation des sources et enseignements vérifiables}
+\section{eSonde v7 et checkpoint}
+La livraison source contient un runtime v7 au-dessus du checkpoint v6, une population annoncée de 1\,000\,000 d'Obsiss, deux vecteurs historiques par Obsiss et seize canaux d'observation. Les poids d'origine sont conservés en lecture seule. Le runtime v7 contient activation, contexte, apprentissage dialogique, génération, observateurs, espace sémantique, supervision et enregistrement. Les expériences M-032 à M-035 et les rapports associés sont conservés comme historique, non comme preuve automatique d'efficacité générale.
+
+Les documents de suivi v7 rapportent des problèmes de sensibilité au prompt, d'ancrage contextuel, de répétition et de réponses hors sujet. Les gains de stabilité de classement ne démontrent pas la vérité ni la pertinence. Les canaux de négation, temporalité, référence et modalité sont des observations explicites et bornées; ils ne doivent pas être promus au rang d'analyse complète de portée logique, de coréférence ou de raisonnement temporel sans évaluations spécifiques.
+
+\section{Théorie des empreintes}
+Le corpus théorique formalise observables, sondes, empreintes, indiscernabilité, fibres, quotients, factorisation, seuils, trajectoires, fermeture et généralisation observationnelle. Le résultat de factorisation est exact: une fonction descend vers le quotient si et seulement si elle est constante sur chaque fibre de l'empreinte. Pour eSonde, cela fournit un critère falsifiable: des dialogues distincts mais observationnellement indiscernables ne peuvent recevoir des traitements différents par un composant qui ne voit que cette empreinte. Le laboratoire doit donc mesurer collisions sémantiques, faux rapprochements, stabilité aux paraphrases et séparation des contrastes minimaux.
+
+La théorie décrit aussi des notions d'imagination, de contraintes, de recherche, d'identité et de méta-observation. Ces notions ne deviennent pas des capacités du runtime par simple présence dans un texte. Chacune exige une représentation exécutable, un contrat, un test indépendant et une mesure de transfert.
+
+\section{PCH}
+Les versions successives PCH décrivent purification hiérarchique/contextuelle, fonctionnelles variationnelles, projections sur ensembles convexes, stabilité/contraction, spécialisation et routage. Les résultats de convergence du noyau proximal sont pertinents comme propriétés mathématiques du solveur, mais ne garantissent pas que le contexte choisi soit sémantiquement adéquat ni que la sortie soit meilleure. Les variantes dépendant de Sentence-Transformers, d'embeddings pré-entraînés ou de PCA sont exclues de l'architecture normative. La piste retenue pour expérimentation est une purification définie directement dans l'espace borné des seize observations, avec certificat numérique et ablation PCH activée/désactivée.
+
+\section{eGenBrain et autres formalismes}
+Les sources eGenBrain apportent des idées de provenance des occurrences, de typage des relations, de distinction entre succession et causalité, et de décodage autonome d'un sous-ensemble Parquet. Les bases persistantes de faits, moteurs de récupération et mécanismes de réponse préfabriquée ne sont pas assimilés à une intelligence dialogique et ne sont pas repris comme substitut de génération. Les autres familles (AAM, NGeGenBrain, eLLM, modèles d'ordre et expériences de sondes) sont des sources d'idées et de contre-exemples; chaque composant n'est admissible qu'après démonstration de compatibilité non neuronale, d'utilité marginale et d'absence de duplication fonctionnelle.
+
+\section{Corpus OASST1}
+Les fichiers Parquet de la révision \texttt{fdf72ae0827c1cda404aff25b6603abec9e3399b} sont présents, décodés par un adaptateur fondé sur les primitives CompactReader/Snappy/hybrid-level/BYTE\_ARRAY du lecteur eGenBrain, avec prise en charge du booléen scalaire requis par le schéma. Les splits dérivés sont séparés par arbre. Les statistiques de couverture et d'association déjà produites sont des pilotes; elles ne constituent pas une validation de cohérence en génération libre.
+
+\chapter{Questions de recherche}
+\begin{enumerate}
+\item Les seize observations discriminent-elles les contextes et candidats utiles, ou plusieurs canaux sont-ils redondants?
+\item Les Obsiss, conservés comme population d'observateurs individuels, apportent-ils une information marginale mesurable au-delà des statistiques agrégées?
+\item L'association prompt/réponse et les transitions locales peuvent-elles proposer des continuations suffisamment diverses et pertinentes sans mémoriser des épisodes?
+\item Le repli trigramme--bigramme--unigramme augmente-t-il la couverture sans provoquer de dérive ou de répétition?
+\item La purification PCH dans $\mathbb R^{16}$ améliore-t-elle la sélection, ou contracte-t-elle aussi des distinctions contextuelles nécessaires?
+\item La généralisation par empreintes résiste-t-elle aux paraphrases, changements de langue, négations, substitutions de référents et changements de but?
+\item L'intégration d'occurrences et de relations typées issue d'eGenBrain apporte-t-elle une amélioration indépendante des seules associations lexicales?
+\end{enumerate}
+
+\chapter{Architectures candidates de bout en bout}
+\section{A -- Référence v7}
+Pipeline: prompt/historique $\to$ tokenizer/features $\to$ activation Obsiss P/R $\to$ génération de candidats $\to$ vote/rang $\to$ token suivant. Cette variante sert de référence de comportement, mais les incidents de latence doivent être instrumentés par étape. Aucun timeout n'est converti en réponse vide ni en score nul.
+
+\section{B -- Associations agrégées et transitions}
+Pipeline: dialogues TRAIN filtrés et séparés par arbre $\to$ extraction d'ancres $\to$ compteurs agrégés ancre-token $\to$ tables de transitions internes à chaque réponse $\to$ propositions candidates $\to$ observables 16D $\to$ Obsiss P/R $\to$ vote. Les exemples et paires brutes ne sont pas intégrés au runtime. Les seuils d'ancres, le budget $K$, le support minimal et le repli de n-grammes sont des paramètres exposés et sélectionnés sur validation.
+
+\section{C -- PCH 16D}
+Même pipeline que B, avec transformation optionnelle des signatures candidates par le minimiseur PCH dans $\mathbb R^{16}$. Le solveur retourne coefficients convexes, résidu primal, violation de positivité, résidu de somme et résidu KKT. En cas de certificat invalide, le système conserve la signature non purifiée et trace le motif; il ne remplace pas silencieusement les données.
+
+\section{D -- Graphe d'occurrences typées}
+Le dialogue courant est converti en occurrences avec positions et locuteurs. Les seules arêtes natives sont l'ordre intra-message, l'ordre des tours et la répétition lexicale exacte. Une relation de coréférence, causalité ou entailment n'est pas ajoutée sans règle vérifiable. Ce graphe peut enrichir les seize observations existantes; il ne crée pas de nouvelles dimensions sans ablation démontrant leur nécessité.
+
+\section{E -- Empreintes et fermeture contrôlée}
+Des sondes dérivées des seize canaux construisent une empreinte de contexte et de candidat. Les collisions sont recherchées sur des paires contrastives et des paraphrases. La fermeture n'est admissible que si extensivité, monotonie et idempotence sont prouvées pour l'opérateur concret. Les seuils d'indiscernabilité ne sont pas choisis après examen du TEST.
+
+\chapter{Protocole expérimental commun}
+Chaque variante utilise le même corpus, tokenizer, ensemble de prompts et budget de génération. Les ablations sont appariées par identifiant de prompt. La génération est libre, non teacher-forced, avec non-réponse désactivée. Les mesures automatiques incluent pertinence au prompt, continuité inter-tours, répétition, diversité, taux de sortie vide, ancrage lexical, contradiction détectable et complétude. Les métriques lexicales sont rapportées séparément. Une évaluation humaine aveugle est requise pour les jugements sémantiques qui ne sont pas validés par un oracle automatique.
+
+\begin{longtable}{p{.14\linewidth}p{.29\linewidth}p{.27\linewidth}p{.22\linewidth}}
+\toprule Expérience & Contraste & Mesures principales & Critère d'interprétation \\
+\midrule
+OBS-RED-01 & 16 canaux complets vs retrait d'un canal & redondance, gain marginal, stabilité & un canal n'est utile que si son retrait détériore une mesure préenregistrée \\
+OBS-POP-02 & population Obsiss complète vs sous-échantillons diagnostiques & rangs, diversité, coût, latence & la sous-population n'est jamais substituée au mode complet \\
+ASSOC-03 & associations seules vs associations + transitions & pertinence, couverture, répétition & couverture accrue sans dégradation de qualité libre \\
+BACKOFF-04 & trigramme strict vs backoff hiérarchique & taux de continuation, répétition, cohérence & précision teacher-forced séparée de la génération libre \\
+PCH-05 & PCH off vs PCH on & qualité appariée, certificat, dérive & aucune supériorité inférée de la seule contraction \\
+GRAPH-06 & graphe occurrence-level off/on & résolution des références, ancrage & gain sur exemples contrastifs non vus \\
+FINGERPRINT-07 & empreinte 16D et sondes enrichies & collisions, séparabilité, invariance & faux rapprochements explicitement comptés \\
+\bottomrule
+\end{longtable}
+
+\chapter{Résultats disponibles et statut exact}
+Les données OASST1 ont été décodées et des splits dérivés ont été construits sans fuite d'arbre. Le pilote d'ancrage sur 2\,000 exemples TRAIN et 500 exemples validation a indiqué des compromis entre budget 8 et 16; il ne sélectionne pas encore un budget final. Le pilote transition a mesuré une couverture teacher-forced de 46,21\% en trigramme strict et 86,26\% avec repli au seuil 1, et une exactitude top-5 de 20,67\% sur tous tokens dans le second cas. Ces nombres ne démontrent pas la cohérence de réponses libres.
+
+La construction complète du profil OASST1 a ensuite été achevée par agrégation SQLite sur disque et publication atomique : 48\,557 lignes TRAIN consommées, 48\,549 exemples non vides, profil de 178\,134\,753 octets, SHA-256 `24780eea05de8cb8c77a772f8d03776adc33dc497fcb7d6e896690f8e99ce0e6`. Les tentatives antérieures interrompues restent consignées comme incidents résolus pour la construction du profil. En revanche, le diagnostic de référence v7 a expiré après 300 secondes sur trois prompts, sans génération achevée. Aucun résultat de génération libre v8 n'est encore établi; les futures exécutions nécessitent une instrumentation de phase et une sauvegarde vérifiée.
+
+\chapter{Décisions de laboratoire}
+\begin{itemize}
+\item Conserver les seize canaux et les identités Obsiss originales; mesurer leur contribution au lieu de les assimiler à des neurones ou de les remplacer par des dimensions apprises.
+\item Garder le chemin chat uniquement et la non-réponse désactivée pour les essais principaux.
+\item Traiter B comme une piste expérimentale de génération, non comme un modèle validé; l'absence de paires brutes dans le profil est une contrainte d'anti-mémorisation, pas une preuve d'intelligence.
+\item Tester C, D et E séparément avant toute composition; chaque ajout doit prouver son gain marginal.
+\item Conserver les branches historiques incompatibles dans l'audit, jamais dans le runtime.
+\end{itemize}
+
+\chapter{Garde de reproductibilité}
+Avant chaque exécution: lire les trois checklists et le fichier de chemins; vérifier la sauvegarde; consigner le hash du code, des poids, du corpus et de la configuration. Après chaque exécution: enregistrer stdout/stderr, code de retour, temps, mémoire maximale, paramètres, hashes des entrées/sorties, erreurs et interprétation. Les écritures de profils sont atomiques (fichier temporaire, fsync, renommage), suivies d'une relecture et d'un hash. Les poids originaux sont en lecture seule.
+
+
+\section{F -- Désambiguïsation des deux bases 16D}
+\textbf{Question.} L'espace de caractéristiques CountSketch issu du checkpoint et l'espace des seize observations sémantiques peuvent-ils être couplés coordonnée par coordonnée sans perte de pertinence?
+
+\textbf{Hypothèse nulle.} La taille commune 16 n'implique aucune correspondance entre les bases. Le couplage historique identité est une convention d'implémentation à comparer, pas une vérité architecturale.
+
+\textbf{Conditions communes.} Même checkpoint original, mêmes exemples TRAIN/validation/test, mêmes prompts, même pool de candidats, mêmes budgets Obsiss, mêmes paramètres de génération; non-réponse désactivée; aucune sélection sur TEST.
+
+\textbf{Variantes.} (F0) couplage identité historique; (F1) ablation du contexte CountSketch; (F2) score CountSketch séparé et observable du vote sémantique; (F3) permutations fixes préenregistrées puis sélectionnées uniquement sur validation. Aucun ajustement neuronal ou rétropropagation n'est admis.
+
+\textbf{Mesures.} Pertinence au prompt, cohérence intra-réponse, continuité multi-tour, contradictions, robustesse aux paraphrases, couverture linguistique, taux de répétition, coût CPU/RAM et stabilité de sélection. Les évaluations de cohérence doivent être aveugles et distinctes des rangs internes Obsiss.
+
+\textbf{Sortie attendue.} Tableau de résultats bruts, intervalles d'incertitude, scripts/commandes, hashes des données et paramètres. Tant que cette expérience n'est pas faite, `V8-MODEL-BASIS-001` reste ouvert et le couplage identité ne peut pas être présenté comme validé.
+\end{document}
