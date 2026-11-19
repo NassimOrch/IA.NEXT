@@ -147,6 +147,10 @@ This work explores whether the theory of information fingerprints and its relate
 
 **Speculation:** coordinated cores could be explored in robotics, scientific simulation, real-time systems, specialized processors, and multimodal AI. A probe might approximate an expensive operator, a logical core might manage the graph, and a physical core might carry out the execution. This is neither a theory of the constituents of matter nor proof of faster execution than conventional architectures. Accuracy, latency, energy, and coordination costs must be measured.
 
+### PCH — Contextual proximal purification and variational routing
+
+PCH studies context-dependent refinement of representations through proximal operators associated with contextual objectives. It separates **purification**—refining a representation once a context is fixed—from **routing**, which selects a context using criteria such as normalized optimal values or normalized energy reduction. The research spans convex analysis, numerical validation on text-classification tasks, and proposed hierarchical or modular architectures, including a language-model design without standard attention. Reported experiments support normalized scalar consistency only in the tested configurations and show that this does not guarantee strong end-to-end classification. The larger PCH-ESM and Pure PCH LLM architectures remain research proposals, not validated replacements for existing models. See theories/PCH/README.md.
+
 ### Fingerprints, LLMs, relational meshes, and eGenBrain
 
 `th_gen_0.tex` and the LLM fingerprint sources propose that meaning and some forms of generalization may be distributed across relational structures formed by contexts and internal fingerprints, rather than localized in a single neuron. One neuron may participate in several structures; polysemanticity is an interpretive research direction, not a cause established by co-activation alone. `eGenBrain_1.tex` formalizes brain meshes, fusion, context, retrieval, and provenance.
