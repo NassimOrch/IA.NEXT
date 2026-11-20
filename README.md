@@ -1,6 +1,4 @@
 # Research Works by Bensalem Nassim
-## Github : https://github.com/NassimOrch/IA.NEXT/
-## Website : https://nassimorch.github.io/IA.NEXT/
 
 ## Overview
 
