@@ -1,4 +1,6 @@
 # Research Works by Bensalem Nassim
+## Github : https://github.com/NassimOrch/IA.NEXT/
+## Website : https://nassimorch.github.io/IA.NEXT/
 
 ## Overview
 
@@ -212,5 +214,6 @@ The complete source for each work is available in its corresponding release. Ver
 | `readme_vHS/` | Material for high-school students | Introductory explanations of the research works |
 
 
+## Github : https://github.com/NassimOrch/IA.NEXT/
 ## Website : https://nassimorch.github.io/IA.NEXT/
 ## Other Works : Zenodo - https://doi.org/10.5281/zenodo.20606404
