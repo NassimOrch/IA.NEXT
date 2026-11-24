@@ -1,0 +1,156 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.4cm}
+\usepackage{booktabs,longtable,array,tabularx}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\usepackage{enumitem}
+\usepackage{microtype}
+\setlist{nosep}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\pct}[1]{#1\%}
+\title{eSonde v8.2.2, Experimental Versions, Population Variants and Research Works\\\large Bilingual Technical Documentation}
+\author{Consolidated source-based documentation}
+\date{24 November 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\selectlanguage{english}
+\chapter*{Documentation scope and reading guide}
+\addcontentsline{toc}{chapter}{Documentation scope and reading guide}
+This document consolidates the recovered Dmodel v8.2.2 documentation, selected Amodel v8.2.2 audit materials, the eight finalized v8.2.3 population checkpoints, and the research works recorded in this conversation and the recovered v8.2.3/v8.2.4 evidence. It distinguishes the one-million-Obsiss base model from the 512-Obsiss experimental populations and distinguishes model checkpoints from coordination methods.
+
+The associated documentation package has separate language trees: \code{EN/} and \code{FR/}. Each model, population variant and research work has its own README and technical documentation in both languages. Original source documents are preserved under \code{SOURCE_REFERENCES/}. This master file is the English section followed by a separate French section.
+
+\chapter{English documentation}
+\section{eSonde v8.2.2 base model}
+The delivered base is a CPU-only non-neural engineering candidate with one million Obsiss, dimension 16, and int16 WH/WP weights (64,000,000 bytes). It combines language/context preprocessing, sparse n-gram/beam proposal, P context activations, grouped response-only R scoring, and a coordinator/ranker selected from A0--A4, Potts or TFIM. The documented OASST1 dataset has 52,108 retained pairs: 41,673 TRAIN, 5,290 VALIDATION and 5,145 TEST. The dataset SHA-256 is \code{c412ae3aba06970bbbd5b03d6a94acfb23fc590eff24d9735d8c7a8439e00b01}.
+
+The checkpoint was rebuilt from verified TRAIN statistics with fresh WH/WP weights. The historic v8.2.1 weights were truncated; full raw-statistics rebuild and contrastive fit attempts were interrupted and not committed. The delivered checkpoint contains one canonical functional profile and zero profile graph edges. The smoke prompt \emph{What is water?} produced \code{I's a good.}; software execution succeeded but response quality failed. Multi-turn/OOD/human validation is absent. It is an engineering candidate, not an accepted conversational model.
+
+\section{Historical source versions v8.2.0 and v8.2.1}
+The v8.2.0 source is a formal laboratory specification dated 22 November 2026. It records stable Obsiss identities, integer/statistical features, signed deterministic identity transforms, P/R operators, A0--A4, CPU-only bounded processing and TRAIN/VALIDATION/TEST separation. It is a design/formal record; the inspected sources do not establish a separate verified final v8.2.0 checkpoint.
+
+The v8.2.1 archive contains formalism, runtime guides and status records, but the source-recovery report says the historical weight record was truncated and no complete corresponding checkpoint was recovered. The v8.2.2 checkpoint reused verified TRAIN language statistics but initialized fresh WH/WP weights, and is explicitly not a bitwise restoration of v8.2.1. See the separate \code{models/eSonde_v8_2_0/} and \code{models/eSonde_v8_2_1/} documents in both language trees.
+
+\section{Eight finalized v8.2.3 population variants}
+Each experimental checkpoint contains 512 Obsiss, dimension 16, and a 32,768-byte weights file. Profiles are exact canonical weight equivalence classes discovered after training, not assigned semantic roles.
+\begin{longtable}{p{2.8cm}p{3.0cm}p{1.9cm}p{1.9cm}p{1.9cm}p{1.7cm}}
+\toprule
+Variant & Exposure & Profiles & VALIDATION A0 & TEST A0 & TEST TFIM\\
+\midrule
+shared & shared population & 1 & 166/256 & 299/512 (58.40\%) & 58.40\%\\
+local256 & cohorts of 256 & 2 & 174/256 & 314/512 (61.33\%) & 60.35\%\\
+local128 & cohorts of 128 & 4 & 169/256 & 323/512 (63.09\%) & 64.45\%\\
+local64 & cohorts of 64 & 8 & 170/256 & 338/512 (66.02\%) & 65.63\%\\
+local32 & cohorts of 32 & 16 & 172/256 & 336/512 (65.63\%) & 65.43\%\\
+local16 & cohorts of 16 & 32 & 171/256 & 334/512 (65.23\%) & 65.43\%\\
+random64 & random 64/512 per example & 512 & 171/256 & 331/512 (64.65\%) & 64.65\%\\
+annealed16\_to\_all & 1/16 to 100\% exposure & 512 & 167/256 & 327/512 (63.87\%) & 64.06\%\\
+\bottomrule
+\end{longtable}
+
+The fixed-cohort local-vs-shared paired confirmatory comparison with Holm correction retains advantages for local128, local64, local32 and local16; local256 does not pass the adjusted 0.05 threshold. These are reference-vs-distractor retrieval results on 512 examples, not free-form dialogue scores. Potts decisions match A0 for the fixed cohort variants. No TFIM change survives the stated multiple-comparison correction. The two natural exposure variants are recorded separately and are not part of the five fixed-cohort Holm family.
+
+\section{Research work catalogue}
+\begin{enumerate}
+\item \textbf{Functional specialization}: fixed local cohort exposure generated 1, 2, 4, 8, 16 and 32 exact profiles without semantic role assignment.
+\item \textbf{Natural exposure}: random64 changes the 64 active identities per example; annealed16\_to\_all ramps exposure from 6.25\% to 100\%.
+\item \textbf{Complementarity}: per-profile TRAIN margins and retrospective oracle bounds measure potential disagreement/complementarity; the oracle is not deployable.
+\item \textbf{Coordination}: A0--A4, Potts finite-temperature mean-field and classical TFIM mean-field; no robust held-out coordination gain.
+\item \textbf{Signed residual graphs}: remove common difficulty and profile mean before estimating signed TRAIN correlations; signs do not translate into confirmed gains.
+\item \textbf{Local-to-global and recursion}: local-only, global-from-start, staged local-to-global and recursive methods changed support margins but not accuracy in random64/annealed confirmatory tests.
+\item \textbf{Competence reinforcement}: TRAIN-derived reliability weighting versus equal voting and identity-permutation placebo; differences were not statistically supported.
+\item \textbf{TF-IDF context routing}: contextual lexical router matched A0 at 335/512 and made no confirmed improvement.
+\item \textbf{Living context v8.2.4}: real P/R on local64, population-relative activations and persistent response feedback; validation remained 170/256 for all methods, and dialogue smoke answers were poor.
+\item \textbf{Dialogue/generalization}: none of the retrieved benchmarks establishes coherent free-form multi-turn semantic generalization.
+\item \textbf{Integrity/provenance}: recovered source archives, audited the eight checkpoints, preserved stale metadata and historic manifest discrepancies as explicit caveats.
+\end{enumerate}
+
+\section{Evidence boundaries and known caveats}
+The fixed cohort TEST is a paired reference-response/distractor classification task. Profile count and oracle complementarity are not intelligence proofs. Consensus margins do not replace accuracy. The v8.2.4 two-turn loop proves technical state feedback only; its answers were ``\texttt{Here are some of the most popular.}'' and ``\texttt{The most popular and a few examples.}''. The k-NN context-to-utility map was rejected because TRAIN cross-validation error was worse than a mean-only predictor.
+
+In the original experimental \code{TRAIN_RESULT.json} files, top-level \code{weights_bytes=64,000,000} and the top-level \code{weights_sha256} are stale inherited fields; actual variant files are 32,768 bytes and their hashes agree across \code{model.json}, sidecar and nested fit record. One legacy report file is concatenated JSON and preserved as-is. The old v8.2.1 root checksum manifest does not fully describe the present v8.2.2 tree. These caveats are preserved in the source audit; original files were not rewritten.
+
+\section{Documentation package layout}
+\begin{itemize}
+\item \code{EN/}: English README and technical documentation for the base model, eight variants and research works.
+\item \code{FR/}: equivalent French-only documentation, separate from English.
+\item \code{SOURCE_REFERENCES/}: selected original source documents, reports, formal files, manifests and audit material.
+\item \code{manifests/}: SHA-256 manifest for this documentation set.
+\end{itemize}
+
+\clearpage
+\selectlanguage{french}
+\chapter*{Périmètre documentaire et guide de lecture}
+\addcontentsline{toc}{chapter}{Périmètre documentaire et guide de lecture}
+Ce document rassemble la documentation retrouvée de Dmodel v8.2.2, une sélection de pièces d’audit Amodel v8.2.2, les huit checkpoints finaux de populations v8.2.3 et les travaux de recherche consignés dans cette conversation ainsi que dans les preuves v8.2.3/v8.2.4. Il distingue le modèle de base d’un million d’Obsiss des populations expérimentales de 512 Obsiss et distingue les checkpoints des méthodes de coordination.
+
+Le paquet documentaire associé sépare les langues dans deux arborescences : \code{EN/} et \code{FR/}. Chaque modèle, variante de population et travail de recherche possède son propre README et sa documentation technique dans les deux langues. Les documents sources originaux sont conservés sous \code{SOURCE_REFERENCES/}. La présente partie française est entièrement séparée de la partie anglaise précédente.
+
+\chapter{Documentation française}
+\section{Modèle de base eSonde v8.2.2}
+Le modèle de base livré est un candidat d’ingénierie CPU-only non neuronal comprenant un million d’Obsiss, une dimension 16 et des poids WH/WP int16 (64 000 000 octets). Il combine le prétraitement de langue/contexte, la proposition sparse n-gramme/beam, les activations de contexte P, le score R groupé response-only et un coordinateur/classeur A0--A4, Potts ou TFIM. Le corpus OASST1 documenté contient 52 108 paires retenues : 41 673 TRAIN, 5 290 VALIDATION et 5 145 TEST. Le SHA-256 du corpus est \code{c412ae3aba06970bbbd5b03d6a94acfb23fc590eff24d9735d8c7a8439e00b01}.
+
+Le checkpoint a été reconstruit à partir de statistiques TRAIN vérifiées avec des poids WH/WP frais. Les anciens poids v8.2.1 étaient tronqués ; les tentatives de reconstruction complète depuis les statistiques brutes et d’ajustement contrastif ont été interrompues et non commises. Le checkpoint livré contient un seul profil fonctionnel canonique et zéro arête du graphe des profils. Le prompt smoke \emph{What is water?} a produit \code{I's a good.} ; l’exécution logicielle a réussi, mais la qualité de réponse a échoué. La validation multi-tour/hors-distribution/humaine est absente. Il s’agit d’un candidat d’ingénierie, pas d’un modèle conversationnel accepté.
+
+\section{Versions sources historiques v8.2.0 et v8.2.1}
+La source v8.2.0 est une spécification formelle de laboratoire datée du 22 novembre 2026. Elle consigne les identités Obsiss stables, les caractéristiques entières/statistiques, les transformations signées déterministes propres aux identités, les opérateurs P/R, A0--A4, le traitement CPU-only borné et la séparation TRAIN/VALIDATION/TEST. Il s’agit d’un document de conception/formalisme ; les sources inspectées n’établissent pas un checkpoint final v8.2.0 distinct et vérifié.
+
+L’archive v8.2.1 contient formalisme, guides runtime et états, mais le rapport de récupération indique que l’enregistrement historique des poids était tronqué et qu’aucun checkpoint correspondant complet n’a été retrouvé. Le checkpoint v8.2.2 a réutilisé des statistiques linguistiques TRAIN vérifiées mais initialisé de nouveaux poids WH/WP ; il n’est explicitement pas une restauration bit à bit de v8.2.1. Voir les documents séparés \code{models/eSonde_v8_2_0/} et \code{models/eSonde_v8_2_1/} dans les deux arborescences linguistiques.
+
+\section{Huit variantes de population finalisées v8.2.3}
+Chaque checkpoint expérimental contient 512 Obsiss, une dimension 16 et un fichier de poids de 32 768 octets. Les profils sont des classes d’équivalence exacte des poids canoniques découvertes après apprentissage ; aucun rôle sémantique n’est attribué.
+\begin{longtable}{p{2.8cm}p{3.0cm}p{1.9cm}p{1.9cm}p{1.9cm}p{1.7cm}}
+\toprule
+Variante & Exposition & Profils & VALIDATION A0 & TEST A0 & TEST TFIM\\
+\midrule
+shared & population partagée & 1 & 166/256 & 299/512 (58,40\%) & 58,40\%\\
+local256 & cohortes de 256 & 2 & 174/256 & 314/512 (61,33\%) & 60,35\%\\
+local128 & cohortes de 128 & 4 & 169/256 & 323/512 (63,09\%) & 64,45\%\\
+local64 & cohortes de 64 & 8 & 170/256 & 338/512 (66,02\%) & 65,63\%\\
+local32 & cohortes de 32 & 16 & 172/256 & 336/512 (65,63\%) & 65,43\%\\
+local16 & cohortes de 16 & 32 & 171/256 & 334/512 (65,23\%) & 65,43\%\\
+random64 & 64/512 aléatoires par exemple & 512 & 171/256 & 331/512 (64,65\%) & 64,65\%\\
+annealed16\_to\_all & exposition 1/16 à 100\% & 512 & 167/256 & 327/512 (63,87\%) & 64,06\%\\
+\bottomrule
+\end{longtable}
+
+La comparaison confirmatoire appariée des cohortes locales fixes contre shared, corrigée par Holm, conserve un avantage pour local128, local64, local32 et local16 ; local256 ne passe pas le seuil ajusté de 0,05. Il s’agit de récupération référence contre distracteur sur 512 exemples, pas de scores de dialogue libre. Les décisions Potts correspondent à A0 pour les variantes fixes. Aucun changement TFIM ne résiste à la correction des comparaisons multiples indiquée. Les deux variantes d’exposition naturelle sont rapportées séparément et ne font pas partie de la famille Holm des cinq comparaisons à cohortes fixes.
+
+\section{Catalogue des travaux de recherche}
+\begin{enumerate}
+\item \textbf{Spécialisation fonctionnelle} : l’exposition à des cohortes locales fixes a produit 1, 2, 4, 8, 16 et 32 profils exacts sans assignation de rôles sémantiques.
+\item \textbf{Exposition naturelle} : random64 change les 64 identités actives à chaque exemple ; annealed16\_to\_all fait croître l’exposition de 6,25\% à 100\%.
+\item \textbf{Mesure de complémentarité} : les marges TRAIN par profil et les bornes oracle rétrospectives mesurent le potentiel de désaccord/complémentarité ; l’oracle n’est pas déployable.
+\item \textbf{Coordination} : A0--A4, Potts en champ moyen à température finie et TFIM classique en champ moyen ; aucun gain robuste de coordination sur les données tenues à l’écart.
+\item \textbf{Graphes résiduels signés} : retrait de la difficulté commune et de la moyenne par profil avant l’estimation des corrélations signées TRAIN ; les signes ne se traduisent pas en gains confirmés.
+\item \textbf{Local→global et récursion} : local seul, global dès le départ, local→global progressif et récursif modifient les marges de soutien mais pas l’exactitude dans les tests confirmatoires random64/annealed.
+\item \textbf{Renforcement de compétence} : pondération de fiabilité issue de TRAIN contre vote égal et placebo par permutation d’identités ; les différences ne sont pas statistiquement étayées.
+\item \textbf{Routage contextuel TF-IDF} : le routeur lexical contextuel égale A0 à 335/512 et n’apporte aucun gain confirmé.
+\item \textbf{Contexte vivant v8.2.4} : vrais P/R sur local64, activations relatives à la population et retour persistant de la réponse ; VALIDATION reste à 170/256 pour toutes les méthodes et les réponses du smoke test sont mauvaises.
+\item \textbf{Dialogue et généralisation} : aucun des benchmarks retrouvés n’établit une généralisation sémantique cohérente en dialogue libre multi-tour.
+\item \textbf{Intégrité et provenance} : récupération des archives sources, audit des huit checkpoints, conservation explicite des métadonnées périmées et des divergences de manifestes historiques.
+\end{enumerate}
+
+\section{Limites des preuves et réserves connues}
+Le TEST des cohortes fixes est une tâche de classification appariée réponse de référence/distracteur. Le nombre de profils et la complémentarité oracle ne prouvent pas une intelligence. Les marges de consensus ne remplacent pas l’exactitude. La boucle à deux tours v8.2.4 ne prouve que le retour technique d’état ; ses réponses étaient « Here are some of the most popular. » et « The most popular and a few examples. ». La carte k-NN contexte→utilité a été rejetée car son erreur de validation croisée TRAIN était supérieure à celle d’un prédicteur moyen.
+
+Dans les fichiers \code{TRAIN_RESULT.json} expérimentaux originaux, les champs de premier niveau \code{weights_bytes=64,000,000} et \code{weights_sha256} sont des valeurs héritées périmées ; les vrais fichiers de variantes font 32 768 octets et leurs hashes concordent entre \code{model.json}, sidecar et enregistrement imbriqué de fit. Un ancien rapport est du JSON concaténé et conservé tel quel. L’ancien manifeste de sommes de contrôle v8.2.1 à la racine ne décrit pas complètement l’arborescence actuelle v8.2.2. Ces réserves sont conservées dans l’audit source ; les fichiers originaux n’ont pas été réécrits.
+
+\section{Structure du paquet documentaire}
+\begin{itemize}
+\item \code{EN/} : README et documentation technique en anglais du modèle de base, des huit variantes et des travaux de recherche.
+\item \code{FR/} : documentation équivalente exclusivement en français, séparée de l’anglais.
+\item \code{SOURCE_REFERENCES/} : sélection de documents, rapports, formalismes, manifestes et pièces d’audit sources originaux.
+\item \code{manifests/} : manifeste SHA-256 de cet ensemble documentaire.
+\end{itemize}
+
+\end{document}
