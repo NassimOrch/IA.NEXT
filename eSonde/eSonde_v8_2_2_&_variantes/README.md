@@ -10,8 +10,10 @@ This README is the Markdown counterpart of `docs_eSonde_v8.2.2_&_others_versions
 
 > **Interpretation rule:** distinguish the one-million-Obsiss eSonde v8.2.2 base checkpoint from the eight 512-Obsiss experimental populations of v8.2.3. A coordination method tested on a population is not, by that fact alone, a separate model checkpoint.
 
-# Complete Project Files : All complete project files and deliverables are available in the **Releases** section (eSonde_v8_2_1
+# Complete Project Files : 
+> **All complete project files and deliverables are available in the **Releases** section (eSonde_v8_2_1
 , eSonde_v8_2_2, eSonde_v8_2_2_variantes).
+
 ---
 
 # Part I — English
